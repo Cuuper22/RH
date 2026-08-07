@@ -8,6 +8,7 @@ Local modifications: redirected the intra-project import to Zeta23.FromPNTPlus.S
 Re-ported from the
 v4.29.0 port (commit 10e1218932db7e2432aa5881d750acb819e91f19) when the project
 moved to Lean v4.32.2 / Mathlib 905b95818eb32af7874a58b427f50c1711a5e96c.
+Adjusted for Lean v4.33.0-rc2 / Mathlib 51e6992efd06: `Circle.norm_coe` supplied explicitly to two `simp` calls.
 Modified 2026 by Anthropic PBC.
 -/
 import Mathlib.Analysis.Distribution.SchwartzSpace.Deriv
@@ -25,7 +26,7 @@ local instance {E : Type*} : Coe (E → ℝ) (E → ℂ) := ⟨fun f n => f n⟩
 section lemmas
 
 @[simp]
-theorem nnnorm_eq_of_mem_circle (z : Circle) : ‖z.val‖₊ = 1 := NNReal.coe_eq_one.mp (by simp)
+theorem nnnorm_eq_of_mem_circle (z : Circle) : ‖z.val‖₊ = 1 := NNReal.coe_eq_one.mp (by simp [Circle.norm_coe])
 
 @[simp]
 theorem nnnorm_circle_smul (z : Circle) (s : ℂ) : ‖z • s‖₊ = ‖s‖₊ := by
@@ -34,7 +35,7 @@ theorem nnnorm_circle_smul (z : Circle) (s : ℂ) : ‖z • s‖₊ = ‖s‖�
 noncomputable def e (u : ℝ) : ℝ →ᵇ ℂ where
   toFun v := 𝐞 (-v * u)
   map_bounded' :=
-    ⟨2, fun x y => (dist_le_norm_add_norm _ _).trans (by simp [one_add_one_eq_two])⟩
+    ⟨2, fun x y => (dist_le_norm_add_norm _ _).trans (by simp [Circle.norm_coe, one_add_one_eq_two])⟩
 
 @[simp] lemma e_apply (u : ℝ) (v : ℝ) : e u v = 𝐞 (-v * u) := rfl
 

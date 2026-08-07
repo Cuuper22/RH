@@ -3,6 +3,8 @@
 > Research artifact. Not maintained and not accepting contributions.
 > A Lean 4 formalization released as a static companion artifact to the paper.
 
+Repository: <https://github.com/anthropics/zeta-23-lean>.
+
 This repository accompanies the paper "More than two thirds of the zeros of the Riemann zeta function lie on the critical line" (Claude; Anthropic, San Francisco, 2026).
 It contains a complete, `sorry`-free Lean 4 / Mathlib formalization of Theorems A–E of that paper, including proofs
 of every analytic input the argument uses (Weil's explicit formula for ζ and for primitive Dirichlet L-functions,
@@ -11,7 +13,7 @@ Chebyshev–Mertens prime-sum estimates, and the Montgomery–Vaughan generalize
 assumed: the top-level theorems have no hypotheses, the repository declares no axioms, and `#print axioms` on each
 headline theorem reports only Lean's three standard axioms `propext`, `Classical.choice`, `Quot.sound`.
 
-Toolchain: Lean `v4.32.2`, Mathlib commit `905b95818eb32af7874a58b427f50c1711a5e96c` (pinned in `lake-manifest.json`).
+Toolchain: Lean `v4.33.0-rc2`, Mathlib commit `51e6992efd06126df61a496bebf8f49482a4e129` (Mathlib's tag `v4.33.0-rc2`; pinned in `lake-manifest.json`).
 
 ## What is proved
 
@@ -31,6 +33,15 @@ Montgomery–Taylor constant of Theorem D.
 | **C** | liminf N_d/N ≥ 5/6 (dyadic and cumulative) | `five_sixths_distinct`(`_cumulative`) | `Zeta23.thmC₀_mult`(`_cumulative`) |
 | **D** | with the optimal (Montgomery–Taylor) window: liminf N₀*(T,2T)/N(T,2T) ≥ 2 − 1/c₁* (= 0.67250…), the same for N₀ˢ, and N_d: ≥ (3 − 1/c₁*)/2 (= 0.83625…) | `montgomery_taylor_on_critical_line`, `montgomery_taylor_simple_on_critical_line_mult`, `montgomery_taylor_distinct_mult` | `Zeta23.ThmD.thmD₀` (`Zeta23/ThmD/Final.lean`), `Zeta23.ThmD.thmD₀_simple_mult`, `thmD₀_dist_mult` (`Zeta23/ThmD/Mult.lean`) |
 | **E** | for every primitive Dirichlet character χ mod q > 1, the analogues of A, B, C and D for the zeros of L(s,χ) (Mathlib's `DirichletCharacter.LFunction χ`) | `dirichlet_two_thirds_on_critical_line`, `dirichlet_two_thirds_simple_on_critical_line`, `dirichlet_five_sixths_distinct`, `dirichlet_montgomery_taylor_on_critical_line`, `dirichlet_montgomery_taylor_*_mult` | `Zeta23.ThmE.thmE_A₀`, `thmE_B₀_mult`, `thmE_C₀_mult`; `Zeta23.ThmDE.thmE_D₀`, `thmE_D₀_simple_mult`, `thmE_D₀_dist_mult` |
+
+Note on Theorem C: in this repository the constant 5/6 is obtained from the rank–trace inequality of §3 applied with
+parameter c = 3 (`Zeta23.ZeroSide.ZeroBlockData.mult_three`, `Zeta23/ZeroSide/Mult.lean`); the paper's text derives the
+same 5/6 from Proposition 4.5(iii) with c = 2.
+
+Also proved here, beyond the statements of Theorems A–E: the rank–trace certificate ("Lemma R") is TIGHT — for on-line
+atoms with integer multiplicities m_j ≤ c on orthonormal vectors together with b pair-blocks of eigenvalue c,
+2c·tr(P+Q) − ‖P+Q‖_F² = Σ_j k_c(m_j) + c²·b, i.e. the inequality cannot be improved using only these quantities
+(`Zeta23.ZeroSide.TightMult.lemmaR_tight`, `Zeta23/ZeroSide/TightMult.lean`; cited in the paper's appendix).
 
 How the two comparator configurations cover this: [`comparator/config.json`](comparator/config.json) (fifteen statements,
 [`comparator/Challenge.lean`](comparator/Challenge.lean)) contains Theorem A together with the *Cauchy–Schwarz forms* of
@@ -91,8 +102,7 @@ Files under `Zeta23/FromPNTPlus/` are ported from the
 carries a header naming the upstream file and commit, the upstream copyright and license, and the local
 modifications; the upstream text (including its informal comments) is otherwise unedited. `Zeta23/LinAlg/` (the
 linear-algebra core of §3: von Neumann's trace inequality for Hermitian matrices, both directions of Sylvester's law
-of inertia, the rank–trace inequality and Weyl's bound) was written first by the same authors as a self-contained
-development, in its own namespace `RHLinalg`, and is incorporated here unchanged; it has no other contributors or
-upstream. Everything builds on [Mathlib](https://github.com/leanprover-community/mathlib4).
+of inertia, the rank–trace inequality and Weyl's bound) was written first as a self-contained development (namespace `RHLinalg`) accompanying §3 of the
+paper, by the paper's authors, and is incorporated here unchanged; it has no upstream outside this project. Everything builds on [Mathlib](https://github.com/leanprover-community/mathlib4).
 
 Released under the Apache License, Version 2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).

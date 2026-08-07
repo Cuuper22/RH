@@ -6,8 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 /-
 The linear algebra of §3 of the paper (Hermitian positive/negative parts, inertia, the positive index,
 von Neumann's trace inequality, the rank–trace inequality, Weyl's perturbation bound). These seven files
-were written first, as a self-contained development by the same authors, and are kept in their own Lean
-namespace `RHLinalg` (see README § Provenance and attribution).
+were written first as a self-contained development (namespace `RHLinalg`) accompanying §3 of the paper, by the
+paper's authors, and are incorporated here unchanged; they have no upstream outside this project (see README
+§ Provenance and attribution).
 -/
 import Zeta23.LinAlg.PosIndex
 import Mathlib.Analysis.Convex.Birkhoff
@@ -187,9 +188,13 @@ theorem vonNeumann_trace_ineq {A B : Matrix n n 𝕜}
   have hevB : ∀ k, hB.eigenvalues (e k) = hB.eigenvalues₀ k := by
     intro k; simp [Matrix.IsHermitian.eigenvalues, he_def]
   -- Reindex both sums by `e`.
-  rw [← e.sum_comp (fun k => ∑ l, _ * _ * _)]
-  simp only [← e.sum_comp (fun l => _ * _ * _)]
-  simp only [hevA, hevB]
+  have hre : ∑ k, ∑ l, hA.eigenvalues k * normSqMatrix W k l * hB.eigenvalues l
+      = ∑ k, ∑ l, hA.eigenvalues₀ k * normSqMatrix W (e k) (e l) * hB.eigenvalues₀ l := by
+    rw [← e.sum_comp]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [← e.sum_comp]
+    simp only [hevA, hevB]
+  rw [hre]
   -- Step 3: apply the doubly-stochastic bilinear bound.
   refine bilinear_doublyStochastic_le_of_monovary ?_ ?_
   · exact hA.eigenvalues₀_antitone.monovary_antitone hB.eigenvalues₀_antitone

@@ -227,10 +227,12 @@ def xsq (v : ι → n → 𝕜) (j : ι) : ℝ := ∑ a, ‖v j a‖ ^ 2
 
 lemma Pmat_apply {m : ι → ℝ} (hm : ∀ j, 0 ≤ m j) (v : ι → n → 𝕜) (a b : n) :
     Pmat m v a b = ∑ j, (m j : 𝕜) * (v j a * starRingEnd 𝕜 (v j b)) := by
-  unfold Pmat Wmat
+  unfold Pmat
   rw [Matrix.mul_apply]
   refine Finset.sum_congr rfl fun j _ => ?_
-  rw [Matrix.conjTranspose_apply, RCLike.star_def, map_mul, RCLike.conj_ofReal]
+  rw [Matrix.conjTranspose_apply]
+  simp only [Wmat]
+  rw [RCLike.star_def, map_mul, RCLike.conj_ofReal]
   have : ((Real.sqrt (m j) : 𝕜)) * (Real.sqrt (m j) : 𝕜) = (m j : 𝕜) := by
     rw [← RCLike.ofReal_mul, Real.mul_self_sqrt (hm j)]
   calc (Real.sqrt (m j) : 𝕜) * v j a * ((Real.sqrt (m j) : 𝕜) * starRingEnd 𝕜 (v j b))
@@ -243,10 +245,12 @@ lemma Pmat_posSemidef (m : ι → ℝ) (v : ι → n → 𝕜) : (Pmat m v).PosS
 /-- the Gram matrix M := Wᴴ W has diagonal m_j x_j. -/
 lemma re_gram_diag {m : ι → ℝ} (hm : ∀ j, 0 ≤ m j) (v : ι → n → 𝕜) (j : ι) :
     RCLike.re (((Wmat m v)ᴴ * Wmat m v) j j) = m j * xsq v j := by
-  unfold Wmat xsq
+  unfold xsq
   rw [Matrix.mul_apply, map_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
-  rw [Matrix.conjTranspose_apply, RCLike.star_def, (starRingEnd 𝕜).map_mul, RCLike.conj_ofReal]
+  rw [Matrix.conjTranspose_apply]
+  simp only [Wmat]
+  rw [RCLike.star_def, (starRingEnd 𝕜).map_mul, RCLike.conj_ofReal]
   rw [show (Real.sqrt (m j) : 𝕜) * starRingEnd 𝕜 (v j a) * ((Real.sqrt (m j) : 𝕜) * v j a)
       = ((Real.sqrt (m j) : 𝕜) * (Real.sqrt (m j) : 𝕜)) * (starRingEnd 𝕜 (v j a) * v j a) by ring,
     ← RCLike.ofReal_mul, Real.mul_self_sqrt (hm j), RCLike.conj_mul,

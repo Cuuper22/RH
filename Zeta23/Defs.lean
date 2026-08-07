@@ -107,8 +107,9 @@ def gammaOf (ρ : ℂ) : ℂ := (ρ - 1 / 2) / Complex.I
 /-- The reflection ρ ↦ 1 − ρ̄ (same ordinate γ, mirrored β)  [subsec:weil]. -/
 def reflect (ρ : ℂ) : ℂ := 1 - (starRingEnd ℂ) ρ
 
-/-- An abstract zero configuration: a set (carrier) of DISTINCT points ρ = β+iγ in the open
-strip 0 < β < 1 with multiplicities mult ρ ≥ 1, locally finite in the ordinate, and
+/-- An abstract zero configuration: a set (carrier) of DISTINCT points ρ = β+iγ in the closed
+strip 0 ≤ β ≤ 1 (the instances built from the zeros of ζ and of L(s,χ) lie in the open strip) with
+multiplicities mult ρ ≥ 1, locally finite in the ordinate, and
 invariant under ρ ↦ 1−ρ̄ with equal multiplicity. Paper §4 (after prop:zeroside), verbatim:
 "Inequalities (eq:zeroside) hold for every locally finite multiset of points in the strip 0<β<1
 that is invariant under ρ ↦ 1−ρ̄ and satisfies N(t+1)−N(t) ≪ log(t+3); they contain no

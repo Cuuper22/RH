@@ -6,8 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 /-
 The linear algebra of §3 of the paper (Hermitian positive/negative parts, inertia, the positive index,
 von Neumann's trace inequality, the rank–trace inequality, Weyl's perturbation bound). These seven files
-were written first, as a self-contained development by the same authors, and are kept in their own Lean
-namespace `RHLinalg` (see README § Provenance and attribution).
+were written first as a self-contained development (namespace `RHLinalg`) accompanying §3 of the paper, by the
+paper's authors, and are incorporated here unchanged; they have no upstream outside this project (see README
+§ Provenance and attribution).
 -/
 import Zeta23.LinAlg.Sylvester
 

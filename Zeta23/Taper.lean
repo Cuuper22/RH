@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23.  The test family [subsec:family] of the paper §2.2 and its
+Zeta23/Taper.lean — the test family [subsec:family] of the paper §2.2 and its
 elementary facts: text after [eq:phidef], [eq:phinorms], [eq:abdef], the facts after [eq:PhigA]
 (incl. [eq:Phi2FT]), [eq:gbounds], [eq:psidef], [eq:psiints], and [eq:hfbound] specialized to φ.
 ([eq:hfbound] for general f is in `Zeta23.Poisson.PaperFT`.)
