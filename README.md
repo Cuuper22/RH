@@ -1,0 +1,98 @@
+# Zeta23 — a Lean 4 formalization of "More than two thirds of the zeros of the Riemann zeta function lie on the critical line"
+
+> Research artifact. Not maintained and not accepting contributions.
+> A Lean 4 formalization released as a static companion artifact to the paper.
+
+This repository accompanies the paper "More than two thirds of the zeros of the Riemann zeta function lie on the critical line" (Claude; Anthropic, San Francisco, 2026).
+It contains a complete, `sorry`-free Lean 4 / Mathlib formalization of Theorems A–E of that paper, including proofs
+of every analytic input the argument uses (Weil's explicit formula for ζ and for primitive Dirichlet L-functions,
+the Riemann–von Mangoldt zero-counting formulas, Stirling-type estimates for Γ′/Γ on vertical lines,
+Chebyshev–Mertens prime-sum estimates, and the Montgomery–Vaughan generalized Hilbert inequality). Nothing is
+assumed: the top-level theorems have no hypotheses, the repository declares no axioms, and `#print axioms` on each
+headline theorem reports only Lean's three standard axioms `propext`, `Classical.choice`, `Quot.sound`.
+
+Toolchain: Lean `v4.32.2`, Mathlib commit `905b95818eb32af7874a58b427f50c1711a5e96c` (pinned in `lake-manifest.json`).
+
+## What is proved
+
+Write N(T₁,T₂) for the number of zeros ρ of ζ with 0 < Re ρ < 1 and T₁ < Im ρ ≤ T₂, counted with
+multiplicity; N₀*(T₁,T₂) for the number of *distinct* such zeros on the critical line Re ρ = 1/2;
+N₀ˢ for those that are on the line and *simple*; N_d for the number of distinct zeros; N(T) := N(0,T) etc.
+All of these are defined directly from Mathlib's `riemannZeta` and `analyticOrderAt`
+([`comparator/ChallengeDeps.lean`](comparator/ChallengeDeps.lean), ≈60 lines, is the complete list of
+definitions the statements depend on). "liminf_{T→∞} X(T)/N(T) ≥ c" is formalized in the ε-form
+`∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (c − ε)·N(T) ≤ X(T)`. Here c₁* = √2·tan ϑ/(1+ϑ·tan ϑ), ϑ = 1/√2 (= 0.75329…) is the
+Montgomery–Taylor constant of Theorem D.
+
+| | statement (as in the paper) | Lean name (modules `Solution` / `Solution.Multiplicity` under [`comparator/`](comparator/)) | underlying Zeta23 theorem |
+|---|---|---|---|
+| **A** | liminf N₀*(T,2T)/N(T,2T) ≥ 2/3, and liminf N₀*(T)/N(T) ≥ 2/3 | `two_thirds_on_critical_line`(`_cumulative`) | `Zeta23.thmA₀`(`_cumulative`) (`Zeta23/Final.lean`) |
+| **B** | liminf N₀ˢ/N ≥ 2/3: at least two thirds of the zeros are simple and on the critical line (dyadic and cumulative) | `two_thirds_simple_on_critical_line`(`_cumulative`) | `Zeta23.thmB₀_mult`(`_cumulative`) (`Zeta23/FinalMult.lean`) |
+| **C** | liminf N_d/N ≥ 5/6 (dyadic and cumulative) | `five_sixths_distinct`(`_cumulative`) | `Zeta23.thmC₀_mult`(`_cumulative`) |
+| **D** | with the optimal (Montgomery–Taylor) window: liminf N₀*(T,2T)/N(T,2T) ≥ 2 − 1/c₁* (= 0.67250…), the same for N₀ˢ, and N_d: ≥ (3 − 1/c₁*)/2 (= 0.83625…) | `montgomery_taylor_on_critical_line`, `montgomery_taylor_simple_on_critical_line_mult`, `montgomery_taylor_distinct_mult` | `Zeta23.ThmD.thmD₀` (`Zeta23/ThmD/Final.lean`), `Zeta23.ThmD.thmD₀_simple_mult`, `thmD₀_dist_mult` (`Zeta23/ThmD/Mult.lean`) |
+| **E** | for every primitive Dirichlet character χ mod q > 1, the analogues of A, B, C and D for the zeros of L(s,χ) (Mathlib's `DirichletCharacter.LFunction χ`) | `dirichlet_two_thirds_on_critical_line`, `dirichlet_two_thirds_simple_on_critical_line`, `dirichlet_five_sixths_distinct`, `dirichlet_montgomery_taylor_on_critical_line`, `dirichlet_montgomery_taylor_*_mult` | `Zeta23.ThmE.thmE_A₀`, `thmE_B₀_mult`, `thmE_C₀_mult`; `Zeta23.ThmDE.thmE_D₀`, `thmE_D₀_simple_mult`, `thmE_D₀_dist_mult` |
+
+How the two comparator configurations cover this: [`comparator/config.json`](comparator/config.json) (fifteen statements,
+[`comparator/Challenge.lean`](comparator/Challenge.lean)) contains Theorem A together with the *Cauchy–Schwarz forms* of
+B–E — N₀ˢ/N ≥ 1/2, N_d/N ≥ 3/4, and with the optimal window 2c₁* − 1 (= 0.50659…) and c₁*, for ζ and for L(s,χ)
+(`Zeta23.thmB₀`, `Zeta23.thmC₀`, `Zeta23.ThmD.thmD₀_simple`, … in `Zeta23/Final.lean`, `Zeta23/ThmD/Final.lean`,
+`Zeta23/ThmE/Final.lean`, `Zeta23/ThmDE/Final.lean`). [`comparator/config-multiplicity.json`](comparator/config-multiplicity.json)
+(twelve statements, [`comparator/Challenge/Multiplicity.lean`](comparator/Challenge/Multiplicity.lean)) contains B–E with the
+constants stated in the paper. In this formalization the latter are obtained from the same analytic inputs by the
+rank–trace inequality of §3 applied with parameter c = 2 (simple zeros) and c = 3 (distinct zeros) to the
+multiplicity-aware zero side (`Zeta23/ZeroSide/Mult.lean`, `Zeta23/Assembly/SeamMult.lean`, `Zeta23/FinalMult.lean`).
+The same A–C statements in the Cauchy–Schwarz form, with the same names inside namespace `Zeta23`, are in
+[`Zeta23/Unconditional.lean`](Zeta23/Unconditional.lean).
+
+## Layout
+
+```
+comparator/          trusted statements (ChallengeDeps, Challenge), untrusted Solution, comparator config — START HERE
+Zeta23/Statement.lean  nontrivial zeros, multiplicity, the counting functions, against Mathlib's riemannZeta
+Zeta23/Unconditional.lean, Zeta23/Final.lean, Zeta23/FinalMult.lean      Theorems A, B, C (ζ)
+Zeta23/ThmD/           Theorem D (the optimal Montgomery–Taylor window; variational problem in ThmD/Functional.lean; ThmD/Mult.lean)
+Zeta23/ThmE/           Theorem E (primitive Dirichlet L-functions); Zeta23/ThmDE/: Theorem D for L(s,χ)
+Zeta23/LinAlg/         §3 of the paper: Sylvester inertia, rank–trace inequality (via von Neumann), Cauchy–Schwarz count, Weyl
+Zeta23/WeilEF/, Zeta23/ExplicitFormula*   Weil's explicit formula (contour integration, Landau's lemma, zero-sum limits)
+Zeta23/RvM/            Riemann–von Mangoldt formula (argument principle, Backlund's bound via Jensen, local zero counts)
+Zeta23/GammaFacts/, Zeta23/Analytic/   Γ′/Γ estimates on vertical lines (Stirling) and other analysis
+Zeta23/Chebyshev.lean, Zeta23/FromPNTPlus/     Chebyshev–Mertens estimates; files ported (with attribution headers) from PrimeNumberTheoremAnd
+Zeta23/MV/             Montgomery–Vaughan generalized Hilbert inequality
+Zeta23/PrimeSideA/, PrimeSideB/, Poisson.lean, Taper/   the prime side: traces of the Gram matrix (paper §§4–5)
+Zeta23/ZeroSide/, Tail/                the zero side: block structure, tail bounds (paper §§2, 6)
+Zeta23/Assembly/, Main.lean            assembly of the certificate (paper §6)
+```
+
+## Building and checking
+
+Install [`elan`](https://github.com/leanprover/elan); the right Lean toolchain is selected automatically
+from `lean-toolchain`.
+
+```bash
+lake exe cache get        # fetch prebuilt Mathlib for the pinned commit (a few GB). If this fails (no cache
+                          # for your platform / offline), just proceed: the next step builds Mathlib from
+                          # source, which takes several hours of CPU time but needs nothing else.
+lake build                # builds library Zeta23 (the default target imports exactly the headline modules)
+lake build Solution Solution.Multiplicity
+lake env lean comparator/PrintAxioms.lean; lake env lean comparator/PrintAxioms/Multiplicity.lean   # axiom audit of the 15 + 12 theorems
+```
+
+Expected: no errors, no `sorry` warnings from `Zeta23/` or `Solution` (the only `sorry`s in the repository
+are the deliberate ones in the trusted challenge files under `comparator/`), and 27 lines of the
+form `'two_thirds_on_critical_line' depends on axioms: [propext, Classical.choice, Quot.sound]`.
+For the strongest independent check — statement equality against the trusted challenge plus kernel replay —
+run comparator as described in [`comparator/README.md`](comparator/README.md).
+
+
+## Provenance and attribution
+
+Files under `Zeta23/FromPNTPlus/` are ported from the
+[PrimeNumberTheoremAnd](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd) project (Apache 2.0); each
+carries a header naming the upstream file and commit, the upstream copyright and license, and the local
+modifications; the upstream text (including its informal comments) is otherwise unedited. `Zeta23/LinAlg/` (the
+linear-algebra core of §3: von Neumann's trace inequality for Hermitian matrices, both directions of Sylvester's law
+of inertia, the rank–trace inequality and Weyl's bound) was written first by the same authors as a self-contained
+development, in its own namespace `RHLinalg`, and is incorporated here unchanged; it has no other contributors or
+upstream. Everything builds on [Mathlib](https://github.com/leanprover-community/mathlib4).
+
+Released under the Apache License, Version 2.0 — see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE).
