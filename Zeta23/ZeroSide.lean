@@ -716,14 +716,14 @@ lemma s1_eq_mk : Z.s1 T = (mkData Z T v hv).s₁ := by
   convert (card_filter_coe (ZI Z T) (fun ρ => ρ.re = 1 / 2 ∧ Z.mult ρ = 1)
     (fun z => (mkData Z T v hv).σ z = z ∧ (mkData Z T v hv).m z = 1)
     fun z => by rw [mkData_σ_eq_iff]; rfl).symm using 2
-  all_goals (ext z; simp)
+  all_goals first | exact Finset.filter_congr_decidable _ _ _ | exact (Finset.filter_congr_decidable _ _ _).symm
 
 lemma s2_eq_mk : Z.s2 T = (mkData Z T v hv).s₂ := by
   rw [ZeroConfig.s2, S2_eq, Set.ncard_coe_finset, ZeroBlockData.s₂, ZeroBlockData.S₂]
   convert (card_filter_coe (ZI Z T) (fun ρ => ρ.re = 1 / 2 ∧ 2 ≤ Z.mult ρ)
     (fun z => (mkData Z T v hv).σ z = z ∧ 2 ≤ (mkData Z T v hv).m z)
     fun z => by rw [mkData_σ_eq_iff]; rfl).symm using 2
-  all_goals (ext z; simp)
+  all_goals first | exact Finset.filter_congr_decidable _ _ _ | exact (Finset.filter_congr_decidable _ _ _).symm
 
 /-- #offLine = 2p. -/
 lemma card_offLine_eq_mk : (Z.offLine T).ncard = 2 * (mkPairReps Z T v hv).p := by
@@ -830,7 +830,7 @@ theorem Az_eq_blockA (hconj : PhiHatConj T P) : Z.Az P T = (blockData Z T P hcon
   change ∑ᶠ ρ ∈ Z.ZIprime T, Z.Gsummand P T k l ρ = _
   rw [finsum_mem_eq_finite_toFinset_sum _ (ZIprime_finite Z T), ← Finset.sum_coe_sort]
   refine sum_congr rfl fun z _ => ?_
-  simp only [ZeroConfig.Gsummand, blockData, mkData_m, mkData_v, evalVec]
+  simp only [ZeroConfig.Gsummand, blockData, mkData, evalVec]
   ring
 
 /-- A is Hermitian (indeed real symmetric). -/

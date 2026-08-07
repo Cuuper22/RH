@@ -10,6 +10,7 @@ imports to Zeta23.FromPNTPlus.*, and added (name := ...) tags to the three local
 Re-ported from the
 v4.29.0 port (commit 10e1218932db7e2432aa5881d750acb819e91f19) when the project
 moved to Lean v4.32.2 / Mathlib 905b95818eb32af7874a58b427f50c1711a5e96c.
+Adjusted for Lean v4.33.0-rc2 / Mathlib 51e6992efd06: one redundant `rfl` after `simp` removed.
 Modified 2026 by Anthropic PBC.
 -/
 import Zeta23.FromPNTPlus.MellinCalculus
@@ -1974,7 +1975,6 @@ lemma log_pow_over_xsq_integral_bounded :
         apply intervalIntegral.integral_congr
         intro x hx
         simp
-        rfl
       rw [change_int_power, integral]
       have : T ^ (-1 : ℤ) > 0 := by
         refine zpow_pos ?_ (-1)

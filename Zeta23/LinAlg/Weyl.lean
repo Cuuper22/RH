@@ -6,8 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 /-
 The linear algebra of §3 of the paper (Hermitian positive/negative parts, inertia, the positive index,
 von Neumann's trace inequality, the rank–trace inequality, Weyl's perturbation bound). These seven files
-were written first, as a self-contained development by the same authors, and are kept in their own Lean
-namespace `RHLinalg` (see README § Provenance and attribution).
+were written first as a self-contained development (namespace `RHLinalg`) accompanying §3 of the paper, by the
+paper's authors, and are incorporated here unchanged; they have no upstream outside this project (see README
+§ Provenance and attribution).
 -/
 import Zeta23.LinAlg.PosIndex
 import Zeta23.LinAlg.Sylvester
@@ -35,10 +36,14 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 /-- **Weyl's eigenvalue perturbation inequality** (the paper's [lem:weyl], §3).
 If `A, E` are Hermitian and `θ ≥ ‖E‖_op`, then `n₊^θ(A + E) ≤ n₊(A)`.
 
-Proof: With eigenvalues in decreasing order, `λᵢ(A+E) ≤ λᵢ(A) + ‖E‖`
+Proof in the paper: with eigenvalues in decreasing order, `λᵢ(A+E) ≤ λᵢ(A) + ‖E‖`
 (Courant–Fischer). Hence `λᵢ(A+E) > θ ≥ ‖E‖` forces `λᵢ(A) > 0`.
 
-The proof uses Courant–Fischer (`Mathlib.Analysis.InnerProductSpace.Spectrum`).
+That is the paper's proof. The Lean proof instead takes W := the range of the spectral truncation
+(t − θ)⁺ of A + E (so dim W = n₊^θ(A+E)), shows that the Hermitian form of A is positive definite on W
+(that of A + E exceeds θ‖x‖² there while that of E is at most θ‖x‖²), and concludes with the subspace
+characterization of the positive index (`finrank_le_posIndex_of_posDefOn`, Sylvester.lean); the
+hypothesis is stated as |λᵢ(E)| ≤ θ for every eigenvalue of E.
 The operator norm `‖E‖_op` is
 `Matrix.instNormedRing` (the `linftyOpNorm`), which for Hermitian matrices
 equals `max |λᵢ|`. -/

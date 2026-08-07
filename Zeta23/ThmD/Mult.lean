@@ -11,9 +11,7 @@ Cauchy–Schwarz forms in Zeta23/ThmD/Final.lean give 2c₁* − 1 = 0.50659… 
 running the c = 2 / c = 3 rank–trace inequalities (Assembly/SeamMult.lean; the zero side uses only
 the Poisson identity, so the window-realizing family P.atD plugs in) through the Theorem-D endgame.
 For Mathlib's riemannZeta, NO hypotheses.  The multiplicity-aware zero side and seams are
-ZeroSide/Mult.lean and Assembly/SeamMult.lean; the underlying bookkeeping is Σ_ρ (c·m_ρ − m_ρ²)
-(cf. an independent note on a band-localized large sieve for the family, where the same device
-appears).
+ZeroSide/Mult.lean and Assembly/SeamMult.lean; the underlying bookkeeping is Σ_ρ (c·m_ρ − m_ρ²).
 -/
 import Zeta23.ThmD.Final
 import Zeta23.Assembly.SeamMult

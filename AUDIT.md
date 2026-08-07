@@ -2,7 +2,7 @@
 
 This file records the checks that were run on exactly the sources in this repository and how to reproduce them. Nothing here is part of the trusted base: a reader can re-run everything below, and can run the [comparator](https://github.com/leanprover/comparator) tool against the trusted statement files in `comparator/` (see `comparator/README.md`).
 
-Toolchain: Lean `leanprover/lean4:v4.32.2`; Mathlib commit `905b95818eb32af7874a58b427f50c1711a5e96c` (pinned in `lake-manifest.json`). Library name: `Zeta23`.
+Toolchain: Lean `leanprover/lean4:v4.33.0-rc2`; Mathlib commit `51e6992efd06126df61a496bebf8f49482a4e129` (the commit Mathlib's tag `v4.33.0-rc2` points to, read from the tag archive; pinned in `lake-manifest.json`). Library name: `Zeta23`. Repository: <https://github.com/anthropics/zeta-23-lean>.
 
 ## How to reproduce
 
@@ -16,7 +16,7 @@ lake build Challenge          # the trusted statement files; expect only the del
 
 ## Recorded results at this commit
 
-* `lake build`: completed successfully (8847 jobs, counting the Mathlib dependency closure); no errors and no `sorry` warnings.
+* `lake build`: completed successfully (8890 jobs, counting the Mathlib dependency closure); no errors and no `sorry` warnings.
 * `lake build Solution` and `lake build Solution.Multiplicity`: completed successfully; no errors and no `sorry` warnings.
 * `lake build Challenge` and the topic challenge files: complete with `declaration uses 'sorry'` warnings **only** in the trusted statement files, which state each theorem with a placeholder proof by design (`comparator/Challenge.lean`: 15, `comparator/Challenge/Multiplicity.lean`: 12), and with no other warnings or errors.
 * Declarations of new axioms (`axiom ...`) anywhere in the repository, counted on the sources with comments and docstrings stripped: **0**.
@@ -55,7 +55,7 @@ lake build Challenge          # the trusted statement files; expect only the del
 'dirichlet_montgomery_taylor_distinct_mult' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
-### `#print axioms` for the 27 `Zeta23` library theorems those statements are proved from, verbatim
+### `#print axioms` for the 28 `Zeta23` library theorems behind them (the theorems the comparator statements delegate to, plus the further results listed in README), verbatim
 
 Each `Solution` theorem is a short delegation to the corresponding `Zeta23` theorem, so the two lists necessarily agree; the library names are the ones a reader of the library (or of the paper's appendix) will look for.
 
@@ -87,6 +87,7 @@ Each `Solution` theorem is a short delegation to the corresponding `Zeta23` theo
 'Zeta23.ThmE.thmE_C₀_mult' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Zeta23.ThmDE.thmE_D₀_simple_mult' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Zeta23.ThmDE.thmE_D₀_dist_mult' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Zeta23.ZeroSide.TightMult.lemmaR_tight' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ## Comparator
