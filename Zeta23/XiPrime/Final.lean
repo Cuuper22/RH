@@ -29,11 +29,11 @@ Proved in this tree:
   H-Γ (Zeta23.gammaFacts) and Montgomery–Vaughan (Zeta23.MV.mv_hilbert).
 
 Prior art.  For "simple and on the critical line", unconditionally, the ξ′
-constants 0.8584 (flat) / 0.8686 (quartic) exceed the best previous value 0.79874 (Conrey,
-J. reine angew. Math. 399 (1989) Thm 2 with θ = 4/7, building on J. Number Theory 16 (1983) and, for simple zeros of the
-derivatives, J. Number Theory 17 (1983) 71–75; as recorded in
-Farmer, Electron. J. Combin. 1995 and quoted in Farmer–Gonek, arXiv:0803.0425); they equal Farmer–Gonek's
-RH-conditional value with RH removed.  They do not exceed the best known on-line-only proportion (multiplicity
+constants 0.8584 (flat) / 0.8686 (quartic) exceed the best previous value 0.79874 (Conrey's method,
+J. reine angew. Math. 399 (1989), with θ = 4/7, building on J. Number Theory 16 (1983) and, for simple zeros of the
+derivatives, J. Number Theory 17 (1983) 71–75; the value is the one recorded in
+Farmer, Electron. J. Combin. 2 (1995) and quoted in Farmer–Gonek, arXiv:0803.0425 = Farmer–Gonek–Lee,
+J. London Math. Soc. (2) 90 (2014)); they equal Farmer–Gonek–Lee's RH-conditional value with RH removed.  They do not exceed the best known on-line-only proportion (multiplicity
 allowed): X. Wu, Quart. J. Math. 66 (2015) 759–771 (arXiv:1206.3737) has 0.86957.
 Z′ simple-and-real: Hall 2004:
 "Z′ has not been studied directly"; Rolle from PRZZ gives ≈ 0.417.  RH-conditional comparators:
