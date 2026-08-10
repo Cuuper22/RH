@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 /-
 Zeta23/RvM/Fold.lean — the symmetry fold of the argument-principle rectangle onto its right half
-(used by MainTerm.lean's N_eq_halfContour_completedZeta).
+(used for MainTerm.lean's N_eq_halfContour_completedZeta).
 
 With F := Λ'/Λ (Λ = completedRiemannZeta), A_T := ∫_{1/2}^{2} F(σ+iT)dσ, B := ∫_{T₁}^{T₂} F(2+it)dt:
 the functional equation Λ(1−w) = Λ(w) and the reflection Λ(w̄) = conj Λ(w) give F(1−s̄) = −conj F(s)
@@ -14,8 +14,8 @@ on the right half-path, hence ∫_{−1}^{1/2}F(σ+iT)dσ = −conj A_T, ∫_{T�
                            = 2i·Im(A_{T₁} + B·i − A_{T₂}) = 2i·Im(halfContour F T₁ T₂).
 Combined with Zeta23.RvM.rectangleIntegral'_logDeriv_completedZeta_eq_Ncount (CountByIntegral.lean):
     N(T₁,T₂) = (1/π)·Im(halfContour (logDeriv Λ) T₁ T₂)   for good heights 1 ≤ T₁ < T₂.
-The conj-symmetry lemmas for Gammaℝ and Λ'/Λ (section ConjSymmetry) live here so that both this
-file and MainTerm.lean can use them.
+The conj-symmetry lemmas for Gammaℝ and Λ'/Λ (section ConjSymmetry) live here rather than in
+MainTerm.lean so that both files can use them.
 -/
 import Zeta23.RvM.Defs
 import Zeta23.RvM.CountByIntegral
@@ -57,7 +57,7 @@ lemma logDeriv_Gammaℝ_conj (s : ℂ) :
     logDeriv Complex.Gammaℝ (starRingEnd ℂ s) = starRingEnd ℂ (logDeriv Complex.Gammaℝ s) := by
   rw [logDeriv_apply, logDeriv_apply, deriv_Gammaℝ_conj, Gammaℝ_conj, ← map_div₀]
 
-/-- Conjugation symmetry of Λ'/Λ at points with Re > 0 where ζ ≠ 0.  -/
+/-- Conjugation symmetry of Λ'/Λ at points with Re > 0 where ζ ≠ 0. -/
 lemma logDeriv_completedZeta_conj {s : ℂ} (hre : 0 < s.re) (hs0 : s ≠ 0) (hs1 : s ≠ 1)
     (hζs : riemannZeta s ≠ 0) :
     logDeriv completedRiemannZeta (starRingEnd ℂ s)
@@ -68,8 +68,8 @@ lemma logDeriv_completedZeta_conj {s : ℂ} (hre : 0 < s.re) (hs0 : s ≠ 0) (hs
   have hζc : riemannZeta (starRingEnd ℂ s) ≠ 0 := by
     rw [_root_.riemannZeta_conj]
     exact (map_ne_zero _).mpr hζs
-  rw [Zeta23.WeilEF.logDeriv_completedZeta _ hc0 hc1 hζc hcre,
-    Zeta23.WeilEF.logDeriv_completedZeta _ hs0 hs1 hζs hre, map_add, logDeriv_Gammaℝ_conj,
+  rw [Zeta23.WeilEF.logDeriv_completedZeta _ hc1 hζc hcre,
+    Zeta23.WeilEF.logDeriv_completedZeta _ hs1 hζs hre, map_add, logDeriv_Gammaℝ_conj,
     logDerivZeta_conj']
 
 /-- The fold symmetry: Λ'/Λ(1 − s̄) = −conj(Λ'/Λ(s)) (Re s > 0, s ≠ 1, ζ(s) ≠ 0). -/

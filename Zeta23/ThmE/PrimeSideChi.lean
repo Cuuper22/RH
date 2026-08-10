@@ -3,21 +3,6 @@ Copyright (c) 2026 Anthropic, PBC. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
-/-
-Zeta23/ThmE/PrimeSideChi.lean — the §5 prime side for a primitive Dirichlet character χ mod q,
-over the abstract taper layer of Zeta23/PrimeSideA/Basic.lean
-(Setting / LocalFun / LocalHypsCore / EventuallyAtCore — the Thm-D-ready Core interface), with ζ's
-density ν_X replaced by ν_{X,χ} = μ_{κ,q} + P_{X,c} (Zeta23/ThmE/Hypotheses.lean) and no pole term.
-
-Paper: [thm:E] proof (i)+(iii) — "Section 5 applies with the following changes: the coefficients
-a_n = Λ(n)χ(n)n^{−1/2} acquire unimodular factors and enter lem:MV and all other bounds only
-through |a_n|; μ_χ satisfies (eq:mufacts)–(eq:muints) with ℓ₁ → ℓ_{1,χ}; there is no pole term."
-All constants may depend on (κ, q) — q is fixed ([thm:E]); q-dependence is recorded per-theorem in
-docstrings for [rem:otherL](i).
-
-The proofs mirror the ζ-versions in Zeta23/PrimeSideA.lean.  The results are consumed by the
-BridgeChi/TracesChi assembly proving Zeta23.ThmE.ThmTracesHypChi.
--/
 import Zeta23.PrimeSideA.Basic
 import Zeta23.PrimeSideA.Ends
 import Zeta23.ThmE.Hypotheses
@@ -33,8 +18,6 @@ namespace ThmE
 open Zeta23.PrimeSide
 
 /-! ## Definitions: the χ-analogues of GentryA / trGtA / trGt2A / MtotalA -/
-
--- CoeffOK / CoeffUnimodular are defined in Zeta23/ThmE/Hypotheses.lean
 
 
 variable (κ q : ℕ) (c : ℕ → ℂ)
@@ -227,7 +210,6 @@ lemma integral_phiHat_sq_re_twist_core (hF : LocalHypsCoreW cϱ p F) (z : ℂ) (
     simp only [Complex.mul_re, Complex.add_re, Complex.add_im, Complex.mul_im,
       Complex.cos_ofReal_re, Complex.sin_ofReal_re, Complex.cos_ofReal_im,
       Complex.sin_ofReal_im, Real.cos_neg, Real.sin_neg]
-    push_cast
     ring_nf
     simp [Complex.I_re, Complex.I_im]
   have e2 : ∀ r : ℝ, F.phiHat r ^ 2 * (z * Complex.exp (-Complex.I * ((t + r) * y))).re
@@ -435,12 +417,10 @@ lemma abs_sin_mul_norm_geom_le (θ : ℝ) (d : ℕ) :
     rw [hw, Complex.exp_mul_I]
     have hre : (Complex.cos ↑θ + Complex.sin ↑θ * Complex.I - 1).re = Real.cos θ - 1 := by
       simp [Complex.sub_re, Complex.add_re, Complex.mul_re, Complex.I_re, Complex.I_im,
-        Complex.one_re, Complex.cos_ofReal_re, Complex.sin_ofReal_im, Complex.sin_ofReal_re,
-        Complex.cos_ofReal_im]
+        Complex.one_re, Complex.cos_ofReal_re, Complex.sin_ofReal_im, Complex.sin_ofReal_re]
     have him : (Complex.cos ↑θ + Complex.sin ↑θ * Complex.I - 1).im = Real.sin θ := by
       simp [Complex.sub_im, Complex.add_im, Complex.mul_im, Complex.I_re, Complex.I_im,
-        Complex.one_im, Complex.cos_ofReal_im, Complex.sin_ofReal_re, Complex.sin_ofReal_im,
-        Complex.cos_ofReal_re]
+        Complex.one_im, Complex.cos_ofReal_im, Complex.sin_ofReal_re, Complex.sin_ofReal_im]
     rw [show ‖Complex.cos ↑θ + Complex.sin ↑θ * Complex.I - 1‖
         = Real.sqrt ((Real.cos θ - 1) ^ 2 + Real.sin θ ^ 2) by
       rw [← hre, ← him]
@@ -575,7 +555,7 @@ lemma P_part_chi_eq (hF : LocalHypsCoreW cϱ p F) (c : ℕ → ℂ) (t : ℝ) :
     refine Finset.sum_congr rfl fun n _ => ?_
     rw [show (t + r) * Real.log n = (t + r) * Real.log n from rfl]
     ring
-  rw [h1, MeasureTheory.integral_finset_sum]
+  rw [h1, MeasureTheory.integral_finsetSum]
   · rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun n _ => ?_
     rw [MeasureTheory.integral_const_mul, MeasureTheory.integral_add, 
@@ -596,11 +576,11 @@ lemma P_part_chi_eq (hF : LocalHypsCoreW cϱ p F) (c : ℕ → ℂ) (t : ℝ) :
 end KernelChi
 
 /-- `P_{X,c}` is continuous in τ. -/
-lemma PXc_continuous (hX : 0 < X) : Continuous (PXc c X) := by
+lemma PXc_continuous (_hX : 0 < X) : Continuous (PXc c X) := by
   unfold PXc
   apply Continuous.mul continuous_const
   apply Complex.continuous_re.comp
-  apply continuous_finset_sum
+  apply continuous_finsetSum
   intro n hn
   have hn0 : 0 < n := (Finset.mem_Ioc.1 hn).1
   have hnC : (n : ℂ) ≠ 0 := Nat.cast_ne_zero.2 hn0.ne'
@@ -616,7 +596,7 @@ variable {cϱ : ℝ} {p : Setting} {F : LocalFun} {κ q : ℕ} {c : ℕ → ℂ}
 
 /-- μ_χ-part bound at one grid point (mirror of mu_part_bound, K(|r|+r²)/t shape). -/
 lemma muq_part_bound (hΓq : GammaFactsChi κ q) (hq : 1 ≤ q) (hF : LocalHypsCoreW cϱ p F) {K : ℝ}
-    (hK0 : 0 ≤ K)
+    (_hK0 : 0 ≤ K)
     (hK : ∀ t : ℝ, 2 ≤ t → ∀ r : ℝ, |muq κ q (t + r) - muq κ q t| ≤ K * (|r| + r ^ 2) / t)
     {t : ℝ} (ht : 2 ≤ t) :
     |(∫ r, F.phiHat r ^ 2 * muq κ q (t + r)) - 2 * π * F.a * p.L * muq κ q t|
@@ -1160,12 +1140,6 @@ theorem eq_Msplit_chi (hΓq : GammaFactsChi κ q) (hc : CoeffOK q c)
     Mform_add_right hΦ hμc hPc hPc, Mform_comm hΦe (PXc c p.X) (muq κ q)]
   ring
 
--- [prop:mumu] for L(s,χ) is proved in Zeta23/ThmE/MuMuChi.lean:
--- `Zeta23.ThmE.prop_mumu_chi` (that file imports this one).
-
--- [prop:cross] for L(s,χ) is proved in Zeta23/ThmE/CrossMuPChi.lean:
--- `Zeta23.ThmE.prop_cross_muP_chi_proved` (with hypothesis (hq : 1 ≤ q)); that file imports
--- this one.
 
 set_option maxHeartbeats 1600000 in
 /-- μ_χ satisfies the `NuBound` μ-part: `|μ_χ(τ)| ≤ C₀·l + log⁺(|τ|/4T)` for large `T`
@@ -1359,7 +1333,7 @@ lemma muq_nuBound (hΓq : GammaFactsChi κ q) (hq : 1 ≤ q) :
             = 1 / (2 * π) * |Real.log ((q:ℝ) * |τ| / (2 * π))| := by
           rw [abs_mul, abs_of_pos (by positivity : (0:ℝ) < 1 / (2 * π))]
         linarith
-      -- log < 0: bound |log| ≤ log 2π, since the argument q|τ|/2π ≥ 1/(2π)
+      -- |log| when log < 0: the argument ≥ |τ|/(2π·…)… bound |log| ≤ log 2π (argument ≥ q|τ|/2π ≥ 1/(2π))
       have harg : (1:ℝ) / (2 * π) ≤ (q:ℝ) * |τ| / (2 * π) := by
         apply div_le_div_of_nonneg_right _ (by positivity)
         nlinarith
@@ -1460,10 +1434,6 @@ theorem lem_ends_chi (hΓq : GammaFactsChi κ q) (hcheb : ChebyshevMertens)
         * (p.L * Zeta23.l p.T * Real.log (Zeta23.l p.T) * (Zeta23.l p.T ^ 2 + p.X)) := by
         ring
 
-
-/- [prop:PP] for L(s,χ): statement and proof are in Zeta23/ThmE/PPChi.lean, in the form
-|𝓜[P,P] − (T/π)·sumA2gCoprime q X g| ≤ C·L²X over EventuallyAtCore, together with the coprime
-g-sandwich sumA2gCoprime_upper (Core) / sumA2gCoprime_lower (full EventuallyAt). -/
 
 end ThmE
 end Zeta23

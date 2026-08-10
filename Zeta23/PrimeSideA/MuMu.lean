@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 /-
 Zeta23/PrimeSideA/MuMu.lean
 
-[prop:mumu] of the paper: 𝓜[μ,μ] = 2πbL ∫_T^{2T} μ² + O(l² log L).
+[prop:mumu] (paper §5.4): 𝓜[μ,μ] = 2πbL ∫_T^{2T} μ² + O(l² log L).
 
 Paper proof, as implemented here:
   * shear τ = τ' + x (`sqIntegral_shear`):
@@ -123,11 +123,11 @@ theorem abs_inner_sub_le (hΓ : Zeta23.GammaFacts) (hF : LocalHypsCore cϱ p F) 
     -- completion piece
     have hcomp : |(∫ τ' in Ix p.T x, Zeta23.mu τ' ^ 2)
         - ∫ τ' in Icc p.T (2 * p.T), Zeta23.mu τ' ^ 2| ≤ p.l ^ 2 * |x| := by
-      rw [abs_sub_comm, ← setIntegral_diff hIxmeas hIInt2 hIxI]
+      rw [abs_sub_comm, ← setIntegral_sdiff hIxmeas hIInt2 hIxI]
       have hdvol : (volume : Measure ℝ).real (Icc p.T (2 * p.T) \ Ix p.T x) = |x| := by
         have hsub : volume (Icc p.T (2 * p.T) \ Ix p.T x)
             = volume (Icc p.T (2 * p.T)) - volume (Ix p.T x) :=
-          measure_diff hIxI hIxmeas.nullMeasurableSet hIxfin
+          measure_sdiff hIxI hIxmeas.nullMeasurableSet hIxfin
         rw [measureReal_def, hsub]
         unfold Ix
         rw [Real.volume_Icc, Real.volume_Icc,
@@ -139,7 +139,7 @@ theorem abs_inner_sub_le (hΓ : Zeta23.GammaFacts) (hF : LocalHypsCore cϱ p F) 
         fun τ' hτ' => hsq_bound τ' hτ'.1
       have h := norm_setIntegral_le_of_norm_le_const (μ := volume)
         (s := Icc p.T (2 * p.T) \ Ix p.T x) (f := fun τ' => Zeta23.mu τ' ^ 2)
-        (lt_of_le_of_lt (measure_mono diff_subset)
+        (lt_of_le_of_lt (measure_mono Set.sdiff_subset)
           (by rw [Real.volume_Icc]; exact ENNReal.ofReal_lt_top)) hb
       rw [Real.norm_eq_abs, hdvol] at h
       exact h
@@ -218,9 +218,9 @@ end Core
 variable (cϱ lam : ℝ)
 
 set_option linter.unusedVariables false in
-/-- **[prop:mumu]**: `𝓜[μ,μ] = 2πbL ∫_T^{2T} μ² + O(l² log L)`.
-(`hcheb`/`hlam` are unused here but kept so that the statement matches the common
-interface of the prime-side propositions.) -/
+/-- **[prop:mumu]** (§5.4): `𝓜[μ,μ] = 2πbL ∫_T^{2T} μ² + O(l² log L)`.
+(`hcheb`/`hlam` are unused here but kept so that the statement matches the fixed interface
+shared with the other prime-side propositions.) -/
 theorem prop_mumu (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMertens)
     (hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>

@@ -10,7 +10,7 @@ for L(s,χ) is EXACTLY ∫ μ_χ:
 where κ ∈ {0,1} is the parity (gammaFactor χ s = Γℝ(s + κ) by Even/Odd.gammaFactor_def), because
 logDeriv arch = (log q)/2 + logDeriv Γℝ(·+κ) is holomorphic on Re s > 0 and on the critical line
   Re[(log q)/2 − (log π)/2 + ψ(¼ + κ/2 + it/2)/2] = π·μ_χ(t)   (μ_χ = Zeta23.ThmE.muq κ q).
-The analogue for L(s,χ) of Zeta23/RvM/GammaSide.lean.
+This is the analogue of Zeta23/RvM/GammaSide.lean for L(s,χ).
 -/
 import Zeta23.ThmE.Hypotheses
 import Zeta23.RvM.GammaSide
@@ -144,7 +144,7 @@ theorem re_logDeriv_archChi_half (t : ℝ) :
 
 /-- the Γ/conductor-side contour identity: for 0 < T₁, T₂,
 (1/π)·Im(halfContour (logDeriv arch) T₁ T₂) = ∫_{T₁}^{T₂} μ_χ. -/
-theorem gammaSideChi {T₁ T₂ : ℝ} (h0 : 0 < T₁) (h0' : 0 < T₂) :
+theorem gammaSideChi {T₁ T₂ : ℝ} (_h0 : 0 < T₁) (_h0' : 0 < T₂) :
     (1 / Real.pi) * (RvM.halfContour (logDeriv (archChi q κ)) T₁ T₂).im =
       ∫ t in T₁..T₂, muq κ q t := by
   set F := logDeriv (archChi q κ) with hF

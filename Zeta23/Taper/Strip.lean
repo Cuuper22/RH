@@ -9,9 +9,9 @@ Zeta23 — Taper/Strip.lean.
 "`|φ̂(r − iy)| ≤ e^{L/4} ‖φ''‖₁ |r − iy|⁻²`" for `|y| ≤ 1/2`.
 All three statements are proved here from the general-`f` bounds in Zeta23/Poisson/PaperFT.lean,
 and are consumed via `Zeta23.Params.norm_phiHat_*`.
-Canonical text: the paper §2.1 [eq:hfbound], §4 [prop:tail].
+Reference: the paper, §2.1 [eq:hfbound], §4 [prop:tail].
 -/
-import Mathlib.Data.Real.StarOrdered
+import Mathlib.Algebra.Order.Star.Real
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Zeta23.Taper.Basic
 

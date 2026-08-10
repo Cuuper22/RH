@@ -4,7 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmE/CrossMuPChi.lean — [prop:cross] (i) for L(s,χ):  `𝓜[μ_χ, P_{X,χ}] ≪_q l√X`.
+Zeta23/ThmE/CrossMuPChi.lean — [prop:cross] (i) for L(s,χ):  `𝓜[μ_χ, P_{X,χ}] ≪_q l√X`
+(statement in Zeta23/ThmE/PrimeSideChi.lean, which re-exports this proof).
 
 Route = the ζ-proof of Zeta23/PrimeSideA/CrossMuP.lean (double IBP, no differentiation under the
 integral), with two changes: the density μ_χ's bounds come from the H-Γ(χ) package
@@ -47,7 +48,7 @@ lemma Mform_mu_PXc_eq {Φ : ℝ → ℝ} (hΦ : Continuous Φ) {u : ℝ → ℝ}
     rw [PXc_eq_sum_cos_sin, Finset.mul_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun n _ => ?_
     ring
-  rw [h1, integral_finset_sum]
+  rw [h1, integral_finsetSum]
   · refine Finset.sum_congr rfl fun n _ => ?_
     rw [integral_const_mul]
     congr 1

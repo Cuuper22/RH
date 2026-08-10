@@ -4,9 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-  Part of the Zeta23 formalization of the paper
-  "More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
-  Bracketed labels ([prop:cross], [eq:Msplit], …) and section numbers (§5.4, …) refer to that paper.
+Part of the Zeta23 formalization of the paper
+"More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
 -/
 import Zeta23.ThmE.TracesHypChi
 import Zeta23.ThmE.PrimeSideChi
@@ -18,18 +17,20 @@ import Zeta23.PrimeSideB.Concrete
 import Zeta23.PrimeSideA.Bridge
 
 /-!
-# [thm:traces] for L(s,chi) — the assembly
+# [thm:traces] for L(s,chi) — the E3 assembly
 
 Mirror of Zeta23/PrimeSideB.lean (abstract Facts → TracesBounds assembly) and
 Zeta23/PrimeSideB/Traces.lean (concrete instantiation) for a Dirichlet character:
 ell1 ↦ ell1q q, nu_X ↦ nu_{X,chi} = mu_{kappa,q} + P_{X,c} (no pole term: [eq:Msplit] has three
 terms), [prop:PP] main sum ↦ sumA2gCoprime.  The real-variable pointwise lemmas tr2_pointwise and
 ratio_pointwise (PrimeSideB.lean) are reused verbatim — they take the density-log as a free real,
-and ell1q slots in (l ≤ ell1q for q ≥ 1).  Constants may depend on q (q is fixed in [thm:E]).
+and ell1q slots in (l ≤ ell1q for q ≥ 1).  Constants may depend on q (q fixed in [thm:E]; the
+q-uniformity question for [rem:otherL](i) is addressed in Zeta23/ThmE/Hybrid.lean).
 
-Inputs: prop_trace_chi, eq_Msplit_chi (PrimeSideChi.lean); prop_mumu_chi (MuMuChi.lean);
-prop_cross_muP_chi_proved (CrossMuPChi.lean); prop_PP_chi + sumA2gCoprime sandwich
-(PPChi.lean); lem_ends_chi (via the nu-generic lem:ends).
+Inputs: prop_trace_chi, eq_Msplit_chi (PrimeSideChi.lean);
+prop_mumu_chi (MuMuChi.lean); prop_cross_muP_chi_proved (CrossMuPChi.lean);
+prop_PP_chi + sumA2gCoprime sandwich (PPChi.lean);
+lem_ends_chi (via the nu-generic lem:ends).
 -/
 
 noncomputable section
@@ -183,7 +184,7 @@ theorem tr2_first_chi : EvBound
     refine h.prop_PP.mono_right' one_pos ?_
     filter_upwards [regime_chi h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
     calc P.L T ^ 2 * P.X T = P.L T * P.L T * 1 * P.X T := by ring
-      _ ≤ P.L T * Zeta23.l T * Real.log (Zeta23.l T) * (Zeta23.l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * Zeta23.l T * Real.log (Zeta23.l T) * (Zeta23.l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * Zeta23.l T * Real.log (Zeta23.l T) * (Zeta23.l T ^ 2 + P.X T)) := (one_mul _).symm
   have e3 : EvBound (fun T => D.Mmumu T - 2 * π * D.bT T * P.L T * D.intMu2 T)
       (fun T => P.L T * Zeta23.l T * Real.log (Zeta23.l T) * (Zeta23.l T ^ 2 + P.X T)) := by
@@ -193,7 +194,7 @@ theorem tr2_first_chi : EvBound
     have hlogL0 : 0 ≤ Real.log (P.L T) := Real.log_nonneg hL
     calc Zeta23.l T ^ 2 * Real.log (P.L T) ≤ Zeta23.l T ^ 2 * Real.log (Zeta23.l T) := by gcongr
       _ = 1 * Zeta23.l T * Real.log (Zeta23.l T) * Zeta23.l T := by ring
-      _ ≤ P.L T * Zeta23.l T * Real.log (Zeta23.l T) * (Zeta23.l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * Zeta23.l T * Real.log (Zeta23.l T) * (Zeta23.l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = _ := (one_mul _).symm
   have hsqrtX : ∀ᶠ T in atTop, Real.sqrt (P.X T) ≤ P.X T := by
     filter_upwards [regime_chi h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
@@ -205,7 +206,7 @@ theorem tr2_first_chi : EvBound
     filter_upwards [regime_chi h, hsqrtX] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ hs
     calc Zeta23.l T * Real.sqrt (P.X T) ≤ Zeta23.l T * P.X T := by gcongr
       _ = 1 * Zeta23.l T * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * Zeta23.l T * Real.log (Zeta23.l T) * (Zeta23.l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * Zeta23.l T * Real.log (Zeta23.l T) * (Zeta23.l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = _ := (one_mul _).symm
   have S := h.lem_ends.add (e3.add (e4.add (e5.const_mul 2)))
   refine S.congr_left ?_
@@ -341,7 +342,8 @@ lemma rvm_evBound_chi {Z : ZeroConfig} (hR : RiemannVonMangoldtChi q Z) :
     _ = 2 * max C 1 * Zeta23.l T := by ring
 
 set_option maxHeartbeats 1600000 in
-/-- FactsChi for the concrete data, from the published chi-inputs + the taper facts. -/
+/-- FactsChi for the concrete data, from the chi-inputs together with the taper facts
+(including lem_ends_chi). -/
 theorem concreteFactsChi {cϱ : ℝ} {Z : ZeroConfig} (hP : P.Valid) (hq : 1 ≤ q)
     (hcu : CoeffUnimodular q c) (inp : PaperInputsChi κ q c Z)
     (hLoc : LocalHypsEventually cϱ P) : FactsChi q (concreteDataChi P κ q c Z) := by
@@ -456,7 +458,7 @@ theorem concreteFactsChi {cϱ : ℝ} {Z : ZeroConfig} (hP : P.Valid) (hq : 1 ≤
     exact max_le (by linarith) hpos
   case cross_muP => exact e_muP
 
-/-- **[thm:traces] for L(s,chi), concrete.** -/
+/-- **[thm:traces] for L(s,χ), concrete.** -/
 theorem thm_traces_chi {cϱ : ℝ} {Z : ZeroConfig} (hP : P.Valid) (hq : 1 ≤ q)
     (hcu : CoeffUnimodular q c) (inp : PaperInputsChi κ q c Z)
     (hLoc : LocalHypsEventually cϱ P) : ThmTracesHypChi P κ q c Z :=

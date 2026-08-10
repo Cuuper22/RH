@@ -4,8 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmE/SeamL.lean — discharging the L(s,χ)-seam obligations of Zeta23.ThmE.LSeam from Mathlib.  Mirror of Zeta23/ZetaReflect.lean + Zeta23/Statement/Seam.lean for a
-primitive Dirichlet character χ mod q, q > 1.
+Zeta23/ThmE/SeamL.lean — discharging the L(s,χ)-seam obligations of Zeta23.ThmE.LSeam from Mathlib.
+Mirror of Zeta23/ZetaReflect.lean + Zeta23/Statement/Seam.lean for a primitive Dirichlet character
+χ mod q, q > 1.
 
 Paper [thm:E] proof (ii), verbatim: "the multiset of zeros of L(s,χ) is invariant under ρ ↦ 1−ρ̄
 with multiplicities (functional equation χ ↔ χ̄ composed with conj L(conj s, χ) = L(s, χ̄)), all
@@ -50,6 +51,7 @@ lemma ne_one_of_primitive (hq : 1 < q) (hprim : χ.IsPrimitive) : χ ≠ 1 := by
   rw [IsPrimitive, h, conductor_one] at hprim
   omega
 
+omit [NeZero q] in
 lemma inv_ne_one (hχ1 : χ ≠ 1) : χ⁻¹ ≠ 1 := by
   simpa [inv_eq_one] using hχ1
 
@@ -126,6 +128,7 @@ theorem analyticOrderAt_LFunction_conj (hχ1 : χ ≠ 1) (w : ℂ) :
 
 /-! ### 3. The Γ-factor and the FE prefactor in the strip -/
 
+omit [NeZero q] in
 lemma gammaFactor_analyticAt {w : ℂ} (h0 : 0 < w.re) :
     AnalyticAt ℂ (gammaFactor χ) w ∧ gammaFactor χ w ≠ 0 := by
   have key : ∀ a : ℂ, 0 < (w + a).re → AnalyticAt ℂ (fun z => Gammaℝ (z + a)) w ∧

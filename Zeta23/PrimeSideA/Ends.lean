@@ -4,10 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23 — prime side, [lem:ends] "End effects" (the paper §5, §5.3), with [eq:Kdef],
+Zeta23 — prime side, [lem:ends] "End effects" (the paper, §5, §5.3), with [eq:Kdef],
 [eq:trG2int], [eq:Kbounds].
 
-MAIN RESULT:
+MAIN RESULT (consumed by thm:traces):
   theorem lem_ends (hΓ : GammaFacts) (hcheb : ChebyshevMertens) (hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>
       |trGt2A p F - MtotalA p F| ≤ C * (p.L * p.l * Real.log p.l * (p.l ^ 2 + p.X)))
@@ -35,6 +35,9 @@ ROUTE (paper's, §5.3, with two simplifications that only change absolute consta
 * [eq:Bdef] |ν_X(τ)| ≤ B + log⁺(|τ|/4T), B = l + 4√X (Zeta23/PiFacts.lean,
   from H-Γ + H-cheb); B² ≤ 2l² + 32X.
 All constants C may depend on c_ϱ and λ (PrimeSideA convention); T₀ likewise.
+
+The proof is assembled from the 𝓔₁ and 𝓔₂ bounds (Zeta23.PrimeSideA.EndsE1/EndsE2) in the
+theorems below.
 -/
 import Zeta23.PrimeSideA.EndsE1
 import Zeta23.PrimeSideA.EndsE2
@@ -57,8 +60,7 @@ theorem Bconst_sq_le (p : Setting) (_hl : 0 ≤ p.l) : Bconst p ^ 2 ≤ 32 * (p.
 section Main
 variable (cϱ lam : ℝ)
 
-/-- **[lem:ends], ν-generic, window-generic core** (LocalHypsCoreW + the cap L ≤ 2l;
-also usable with λ ∈ (1,2]). -/
+/-- **[lem:ends], ν-generic, window-generic core**: LocalHypsCoreW + the cap L ≤ 2l (used downstream with λ ∈ (1,2]). -/
 theorem lem_ends_nu_W :
     ∃ C T₀ : ℝ, ∀ (p : Setting) (F : LocalFun) (B : ℝ) (ν : ℝ → ℝ), p.lam = lam → T₀ ≤ p.T →
       LocalHypsCoreW cϱ p F → p.L ≤ 2 * p.l → Continuous ν → NuBound p B ν → p.l ≤ B →
@@ -123,7 +125,7 @@ theorem lem_ends_nu :
   have hl : 0 ≤ p.l := by linarith [hF.one_le_l]
   rw [h3]; nlinarith
 
-/-- [eq:Bdef] in our packaging: `Zeta23.nuX_abs_le` gives
+/-- [eq:Bdef] in the present packaging: `Zeta23.nuX_abs_le` gives
 `NuBound p (Bconst p) (Zeta23.nuX p.X)` for `T ≥ T₀(λ)`. -/
 theorem nuBound_eventually (hΓ : Zeta23.GammaFacts) (hlam : 0 < lam) :
     ∃ T₀ : ℝ, ∀ p : Setting, p.lam = lam → T₀ ≤ p.T → NuBound p (Bconst p) (Zeta23.nuX p.X) := by
@@ -138,7 +140,7 @@ theorem nuBound_eventually (hΓ : Zeta23.GammaFacts) (hlam : 0 < lam) :
 ζ-instantiation of `lem_ends_nu` with
 `ν := ν_X`, `B := l + 4√X` ([eq:Bdef] via `Zeta23.nuX_abs_le`, continuity of μ from H-Γ);
 `hcheb` is carried for interface uniformity. -/
-theorem lem_ends (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMertens)
+theorem lem_ends (hΓ : Zeta23.GammaFacts) (_hcheb : Zeta23.ChebyshevMertens)
     (hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>
       |trGt2A p F - MtotalA p F| ≤ C * (p.L * p.l * Real.log p.l * (p.l ^ 2 + p.X))) := by

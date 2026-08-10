@@ -6,10 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 /-
 Zeta23/ExplicitFormula.lean  —  the explicit formula, normalisations (paper App. A [app:EF]).
 
-PURPOSE.  The residual risk of Prop. 2.1 [prop:EF] lies in its *normalisation chain*: the
-passage from a literature-verbatim explicit formula to the paper's density
-ν_X = μ + Π_X + P_X [eq:mudef]–[eq:nudef], with every 2π and every sign.  This file puts
-that chain inside the formal boundary:
+The *normalisation chain*: the passage from a literature-verbatim explicit formula to the paper's
+density ν_X = μ + Π_X + P_X [eq:mudef]–[eq:nudef], with every 2π and every sign:
 
   * `EF.literatureRHS` / `EF_lit` : the right-hand side of [eq:EFstd] (App. A, first display), i.e. the
     Weil explicit formula in the form the paper quotes from [IK04, Thm 5.12] / [Wei52] / [Bom00],
@@ -18,10 +16,9 @@ that chain inside the formal boundary:
     X = e^L, for f, g ∈ C_c²(ℝ) supported in [−L/2, L/2]  — exactly App. A's three identifications
     (Gamma term, prime term, pole term) plus h_{f⋆g̃}(z) = h_f(z)·conj(h_g(conj z)).
 
-What is NOT proved in this file: the truth of [eq:EFstd] itself (contour integration of
-h((s-1/2)/i)·ξ'/ξ(s)) — here it is the hypothesis `EF_lit`, stated for the zero configuration
-abstractly (this file does not import riemannZeta); it is proved for ζ in Zeta23/WeilEF/Main.lean
-(`EF_lit_zeta`) and for primitive Dirichlet L-functions in Zeta23/ThmE/EFLitChi.lean.
+The truth of [eq:EFstd] itself (contour integration of
+h((s-1/2)/i)·ξ'/ξ(s)) is the hypothesis `EF_lit`, stated for the zero configuration
+abstractly.
 
 CONVENTIONS (paper [Notation]).  Paper Fourier transform:
     f̂(τ) = h_f(τ) := ∫_ℝ f(u) e^{iτu} du,   inversion  f(u) = (1/2π) ∫_ℝ h_f(r) e^{-iru} dr.
@@ -45,7 +42,7 @@ set_option backward.isDefEq.respectTransparency false
 namespace Zeta23
 namespace EF
 
-/-! ### App. A objects defined in this file -/
+/-! ### App. A objects owned by this file -/
 
 /-- App. A: `g̃(u) := conj (g(−u))`. -/
 def tilde (g : ℝ → ℂ) : ℝ → ℂ := fun u => conj (g (-u))
@@ -66,7 +63,7 @@ namespace EF
 Γ'/Γ is spelled `Complex.digamma` (= logDeriv Gamma), identically to `Zeta23.mu` in Defs.lean. -/
 def gammaBracket (r : ℝ) : ℝ := (Complex.digamma (1 / 4 + I * r / 2)).re - Real.log π
 
-/-- Right-hand side of [eq:EFstd] (App. A, first display), verbatim:
+/-- Right-hand side of [eq:EFstd] (App. A, first display), VERBATIM:
 `h(i/2) + h(−i/2) − Σ_{n≥1} Λ(n) n^{-1/2} (k(log n) + k(−log n)) + (1/2π) ∫_ℝ h(r) [Re Γ'/Γ(1/4 + ir/2) − log π] dr`
 with `h := paperFT k`.  The n-sum is written over all `n : ℕ` (Λ(0) = Λ(1) = 0); for compactly supported k it
 has finite support. -/
@@ -79,8 +76,8 @@ def literatureRHS (k : ℝ → ℂ) : ℂ :=
 /-- **H-EF, literature form** ([eq:EFstd]; [IK04, Thm 5.12] specialised to ζ / [Wei52] / [Bom00]):
 for every `k ∈ C_c²(ℝ)` with `h(z) := ∫ k(u)e^{izu}du`,
 `Σ_ρ m_ρ h(γ_ρ) = literatureRHS k`, the zero sum converging absolutely (paper: "here absolutely
-convergent since h(r) ≪_k (1+|r|)^{-2} on |Im r| ≤ 1/2").  This is the only explicit-formula trust;
-it is a hypothesis (structure field in Hypotheses.lean), never a Lean axiom. -/
+convergent since h(r) ≪_k (1+|r|)^{-2} on |Im r| ≤ 1/2").  It is a hypothesis
+(structure field in Hypotheses.lean), never a Lean axiom. -/
 def EF_lit (Z : ZeroConfig) : Prop :=
   ∀ k : ℝ → ℂ, ContDiff ℝ 2 k → HasCompactSupport k →
     Summable (fun ρ : Z.carrier => (Z.mult ρ : ℂ) * paperFT k (gammaOf ρ)) ∧
@@ -363,7 +360,7 @@ theorem prime_term {k : ℝ → ℂ} {L : ℝ} (hk : Continuous k)
     rw [Finset.mul_sum, Finset.mul_sum]
     refine Finset.sum_congr rfl fun n _ => ?_
     ring
-  rw [step2, integral_finset_sum _ (fun n _ => (integrable_paperFT_mul_cos hFk _).const_mul _)]
+  rw [step2, integral_finsetSum _ (fun n _ => (integrable_paperFT_mul_cos hFk _).const_mul _)]
   rw [← Finset.sum_neg_distrib]
   refine Finset.sum_congr rfl fun n _ => ?_
   rw [cintegral_const_mul]
@@ -664,7 +661,7 @@ theorem paperFT_mul_PX_eq (k : ℝ → ℂ) (L : ℝ) :
 theorem integrable_paperFT_mul_PX {k : ℝ → ℂ} (L : ℝ) (hFk : Integrable (𝓕 k)) :
     Integrable (fun τ : ℝ => paperFT k τ * (PX (Real.exp L) τ : ℂ)) := by
   rw [paperFT_mul_PX_eq]
-  exact integrable_finset_sum _ (fun n _ => (integrable_paperFT_mul_cos hFk _).const_mul _)
+  exact integrable_finsetSum _ (fun n _ => (integrable_paperFT_mul_cos hFk _).const_mul _)
 
 /-- `h·ν_X` is integrable, given that `h·μ` is (μ grows like log|τ|, so this last fact needs the
 decay [eq:hfbound] of h and the Stirling bound [eq:mufacts]; it is supplied by the caller). -/
@@ -699,7 +696,7 @@ theorem literatureRHS_eq_integral_nu {k : ℝ → ℂ} {L : ℝ} (hL : 0 < L) (h
 
 /-! ## [prop:EF] from the literature form -/
 
-/-- **Main theorem of this file.**  [eq:EFstd] (hypothesis `EF_lit`) ⟹ [eq:EF] for the pair (f,g):
+/-- **Main theorem.**  [eq:EFstd] (hypothesis `EF_lit`) ⟹ [eq:EF] for the pair (f,g):
 `W(f,g) = ∫ h_f(τ) conj(h_g(τ)) ν_X(τ) dτ`, `X = e^L`.
 Side hypotheses `hFk`, `hμ` are the two integrability facts App. A uses silently
 ("all integrals absolutely convergent") for k = f ⋆ g̃; both follow from [eq:hfbound] and [eq:mufacts]. -/

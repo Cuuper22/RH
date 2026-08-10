@@ -4,14 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmD/Functional.lean
-The scale-free variational objects of the paper §7.1 [subsec:MT]:
+Zeta23/ThmD/Functional.lean — the scale-free variational objects of the paper §7.1 [subsec:MT]:
 [eq:cv] the functional c_λ(v), [eq:vstar] the optimal profile v*_λ(s) = cos(√2 λ s) and the
 closed-form constant c*_λ = √2 tan ϑ/(1 + ϑ tan ϑ), ϑ = λ/√2.
-Pure one-variable calculus with no project imports; consumed by Zeta23/ThmD/Window.lean
+Pure one-variable calculus: no project imports; consumed by Zeta23/ThmD/Window.lean
 (a/b/J of the concrete window) and Zeta23/ThmD/Assembly/Final (the constants of Theorem D).
 
-Convention: cStar is defined in the division-safe sin/cos form
+Convention: we DEFINE cStar in the division-safe sin/cos form
   cStar λ := √2 sin ϑ / (cos ϑ + ϑ sin ϑ)
 (the paper's √2 tan ϑ/(1+ϑ tan ϑ) after multiplying through by cos ϑ; equality recorded as
 cStar_eq_tan_form).  For 0 ≤ ϑ ≤ 1/√2 < π/2 the denominator is ≥ cos(1/√2) ≥ 3/4 > 0
@@ -118,8 +117,7 @@ theorem cStar_pos {lam : ℝ} (h0 : 0 < lam) (h1 : lam ≤ 1) : 0 < cStar lam :=
   have hd := cStar_denom_ge h0.le h1
   positivity
 
-/-- Lipschitz bound on [0,1] (enough for the λ → 1⁻ passage): |c*_x − c*_y| ≤ 14|x − y|.
-(The constant is crude; downstream only finiteness matters.) -/
+/-- Lipschitz bound on [0,1]: |c*_x − c*_y| ≤ 14|x − y| (the constant is crude). -/
 theorem cStar_lipschitzOn {x y : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (hy0 : 0 ≤ y) (hy1 : y ≤ 1) :
     |cStar x - cStar y| ≤ 14 * |x - y| := by
   have hs2 : (0:ℝ) < Real.sqrt 2 := by positivity
@@ -217,7 +215,15 @@ theorem cStar_lipschitzOn {x y : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) (hy0 : 0 �
   calc |Nx * Dy - Ny * Dx| / |Dx * Dy| ≤ (15 / 2 * |x - y|) / (9 / 16) := by
         apply div_le_div₀ (by positivity) hnum (by norm_num) hden
     _ ≤ 14 * |x - y| := by rw [div_div_eq_mul_div]; nlinarith [abs_nonneg (x - y)]
-  
+
+/-- c*_λ is continuous on [0,1] (its denominator is ≥ 3/4 there); this is all the λ → 1⁻ passage needs. -/
+theorem cStar_continuousOn : ContinuousOn cStar (Set.Icc 0 1) := by
+  have hnum : Continuous fun lam : ℝ => Real.sqrt 2 * Real.sin (theta lam) := by unfold theta; fun_prop
+  have hden : Continuous fun lam : ℝ => Real.cos (theta lam) + theta lam * Real.sin (theta lam) := by
+    unfold theta; fun_prop
+  refine (hnum.continuousOn.div hden.continuousOn fun lam hlam => ?_).congr fun lam _ => rfl
+  have := cStar_denom_ge hlam.1 hlam.2
+  linarith
 
 /-- c* in the paper's tan form [eq:vstar] (cos ϑ ≠ 0 on the range). -/
 theorem cStar_eq_tan_form {lam : ℝ} (h0 : 0 ≤ lam) (h1 : lam ≤ 1) :

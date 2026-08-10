@@ -6,9 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 /-
 Zeta23/WeilEF/FullLineAssembly.lean — the R → ∞ assembly of
 `full_line_identity` from: rectangle_identity (Contour), the majorant pack + heights +
-vertical limits (FullLine, incl. verticals_eq), horizontal_vanish
-(Horizontal), zero_sum_limit (ZeroSumLimit).
-The statement is consumed by Zeta23/WeilEF/Main.lean.
+vertical limits (FullLine), horizontal_vanish (Horizontal), zero_sum_limit (ZeroSumLimit).
 -/
 import Zeta23.WeilEF.FullLine
 import Zeta23.WeilEF.Horizontal
@@ -44,7 +42,7 @@ theorem full_line_identity (hs : ZetaSeam) {k : ℝ → ℂ} (hk : ContDiff ℝ 
         * logDeriv completedRiemannZeta ((c:ℂ) + t * I)
       = (∑' ρ : (zetaZeros hs).carrier, ((zetaZeros hs).mult ρ : ℂ) * Hfn k ρ)
         - Hfn k 0 - Hfn k 1 := by
-  obtain ⟨Cg, hCg, R, hR⟩ := exists_heights
+  obtain ⟨Cg, hCg, R, hR⟩ := good_heights
   set f : ℂ → ℂ := fun s => Hfn k s * logDeriv completedRiemannZeta s with hf
   -- the rectangle identity at every height R_j
   have hrect : ∀ j : ℕ, ∃ Z : Finset ℂ,

@@ -4,13 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/WeilEF/GoodHeights.lean
-Good horizontal heights for the EF contour: for every j ≥ 7 a height R ∈ [j, j+1] avoiding the ordinates of
-all ζ-zeros near heights ±j by ≥ 1/(2(n+1)) (n ≪ log j of them; pigeonhole over n+1 cell midpoints), whence
-on Im s = ±R, 1/2 ≤ Re s ≤ 2:  ζ(s) ≠ 0 and ‖ζ'/ζ(s)‖ ≤ C log²(j+3), by the partial fraction
-Zeta23.WeilEF.zeta_logDeriv_partial_fraction (with its multiplicity-sum conjunct) and the local zero
-count Zeta23.RvM.zetaZeroConfig_local_count (via Zeta23.Tail.LocalCount).  Statement shape
-(consumer: Contour.lean horizontal_vanish): j ≥ 7, σ ∈ [1/2, 2], bound in log((j:ℝ)+3).
+Zeta23/WeilEF/GoodHeights.lean — good horizontal heights for the EF contour: for every j ≥ 7 a height
+R ∈ [j, j+1] avoiding the ordinates of all ζ-zeros near heights ±j by ≥ 1/(2(n+1)) (n ≪ log j of them;
+pigeonhole over n+1 cell midpoints), whence on Im s = ±R, 1/2 ≤ Re s ≤ 2:  ζ(s) ≠ 0 and
+‖ζ'/ζ(s)‖ ≤ C log²(j+3), by the partial fraction Zeta23.WeilEF.zeta_logDeriv_partial_fraction (with its
+multiplicity-sum conjunct) and the proved local zero count Zeta23.RvM.zetaZeroConfig_local_count
+(via Zeta23.Tail.LocalCount).  Statement shape (consumed by Contour.lean horizontal_vanish):
+j ≥ 7, σ ∈ [1/2, 2], bound in log((j:ℝ)+3).
 -/
 import Zeta23.WeilEF.Landau
 import Zeta23.RvM.LocalCount
@@ -156,7 +156,7 @@ lemma card_le_sum_mult (F : Finset zetaZeroConfig.carrier) :
 Im s = ±R, 1/2 ≤ Re s ≤ 2, ζ(s) ≠ 0 and ‖ζ'/ζ(s)‖ ≤ C log²(j+3)  (R avoids the ordinates of all
 zeros with |Im ρ ∓ R| < 2 by at least 1/(2(n+1)), n ≪ log j their number; then the partial
 fraction ζ'/ζ(s) = Σ_{|ρ−(2±iR)| ≤ 1.6} m_ρ/(s−ρ) + O(log) with Σ m_ρ ≪ log). -/
-theorem good_heights : ∃ C : ℝ, 0 < C ∧ ∀ j : ℕ, 7 ≤ j →
+theorem good_heights_at : ∃ C : ℝ, 0 < C ∧ ∀ j : ℕ, 7 ≤ j →
     ∃ R : ℝ, (j : ℝ) ≤ R ∧ R ≤ (j : ℝ) + 1 ∧
     ∀ s : ℂ, (s.im = R ∨ s.im = -R) → 1 / 2 ≤ s.re → s.re ≤ 2 →
       riemannZeta s ≠ 0 ∧ ‖logDeriv riemannZeta s‖ ≤ C * (Real.log ((j : ℝ) + 3)) ^ 2 := by
@@ -323,6 +323,32 @@ theorem good_heights : ∃ C : ℝ, 0 < C ∧ ∀ j : ℕ, 7 ≤ j →
   calc 2 * C * Lg * (2 * (S.card : ℝ) + 3) ≤ 2 * C * Lg * ((48 * A₀ + 3) * Lg) :=
         mul_le_mul_of_nonneg_left hn (by positivity)
     _ = 2 * C * (48 * A₀ + 3) * Real.log ((j : ℝ) + 3) ^ 2 := by rw [hLg]; ring
+
+/-- **Good heights**, in the consumed shape: a height function `R_j ∈ [j+7, j+8]` (all `j : ℕ`) with
+ζ ≠ 0 and `‖ζ'/ζ‖ ≤ C_g log²(j+10)` on both horizontal lines `im = ±R_j`, `1/2 ≤ re ≤ 2`
+(`good_heights_at` re-indexed by `j ↦ j + 7` and a choice function). -/
+theorem good_heights : ∃ Cg : ℝ, 0 < Cg ∧ ∃ R : ℕ → ℝ, ∀ j : ℕ,
+    (j : ℝ) + 7 ≤ R j ∧ R j ≤ (j : ℝ) + 8 ∧
+    ∀ s : ℂ, (s.im = R j ∨ s.im = -R j) → 1 / 2 ≤ s.re → s.re ≤ 2 →
+      riemannZeta s ≠ 0 ∧ ‖logDeriv riemannZeta s‖ ≤ Cg * (Real.log ((j : ℝ) + 10)) ^ 2 := by
+  obtain ⟨C, hC, h⟩ := good_heights_at
+  have hex : ∀ j : ℕ, ∃ R : ℝ, ((j + 7 : ℕ) : ℝ) ≤ R ∧ R ≤ ((j + 7 : ℕ) : ℝ) + 1 ∧
+      ∀ s : ℂ, (s.im = R ∨ s.im = -R) → 1 / 2 ≤ s.re → s.re ≤ 2 →
+        riemannZeta s ≠ 0 ∧ ‖logDeriv riemannZeta s‖ ≤ C * (Real.log (((j + 7 : ℕ) : ℝ) + 3)) ^ 2 :=
+    fun j => h (j + 7) (by omega)
+  refine ⟨C, hC, fun j => (hex j).choose, fun j => ?_⟩
+  dsimp only
+  obtain ⟨hs1, hs2, hs3⟩ := (hex j).choose_spec
+  have e : ((j + 7 : ℕ) : ℝ) = (j : ℝ) + 7 := by push_cast; ring
+  refine ⟨?_, ?_, ?_⟩
+  · calc (j : ℝ) + 7 = ((j + 7 : ℕ) : ℝ) := e.symm
+      _ ≤ _ := hs1
+  · exact hs2.trans (by rw [e]; linarith)
+  · intro s him h1 h2
+    have e3 : Real.log (((j + 7 : ℕ) : ℝ) + 3) = Real.log ((j : ℝ) + 10) := by rw [e]; ring_nf
+    obtain ⟨h3, h4⟩ := hs3 s him h1 h2
+    exact ⟨h3, by rwa [e3] at h4⟩
+
 
 end WeilEF
 end Zeta23

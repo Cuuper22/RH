@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23 — The paper's Fourier convention and the bound [eq:hfbound].
+The paper's Fourier convention and the bound [eq:hfbound].
 
-Canonical text: the paper, §2.1 [subsec:weil].
+Reference: the paper, §2.1 [subsec:weil].
 -/
 import Mathlib.Analysis.Fourier.FourierTransform
 import Mathlib.MeasureTheory.Integral.IntegralEqImproper
@@ -20,16 +20,16 @@ open scoped FourierTransform
 namespace Zeta23
 
 /-! `Zeta23.paperFT (f : ℝ → ℂ) (z : ℂ) : ℂ := ∫ u, f u * cexp (I * z * u)` is defined in
-`Zeta23/Defs.lean` : the PAPER's convention [subsec:weil] "h_f(z) := f̂(z) = ∫ f(u) e^{izu} du",
+`Zeta23/Defs.lean`: the paper's convention [subsec:weil] "h_f(z) := f̂(z) = ∫ f(u) e^{izu} du",
 sign `+i`, no `2π`, complex argument.  This file supplies the dictionary to Mathlib's `𝓕`
 (`∫ f(v) e^{-2πi v w} dv`) and the decay bound [eq:hfbound]. -/
 
 theorem paperFT_def (f : ℝ → ℂ) (z : ℂ) : paperFT f z = ∫ u : ℝ, f u * cexp (I * z * u) := rfl
 
-/-! Mathlib's `integral_const_mul` / `integral_mul_const` are stated for a general `RCLike L`
-and, at this Mathlib pin, their instance path (RCLike-derived `NormedAddCommGroup ℂ`) does not
-match the directly-synthesized `Complex.instNormedAddCommGroup` under `rw`'s reducible
-unification.  These ℂ-specialized restatements (same proofs) rewrite reliably. -/
+/-! Mathlib's `integral_const_mul` / `integral_mul_const` are stated for a general `RCLike L`,
+and their instance path (RCLike-derived `NormedAddCommGroup ℂ`) does not match the
+directly-synthesized `Complex.instNormedAddCommGroup` under `rw`'s reducible unification.
+These ℂ-specialized restatements (same proofs) rewrite reliably. -/
 
 theorem integral_const_mul_C (r : ℂ) (f : ℝ → ℂ) : (∫ a, r * f a) = r * ∫ a, f a :=
   integral_const_mul r f
@@ -111,7 +111,6 @@ theorem paperFT_deriv {f : ℝ → ℂ} (hf : ContDiff ℝ 1 f) (hsupp : HasComp
   have : (fun u : ℝ => f u * (I * z * cexp (I * z * u))) = fun u => (I * z) * (f u * cexp (I * z * u)) := by
     funext u; ring
   rw [this, integral_const_mul] at key
-  beta_reduce at key
   have key' : I * z * paperFT f z = -paperFT (deriv f) z := by
     rw [paperFT_def, paperFT_def]; exact key
   linear_combination key'

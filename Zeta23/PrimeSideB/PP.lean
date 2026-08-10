@@ -3,19 +3,16 @@ Copyright (c) 2026 Anthropic, PBC. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
-/-
-  Part of the Zeta23 formalization of the paper
-  "More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
-  Bracketed labels ([prop:cross], [eq:Msplit], …) and section numbers (§5.4, …) refer to that paper.
--/
+
 import Zeta23.PrimeSideA.Basic
 import Zeta23.PrimeSideB.PPKernel
 import Zeta23.PrimeSideB.PPOffDiag
 
 /-!
 # Prime side, part B/PP — paper §5 [prop:PP] (§5.4): the term 𝓜[P_X,P_X]
-Consumed by `Zeta23/PrimeSideB.lean` ([thm:traces]) through the
-three results at the bottom of this file:
+
+Consumed by `Zeta23/PrimeSideB.lean` ([thm:traces]) through the three results at the bottom of
+this file:
 
 * `prop_PP`        [prop:PP] first form (§5.4):
       𝓜[P_X,P_X] = (T/π) Σ_{n≤X} Λ(n)²/n · g(log n) + O(L²X);
@@ -27,7 +24,7 @@ Everything is stated in the abstract prime-side layer (Zeta23/PrimeSideA/Defs.le
 `LocalHyps`/`EventuallyAt` of Zeta23/PrimeSideA.lean): `p : Setting` = (T, λ, w), `F : LocalFun` =
 the taper data (φ̂, Φ, A_φ, g, a, b) subject to `LocalHyps cϱ p F` (the facts [eq:psidef],
 [eq:abdef], [eq:gbounds], [eq:Phi2FT], …, each a proof obligation of Zeta23/Taper.lean, not an
-axiom).  `P_X` is the CONCRETE `Zeta23.PX` [eq:Pdef] of Zeta23/Defs.lean and 𝓜[·,·] is the literal seam
+axiom).  `P_X` is `Zeta23.PX` [eq:Pdef] of Zeta23/Defs.lean and 𝓜[·,·] is
 `Zeta23.PrimeSide.Mform` (§5.4).  Analytic inputs: H-cheb = `Zeta23.ChebyshevMertens` [lem:cheb]
 and H-MV = `Zeta23.MVHilbert` [lem:MV] from Zeta23/Hypotheses.lean (fields of `PaperInputs`).
 
@@ -75,7 +72,7 @@ variable {p : Setting} {F : LocalFun}
 lemma Setting.log_X (p : Setting) : Real.log p.X = p.L := Real.log_exp _
 
 /-- `X = e^L ≥ 1 + L`; with `L ≥ 8` [eq:wrange] this gives `X ≥ 2` and `L ≤ X`. -/
-lemma LocalHypsCore.L_add_one_le_X (hF : LocalHypsCore cϱ p F) : p.L + 1 ≤ p.X :=
+lemma LocalHypsCore.L_add_one_le_X (_hF : LocalHypsCore cϱ p F) : p.L + 1 ≤ p.X :=
   Real.add_one_le_exp _
 
 lemma LocalHypsCore.two_le_X (hF : LocalHypsCore cϱ p F) : 2 ≤ p.X := by
@@ -94,7 +91,7 @@ end Basics
 section Sandwich
 variable {p : Setting} {F : LocalFun}
 
-theorem sum_a2g_upper' (hcheb : Zeta23.ChebyshevMertens) (hlam : 0 < lam ∧ lam ≤ 1) :
+theorem sum_a2g_upper' (hcheb : Zeta23.ChebyshevMertens) (_hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>
       sumA2g p.X F.g ≤ p.L ^ 3 / 6 + C * p.L ^ 2) := by
   obtain ⟨C, hC⟩ := hcheb.cheb2b
@@ -118,7 +115,7 @@ theorem sum_a2g_upper' (hcheb : Zeta23.ChebyshevMertens) (hlam : 0 < lam ∧ lam
   unfold primeRange at h1
   linarith
 
-theorem sum_a2g_lower' (hcheb : Zeta23.ChebyshevMertens) (hlam : 0 < lam ∧ lam ≤ 1) :
+theorem sum_a2g_lower' (hcheb : Zeta23.ChebyshevMertens) (_hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAt cϱ lam (fun p F =>
       (p.L - 2 * p.w) ^ 3 / 6 - C * p.L ^ 2 ≤ sumA2g p.X F.g) := by
   obtain ⟨C, hC⟩ := hcheb.cheb2b
@@ -220,9 +217,9 @@ lemma Mform_PX_PX (hT : 0 ≤ T) (hΦ : Continuous Φ) (X : ℝ) :
         (volume.restrict (Icc T (2 * T) ×ˢ Icc T (2 * T))) := fun n m =>
       (Mform_integrableOn hΦ (u := fun τ => Real.cos (τ * Real.log n))
         (v := fun τ => Real.cos (τ * Real.log m)) (by fun_prop) (by fun_prop)).const_mul _
-    rw [integral_finset_sum _ (fun n _ => integrable_finset_sum _ (fun m _ => hint n m))]
+    rw [integral_finsetSum _ (fun n _ => integrable_finsetSum _ (fun m _ => hint n m))]
     refine Finset.sum_congr rfl fun n _ => ?_
-    rw [integral_finset_sum _ (fun m _ => hint n m)]
+    rw [integral_finsetSum _ (fun m _ => hint n m)]
     refine Finset.sum_congr rfl fun m _ => ?_
     rw [integral_const_mul]
   -- Step 2: per pair, 𝓜[cos,cos] = (A⁻+A⁺)/2, and split the A⁻ double sum into n=m / n≠m
@@ -409,7 +406,6 @@ theorem prop_PP (hcheb : Zeta23.ChebyshevMertens) (hMV : ∃ C : ℝ, 0 < C ∧ 
   have hO1 := O1_bound hMV hCMV.le hT0 hΦc hF.Phi_sq_integrable p.X
   have hO2 := O2_estimate hΦc hF.Phi_sq_integrable p.X p.T
   rw [Mform_PX_PX hT0 hΦc]
-  -- abbreviate
   set D := ∑ n ∈ primeRange p.X, acoef n ^ 2 * Aminus F.Phi p.T (Real.log n) (Real.log n)
   set O1 := ∑ n ∈ primeRange p.X, ∑ m ∈ primeRange p.X,
     (if n = m then (0:ℝ) else acoef n * acoef m * Aminus F.Phi p.T (Real.log n) (Real.log m))
@@ -479,7 +475,6 @@ theorem sum_a2g_upper (hcheb : Zeta23.ChebyshevMertens) (hlam : 0 < lam ∧ lam 
   sum_a2g_upper' hcheb hlam
 
 end Results
-
 
 
 end PrimeSide

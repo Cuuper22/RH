@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmDE/Concrete.lean.  The concrete FactsDChi instance:
+Zeta23/ThmDE/Concrete.lean — the concrete FactsDChi instance:
 Zeta23/ThmE/TracesChi.lean's concreteFactsChi (the χ prime side from PaperInputsChi) re-run for the
 Montgomery–Taylor window data P.localFunD T (BridgeD: LocalHypsCore eventually), with the
 [eq:gbounds] sandwich replaced by the coprime partial-summation step (Zeta23/ThmDE/PP.lean) and the
@@ -65,7 +65,7 @@ variable {P κ q c}
 
 /-- vanishing of the autocorrelation beyond the support width. -/
 private lemma autocorr_eq_zero_of_support {h : ℝ → ℝ} {M : ℝ}
-    (hsupp : ∀ u : ℝ, M ≤ |u| → h u = 0) {y : ℝ} (hy : 2 * M ≤ |y|) (hM : 0 ≤ M) :
+    (hsupp : ∀ u : ℝ, M ≤ |u| → h u = 0) {y : ℝ} (hy : 2 * M ≤ |y|) (_hM : 0 ≤ M) :
     Params.autocorr h y = 0 := by
   show ∫ u, h u * h (u + y) = 0
   have hz : ∀ u : ℝ, h u * h (u + y) = 0 := by

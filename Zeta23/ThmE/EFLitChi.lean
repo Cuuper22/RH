@@ -7,10 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 Zeta23/ThmE/EFLitChi.lean — the literature-form explicit formula for L(s,χ)
 (primitive χ mod q > 1) and its bridge to ExplicitFormulaPaperChi.
 
-Transcription note: the paper does not display the χ-EF ([thm:E] proof (i), §8.2,
-says only "the derivation of Appendix A applies to [IK04, Theorem 5.12] for L(s,χ)");
-literatureRHSchi below is a transcription of IK04 Thm 5.12 for L(s,χ), with the
-χ/conj(χ) leg assignment forced by the paper's ν-side display P_{X,χ} (§8.2).
+The paper does not display the χ-EF ([thm:E] proof (i),
+§8.2, says only "the derivation of Appendix A applies to [IK04, Theorem 5.12] for
+L(s,χ)"); literatureRHSchi below is a transcription of IK04-Thm-5.12-for-L(s,χ), with
+the χ/conj(χ) leg assignment forced by the paper's ν-side display P_{X,χ} (§8.2).
 
 Conventions: h := paperFT k (h(z) = ∫k(u)e^{izu}du); κ = (1−χ(−1))/2; no pole terms (Λ(s,χ)
 entire for primitive χ, q > 1); coefficients c n = (coeff χ) n (the character values ℕ → ℂ).
@@ -82,7 +82,7 @@ theorem ck_add_conj_k_neg {k : ℝ → ℂ} (hk : Continuous k) (hki : Integrabl
       rw [show (-I * τ * y : ℂ) = ((-(τ * y) : ℝ) : ℂ) * I by push_cast; ring,
         Complex.exp_mul_I]
       push_cast
-      simp [Real.cos_neg, Real.sin_neg]
+      simp
       ring
     have he2 : cexp (-I * τ * ((-y : ℝ) : ℂ)) = Real.cos (τ * y) + Real.sin (τ * y) * I := by
       rw [show (-I * τ * ((-y : ℝ) : ℂ) : ℂ) = (((τ * y) : ℝ) : ℂ) * I by push_cast; ring,
@@ -173,7 +173,7 @@ theorem prime_term_chi {q : ℕ} {c : ℕ → ℂ} {k : ℝ → ℂ} {L : ℝ} (
     rw [hpow]
     push_cast
     ring
-  rw [step2, integral_finset_sum _ (fun n _ => (hint n).const_mul _)]
+  rw [step2, integral_finsetSum _ (fun n _ => (hint n).const_mul _)]
   rw [← Finset.sum_neg_distrib]
   refine Finset.sum_congr rfl fun n _ => ?_
   rw [Zeta23.EF.cintegral_const_mul]
@@ -181,7 +181,7 @@ theorem prime_term_chi {q : ℕ} {c : ℕ → ℂ} {k : ℝ → ℂ} {L : ℝ} (
 
 /-- κ-shifted archimedean term (mirror of Zeta23.EF.gamma_term): pointwise-rearrangement of the
 bracket into μ_χ (muq's definition is (1/2π)(log(q/π) + Re ψ(1/4+κ/2+iτ/2))). -/
-theorem gamma_term_chi {κ q : ℕ} (hq : 1 ≤ q) (k : ℝ → ℂ) :
+theorem gamma_term_chi {κ q : ℕ} (_hq : 1 ≤ q) (k : ℝ → ℂ) :
     (1 / (2 * π) : ℂ) * ∫ r : ℝ, paperFT k r
         * ((((Complex.digamma (1 / 4 + (κ : ℂ) / 2 + I * r / 2)).re + Real.log (q / π) : ℝ)) : ℂ)
       = ∫ τ : ℝ, paperFT k τ * (muq κ q τ : ℂ) := by
@@ -226,11 +226,11 @@ theorem integrable_paperFT_mul_PXc {k : ℝ → ℂ} (c : ℕ → ℂ) (L : ℝ)
     push_cast
     ring
   rw [step2]
-  exact integrable_finset_sum _ (fun n _ => (hint n).const_mul _)
+  exact integrable_finsetSum _ (fun n _ => (hint n).const_mul _)
 
-/-- Mirror of Zeta23.EF.literatureRHS_eq_integral_nu — no pole term for q > 1. -/
+/-- Mirror of Zeta23.EF.literatureRHS_eq_integral_nu — NO pole term for q > 1. -/
 theorem literatureRHSchi_eq_integral_nu {κ q : ℕ} {c : ℕ → ℂ} {k : ℝ → ℂ} {L : ℝ}
-    (hq : 1 ≤ q) (hL : 0 < L) (hk : Continuous k)
+    (hq : 1 ≤ q) (_hL : 0 < L) (hk : Continuous k)
     (hks : tsupport k ⊆ Icc (-L) L) (hFk : Integrable (FourierTransform.fourier k))
     (hμ : Integrable (fun τ : ℝ => paperFT k τ * (muq κ q τ : ℂ))) :
     literatureRHSchi κ q c k = ∫ τ : ℝ, paperFT k τ * (nuXc κ q c (Real.exp L) τ : ℂ) := by
@@ -353,7 +353,7 @@ plus the χ-Γ facts give the paper form H-EF(χ).  [Proof: transplant of the ζ
 abs_mu-type from GammaFactsChi.stirling) + PXc continuity/boundedness (PXc_abs_le).] -/
 theorem explicitFormulaPaperChi_of_lit {κ q : ℕ} {c : ℕ → ℂ} {Z : ZeroConfig}
     (hEF : EF_lit_chi κ q c Z) (hΓq : GammaFactsChi κ q) (hq : 1 ≤ q)
-    (hc : CoeffOK q c) :
+    (_hc : CoeffOK q c) :
     ExplicitFormulaPaperChi κ q c Z := by
   intro L hL f g hf hg hfs hgs
   have hfc : HasCompactSupport f :=

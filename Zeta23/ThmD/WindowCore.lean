@@ -4,12 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmD/WindowCore.lean — the test-family facts of §5 for an ARBITRARY admissible window.
+Zeta23/ThmD/WindowCore.lean — the test-family facts of §5 for an ARBITRARY admissible window
+(the generic half of "BridgeD").
 
 Paper §7.1: "Propositions 5.1–5.5 hold verbatim for any even C_c² window with the same support
 and derivative norms."  We package such a window as `AdmWindow v L w c` (even, `0 ≤ v ≤ 1`,
 `C²`, `supp v ⊆ [−L/2, L/2]`, `‖v'‖₁, ‖(v²)'‖₁ ≤ 2`, `‖v''‖₁, ‖(v²)''‖₁ ≤ c/w`, `c ≥ 4`,
-`1 ≤ w`, `8w ≤ L`) and derive, once, everything `LocalHypsCore` asks of the data
+`1 ≤ w`, `8w ≤ L`) and derive, ONCE, everything `LocalHypsCore` asks of the data
 `(v̂, (v²)^, v⋆v, v²⋆v², a, b)` — by the same generic lemmas (Zeta23/Poisson/PaperFT.lean,
 Zeta23/Taper/{Strip,Decay,Fourier}.lean §Generic, Zeta23/Poisson.lean) that the flat-top facade
 Zeta23/Taper.lean specializes to `Taper.phi`.  The Montgomery–Taylor window `ThmD.phiD` is an
@@ -63,7 +64,7 @@ def gv (y : ℝ) : ℝ := Params.autocorr (fun u => v u ^ 2) y
 def av : ℝ := L⁻¹ * ∫ u, v u ^ 2
 def bv : ℝ := L⁻¹ * ∫ u, v u ^ 4
 
-/-- The abstract local data of the window (`PrimeSide.LocalFun`). -/
+/-- The abstract local data of the window (`LocalFun`). -/
 def localFun : PrimeSide.LocalFun := ⟨vHatR v, VPhiR v, Av v, gv v, av v L, bv v L⟩
 
 end Defs
@@ -197,7 +198,9 @@ lemma norm_vHat_mul_sq_le (z : ℂ) :
   simp only [Complex.norm_real, Real.norm_eq_abs] at h
   exact h
 
+set_option linter.unusedSectionVars false in  -- `hW` is unused here but kept so that call sites can write `hW.<name>`
 lemma abs_vHatR_le_norm (r : ℝ) : |vHatR v r| ≤ ‖vHat v r‖ := Complex.abs_re_le_norm _
+set_option linter.unusedSectionVars false in  -- `hW` is unused here but kept so that call sites can write `hW.<name>`
 lemma abs_VPhiR_le_norm (r : ℝ) : |VPhiR v r| ≤ ‖VPhi v r‖ := Complex.abs_re_le_norm _
 
 lemma abs_vHatR_le_L (r : ℝ) : |vHatR v r| ≤ L := by
@@ -363,7 +366,9 @@ lemma integrable_VPhiR_sq_mul_abs : Integrable (fun x => VPhiR v x ^ 2 * |x|) :=
 
 /-! #### the autocorrelations -/
 
+set_option linter.unusedSectionVars false in  -- `hW` is unused here but kept so that call sites can write `hW.<name>`
 lemma Av_even (y : ℝ) : Av v (-y) = Av v y := Taper.autocorr_even' _ y
+set_option linter.unusedSectionVars false in  -- `hW` is unused here but kept so that call sites can write `hW.<name>`
 lemma gv_even (y : ℝ) : gv v (-y) = gv v y := Taper.autocorr_even' _ y
 
 lemma integrable_mul_shift (y : ℝ) : Integrable fun u => v u * v (u + y) := by
@@ -378,6 +383,7 @@ lemma integrable_sq_mul_shift (y : ℝ) : Integrable fun u => v u ^ 2 * v (u + y
   exact HasCompactSupport.intro (K := Icc (-(L / 2)) (L / 2)) isCompact_Icc fun u hu => by
     rw [hW.eq_zero_of_not_mem hu]; ring
 
+set_option linter.unusedSectionVars false in  -- `hW` is unused here but kept so that call sites can write `hW.<name>`
 lemma gv_nonneg (y : ℝ) : 0 ≤ gv v y :=
   integral_nonneg fun u => mul_nonneg (sq_nonneg _) (sq_nonneg _)
 

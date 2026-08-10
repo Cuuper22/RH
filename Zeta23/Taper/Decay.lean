@@ -4,8 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23 — Taper/Decay.lean.
-Canonical text: the paper §2.2 [subsec:family].  See Zeta23/Taper.lean header for conventions:
+Zeta23 — Taper/Decay.lean.  Two sections, `GBounds` and `Psi`.
+Names and statements here are used by the umbrella Zeta23/Taper.lean (and the Params layer)
+and by downstream files.
+Canonical text: the paper, §2.2 [subsec:family].  See Zeta23/Taper.lean header for conventions:
 generic parameters (ϱ : ℝ → ℝ) (L w : ℝ); paper's side condition is 1 ≤ w ≤ L/8 [eq:wrange];
 each lemma carries the minimal hypothesis it needs.
 -/
@@ -186,7 +188,7 @@ theorem g_le_Aphi (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) (y : 
   exact mul_le_mul (pow_le_of_le_one (h0 _) (h1 _) two_ne_zero)
     (pow_le_of_le_one (h0 _) (h1 _) two_ne_zero) (sq_nonneg _) (h0 _)
 
-theorem Aphi_le (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) (y : ℝ) :
+theorem Aphi_le (hϱ : TaperProfile ϱ) (hw : 0 < w) (_hwL : 2 * w ≤ L) (y : ℝ) :
     Aphi ϱ L w y ≤ max (L - |y|) 0 := by
   have h := autocorr_le_of_support (phi ϱ L w) (M := L / 2) (phi_nonneg hϱ) (phi_le_one hϱ)
     (fun u hu => phi_eq_zero hϱ hw hu) y
@@ -202,13 +204,13 @@ theorem Aphi_nonneg (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) (y 
   le_trans (g_nonneg hϱ hw hwL y) (g_le_Aphi hϱ hw hwL y)
 
 /-- `g(y) = 0` for `|y| ≥ L` (so `Σ_n a_n² g(log n)` runs over `n ≤ X = e^L` only). -/
-theorem g_eq_zero (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) {y : ℝ}
+theorem g_eq_zero (hϱ : TaperProfile ϱ) (hw : 0 < w) (_hwL : 2 * w ≤ L) {y : ℝ}
     (hy : L ≤ |y|) : g ϱ L w y = 0 :=
   autocorr_eq_zero_of_support (fun u => phi ϱ L w u ^ 2) (M := L / 2)
     (fun u hu => phi_sq_eq_zero hϱ hw u hu) (by linarith)
 
 /-- "(and `A_φ(L) = 0`)" [prop:trace, P-part]; more generally `A_φ(y) = 0` for `|y| ≥ L`. -/
-theorem Aphi_eq_zero (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) {y : ℝ}
+theorem Aphi_eq_zero (hϱ : TaperProfile ϱ) (hw : 0 < w) (_hwL : 2 * w ≤ L) {y : ℝ}
     (hy : L ≤ |y|) : Aphi ϱ L w y = 0 :=
   autocorr_eq_zero_of_support (phi ϱ L w) (M := L / 2) (fun u hu => phi_eq_zero hϱ hw hu)
     (by linarith)
@@ -221,17 +223,17 @@ theorem g_continuous (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
 theorem Aphi_continuous (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
     Continuous (Aphi ϱ L w) :=
   autocorr_continuous_of_support (phi ϱ L w) (M := L / 2) (phi_continuous hϱ hw hwL)
-    (fun u hu => phi_eq_zero hϱ hw hu)
+    (fun _ hu => phi_eq_zero hϱ hw hu)
 
 end GBounds
 
 /-! ### [eq:psidef]: "`max(|φ̂(r)|, |Φ(r)|) ≤ ψ(r) := min(L, 2/|r|, c_ϱ/(w r²))`"
 We give the three bounds separately (division-free) and then the `ψ` form. -/
 
-section Psi -- ([eq:psidef], [eq:psiints], and the packaged φ̂²/Φ² moment bounds)
+section Psi 
 variable {ϱ : ℝ → ℝ} {L w : ℝ}
 
-/-! #### Helpers : first-order [eq:hfbound], and the ℂ-valued φ² -/
+/-! #### Helpers: first-order [eq:hfbound], and the ℂ-valued φ² -/
 
 /-- [eq:hfbound], first order (one integration by parts): supp f ⊆ [−Λ, Λ], f ∈ C_c¹ ⇒
 ‖h_f(z)‖ · ‖z‖ ≤ e^{|Im z| Λ} ‖f'‖₁. (Companion of Zeta23.norm_paperFT_mul_sq_le.) -/
@@ -359,33 +361,29 @@ theorem abs_PhiR_mul_sq_le (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w �
     _ ≤ ∫ u, |deriv (deriv fun u => phi ϱ L w u ^ 2) u| := h
     _ ≤ cRho ϱ / w := integral_abs_deriv2_phi_sq_le hϱ hw hwL
 
-theorem abs_phiHatR_le_psi (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
-    |phiHatR ϱ L w r| ≤ psi ϱ L w r := by
-  have hw0 : 0 < w := by linarith
+/-- [eq:psidef] abstractly: the three bounds `|F| ≤ L`, `|F|·|r| ≤ 2`, `|F|·r² ≤ c_ϱ/w` give `|F| ≤ ψ`. -/
+theorem abs_le_psi_of_bounds (hw : 0 < w) {F : ℝ → ℝ} (h0 : ∀ r, |F r| ≤ L)
+    (h1 : ∀ r, |F r| * |r| ≤ 2) (h2 : ∀ r, |F r| * r ^ 2 ≤ cRho ϱ / w) (r : ℝ) :
+    |F r| ≤ psi ϱ L w r := by
   unfold psi
   split_ifs with hr
-  · exact abs_phiHatR_le_L hϱ hw0 hwL r
+  · exact h0 r
   · have hra : 0 < |r| := abs_pos.mpr hr
-    have hr2 : 0 < r ^ 2 := by positivity
-    refine le_min (abs_phiHatR_le_L hϱ hw0 hwL r) (le_min ?_ ?_)
-    · rw [le_div_iff₀ hra]; exact abs_phiHatR_mul_abs_le hϱ hw0 hwL r
+    refine le_min (h0 r) (le_min ?_ ?_)
+    · rw [le_div_iff₀ hra]; exact h1 r
     · rw [le_div_iff₀ (by positivity), show w * r ^ 2 = r ^ 2 * w by ring, ← mul_assoc,
-        ← le_div_iff₀ hw0]
-      exact abs_phiHatR_mul_sq_le hϱ hw hwL r
+        ← le_div_iff₀ hw]
+      exact h2 r
+
+theorem abs_phiHatR_le_psi (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
+    |phiHatR ϱ L w r| ≤ psi ϱ L w r :=
+  abs_le_psi_of_bounds (by linarith) (abs_phiHatR_le_L hϱ (by linarith) hwL)
+    (abs_phiHatR_mul_abs_le hϱ (by linarith) hwL) (abs_phiHatR_mul_sq_le hϱ hw hwL) r
 
 theorem abs_PhiR_le_psi (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
-    |PhiR ϱ L w r| ≤ psi ϱ L w r := by
-  have hw0 : 0 < w := by linarith
-  unfold psi
-  split_ifs with hr
-  · exact abs_PhiR_le_L hϱ hw0 hwL r
-  · have hra : 0 < |r| := abs_pos.mpr hr
-    have hr2 : 0 < r ^ 2 := by positivity
-    refine le_min (abs_PhiR_le_L hϱ hw0 hwL r) (le_min ?_ ?_)
-    · rw [le_div_iff₀ hra]; exact abs_PhiR_mul_abs_le hϱ hw0 hwL r
-    · rw [le_div_iff₀ (by positivity), show w * r ^ 2 = r ^ 2 * w by ring, ← mul_assoc,
-        ← le_div_iff₀ hw0]
-      exact abs_PhiR_mul_sq_le hϱ hw hwL r
+    |PhiR ϱ L w r| ≤ psi ϱ L w r :=
+  abs_le_psi_of_bounds (by linarith) (abs_PhiR_le_L hϱ (by linarith) hwL)
+    (abs_PhiR_mul_abs_le hϱ (by linarith) hwL) (abs_PhiR_mul_sq_le hϱ hw hwL) r
 
 theorem psi_nonneg (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
     0 ≤ psi ϱ L w r := by
@@ -399,14 +397,14 @@ theorem psi_nonneg (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r
 theorem psi_even (r : ℝ) : psi ϱ L w (-r) = psi ϱ L w r := by
   simp [psi]
 
-theorem psi_le_L (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
+theorem psi_le_L (_hϱ : TaperProfile ϱ) (_hw : 1 ≤ w) (_hwL : 2 * w ≤ L) (r : ℝ) :
     psi ϱ L w r ≤ L := by
   unfold psi
   split_ifs with hr
   · exact le_rfl
   · exact min_le_left _ _
 
-theorem psi_mul_abs_le (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
+theorem psi_mul_abs_le (_hϱ : TaperProfile ϱ) (_hw : 1 ≤ w) (_hwL : 2 * w ≤ L) (r : ℝ) :
     psi ϱ L w r * |r| ≤ 2 := by
   unfold psi
   split_ifs with hr
@@ -415,7 +413,7 @@ theorem psi_mul_abs_le (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L
     rw [← le_div_iff₀ hra]
     exact (min_le_right _ _).trans (min_le_left _ _)
 
-theorem psi_mul_sq_le (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
+theorem psi_mul_sq_le (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (_hwL : 2 * w ≤ L) (r : ℝ) :
     psi ϱ L w r * r ^ 2 ≤ cRho ϱ / w := by
   have hw0 : 0 < w := by linarith
   have hc : 0 ≤ cRho ϱ := le_trans (by norm_num) (four_le_cRho hϱ)
@@ -426,7 +424,7 @@ theorem psi_mul_sq_le (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L)
     rw [← le_div_iff₀ hr2, div_div, mul_comm]
     exact (min_le_right _ _).trans (min_le_right _ _)
 
-/-! #### Measurability / integrability of ψ  -/
+/-! #### Measurability / integrability of ψ -/
 
 theorem psi_abs (r : ℝ) : psi ϱ L w |r| = psi ϱ L w r := by
   unfold psi
@@ -453,20 +451,56 @@ theorem psi_le_rpow_neg_two (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w 
     ← div_eq_mul_inv, le_div_iff₀ (by positivity)]
   exact h
 
-/-- The integrable majorant of ψ: L on [−1,1] and (c_ϱ/w)|r|⁻² outside. -/
-private noncomputable def psiMaj (ϱ : ℝ → ℝ) (L w : ℝ) (r : ℝ) : ℝ :=
-  (Icc (-1:ℝ) 1).indicator (fun _ => L) r
-    + cRho ϱ / w * ((Ioi (1:ℝ)).indicator (fun x => x ^ (-2:ℝ)) r
-      + (Ioi (1:ℝ)).indicator (fun x => x ^ (-2:ℝ)) (-r))
+/-- The common integrable plateau majorant: `a` on [−1,1] and `b·|r|⁻²` outside (ψ: a = L, b = c_ϱ/w;
+r²-moments: a = 4, b = C²).  ∫ = 2a + 2b. -/
+private noncomputable def plateauMaj (a b : ℝ) (r : ℝ) : ℝ :=
+  (Icc (-1:ℝ) 1).indicator (fun _ => a) r
+    + b * ((Ioi (1:ℝ)).indicator (fun x => x ^ (-2:ℝ)) r + (Ioi (1:ℝ)).indicator (fun x => x ^ (-2:ℝ)) (-r))
 
-private theorem psiMaj_integrable : Integrable (psiMaj ϱ L w) := by
-  have h1 : Integrable ((Icc (-1:ℝ) 1).indicator (fun _ => L)) :=
+private theorem tail_indicator_integrable :
+    Integrable ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ))) :=
+  (integrableOn_Ioi_rpow_of_lt (by norm_num) one_pos).integrable_indicator measurableSet_Ioi
+
+private theorem plateauMaj_integrable (a b : ℝ) : Integrable (plateauMaj a b) :=
+  ((integrable_indicator_iff measurableSet_Icc).mpr (integrableOn_const (by simp))).add
+    ((tail_indicator_integrable.add tail_indicator_integrable.comp_neg).const_mul _)
+
+private theorem integral_plateauMaj (a b : ℝ) : ∫ r, plateauMaj a b r = 2 * a + 2 * b := by
+  have h1 : Integrable ((Icc (-1:ℝ) 1).indicator (fun _ => a)) :=
     (integrable_indicator_iff measurableSet_Icc).mpr (integrableOn_const (by simp))
-  have h2 : Integrable ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ))) :=
-    (integrableOn_Ioi_rpow_of_lt (by norm_num) one_pos).integrable_indicator measurableSet_Ioi
-  have h3 : Integrable (fun r => (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) :=
-    h2.comp_neg
-  exact h1.add ((h2.add h3).const_mul _)
+  have h2 := tail_indicator_integrable
+  have h3 : Integrable (fun r => (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) := h2.comp_neg
+  have e1 : ∫ r, (Icc (-1:ℝ) 1).indicator (fun _ => a) r = 2 * a := by
+    rw [integral_indicator measurableSet_Icc, setIntegral_const, measureReal_def,
+      Real.volume_Icc, ENNReal.toReal_ofReal (by norm_num), smul_eq_mul]
+    norm_num
+  have e2 : ∫ r, (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r = 1 := by
+    rw [integral_indicator measurableSet_Ioi, integral_Ioi_rpow_of_lt (by norm_num) one_pos]
+    norm_num
+  have e3 : ∫ r, (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r) = 1 := by
+    rw [MeasureTheory.integral_neg_eq_self ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ))) volume]
+    exact e2
+  have h23 : Integrable (fun r => (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r
+      + (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) := h2.add h3
+  unfold plateauMaj
+  calc ∫ r, ((Icc (-1:ℝ) 1).indicator (fun _ => a) r
+        + b * ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r
+          + (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)))
+      = (∫ r, (Icc (-1:ℝ) 1).indicator (fun _ => a) r)
+        + ∫ r, b * ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r
+          + (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) :=
+        integral_add h1 (h23.const_mul _)
+    _ = 2 * a + b * ((∫ r, (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r)
+          + ∫ r, (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) := by
+        rw [e1, integral_const_mul]
+        congr 2
+        exact integral_add h2 h3
+    _ = 2 * a + 2 * b := by rw [e2, e3]; ring
+
+/-- The integrable majorant of ψ: L on [−1,1] and (c_ϱ/w)|r|⁻² outside. -/
+private noncomputable abbrev psiMaj (ϱ : ℝ → ℝ) (L w : ℝ) : ℝ → ℝ := plateauMaj L (cRho ϱ / w)
+
+private theorem psiMaj_integrable : Integrable (psiMaj ϱ L w) := plateauMaj_integrable _ _
 
 private theorem psi_le_psiMaj (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
     psi ϱ L w r ≤ psiMaj ϱ L w r := by
@@ -474,7 +508,7 @@ private theorem psi_le_psiMaj (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * 
   have hc : 0 ≤ cRho ϱ := le_trans (by norm_num) (four_le_cRho hϱ)
   have hind : ∀ s : ℝ, 0 ≤ (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) s := fun s =>
     Set.indicator_nonneg (fun x hx => Real.rpow_nonneg (le_trans zero_le_one (le_of_lt hx)) _) _
-  unfold psiMaj
+  unfold psiMaj plateauMaj
   by_cases h : r ∈ Icc (-1:ℝ) 1
   · rw [Set.indicator_of_mem h]
     have := psi_le_L hϱ hw hwL r
@@ -496,8 +530,8 @@ private theorem psi_le_psiMaj (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 2 * 
       exact psi_le_rpow_neg_two hϱ hw hwL hr
 
 /-- φ̂_ℝ is continuous (paperFT of an integrable function, at real arguments; dominated
-convergence with the bound ‖φ‖). Auxiliary copy for this file — Zeta23/Taper/Fourier.lean
-(downstream) carries `phiHatR_continuous`. -/
+convergence with the bound ‖φ‖). Auxiliary version for this file; Zeta23/Taper/Fourier.lean
+(downstream) carries phiHatR_continuous. -/
 theorem continuous_paperFT_ofReal {f : ℝ → ℂ} (hf : Integrable f) :
     Continuous (fun r : ℝ => paperFT f r) := by
   unfold paperFT
@@ -838,7 +872,7 @@ theorem psi_sq_mul_abs_integrable (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 
   rw [Real.norm_of_nonneg (by positivity)]
   nlinarith
 
-/-! #### Generic moment bounds from |F| ≤ ψ-type information  -/
+/-! #### Generic moment bounds from |F| ≤ ψ-type information -/
 
 /-- If |F| ≤ ψ pointwise then ∫ F²|r| ≤ ∫ ψ²|r| ≤ 8 + 8 log(c_ϱ L/4w). -/
 private theorem integral_sq_mul_abs_le_of_le_psi (hϱ : TaperProfile ϱ) (hw : 1 ≤ w)
@@ -853,58 +887,15 @@ private theorem integral_sq_mul_abs_le_of_le_psi (hϱ : TaperProfile ϱ) (hw : 1
   exact mul_le_mul_of_nonneg_right h (abs_nonneg r)
 
 /-- The integrable majorant for the r²-moments: 4 on [−1,1] and C²|r|⁻² outside. -/
-private noncomputable def momMaj (C : ℝ) (r : ℝ) : ℝ :=
-  (Icc (-1:ℝ) 1).indicator (fun _ => (4:ℝ)) r
-    + C ^ 2 * ((Ioi (1:ℝ)).indicator (fun x => x ^ (-2:ℝ)) r
-      + (Ioi (1:ℝ)).indicator (fun x => x ^ (-2:ℝ)) (-r))
+private noncomputable abbrev momMaj (C : ℝ) : ℝ → ℝ := plateauMaj 4 (C ^ 2)
 
-private theorem momMaj_integrable (C : ℝ) : Integrable (momMaj C) := by
-  have h1 : Integrable ((Icc (-1:ℝ) 1).indicator (fun _ => (4:ℝ))) :=
-    (integrable_indicator_iff measurableSet_Icc).mpr (integrableOn_const (by simp))
-  have h2 : Integrable ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ))) :=
-    (integrableOn_Ioi_rpow_of_lt (by norm_num) one_pos).integrable_indicator measurableSet_Ioi
-  have h3 : Integrable (fun r => (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) :=
-    h2.comp_neg
-  exact h1.add ((h2.add h3).const_mul _)
+private theorem momMaj_integrable (C : ℝ) : Integrable (momMaj C) := plateauMaj_integrable _ _
 
 private theorem integral_momMaj (C : ℝ) : ∫ r, momMaj C r = 8 + 2 * C ^ 2 := by
-  have h1 : Integrable ((Icc (-1:ℝ) 1).indicator (fun _ => (4:ℝ))) :=
-    (integrable_indicator_iff measurableSet_Icc).mpr (integrableOn_const (by simp))
-  have h2 : Integrable ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ))) :=
-    (integrableOn_Ioi_rpow_of_lt (by norm_num) one_pos).integrable_indicator measurableSet_Ioi
-  have h3 : Integrable (fun r => (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) :=
-    h2.comp_neg
-  have e1 : ∫ r, (Icc (-1:ℝ) 1).indicator (fun _ => (4:ℝ)) r = 8 := by
-    rw [integral_indicator measurableSet_Icc, setIntegral_const, measureReal_def,
-      Real.volume_Icc, ENNReal.toReal_ofReal (by norm_num), smul_eq_mul]
-    norm_num
-  have e2 : ∫ r, (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r = 1 := by
-    rw [integral_indicator measurableSet_Ioi, integral_Ioi_rpow_of_lt (by norm_num) one_pos]
-    norm_num
-  have e3 : ∫ r, (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r) = 1 := by
-    have hneg := MeasureTheory.integral_neg_eq_self
-      ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ))) volume
-    rw [hneg]
-    exact e2
-  have h23 : Integrable (fun r => (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r
-      + (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) := h2.add h3
-  unfold momMaj
-  calc ∫ r, ((Icc (-1:ℝ) 1).indicator (fun _ => (4:ℝ)) r
-        + C ^ 2 * ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r
-          + (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)))
-      = (∫ r, (Icc (-1:ℝ) 1).indicator (fun _ => (4:ℝ)) r)
-        + ∫ r, C ^ 2 * ((Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r
-          + (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) :=
-        integral_add h1 (h23.const_mul _)
-    _ = 8 + C ^ 2 * ((∫ r, (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) r)
-          + ∫ r, (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) (-r)) := by
-        rw [e1, integral_const_mul]
-        congr 2
-        exact integral_add h2 h3
-    _ = 8 + 2 * C ^ 2 := by rw [e2, e3]; ring
+  rw [integral_plateauMaj]; ring
 
 /-- Pointwise: |F(r)|·|r| ≤ 2 and |F(r)|·r² ≤ C give F(r)² r² ≤ momMaj C r. -/
-private theorem sq_mul_sq_le_momMaj {F : ℝ → ℝ} {C : ℝ} (hC : 0 ≤ C)
+private theorem sq_mul_sq_le_momMaj {F : ℝ → ℝ} {C : ℝ} (_hC : 0 ≤ C)
     (h1 : ∀ r, |F r| * |r| ≤ 2) (h2 : ∀ r, |F r| * r ^ 2 ≤ C) (r : ℝ) :
     F r ^ 2 * r ^ 2 ≤ momMaj C r := by
   have hind : ∀ s : ℝ, 0 ≤ (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) s := fun s =>
@@ -915,7 +906,7 @@ private theorem sq_mul_sq_le_momMaj {F : ℝ → ℝ} {C : ℝ} (hC : 0 ≤ C)
     rw [Real.rpow_neg hs0.le, show (2:ℝ) = ((2:ℕ):ℝ) by norm_num, Real.rpow_natCast,
       ← div_eq_mul_inv, le_div_iff₀ (by positivity)]
     exact h
-  unfold momMaj
+  unfold momMaj plateauMaj
   by_cases h : r ∈ Icc (-1:ℝ) 1
   · rw [Set.indicator_of_mem h]
     have hb : F r ^ 2 * r ^ 2 ≤ 4 := by
@@ -968,7 +959,7 @@ theorem integral_PhiR_sq_mul_abs_le (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL 
   integral_sq_mul_abs_le_of_le_psi hϱ hw hwL
     (fun r => abs_PhiR_le_psi hϱ hw (by linarith) r)
 
-/-- Used for the [prop:trace] μ/Π tails: `φ̂(r)² r²` is integrable … -/
+/-- Used for [prop:trace] (μ/Π tails): `φ̂(r)² r²` is integrable … -/
 theorem integrable_phiHatR_sq_mul_sq (hϱ : TaperProfile ϱ) (hw : 1 ≤ w) (hwL : 8 * w ≤ L) :
     Integrable (fun r => phiHatR ϱ L w r ^ 2 * r ^ 2) := by
   have hw0 : 0 < w := by linarith

@@ -3,15 +3,6 @@ Copyright (c) 2026 Anthropic, PBC. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
-/-
-Zeta23/ThmD/PsiC.lean — the ψ-majorant toolkit [eq:psidef]/[eq:psiints] with an ARBITRARY constant
-`c ≥ 4` in place of `c_ϱ`.
-
-This file parallels §Psi of Zeta23/Taper/Decay.lean (same statements and proofs), with
-`Taper.psi ϱ L w` / `cRho ϱ` / `four_le_cRho hϱ` replaced by
-`psiC c L w` / `c` / `(hc : 4 ≤ c)`.  Needed because the Montgomery–Taylor window has
-second-derivative norms `≤ cDT/w` with `cDT ≠ c_ϱ`; `Taper.psi ϱ L w = psiC (cRho ϱ) L w`.
--/
 import Zeta23.Taper
 import Zeta23.PrimeSideA.Basic
 
@@ -24,7 +15,7 @@ namespace PsiC
 
 variable {c L w : ℝ}
 
-/-- `ψ_c(r) := min(L, 2/|r|, c/(w r²))` (value `L` at `r = 0`) — agrees with `psiA c p` when
+/-- `ψ_c(r) := min(L, 2/|r|, c/(w r²))` (value `L` at `r = 0`), i.e. `psiA c p` with
 `(p.L, p.w) = (L, w)`. -/
 def psiC (c L w : ℝ) (r : ℝ) : ℝ :=
   if r = 0 then L else min L (min (2 / |r|) (c / (w * r ^ 2)))
@@ -44,14 +35,14 @@ theorem psi_nonneg (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
 theorem psi_even (r : ℝ) : psiC c L w (-r) = psiC c L w r := by
   simp [psiC]
 
-theorem psi_le_L (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
+theorem psi_le_L (_hc : 4 ≤ c) (_hw : 1 ≤ w) (_hwL : 2 * w ≤ L) (r : ℝ) :
     psiC c L w r ≤ L := by
   unfold psiC
   split_ifs with hr
   · exact le_rfl
   · exact min_le_left _ _
 
-theorem psi_mul_abs_le (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
+theorem psi_mul_abs_le (_hc : 4 ≤ c) (_hw : 1 ≤ w) (_hwL : 2 * w ≤ L) (r : ℝ) :
     psiC c L w r * |r| ≤ 2 := by
   unfold psiC
   split_ifs with hr
@@ -60,7 +51,7 @@ theorem psi_mul_abs_le (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : �
     rw [← le_div_iff₀ hra]
     exact (min_le_right _ _).trans (min_le_left _ _)
 
-theorem psi_mul_sq_le (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ) :
+theorem psi_mul_sq_le (hc : 4 ≤ c) (hw : 1 ≤ w) (_hwL : 2 * w ≤ L) (r : ℝ) :
     psiC c L w r * r ^ 2 ≤ c / w := by
   have hw0 : 0 < w := by linarith
   have hc0 : 0 ≤ c := le_trans (by norm_num) hc
@@ -71,7 +62,7 @@ theorem psi_mul_sq_le (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 2 * w ≤ L) (r : ℝ
     rw [← le_div_iff₀ hr2, div_div, mul_comm]
     exact (min_le_right _ _).trans (min_le_right _ _)
 
-/-! #### Measurability / integrability of ψ  -/
+/-! #### Measurability / integrability of ψ -/
 
 theorem psi_abs (r : ℝ) : psiC c L w |r| = psiC c L w r := by
   unfold psiC
@@ -256,8 +247,7 @@ theorem integral_psi_Ioi_le (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 8 * w ≤ L) :
     _ = 4 + 2 * Real.log (c * L / (4 * w)) := by rw [hBA]; ring
 
 /-- [eq:psiints]: ∫_ℝ ψ(r)²|r| dr ≤ 8 + 8 log(c_ϱ L/(4w)) (paper: "="): split (0,2/L],
-(2/L, c/2w], (c/2w, ∞): ∫₀^∞ ψ² r ≤ L²(2/L)²/2 + 4 log(cL/4w) + (c/w)²/(2(c/2w)²) = 2 + 4 log + 2.
--/
+(2/L, c/2w], (c/2w, ∞): ∫₀^∞ ψ² r ≤ L²(2/L)²/2 + 4 log(cL/4w) + (c/w)²/(2(c/2w)²) = 2 + 4 log + 2. -/
 theorem integral_psi_sq_mul_abs_le (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 8 * w ≤ L) :
     ∫ r, psiC c L w r ^ 2 * |r| ≤ 8 + 8 * Real.log (c * L / (4 * w)) := by
   obtain ⟨hA, hB, hAB, hBA⟩ := psiints_consts hc hw hwL
@@ -457,7 +447,7 @@ theorem psi_sq_mul_abs_integrable (hc : 4 ≤ c) (hw : 1 ≤ w) (hwL : 8 * w ≤
   rw [Real.norm_of_nonneg (by positivity)]
   nlinarith
 
-/-! #### Generic moment bounds from |F| ≤ ψ-type information  -/
+/-! #### Generic moment bounds from |F| ≤ ψ-type information -/
 
 /-- If |F| ≤ ψ pointwise then ∫ F²|r| ≤ ∫ ψ²|r| ≤ 8 + 8 log(c_ϱ L/4w). -/
 theorem integral_sq_mul_abs_le_of_le_psi (hc : 4 ≤ c) (hw : 1 ≤ w)
@@ -523,7 +513,7 @@ theorem integral_momMaj (C : ℝ) : ∫ r, momMaj C r = 8 + 2 * C ^ 2 := by
     _ = 8 + 2 * C ^ 2 := by rw [e2, e3]; ring
 
 /-- Pointwise: |F(r)|·|r| ≤ 2 and |F(r)|·r² ≤ C give F(r)² r² ≤ momMaj C r. -/
-theorem sq_mul_sq_le_momMaj {F : ℝ → ℝ} {C : ℝ} (hC : 0 ≤ C)
+theorem sq_mul_sq_le_momMaj {F : ℝ → ℝ} {C : ℝ} (_hC : 0 ≤ C)
     (h1 : ∀ r, |F r| * |r| ≤ 2) (h2 : ∀ r, |F r| * r ^ 2 ≤ C) (r : ℝ) :
     F r ^ 2 * r ^ 2 ≤ momMaj C r := by
   have hind : ∀ s : ℝ, 0 ≤ (Ioi (1:ℝ)).indicator (fun x : ℝ => x ^ (-2:ℝ)) s := fun s =>

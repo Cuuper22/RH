@@ -8,9 +8,8 @@ Zeta23/WeilEF/Landau.lean
 
 Landau's lemma (Borel–Carathéodory + Jensen route; Mathlib: Analysis/Complex/BorelCaratheodory,
 JensenFormula): zero counts and the partial-fraction expansion of f'/f on disks, specialized to ζ.
+`zeta_local_zero_count` is consumed downstream as `RiemannVonMangoldt.local_count`.
 -/
-import Mathlib.Analysis.Complex.BorelCaratheodory
-import Mathlib.Analysis.Complex.JensenFormula
 import Zeta23.RvM.ZetaGrowth
 import Zeta23.FromPNTPlus.StrongPNTPrefix
 import Zeta23.Statement
@@ -21,7 +20,6 @@ namespace Zeta23
 namespace WeilEF
 
 open Complex Set
-
 
 
 section UnitDisk
@@ -74,39 +72,16 @@ lemma f_eq_prod_mul_Cf {f : ℂ → ℂ} {r : ℝ} (hr1 : r < 1) (hfin : (SetOfZ
     exact hz hρ'
   exact pow_ne_zero _ (sub_ne_zero.mpr hne)
 
-/-- logDeriv of the finite zero product: `logDeriv (Π (·−ρ)^{m_ρ}) z = Σ m_ρ/(z−ρ)`. -/
+/-- logDeriv of the finite zero product: `logDeriv (Π (·−ρ)^{m_ρ}) z = Σ m_ρ/(z−ρ)`
+(Mathlib's `logDeriv_prod` + `logDeriv_fun_pow`). -/
 lemma logDeriv_zero_prod {s : Finset ℂ} {m : ℂ → ℕ} {z : ℂ} (hz : ∀ ρ ∈ s, z ≠ ρ) :
     logDeriv (fun w => ∏ ρ ∈ s, (w - ρ) ^ m ρ) z = ∑ ρ ∈ s, (m ρ : ℂ) / (z - ρ) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [logDeriv]
-  | insert ρ₀ s' hρ₀ ih =>
-    have hz' : ∀ ρ ∈ s', z ≠ ρ := fun ρ hρ => hz ρ (Finset.mem_insert_of_mem hρ)
-    have hzρ₀ : z ≠ ρ₀ := hz ρ₀ (Finset.mem_insert_self _ _)
-    rw [show (fun w => ∏ ρ ∈ insert ρ₀ s', (w - ρ) ^ m ρ)
-        = fun w => (w - ρ₀) ^ m ρ₀ * ∏ ρ ∈ s', (w - ρ) ^ m ρ from
-      funext fun w => Finset.prod_insert hρ₀]
-    rw [logDeriv_mul, Finset.sum_insert hρ₀, ih hz']
-    · congr 1
-      rw [show (fun w : ℂ => (w - ρ₀) ^ m ρ₀) = fun w : ℂ => (w - ρ₀) ^ m ρ₀ from rfl]
-      have hd : HasDerivAt (fun w : ℂ => (w - ρ₀) ^ m ρ₀)
-          ((m ρ₀ : ℂ) * (z - ρ₀) ^ (m ρ₀ - 1)) z := by
-        have h1 : HasDerivAt (fun w : ℂ => w - ρ₀) 1 z := (hasDerivAt_id z).sub_const ρ₀
-        simpa using (h1.fun_pow (m ρ₀))
-      rw [logDeriv, Pi.div_apply, hd.deriv]
-      rcases Nat.eq_zero_or_pos (m ρ₀) with hm | hm
-      · simp [hm]
-      · have hpow : (z - ρ₀) ^ (m ρ₀ - 1) * (z - ρ₀) = (z - ρ₀) ^ m ρ₀ := by
-          rw [← pow_succ, Nat.sub_add_cancel hm]
-        rw [div_eq_div_iff (pow_ne_zero _ (sub_ne_zero.mpr hzρ₀)) (sub_ne_zero.mpr hzρ₀)]
-        calc (m ρ₀ : ℂ) * (z - ρ₀) ^ (m ρ₀ - 1) * (z - ρ₀)
-            = (m ρ₀ : ℂ) * ((z - ρ₀) ^ (m ρ₀ - 1) * (z - ρ₀)) := by ring
-          _ = (m ρ₀ : ℂ) * (z - ρ₀) ^ m ρ₀ := by rw [hpow]
-    · exact pow_ne_zero _ (sub_ne_zero.mpr hzρ₀)
-    · exact Finset.prod_ne_zero_iff.mpr fun ρ hρ => pow_ne_zero _ (sub_ne_zero.mpr (hz' ρ hρ))
-    · exact (differentiable_pow _).comp ((differentiable_id.sub_const ρ₀)) |>.differentiableAt
-    · exact DifferentiableAt.fun_finsetProd fun ρ hρ =>
-        ((differentiable_id.sub_const ρ).differentiableAt).pow _
+  rw [logDeriv_prod (f := fun ρ w => (w - ρ) ^ m ρ)
+    (fun ρ hρ => pow_ne_zero _ (sub_ne_zero.mpr (hz ρ hρ))) (fun ρ _ => by fun_prop)]
+  refine Finset.sum_congr rfl fun ρ _ => ?_
+  have hd : HasDerivAt (fun w : ℂ => w - ρ) 1 z := (hasDerivAt_id z).sub_const ρ
+  rw [logDeriv_fun_pow hd.differentiableAt, logDeriv_apply, hd.deriv]
+  ring
 
 /-- logDeriv splits into the zero sum plus the regular part, at non-zeros inside the divided
 ball. -/
@@ -398,9 +373,7 @@ theorem logDeriv_partial_fraction_disk {f : ℂ → ℂ} {s₀ : ℂ} {R B : ℝ
   have hφd : ∀ w : ℂ, deriv φ w = (R : ℂ) := by
     intro w
     rw [hφ]
-    have h1 : HasDerivAt (fun w : ℂ => s₀ + (R:ℂ) * w) ((R:ℂ) * 1) w :=
-      ((hasDerivAt_id w).const_mul ((R:ℂ))).const_add s₀
-    simpa using h1.deriv
+    simp
   have hφinj : Function.Injective φ := by
     intro a b hab
     rw [hφ] at hab
@@ -622,36 +595,39 @@ theorem zeta_logDeriv_partial_fraction : ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 6 �
           refine mul_le_mul_of_nonneg_left hlow (by rw [hB]; positivity)
   obtain ⟨Z, hZset, hZcount, hZpf⟩ := logDeriv_partial_fraction_disk (f := riemannZeta)
     (by norm_num : (0:ℝ) < 91/50) hfa hζs₀ hB2 hfB
+  -- logarithmic bookkeeping shared by the count bound and the partial-fraction bound
+  have hT3 : (2:ℝ) ≤ Real.log (|t| + 3) := by
+    rw [Real.le_log_iff_exp_le (by linarith)]
+    have h1 := Real.exp_one_lt_d9
+    calc Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
+      _ ≤ 2.7182818286 * 2.7182818286 := by nlinarith [Real.exp_pos 1]
+      _ ≤ 9 := by norm_num
+      _ ≤ |t| + 3 := by linarith
+  have hlogB : Real.log B ≤ (Real.log 3 + Real.log (C₀ + 2) + A') * Real.log (|t| + 3) := by
+    have h1 : B ≤ 3 * ((C₀ + 2) * (|t| + 2) ^ A') := by
+      rw [hB]
+      nlinarith [hpow1, hC₀]
+    have h2 : Real.log B ≤ Real.log (3 * ((C₀ + 2) * (|t| + 2) ^ A')) :=
+      Real.log_le_log (by rw [hB]; positivity) h1
+    rw [Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity),
+      Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity),
+      Real.log_mul (by positivity : (C₀ + 2 : ℝ) ≠ 0) (by positivity),
+      Real.log_rpow (by linarith : (0:ℝ) < |t| + 2)] at h2
+    have h3 : Real.log (|t| + 2) ≤ Real.log (|t| + 3) :=
+      Real.log_le_log (by linarith) (by linarith)
+    have h4 : (0:ℝ) ≤ Real.log 3 := Real.log_nonneg (by norm_num)
+    have h5 : (0:ℝ) ≤ Real.log (C₀ + 2) := Real.log_nonneg (by linarith)
+    have hBeq : Real.log B = Real.log 3 + Real.log (C₀ * (|t| + 2) ^ A' + 2) := by
+      rw [hB, Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity)]
+    rw [hBeq]
+    nlinarith [mul_nonneg hA'0 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - Real.log (|t|+2)),
+      mul_nonneg h4 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - 1),
+      mul_nonneg h5 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - 1), hT3]
+  have h4 : (0:ℝ) ≤ Real.log 3 := Real.log_nonneg (by norm_num)
+  have h5 : (0:ℝ) ≤ Real.log (C₀ + 2) := Real.log_nonneg (by linarith)
   refine ⟨Z, ?_, ?_, ?_⟩
   · rw [hZset]
   · refine hZcount.trans ?_
-    have hT3 : (2:ℝ) ≤ Real.log (|t| + 3) := by
-      rw [Real.le_log_iff_exp_le (by linarith)]
-      have h1 := Real.exp_one_lt_d9
-      calc Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
-        _ ≤ 2.7182818286 * 2.7182818286 := by nlinarith [Real.exp_pos 1]
-        _ ≤ 9 := by norm_num
-        _ ≤ |t| + 3 := by linarith
-    have hlogB : Real.log B ≤ (Real.log 3 + Real.log (C₀ + 2) + A') * Real.log (|t| + 3) := by
-      have h1 : B ≤ 3 * ((C₀ + 2) * (|t| + 2) ^ A') := by
-        rw [hB]
-        nlinarith [hpow1, hC₀]
-      have h2 : Real.log B ≤ Real.log (3 * ((C₀ + 2) * (|t| + 2) ^ A')) :=
-        Real.log_le_log (by rw [hB]; positivity) h1
-      rw [Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity),
-        Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity),
-        Real.log_mul (by positivity : (C₀ + 2 : ℝ) ≠ 0) (by positivity),
-        Real.log_rpow (by linarith : (0:ℝ) < |t| + 2)] at h2
-      have h3 : Real.log (|t| + 2) ≤ Real.log (|t| + 3) :=
-        Real.log_le_log (by linarith) (by linarith)
-      have h4 : (0:ℝ) ≤ Real.log 3 := Real.log_nonneg (by norm_num)
-      have h5 : (0:ℝ) ≤ Real.log (C₀ + 2) := Real.log_nonneg (by linarith)
-      have hBeq : Real.log B = Real.log 3 + Real.log (C₀ * (|t| + 2) ^ A' + 2) := by
-        rw [hB, Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity)]
-      rw [hBeq]
-      nlinarith [mul_nonneg hA'0 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - Real.log (|t|+2)),
-        mul_nonneg h4 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - 1),
-        mul_nonneg h5 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - 1), hT3]
     have hratio : ((24/25 : ℝ))/(22/25) = 12/11 := by norm_num
     have hlog1211 : (1:ℝ)/12 ≤ Real.log ((24/25)/(22/25)) := by
       rw [hratio]
@@ -662,8 +638,6 @@ theorem zeta_logDeriv_partial_fraction : ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 6 �
       rw [hratio]
       exact Real.log_pos (by norm_num)
     have hlogBnn : (0:ℝ) ≤ Real.log B := Real.log_nonneg (by linarith)
-    have h4 : (0:ℝ) ≤ Real.log 3 := Real.log_nonneg (by norm_num)
-    have h5 : (0:ℝ) ≤ Real.log (C₀ + 2) := Real.log_nonneg (by linarith)
     calc 1 / Real.log ((24/25)/(22/25)) * Real.log B ≤ 12 * Real.log B := by
           refine mul_le_mul_of_nonneg_right ?_ hlogBnn
           rw [div_le_iff₀ hlogpos]
@@ -676,41 +650,11 @@ theorem zeta_logDeriv_partial_fraction : ∃ C : ℝ, 0 < C ∧ ∀ t : ℝ, 6 �
     have hs' : s ∈ Metric.closedBall s₀ (83/100 * (91/50)) :=
       Metric.closedBall_subset_closedBall (by norm_num) hs
     refine (hZpf s hs' hζs).trans ?_
-    have hT3 : (2:ℝ) ≤ Real.log (|t| + 3) := by
-      rw [Real.le_log_iff_exp_le (by linarith)]
-      have h1 := Real.exp_one_lt_d9
-      calc Real.exp 2 = Real.exp 1 * Real.exp 1 := by rw [← Real.exp_add]; norm_num
-        _ ≤ 2.7182818286 * 2.7182818286 := by nlinarith [Real.exp_pos 1]
-        _ ≤ 9 := by norm_num
-        _ ≤ |t| + 3 := by linarith
-    have hlogB : Real.log B ≤ (Real.log 3 + Real.log (C₀ + 2) + A') * Real.log (|t| + 3) := by
-      have h1 : B ≤ 3 * ((C₀ + 2) * (|t| + 2) ^ A') := by
-        rw [hB]
-        nlinarith [hpow1, hC₀]
-      have h2 : Real.log B ≤ Real.log (3 * ((C₀ + 2) * (|t| + 2) ^ A')) :=
-        Real.log_le_log (by rw [hB]; positivity) h1
-      rw [Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity),
-        Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity),
-        Real.log_mul (by positivity : (C₀ + 2 : ℝ) ≠ 0) (by positivity),
-        Real.log_rpow (by linarith : (0:ℝ) < |t| + 2)] at h2
-      have h3 : Real.log (|t| + 2) ≤ Real.log (|t| + 3) :=
-        Real.log_le_log (by linarith) (by linarith)
-      have h4 : (0:ℝ) ≤ Real.log 3 := Real.log_nonneg (by norm_num)
-      have h5 : (0:ℝ) ≤ Real.log (C₀ + 2) := Real.log_nonneg (by linarith)
-      have hBeq : Real.log B = Real.log 3 + Real.log (C₀ * (|t| + 2) ^ A' + 2) := by
-        rw [hB, Real.log_mul (by norm_num : (3:ℝ) ≠ 0) (by positivity)]
-      rw [hBeq]
-      nlinarith [mul_nonneg hA'0 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - Real.log (|t|+2)),
-        mul_nonneg h4 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - 1),
-        mul_nonneg h5 (by linarith : (0:ℝ) ≤ Real.log (|t|+3) - 1), hT3]
-    have h4 : (0:ℝ) ≤ Real.log 3 := Real.log_nonneg (by norm_num)
-    have h5 : (0:ℝ) ≤ Real.log (C₀ + 2) := Real.log_nonneg (by linarith)
     calc 44795000 / (91/50) * Real.log B
         ≤ 44795000 / (91/50) * ((Real.log 3 + Real.log (C₀ + 2) + A') * Real.log (|t| + 3)) :=
           mul_le_mul_of_nonneg_left hlogB (by norm_num)
       _ ≤ (44795000 * 50 / 91) * (Real.log 3 + Real.log (C₀ + 2) + A' + 1) * Real.log (|t| + 3) := by
           nlinarith [hT3, hA'0]
-
 
 
 end WeilEF

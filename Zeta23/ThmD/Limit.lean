@@ -28,42 +28,6 @@ theorem cRatio_star {lam : ℝ} (h0 : 0 < lam) (h1 : lam ≤ 1) :
 
 /-! ### range facts -/
 
-/-- c* ≥ 1/(2π) on [1/2, 1] (Jordan's inequality for the numerator; denominator ≤ 2). -/
-theorem cStar_ge_lb {lam : ℝ} (h0 : 1/2 ≤ lam) (h1 : lam ≤ 1) :
-    1 / (2 * Real.pi) ≤ cStar lam := by
-  have h0' : (0:ℝ) < lam := by linarith
-  have hθ0 : 0 < theta lam := theta_pos h0'
-  have hθle : theta lam ≤ (Real.sqrt 2)⁻¹ := theta_le h1 h0'.le
-  have hs2 : (1:ℝ) ≤ Real.sqrt 2 := by
-    nlinarith [Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 2), Real.sqrt_nonneg 2]
-  have hs2' : (0:ℝ) < Real.sqrt 2 := by linarith
-  have hθ1 : theta lam ≤ 1 := hθle.trans (by rw [inv_le_one_iff₀]; right; exact hs2)
-  have hθπ : theta lam ≤ Real.pi / 2 := by nlinarith [Real.pi_gt_three]
-  have hπ0 : (0:ℝ) < Real.pi := Real.pi_pos
-  have hsin := Real.mul_le_sin hθ0.le hθπ
-  have hnum : 1 / Real.pi ≤ Real.sqrt 2 * Real.sin (theta lam) := by
-    have h2 : Real.sqrt 2 * (2 / Real.pi * theta lam) = 2 * lam / Real.pi := by
-      unfold theta
-      field_simp
-      try ring
-    have h3 : Real.sqrt 2 * (2 / Real.pi * theta lam) ≤ Real.sqrt 2 * Real.sin (theta lam) :=
-      mul_le_mul_of_nonneg_left hsin hs2'.le
-    rw [h2] at h3
-    have h4 : 1 / Real.pi ≤ 2 * lam / Real.pi := by gcongr; linarith
-    linarith
-  have hsin1 : Real.sin (theta lam) ≤ 1 := Real.sin_le_one _
-  have hcos1 : Real.cos (theta lam) ≤ 1 := Real.cos_le_one _
-  have hden2 : Real.cos (theta lam) + theta lam * Real.sin (theta lam) ≤ 2 := by
-    nlinarith [Real.sin_nonneg_of_nonneg_of_le_pi hθ0.le (by nlinarith [Real.pi_gt_three])]
-  have hden34 := cStar_denom_ge h0'.le h1
-  unfold cStar
-  rw [div_le_div_iff₀ (by positivity) (by linarith)]
-  have h5 : 2 ≤ Real.sqrt 2 * Real.sin (theta lam) * (2 * Real.pi) := by
-    have h6 := mul_le_mul_of_nonneg_right hnum (by positivity : (0:ℝ) ≤ 2*Real.pi)
-    have h7 : 1/Real.pi * (2*Real.pi) = 2 := by field_simp
-    linarith
-  linarith
-
 /-- vStar is nonnegative on the unit window. -/
 theorem vStar_nonneg_on {lam s : ℝ} (h0 : 0 ≤ lam) (h1 : lam ≤ 1)
     (hs : s ∈ Set.Icc (-(1:ℝ)/2) (1/2)) : 0 ≤ vStar lam s := by
@@ -122,110 +86,49 @@ theorem eps_form_of_approx {g : ℝ → ℝ} {N lower : ℝ → ℝ}
     linarith
   linarith
 
+/-- left-approximation at 1 from continuity within [0,1]: the `hg` hypothesis of `eps_form_of_approx`. -/
+theorem approx_of_continuousWithinAt {g : ℝ → ℝ} (hg : ContinuousWithinAt g (Set.Icc 0 1) 1) :
+    ∀ δ : ℝ, 0 < δ → ∃ lam : ℝ, 1/2 ≤ lam ∧ lam < 1 ∧ g 1 - δ ≤ g lam := by
+  intro δ hδ
+  obtain ⟨η, hη, hclose⟩ := (Metric.continuousWithinAt_iff.mp hg) δ hδ
+  refine ⟨max (1/2) (1 - η/2), le_max_left _ _, max_lt (by norm_num) (by linarith), ?_⟩
+  set lam := max (1/2) (1 - η/2) with hlam
+  have hl1 : lam ≤ 1 := max_le (by norm_num) (by linarith)
+  have hl0 : (0:ℝ) ≤ lam := le_trans (by norm_num) (le_max_left _ _)
+  have hsub : 1 - lam ≤ η/2 := by have := le_max_right (1/2 : ℝ) (1 - η/2); linarith
+  have hd : dist lam 1 < η := by rw [Real.dist_eq, abs_sub_comm, abs_of_nonneg (by linarith)]; linarith
+  have := hclose ⟨hl0, hl1⟩ hd
+  rw [Real.dist_eq] at this
+  linarith [neg_abs_le (g lam - g 1)]
+
+private theorem one_mem : (1:ℝ) ∈ Set.Icc (0:ℝ) 1 := ⟨zero_le_one, le_rfl⟩
+
 /-- the c*-rate ε-step. -/
 theorem eps_form_cStar {N lower : ℝ → ℝ} (hN : ∀ T, 0 ≤ N T)
     (h : ∀ lam : ℝ, 1/2 ≤ lam → lam < 1 →
       ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (cStar lam - ε) * N T ≤ lower T) :
-    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (cStar 1 - ε) * N T ≤ lower T := by
-  apply eps_form_of_approx _ hN h
-  intro δ hδ
-  refine ⟨max (1/2) (1 - δ/14), le_max_left _ _, ?_, ?_⟩
-  · apply max_lt (by norm_num) (by linarith)
-  · set lam := max (1/2) (1 - δ/14) with hlam
-    have hl0 : (0:ℝ) ≤ lam := le_trans (by norm_num) (le_max_left _ _)
-    have hl1 : lam ≤ 1 := by
-      apply max_le (by norm_num) (by linarith)
-    have hsub : 1 - lam ≤ δ/14 := by
-      have := le_max_right (1/2 : ℝ) (1 - δ/14)
-      linarith [this.trans_eq hlam.symm]
-    have hlip := cStar_lipschitzOn hl0 hl1 (by norm_num : (0:ℝ) ≤ 1) le_rfl
-    have habs := abs_le.mp hlip
-    have h14 : 14 * |lam - 1| ≤ δ := by
-      rw [abs_sub_comm, abs_of_nonneg (by linarith)]
-      linarith
-    linarith [habs.1, neg_abs_le (cStar lam - cStar 1)]
+    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (cStar 1 - ε) * N T ≤ lower T :=
+  eps_form_of_approx (approx_of_continuousWithinAt (cStar_continuousOn 1 one_mem)) hN h
 
 /-- the (2c* − 1)-rate ε-step. -/
 theorem eps_form_twoCStar {N lower : ℝ → ℝ} (hN : ∀ T, 0 ≤ N T)
     (h : ∀ lam : ℝ, 1/2 ≤ lam → lam < 1 →
       ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, ((2 * cStar lam - 1) - ε) * N T ≤ lower T) :
-    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, ((2 * cStar 1 - 1) - ε) * N T ≤ lower T := by
-  have := eps_form_of_approx (g := fun lam => 2 * cStar lam - 1) (N := N) (lower := lower)
-  apply this _ hN h
-  intro δ hδ
-  refine ⟨max (1/2) (1 - δ/28), le_max_left _ _, ?_, ?_⟩
-  · apply max_lt (by norm_num) (by linarith)
-  · set lam := max (1/2) (1 - δ/28) with hlam
-    have hl0 : (0:ℝ) ≤ lam := le_trans (by norm_num) (le_max_left _ _)
-    have hl1 : lam ≤ 1 := max_le (by norm_num) (by linarith)
-    have hsub : 1 - lam ≤ δ/28 := by
-      have := le_max_right (1/2 : ℝ) (1 - δ/28)
-      linarith [this.trans_eq hlam.symm]
-    have hlip := cStar_lipschitzOn hl0 hl1 (by norm_num : (0:ℝ) ≤ 1) le_rfl
-    have habs := abs_le.mp hlip
-    have h14 : 14 * |lam - 1| ≤ δ/2 := by
-      rw [abs_sub_comm, abs_of_nonneg (by linarith)]
-      linarith
-    have := habs.1
-    linarith [neg_abs_le (cStar lam - cStar 1)]
+    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, ((2 * cStar 1 - 1) - ε) * N T ≤ lower T :=
+  eps_form_of_approx (g := fun lam => 2 * cStar lam - 1)
+    (approx_of_continuousWithinAt
+      ((continuousWithinAt_const.mul (cStar_continuousOn 1 one_mem)).sub continuousWithinAt_const)) hN h
 
-/-- the HD-rate ε-step (HD = 2 − 1/c*; uses the uniform lower bound c* ≥ 1/(2π) on [1/2,1]). -/
+/-- the HD-rate ε-step (HD = 2 − 1/c*; c* 1 > 0 makes 1/c* continuous at 1 within [0,1]). -/
 theorem eps_form_HD {N lower : ℝ → ℝ} (hN : ∀ T, 0 ≤ N T)
     (h : ∀ lam : ℝ, 1/2 ≤ lam → lam < 1 →
       ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (HD lam - ε) * N T ≤ lower T) :
     ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (HD 1 - ε) * N T ≤ lower T := by
-  apply eps_form_of_approx (g := HD) _ hN h
-  intro δ hδ
-  -- |1/c*λ − 1/c*1| ≤ (2π)²·14·(1−λ); choose 1 − λ ≤ δ/(56·π²) ≥ δ/(14·(2π)²)
-  refine ⟨max (1/2) (1 - δ/(56 * Real.pi^2)), le_max_left _ _, ?_, ?_⟩
-  · have hπ := Real.pi_pos
-    apply max_lt (by norm_num)
-    have : 0 < δ/(56 * Real.pi^2) := by positivity
-    linarith
-  · set lam := max (1/2) (1 - δ/(56 * Real.pi^2)) with hlam
-    have hπ := Real.pi_pos
-    have hl05 : (1:ℝ)/2 ≤ lam := le_max_left _ _
-    have hl0 : (0:ℝ) ≤ lam := by linarith
-    have hl1 : lam ≤ 1 := by
-      apply max_le (by norm_num)
-      have : 0 < δ/(56 * Real.pi^2) := by positivity
-      linarith
-    have hsub : 1 - lam ≤ δ/(56 * Real.pi^2) := by
-      have := le_max_right (1/2 : ℝ) (1 - δ/(56 * Real.pi^2))
-      linarith [this.trans_eq hlam.symm]
-    have hclb := cStar_ge_lb hl05 hl1
-    have hclb1 := cStar_ge_lb (by norm_num : (1:ℝ)/2 ≤ 1) le_rfl
-    have hc0 : (0:ℝ) < cStar lam := lt_of_lt_of_le (by positivity) hclb
-    have hc1 : (0:ℝ) < cStar 1 := lt_of_lt_of_le (by positivity) hclb1
-    have hlip := cStar_lipschitzOn hl0 hl1 (by norm_num : (0:ℝ) ≤ 1) le_rfl
-    have hdiff : |cStar lam - cStar 1| ≤ 14 * (1 - lam) := by
-      refine hlip.trans ?_
-      rw [abs_sub_comm, abs_of_nonneg (by linarith)]
-    -- 1/c*λ − 1/c*1 = (c*1 − c*λ)/(c*λ c*1) ≤ 14(1−λ)·(2π)²
-    unfold HD
-    have hprod : 1/(2*Real.pi) * (1/(2*Real.pi)) ≤ cStar lam * cStar 1 := by
-      apply mul_le_mul hclb hclb1 (by positivity) (by linarith)
-    have hkey : 1 / cStar lam - 1 / cStar 1 ≤ δ := by
-      have he : 1 / cStar lam - 1 / cStar 1 = (cStar 1 - cStar lam) / (cStar lam * cStar 1) := by
-        field_simp
-      rw [he]
-      have hnum : cStar 1 - cStar lam ≤ 14 * (1 - lam) :=
-        le_trans (le_abs_self _) (by rwa [abs_sub_comm] at hdiff)
-      have hpos : (0:ℝ) < cStar lam * cStar 1 := by positivity
-      rw [div_le_iff₀ hpos]
-      have h2π : 1/(2*Real.pi) * (1/(2*Real.pi)) = 1/(4 * Real.pi^2) := by
-        field_simp; ring
-      rw [h2π] at hprod
-      have h56 : 14 * (1 - lam) ≤ δ/(4 * Real.pi^2) := by
-        calc 14 * (1 - lam) ≤ 14 * (δ/(56 * Real.pi^2)) := by
-              apply mul_le_mul_of_nonneg_left hsub (by norm_num)
-          _ = δ/(4 * Real.pi^2) := by field_simp; ring
-      have hδprod : δ/(4 * Real.pi^2) ≤ δ * (cStar lam * cStar 1) := by
-        calc δ/(4 * Real.pi^2) = δ * (1/(4 * Real.pi^2)) := by ring
-          _ ≤ δ * (cStar lam * cStar 1) := by
-              apply mul_le_mul_of_nonneg_left hprod (by linarith)
-      linarith
-    linarith
+  refine eps_form_of_approx (g := HD) (approx_of_continuousWithinAt ?_) hN h
+  have hc : ContinuousWithinAt cStar (Set.Icc 0 1) 1 := cStar_continuousOn 1 one_mem
+  have h1 : cStar 1 ≠ 0 := (cStar_pos one_pos le_rfl).ne'
+  show ContinuousWithinAt (fun lam => 2 - 1 / cStar lam) (Set.Icc 0 1) 1
+  exact continuousWithinAt_const.sub (continuousWithinAt_const.div hc h1)
 
 /-! ### (L2) convergence of the concrete data -/
 

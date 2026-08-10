@@ -3,12 +3,6 @@ Copyright (c) 2026 Anthropic, PBC. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
-/-
-Zeta23 — Taper/Norms.lean.
-Canonical text: the paper §2.2 [subsec:family].  See Zeta23/Taper.lean header for conventions:
-generic parameters (ϱ : ℝ → ℝ) (L w : ℝ); paper's side condition is 1 ≤ w ≤ L/8 [eq:wrange];
-each lemma carries the minimal hypothesis it needs.
--/
 import Mathlib
 import Zeta23.Taper.Basic
 
@@ -50,7 +44,7 @@ private lemma rho_differentiable (hϱ : TaperProfile ϱ) : Differentiable ℝ ϱ
   hϱ.contDiff.differentiable (by norm_num)
 
 /-- For u > 0, φ′(u) = −ϱ′((L/2 − u)/w)/w. -/
-private lemma deriv_phi_pos (hϱ : TaperProfile ϱ) (hw : 0 < w) {u : ℝ} (hu : 0 < u) :
+private lemma deriv_phi_pos (hϱ : TaperProfile ϱ) (_hw : 0 < w) {u : ℝ} (hu : 0 < u) :
     deriv (phi ϱ L w) u = -(deriv ϱ ((L / 2 - u) / w) / w) := by
   have hev : phi ϱ L w =ᶠ[nhds u] (fun v => ϱ ((L / 2 - v) / w)) := by
     filter_upwards [isOpen_Ioi.mem_nhds hu] with v hv
@@ -228,7 +222,7 @@ private lemma supDeriv_nonneg (hϱ : TaperProfile ϱ) : 0 ≤ supDeriv ϱ :=
 private lemma l1Deriv2_nonneg (ϱ : ℝ → ℝ) : 0 ≤ l1Deriv2 ϱ :=
   MeasureTheory.integral_nonneg fun _ => abs_nonneg _
 
-private lemma deriv_phi_odd (hϱ : TaperProfile ϱ) (v : ℝ) :
+private lemma deriv_phi_odd (_hϱ : TaperProfile ϱ) (v : ℝ) :
     deriv (phi ϱ L w) (-v) = -(deriv (phi ϱ L w) v) := by
   have h1 : deriv (fun x : ℝ => phi ϱ L w (-x)) v = -deriv (phi ϱ L w) (-v) :=
     deriv_comp_neg _ _
@@ -237,7 +231,7 @@ private lemma deriv_phi_odd (hϱ : TaperProfile ϱ) (v : ℝ) :
   linarith
 
 /-- [eq:phinorms]: "`‖φ'‖_∞ = ‖ϱ'‖_∞ / w`" (we record `≤`, which is what is used). -/
-theorem abs_deriv_phi_le (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) (u : ℝ) :
+theorem abs_deriv_phi_le (hϱ : TaperProfile ϱ) (hw : 0 < w) (_hwL : 2 * w ≤ L) (u : ℝ) :
     |deriv (phi ϱ L w) u| ≤ supDeriv ϱ / w := by
   have key : ∀ v : ℝ, 0 < v → |deriv (phi ϱ L w) v| ≤ supDeriv ϱ / w := by
     intro v hv

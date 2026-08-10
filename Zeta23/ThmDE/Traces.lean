@@ -4,12 +4,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmDE/Traces.lean.  [eq:ratio-general] for L(s,χ):
+Zeta23/ThmDE/Traces.lean — [eq:ratio-general] for L(s,χ):
 the window-general [thm:traces] assembly of Zeta23/ThmD/Traces.lean (moments b, J symbolic; the
 [eq:gbounds] sandwich replaced by the §7.1 partial-summation field sumJ) with the Dirichlet-
 character changes of Zeta23/ThmE/TracesChi.lean ([thm:E] proof (iii)): ℓ₁ ↦ ℓ_{1,χ}, three-term
 [eq:Msplit] (no pole terms), Σ_{(n,q)=1}.  The pointwise real inequalities tr2D_pointwise /
-ratioD_pointwise / frhatD_pointwise (Zeta23/ThmD/Traces.lean) are reused verbatim with ℓ := ℓ_{1,χ}
+ratioD_pointwise / frhatD_pointwise (Zeta23/ThmD/Traces.lean) are reused VERBATIM with ℓ := ℓ_{1,χ}
 (they take the density-log as a free real ≥ l).  Output: Zeta23.ThmDE.TracesBoundsDChi.
 -/
 import Zeta23.ThmD.Traces
@@ -103,7 +103,7 @@ private lemma regimeD : ∀ᶠ T in Filter.atTop, 1 ≤ T ∧ 1 ≤ l T ∧ 1 �
     PaperParams.eventually_X_le_T P hlam h.lam_le_one] with T h1 h2 h3 h4 h5 h6
   exact ⟨h1, h2, h3, h4, h5, PaperParams.L_le_l P h.lam_le_one (by linarith), h6⟩
 
-/-- the D-form of [eq:tr1]': tr G̃ = a L N (1 + O(𝓔)) — a stays (no collapse to 1). -/
+/-- the D-form of [eq:tr1]': tr G̃ = a L N (1 + O(𝓔)) — a STAYS (no collapse to 1). -/
 private lemma tr1'D : EvBound (fun T => D.trG T - D.aT T * P.L T * D.Ncnt T)
     (fun T => P.calE T * (D.aT T * P.L T * D.Ncnt T)) := by
   obtain ⟨C₁, hC₁, h1⟩ := h.prop_trace.eventually_le
@@ -157,14 +157,14 @@ private lemma tr2_firstD : EvBound
     have hlogL0 : 0 ≤ Real.log (P.L T) := Real.log_nonneg hL
     calc l T ^ 2 * Real.log (P.L T) ≤ l T ^ 2 * Real.log (l T) := by gcongr
       _ = 1 * l T * Real.log (l T) * l T := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have e4 : EvBound (fun T => D.MPP T - T / π * D.sumL2gq T)
       (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.prop_PP.mono_right' one_pos ?_
     filter_upwards [regimeD h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
     calc P.L T ^ 2 * P.X T = P.L T * P.L T * 1 * P.X T := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have hsqrtX : ∀ᶠ T in Filter.atTop, Real.sqrt (P.X T) ≤ P.X T := by
     filter_upwards [regimeD h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
@@ -175,7 +175,7 @@ private lemma tr2_firstD : EvBound
     filter_upwards [regimeD h, hsqrtX] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ hs
     calc l T * Real.sqrt (P.X T) ≤ l T * P.X T := by gcongr
       _ = 1 * l T * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have S := h.lem_ends.add (e3.add (e4.add (e5.const_mul 2)))
   refine S.congr_left ?_
@@ -198,14 +198,14 @@ private lemma tr2D : EvBound (fun T => D.trG2 T - mainTr2D P q D T)
     PaperParams.eventually_L_ge P hlam (2 * P.w), Filter.eventually_gt_atTop (0:ℝ)]
     with T hR hμ hsj hab hreg hEw hEmid hE0 hL2w hT0
   obtain ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ := hreg
-  obtain ⟨hb2, hba, ha1, hJ0, hJ1⟩ := hab
+  obtain ⟨hb2, hba, ha1, hJ0, -⟩ := hab
   have hSJ : |D.sumL2gq T - P.L T ^ 3 * D.JT T / 2| ≤ Cs * P.L T ^ 2 := by
     have e : P.L T ^ 3 * D.JT T / 2 = P.L T ^ 3 / 2 * D.JT T := by ring
     rw [e]
     exact hsj
   exact tr2D_pointwise T (P.L T) (ell1q q T) (l T) (P.X T) (P.calE T) (D.sumL2gq T) (D.intMu2 T)
     (D.bT T) (D.JT T) (D.trG2 T) P.w CR Cμ Cs hT hL hl hlog hX (ThmE.l_le_ell1q h.one_le_q hT0) hLl hw1 hL2w
-    hb2 (hba.trans ha1) hJ0 hJ1 hE0 hEw hEmid hCR.le hCμ.le hCs.le hR hμ hSJ
+    hb2 (hba.trans ha1) hJ0 hE0 hEw hEmid hCR.le hCμ.le hCs.le hR hμ hSJ
 
 /-- the D-form of [eq:ratio]: (tr G̃)²/tr G̃² = cRatio(λ₁; a, b, J)·N·(1 + O(𝓔_T)). -/
 private lemma ratioD : EvBound
@@ -218,30 +218,22 @@ private lemma ratioD : EvBound
   obtain ⟨C₂, hC₂, h2⟩ := (tr2D h).eventually_le
   obtain ⟨A, hA, hN⟩ := h.rvm.eventually_le
   have hcal := PaperParams.calE_tendsto_zero hlam hlam1 hw
-  have hs1 : ∀ᶠ T in Filter.atTop, C₁ * P.calE T ≤ 1 / 2 := by
-    filter_upwards [hcal.eventually (Iio_mem_nhds (show (0:ℝ) < 1 / (2 * C₁) by positivity))]
-      with T hT
-    rw [lt_div_iff₀ (by positivity)] at hT
-    linarith
-  have hs2 : ∀ᶠ T in Filter.atTop, C₂ * P.calE T ≤ 1 / 2 := by
-    filter_upwards [hcal.eventually (Iio_mem_nhds (show (0:ℝ) < 1 / (2 * C₂) by positivity))]
-      with T hT
-    rw [lt_div_iff₀ (by positivity)] at hT
-    linarith
+  have hs1 := ThmD.eventually_const_mul_le_half hcal hC₁
+  have hs2 := ThmD.eventually_const_mul_le_half hcal hC₂
   refine EvBound.of_eventually_le (c := 2 * (2 * π * A + 5 * C₁ + C₂)) (by positivity) ?_
   filter_upwards [h1, h2, hN, hs1, hs2, regimeD h, h.ab_range, PaperParams.calE_ge_rpow hlam hw,
     PaperParams.calE_nonneg_eventually hlam hw, NcntD_pos h, Filter.eventually_ge_atTop (2 * π * A),
     Filter.eventually_gt_atTop (0:ℝ)]
     with T h1 h2 hN hs1 hs2 hreg hab hEr hE0 hN0 hTA hT0
   obtain ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ := hreg
-  obtain ⟨hb2, hba, ha1, hJ0, hJ1⟩ := hab
+  obtain ⟨hb2, hba, -, hJ0, -⟩ := hab
   have hET : 1 / T ≤ P.calE T := by
     refine le_trans ?_ hEr
     rw [one_div, ← Real.rpow_neg_one]
     exact Real.rpow_le_rpow_of_exponent_le hT (by linarith)
   exact ratioD_pointwise T (P.L T) (ell1q q T) (l T) (P.calE T) (D.Ncnt T) (D.trG T) (D.trG2 T)
     A (D.aT T) (D.bT T) (D.JT T) C₁ C₂ hT (by linarith) (hl.trans (ThmE.l_le_ell1q h.one_le_q hT0)) (ThmE.l_le_ell1q h.one_le_q hT0)
-    hN0 hE0 hET hA.le hC₁.le hC₂.le (le_trans hb2 hba) ha1 hb2 hJ0 hs1 hs2 hTA h1 h2 hN
+    hN0 hE0 hET hA.le hC₁.le hC₂.le (le_trans hb2 hba) hb2 hJ0 hs1 hs2 hTA h1 h2 hN
 
 
 end assemblyD
@@ -261,7 +253,7 @@ private lemma frhatD {D : DataDChi P} (h : FactsDChi q D) : EvBound
     Filter.eventually_ge_atTop (4 * π * A), Filter.eventually_gt_atTop (0:ℝ)]
     with T h2 hN hreg hab hEr hE0 hN0 hTA hT0
   obtain ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ := hreg
-  obtain ⟨hb2, hba, ha1, hJ0, hJ1⟩ := hab
+  obtain ⟨hb2, hba, -, hJ0, -⟩ := hab
   have hET : 1 / T ≤ P.calE T := by
     refine le_trans ?_ hEr
     rw [one_div, ← Real.rpow_neg_one]
@@ -269,7 +261,7 @@ private lemma frhatD {D : DataDChi P} (h : FactsDChi q D) : EvBound
   refine le_trans (le_of_eq (abs_of_nonneg (le_max_right _ _))) ?_
   exact frhatD_pointwise T (P.L T) (ell1q q T) (l T) (P.calE T) (D.Ncnt T) (D.trG2 T)
     A (D.aT T) (D.bT T) (D.JT T) C₂ hT (by linarith) (hl.trans (ThmE.l_le_ell1q h.one_le_q hT0))
-    (ThmE.l_le_ell1q h.one_le_q hT0) hN0 hE0 hET hA.le hC₂.le (le_trans hb2 hba) ha1 hb2 hJ0 hTA h2 hN
+    (ThmE.l_le_ell1q h.one_le_q hT0) hN0 hE0 hET hA.le hC₂.le (le_trans hb2 hba) hb2 hJ0 hTA h2 hN
 
 /-- **[eq:ratio-general] for L(s,χ), assembled.** -/
 theorem tracesBoundsDChi_of_factsDChi (h : FactsDChi q D) :

@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-  Part of the Zeta23 formalization of the paper
-  "More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
+Part of the Zeta23 formalization of the paper
+"More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
 -/
 import Zeta23.PrimeSideTemp
 import Mathlib.Analysis.Complex.ExponentialBounds
@@ -17,9 +17,7 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 /-!
 # Prime side, part B: [prop:PP] and the assembly of Theorem [thm:traces]
 
-The paper §5 ("The prime side: magnitude"), subsections "Evaluation of 𝓜" and "Summary".
-Sibling file `PrimeSideA.lean` contains [prop:trace], [lem:ends],
-[eq:Msplit], [prop:mumu], [prop:cross] and the shared bilinear form `Mform`.
+Paper §5 ("The prime side: magnitude"), subsections "Evaluation of 𝓜" and "Summary".
 
 Contents
 * §0 glue between the explicit-constant interface shape `EvBound` and Mathlib's `IsBigO`.
@@ -28,10 +26,10 @@ Contents
 * §2 `Zeta23.PrimeSide.Facts` / `Zeta23.PrimeSide.tracesBounds_of_facts`: the proof of [thm:traces]
   ([eq:tr1], [eq:tr2], [eq:ratio], second forms) from the five sub-results of §5 + [eq:muints] (H-Γ)
   + [eq:RvM] (H-RvM) + [eq:abdef] (Taper), all taken as hypotheses on abstract real functions of `T`.
-  This is where the paper's constants `ℓ₁² + L²/3` and `F(λ₁)` are checked by Lean.
-* [prop:PP]: `𝓜[P_X,P_X] = (T/π) Σ_{n≤X} Λ(n)²/n · g(log n) + O(L² X)` and the sandwich
-  `(L−2w)³/6 + O(L²) ≤ Σ a_n² g(y_n) ≤ L³/6 + O(L²)` enter §2 as the hypotheses
-  `prop_PP`, `sum_lower`, `sum_upper` of `Facts`.
+  This is where the paper's constants `ℓ₁² + L²/3` and `F(λ₁)` are checked.
+* §3 [prop:PP]: `𝓜[P_X,P_X] = (T/π) Σ_{n≤X} Λ(n)²/n · g(log n) + O(L² X)` and the sandwich
+  `(L−2w)³/6 + O(L²) ≤ Σ a_n² g(y_n) ≤ L³/6 + O(L²)` — over the concrete definitions of `Defs.lean`
+  and `Mform`.
 -/
 
 noncomputable section
@@ -210,7 +208,7 @@ lemma sqrt_X_le_rpow (hlam : 0 < P.lam) {T : ℝ} (hT : 0 < T) :
   nlinarith
 
 /-- `X ≤ T` eventually (`λ ≤ 1`). -/
-lemma eventually_X_le_T (hlam : 0 < P.lam) (hlam1 : P.lam ≤ 1) : ∀ᶠ T in atTop, P.X T ≤ T := by
+lemma eventually_X_le_T (_hlam : 0 < P.lam) (hlam1 : P.lam ≤ 1) : ∀ᶠ T in atTop, P.X T ≤ T := by
   filter_upwards [eventually_ge_atTop (2 * π)] with T hT
   have hπ := Real.pi_gt_three
   have hT0 : 0 < T := by linarith
@@ -367,27 +365,27 @@ structure Facts : Prop where
   /-- [eq:muints], second formula (from H-Γ): `∫_T^{2T} μ² = (T ℓ₁²/4π²)(1 + O(l⁻²))`. -/
   muints2 : EvBound (fun T => D.intMu2 T - T * ell1 T ^ 2 / (4 * π ^ 2))
       (fun T => T * ell1 T ^ 2 / (4 * π ^ 2) / l T ^ 2)
-  /-- [prop:trace] : `tr G̃ = a L N(T,2T) + O(L √X)`. -/
+  /-- [prop:trace]: `tr G̃ = a L N(T,2T) + O(L √X)`. -/
   prop_trace : EvBound (fun T => D.trG T - D.aT T * P.L T * D.Ncnt T)
       (fun T => P.L T * Real.sqrt (P.X T))
-  /-- [lem:ends] : `tr G̃² = 𝓜 + O(L l log l (l² + X))`. -/
+  /-- [lem:ends]: `tr G̃² = 𝓜 + O(L l log l (l² + X))`. -/
   lem_ends : EvBound (fun T => D.trG2 T - D.Mtot T)
       (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T))
-  /-- [eq:Msplit] : bilinear expansion of `𝓜 = 𝓜[ν_X, ν_X]`, `ν_X = μ + Π_X + P_X`. -/
+  /-- [eq:Msplit]: bilinear expansion of `𝓜 = 𝓜[ν_X, ν_X]`, `ν_X = μ + Π_X + P_X`. -/
   Msplit : ∀ᶠ T in atTop, D.Mtot T =
       D.Mmumu T + D.MPP T + 2 * D.MmuP T + 2 * D.MmuPi T + 2 * D.MPPi T + D.MPiPi T
-  /-- [prop:mumu] , first form: `𝓜[μ,μ] = 2π b L ∫_T^{2T} μ² + O(l² log L)`. -/
+  /-- [prop:mumu], first form: `𝓜[μ,μ] = 2π b L ∫_T^{2T} μ² + O(l² log L)`. -/
   prop_mumu : EvBound (fun T => D.Mmumu T - 2 * π * D.bT T * P.L T * D.intMu2 T)
       (fun T => l T ^ 2 * Real.log (P.L T))
-  /-- [prop:PP], first form:
+  /-- [prop:PP] (this file, §3), first form:
     `𝓜[P_X,P_X] = (T/π) Σ_{n≤X} Λ(n)²/n g(log n) + O(L² X)`. -/
   prop_PP : EvBound (fun T => D.MPP T - T / π * D.sumL2g T) (fun T => P.L T ^ 2 * P.X T)
-  /-- [prop:PP], sandwich lower half: `Σ a_n² g(y_n) ≥ (L−2w)³/6 − O(L²)`. -/
+  /-- [prop:PP] (this file, §3), sandwich lower half: `Σ a_n² g(y_n) ≥ (L−2w)³/6 − O(L²)`. -/
   sum_lower : EvBound (fun T => min (D.sumL2g T - (P.L T - 2 * P.w) ^ 3 / 6) 0)
       (fun T => P.L T ^ 2)
   /-- sandwich upper half: `Σ a_n² g(y_n) ≤ L³/6 + O(L²)`. -/
   sum_upper : EvBound (fun T => max (D.sumL2g T - P.L T ^ 3 / 6) 0) (fun T => P.L T ^ 2)
-  /-- [prop:cross] : `𝓜[μ,P_X] ≪ l √X`. -/
+  /-- [prop:cross]: `𝓜[μ,P_X] ≪ l √X`. -/
   cross_muP : EvBound D.MmuP (fun T => l T * Real.sqrt (P.X T))
   /-- [prop:cross]: `𝓜[μ,Π_X] ≪ l L √X`. -/
   cross_muPi : EvBound D.MmuPi (fun T => l T * P.L T * Real.sqrt (P.X T))
@@ -429,7 +427,7 @@ lemma T_le_Ncnt : ∀ᶠ T in atTop, T ≤ 4 * π * D.Ncnt T := by
 lemma Ncnt_pos : ∀ᶠ T in atTop, 0 < D.Ncnt T := by
   filter_upwards [Ncnt_lower h, eventually_l_ge 1, eventually_ge_atTop 1] with T hN hl hT
   have hπ := Real.pi_pos
-  exact lt_of_lt_of_le (by positivity) (le_trans (by gcongr <;> linarith : T * 1 / (4 * π) ≤ _) hN)
+  exact lt_of_lt_of_le (by positivity) (le_trans (by gcongr : T * 1 / (4 * π) ≤ _) hN)
     |> fun h => by simpa using h
 
 /-- [eq:tr1], second equality: `tr G̃ = L N(T,2T)(1 + O(𝓔_T))`.
@@ -496,14 +494,14 @@ theorem tr2_first : EvBound
     have hlogL0 : 0 ≤ Real.log (P.L T) := Real.log_nonneg hL
     calc l T ^ 2 * Real.log (P.L T) ≤ l T ^ 2 * Real.log (l T) := by gcongr
       _ = 1 * l T * Real.log (l T) * l T := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = _ := (one_mul _).symm
   have e4 : EvBound (fun T => D.MPP T - T / π * D.sumL2g T)
       (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.prop_PP.mono_right' one_pos ?_
     filter_upwards [regime h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
     calc P.L T ^ 2 * P.X T = P.L T * P.L T * 1 * P.X T := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have hsqrtX : ∀ᶠ T in atTop, Real.sqrt (P.X T) ≤ P.X T := by
     filter_upwards [regime h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
@@ -513,27 +511,27 @@ theorem tr2_first : EvBound
     filter_upwards [regime h, hsqrtX] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ hs
     calc l T * Real.sqrt (P.X T) ≤ l T * P.X T := by gcongr
       _ = 1 * l T * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = _ := (one_mul _).symm
   have e6 : EvBound D.MmuPi (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.cross_muPi.mono_right' one_pos ?_
     filter_upwards [regime h, hsqrtX] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ hs
     calc l T * P.L T * Real.sqrt (P.X T) ≤ l T * P.L T * P.X T := by gcongr
       _ = P.L T * l T * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = _ := (one_mul _).symm
   have e7 : EvBound D.MPPi (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.cross_PPi.mono_right' one_pos ?_
     filter_upwards [regime h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
     calc P.L T * P.X T = P.L T * 1 * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = _ := (one_mul _).symm
   have e8 : EvBound D.MPiPi (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.cross_PiPi.mono_right' one_pos ?_
     filter_upwards [regime h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
     calc P.L T * P.X T / T ≤ P.L T * P.X T := div_le_self (by nlinarith) hT
       _ = P.L T * 1 * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = _ := (one_mul _).symm
   have S := h.lem_ends.add (e3.add (e4.add (((e5.const_mul 2).add (e6.const_mul 2)).add
     ((e7.const_mul 2).add e8))))
@@ -806,7 +804,7 @@ theorem ratio : EvBound (fun T => D.trG T ^ 2 / D.trG2 T - Ffun (P.lam1 T) * D.N
     A C₁ C₂ hT (by linarith) (hl.trans (l_le_ell1 T)) (l_le_ell1 T) hN0 hE0 hET hA.le hC₁.le
     hC₂.le hs1 hs2 hTA h1 h2 hN
 
-/-- **Theorem [thm:traces]** (the paper §5, "Summary"), assembled: the interface
+/-- **Theorem [thm:traces]** (§5 of the paper, "Summary"), assembled: the content
 `TracesBounds` holds for the data `D` under `Facts D`. -/
 theorem tracesBounds_of_facts : TracesBounds P D.aT D.trG D.trG2 D.Ncnt where
   tr1 := tr1 h
@@ -818,7 +816,10 @@ end assembly
 
 end PrimeSide
 
+/-! ## §3.  [prop:PP]
 
+Statement over `Mform` and `Defs.lean`'s `PX, PhiR, g`,
+via the 𝒟 / 𝒪₁ / 𝒪₂ decomposition [eq:MPP]. -/
 
 end Zeta23
 

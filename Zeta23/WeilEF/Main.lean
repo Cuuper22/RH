@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/WeilEF/Main.lean.  Final assembly: EF_lit for the concrete ζ zero configuration.
+Zeta23/WeilEF/Main.lean — Final assembly: EF_lit for the concrete ζ zero configuration.
 -/
 import Zeta23.WeilEF.ZeroSummability
 import Zeta23.WeilEF.FullLineAssembly
@@ -38,13 +38,11 @@ theorem Hfn_mirror (k : ℝ → ℂ) (c t : ℝ) :
   ring
 
 /-- The literature-form Weil explicit formula holds for Mathlib's ζ
-(zero set = IsNontrivialZero, multiplicities = analyticOrderAt).  Together with
-Zeta23.EF.explicitFormulaPaper_of_lit + GammaFacts this yields
+(zero set = IsNontrivialZero, multiplicities = analyticOrderAt).  Together with Zeta23.EF.explicitFormulaPaper_of_lit + GammaFacts this yields
 ExplicitFormulaPaper (zetaZeros hs) outright.
 
-Assembly:
-full_line_identity (Contour) splits via logDeriv_completedZeta (XiLogDeriv) into
-• ζ-part = prime_side_line (k) + prime_side_line (k ∘ Neg.neg)
+Assembly: full_line_identity (Contour) splits via logDeriv_completedZeta (XiLogDeriv) into
+• ζ-part = prime_side_line (k) + prime_side_line (k ∘ Neg.neg),
     giving −Σ Λ(n)n^{−1/2}(k(log n) + k(−log n)) after sign bookkeeping,
 • Γℝ-part = gamma_line_shift + gammaR_bracket → (1/2π)∫ h(r)[Re ψ(1/4+ir/2) − log π]dr,
 • zero side: Σ' m_ρ H(ρ) with H(ρ) = h(γ_ρ) (Hfn at ρ = paperFT k ((ρ−1/2)/i) = h(γ_ρ) by
@@ -79,7 +77,7 @@ theorem EF_lit_zeta (hs : ZetaSeam) : Zeta23.EF.EF_lit (zetaZeros hs) := by
         + logDeriv riemannZeta (((5/4:ℝ):ℂ) + t * I) := by
     intro t
     obtain ⟨h0, h1, hζ, hpos⟩ := hsne t
-    exact logDeriv_completedZeta _ h0 h1 hζ hpos
+    exact logDeriv_completedZeta _ h1 hζ hpos
   -- notation
   have hH2eq : ∀ t : ℝ, Hfn k (1 - (5/4:ℝ) - t * I)
       = Hfn (fun u => k (-u)) (((5/4:ℝ):ℂ) + t * I) := fun t => Hfn_mirror k (5/4) t
@@ -139,7 +137,7 @@ theorem EF_lit_zeta (hs : ZetaSeam) : Zeta23.EF.EF_lit (zetaZeros hs) := by
   have hζ1 : (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ, Hfn k (((5/4:ℝ):ℂ) + t * I)
       * logDeriv riemannZeta (((5/4:ℝ):ℂ) + t * I)
       = -∑' n : ℕ, ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (Real.log n) := by
-    have h := prime_side_line hk hkc h54a h54b
+    have h := prime_side_line hk hkc h54a
     have h2 : (∫ t : ℝ, Hfn k (((5/4:ℝ):ℂ) + t * I)
         * (-logDeriv riemannZeta (((5/4:ℝ):ℂ) + t * I)))
         = -∫ t : ℝ, Hfn k (((5/4:ℝ):ℂ) + t * I)
@@ -153,7 +151,7 @@ theorem EF_lit_zeta (hs : ZetaSeam) : Zeta23.EF.EF_lit (zetaZeros hs) := by
   have hζ2 : (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ, Hfn k (1 - (5/4:ℝ) - t * I)
       * logDeriv riemannZeta (((5/4:ℝ):ℂ) + t * I)
       = -∑' n : ℕ, ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (-Real.log n) := by
-    have h := prime_side_line hkneg2 hknegc h54a h54b
+    have h := prime_side_line hkneg2 hknegc h54a
     have h2 : (∫ t : ℝ, Hfn (fun u => k (-u)) (((5/4:ℝ):ℂ) + t * I)
         * (-logDeriv riemannZeta (((5/4:ℝ):ℂ) + t * I)))
         = -∫ t : ℝ, Hfn k (1 - (5/4:ℝ) - t * I)
@@ -267,7 +265,7 @@ theorem EF_lit_zeta (hs : ZetaSeam) : Zeta23.EF.EF_lit (zetaZeros hs) := by
         rw [hζboth]
         ring
 
-/-- **Hypothesis-free form** for the headline wiring: [eq:EFstd] holds for the canonical
+/-- **Hypothesis-free form**: [eq:EFstd] holds for the canonical
 unconditional ζ zero configuration. -/
 theorem EF_lit_zetaZeroConfig : Zeta23.EF.EF_lit zetaZeroConfig := EF_lit_zeta zetaSeam
 

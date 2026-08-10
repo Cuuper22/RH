@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmD/Traces.lean
+Zeta23/ThmD/Traces.lean — window-general traces assembly.
 [eq:ratio-general]: the window-general [thm:traces] assembly.  Mirrors Zeta23/PrimeSideB.lean's
 Data/Facts → TracesBounds pipeline with TWO changes (paper §7.1):
  * the [eq:gbounds] sandwich fields (sum_lower/sum_upper, forcing Σa_n²g ≈ L³/6 i.e. J = 1/3)
@@ -71,7 +71,7 @@ Simpler than PrimeSide.tr2_pointwise: no (b−1)-collapse is needed since b stay
 theorem tr2D_pointwise (T L ℓ lT X E S I2 b J G2 w CR Cμ Cs : ℝ)
     (hT : 1 ≤ T) (hL : 1 ≤ L) (hl : 1 ≤ lT) (hlog : 1 ≤ Real.log lT) (hX : 1 ≤ X)
     (hℓl : lT ≤ ℓ) (hLl : L ≤ lT) (hw : 1 ≤ w) (hL2w : 2 * w ≤ L)
-    (hb : 1 / 2 ≤ b) (hb1 : b ≤ 1) (hJ0 : 0 ≤ J) (_hJ1 : J ≤ 1)
+    (hb : 1 / 2 ≤ b) (hb1 : b ≤ 1) (hJ0 : 0 ≤ J)
     (hE0 : 0 ≤ E) (hEw : w / L ≤ E) (hEmid : (lT ^ 2 + X) * Real.log lT / (T * lT) ≤ E)
     (hCR : 0 ≤ CR) (hCμ : 0 ≤ Cμ) (hCs : 0 ≤ Cs)
     (hR : |G2 - (2 * π * b * L * I2 + T / π * S)| ≤ CR * (L * lT * Real.log lT * (lT ^ 2 + X)))
@@ -178,14 +178,22 @@ theorem tr2D_pointwise (T L ℓ lT X E S I2 b J G2 w CR Cμ Cs : ℝ)
         gcongr
     _ = (4 * π * CR + 2 * Cμ + 4 * Cs) * (E * M₂) := by ring
 
-set_option maxHeartbeats 2000000 in
+/-- from `f → 0`: eventually `C * f T ≤ 1/2` (used for the `Cᵢ·𝓔_T ≤ 1/2` side conditions of
+`ratioD_pointwise`, here and in ThmDE.Traces). -/
+theorem eventually_const_mul_le_half {f : ℝ → ℝ} (hf : Tendsto f atTop (nhds 0)) {C : ℝ}
+    (hC : 0 < C) : ∀ᶠ T in atTop, C * f T ≤ 1 / 2 := by
+  filter_upwards [hf.eventually (Iio_mem_nhds (show (0:ℝ) < 1 / (2 * C) by positivity))] with T hT
+  rw [lt_div_iff₀ (by positivity)] at hT
+  linarith
+
+set_option maxHeartbeats 800000 in
 /-- The pointwise inequality behind [eq:ratio-general], every quantity a real variable; the
 identity cRatio(L/ℓ; a, b, J)·N · (TL/2π)(bℓ² + L²J) = (aL)²N · Tℓ/2π is where the
 window-general constant is checked (mirrors PrimeSide.ratio_pointwise; a stays on tr G̃). -/
 theorem ratioD_pointwise (T L ℓ lT E N G G2 A aa b J C₁ C₂ : ℝ)
     (hT : 1 ≤ T) (hL : 0 < L) (hℓ1 : 1 ≤ ℓ) (hℓl : lT ≤ ℓ) (hN0 : 0 < N) (hE0 : 0 ≤ E)
     (hET : 1 / T ≤ E) (hA : 0 ≤ A) (hC₁ : 0 ≤ C₁) (hC₂ : 0 ≤ C₂)
-    (ha : 1 / 2 ≤ aa) (_ha1 : aa ≤ 1) (hb : 1 / 2 ≤ b) (hJ0 : 0 ≤ J)
+    (ha : 1 / 2 ≤ aa) (hb : 1 / 2 ≤ b) (hJ0 : 0 ≤ J)
     (hs1 : C₁ * E ≤ 1 / 2) (hs2 : C₂ * E ≤ 1 / 2) (hTA : 2 * π * A ≤ T)
     (h1 : |G - aa * L * N| ≤ C₁ * (E * (aa * L * N)))
     (h2 : |G2 - T * L / (2 * π) * (b * ℓ ^ 2 + L ^ 2 * J)|
@@ -343,7 +351,7 @@ private lemma regimeD : ∀ᶠ T in Filter.atTop, 1 ≤ T ∧ 1 ≤ l T ∧ 1 �
     PaperParams.eventually_X_le_T P hlam h.lam_le_one] with T h1 h2 h3 h4 h5 h6
   exact ⟨h1, h2, h3, h4, h5, PaperParams.L_le_l P h.lam_le_one (by linarith), h6⟩
 
-/-- the D-form of [eq:tr1]': tr G̃ = a L N (1 + O(𝓔)) — a stays (no collapse to 1). -/
+/-- the D-form of [eq:tr1]': tr G̃ = a L N (1 + O(𝓔)) — a STAYS (no collapse to 1). -/
 private lemma tr1'D : EvBound (fun T => D.trG T - D.aT T * P.L T * D.Ncnt T)
     (fun T => P.calE T * (D.aT T * P.L T * D.Ncnt T)) := by
   obtain ⟨C₁, hC₁, h1⟩ := h.prop_trace.eventually_le
@@ -402,14 +410,14 @@ private lemma tr2_firstD : EvBound
     have hlogL0 : 0 ≤ Real.log (P.L T) := Real.log_nonneg hL
     calc l T ^ 2 * Real.log (P.L T) ≤ l T ^ 2 * Real.log (l T) := by gcongr
       _ = 1 * l T * Real.log (l T) * l T := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have e4 : EvBound (fun T => D.MPP T - T / π * D.sumL2g T)
       (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.prop_PP.mono_right' one_pos ?_
     filter_upwards [regimeD h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
     calc P.L T ^ 2 * P.X T = P.L T * P.L T * 1 * P.X T := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have hsqrtX : ∀ᶠ T in Filter.atTop, Real.sqrt (P.X T) ≤ P.X T := by
     filter_upwards [regimeD h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
@@ -420,27 +428,27 @@ private lemma tr2_firstD : EvBound
     filter_upwards [regimeD h, hsqrtX] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ hs
     calc l T * Real.sqrt (P.X T) ≤ l T * P.X T := by gcongr
       _ = 1 * l T * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have e6 : EvBound D.MmuPi (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.cross_muPi.mono_right' one_pos ?_
     filter_upwards [regimeD h, hsqrtX] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ hs
     calc l T * P.L T * Real.sqrt (P.X T) ≤ l T * P.L T * P.X T := by gcongr
       _ = P.L T * l T * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have e7 : EvBound D.MPPi (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.cross_PPi.mono_right' one_pos ?_
     filter_upwards [regimeD h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
     calc P.L T * P.X T = P.L T * 1 * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have e8 : EvBound D.MPiPi (fun T => P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := by
     refine h.cross_PiPi.mono_right' one_pos ?_
     filter_upwards [regimeD h] with T ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩
     calc P.L T * P.X T / T ≤ P.L T * P.X T := div_le_self (by nlinarith) hT
       _ = P.L T * 1 * 1 * (0 + P.X T) := by ring
-      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr <;> nlinarith
+      _ ≤ P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T) := by gcongr; nlinarith
       _ = 1 * (P.L T * l T * Real.log (l T) * (l T ^ 2 + P.X T)) := (one_mul _).symm
   have S := h.lem_ends.add (e3.add (e4.add (((e5.const_mul 2).add (e6.const_mul 2)).add
     ((e7.const_mul 2).add e8))))
@@ -464,14 +472,14 @@ private lemma tr2D : EvBound (fun T => D.trG2 T - mainTr2D P D T)
     PaperParams.eventually_L_ge P hlam (2 * P.w)]
     with T hR hμ hsj hab hreg hEw hEmid hE0 hL2w
   obtain ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ := hreg
-  obtain ⟨hb2, hba, ha1, hJ0, hJ1⟩ := hab
+  obtain ⟨hb2, hba, ha1, hJ0, -⟩ := hab
   have hSJ : |D.sumL2g T - P.L T ^ 3 * D.JT T / 2| ≤ Cs * P.L T ^ 2 := by
     have e : P.L T ^ 3 * D.JT T / 2 = P.L T ^ 3 / 2 * D.JT T := by ring
     rw [e]
     exact hsj
   exact tr2D_pointwise T (P.L T) (ell1 T) (l T) (P.X T) (P.calE T) (D.sumL2g T) (D.intMu2 T)
     (D.bT T) (D.JT T) (D.trG2 T) P.w CR Cμ Cs hT hL hl hlog hX (PaperParams.l_le_ell1 T) hLl hw1 hL2w
-    hb2 (hba.trans ha1) hJ0 hJ1 hE0 hEw hEmid hCR.le hCμ.le hCs.le hR hμ hSJ
+    hb2 (hba.trans ha1) hJ0 hE0 hEw hEmid hCR.le hCμ.le hCs.le hR hμ hSJ
 
 /-- the D-form of [eq:ratio]: (tr G̃)²/tr G̃² = cRatio(λ₁; a, b, J)·N·(1 + O(𝓔_T)). -/
 private lemma ratioD : EvBound
@@ -484,39 +492,30 @@ private lemma ratioD : EvBound
   obtain ⟨C₂, hC₂, h2⟩ := (tr2D h).eventually_le
   obtain ⟨A, hA, hN⟩ := h.rvm.eventually_le
   have hcal := PaperParams.calE_tendsto_zero hlam hlam1 hw
-  have hs1 : ∀ᶠ T in Filter.atTop, C₁ * P.calE T ≤ 1 / 2 := by
-    filter_upwards [hcal.eventually (Iio_mem_nhds (show (0:ℝ) < 1 / (2 * C₁) by positivity))]
-      with T hT
-    rw [lt_div_iff₀ (by positivity)] at hT
-    linarith
-  have hs2 : ∀ᶠ T in Filter.atTop, C₂ * P.calE T ≤ 1 / 2 := by
-    filter_upwards [hcal.eventually (Iio_mem_nhds (show (0:ℝ) < 1 / (2 * C₂) by positivity))]
-      with T hT
-    rw [lt_div_iff₀ (by positivity)] at hT
-    linarith
+  have hs1 := eventually_const_mul_le_half hcal hC₁
+  have hs2 := eventually_const_mul_le_half hcal hC₂
   refine EvBound.of_eventually_le (c := 2 * (2 * π * A + 5 * C₁ + C₂)) (by positivity) ?_
   filter_upwards [h1, h2, hN, hs1, hs2, regimeD h, h.ab_range, PaperParams.calE_ge_rpow hlam hw,
     PaperParams.calE_nonneg_eventually hlam hw, NcntD_pos h, Filter.eventually_ge_atTop (2 * π * A)]
     with T h1 h2 hN hs1 hs2 hreg hab hEr hE0 hN0 hTA
   obtain ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ := hreg
-  obtain ⟨hb2, hba, ha1, hJ0, hJ1⟩ := hab
+  obtain ⟨hb2, hba, -, hJ0, -⟩ := hab
   have hET : 1 / T ≤ P.calE T := by
     refine le_trans ?_ hEr
     rw [one_div, ← Real.rpow_neg_one]
     exact Real.rpow_le_rpow_of_exponent_le hT (by linarith)
   exact ratioD_pointwise T (P.L T) (ell1 T) (l T) (P.calE T) (D.Ncnt T) (D.trG T) (D.trG2 T)
     A (D.aT T) (D.bT T) (D.JT T) C₁ C₂ hT (by linarith) (hl.trans (PaperParams.l_le_ell1 T)) (PaperParams.l_le_ell1 T)
-    hN0 hE0 hET hA.le hC₁.le hC₂.le (le_trans hb2 hba) ha1 hb2 hJ0 hs1 hs2 hTA h1 h2 hN
+    hN0 hE0 hET hA.le hC₁.le hC₂.le (le_trans hb2 hba) hb2 hJ0 hs1 hs2 hTA h1 h2 hN
 
 end assemblyD2
 
-set_option maxHeartbeats 2000000 in
 /-- pointwise form of the hat-units Frobenius bound: the positive part of
 G2/(aL)² − (1/cRatio)N is ≤ (4πA + 2C₂)·E·((1/cRatio)N). -/
 theorem frhatD_pointwise (T L ℓ lT E N G2 A aa b J C₂ : ℝ)
     (hT : 1 ≤ T) (hL : 0 < L) (hℓ1 : 1 ≤ ℓ) (hℓl : lT ≤ ℓ) (hN0 : 0 < N) (hE0 : 0 ≤ E)
     (hET : 1 / T ≤ E) (hA : 0 ≤ A) (hC₂ : 0 ≤ C₂)
-    (ha : 1 / 2 ≤ aa) (_ha1 : aa ≤ 1) (hb : 1 / 2 ≤ b) (hJ0 : 0 ≤ J)
+    (ha : 1 / 2 ≤ aa) (hb : 1 / 2 ≤ b) (hJ0 : 0 ≤ J)
     (hTA : 4 * π * A ≤ T)
     (h2 : |G2 - T * L / (2 * π) * (b * ℓ ^ 2 + L ^ 2 * J)|
       ≤ C₂ * (E * (T * L / (2 * π) * (b * ℓ ^ 2 + L ^ 2 * J))))
@@ -645,7 +644,7 @@ private lemma frhatD {D : DataD P} (h : FactsD D) : EvBound
     Filter.eventually_ge_atTop (4 * π * A)]
     with T h2 hN hreg hab hEr hE0 hN0 hTA
   obtain ⟨hT, hl, hlog, hL, hX, hLl, hXT⟩ := hreg
-  obtain ⟨hb2, hba, ha1, hJ0, hJ1⟩ := hab
+  obtain ⟨hb2, hba, -, hJ0, -⟩ := hab
   have hET : 1 / T ≤ P.calE T := by
     refine le_trans ?_ hEr
     rw [one_div, ← Real.rpow_neg_one]
@@ -653,11 +652,11 @@ private lemma frhatD {D : DataD P} (h : FactsD D) : EvBound
   refine le_trans (le_of_eq (abs_of_nonneg (le_max_right _ _))) ?_
   exact frhatD_pointwise T (P.L T) (ell1 T) (l T) (P.calE T) (D.Ncnt T) (D.trG2 T)
     A (D.aT T) (D.bT T) (D.JT T) C₂ hT (by linarith) (hl.trans (PaperParams.l_le_ell1 T))
-    (PaperParams.l_le_ell1 T) hN0 hE0 hET hA.le hC₂.le (le_trans hb2 hba) ha1 hb2 hJ0 hTA h2 hN
+    (PaperParams.l_le_ell1 T) hN0 hE0 hET hA.le hC₂.le (le_trans hb2 hba) hb2 hJ0 hTA h2 hN
 
-/-- **[eq:ratio-general] assembly** (body mirrors
-Zeta23.PrimeSide.tracesBounds_of_facts with b, J symbolic): the D-interface traces bounds
-with ratio constant cRatio λ₁ a b J. -/
+/-- **[eq:ratio-general] assembly**: the D-interface traces bounds with ratio constant
+cRatio λ₁ a b J. The body mirrors Zeta23.PrimeSide.tracesBounds_of_facts with b, J
+symbolic. -/
 theorem tracesBoundsD_of_factsD (h : FactsD D) :
     TracesBoundsD P D.aT D.bT D.JT D.trG D.trG2 D.Ncnt where
   tr1 := h.prop_trace

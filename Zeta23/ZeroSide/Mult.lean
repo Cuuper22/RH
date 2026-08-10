@@ -117,14 +117,12 @@ lemma Non_ge_weighted :
     · simp [b]
     have c3 : 3 ≤ D.m z := by omega
     rw [if_neg a, if_neg b, if_pos c3]; norm_num
-    try exact_mod_cast c3
+    exact_mod_cast c3
   have := Finset.sum_le_sum key
   rw [Nat.cast_sum]
   refine le_trans (le_of_eq ?_) this
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum,
     Finset.sum_boole, Finset.sum_boole, Finset.sum_boole]
-  all_goals (try push_cast)
-  all_goals (try ring)
 
 /-- **c = 2 at the block level**:  4·tr Â − ‖Â‖² − 2N(I′) ≤ s₁   (Â := c⁻¹·A = blockP + blockQ, c = aL²). -/
 theorem mult_two (Pr : D.PairReps) {c : ℝ} (hc : 0 < c) (hPois : ∀ z ∈ D.onLine, ∑ k, ‖D.v z k‖ ^ 2 ≤ c) :

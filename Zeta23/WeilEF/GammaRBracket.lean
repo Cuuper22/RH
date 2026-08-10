@@ -4,7 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/WeilEF/GammaRBracket.lean — the critical-line Γℝ bracket.
+Zeta23/WeilEF/GammaRBracket.lean — the critical-line Γℝ bracket; proves
+`Zeta23.WeilEF.gammaR_bracket`:
 
   logDeriv Γℝ(1/2+it) + logDeriv Γℝ(1/2−it) = Re ψ(1/4 + it/2) − log π      (t ∈ ℝ),
 
@@ -91,8 +92,10 @@ theorem logDeriv_Gammaℝ {s : ℂ} (hs : 0 < s.re) :
   rw [h1, h2, (Complex.ofReal_log Real.pi_pos.le).symm]
   ring
 
-/-- **The critical-line Γℝ bracket** (statement identical to `Zeta23.WeilEF.gammaR_bracket`). -/
-theorem gammaR_bracket' (t : ℝ) :
+/-- **The critical-line Γℝ bracket** is EF_lit's Γ-integrand: for real t,
+logDeriv Γℝ(1/2+it) + logDeriv Γℝ(1/2−it) = Re ψ(1/4+it/2) − log π  (ψ = digamma;
+Γℝ(s) = π^{−s/2}Γ(s/2), logDeriv Γℝ(s) = −(log π)/2 + ψ(s/2)/2, conj symmetry). -/
+theorem gammaR_bracket (t : ℝ) :
     logDeriv Complex.Gammaℝ (1/2 + t * I) + logDeriv Complex.Gammaℝ (1/2 - t * I)
       = (((Complex.digamma (1/4 + t/2 * I)).re - Real.log Real.pi : ℝ) : ℂ) := by
   have hp : 0 < ((1:ℂ)/2 + t * I).re := by simp
