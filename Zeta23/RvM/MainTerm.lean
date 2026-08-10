@@ -5,9 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -/
 /-
 Zeta23/RvM/MainTerm.lean — the main term N(T,2T) = (T/2π)·ell1 T + O(log T).
+The statements here are assembled into Zeta23.RvM.riemannVonMangoldt in Zeta23/RvM/Statement.lean.
 
-Inputs (proved in other files):
- * Zeta23.RvM.zetaZeroConfig_local_count (LocalCount.lean): local count.
+Inputs (from other files):
+ * Zeta23.RvM.zetaZeroConfig_local_count (LocalCount.lean, proved): local count.
  * Zeta23/Analytic/RectangleLogDeriv.lean: ∮_{∂Rect} g·f'/f = 2πi Σ m_ρ g(ρ) (PNT+ RectangleIntegral'
    conventions) — use with g ≡ 1, f = completedRiemannZeta (or riemannZeta·Gammaℝ) on [−1,2]×[T₁,T₂]
    (mind Λ's poles at s = 0, 1: for T₁ > 0 the rectangle avoids them).
@@ -18,6 +19,8 @@ Inputs (proved in other files):
  * Zeta23/RvM/GammaSide.lean: gamma_side : 0 < T₁ ≤ T₂ → (1/π)·(halfContour (logDeriv Gammaℝ) T₁ T₂).im
    = ∫ t in T₁..T₂, mu t.
  * GammaFacts.int_mu, GammaFacts.stirling (μ(τ) = (1/2π) log(|τ|/2π) + O(τ⁻²) ⇒ μ ≪ log on [T−1,2T+1]).
+The assembly is proved once as the constant-parametric `rvM_main_param`; `rvM_main_aux` /
+`rvM_main` are its ∃-corollaries; MainTermExplicit.lean keeps only the numeric inputs and `rvM_main_explicit`.
 -/
 import Zeta23.RvM.Defs
 import Zeta23.RvM.LocalCount
@@ -27,6 +30,7 @@ import Zeta23.Analytic.RectangleLogDeriv
 import Zeta23.RvM.GammaSide
 import Zeta23.RvM.Backlund
 import Zeta23.RvM.Fold
+import Zeta23.RvM.NcountWindow
 
 open Complex MeasureTheory
 
@@ -37,7 +41,7 @@ noncomputable section
 namespace Zeta23.RvM
 
 
-/-- The folded argument principle. For zero-free ordinates 1 ≤ T₁ < T₂:
+/-- (M2)+(M3): the folded argument principle. For zero-free ordinates 1 ≤ T₁ < T₂:
 N(T₁,T₂) = (1/π)·Im ∫_L Λ'/Λ ds, L the right half-contour.  [Tit86 §9.3; fold by Λ(1−s̄) = conj Λ(s)] -/
 theorem N_eq_halfContour_completedZeta {T₁ T₂ : ℝ} (h1 : 1 ≤ T₁) (h12 : T₁ < T₂)
     (hg1 : GoodHeight T₁) (hg2 : GoodHeight T₂) :
@@ -45,7 +49,7 @@ theorem N_eq_halfContour_completedZeta {T₁ T₂ : ℝ} (h1 : 1 ≤ T₁) (h12 
   Ncount_eq_im_halfContour h1 h12 hg1 hg2
 
 /-- Points on the half-contour: ζ and Γℝ facts packaged. -/
-private lemma contour_point_facts {s : ℂ} (hre1 : 1/2 ≤ s.re) (hre2 : s.re ≤ 2)
+private lemma contour_point_facts {s : ℂ} (hre1 : 1/2 ≤ s.re) (_hre2 : s.re ≤ 2)
     (him : 1 ≤ s.im) (hgood : ∀ ρ, IsNontrivialZero ρ → ρ.im ≠ s.im) :
     s ≠ 0 ∧ s ≠ 1 ∧ riemannZeta s ≠ 0 ∧ 0 < s.re := by
   have hs0 : s ≠ 0 := by
@@ -118,7 +122,7 @@ theorem halfContour_completedZeta_split {T₁ T₂ : ℝ} (h1 : 1 ≤ T₁) (h12
     intro σ hσ
     obtain ⟨hs0, hs1, hζ, hre⟩ := hseg T₁ h1 hg1 σ hσ
     simp only
-    rw [Zeta23.WeilEF.logDeriv_completedZeta _ hs0 hs1 hζ hre]
+    rw [Zeta23.WeilEF.logDeriv_completedZeta _ hs1 hζ hre]
     ring
   have keyt : Set.EqOn (fun σ : ℝ => logDeriv completedRiemannZeta ((σ:ℂ) + T₂*I))
       (fun σ : ℝ => logDeriv riemannZeta ((σ:ℂ) + T₂*I)
@@ -126,7 +130,7 @@ theorem halfContour_completedZeta_split {T₁ T₂ : ℝ} (h1 : 1 ≤ T₁) (h12
     intro σ hσ
     obtain ⟨hs0, hs1, hζ, hre⟩ := hseg T₂ (by linarith) hg2 σ hσ
     simp only
-    rw [Zeta23.WeilEF.logDeriv_completedZeta _ hs0 hs1 hζ hre]
+    rw [Zeta23.WeilEF.logDeriv_completedZeta _ hs1 hζ hre]
     ring
   have keyr : Set.EqOn (fun t : ℝ => logDeriv completedRiemannZeta ((2:ℂ) + t*I))
       (fun t : ℝ => logDeriv riemannZeta ((2:ℂ) + t*I)
@@ -134,7 +138,7 @@ theorem halfContour_completedZeta_split {T₁ T₂ : ℝ} (h1 : 1 ≤ T₁) (h12
     intro t ht
     obtain ⟨hs0, hs1, hζ, hre⟩ := hvert t ht
     simp only
-    rw [Zeta23.WeilEF.logDeriv_completedZeta _ hs0 hs1 hζ hre]
+    rw [Zeta23.WeilEF.logDeriv_completedZeta _ hs1 hζ hre]
     ring
   -- integrability of the ζ and Γℝ pieces on each segment
   have hintb : ∀ (T : ℝ), 1 ≤ T → GoodHeight T →
@@ -193,7 +197,7 @@ theorem exists_goodHeight (a : ℝ) : ∃ T ∈ Set.Icc a (a + 1), GoodHeight T 
   have hfin : ((fun ρ : ℂ => ρ.im) '' zerosIn a (a + 1)).Finite :=
     (zerosIn_finite a (a + 1)).image _
   have hinf : (Set.Ioo a (a + 1)).Infinite := Set.Ioo_infinite (by linarith)
-  obtain ⟨T, hT⟩ := (hinf.diff hfin).nonempty
+  obtain ⟨T, hT⟩ := (hinf.sdiff hfin).nonempty
   obtain ⟨hT, hTnot⟩ := hT
   refine ⟨T, ⟨hT.1.le, hT.2.le⟩, ?_⟩
   intro ρ hρ him
@@ -202,69 +206,27 @@ theorem exists_goodHeight (a : ℝ) : ∃ T ∈ Set.Icc a (a + 1), GoodHeight T 
   · rw [him]; exact hT.1
   · rw [him]; exact hT.2.le
 
-section NcountWindow
-
-private lemma zerosIn_union {T₁ T T₂ : ℝ} (h1 : T₁ ≤ T) (h2 : T ≤ T₂) :
-    zerosIn T₁ T₂ = zerosIn T₁ T ∪ zerosIn T T₂ := by
-  ext ρ
-  simp only [zerosIn, Set.mem_setOf_eq, Set.mem_union]
-  constructor
-  · rintro ⟨hρ, ha, hb⟩
-    rcases le_or_gt ρ.im T with hle | hgt
-    · exact Or.inl ⟨hρ, ha, hle⟩
-    · exact Or.inr ⟨hρ, hgt, hb⟩
-  · rintro (⟨hρ, ha, hb⟩ | ⟨hρ, ha, hb⟩)
-    · exact ⟨hρ, ha, le_trans hb h2⟩
-    · exact ⟨hρ, lt_of_le_of_lt h1 ha, hb⟩
-
-private lemma Ncount_add {T₁ T T₂ : ℝ} (h1 : T₁ ≤ T) (h2 : T ≤ T₂) :
-    Ncount T₁ T₂ = Ncount T₁ T + Ncount T T₂ := by
-  unfold Ncount
-  rw [zerosIn_union h1 h2]
-  refine finsum_mem_union ?_ ?_ ?_
-  · rw [Set.disjoint_left]
-    rintro ρ ⟨_, _, hb⟩ ⟨_, ha, _⟩
-    exact absurd hb (not_le.2 ha)
-  · exact zerosIn_finite T₁ T
-  · exact zerosIn_finite T T₂
-
-private lemma Ncount_eq_sum (a b : ℝ) :
-    Ncount a b = ∑ ρ ∈ (zerosIn_finite a b).toFinset, zeroMult ρ := by
-  rw [Ncount, ← finsum_mem_coe_finset, Set.Finite.coe_toFinset]
-
-private lemma Ncount_le_of_subset {a b c d : ℝ} (h : zerosIn a b ⊆ zerosIn c d) :
-    Ncount a b ≤ Ncount c d := by
-  rw [Ncount_eq_sum, Ncount_eq_sum]
-  apply Finset.sum_le_sum_of_subset
-  intro ρ hρ
-  rw [Set.Finite.mem_toFinset] at hρ ⊢
-  exact h hρ
-
-private lemma zerosIn_subset_of_le {a b c d : ℝ} (hca : c ≤ a) (hbd : b ≤ d) :
-    zerosIn a b ⊆ zerosIn c d := by
-  rintro ρ ⟨hρ, h1, h2⟩
-  exact ⟨hρ, lt_of_le_of_lt hca h1, le_trans h2 hbd⟩
-
-end NcountWindow
+/-! (window arithmetic Ncount_add / Ncount_mono: Zeta23/Statement/SeamClosed.lean) -/
 
 set_option maxHeartbeats 1000000 in
-/-- The assembly, stated against the two Backlund bounds as explicit hypotheses (they are
-proved in Zeta23/RvM/Backlund.lean; `rvM_main` below instantiates them). -/
-theorem rvM_main_aux (hΓ : GammaFacts)
-    (backlund_horizontal : ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
-      (∀ ρ, IsNontrivialZero ρ → ρ.im ≠ T) →
-      |(∫ σ in (1 / 2 : ℝ)..2, logDeriv riemannZeta (σ + T * I)).im| ≤ C * Real.log T)
+/-- **rvM_main, parametric in all constants**: the five constant sources —
+Backlund CB TB, local count A₀, int_mu Cμ Tμ, μ ≪ log CM, continuity of μ — are explicit parameters, so numeric
+inputs give a numeric C_N. -/
+theorem rvM_main_param {CB TB A₀ Cμ Tμ CM : ℝ}
+    (hB : ∀ T : ℝ, TB ≤ T → (∀ ρ, IsNontrivialZero ρ → ρ.im ≠ T) →
+      |(∫ σ in (1 / 2 : ℝ)..2, logDeriv riemannZeta (σ + T * I)).im| ≤ CB * Real.log T)
     (vertical_two : ∀ T₁ T₂ : ℝ,
-      |(∫ t in T₁..T₂, logDeriv riemannZeta (2 + t * I) * I).im| ≤ Real.pi) :
-    ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
-    |(zetaZeroConfig.N T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1 T| ≤ C * Real.log T := by
-  obtain ⟨CB, TB, hB⟩ := backlund_horizontal
-  obtain ⟨A₀, hA₀1, hA₀⟩ := zeta_local_zero_count
-  obtain ⟨Cμ, Tμ, hCμ⟩ := hΓ.int_mu
-  obtain ⟨CM, hCM0, hCM⟩ := mu_le_log hΓ
-  have hμc : Continuous mu := mu_continuous hΓ
+      |(∫ t in T₁..T₂, logDeriv riemannZeta (2 + t * I) * I).im| ≤ Real.pi)
+    (hA₀1 : 1 ≤ A₀) (hA₀ : ∀ t : ℝ, (Ncount t (t + 1) : ℝ) ≤ A₀ * Real.log (|t| + 3))
+    (hCμ : ∀ T : ℝ, Tμ ≤ T →
+      |(∫ τ in T..(2 * T), mu τ) - T * ell1 T / (2 * Real.pi)| ≤ Cμ / T)
+    (hCM0 : 0 < CM) (hCM : ∀ τ : ℝ, 1 ≤ τ → |mu τ| ≤ CM * Real.log (τ + 3))
+    (hμc : Continuous mu) :
+    ∀ T : ℝ, max (max (TB + 1) (Tμ + 1)) 4 ≤ T →
+      |(zetaZeroConfig.N T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1 T|
+        ≤ (3 * |CB| + 4 * A₀ + 4 * CM + |Cμ| + 1) * Real.log T := by
   have hA₀0 : 0 ≤ A₀ := by linarith
-  refine ⟨3 * |CB| + 4 * A₀ + 4 * CM + |Cμ| + 1, max (max (TB + 1) (Tμ + 1)) 4, fun T hT => ?_⟩
+  intro T hT
   have hT4 : 4 ≤ T := le_trans (le_max_right _ _) hT
   have hTB : TB + 1 ≤ T := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hT
   have hTμ : Tμ + 1 ≤ T := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hT
@@ -288,8 +250,8 @@ theorem rvM_main_aux (hΓ : GammaFacts)
   -- window arithmetic
   have hadd : (Ncount T₁ T₂ : ℝ)
       = (Ncount T₁ T : ℝ) + (Ncount T (2*T) : ℝ) + (Ncount (2*T) T₂ : ℝ) := by
-    have e1 := Ncount_add (T₁ := T₁) (T := T) (T₂ := T₂) hT₁b (by linarith)
-    have e2 := Ncount_add (T₁ := T) (T := 2*T) (T₂ := T₂) (by linarith) hT₂a
+    have e1 := Zeta23.Ncount_add (a := T₁) (b := T) (c := T₂) hT₁b (by linarith)
+    have e2 := Zeta23.Ncount_add (a := T) (b := 2*T) (c := T₂) (by linarith) hT₂a
     rw [e1, e2]
     push_cast
     ring
@@ -303,7 +265,7 @@ theorem rvM_main_aux (hΓ : GammaFacts)
           ring
   have hw1 : (Ncount T₁ T : ℝ) ≤ 2 * A₀ * Real.log T := by
     have hsub : Ncount T₁ T ≤ Ncount T₁ (T₁ + 1) :=
-      Ncount_le_of_subset (zerosIn_subset_of_le le_rfl (by linarith))
+      Zeta23.Ncount_mono le_rfl (by linarith)
     calc (Ncount T₁ T : ℝ) ≤ (Ncount T₁ (T₁ + 1) : ℝ) := by exact_mod_cast hsub
       _ ≤ A₀ * Real.log (|T₁| + 3) := hA₀ T₁
       _ ≤ A₀ * (2 * Real.log T) := by
@@ -313,7 +275,7 @@ theorem rvM_main_aux (hΓ : GammaFacts)
       _ = 2 * A₀ * Real.log T := by ring
   have hw2 : (Ncount (2*T) T₂ : ℝ) ≤ 2 * A₀ * Real.log T := by
     have hsub : Ncount (2*T) T₂ ≤ Ncount (2*T) (2*T + 1) :=
-      Ncount_le_of_subset (zerosIn_subset_of_le le_rfl hT₂b)
+      Zeta23.Ncount_mono le_rfl hT₂b
     calc (Ncount (2*T) T₂ : ℝ) ≤ (Ncount (2*T) (2*T+1) : ℝ) := by exact_mod_cast hsub
       _ ≤ A₀ * Real.log (|2*T| + 3) := hA₀ (2*T)
       _ ≤ A₀ * (2 * Real.log T) := by
@@ -498,9 +460,24 @@ theorem rvM_main_aux (hΓ : GammaFacts)
   refine htri.trans ?_
   linarith [hA, hμ1, hμ2, hD, hw1, hw2]
 
+/-- The assembly, stated against the two Backlund bounds as explicit hypotheses (∃-form; from
+`rvM_main_param` instantiated with the ∃-witnesses of Backlund, the local count, H-Γ's int_mu, μ ≪ log, continuity). -/
+theorem rvM_main_aux (hΓ : GammaFacts)
+    (backlund_horizontal : ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
+      (∀ ρ, IsNontrivialZero ρ → ρ.im ≠ T) →
+      |(∫ σ in (1 / 2 : ℝ)..2, logDeriv riemannZeta (σ + T * I)).im| ≤ C * Real.log T)
+    (vertical_two : ∀ T₁ T₂ : ℝ,
+      |(∫ t in T₁..T₂, logDeriv riemannZeta (2 + t * I) * I).im| ≤ Real.pi) :
+    ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
+    |(zetaZeroConfig.N T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1 T| ≤ C * Real.log T := by
+  obtain ⟨CB, TB, hB⟩ := backlund_horizontal
+  obtain ⟨A₀, hA₀1, hA₀⟩ := zeta_local_zero_count
+  obtain ⟨Cμ, Tμ, hCμ⟩ := hΓ.int_mu
+  obtain ⟨CM, hCM0, hCM⟩ := mu_le_log hΓ
+  exact ⟨_, _, rvM_main_param hB vertical_two hA₀1 hA₀ hCμ hCM0 hCM (mu_continuous hΓ)⟩
+
 set_option maxHeartbeats 1000000 in
-/-- Assembly: the main clause of the Riemann–von Mangoldt formula for ζ, given the Γ-facts
-`GammaFacts` (proved in Zeta23/GammaFacts/Complete.lean).
+/-- (M7)+assembly: H-RvM's main clause for ζ, conditional on the Γ-facts.
 [Tit86, Thm 9.4]: N(T,2T) = (T/2π)(log(T/2π) + 2 log 2 − 1) + O(log T). -/
 theorem rvM_main (hΓ : GammaFacts) : ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
     |(zetaZeroConfig.N T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1 T| ≤ C * Real.log T :=

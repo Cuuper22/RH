@@ -8,12 +8,16 @@ Zeta23/WeilEF/XiLogDeriv.lean
 The completed zeta function Λ = completedRiemannZeta: log-derivative decomposition, functional equation
 for logDeriv, zeros in the strip = nontrivial zeros of ζ with equal analytic order.
 
-Mathlib normalization: for s ≠ 0, riemannZeta s = completedRiemannZeta s / Gammaℝ s
+Mathlib normalization (verified): for s ≠ 0, riemannZeta s = completedRiemannZeta s / Gammaℝ s
 (riemannZeta_def_of_ne_zero) and Gammaℝ s ≠ 0 for 0 < Re s (Gammaℝ_ne_zero_of_re_pos); hence on the
 open right half-plane Λ = Γℝ · ζ on the nose (completedZeta_eventuallyEq_mul) — no pole bookkeeping is
 needed for the three statements below (Λ's poles at 0, 1 are excluded by hypothesis).
 -/
-import Zeta23.WeilEF.Landau
+import Mathlib.NumberTheory.LSeries.RiemannZeta
+import Mathlib.Analysis.SpecialFunctions.Gamma.Deligne
+import Mathlib.Analysis.Calculus.LogDeriv
+import Mathlib.Analysis.Complex.CauchyIntegral
+import Zeta23.Statement
 
 noncomputable section
 
@@ -60,7 +64,7 @@ lemma analyticAt_riemannZeta {s : ℂ} (hs : s ≠ 1) : AnalyticAt ℂ riemannZe
     (isOpen_compl_singleton.mem_nhds hs)
 
 /-- On the right half-plane away from 1 and from the zeros of ζ:  Λ'/Λ = Γℝ'/Γℝ + ζ'/ζ. -/
-theorem logDeriv_completedZeta (s : ℂ) (hs0 : s ≠ 0) (hs1 : s ≠ 1)
+theorem logDeriv_completedZeta (s : ℂ) (hs1 : s ≠ 1)
     (hζ : riemannZeta s ≠ 0) (hstrip : 0 < s.re) :
     logDeriv completedRiemannZeta s = logDeriv Complex.Gammaℝ s + logDeriv riemannZeta s := by
   have hev := completedZeta_eventuallyEq_mul hstrip

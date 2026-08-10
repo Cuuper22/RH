@@ -4,13 +4,14 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmD/Window.lean
+Zeta23/ThmD/Window.lean — [thm:D], the concrete window.  A summary of the statements
+proved is given at the bottom of the file.
 
-The concrete Montgomery–Taylor window of the [thm:D] proof (the paper §7.1):
+The concrete Montgomery–Taylor window of the [thm:D] proof (paper §7.1):
   φ_D(u) := √(cos(√2 λ u/L)) · φ_flat(u),   φ_flat = Zeta23.Taper.phi ϱ L w (the §2.2 ramp taper),
-i.e. the paper's "cos(√2 u/l)^{1/2} ϱ(L/2−|u|)" at general 0 < λ ≤ 1 (we avoid the
-λ = 1 endpoint; the paper's display is the λ = 1 case with w = 1) and with the ramp width w kept
-free as everywhere else in this development.
+i.e. the paper's "cos(√2 u/l)^{1/2} ϱ(L/2−|u|)" at general 0 < λ ≤ 1 (we avoid the λ = 1
+endpoint; the paper's display is the λ = 1 case with w = 1) and with the ramp width w kept
+free as everywhere else in this project.
 
 On the support [−L/2, L/2] the cosine argument is ≤ √2λ/2 = ϑ ≤ 1/√2 < π/2, so cos ≥ cos ϑ ≥ 3/4
 > 0 there and √cos is smooth on a neighbourhood; off the support φ_flat kills everything
@@ -985,7 +986,7 @@ theorem integral_abs_deriv2_phiD_le (hϱ : TaperProfile ϱ) (h0 : 0 < lam) (h1 :
 /-- shared edge estimate for the moment comparisons: for |h| ≤ 1 and a plateau function
 0 ≤ p ≤ 1 with p = 1 on [−L/2+w, L/2−w] and p = 0 off [−L/2, L/2],
 |∫ h·p − ∫_{[−L/2,L/2]} h| ≤ 2w (the integrands differ only on the two ramps). -/
-private theorem edge_estimate {h p : ℝ → ℝ} {L w : ℝ} (hL : 0 < L) (hw0 : 0 < w)
+private theorem edge_estimate {h p : ℝ → ℝ} {L w : ℝ} (_hL : 0 < L) (hw0 : 0 < w)
     (hwL : 2 * w ≤ L) (hh : ∀ u, |h u| ≤ 1) (hp0 : ∀ u, 0 ≤ p u) (hp1 : ∀ u, p u ≤ 1)
     (hpl : ∀ u : ℝ, |u| ≤ L/2 - w → p u = 1) (hsupp : ∀ u : ℝ, L/2 ≤ |u| → p u = 0)
     (hpc : Continuous p) (hhc : Continuous h) :
@@ -1257,7 +1258,7 @@ theorem integral_cos_overlap (h0 : 0 < lam) (hL : 0 < L) (y : ℝ) :
 
 /-- the y-moment of the sharp autocorrelation, in closed form:
 ∫_0^L Cfun(y)·y dy = (L³/2)·(sin(2ϑ)/(8ϑ³) − cos(2ϑ)/(4ϑ²))  (explicit antiderivatives). -/
-theorem integral_Cfun_moment (h0 : 0 < lam) (h1 : lam ≤ 1) (hL : 0 < L) :
+theorem integral_Cfun_moment (h0 : 0 < lam) (_h1 : lam ≤ 1) (hL : 0 < L) :
     ∫ y in (0:ℝ)..L, Cfun lam L y * y
       = L ^ 3 / 2 * (Real.sin (2 * theta lam) / (8 * theta lam ^ 3)
         - Real.cos (2 * theta lam) / (4 * theta lam ^ 2)) := by
@@ -1778,14 +1779,13 @@ theorem gD_deriv_facts (hϱ : TaperProfile ϱ) (h0 : 0 < lam) (h1 : lam ≤ 1)
 end AutocorrC1
 
 /-!
-Summary of this file: cos_factor_ge, phiD_contDiff, phiD_antitoneOn, integral_abs_deriv_phiD_le,
+Summary of the statements proved in this file:
+cos_factor_ge, phiD_contDiff, phiD_antitoneOn, integral_abs_deriv_phiD_le,
 integral_abs_deriv_phiD_sq_le, integral_abs_deriv2_phiD_le, integral_abs_deriv2_phiD_sq_le,
 aD_close, bD_close, jD_close (via the 1-D route: jStar_closed [Functional.lean] + the
 sharp-window autocorrelation closed form integral_cos_overlap/sharp_autocorr_eq + the
 y-moment closed form integral_Cfun_moment + the 4w ramp comparison
 integral_abs_phiDsq_sub_sharp/autocorr_phiDsq_close — no Fubini anywhere).
-The cDT constant and the 4w/L / 16w/L error shapes are interface choices
-(any C(ϱ,λ)·w/L works downstream).
 -/
 
 end ThmD

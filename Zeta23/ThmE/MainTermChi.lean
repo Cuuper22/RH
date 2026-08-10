@@ -4,12 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmE/MainTermChi.lean — the main term of N_χ(T,2T) (a piece of the Riemann–von Mangoldt
-formula for L(s,χ), see Zeta23/ThmE/RvMChi.lean):
+Zeta23/ThmE/MainTermChi.lean — the main term of N_χ(T,2T) (a piece of H-RvM(χ), see
+Zeta23/ThmE/RvMChi.lean).
   |N_χ(T,2T) − (T/2π)·ell1q q T| ≤ C log T   (T ≥ T₀; C, T₀ depend on q).
-The analogue for L(s,χ) of Zeta23/RvM/MainTerm.lean, with Λ_sym = completedLSym
-(CountByIntegralChi/FoldChi), the Γ/conductor side gammaSideChi, Backlund's bound for L
-(BacklundChi) and the local count localCountChi.
+The analogue of the RvM MainTerm.lean assembly for L(s,χ), with Λ_sym = completedLSym
+(CountByIntegralChi/FoldChi), Γ/conductor side = gammaSideChi, Backlund for L (BacklundChi),
+local count = localCountChi.
+
+The assembly is proved once, q-uniformly (`mainChi_uniform_aux`, absolute constants, log scale
+log(q(T+2))); the per-χ headline `mainChi` is its corollary.
 -/
 import Zeta23.ThmE.LGrowth
 import Zeta23.ThmE.Statement
@@ -32,7 +35,7 @@ namespace ThmE
 
 variable {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q}
 
-/-! ### window helpers (analogues of RvM's private lemmas) -/
+/-! ### window helpers -/
 
 lemma zerosInL_subset_of_le {a b c d : ℝ} (hca : c ≤ a) (hbd : b ≤ d) :
     zerosInL χ a b ⊆ zerosInL χ c d := by
@@ -69,7 +72,7 @@ lemma exists_goodHeightL (hq : 1 < q) (hprim : χ.IsPrimitive) (a : ℝ) :
     exact ⟨by rwa [LZeros_carrier], h1, h2⟩
   have hSfin : ((fun ρ : ℂ => ρ.im) '' zerosInL χ (a - 1) (a + 2)).Finite := hfin.image _
   have hinf : (Set.Icc a (a + 1)).Infinite := Set.Icc_infinite (by linarith)
-  obtain ⟨T, hTd⟩ := (hinf.diff hSfin).nonempty
+  obtain ⟨T, hTd⟩ := (hinf.sdiff hSfin).nonempty
   obtain ⟨hT, hTnot⟩ := hTd
   refine ⟨T, hT, fun ρ hρ him => hTnot ?_⟩
   refine ⟨ρ, ⟨hρ, ?_, ?_⟩, him⟩
@@ -102,7 +105,7 @@ set_option maxHeartbeats 800000 in
 /-- the half-contour split: logDeriv Λ_sym = logDeriv L + logDeriv arch along L. -/
 lemma halfContourChi_split (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
     (hκdef : ∀ s, gammaFactor χ s = Complex.Gammaℝ (s + κ)) {T₁ T₂ : ℝ}
-    (h1 : 1 ≤ T₁) (h12 : T₁ ≤ T₂) (hg1 : GoodHeightL χ T₁) (hg2 : GoodHeightL χ T₂) :
+    (_h1 : 1 ≤ T₁) (_h12 : T₁ ≤ T₂) (hg1 : GoodHeightL χ T₁) (hg2 : GoodHeightL χ T₂) :
     RvM.halfContour (logDeriv (completedLSym χ)) T₁ T₂ =
       RvM.halfContour (logDeriv χ.LFunction) T₁ T₂ +
         RvM.halfContour (logDeriv (archChi q κ)) T₁ T₂ := by
@@ -179,124 +182,193 @@ lemma halfContourChi_split (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
   rw [hhor T₁ hg1, hhor T₂ hg2, hvert]
   ring
 
-/-! ### mu_chi bounds and the assembly -/
+/-! ### The q-UNIFORM assembly (absolute constants) -/
 
-/-- |mu_chi(tau)| << log(tau+3) for tau >= 1 (constants depend on q). -/
-theorem muq_le_log {κ : ℕ} (hΓχ : GammaFactsChi κ q) : ∃ CM : ℝ, 0 < CM ∧ ∀ τ : ℝ, 1 ≤ τ →
-    |muq κ q τ| ≤ CM * Real.log (τ + 3) := by
-  obtain ⟨C₀, hC₀⟩ := hΓχ.stirling
-  have hq1 : (1:ℝ) ≤ (q:ℝ) := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
-  refine ⟨1 + |C₀| + |Real.log ((q:ℝ) / (2 * Real.pi))|, by positivity, fun τ hτ => ?_⟩
+/-- q-uniform |μ_χ| ≤ (C+2)·log(q(τ+3)) for τ ≥ 1, from the bounded Stirling field. -/
+theorem muq_le_log_uniform {κ q : ℕ} [NeZero q] {C : ℝ} (hC : 0 ≤ C)
+    (hst : ∀ τ : ℝ, 1 ≤ |τ| →
+      |muq κ q τ - (1 / (2 * Real.pi)) * Real.log (q * |τ| / (2 * Real.pi))| ≤ C / τ ^ 2)
+    (hq1 : 1 ≤ q) : ∀ τ : ℝ, 1 ≤ τ →
+    |muq κ q τ| ≤ (C + 2) * Real.log ((q:ℝ) * (τ + 3)) := by
+  intro τ hτ
   have hτ0 : (0:ℝ) < τ := by linarith
-  have h1 := hC₀ τ (by rw [abs_of_pos hτ0]; exact hτ)
+  have hq0 : (0:ℝ) < (q:ℝ) := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)
+  have hq1' : (1:ℝ) ≤ (q:ℝ) := by exact_mod_cast hq1
+  have h1 := hst τ (by rw [abs_of_pos hτ0]; exact hτ)
   rw [abs_of_pos hτ0] at h1
   obtain ⟨hl, hr⟩ := abs_le.mp h1
-  have hlog3 : 1 ≤ Real.log (τ + 3) := by
-    rw [← Real.log_exp 1]
+  set L : ℝ := Real.log ((q:ℝ) * (τ + 3)) with hLdef
+  have hqt4 : (4:ℝ) ≤ (q:ℝ) * (τ + 3) := by nlinarith
+  have hL1 : 1 ≤ L := by
+    rw [hLdef, ← Real.log_exp 1]
     apply Real.log_le_log (Real.exp_pos 1)
     have := Real.exp_one_lt_d9; linarith
-  have hlogτ0 : 0 ≤ Real.log τ := Real.log_nonneg hτ
-  have hlogτ : Real.log τ ≤ Real.log (τ + 3) := Real.log_le_log hτ0 (by linarith)
-  have hdiv : Real.log ((q:ℝ) * τ / (2 * Real.pi))
-      = Real.log τ + Real.log ((q:ℝ) / (2 * Real.pi)) := by
-    rw [show (q:ℝ) * τ / (2 * Real.pi) = τ * ((q:ℝ) / (2 * Real.pi)) by ring]
-    rw [Real.log_mul (by positivity) (by positivity)]
-  rw [hdiv] at hl hr
-  have hC₀τ : |C₀ / τ ^ 2| ≤ |C₀| := by
-    rw [abs_div, abs_of_pos (by positivity : (0:ℝ) < τ ^ 2)]
-    apply div_le_self (abs_nonneg _) (by nlinarith)
-  obtain ⟨hCl, hCr⟩ := abs_le.mp hC₀τ
-  have h2π : 1 / (2 * Real.pi) ≤ 1 := by
-    rw [div_le_one (by positivity)]; nlinarith [Real.pi_gt_three]
+  -- 0 ≤ log(qτ/2π) ≤ L   and   C/τ² ≤ C
+  have harg : Real.log ((q:ℝ) * τ / (2 * Real.pi)) ≤ L := by
+    rw [hLdef]
+    apply Real.log_le_log (by positivity)
+    have hπ3 := Real.pi_gt_three
+    rw [div_le_iff₀ (by positivity)]
+    nlinarith
+  have hCτ : |C / τ ^ 2| ≤ C := by
+    rw [abs_div, abs_of_nonneg hC, abs_of_pos (by positivity : (0:ℝ) < τ ^ 2)]
+    apply div_le_self hC (by nlinarith)
+  obtain ⟨hCl, hCr⟩ := abs_le.mp hCτ
   have h2π0 : 0 < 1 / (2 * Real.pi) := by positivity
-  have hlogq := le_abs_self (Real.log ((q:ℝ) / (2 * Real.pi)))
-  have hlogq' := neg_abs_le (Real.log ((q:ℝ) / (2 * Real.pi)))
+  have h2π1 : 1 / (2 * Real.pi) ≤ 1 := by
+    rw [div_le_one (by positivity)]; nlinarith [Real.pi_gt_three]
+  -- lower bound for log(qτ/2π): ≥ −log(2π) ≥ −2 ≥ −2L  (qτ ≥ 1·1 = 1 ⇒ log ≥ −log 2π)
+  have hlow : -(2 * L) ≤ 1 / (2 * Real.pi) * Real.log ((q:ℝ) * τ / (2 * Real.pi)) := by
+    have h7 : Real.log ((q:ℝ) * τ / (2 * Real.pi)) ≥ -Real.log (2 * Real.pi) := by
+      rw [Real.log_div (by positivity) (by positivity)]
+      have : 0 ≤ Real.log ((q:ℝ) * τ) := Real.log_nonneg (by nlinarith)
+      linarith
+    have h8 : Real.log (2 * Real.pi) ≤ 2 * L := by
+      have h9 : Real.log (2 * Real.pi) ≤ Real.log 16 := by
+        apply Real.log_le_log (by positivity)
+        nlinarith [Real.pi_lt_d2]
+      have h10 : Real.log 16 = 2 * Real.log 4 := by
+        rw [show (16:ℝ) = 4^2 by norm_num, Real.log_pow]; push_cast; ring
+      have h11 : Real.log 4 ≤ L := by
+        rw [hLdef]; exact Real.log_le_log (by norm_num) hqt4
+      linarith
+    have hln2π0 : 0 ≤ Real.log (2 * Real.pi) :=
+      Real.log_nonneg (by nlinarith [Real.pi_gt_three])
+    have h12 := mul_le_mul_of_nonneg_left h7 h2π0.le
+    -- h12 : (1/2π)·(−log 2π) ≤ (1/2π)·log(qτ/2π)
+    have h13 : -(2 * L) ≤ 1 / (2 * Real.pi) * -(Real.log (2 * Real.pi)) := by
+      have h14 : 1 / (2 * Real.pi) * Real.log (2 * Real.pi) ≤ 1 * (2 * L) := by
+        apply mul_le_mul h2π1 h8 hln2π0 (by norm_num)
+      nlinarith
+    linarith
   rw [abs_le]
   constructor
-  · nlinarith
-  · nlinarith
+  · have : 1 / (2 * Real.pi) * Real.log ((q:ℝ) * τ / (2 * Real.pi)) - C ≤ muq κ q τ := by linarith
+    nlinarith
+  · have hup : 1 / (2 * Real.pi) * Real.log ((q:ℝ) * τ / (2 * Real.pi)) ≤ L := by
+      rcases le_or_gt 0 (Real.log ((q:ℝ) * τ / (2 * Real.pi))) with h | h
+      · calc 1 / (2 * Real.pi) * Real.log ((q:ℝ) * τ / (2 * Real.pi))
+            ≤ 1 * Real.log ((q:ℝ) * τ / (2 * Real.pi)) := mul_le_mul_of_nonneg_right h2π1 h
+          _ = Real.log ((q:ℝ) * τ / (2 * Real.pi)) := one_mul _
+          _ ≤ L := harg
+      · nlinarith
+    nlinarith
 
-set_option maxHeartbeats 1600000 in
-/-- The assembly, against the chi-Backlund bounds and H-Gamma(chi) as explicit hypotheses
-(instantiated in mainChi). -/
-theorem mainChi_aux (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
-    (hκdef : ∀ s, gammaFactor χ s = Complex.Gammaℝ (s + κ))
-    (hΓχ : GammaFactsChi κ q)
-    (backlundχ : ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ |T| →
-      (∀ ρ, IsNontrivialZeroL χ ρ → ρ.im ≠ T) →
-      |(∫ σ in (1 / 2 : ℝ)..2, logDeriv χ.LFunction (σ + T * I)).im| ≤ C * Real.log |T|)
-    (verticalχ : ∀ T₁ T₂ : ℝ,
-      |(∫ t in T₁..T₂, logDeriv χ.LFunction (2 + t * I) * I).im| ≤ Real.pi) :
-    ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
-      |(NcountL χ T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1q q T| ≤ C * Real.log T := by
-  obtain ⟨CB, TB, hB⟩ := backlundχ
-  obtain ⟨A₀, hA₀1, hA₀⟩ := localCountChi hq hprim
-  obtain ⟨Cμ, Tμ, hCμ⟩ := hΓχ.int_mu
-  obtain ⟨CM, hCM0, hCM⟩ := muq_le_log hΓχ
-  have hμc : Continuous (muq κ q) := hΓχ.smooth.continuous
+set_option maxHeartbeats 3200000 in
+/-- q-uniform main-term assembly, parametric in the uniform Backlund and H-Γ(χ)-bounded inputs
+(shapes = RvMChiUniform's backlund_horizontalChi_uniform / gammaFactsChi_uniform). -/
+theorem mainChi_uniform_aux
+    (hBack : ∃ C : ℝ, ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q), χ ≠ 1 →
+      ∀ T : ℝ, (∀ ρ, IsNontrivialZeroL χ ρ → ρ.im ≠ T) →
+        |(∫ σ in (1 / 2 : ℝ)..2, logDeriv χ.LFunction (σ + T * I)).im|
+          ≤ C * Real.log (q * (|T| + 3)))
+    (hΓ : ∃ C : ℝ, ∀ (κ q : ℕ), κ ≤ 1 → 1 ≤ q → GammaFactsChiBounded κ q C) :
+    ∃ A T₀ : ℝ, 0 < A ∧
+    ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q), 1 < q → χ.IsPrimitive →
+    ∀ T : ℝ, T₀ ≤ T →
+      |(NcountL χ T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1q q T|
+        ≤ A * Real.log (q * (T + 2)) := by
+  obtain ⟨CB, hB⟩ := hBack
+  obtain ⟨CΓ, hΓall⟩ := hΓ
+  obtain ⟨A₀, hA₀1, hA₀⟩ := localCountChi_uniform_proof
   have hA₀0 : 0 ≤ A₀ := by linarith
-  refine ⟨3 * |CB| + 4 + 4 * A₀ + 4 * CM + |Cμ|, max (max (|TB| + 1) (Tμ + 1)) 4,
-    fun T hT => ?_⟩
-  have hT4 : 4 ≤ T := le_trans (le_max_right _ _) hT
-  have hTB : |TB| + 1 ≤ T := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hT
-  have hTμ : Tμ + 1 ≤ T := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hT
-  have hlogT : 1 ≤ Real.log T := by
-    rw [← Real.log_exp 1]
-    exact Real.log_le_log (Real.exp_pos 1) (by linarith [Real.exp_one_lt_d9])
-  have hlogT0 : 0 < Real.log T := by linarith
-  obtain ⟨T₁, hT₁mem, hg1⟩ := exists_goodHeightL hq hprim (T - 1)
-  obtain ⟨T₂, hT₂mem, hg2⟩ := exists_goodHeightL hq hprim (2 * T)
+  set CM : ℝ := |CΓ| + 2 with hCM
+  have hCM0 : 0 < CM := by positivity
+  refine ⟨4 * |CB| + 4 + 8 * A₀ + 8 * CM + |CΓ|, max 4 (|CΓ| + 1),
+    by positivity, ?_⟩
+  intro q _ χ hq1 hprim T hT
+  have hχ1 : χ ≠ 1 := ne_one_of_primitive hq1 hprim
+  have hq0 : (0:ℝ) < (q:ℝ) := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne q)
+  have hq2 : (2:ℝ) ≤ (q:ℝ) := by exact_mod_cast hq1
+  have hqnat1 : 1 ≤ q := hq1.le
+  have hT4 : 4 ≤ T := le_trans (le_max_left _ _) hT
+  have hTΓ : |CΓ| + 1 ≤ T := le_trans (le_max_right _ _) hT
+  -- parity
+  obtain ⟨κ, hκ1, hκdef⟩ : ∃ κ : ℕ, κ ≤ 1 ∧
+      ∀ s, gammaFactor χ s = Complex.Gammaℝ (s + κ) := by
+    rcases χ.even_or_odd with he | ho
+    · exact ⟨0, by norm_num, fun s => by rw [he.gammaFactor_def]; norm_num⟩
+    · exact ⟨1, le_rfl, fun s => by rw [ho.gammaFactor_def]; norm_num⟩
+  have hΓb := hΓall κ q hκ1 hqnat1
+  -- log scale
+  set L' : ℝ := Real.log ((q:ℝ) * (T + 2)) with hL'def
+  have hqT12 : (12:ℝ) ≤ (q:ℝ) * (T + 2) := by nlinarith
+  have hL'1 : 1 ≤ L' := by
+    rw [hL'def, ← Real.log_exp 1]
+    apply Real.log_le_log (Real.exp_pos 1)
+    have := Real.exp_one_lt_d9; linarith
+  have hL'0 : 0 < L' := by linarith
+  -- generic: log(q·x) ≤ 2L' whenever 0 < x ≤ (T+2)²·q  (used at x = |T₁|+3 etc.)
+  have hlog2L : ∀ x : ℝ, 0 < x → (q:ℝ) * x ≤ ((q:ℝ) * (T + 2))^2 → Real.log ((q:ℝ) * x) ≤ 2 * L' := by
+    intro x hx hxq
+    have h1 : Real.log ((q:ℝ) * x) ≤ Real.log (((q:ℝ) * (T + 2))^2) :=
+      Real.log_le_log (by positivity) hxq
+    have h2 : Real.log (((q:ℝ) * (T + 2))^2) = 2 * L' := by
+      rw [hL'def, Real.log_pow]; push_cast; ring
+    linarith
+  -- good heights
+  obtain ⟨T₁, hT₁mem, hg1⟩ := exists_goodHeightL hq1 hprim (T - 1)
+  obtain ⟨T₂, hT₂mem, hg2⟩ := exists_goodHeightL hq1 hprim (2 * T)
   have hT₁a : T - 1 ≤ T₁ := hT₁mem.1
   have hT₁b : T₁ ≤ T := by have := hT₁mem.2; linarith
   have hT₂a : 2 * T ≤ T₂ := hT₂mem.1
   have hT₂b : T₂ ≤ 2 * T + 1 := hT₂mem.2
   have h1T₁ : 1 ≤ T₁ := by linarith
   have h12 : T₁ ≤ T₂ := by linarith
-  have hN := NcountL_eq_im_halfContour hq hprim h12 hg1 hg2
-  have hsplit := halfContourChi_split hq hprim hκdef h1T₁ h12 hg1 hg2
+  have hN := NcountL_eq_im_halfContour hq1 hprim h12 hg1 hg2
+  have hsplit := halfContourChi_split hq1 hprim hκdef h1T₁ h12 hg1 hg2
   have hgam := gammaSideChi q κ (T₁ := T₁) (T₂ := T₂) (by linarith) (by linarith)
   have hadd : (NcountL χ T₁ T₂ : ℝ)
       = (NcountL χ T₁ T : ℝ) + (NcountL χ T (2*T) : ℝ) + (NcountL χ (2*T) T₂ : ℝ) := by
-    have e1 := NcountL_add hq hprim (T₁ := T₁) (T := T) (T₂ := T₂) hT₁b (by linarith)
-    have e2 := NcountL_add hq hprim (T₁ := T) (T := 2*T) (T₂ := T₂) (by linarith) hT₂a
-    rw [e1, e2]
-    push_cast
-    ring
-  have hlogsq : ∀ x : ℝ, 0 < x → x + 3 ≤ T ^ 2 → Real.log (x + 3) ≤ 2 * Real.log T := by
-    intro x hx hxT
-    calc Real.log (x + 3) ≤ Real.log (T ^ 2) := Real.log_le_log (by linarith) hxT
-      _ = 2 * Real.log T := by rw [Real.log_pow]; push_cast; ring
-  have hw1 : (NcountL χ T₁ T : ℝ) ≤ 2 * A₀ * Real.log T := by
+    have e1 := NcountL_add hq1 hprim (T₁ := T₁) (T := T) (T₂ := T₂) hT₁b (by linarith)
+    have e2 := NcountL_add hq1 hprim (T₁ := T) (T := 2*T) (T₂ := T₂) (by linarith) hT₂a
+    rw [e1, e2]; push_cast; ring
+  -- end windows ≤ 2A₀L' each... (uniform local count at T₁ resp. 2T)
+  have hw1 : (NcountL χ T₁ T : ℝ) ≤ 2 * A₀ * L' := by
     have hsub : NcountL χ T₁ T ≤ NcountL χ T₁ (T₁ + 1) :=
-      NcountL_le_of_subset hq hprim (zerosInL_subset_of_le le_rfl (by linarith))
+      NcountL_le_of_subset hq1 hprim (zerosInL_subset_of_le le_rfl (by linarith))
     calc (NcountL χ T₁ T : ℝ) ≤ (NcountL χ T₁ (T₁ + 1) : ℝ) := by exact_mod_cast hsub
-      _ ≤ A₀ * Real.log (|T₁| + 3) := hA₀ T₁
-      _ ≤ A₀ * (2 * Real.log T) := by
+      _ ≤ A₀ * Real.log ((q:ℝ) * (|T₁| + 3)) := hA₀ q χ hq1 hprim T₁
+      _ ≤ A₀ * (2 * L') := by
           refine mul_le_mul_of_nonneg_left ?_ hA₀0
+          apply hlog2L _ (by positivity)
           rw [abs_of_pos (by linarith : (0:ℝ) < T₁)]
-          exact hlogsq T₁ (by linarith) (by nlinarith)
-      _ = 2 * A₀ * Real.log T := by ring
-  have hw2 : (NcountL χ (2*T) T₂ : ℝ) ≤ 2 * A₀ * Real.log T := by
+          nlinarith
+      _ = 2 * A₀ * L' := by ring
+  have hw2 : (NcountL χ (2*T) T₂ : ℝ) ≤ 2 * A₀ * L' := by
     have hsub : NcountL χ (2*T) T₂ ≤ NcountL χ (2*T) (2*T + 1) :=
-      NcountL_le_of_subset hq hprim (zerosInL_subset_of_le le_rfl hT₂b)
+      NcountL_le_of_subset hq1 hprim (zerosInL_subset_of_le le_rfl hT₂b)
     calc (NcountL χ (2*T) T₂ : ℝ) ≤ (NcountL χ (2*T) (2*T+1) : ℝ) := by exact_mod_cast hsub
-      _ ≤ A₀ * Real.log (|2*T| + 3) := hA₀ (2*T)
-      _ ≤ A₀ * (2 * Real.log T) := by
+      _ ≤ A₀ * Real.log ((q:ℝ) * (|2*T| + 3)) := hA₀ q χ hq1 hprim (2*T)
+      _ ≤ A₀ * (2 * L') := by
           refine mul_le_mul_of_nonneg_left ?_ hA₀0
+          apply hlog2L _ (by positivity)
           rw [abs_of_pos (by linarith : (0:ℝ) < 2*T)]
-          exact hlogsq (2*T) (by linarith) (by nlinarith)
-      _ = 2 * A₀ * Real.log T := by ring
+          nlinarith
+      _ = 2 * A₀ * L' := by ring
+  -- Backlund on the horizontals + π on the vertical
   have habs₁ : |T₁| = T₁ := abs_of_pos (by linarith)
   have habs₂ : |T₂| = T₂ := abs_of_pos (by linarith)
-  have hbk1 := hB T₁ (by rw [habs₁]; linarith [le_abs_self TB, neg_abs_le TB]) hg1
-  have hbk2 := hB T₂ (by rw [habs₂]; linarith [le_abs_self TB, neg_abs_le TB]) hg2
+  have hbk1 := hB q χ hχ1 T₁ hg1
+  have hbk2 := hB q χ hχ1 T₂ hg2
   rw [habs₁] at hbk1
   rw [habs₂] at hbk2
-  have hvert := verticalχ T₁ T₂
-  have hlog₁0 : 0 ≤ Real.log T₁ := Real.log_nonneg h1T₁
-  have hlog₂0 : 0 ≤ Real.log T₂ := Real.log_nonneg (by linarith)
+  have hlogqT₁ : Real.log ((q:ℝ) * (T₁ + 3)) ≤ 2 * L' :=
+    hlog2L _ (by linarith) (by nlinarith)
+  have hlogqT₂ : Real.log ((q:ℝ) * (T₂ + 3)) ≤ 2 * L' :=
+    hlog2L _ (by linarith) (by nlinarith)
+  have hbk1' : |(∫ σ in (1/2:ℝ)..2, logDeriv χ.LFunction (σ + T₁ * I)).im| ≤ |CB| * (2 * L') := by
+    refine hbk1.trans (le_trans (mul_le_mul (le_abs_self CB) hlogqT₁ ?_ (abs_nonneg _)) le_rfl)
+    have : (0:ℝ) < (q:ℝ) * (T₁ + 3) := by positivity
+    rw [← Real.log_one]
+    exact Real.log_le_log one_pos (by nlinarith)
+  have hbk2' : |(∫ σ in (1/2:ℝ)..2, logDeriv χ.LFunction (σ + T₂ * I)).im| ≤ |CB| * (2 * L') := by
+    refine hbk2.trans (le_trans (mul_le_mul (le_abs_self CB) hlogqT₂ ?_ (abs_nonneg _)) le_rfl)
+    rw [← Real.log_one]
+    exact Real.log_le_log one_pos (by nlinarith)
+  have hvert := vertical_twoChi hχ1 T₁ T₂
   have hLbound : |(RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im|
-      ≤ |CB| * Real.log T₁ + Real.pi + |CB| * Real.log T₂ := by
+      ≤ |CB| * (2 * L') + Real.pi + |CB| * (2 * L') := by
     unfold RvM.halfContour
     have eim : ((∫ σ in (1/2:ℝ)..2, logDeriv χ.LFunction (σ + T₁ * I))
         + (∫ t in T₁..T₂, logDeriv χ.LFunction (2 + t * I)) * I
@@ -310,12 +382,6 @@ theorem mainChi_aux (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
         = (∫ t in T₁..T₂, logDeriv χ.LFunction (2 + t * I) * I).im :=
       congrArg Complex.im (intervalIntegral.integral_mul_const (μ := MeasureTheory.volume) I
         (fun t : ℝ => logDeriv χ.LFunction (2 + t * I))).symm
-    have h1 : |(∫ σ in (1/2:ℝ)..2, logDeriv χ.LFunction (σ + T₁ * I)).im|
-        ≤ |CB| * Real.log T₁ :=
-      hbk1.trans (mul_le_mul_of_nonneg_right (le_abs_self CB) hlog₁0)
-    have h2 : |(∫ σ in (1/2:ℝ)..2, logDeriv χ.LFunction (σ + T₂ * I)).im|
-        ≤ |CB| * Real.log T₂ :=
-      hbk2.trans (mul_le_mul_of_nonneg_right (le_abs_self CB) hlog₂0)
     calc |(∫ σ in (1/2:ℝ)..2, logDeriv χ.LFunction (σ + T₁ * I)).im
           + ((∫ t in T₁..T₂, logDeriv χ.LFunction (2 + t * I)) * I).im
           - (∫ σ in (1/2:ℝ)..2, logDeriv χ.LFunction (σ + T₂ * I)).im|
@@ -323,9 +389,17 @@ theorem mainChi_aux (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
           + |((∫ t in T₁..T₂, logDeriv χ.LFunction (2 + t * I)) * I).im|
           + |(∫ σ in (1/2:ℝ)..2, logDeriv χ.LFunction (σ + T₂ * I)).im| :=
           (abs_sub _ _).trans (add_le_add (abs_add_le _ _) le_rfl)
-      _ ≤ |CB| * Real.log T₁ + Real.pi + |CB| * Real.log T₂ := by
+      _ ≤ |CB| * (2 * L') + Real.pi + |CB| * (2 * L') := by
           rw [hmulI]
           linarith [hvert]
+  -- μ_χ bookkeeping (bounded Γ-facts)
+  have hμc : Continuous (muq κ q) := hΓb.smooth.continuous
+  have hCMbound := muq_le_log_uniform (abs_nonneg CΓ)
+    (fun τ hτ => (hΓb.stirling τ hτ).trans (by
+      have : CΓ / τ ^ 2 ≤ |CΓ| / τ ^ 2 := by
+        gcongr
+        exact le_abs_self _
+      linarith)) hqnat1
   have hμint : ∀ a b : ℝ, IntervalIntegrable (muq κ q) MeasureTheory.volume a b :=
     fun a b => hμc.intervalIntegrable a b
   have hμsplit : (∫ t in T₁..T₂, muq κ q t)
@@ -339,40 +413,38 @@ theorem mainChi_aux (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
       (intervalIntegral.integral_add_adjacent_intervals (hμint T₁ (2*T)) (hμint (2*T) T₂)).symm
     rw [e2, e1]
   have hμwin : ∀ a b : ℝ, 1 ≤ a → a ≤ b → b ≤ 2*T + 1 → |b - a| ≤ 1 →
-      |∫ t in a..b, muq κ q t| ≤ 2 * CM * Real.log T := by
+      |∫ t in a..b, muq κ q t| ≤ 2 * CM * L' := by
     intro a b ha hab hb hba
-    have hbound : ∀ t ∈ Set.uIoc a b, ‖muq κ q t‖ ≤ CM * Real.log (2*T + 4) := by
+    have hbound : ∀ t ∈ Set.uIoc a b, ‖muq κ q t‖ ≤ CM * (2 * L') := by
       intro t ht
       rw [Set.uIoc_of_le hab] at ht
       have ht1 : 1 ≤ t := le_trans ha ht.1.le
       have ht2 : t ≤ 2*T + 1 := le_trans ht.2 hb
       rw [Real.norm_eq_abs]
-      refine (hCM t ht1).trans ?_
-      refine mul_le_mul_of_nonneg_left ?_ hCM0.le
-      exact Real.log_le_log (by linarith) (by linarith)
+      refine (hCMbound t ht1).trans ?_
+      have h1 : Real.log ((q:ℝ) * (t + 3)) ≤ 2 * L' :=
+        hlog2L _ (by linarith) (by nlinarith)
+      calc (|CΓ| + 2) * Real.log ((q:ℝ) * (t + 3)) ≤ (|CΓ| + 2) * (2 * L') := by
+            apply mul_le_mul_of_nonneg_left h1 (by positivity)
+        _ = CM * (2 * L') := by rw [hCM]
     have hnorm := intervalIntegral.norm_integral_le_of_norm_le_const hbound
     rw [Real.norm_eq_abs] at hnorm
-    have hlog24 : Real.log (2*T + 4) ≤ 2 * Real.log T := by
-      calc Real.log (2*T + 4) ≤ Real.log (T ^ 2) := Real.log_le_log (by linarith) (by nlinarith)
-        _ = 2 * Real.log T := by rw [Real.log_pow]; push_cast; ring
-    calc |∫ t in a..b, muq κ q t| ≤ CM * Real.log (2*T+4) * |b - a| := hnorm
-      _ ≤ CM * (2 * Real.log T) * 1 := by
-          refine mul_le_mul ?_ hba (abs_nonneg _) (by positivity)
-          exact mul_le_mul_of_nonneg_left hlog24 hCM0.le
-      _ = 2 * CM * Real.log T := by ring
-  have hμ1 : |∫ t in T₁..T, muq κ q t| ≤ 2 * CM * Real.log T :=
+    calc |∫ t in a..b, muq κ q t| ≤ CM * (2 * L') * |b - a| := hnorm
+      _ ≤ CM * (2 * L') * 1 := by
+          apply mul_le_mul_of_nonneg_left hba (by positivity)
+      _ = 2 * CM * L' := by ring
+  have hμ1 : |∫ t in T₁..T, muq κ q t| ≤ 2 * CM * L' :=
     hμwin T₁ T h1T₁ hT₁b (by linarith) (by rw [abs_of_nonneg (by linarith)]; linarith)
-  have hμ2 : |∫ t in (2*T)..T₂, muq κ q t| ≤ 2 * CM * Real.log T :=
+  have hμ2 : |∫ t in (2*T)..T₂, muq κ q t| ≤ 2 * CM * L' :=
     hμwin (2*T) T₂ (by linarith) hT₂a (by linarith) (by rw [abs_of_nonneg (by linarith)]; linarith)
-  have hintmu := hCμ T (by linarith)
-  have hCμT : Cμ / T ≤ |Cμ| := by
-    calc Cμ / T ≤ |Cμ| / T := by gcongr; exact le_abs_self _
-      _ ≤ |Cμ| / 1 := by
+  have hintmu := hΓb.int_mu T (by linarith [le_abs_self CΓ])
+  have hCΓT : CΓ / T ≤ |CΓ| := by
+    calc CΓ / T ≤ |CΓ| / T := by gcongr; exact le_abs_self _
+      _ ≤ |CΓ| / 1 := by
           apply div_le_div_of_nonneg_left (abs_nonneg _) one_pos
           linarith
-      _ = |Cμ| := div_one _
+      _ = |CΓ| := div_one _
   have hπ : (0:ℝ) < Real.pi := Real.pi_pos
-  have hπ1 : (1:ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
   have hkey : (NcountL χ T (2*T) : ℝ) - T / (2 * Real.pi) * ell1q q T
       = (1/Real.pi) * (RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im
         + ((∫ t in T₁..T, muq κ q t) + (∫ t in (2*T)..T₂, muq κ q t)
@@ -381,8 +453,7 @@ theorem mainChi_aux (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
     have hΛim : (1/Real.pi) * (RvM.halfContour (logDeriv (completedLSym χ)) T₁ T₂).im
         = (1/Real.pi) * (RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im
           + (1/Real.pi) * (RvM.halfContour (logDeriv (archChi q κ)) T₁ T₂).im := by
-      rw [hsplit, Complex.add_im]
-      ring
+      rw [hsplit, Complex.add_im]; ring
     have h5 : (NcountL χ T₁ T₂ : ℝ)
         = (1/Real.pi) * (RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im
           + ∫ t in T₁..T₂, muq κ q t := by
@@ -391,35 +462,25 @@ theorem mainChi_aux (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
     have hTell : T / (2 * Real.pi) * ell1q q T = T * ell1q q T / (2 * Real.pi) := by ring
     rw [hTell]
     linarith [hadd]
-  have hlogT₁ : Real.log T₁ ≤ Real.log T := Real.log_le_log (by linarith) hT₁b
-  have hlogT₂ : Real.log T₂ ≤ 2 * Real.log T := by
-    calc Real.log T₂ ≤ Real.log (T^2) := Real.log_le_log (by linarith) (by nlinarith)
-      _ = 2 * Real.log T := by rw [Real.log_pow]; push_cast; ring
   have hA : |(1/Real.pi) * (RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im|
-      ≤ (3 * |CB| + 4) * Real.log T := by
+      ≤ (4 * |CB| + 4) * L' := by
     rw [abs_mul, abs_of_pos (by positivity : (0:ℝ) < 1/Real.pi)]
+    have hπ1 : (1:ℝ) ≤ Real.pi := by linarith [Real.pi_gt_three]
     have hfrac : (1:ℝ)/Real.pi ≤ 1 := by rw [div_le_one hπ]; exact hπ1
     have step : (1/Real.pi) * |(RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im|
-        ≤ |CB| * Real.log T₁ + Real.pi + |CB| * Real.log T₂ := by
+        ≤ |CB| * (2 * L') + Real.pi + |CB| * (2 * L') := by
       calc (1/Real.pi) * |(RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im|
           ≤ 1 * |(RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im| :=
             mul_le_mul_of_nonneg_right hfrac (abs_nonneg _)
         _ = |(RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im| := one_mul _
-        _ ≤ |CB| * Real.log T₁ + Real.pi + |CB| * Real.log T₂ := hLbound
-    have hπ4 : Real.pi ≤ 4 * Real.log T := by
-      nlinarith [Real.pi_lt_d2]
-    have e1 : |CB| * Real.log T₁ ≤ |CB| * Real.log T :=
-      mul_le_mul_of_nonneg_left hlogT₁ (abs_nonneg _)
-    have e2 : |CB| * Real.log T₂ ≤ |CB| * (2 * Real.log T) :=
-      mul_le_mul_of_nonneg_left hlogT₂ (abs_nonneg _)
+        _ ≤ |CB| * (2 * L') + Real.pi + |CB| * (2 * L') := hLbound
+    have hπ4 : Real.pi ≤ 4 * L' := by nlinarith [Real.pi_lt_d2]
     nlinarith [abs_nonneg CB]
-  have hmid : |(∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi)| ≤ |Cμ| * Real.log T := by
-    calc |(∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi)| ≤ Cμ / T := hintmu
-      _ ≤ |Cμ| := hCμT
-      _ ≤ |Cμ| * Real.log T := le_mul_of_one_le_right (abs_nonneg _) hlogT
+  have hmid : |(∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi)| ≤ |CΓ| * L' := by
+    calc |(∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi)| ≤ CΓ / T := hintmu
+      _ ≤ |CΓ| := hCΓT
+      _ ≤ |CΓ| * L' := le_mul_of_one_le_right (abs_nonneg _) hL'1
   rw [hkey]
-  have hNc1 : (0:ℝ) ≤ (NcountL χ T₁ T : ℝ) := Nat.cast_nonneg _
-  have hNc2 : (0:ℝ) ≤ (NcountL χ (2*T) T₂ : ℝ) := Nat.cast_nonneg _
   have htri : |(1/Real.pi) * (RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im
         + ((∫ t in T₁..T, muq κ q t) + (∫ t in (2*T)..T₂, muq κ q t)
         + ((∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi)))
@@ -428,12 +489,12 @@ theorem mainChi_aux (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
         + (|∫ t in T₁..T, muq κ q t| + |∫ t in (2*T)..T₂, muq κ q t|
         + |(∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi)|)
         + ((NcountL χ T₁ T : ℝ) + (NcountL χ (2*T) T₂ : ℝ)) := by
-    have h1 := abs_add_le ((1/Real.pi) * (RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im)
-      ((∫ t in T₁..T, muq κ q t) + (∫ t in (2*T)..T₂, muq κ q t)
-        + ((∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi)))
     have h2 := abs_add_le (∫ t in T₁..T, muq κ q t) (∫ t in (2*T)..T₂, muq κ q t)
     have h3 := abs_add_le ((∫ t in T₁..T, muq κ q t) + (∫ t in (2*T)..T₂, muq κ q t))
       ((∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi))
+    have h1 := abs_add_le ((1/Real.pi) * (RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im)
+      ((∫ t in T₁..T, muq κ q t) + (∫ t in (2*T)..T₂, muq κ q t)
+        + ((∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi)))
     have h4 := abs_sub (((1/Real.pi) * (RvM.halfContour (logDeriv χ.LFunction) T₁ T₂).im)
         + ((∫ t in T₁..T, muq κ q t) + (∫ t in (2*T)..T₂, muq κ q t)
         + ((∫ t in T..(2*T), muq κ q t) - T * ell1q q T / (2 * Real.pi))))
@@ -443,40 +504,38 @@ theorem mainChi_aux (hq : 1 < q) (hprim : χ.IsPrimitive) {κ : ℕ}
     rw [h5] at h4
     linarith
   refine htri.trans ?_
-  have hfinal : (NcountL χ T₁ T : ℝ) + (NcountL χ (2*T) T₂ : ℝ) ≤ 4 * A₀ * Real.log T := by
-    linarith
-  nlinarith [hA, hμ1, hμ2, hmid, hfinal, hlogT0]
+  nlinarith [hA, hμ1, hμ2, hmid, hw1, hw2, hL'0]
 
-/-- mainChi modulo only the σ=2 vertical bound and H-Γ(χ) (both supplied in mainChi). -/
-theorem mainChi_of (hq : 1 < q) (hprim : χ.IsPrimitive)
-    (hΓχ : ∀ κ : ℕ, κ ≤ 1 → GammaFactsChi κ q)
-    (hvert : ∀ T₁ T₂ : ℝ,
-      |(∫ t in T₁..T₂, logDeriv χ.LFunction (2 + t * I) * I).im| ≤ Real.pi) :
-    ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
-      |(NcountL χ T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1q q T| ≤ C * Real.log T := by
-  have hχ1 := ne_one_of_primitive hq hprim
-  rcases χ.even_or_odd with he | ho
-  · refine mainChi_aux hq hprim (κ := 0) (fun s => ?_) (hΓχ 0 (by norm_num))
-      (backlund_horizontalChi hχ1) hvert
-    rw [he.gammaFactor_def]
-    norm_num
-  · refine mainChi_aux hq hprim (κ := 1) (fun s => ?_) (hΓχ 1 le_rfl)
-      (backlund_horizontalChi hχ1) hvert
-    rw [ho.gammaFactor_def]
-    norm_num
 
-/-- mainChi modulo H-Gamma(chi) alone (vertical bound from BacklundChi.vertical_twoChi). -/
-theorem mainChi_of_Gamma (hq : 1 < q) (hprim : χ.IsPrimitive)
-    (hΓχ : ∀ κ : ℕ, κ ≤ 1 → GammaFactsChi κ q) :
-    ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
-      |(NcountL χ T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1q q T| ≤ C * Real.log T :=
-  mainChi_of hq hprim hΓχ (vertical_twoChi (ne_one_of_primitive hq hprim))
+/-! ### Per-χ main term (from the q-uniform assembly) -/
 
-/-- **Main term for N_χ(T,2T)**. -/
+/-- **Main term for N_χ(T,2T)** (per-χ constant; from `mainChi_uniform_aux` instantiated with the q-uniform
+Backlund bound and the bounded H-Γ(χ) facts: log(q(T+2)) ≤ (log q + log 2 + 1)·log T for T ≥ 3). -/
 theorem mainChi (hq : 1 < q) (hprim : χ.IsPrimitive) :
     ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ T →
-      |(NcountL χ T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1q q T| ≤ C * Real.log T :=
-  mainChi_of_Gamma hq hprim fun κ hκ => GammaChi.gammaFactsChi hκ (Nat.one_le_iff_ne_zero.mpr (NeZero.ne q))
+      |(NcountL χ T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1q q T| ≤ C * Real.log T := by
+  obtain ⟨A, T₀, hA, h⟩ := mainChi_uniform_aux backlund_horizontalChi_uniform GammaChi.gammaFactsChi_uniform
+  have hq0 : (0:ℝ) < (q:ℝ) := by exact_mod_cast (lt_trans Nat.zero_lt_one hq)
+  have hlogq : 0 ≤ Real.log q := Real.log_nonneg (by exact_mod_cast hq.le)
+  have hl2 : 0 ≤ Real.log 2 := Real.log_nonneg one_le_two
+  refine ⟨A * (Real.log q + Real.log 2 + 1), max T₀ 3, fun T hT => ?_⟩
+  have hT3 : (3:ℝ) ≤ T := (le_max_right _ _).trans hT
+  have hT0 : (0:ℝ) < T := by linarith
+  have hlogT : 1 ≤ Real.log T := by
+    rw [← Real.log_exp 1]
+    apply Real.log_le_log (Real.exp_pos 1)
+    have := Real.exp_one_lt_d9; linarith
+  have hsplit : Real.log (q * (T + 2)) ≤ Real.log q + Real.log 2 + Real.log T := by
+    rw [Real.log_mul hq0.ne' (by linarith)]
+    have : Real.log (T + 2) ≤ Real.log (2 * T) := Real.log_le_log (by linarith) (by linarith)
+    rw [Real.log_mul two_ne_zero hT0.ne'] at this
+    linarith
+  calc |(NcountL χ T (2 * T) : ℝ) - T / (2 * Real.pi) * ell1q q T|
+      ≤ A * Real.log (q * (T + 2)) := h q χ hq hprim T ((le_max_left _ _).trans hT)
+    _ ≤ A * (Real.log q + Real.log 2 + Real.log T) := mul_le_mul_of_nonneg_left hsplit hA.le
+    _ ≤ A * ((Real.log q + Real.log 2 + 1) * Real.log T) := by
+        apply mul_le_mul_of_nonneg_left _ hA.le; nlinarith
+    _ = A * (Real.log q + Real.log 2 + 1) * Real.log T := by ring
 
 end ThmE
 end Zeta23

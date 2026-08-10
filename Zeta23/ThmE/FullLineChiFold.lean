@@ -4,15 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmE/FullLineChiFold.lean — supporting lemmas for full_line_identity_chi
-(Zeta23/ThmE/FullLineChi.lean). Two pieces, χ-analogues of verticals_eq (FullLine.lean)
-and zero_sum_limit (ZeroSumLimit.lean):
- (V) the two vertical sides of the rectangle [1−c,c]×[−R,R] for H·Λ_sym'/Λ_sym(·,χ) fold onto the
-     line Re s = c: the left side is the χ⁻¹-term, by (Λ_sym'/Λ_sym)(1−s̄,χ) = −conj(Λ_sym'/Λ_sym)(s,χ)
-     (FoldChi.logDeriv_completedLSym_one_sub_conj) and conj(Λ_sym'/Λ_sym)(s,χ) = (Λ_sym'/Λ_sym)(s̄,χ⁻¹)
-     (FoldChi.logDeriv_completedLSym_inv_conj), then y ↦ −t;
- (Z) the finite zero sums Σ_{|γ|<R_j} m_ρ H(ρ) → the absolutely convergent tsum over LZeros
-     (EF_zero_sum_summable_chi).
+Zeta23/ThmE/FullLineChiFold.lean — auxiliary pieces for full_line_identity_chi
+(Zeta23/ThmE/FullLineChi.lean), the χ-analogues of verticals_eq (FullLine.lean) and
+zero_sum_limit (ZeroSumLimit.lean):
+ • the two vertical sides of the rectangle [1−c,c]×[−R,R] for H·Λ_sym'/Λ_sym(·,χ) fold onto the
+   line Re s = c: the left side is the χ⁻¹-term, by (Λ_sym'/Λ_sym)(1−s̄,χ) = −conj(Λ_sym'/Λ_sym)(s,χ)
+   (FoldChi.logDeriv_completedLSym_one_sub_conj) and conj(Λ_sym'/Λ_sym)(s,χ) = (Λ_sym'/Λ_sym)(s̄,χ⁻¹)
+   (FoldChi.logDeriv_completedLSym_inv_conj), then y ↦ −t;
+ • the finite zero sums Σ_{|γ|<R_j} m_ρ H(ρ) → the absolutely convergent tsum over LZeros
+   (EF_zero_sum_summable_chi).
 -/
 import Zeta23.ThmE.FullLineChi
 import Zeta23.WeilEF.FullLine
@@ -55,7 +55,7 @@ lemma continuous_logDeriv_completedLSym_line (hq : 1 < q) (hprim : χ.IsPrimitiv
 
 /-- **(V) verticals fold for χ.** -/
 theorem verticals_eq_chi (hq : 1 < q) (hprim : χ.IsPrimitive) {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k)
-    (hkc : HasCompactSupport k) {c : ℝ} (hc1 : 1 < c) (hc2 : c ≤ 3/2) (R : ℝ) :
+    (hkc : HasCompactSupport k) {c : ℝ} (hc1 : 1 < c) (_hc2 : c ≤ 3/2) (R : ℝ) :
     VIntegral (fun s => Hfn k s * logDeriv (completedLSym χ) s) c (-R) R
       - VIntegral (fun s => Hfn k s * logDeriv (completedLSym χ) s) (1 - c) (-R) R
       = I • ∫ t in (-R)..R, FlineChi χ k c t := by

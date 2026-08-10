@@ -3,14 +3,6 @@ Copyright (c) 2026 Anthropic, PBC. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
-/-
-Zeta23/ThmE/MainChi.lean — Final assembly: EF_lit_chi for the concrete L(s,χ) zero
-configuration (primitive χ mod q > 1) — mirror of Zeta23/WeilEF/Main.lean's EF_lit_zeta.
-Consumes (from FullLineChi.lean):
-full_line_identity_chi (two-character form), gamma_line_shift_chi, EF_zero_sum_summable_chi,
-good_heights_chi (indirectly), + the majorant pack (integrable_Hfn_mul_logDeriv_L etc.).
-Together with Zeta23.ThmE.explicitFormulaPaperChi_of_lit this discharges ThmE's hEF.
--/
 import Zeta23.ThmE.FullLineChi
 import Zeta23.ThmE.EFLitChi
 import Zeta23.WeilEF.Main
@@ -146,7 +138,7 @@ theorem EF_lit_chi_L (hq : 1 < q) (hprim : χ.IsPrimitive) :
   have hζ1 : (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ, Hfn k (((5/4:ℝ):ℂ) + t * I)
       * logDeriv χ.LFunction (((5/4:ℝ):ℂ) + t * I)
       = -∑' n : ℕ, (χ n : ℂ) * ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (Real.log n) := by
-    have h := prime_side_line_chi hχ1 hk hkc h54a h54b
+    have h := prime_side_line_chi hχ1 hk hkc h54a
     have h2 : (∫ t : ℝ, Hfn k ((5/4:ℝ) + t * I)
         * (-logDeriv χ.LFunction (((5/4:ℝ):ℂ) + t * I)))
         = -∫ t : ℝ, Hfn k (((5/4:ℝ):ℂ) + t * I)
@@ -160,7 +152,7 @@ theorem EF_lit_chi_L (hq : 1 < q) (hprim : χ.IsPrimitive) :
   have hζ2 : (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ, Hfn k (1 - (5/4:ℝ) - t * I)
       * logDeriv (χ⁻¹).LFunction (((5/4:ℝ):ℂ) + t * I)
       = -∑' n : ℕ, (starRingEnd ℂ) (χ n) * ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (-Real.log n) := by
-    have h := prime_side_line_chi hχi1 (k := fun u => k (-u)) hkneg2 hknegc h54a h54b
+    have h := prime_side_line_chi hχi1 (k := fun u => k (-u)) hkneg2 hknegc h54a
     have h2 : (∫ t : ℝ, Hfn (fun u => k (-u)) ((5/4:ℝ) + t * I)
         * (-logDeriv (χ⁻¹).LFunction (((5/4:ℝ):ℂ) + t * I)))
         = -∫ t : ℝ, Hfn k (1 - (5/4:ℝ) - t * I)

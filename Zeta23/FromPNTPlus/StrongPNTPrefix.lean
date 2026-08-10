@@ -7,9 +7,10 @@ Copyright the PrimeNumberTheoremAnd contributors; Apache License 2.0
 Local modifications: kept only a prefix of the file (through `ZerosBound`: the Blaschke-factor /
 Borel–Carathéodory bound on zeros in a disk; the remainder of StrongPNT.lean is not ported),
 removed the Architect blueprint tooling (import Architect, blueprint_comment blocks,
-@[blueprint ...] attributes), redirected the intra-project import to Zeta23.FromPNTPlus.MediumPNT,
-added `import Zeta23.Prelude.InstancePriorities` (this project's instance-priority settings),
-and added/renamed (name := ...) tags on the local notations.
+@[blueprint ...] attributes), dropped the intra-project import of MediumPNT together with the
+local notations and the `open ArithmeticFunction` that only the unported remainder used (the two Mathlib
+imports previously reached through MediumPNT are imported directly), and added
+`import Zeta23.Prelude.InstancePriorities` (this project's instance-priority settings).
 Re-ported from the
 v4.29.0 port (commit 10e1218932db7e2432aa5881d750acb819e91f19) when the project
 moved to Lean v4.32.2 / Mathlib 905b95818eb32af7874a58b427f50c1711a5e96c.
@@ -24,23 +25,10 @@ import Mathlib.Data.Rat.Cast.OfScientific
 import Mathlib.Algebra.Order.Star.Real
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Analysis.Complex.BorelCaratheodory
-import Zeta23.FromPNTPlus.MediumPNT
+import Mathlib.Analysis.Analytic.Order
+import Mathlib.Analysis.Normed.Module.Connected
 
 open Nat Filter Set Function Complex Real ComplexConjugate MeasureTheory
-
-open ArithmeticFunction (vonMangoldt)
-
-local notation (name := mellintransform2b) "𝓜" => mellin
-
-local notation (name := spp_Lambda) "Λ" => vonMangoldt
-
-local notation (name := spp_zeta) "ζ" => riemannZeta
-
-local notation (name := spp_zetaderiv) "ζ'" => deriv ζ
-
-local notation (name := spp_psi) "ψ" => ChebyshevPsi
-
---open scoped ArithmeticFunction
 
 lemma AnalyticOn.norm_le_of_norm_le_on_sphere {C r R : ℝ} {f : ℂ → ℂ} {w : ℂ}
     (hyp_r : r ≤ R)

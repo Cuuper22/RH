@@ -7,8 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 Zeta23/GammaFacts/Series.lean — the digamma partial-fraction series.
 
 Target:  digamma z = −γ − 1/z + ∑'_{n≥0} (1/(n+1) − 1/(z+n+1))   for z ∈ ℂ_ℤ,
-the Mathlib-style input for the H-Γ fields of [eq:mufacts] (see Zeta23/GammaFacts.lean).
-Route (modelled on Mathlib's
+the Mathlib-missing piece needed for the remaining H-Γ fields
+([eq:mufacts]; see Zeta23/GammaFacts.lean).  Route (modelled on Mathlib's
 Analysis/SpecialFunctions/Trigonometric/Cotangent.lean, which does the same for
 sin → cot):
   1. Weierstrass factors  1 + wTerm n z = (1 + z/(n+1))·e^{−z/(n+1)}, with
@@ -17,7 +17,7 @@ sin → cot):
   3. N → ∞ (GammaSeq_tendsto_Gamma + tendsto_harmonic_sub_log):
        Γ(z)⁻¹ = z·e^{γz}·∏'_n (1 + wTerm n z)            [Weierstrass product]
   4. logDeriv via Complex.logDeriv_tprod_eq_tsum          [digamma series].
-Steps 1–3 come first; step 4 is `digamma_series` at the bottom.
+This file has steps 1–3; step 4 is `digamma_series` at the bottom.
 -/
 import Zeta23.GammaFacts
 import Mathlib.Analysis.Calculus.LogDerivUniformlyOn
@@ -127,7 +127,7 @@ lemma harmonic_cast_eq (N : ℕ) :
   rw [one_div]
 
 /-- The finite identity: (GammaSeq z N)⁻¹ = z·e^{(H_N − log N)z}·∏_{n<N}(1 + wTerm n z). -/
-lemma inv_gammaSeq_eq {z : ℂ} (hz : z ∈ Complex.integerComplement) {N : ℕ} (hN : 1 ≤ N) :
+lemma inv_gammaSeq_eq {z : ℂ} (_hz : z ∈ Complex.integerComplement) {N : ℕ} (hN : 1 ≤ N) :
     (Complex.GammaSeq z N)⁻¹
       = z * Complex.exp ((((∑ m ∈ Finset.range N, (1 : ℝ) / ((m : ℝ) + 1))
             - Real.log N : ℝ) : ℂ) * z)
@@ -487,7 +487,7 @@ theorem hasSum_digamma_series {z : ℂ} (hz : z ∈ Complex.integerComplement) :
   rwa [htsum] at h
 
 /-- **The digamma partial-fraction series** (paper [eq:mufacts]'s parenthetical, the
-keystone for the H-Γ fields):
+keystone for the remaining H-Γ fields):
 ψ(z) = −γ − 1/z + Σ'ₙ (1/(n+1) − 1/(z+n+1)) for z off the integers. -/
 theorem digamma_series {z : ℂ} (hz : z ∈ Complex.integerComplement) :
     Complex.digamma z = -(Real.eulerMascheroniConstant : ℂ) - 1 / z

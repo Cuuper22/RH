@@ -4,11 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/Analytic/RectangleLogDeriv.lean — residue calculus on rectangles beyond one simple pole.
-Used for the contour integral ∮ H·Λ'/Λ and for the zero count
-(N(T₁,T₂) = (1/2πi)∮ Λ'/Λ); built on the PrimeNumberTheoremAnd port
-Zeta23/FromPNTPlus/ResidueCalcOnRectangles.lean (RectangleIntegral, RectangleIntegral' := (1/2πi)•∮,
-ResidueTheoremInRectangle, existsDifferentiableOn_of_bddAbove, …; Apache-2.0, see README).
+Residue calculus on rectangles beyond one simple pole.
+Used for the weighted contour integral ∮ H·Λ'/Λ and for the Riemann–von Mangoldt count
+N(T₁,T₂) = (1/2πi)∮ Λ'/Λ.
 
 * `residueTheorem_finset`: f holomorphic on Rectangle z w minus a finite set S of interior points, with
   f − A p/(s − p) bounded near each p ∈ S  ⟹  RectangleIntegral' f z w = Σ_{p∈S} A p.
@@ -39,7 +37,7 @@ theorem residueTheorem_finset {f : ℂ → ℂ} {z w : ℂ} (hre : z.re ≤ w.re
   classical
   induction S using Finset.induction_on generalizing f with
   | empty =>
-    simp only [Finset.coe_empty, diff_empty] at fHolo
+    simp only [Finset.coe_empty, sdiff_empty] at fHolo
     rw [Finset.sum_empty]
     show (1 / (2 * π * I)) • RectangleIntegral f z w = 0
     rw [fHolo.vanishesOnRectangle subset_rfl, smul_zero]
@@ -75,7 +73,7 @@ theorem residueTheorem_finset {f : ℂ → ℂ} {z w : ℂ} (hre : z.re ≤ w.re
       simp only [Finset.coe_insert, mem_insert_iff, Finset.mem_coe, not_or]
       exact ⟨by simpa using hsp, by simpa using hsS⟩
     have hbddV : BddAbove (norm ∘ f₁ '' ((U ∩ (Rectangle z w \ (S : Set ℂ))) \ {p})) :=
-      hbdd.mono (image_mono (diff_subset_diff_left inter_subset_left))
+      hbdd.mono (image_mono (Set.sdiff_subset_sdiff_left inter_subset_left))
     have hf₂V : DifferentiableOn ℂ f₂ (U ∩ (Rectangle z w \ (S : Set ℂ))) :=
       differentiableOn_update_limUnder_of_bddAbove hV hf₁V hbddV
     have hf₂eq : ∀ s, s ≠ p → f₂ s = f₁ s := fun s hs => Function.update_of_ne hs _ _
@@ -93,7 +91,7 @@ theorem residueTheorem_finset {f : ℂ → ℂ} {z w : ℂ} (hre : z.re ≤ w.re
         have hset : (Rectangle z w \ ((insert p S : Finset ℂ) : Set ℂ))
             = (Rectangle z w \ (S : Set ℂ)) ∩ {p}ᶜ := by
           ext x
-          simp only [Finset.coe_insert, mem_diff, mem_insert_iff, Finset.mem_coe, not_or,
+          simp only [Finset.coe_insert, Set.mem_sdiff, mem_insert_iff, Finset.mem_coe, not_or,
             mem_inter_iff, mem_compl_iff, mem_singleton_iff]
           tauto
         rw [hset] at h1
@@ -140,103 +138,6 @@ theorem residueTheorem_finset {f : ℂ → ℂ} {z w : ℂ} (hre : z.re ≤ w.re
     show RectangleIntegral' f₂ z w + RectangleIntegral' P z w = _
     rw [ih', ResidueTheoremInRectangle hre him hp, add_comm]
 
-/-- **Weighted argument principle on a rectangle.** For f, g analytic on a neighbourhood of every
-point of the closed rectangle, f nonvanishing on its border, and Z the zero set of f in the
-rectangle (as a Finset):  (1/2πi) ∮ g·(f'/f) = Σ_{ρ ∈ Z} ord_ρ(f)·g(ρ). -/
-theorem rectangleIntegral'_mul_logDeriv {f g : ℂ → ℂ} {z w : ℂ} (hre : z.re ≤ w.re)
-    (him : z.im ≤ w.im)
-    (hf : AnalyticOnNhd ℂ f (Rectangle z w)) (hg : AnalyticOnNhd ℂ g (Rectangle z w))
-    (hborder : ∀ s ∈ RectangleBorder z w, f s ≠ 0)
-    (Z : Finset ℂ) (hZ : ∀ s ∈ Rectangle z w, f s = 0 ↔ s ∈ Z) (hZsub : (Z : Set ℂ) ⊆ Rectangle z w) :
-    RectangleIntegral' (fun s => g s * logDeriv f s) z w
-      = ∑ ρ ∈ Z, (analyticOrderNatAt f ρ : ℂ) * g ρ := by
-  classical
-  -- a border point where f ≠ 0, hence all orders in the (preconnected) rectangle are finite
-  have hzB : z ∈ RectangleBorder z w := by
-    left; left; left
-    exact ⟨left_mem_uIcc, rfl⟩
-  have hz0 : f z ≠ 0 := hborder z hzB
-  have hzR : z ∈ Rectangle z w := rectangleBorder_subset_rectangle z w hzB
-  have hconv : Convex ℝ (Rectangle z w) := by
-    rw [rectangle_eq_convexHull]; exact convex_convexHull ℝ _
-  have hordz : analyticOrderAt f z ≠ ⊤ := by
-    rw [analyticOrderAt_eq_zero.mpr (Or.inr hz0)]
-    exact ENat.zero_ne_top
-  have hord : ∀ ρ ∈ Z, analyticOrderAt f ρ ≠ ⊤ := fun ρ hρ =>
-    hf.analyticOrderAt_ne_top_of_isPreconnected hconv.isPreconnected hzR (hZsub hρ) hordz
-  -- zeros are interior points
-  have hint : ∀ ρ ∈ Z, Rectangle z w ∈ 𝓝 ρ := by
-    intro ρ hρ
-    have hρR : ρ ∈ Rectangle z w := hZsub hρ
-    have hρB : ρ ∉ RectangleBorder z w := fun h => hborder ρ h ((hZ ρ hρR).mpr hρ)
-    obtain ⟨h1, h2⟩ := hρR
-    have h1' : z.re ≤ ρ.re ∧ ρ.re ≤ w.re := by simpa [uIcc_of_le hre] using h1
-    have h2' : z.im ≤ ρ.im ∧ ρ.im ≤ w.im := by simpa [uIcc_of_le him] using h2
-    simp only [RectangleBorder, mem_union, mem_reProdIm, mem_singleton_iff, not_or] at hρB
-    obtain ⟨⟨⟨hb1, hb2⟩, hb3⟩, hb4⟩ := hρB
-    rw [rectangle_mem_nhds_iff, mem_reProdIm, uIoo_of_le hre, uIoo_of_le him]
-    refine ⟨⟨lt_of_le_of_ne h1'.1 (fun h => hb2 ⟨h.symm, h2⟩),
-      lt_of_le_of_ne h1'.2 (fun h => hb4 ⟨h, h2⟩)⟩,
-      ⟨lt_of_le_of_ne h2'.1 (fun h => hb1 ⟨h1, h.symm⟩),
-      lt_of_le_of_ne h2'.2 (fun h => hb3 ⟨h1, h⟩)⟩⟩
-  have key := residueTheorem_finset (f := fun s => g s * logDeriv f s) hre him Z
-    (fun ρ => (analyticOrderNatAt f ρ : ℂ) * g ρ) hint ?holo ?near
-  · simpa using key
-  case holo =>
-    intro s hs
-    have hsR := hs.1
-    have hfs : f s ≠ 0 := fun h => hs.2 ((hZ s hsR).mp h)
-    have hfa := hf s hsR
-    have hga := hg s hsR
-    apply DifferentiableAt.differentiableWithinAt
-    show DifferentiableAt ℂ (fun s => g s * (deriv f s / f s)) s
-    exact hga.differentiableAt.mul (hfa.deriv.differentiableAt.div hfa.differentiableAt hfs)
-  case near =>
-    intro ρ hρ
-    have hρR : ρ ∈ Rectangle z w := hZsub hρ
-    obtain ⟨h, hh, hh0, hfh⟩ := (hf ρ hρR).analyticOrderAt_ne_top.mp (hord ρ hρ)
-    have hga := hg ρ hρR
-    have hh_ne : ∀ᶠ s in 𝓝 ρ, h s ≠ 0 := hh.continuousAt.eventually_ne hh0
-    have h2 : ∀ᶠ s in 𝓝 ρ, f =ᶠ[𝓝 s] (fun s => (s - ρ) ^ analyticOrderNatAt f ρ • h s) :=
-      hfh.eventually_nhds
-    have h3 : ∀ᶠ s in 𝓝 ρ, AnalyticAt ℂ h s := hh.eventually_analyticAt
-    -- the local expansion of g·f'/f minus its principal part
-    have hexp : ∀ᶠ s in 𝓝[≠] ρ,
-        (analyticOrderNatAt f ρ : ℂ) * ((g s - g ρ) / (s - ρ)) + g s * logDeriv h s
-          = ((fun s => g s * logDeriv f s) - fun s =>
-              (analyticOrderNatAt f ρ : ℂ) * g ρ / (s - ρ)) s := by
-      filter_upwards [self_mem_nhdsWithin, mem_nhdsWithin_of_mem_nhds h2,
-        mem_nhdsWithin_of_mem_nhds hh_ne, mem_nhdsWithin_of_mem_nhds h3]
-        with s hs hfs hhs hhas
-      have hsρ : s - ρ ≠ 0 := sub_ne_zero.mpr (by simpa using hs)
-      have hld : logDeriv f s = (analyticOrderNatAt f ρ : ℂ) / (s - ρ) + logDeriv h s := by
-        have e1 : logDeriv f s = logDeriv (fun s => (s - ρ) ^ analyticOrderNatAt f ρ * h s) s := by
-          simp only [logDeriv_apply, hfs.deriv_eq, hfs.self_of_nhds, smul_eq_mul]
-        rw [e1, logDeriv_mul (f := fun s : ℂ => (s - ρ) ^ analyticOrderNatAt f ρ) (g := h) s
-          (pow_ne_zero _ hsρ) hhs (by fun_prop) hhas.differentiableAt]
-        have e2 : logDeriv (fun s : ℂ => (s - ρ) ^ analyticOrderNatAt f ρ) s
-            = (analyticOrderNatAt f ρ : ℂ) / (s - ρ) := by
-          rw [show (fun s : ℂ => (s - ρ) ^ analyticOrderNatAt f ρ)
-              = (fun x : ℂ => x ^ analyticOrderNatAt f ρ) ∘ (fun s => s - ρ) from rfl,
-            logDeriv_comp (by fun_prop) (by fun_prop), logDeriv_pow]
-          simp
-        rw [e2]
-      simp only [Pi.sub_apply, hld]
-      ring
-    have hslope : Tendsto (fun s => (g s - g ρ) / (s - ρ)) (𝓝[≠] ρ) (𝓝 (deriv g ρ)) := by
-      have := hasDerivAt_iff_tendsto_slope.mp hga.differentiableAt.hasDerivAt
-      simpa only [slope_fun_def_field] using this
-    have hcont : Tendsto (fun s => g s * logDeriv h s) (𝓝[≠] ρ)
-        (𝓝 (g ρ * logDeriv h ρ)) := by
-      have : ContinuousAt (fun s => g s * logDeriv h s) ρ := by
-        show ContinuousAt (fun s => g s * (deriv h s / h s)) ρ
-        exact hga.continuousAt.mul (hh.deriv.continuousAt.div hh.continuousAt hh0)
-      exact this.tendsto.mono_left nhdsWithin_le_nhds
-    have hO : (fun s => (analyticOrderNatAt f ρ : ℂ) * ((g s - g ρ) / (s - ρ))
-        + g s * logDeriv h s) =O[𝓝[≠] ρ] (1 : ℂ → ℂ) :=
-      ((hslope.const_mul (analyticOrderNatAt f ρ : ℂ)).add hcont).isBigO_one ℂ
-    exact hO.congr' hexp EventuallyEq.rfl
-
 /-- The zero set of a function analytic on a neighbourhood of every point of a rectangle and
 nonvanishing at one of its points is finite. -/
 theorem finite_zeros_rectangle {f : ℂ → ℂ} {z w : ℂ} (hf : AnalyticOnNhd ℂ f (Rectangle z w))
@@ -252,27 +153,6 @@ theorem finite_zeros_rectangle {f : ℂ → ℂ} {z w : ℂ} (hf : AnalyticOnNhd
   · rw [inter_comm]
     exact isDiscrete_of_codiscreteWithin
       (hf.preimage_zero_mem_codiscreteWithin hfx hx ⟨⟨x, hx⟩, hconv.isPreconnected⟩)
-
-/-- **Weighted argument principle, self-contained form**: as `rectangleIntegral'_mul_logDeriv`, with
-the finite zero set produced rather than supplied. -/
-theorem rectangleIntegral'_mul_logDeriv' {f g : ℂ → ℂ} {z w : ℂ} (hre : z.re ≤ w.re)
-    (him : z.im ≤ w.im)
-    (hf : AnalyticOnNhd ℂ f (Rectangle z w)) (hg : AnalyticOnNhd ℂ g (Rectangle z w))
-    (hborder : ∀ s ∈ RectangleBorder z w, f s ≠ 0) :
-    RectangleIntegral' (fun s => g s * logDeriv f s) z w
-      = ∑ ρ ∈ (finite_zeros_rectangle hf (rectangleBorder_subset_rectangle z w
-          (show z ∈ RectangleBorder z w from Or.inl (Or.inl (Or.inl ⟨left_mem_uIcc, rfl⟩))))
-          (hborder z (Or.inl (Or.inl (Or.inl ⟨left_mem_uIcc, rfl⟩))))).toFinset,
-        (analyticOrderNatAt f ρ : ℂ) * g ρ := by
-  classical
-  set hfin := finite_zeros_rectangle hf (rectangleBorder_subset_rectangle z w
-    (show z ∈ RectangleBorder z w from Or.inl (Or.inl (Or.inl ⟨left_mem_uIcc, rfl⟩))))
-    (hborder z (Or.inl (Or.inl (Or.inl ⟨left_mem_uIcc, rfl⟩))))
-  refine rectangleIntegral'_mul_logDeriv hre him hf hg hborder hfin.toFinset ?_ ?_
-  · intro s hs
-    simp [Set.Finite.mem_toFinset, hs]
-  · intro s hs
-    exact ((Set.Finite.mem_toFinset _).mp hs).1
 
 /-! ## Meromorphic version: finitely many zeros AND poles inside the rectangle
 
@@ -344,7 +224,7 @@ theorem rectangleIntegral'_mul_logDeriv_of_poles {f g : ℂ → ℂ} {z w : ℂ}
   case near =>
     intro q hq
     rcases Finset.mem_union.mp hq with hρ | hp
-    · -- case: q is a zero ρ
+    · ---------------- a zero ρ := q
       have hρRP := hZmem q hρ
       have hga := hg q (hZsub hρ)
       have hA : A q = (analyticOrderNatAt f q : ℂ) * g q := by simp [A, hZnotP q hρ]
@@ -398,7 +278,7 @@ theorem rectangleIntegral'_mul_logDeriv_of_poles {f g : ℂ → ℂ} {z w : ℂ}
           + g s * logDeriv h s) =O[𝓝[≠] q] (1 : ℂ → ℂ) :=
         ((hslope.const_mul (analyticOrderNatAt f q : ℂ)).add hcont).isBigO_one ℂ
       exact hO.congr' hexp EventuallyEq.rfl
-    · -- case: q is a pole p
+    · ---------------- a pole p := q
       obtain ⟨c, hc, hT⟩ := hpole q hp
       have hqR : q ∈ Rectangle z w := mem_of_mem_nhds (hPint q hp)
       have hga := hg q hqR
@@ -409,7 +289,7 @@ theorem rectangleIntegral'_mul_logDeriv_of_poles {f g : ℂ → ℂ} {z w : ℂ}
       have hGq : G q = c := Function.update_self _ _ _
       have hGF : ∀ s, s ≠ q → G s = F s := fun s hs => Function.update_of_ne hs _ _
       have hPc : ((P : Set ℂ) \ {q})ᶜ ∈ 𝓝 q :=
-        (P.finite_toSet.subset diff_subset).isClosed.isOpen_compl.mem_nhds (by simp)
+        (P.finite_toSet.subset Set.sdiff_subset).isClosed.isOpen_compl.mem_nhds (by simp)
       have hnear : ∀ᶠ s in 𝓝[≠] q, s ≠ q ∧ s ∈ Rectangle z w \ (P : Set ℂ) := by
         filter_upwards [mem_nhdsWithin_of_mem_nhds (hPint q hp),
           mem_nhdsWithin_of_mem_nhds hPc, self_mem_nhdsWithin] with s h1 h2 h3
@@ -465,6 +345,42 @@ theorem rectangleIntegral'_mul_logDeriv_of_poles {f g : ℂ → ℂ} {z w : ℂ}
           =O[𝓝[≠] q] (1 : ℂ → ℂ) :=
         (hcont.sub (hslope.const_mul (m q : ℂ))).isBigO_one ℂ
       exact hO.congr' hexp EventuallyEq.rfl
+
+/-- **Weighted argument principle on a rectangle.** For f, g analytic on a neighbourhood of every
+point of the closed rectangle, f nonvanishing on its border, and Z the zero set of f in the
+rectangle (as a Finset):  (1/2πi) ∮ g·(f'/f) = Σ_{ρ ∈ Z} ord_ρ(f)·g(ρ). -/
+theorem rectangleIntegral'_mul_logDeriv {f g : ℂ → ℂ} {z w : ℂ} (hre : z.re ≤ w.re)
+    (him : z.im ≤ w.im)
+    (hf : AnalyticOnNhd ℂ f (Rectangle z w)) (hg : AnalyticOnNhd ℂ g (Rectangle z w))
+    (hborder : ∀ s ∈ RectangleBorder z w, f s ≠ 0)
+    (Z : Finset ℂ) (hZ : ∀ s ∈ Rectangle z w, f s = 0 ↔ s ∈ Z) (hZsub : (Z : Set ℂ) ⊆ Rectangle z w) :
+    RectangleIntegral' (fun s => g s * logDeriv f s) z w
+      = ∑ ρ ∈ Z, (analyticOrderNatAt f ρ : ℂ) * g ρ := by
+  have h := rectangleIntegral'_mul_logDeriv_of_poles hre him Z ∅ (Finset.disjoint_empty_right _)
+    (by simp) (by simpa using hf) hg hborder (by simpa using hZ) hZsub (fun _ => 0) (by simp)
+  simpa using h
+
+/-- **Weighted argument principle, self-contained form**: as `rectangleIntegral'_mul_logDeriv`, with
+the finite zero set produced rather than supplied. -/
+theorem rectangleIntegral'_mul_logDeriv' {f g : ℂ → ℂ} {z w : ℂ} (hre : z.re ≤ w.re)
+    (him : z.im ≤ w.im)
+    (hf : AnalyticOnNhd ℂ f (Rectangle z w)) (hg : AnalyticOnNhd ℂ g (Rectangle z w))
+    (hborder : ∀ s ∈ RectangleBorder z w, f s ≠ 0) :
+    RectangleIntegral' (fun s => g s * logDeriv f s) z w
+      = ∑ ρ ∈ (finite_zeros_rectangle hf (rectangleBorder_subset_rectangle z w
+          (show z ∈ RectangleBorder z w from Or.inl (Or.inl (Or.inl ⟨left_mem_uIcc, rfl⟩))))
+          (hborder z (Or.inl (Or.inl (Or.inl ⟨left_mem_uIcc, rfl⟩))))).toFinset,
+        (analyticOrderNatAt f ρ : ℂ) * g ρ := by
+  classical
+  set hfin := finite_zeros_rectangle hf (rectangleBorder_subset_rectangle z w
+    (show z ∈ RectangleBorder z w from Or.inl (Or.inl (Or.inl ⟨left_mem_uIcc, rfl⟩))))
+    (hborder z (Or.inl (Or.inl (Or.inl ⟨left_mem_uIcc, rfl⟩))))
+  refine rectangleIntegral'_mul_logDeriv hre him hf hg hborder hfin.toFinset ?_ ?_
+  · intro s hs
+    simp [Set.Finite.mem_toFinset, hs]
+  · intro s hs
+    exact ((Set.Finite.mem_toFinset _).mp hs).1
+
 
 end Analytic
 end Zeta23

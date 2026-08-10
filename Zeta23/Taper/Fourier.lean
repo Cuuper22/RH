@@ -4,18 +4,16 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23 — Taper/Fourier.lean.
-Canonical text: the paper §2.2 [subsec:family]:
+Zeta23 — Taper/Fourier.lean  (Fourier-side facts about the taper).
+Canonical text: the paper, §2.2 [subsec:family]:
   "Thus φ̂ and Φ are real, even, entire; φ̂(0) ≤ L, Φ(0) = aL; φ̂² = Â_φ and Φ² = ĝ on ℝ;
    ∫_ℝ Φ² = 2π g(0) = 2π bL; g and A_φ are even".
-See Zeta23/Taper.lean header for conventions: generic parameters (ϱ : ℝ → ℝ) (L w : ℝ); paper's
+Conventions: generic parameters (ϱ : ℝ → ℝ) (L w : ℝ); paper's
 side condition is 1 ≤ w ≤ L/8 [eq:wrange]; each lemma carries the minimal hypothesis it needs.
-
-IMPORTS: only Zeta23.Taper.Basic (definitions + basic φ facts) — deliberately NOT Norms/Strip/Decay,
-so this file can be checked independently; the decay needed for integrability is taken directly
+The decay needed for integrability is taken directly
 from Zeta23/Poisson/PaperFT.lean (norm_paperFT_le, norm_paperFT_mul_sq_le).
 
-Mathlib lemmas this file leans on:
+MATHLIB INVENTORY, what this file leans on:
 * dictionary  Zeta23.paperFT_ofReal_eq_fourier : paperFT f s = 𝓕 f (-s/(2π))  (PaperFT.lean);
 * convolution theorem  Real.fourier_mul_convolution_eq  (Mathlib/Analysis/Fourier/Convolution.lean)
   for integrable + continuous f₁ f₂ : ℝ → ℂ, 𝓕 (f₁ ⋆[mul ℂ ℂ] f₂) = 𝓕 f₁ · 𝓕 f₂ — the paper's
@@ -27,7 +25,7 @@ Mathlib lemmas this file leans on:
 * integrable_inv_one_add_sq  (dominating function (1+r²)⁻¹ for the decay |φ̂(r)| ≤ min(C₀, C₂/r²)).
 -/
 import Mathlib
-import Zeta23.Taper.Basic
+import Zeta23.Taper.Strip
 
 open Complex MeasureTheory Real Set Filter Topology
 open scoped FourierTransform ComplexConjugate
@@ -35,7 +33,7 @@ open scoped FourierTransform ComplexConjugate
 namespace Zeta23
 
 /-! ### ℂ-specialized restatements of RCLike-generic integral lemmas
-(same workaround as `integral_const_mul_C` in PaperFT.lean: at this pin `rw` with the
+(same workaround as `integral_const_mul_C` in PaperFT.lean: `rw` with the
 RCLike-stated lemma can fail to unify the `NormedAddCommGroup ℂ` instance path). -/
 
 theorem integral_ofReal_C (f : ℝ → ℝ) : ∫ x, (f x : ℂ) = ((∫ x, f x : ℝ) : ℂ) := integral_ofReal
@@ -293,15 +291,12 @@ theorem phiC_hasCompactSupport (hϱ : TaperProfile ϱ) (hw : 0 < w) :
   (phi_hasCompactSupport hϱ hw).comp_left Complex.ofReal_zero
 
 theorem phiC_contDiff_two (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
-    ContDiff ℝ 2 (fun u => (phi ϱ L w u : ℂ)) := by
-  have := Complex.ofRealCLM.contDiff.comp ((phi_contDiff hϱ hw hwL).of_le (m := 2) (by norm_num))
-  simpa [Function.comp_def] using this
+    ContDiff ℝ 2 (fun u => (phi ϱ L w u : ℂ)) :=
+  (phiC_contDiff hϱ hw hwL).of_le (by norm_num)
 
+/-- alias of `Strip.phiC_support`. -/
 theorem phiC_supp (hϱ : TaperProfile ϱ) (hw : 0 < w) :
-    ∀ u, (phi ϱ L w u : ℂ) ≠ 0 → |u| ≤ L / 2 := by
-  intro u hu
-  have := phi_support_subset hϱ hw (Function.mem_support.mpr (Complex.ofReal_ne_zero.mp hu))
-  exact abs_le.mpr ⟨this.1, this.2⟩
+    ∀ u, (phi ϱ L w u : ℂ) ≠ 0 → |u| ≤ L / 2 := phiC_support hϱ hw
 
 theorem phiSqC_continuous (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
     Continuous (fun u => (((phi ϱ L w u) ^ 2 : ℝ) : ℂ)) :=
@@ -375,39 +370,23 @@ theorem paperFT_ofReal_zero (f : ℝ → ℝ) :
 /-- "`φ̂(0) ≤ L`". -/
 theorem phiHatR_zero_le (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
     phiHatR ϱ L w 0 ≤ L := by
-  have hL : 0 ≤ L := by linarith
   rw [phiHatR, phiHat, Complex.ofReal_zero, paperFT_ofReal_zero, Complex.ofReal_re]
-  have hS : Integrable ((Icc (-(L / 2)) (L / 2)).indicator (1 : ℝ → ℝ)) :=
-    (integrable_indicator_iff measurableSet_Icc).mpr
-      ((integrableOn_const_iff).mpr (Or.inr (by rw [Real.volume_Icc]; exact ENNReal.ofReal_lt_top)))
-  calc ∫ u, phi ϱ L w u ≤ ∫ u, (Icc (-(L / 2)) (L / 2)).indicator 1 u := by
-        refine integral_mono_of_nonneg (ae_of_all _ (phi_nonneg hϱ)) hS (ae_of_all _ fun u => ?_)
-        by_cases hu : u ∈ Icc (-(L / 2)) (L / 2)
-        · rw [indicator_of_mem hu, Pi.one_apply]; exact phi_le_one hϱ u
-        · rw [indicator_of_notMem hu, phi_eq_zero hϱ hw]
-          simp only [mem_Icc, not_and_or, not_le] at hu
-          rcases hu with hu | hu
-          · linarith [neg_le_abs u]
-          · linarith [le_abs_self u]
-    _ = L := by
-        rw [integral_indicator_one measurableSet_Icc, measureReal_def, Real.volume_Icc,
-          ENNReal.toReal_ofReal (by linarith)]
-        ring
+  exact integral_phi_le hϱ hw hwL
 
 /-- "`Φ(0) = aL`". -/
-theorem PhiR_zero (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
+theorem PhiR_zero (_hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
     PhiR ϱ L w 0 = aConst ϱ L w * L := by
   have hL : L ≠ 0 := by linarith
   rw [PhiR, Phi, Complex.ofReal_zero, paperFT_ofReal_zero, Complex.ofReal_re, aConst,
     mul_comm, ← mul_assoc, mul_inv_cancel₀ hL, one_mul]
 
-theorem g_zero (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
+theorem g_zero (_hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
     g ϱ L w 0 = bConst ϱ L w * L := by
   have hL : L ≠ 0 := by linarith
   rw [g, Params.autocorr, bConst, mul_comm, ← mul_assoc, mul_inv_cancel₀ hL, one_mul]
   congr 1; funext u; rw [add_zero]; ring
 
-theorem Aphi_zero (hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
+theorem Aphi_zero (_hϱ : TaperProfile ϱ) (hw : 0 < w) (hwL : 2 * w ≤ L) :
     Aphi ϱ L w 0 = aConst ϱ L w * L := by
   have hL : L ≠ 0 := by linarith
   rw [Aphi, Params.autocorr, aConst, mul_comm, ← mul_assoc, mul_inv_cancel₀ hL, one_mul]

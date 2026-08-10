@@ -4,13 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/WeilEF/FullLine.lean.  The R → ∞ limit of the rectangle
-identity (Zeta23.WeilEF.rectangle_identity): along good heights
-R_j ∈ [j, j+1] the horizontal sides vanish (‖H‖ ≪_k 1/R², ‖Λ'/Λ‖ ≪ log²j on them, reflecting
-Λ'/Λ(1−s) = −Λ'/Λ(s) for re s < 1/2), the vertical sides converge to the full-line integral
-(dominated convergence; the left side is folded onto the right by the functional equation and
-t ↦ −t), and the zero sums over |γ| < R_j converge to the absolutely convergent tsum
-(EF_zero_sum_summable).  The statement is consumed by Zeta23/WeilEF/Main.lean.
+Zeta23/WeilEF/FullLine.lean — the R → ∞ limit of the rectangle identity
+(Zeta23.WeilEF.rectangle_identity, proved): along good heights R_j ∈ [j, j+1] the horizontal
+sides vanish (‖H‖ ≪_k 1/R², ‖Λ'/Λ‖ ≪ log²j on them, reflecting Λ'/Λ(1−s) = −Λ'/Λ(s) for
+re s < 1/2), the vertical sides converge to the full-line integral (dominated convergence; the
+left side is folded onto the right by the functional equation and t ↦ −t), and the zero sums
+over |γ| < R_j converge to the absolutely convergent tsum (EF_zero_sum_summable).  The
+resulting statement is consumed by Zeta23/WeilEF/Main.lean.
 -/
 import Zeta23.WeilEF.Contour
 
@@ -22,7 +22,7 @@ namespace WeilEF
 open Complex Topology Filter Set MeasureTheory
 open scoped ArithmeticFunction
 
-/-! ## Majorant pack (consumed by Main.lean and gamma_line_shift) -/
+/-! ## Majorant pack -/
 
 section Majorants
 
@@ -283,30 +283,6 @@ end Majorants
 
 section Heights
 
-/-- `good_heights`, re-indexed: heights `R_j ∈ [j+7, j+8]` with ζ ≠ 0 and
-`‖ζ'/ζ‖ ≤ C_g log²(j+10)` on both horizontal lines `im = ±R_j`, `1/2 ≤ re ≤ 2`. -/
-theorem exists_heights : ∃ Cg : ℝ, 0 < Cg ∧ ∃ R : ℕ → ℝ, ∀ j : ℕ,
-    (j : ℝ) + 7 ≤ R j ∧ R j ≤ (j : ℝ) + 8 ∧
-    ∀ s : ℂ, (s.im = R j ∨ s.im = -R j) → 1 / 2 ≤ s.re → s.re ≤ 2 →
-      riemannZeta s ≠ 0 ∧ ‖logDeriv riemannZeta s‖ ≤ Cg * (Real.log ((j : ℝ) + 10)) ^ 2 := by
-  obtain ⟨C, hC, h⟩ := good_heights
-  have hex : ∀ j : ℕ, ∃ R : ℝ, ((j + 7 : ℕ) : ℝ) ≤ R ∧ R ≤ ((j + 7 : ℕ) : ℝ) + 1 ∧
-      ∀ s : ℂ, (s.im = R ∨ s.im = -R) → 1 / 2 ≤ s.re → s.re ≤ 2 →
-        riemannZeta s ≠ 0 ∧ ‖logDeriv riemannZeta s‖ ≤ C * (Real.log (((j + 7 : ℕ) : ℝ) + 3)) ^ 2 :=
-    fun j => h (j + 7) (by omega)
-  refine ⟨C, hC, fun j => (hex j).choose, fun j => ?_⟩
-  dsimp only
-  obtain ⟨hs1, hs2, hs3⟩ := (hex j).choose_spec
-  have e : ((j + 7 : ℕ) : ℝ) = (j : ℝ) + 7 := by push_cast; ring
-  refine ⟨?_, ?_, ?_⟩
-  · calc (j : ℝ) + 7 = ((j + 7 : ℕ) : ℝ) := e.symm
-      _ ≤ _ := hs1
-  · exact hs2.trans (by rw [e]; linarith)
-  · intro s him h1 h2
-    have e3 : Real.log (((j + 7 : ℕ) : ℝ) + 3) = Real.log ((j : ℝ) + 10) := by rw [e]; ring_nf
-    obtain ⟨h3, h4⟩ := hs3 s him h1 h2
-    exact ⟨h3, by rwa [e3] at h4⟩
-
 /-- nonvanishing of Λ on the horizontal sides `im = ±R`, `1−c ≤ re ≤ c`, given ζ ≠ 0 on
 `im = ±R`, `1/2 ≤ re ≤ 2` (the left half by the functional equation Λ(1−s) = Λ(s)). -/
 theorem completedZeta_ne_zero_on_horizontals {c : ℝ} (hc1 : 1 < c) (hc2 : c ≤ 3 / 2) {R : ℝ}
@@ -349,13 +325,20 @@ def Fline (k : ℝ → ℂ) (c : ℝ) (t : ℝ) : ℂ :=
 theorem one_sub_cast (c t : ℝ) : (1 : ℂ) - c - t * I = ((1 - c : ℝ) : ℂ) + ((-t : ℝ) : ℂ) * I := by
   push_cast; ring
 
+/-- continuity of the reflected weight `t ↦ H(1 − c − it)` (= `H((1−c) + i(−t))`). -/
+theorem continuous_Hfn_reflect {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasCompactSupport k) (c : ℝ) :
+    Continuous (fun t : ℝ => Hfn k (1 - c - t * I)) := by
+  have : (fun t : ℝ => Hfn k (1 - c - t * I))
+      = (fun t : ℝ => Hfn k (((1 - c : ℝ) : ℂ) + t * I)) ∘ fun t : ℝ => -t := by
+    funext t; simp only [Function.comp_apply, one_sub_cast]
+  rw [this]; exact (continuous_Hfn_line hk hkc (1 - c)).comp continuous_neg
+
 /-- on `re = c > 1`: `Λ'/Λ = Γℝ'/Γℝ + ζ'/ζ`. -/
 theorem logDeriv_completedZeta_line {c : ℝ} (hc1 : 1 < c) (t : ℝ) :
     logDeriv completedRiemannZeta ((c : ℂ) + t * I)
       = logDeriv Complex.Gammaℝ ((c : ℂ) + t * I) + logDeriv riemannZeta ((c : ℂ) + t * I) := by
   have hre : ((c : ℂ) + t * I).re = c := by simp
-  refine logDeriv_completedZeta _ ?_ ?_ ?_ (by rw [hre]; linarith)
-  · intro h; have := congrArg Complex.re h; simp at this; linarith
+  refine logDeriv_completedZeta _ ?_ ?_ (by rw [hre]; linarith)
   · intro h; have := congrArg Complex.re h; simp at this; linarith
   · exact riemannZeta_ne_zero_of_one_lt_re (by rw [hre]; exact hc1)
 
@@ -364,13 +347,7 @@ theorem integrable_Fline (hk : ContDiff ℝ 2 k) (hkc : HasCompactSupport k) {c 
     (hc1 : 1 < c) (hc2 : c ≤ 3 / 2) : Integrable (Fline k c) := by
   obtain ⟨C, hC0, hC⟩ := norm_Hfn_le hk hkc
   set φ : ℝ → ℂ := fun t => Hfn k ((c : ℂ) + t * I) + Hfn k (1 - c - t * I) with hφ
-  have hφc : Continuous φ := by
-    refine (continuous_Hfn_line hk hkc c).add ?_
-    have h := continuous_Hfn_line hk hkc (1 - c)
-    have : (fun t : ℝ => Hfn k (1 - c - t * I))
-        = (fun t : ℝ => Hfn k (((1 - c : ℝ) : ℂ) + t * I)) ∘ fun t : ℝ => -t := by
-      funext t; simp only [Function.comp_apply, one_sub_cast]
-    rw [this]; exact h.comp continuous_neg
+  have hφc : Continuous φ := (continuous_Hfn_line hk hkc c).add (continuous_Hfn_reflect hk hkc c)
   have hφb : ∀ t, ‖φ t‖ ≤ (2 * C) / (1 + t ^ 2) := by
     intro t
     have h1 := hC c t (by linarith) (by linarith)
@@ -402,12 +379,7 @@ theorem verticals_eq (hk : ContDiff ℝ 2 k) (hkc : HasCompactSupport k) {c : �
     rw [this]
     exact (continuous_logDeriv_Gammaℝ_line (by linarith) hc2).add (continuous_logDeriv_zeta_line hc1)
   have hHc := continuous_Hfn_line hk hkc c
-  have hH2 : Continuous (fun t : ℝ => Hfn k (1 - c - t * I)) := by
-    have h := continuous_Hfn_line hk hkc (1 - c)
-    have : (fun t : ℝ => Hfn k (1 - c - t * I))
-        = (fun t : ℝ => Hfn k (((1 - c : ℝ) : ℂ) + t * I)) ∘ fun t : ℝ => -t := by
-      funext t; simp only [Function.comp_apply, one_sub_cast]
-    rw [this]; exact h.comp continuous_neg
+  have hH2 : Continuous (fun t : ℝ => Hfn k (1 - c - t * I)) := continuous_Hfn_reflect hk hkc c
   -- the left-line integrand, pointwise
   have hleft : ∀ y : ℝ, Hfn k (((1 - c : ℝ) : ℂ) + y * I) * L (((1 - c : ℝ) : ℂ) + y * I)
       = -(Hfn k (1 - c - ((-y : ℝ) : ℂ) * I) * L ((c : ℂ) + ((-y : ℝ) : ℂ) * I)) := by

@@ -8,12 +8,11 @@ Zeta23/ThmE/Main.lean — Theorem E: [thm:E]'s bounds at fixed λ modulo the
 χ-traces package and the χ-EF bridge.
 
 Mirror of Zeta23/Main.lean's thm{A,B,C}_lam_of_traces for a primitive Dirichlet character: the
-zero-side/tail/taper inputs are discharged from the same Z-generic files
+zero-side/tail/taper inputs are discharged from the SAME Z-generic project files
 (ZeroSide, Tail, Taper — nothing ζ-specific in them), while the two genuinely
 χ-arithmetic inputs stay explicit named hypotheses:
-  hTr   — [thm:traces] for ν_{X,χ} (ThmTracesHypChi; proved in Zeta23/ThmE/TracesChi.lean),
+  hTr   — [thm:traces] for ν_{X,χ} (ThmTracesHypChi),
   hGzGp — the [eq:Gdef]-identity for L(s,χ) (zero side = prime side, from H-EF(χ)).
-Later sections discharge these hypotheses in turn.
 -/
 import Zeta23.ThmE.Statement
 import Zeta23.ThmE.AssemblyQ
@@ -135,7 +134,7 @@ section SeamDischarged
 
 variable {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q}
 
-/-- Theorem E bound 1 at fixed λ, for a primitive χ mod q > 1 — seam discharged from Mathlib;
+/-- Theorem E bound 1 at fixed λ, for a PRIMITIVE χ mod q > 1;
 remaining hypotheses: RvM(χ), the χ-traces package, the χ-EF bridge, 𝓔 → 0. -/
 theorem thmE_A_lam_of_traces' (hq : 1 < q) (hprim : χ.IsPrimitive)
     {ϱ : ℝ → ℝ} (hϱ : TaperProfile ϱ) {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1)
@@ -175,7 +174,8 @@ theorem thmE_C_lam_of_traces' (hq : 1 < q) (hprim : χ.IsPrimitive)
       (Ffun lam - ε) * (NcountL χ T (2 * T) : ℝ) ≤ NdistL χ T (2 * T) :=
   thmE_C_lam_of_traces (LSeam_of hq hprim) (by omega) hϱ h0 h1 hRvM hTr hGzGp hcalE
 
-/-- the χ-EF bridge at fixed T (the eventual form below is this plus
+omit [NeZero q] in
+/-- the χ-EF bridge at FIXED T (the eventual form below is this plus
 two asymptotic side conditions). Conditions: 0 < L(T) and 8w ≤ L(T). -/
 theorem GzGpChi_at {Z : ZeroConfig} {κ : ℕ} {c : ℕ → ℂ} (P : Params) (hP : P.Valid)
     (hEF : ExplicitFormulaPaperChi κ q c Z) (T : ℝ)
@@ -196,7 +196,7 @@ theorem eventually_GzGpChi {Z : ZeroConfig} {κ : ℕ} {c : ℕ → ℂ} (P : Pa
   filter_upwards [hwL, hLpos] with T hwL hL
   exact GzGpChi_at P hP hEF T hL hwL
 
-/-- **Theorem E bound 1 at fixed λ — seam and χ-EF-bridge discharged**: remaining inputs are
+/-- **Theorem E bound 1 at fixed λ**: remaining inputs are
 exactly the χ-arithmetic trio (EF(χ) paper form, RvM(χ), traces(χ)). -/
 theorem thmE_A_lam_final (hq : 1 < q) (hprim : χ.IsPrimitive)
     {ϱ : ℝ → ℝ} (hϱ : TaperProfile ϱ) {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1)
@@ -236,10 +236,10 @@ theorem thmE_C_lam_final (hq : 1 < q) (hprim : χ.IsPrimitive)
     (eventually_GzGpChi _ hP hEF)
     (Assembly.calE_tendsto_zero _ hP.lam_pos hP.lam_le_one (zero_le_one.trans hP.one_le_w))
 
-/-! ## RvM(χ) discharged (Zeta23.ThmE.rvmChi): the two-hypothesis gates — remaining inputs are
-exactly (EF(χ) paper form, traces(χ)). -/
+/-! ## RvM(χ) discharged (Zeta23.ThmE.rvmChi): remaining inputs are
+(EF(χ) paper form, traces(χ)). -/
 
-/-- **Theorem E bound 1 at fixed λ, two hypotheses** (seam, EF-bridge side conditions, 𝓔 → 0 and
+/-- **Theorem E bound 1 at fixed λ, TWO hypotheses** (EF-bridge side conditions, 𝓔 → 0 and
 RvM(χ) all discharged). -/
 theorem thmE_A_lam₂ (hq : 1 < q) (hprim : χ.IsPrimitive)
     {ϱ : ℝ → ℝ} (hϱ : TaperProfile ϱ) {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1)
@@ -269,17 +269,18 @@ theorem thmE_C_lam₂ (hq : 1 < q) (hprim : χ.IsPrimitive)
 
 end SeamDischarged
 
-/-! ## thm:traces(χ) discharged (`thm_traces_chi`): Theorem E at one hypothesis -/
+/-! ## thm:traces(χ) discharged via `thm_traces_chi`: Theorem E at ONE hypothesis -/
 
 section OneHyp
 
 variable {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q}
 
+omit [NeZero q] in
 /-- the coefficient sequence of a primitive character is unimodular-on-coprime
 (values of norm ≤ 1 everywhere, = 1 on units, 0 off units; Mathlib's
 `DirichletCharacter.norm_le_one` / `unit_norm_eq_one` / `MulChar.map_nonunit` +
 `ZMod.isUnit_iff_coprime`). -/
-lemma coeffUnimodular_of_primitive (hq : 1 < q) (hprim : χ.IsPrimitive) :
+lemma coeffUnimodular_of_primitive (_hq : 1 < q) (_hprim : χ.IsPrimitive) :
     CoeffUnimodular q (coeff χ) where
   norm_le := fun n => χ.norm_le_one _
   vanish := fun n hn => by
@@ -291,6 +292,7 @@ lemma coeffUnimodular_of_primitive (hq : 1 < q) (hprim : χ.IsPrimitive) :
       rwa [ZMod.isUnit_iff_coprime]
     simpa [coeff] using χ.unit_norm_eq_one hu.unit
 
+omit [NeZero q] in
 /-- parity is ≤ 1 by construction. -/
 lemma parity_le_one : parity χ ≤ 1 := by
   unfold parity
@@ -308,7 +310,7 @@ theorem PaperInputsChi.of_EF (hq : 1 < q) (hprim : χ.IsPrimitive)
   MV := exists_MVHilbert_of_diag ⟨13, by norm_num, MV.mvDiag_thirteen⟩
   Gamma := GammaChi.gammaFactsChi parity_le_one (by omega)
 
-/-- **Theorem E bound 1 at fixed λ, one hypothesis** — everything but the χ-explicit formula
+/-- **Theorem E bound 1 at fixed λ, ONE hypothesis** — everything but the χ-explicit formula
 (paper form) is a theorem. -/
 theorem thmE_A_lam₁ (hq : 1 < q) (hprim : χ.IsPrimitive)
     {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1)

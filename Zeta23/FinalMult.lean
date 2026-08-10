@@ -56,18 +56,10 @@ lemma Gfun_ge_near_one (lam : ℝ) (h1 : 1 / 2 ≤ lam) (h2 : lam ≤ 1) :
 theorem eps_form_fiveSixths {N lower : ℝ → ℝ} (hN : ∀ T, 0 ≤ N T)
     (h : ∀ lam : ℝ, 1 / 2 ≤ lam → lam < 1 →
       ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (Gfun lam - ε) * N T ≤ lower T) :
-    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (5 / 6 - ε) * N T ≤ lower T := by
-  intro ε hε
-  set lam := max (1 / 2) (1 - ε / 2) with hlam
-  have h1 : 1 / 2 ≤ lam := le_max_left _ _
-  have h2 : lam < 1 := max_lt (by norm_num) (by linarith)
-  have h3 : 1 - lam ≤ ε / 2 := by have : 1 - ε / 2 ≤ lam := le_max_right _ _; linarith
-  obtain ⟨T₀, hT₀⟩ := h lam h1 h2 (ε / 2) (by linarith)
-  refine ⟨T₀, fun T hT => ?_⟩
-  have hG := Gfun_ge_near_one lam h1 h2.le
-  have := hT₀ T hT
-  have hNT := hN T
-  nlinarith
+    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (5 / 6 - ε) * N T ≤ lower T :=
+  Assembly.eps_form_sup_half (fun η hη => by
+    obtain ⟨lam, h1, h2, h3⟩ := Assembly.exists_lam_near_one hη
+    exact ⟨lam, h1, h2, by linarith [Gfun_ge_near_one lam h1 h2.le]⟩) hN h
 
 /-! ## The moment hypotheses from [thm:traces] (abstract zero configuration) -/
 

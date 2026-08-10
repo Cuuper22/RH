@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 /-
 Zeta23/RvM/GammaSide.lean — the Γ-factor side of the folded contour is
-exactly the paper's ∫μ:  (1/π)·Im ∫_L Γℝ'/Γℝ ds = ∫_{T₁}^{T₂} μ(t) dt  for 0 < T₁,
+EXACTLY the paper's ∫μ:  (1/π)·Im ∫_L Γℝ'/Γℝ ds = ∫_{T₁}^{T₂} μ(t) dt  for 0 < T₁,
 because Γℝ'/Γℝ is holomorphic on Re s > 0 (Cauchy–Goursat on [½,2]×[T₁,T₂] moves L to the critical-line
 segment) and Re Γℝ'/Γℝ(½+it) = ½ Re ψ(¼+it/2) − ½ log π = π·μ(t)  (Γℝ(s) = π^{−s/2}Γ(s/2), μ = Zeta23.mu).
 -/
@@ -110,15 +110,15 @@ theorem re_logDeriv_Gammaℝ_half (t : ℝ) :
   have : ((1:ℂ)/2 + t * I) / 2 = 1 / 4 + Complex.I * t / 2 := by ring
   rw [this, mu]
   simp only [Complex.add_re, Complex.neg_re, Complex.div_ofNat_re, Complex.ofReal_re, Complex.mul_re,
-    Complex.one_re, Complex.one_im]
+    Complex.one_re]
   have hπ := Real.pi_ne_zero
   field_simp
   simp
   ring
 
-/-- The Γ-side identity: for 0 < T₁ and any T₂,
+/-- (M4) the Γ-side identity: for 0 < T₁ and any T₂,
 (1/π)·Im(halfContour (logDeriv Γℝ) T₁ T₂) = ∫_{T₁}^{T₂} μ. -/
-theorem gamma_side {T₁ T₂ : ℝ} (h0 : 0 < T₁) (h0' : 0 < T₂) :
+theorem gamma_side {T₁ T₂ : ℝ} (_h0 : 0 < T₁) (_h0' : 0 < T₂) :
     (1 / Real.pi) * (halfContour (logDeriv Complex.Gammaℝ) T₁ T₂).im = ∫ t in T₁..T₂, mu t := by
   set F := logDeriv Complex.Gammaℝ with hF
   -- Cauchy–Goursat on the rectangle [1/2, 2] × [T₁, T₂]
@@ -155,7 +155,7 @@ theorem gamma_side {T₁ T₂ : ℝ} (h0 : 0 < T₁) (h0' : 0 < T₂) :
   rw [intervalIntegral.integral_const_mul]
   field_simp
 
-/-! ### helpers for the assembly (used in MainTerm.lean) -/
+/-! ### helpers for the assembly -/
 
 /-- μ is continuous (given H-Γ's smoothness field). -/
 theorem mu_continuous (hΓ : Zeta23.GammaFacts) : Continuous mu :=

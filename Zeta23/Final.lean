@@ -6,12 +6,10 @@ SPDX-License-Identifier: Apache-2.0
 /-
 Zeta23/Final.lean — the headline theorems.
 
-  Theorems A, B, C of the paper "More than two thirds of the zeros of the Riemann zeta function
-  lie on the critical line" — ε-forms. Theorems B and C appear here with the Cauchy–Schwarz
-  constants 1/2 (simple and on the line) and 3/4 (distinct); the paper's stated constants 2/3 and
-  5/6 are the multiplicity-aware forms, proved from the same inputs in Zeta23/FinalMult.lean.
+  "More than two thirds of the zeros of the Riemann zeta function lie on the critical line",
+   Theorems A, B, C — ε-forms.
 
-In the first section each theorem's TYPE displays the trust base as separate named hypotheses:
+Each theorem's TYPE in the first section displays the inputs as separate named hypotheses:
   hEF  : EF.EF_lit zetaZeroConfig        — Weil's explicit formula, literature form [eq:EFstd]
                                            ([IK04, Thm 5.12] for ζ), over ζ's nontrivial zeros;
   hRvM : RiemannVonMangoldt zetaZeroConfig — [eq:RvM] + local count N(t+1)−N(t) ≤ A₀ log(|t|+3);
@@ -23,9 +21,9 @@ Nothing else: the Chebyshev–Mertens bounds [lem:cheb] are proved (Zeta23.Cheb.
 paper's spectral form of the explicit formula [eq:EF] is derived from hEF (Zeta23.EF), the taper profile
 is Mathlib's Real.smoothTransition (Zeta23.stdProfile), the ζ-facts (analytic order, functional-equation
 symmetry, local finiteness) are proved (Zeta23.zetaSeam), and thm:traces [thm:traces] is
-Zeta23.PrimeSide.thm_traces. The versions with thm:traces as an explicit hypothesis are
-Zeta23.thmA_of_traces etc. in Zeta23/Main.lean. Subsequent sections replace each hypothesis by its proof
-in the repository, down to the unconditional forms.
+Zeta23.PrimeSide.thm_traces (the versions with thm:traces as an explicit hypothesis are
+Zeta23.thmA_of_traces etc. in Zeta23/Main.lean). Later sections discharge the hypotheses
+hMV, hΓ, hRvM and hEF one by one, ending with the unconditional forms.
 
 Counting functions (Zeta23/Statement.lean): Ncount T₁ T₂ = N(T₁,T₂) with multiplicity (analytic order of
 riemannZeta), N0star = N₀* (on the line, distinct), N0simple = N₀ˢ (on the line, simple), Ndist = N_d
@@ -57,6 +55,7 @@ variable (hEF : EF.EF_lit zetaZeroConfig) (hRvM : RiemannVonMangoldt zetaZeroCon
   (hMV : ∃ C : ℝ, 0 < C ∧ MVDiag C) (hΓ : GammaFacts)
 include hEF hRvM hMV hΓ
 
+omit hEF hRvM hMV hΓ in
 private lemma tracesStd (H : PaperInputs zetaZeroConfig) :
     ∀ lam : ℝ, 1 / 2 ≤ lam → lam < 1 → ThmTracesHyp (paramsOf stdProfile lam) zetaZeroConfig :=
   fun _ h1 h2 => PrimeSide.thm_traces (paramsOf_valid taperProfile_stdProfile (by linarith) h2.le) H
@@ -67,13 +66,13 @@ accounted for by DISTINCT zeros on the critical line:  (2/3 − ε)·N(T,2T) ≤
 theorem thmA :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (2 / 3 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0star T (2 * T) :=
   let H := PaperInputs.of_literature hEF hRvM hMV hΓ
-  thmA_of_traces H taperProfile_stdProfile (tracesStd hEF hRvM hMV hΓ H)
+  thmA_of_traces H taperProfile_stdProfile (tracesStd H)
 
 /-- **Theorem A** [thm:A], cumulative: "liminf_{T→∞} N₀*(T)/N(T) ≥ 2/3", N(T) := N(0,T). -/
 theorem thmA_cumulative :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (2 / 3 - ε) * (Ncount 0 T : ℝ) ≤ N0star 0 T :=
   let H := PaperInputs.of_literature hEF hRvM hMV hΓ
-  thmA_cumulative_of_traces H taperProfile_stdProfile (tracesStd hEF hRvM hMV hΓ H)
+  thmA_cumulative_of_traces H taperProfile_stdProfile (tracesStd H)
 
 /-- **Theorem A at fixed λ ∈ (0,1)** [thm:A]: N₀*(T,2T) ≥ (H(λ) − ε) N(T,2T), H(λ) = 2 − 1/λ − λ/3
 (the paper's c(λ)·loglogT/logT absorbed into ε). -/
@@ -88,13 +87,13 @@ theorem thmA_lam {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
 theorem thmB :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (1 / 2 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) :=
   let H := PaperInputs.of_literature hEF hRvM hMV hΓ
-  thmB_of_traces H taperProfile_stdProfile (tracesStd hEF hRvM hMV hΓ H)
+  thmB_of_traces H taperProfile_stdProfile (tracesStd H)
 
 /-- **Theorem B** [thm:B], cumulative: "liminf_{T→∞} N₀ˢ(T)/N(T) ≥ 1/2". -/
 theorem thmB_cumulative :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (1 / 2 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T :=
   let H := PaperInputs.of_literature hEF hRvM hMV hΓ
-  thmB_cumulative_of_traces H taperProfile_stdProfile (tracesStd hEF hRvM hMV hΓ H)
+  thmB_cumulative_of_traces H taperProfile_stdProfile (tracesStd H)
 
 /-- **Theorem B at fixed λ** [thm:B]: N₀ˢ(T,2T) ≥ (2F(λ) − 1 − ε) N(T,2T), F(λ) = λ/(1+λ²/3). -/
 theorem thmB_lam {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
@@ -108,13 +107,13 @@ theorem thmB_lam {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
 theorem thmC :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (3 / 4 - ε) * (Ncount T (2 * T) : ℝ) ≤ Ndist T (2 * T) :=
   let H := PaperInputs.of_literature hEF hRvM hMV hΓ
-  thmC_of_traces H taperProfile_stdProfile (tracesStd hEF hRvM hMV hΓ H)
+  thmC_of_traces H taperProfile_stdProfile (tracesStd H)
 
 /-- **Theorem C** [thm:C], cumulative: "liminf_{T→∞} N_d(T)/N(T) ≥ 3/4". -/
 theorem thmC_cumulative :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (3 / 4 - ε) * (Ncount 0 T : ℝ) ≤ Ndist 0 T :=
   let H := PaperInputs.of_literature hEF hRvM hMV hΓ
-  thmC_cumulative_of_traces H taperProfile_stdProfile (tracesStd hEF hRvM hMV hΓ H)
+  thmC_cumulative_of_traces H taperProfile_stdProfile (tracesStd H)
 
 /-- **Theorem C at fixed λ** [thm:C]: N_d(T,2T) ≥ (F(λ) − ε) N(T,2T). -/
 theorem thmC_lam {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
@@ -125,8 +124,8 @@ theorem thmC_lam {lam : ℝ} (h0 : 0 < lam) (h1 : lam < 1) :
 
 end Final
 
-/-! ## Three-hypothesis forms: H-MV is a theorem (Zeta23.MV.mv_hilbert — MV74's weighted Hilbert
-inequality proved outright). -/
+/-! ## Three-hypothesis forms: H-MV is a theorem (Zeta23.MV.mv_hilbert — the weighted Hilbert
+inequality of Montgomery–Vaughan 1974, proved outright). -/
 
 section ThreeHyp
 
@@ -182,8 +181,8 @@ theorem thmC₃_cumulative :
 
 end ThreeHyp
 
-/-! ## Two-hypothesis forms: H-Γ is a theorem (Zeta23.gammaFacts — digamma partial fractions +
-vertical Stirling + FTC). -/
+/-! ## Two-hypothesis forms: H-Γ is a theorem (Zeta23.gammaFacts; proved via
+digamma partial fractions + vertical Stirling + FTC). -/
 
 section TwoHyp
 
@@ -232,11 +231,11 @@ end TwoHyp
 
 section OneHyp
 
-/-- **H-RvM for ζ, unconditionally** (Zeta23/RvM together with the proved Γ-facts). -/
+/-- **H-RvM for ζ, unconditionally** (from the RvM development and the proved Γ-facts). -/
 theorem riemannVonMangoldt_zeta : RiemannVonMangoldt zetaZeroConfig :=
   RvM.riemannVonMangoldt gammaFacts
 
-/-- PaperInputs from the literature explicit formula alone. -/
+/-- PaperInputs from the literature explicit formula ALONE. -/
 theorem PaperInputs.of_EF (hEF : EF.EF_lit zetaZeroConfig) : PaperInputs zetaZeroConfig :=
   PaperInputs.of_two hEF riemannVonMangoldt_zeta
 
@@ -291,34 +290,34 @@ theorem zetaEF : EF.EF_lit zetaZeroConfig := WeilEF.EF_lit_zetaZeroConfig
 /-- The paper's full input package, unconditionally. -/
 theorem paperInputs_zeta : PaperInputs zetaZeroConfig := PaperInputs.of_EF zetaEF
 
-/-- **Theorem A** [thm:A], unconditional: for every ε > 0, for all large T, at least (2/3 − ε) of the
+/-- **Theorem A** [thm:A], UNCONDITIONAL: for every ε > 0, for all large T, at least (2/3 − ε) of the
 nontrivial zeros of Mathlib's riemannZeta with T < Im ρ ≤ 2T, counted with multiplicity, are matched
 by distinct zeros on the critical line:  (2/3 − ε)·N(T,2T) ≤ N₀*(T,2T). -/
 theorem thmA₀ :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (2 / 3 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0star T (2 * T) :=
   thmA₁ zetaEF
 
-/-- **Theorem A**, cumulative, unconditional: liminf_{T→∞} N₀*(T)/N(T) ≥ 2/3. -/
+/-- **Theorem A**, cumulative, UNCONDITIONAL: liminf_{T→∞} N₀*(T)/N(T) ≥ 2/3. -/
 theorem thmA₀_cumulative :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (2 / 3 - ε) * (Ncount 0 T : ℝ) ≤ N0star 0 T :=
   thmA₁_cumulative zetaEF
 
-/-- **Theorem B** [thm:B], unconditional: at least (1/2 − ε) of the zeros are simple and on the line. -/
+/-- **Theorem B** [thm:B], UNCONDITIONAL: at least (1/2 − ε) of the zeros are simple AND on the line. -/
 theorem thmB₀ :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (1 / 2 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) :=
   thmB₁ zetaEF
 
-/-- **Theorem B**, cumulative, unconditional. -/
+/-- **Theorem B**, cumulative, UNCONDITIONAL. -/
 theorem thmB₀_cumulative :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (1 / 2 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T :=
   thmB₁_cumulative zetaEF
 
-/-- **Theorem C** [thm:C], unconditional: at least (3/4 − ε) of the zeros are distinct. -/
+/-- **Theorem C** [thm:C], UNCONDITIONAL: at least (3/4 − ε) of the zeros are distinct. -/
 theorem thmC₀ :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (3 / 4 - ε) * (Ncount T (2 * T) : ℝ) ≤ Ndist T (2 * T) :=
   thmC₁ zetaEF
 
-/-- **Theorem C**, cumulative, unconditional. -/
+/-- **Theorem C**, cumulative, UNCONDITIONAL. -/
 theorem thmC₀_cumulative :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (3 / 4 - ε) * (Ncount 0 T : ℝ) ≤ Ndist 0 T :=
   thmC₁_cumulative zetaEF

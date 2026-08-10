@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmE/ReZeroCountChi.lean — the Jensen half (J) of Backlund's bound for L(s,χ): the number of
+Zeta23/ThmE/ReZeroCountChi.lean — the Jensen half of Backlund's bound for L(s,χ): the number of
 zeros of Re L(σ+iT,χ) on σ ∈ [1/2,2] is ≪_χ log|T|.
-The argument follows Zeta23/RvM/ReZeroCount.lean, with the
+This is the analogue of Zeta23/RvM/ReZeroCount.lean (same route and proof) for L(s,χ), using the
 symmetrised function g(z) := (L(z+iT,χ) + L(z−iT,χ⁻¹))/2 (entire; = Re L(σ+iT,χ) on ℝ by
 LFunction_conj), growth for χ and χ⁻¹ from LFunction_growth_right, and no pole
 bookkeeping — hence two-sided in the height T.
@@ -23,8 +23,7 @@ namespace ThmE
 
 variable {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q}
 
-/-- the symmetrised function g_T(z) := (L(z+iT,χ) + L(z−iT,χ⁻¹))/2; equals Re L(σ+iT,χ)
-for real σ. -/
+/-- the symmetrised function g_T(z) := (L(z+iT,χ) + L(z−iT,χ⁻¹))/2; equals Re L(σ+iT,χ) for real σ. -/
 def symL (χ : DirichletCharacter ℂ q) (T : ℝ) (z : ℂ) : ℂ :=
   (χ.LFunction (z + T * I) + χ⁻¹.LFunction (z - T * I)) / 2
 
@@ -44,28 +43,32 @@ lemma symL_ofReal (hχ1 : χ ≠ 1) {T : ℝ} (σ : ℝ) :
   have hconj : χ⁻¹.LFunction ((σ:ℂ) - T * I) = (starRingEnd ℂ) (χ.LFunction ((σ:ℂ) + T * I)) := by
     have h := LFunction_conj hχ1 ((σ:ℂ) - T * I)
     have e : (starRingEnd ℂ) ((σ:ℂ) - T * I) = (σ:ℂ) + T * I := by
-      simp [Complex.ext_iff]
+      simp
     rw [e] at h
     rw [h, Complex.conj_conj]
   rw [hconj, Complex.add_conj]
   push_cast
   ring
 
+/-! ## The q-UNIFORM Jensen count and Backlund bound (absolute constants) -/
+
 set_option maxHeartbeats 1600000 in
-/-- **(J) the Jensen half of Backlund's bound for L(s,χ)**: #{σ ∈ [1/2,2] : Re L(σ+iT,χ) = 0} ≪_χ log |T|. -/
-theorem reZeroSetL_card_le (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ |T| →
-    (reZeroSetL χ T).Finite ∧ ((reZeroSetL χ T).ncard : ℝ) ≤ C * Real.log |T| := by
-  have hinv : χ⁻¹ ≠ 1 := fun h => hχ1 (inv_eq_one.mp h)
-  obtain ⟨A₁, C₁, hC₁, hgrowth₁⟩ := LFunction_growth_right hχ1
-  obtain ⟨A₂, C₂, hC₂, hgrowth₂⟩ := LFunction_growth_right (χ := χ⁻¹) hinv
-  set A' : ℝ := max (max A₁ A₂) 0 with hA'
-  have hA'0 : 0 ≤ A' := le_max_right _ _
-  set C : ℝ := max C₁ C₂ with hCdef
-  have hC : 0 < C := lt_max_of_lt_left hC₁
+/-- **(J), q-uniform** (the per-χ `reZeroSetL_card_le` below is its corollary):
+#{σ ∈ [1/2,2] : Re L(σ+iT,χ) = 0} ≤ C·log(q(|T|+3)) with an absolute C,
+for every modulus q, every χ ≠ 1 mod q and every real T. -/
+theorem reZeroSetL_card_le_uniform : ∃ C : ℝ, ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q),
+    χ ≠ 1 → ∀ T : ℝ,
+      (reZeroSetL χ T).Finite ∧ ((reZeroSetL χ T).ncard : ℝ) ≤ C * Real.log (q * (|T| + 3)) := by
   set r : ℝ := 0.8 with hr
   set R : ℝ := 0.9 with hR
   have hlogRr : 0 < Real.log (R / r) := Real.log_pos (by norm_num [hr, hR])
-  refine ⟨1 / Real.log (R / r) * (|Real.log (6 * C)| + 2 * A'), 4, fun T hT => ?_⟩
+  refine ⟨1 / Real.log (R / r) * (Real.log 24 + 2), fun q _ χ hχ1 T => ?_⟩
+  have hinv : χ⁻¹ ≠ 1 := fun h => hχ1 (inv_eq_one.mp h)
+  have hq1 : (1:ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hgrowth₁ : ∀ s : ℂ, (0.15:ℝ) ≤ s.re → ‖χ.LFunction s‖ ≤ 8 * q * (|s.im| + 3) :=
+    fun s hs => LFunction_growth_right_uniform hχ1 hs
+  have hgrowth₂ : ∀ s : ℂ, (0.15:ℝ) ≤ s.re → ‖χ⁻¹.LFunction s‖ ≤ 8 * q * (|s.im| + 3) :=
+    fun s hs => LFunction_growth_right_uniform hinv hs
   set κ : ℂ := ((19/10 : ℝ) : ℂ) with hκ
   have hκ0 : κ ≠ 0 := by simp [hκ]
   have hnormκ : ‖κ‖ = 1.9 := by simp [hκ]; norm_num
@@ -110,7 +113,7 @@ theorem reZeroSetL_card_le (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T�
       (z₀ := 0) (by simp; norm_num) (by rw [hG0]; exact one_ne_zero)
     exact h.subset (by intro z hz; exact hz)
   -- growth bound on ‖w‖ ≤ R
-  set B : ℝ := 6 * C * (|T| + 5) ^ A' with hB
+  set B : ℝ := 24 * q * (|T| + 5) with hB
   have hBpos : 0 < B := by positivity
   have hκre : κ.re = 1.9 := by rw [hκ]; norm_num [Complex.ofReal_re]
   have hκim : κ.im = 0 := by rw [hκ]; simp
@@ -123,10 +126,10 @@ theorem reZeroSetL_card_le (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T�
       rw [Complex.mul_re, hκre, hκim]; ring
     have hκwim : (κ * w).im = 1.9 * w.im := by
       rw [Complex.mul_im, hκre, hκim]; ring
-    have hgen : ∀ (Lf : ℂ → ℂ) (Aψ Cψ : ℝ), Cψ ≤ C → Aψ ≤ A' →
-        (∀ s : ℂ, (0.15:ℝ) ≤ s.re → ‖Lf s‖ ≤ Cψ * (|s.im| + 3) ^ Aψ) →
-        ∀ ε : ℝ, (ε = 1 ∨ ε = -1) → ‖Lf (2 + κ * w + ε * T * I)‖ ≤ C * (|T| + 5) ^ A' := by
-      intro Lf Aψ Cψ hCψ hAψ hg ε hε
+    have hgen : ∀ (Lf : ℂ → ℂ),
+        (∀ s : ℂ, (0.15:ℝ) ≤ s.re → ‖Lf s‖ ≤ 8 * q * (|s.im| + 3)) →
+        ∀ ε : ℝ, (ε = 1 ∨ ε = -1) → ‖Lf (2 + κ * w + ε * T * I)‖ ≤ 8 * q * (|T| + 5) := by
+      intro Lf hg ε hε
       set s : ℂ := 2 + κ * w + ε * T * I with hs
       have hsre : s.re = 2 + 1.9 * w.re := by
         rw [hs]
@@ -140,9 +143,6 @@ theorem reZeroSetL_card_le (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T�
         ring
       have h1 : (0.15:ℝ) ≤ s.re := by rw [hsre]; nlinarith
       have h3 := hg s h1
-      have hbase1 : (1:ℝ) ≤ |s.im| + 3 := by linarith [abs_nonneg s.im]
-      have hA'A : (|s.im| + 3) ^ Aψ ≤ (|s.im| + 3) ^ A' :=
-        Real.rpow_le_rpow_of_exponent_le hbase1 hAψ
       have hbase : |s.im| + 3 ≤ |T| + 5 := by
         rw [hsim]
         have h4 := abs_add_le (1.9 * w.im) (ε * T)
@@ -151,21 +151,15 @@ theorem reZeroSetL_card_le (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T�
           have : |w.im| ≤ 0.9 := abs_le.mpr ⟨hwim.1, hwim.2⟩
           nlinarith
         have h6 : |ε * T| = |T| := by
-          rcases hε with rfl | rfl <;> simp [abs_mul]
+          rcases hε with rfl | rfl <;> simp
         linarith
-      have hmono : (|s.im| + 3) ^ A' ≤ (|T| + 5) ^ A' :=
-        Real.rpow_le_rpow (by positivity) hbase hA'0
-      have hpow0 : 0 ≤ (|s.im| + 3) ^ Aψ := Real.rpow_nonneg (by positivity) _
-      calc ‖Lf s‖ ≤ Cψ * (|s.im| + 3) ^ Aψ := h3
-        _ ≤ C * (|s.im| + 3) ^ Aψ := mul_le_mul_of_nonneg_right hCψ hpow0
-        _ ≤ C * (|T| + 5) ^ A' := mul_le_mul_of_nonneg_left (hA'A.trans hmono) hC.le
-    have hgb : ‖symL χ T (2 + κ * w)‖ ≤ C * (|T| + 5) ^ A' := by
+      calc ‖Lf s‖ ≤ 8 * q * (|s.im| + 3) := h3
+        _ ≤ 8 * q * (|T| + 5) := by gcongr
+    have hgb : ‖symL χ T (2 + κ * w)‖ ≤ 8 * q * (|T| + 5) := by
       have e1 : (2:ℂ) + κ * w + (1:ℝ) * T * I = 2 + κ * w + T * I := by push_cast; ring
       have e2 : (2:ℂ) + κ * w + (-1:ℝ) * T * I = 2 + κ * w - T * I := by push_cast; ring
-      have ha := hgen χ.LFunction A₁ C₁ (le_max_left _ _) ((le_max_left _ _).trans (le_max_left _ _))
-        hgrowth₁ 1 (Or.inl rfl)
-      have hb := hgen χ⁻¹.LFunction A₂ C₂ (le_max_right _ _) ((le_max_right _ _).trans (le_max_left _ _))
-        hgrowth₂ (-1) (Or.inr rfl)
+      have ha := hgen χ.LFunction hgrowth₁ 1 (Or.inl rfl)
+      have hb := hgen χ⁻¹.LFunction hgrowth₂ (-1) (Or.inr rfl)
       rw [e1] at ha
       rw [e2] at hb
       unfold symL
@@ -175,13 +169,11 @@ theorem reZeroSetL_card_le (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T�
         _ ≤ (‖χ.LFunction (2 + κ * w + T * I)‖ + ‖χ⁻¹.LFunction (2 + κ * w - T * I)‖) / 2 := by
             gcongr
             exact norm_add_le _ _
-        _ ≤ C * (|T| + 5) ^ A' := by linarith
+        _ ≤ 8 * q * (|T| + 5) := by linarith
     calc ‖G w‖ = ‖symL χ T (2 + κ * w)‖ * ‖u‖ := by rw [hG]; exact norm_mul _ _
-      _ ≤ (C * (|T| + 5) ^ A') * 3 := by
+      _ ≤ (8 * q * (|T| + 5)) * 3 := by
           apply mul_le_mul hgb hnu (norm_nonneg _) (by positivity)
-      _ ≤ B := by
-          rw [hB]
-          nlinarith [Real.rpow_nonneg (by positivity : (0:ℝ) ≤ |T| + 5) A']
+      _ = B := by rw [hB]; ring
   -- apply ZerosBound
   have hfAnalytic : AnalyticOnNhd ℂ G (Metric.closedBall (0:ℂ) 1) := by
     intro w hw
@@ -258,30 +250,77 @@ theorem reZeroSetL_card_le (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T�
   have hsum : (Z.card : ℝ) ≤ ((∑ ρ ∈ Z, analyticOrderNatAt G ρ : ℕ) : ℝ) := by
     have h := (Finset.card_eq_sum_ones Z).le.trans (Finset.sum_le_sum horder)
     exact_mod_cast h
-  have hlogT : 1 ≤ Real.log |T| := by
+  -- log B ≤ (log 24 + 2)·log(q(|T|+3))
+  have hT3 : (3:ℝ) ≤ |T| + 3 := by linarith [abs_nonneg T]
+  have hqT : (3:ℝ) ≤ q * (|T| + 3) := by nlinarith
+  have hlogqT : 1 ≤ Real.log (q * (|T| + 3)) := by
     rw [← Real.log_exp 1]
     apply Real.log_le_log (Real.exp_pos 1)
     have := Real.exp_one_lt_d9; linarith
-  have hlog5 : Real.log (|T| + 5) ≤ 2 * Real.log |T| := by
-    rw [← Real.log_rpow (by linarith : (0:ℝ) < |T|), Real.rpow_two]
-    apply Real.log_le_log (by linarith)
+  have hlog5 : Real.log (|T| + 5) ≤ Real.log (|T| + 3) + 1 := by
+    have h53 : |T| + 5 ≤ (|T| + 3) * Real.exp 1 := by
+      have := Real.add_one_le_exp (1:ℝ); nlinarith [abs_nonneg T]
+    calc Real.log (|T| + 5) ≤ Real.log ((|T| + 3) * Real.exp 1) :=
+          Real.log_le_log (by positivity) h53
+      _ = Real.log (|T| + 3) + 1 := by
+          rw [Real.log_mul (by positivity) (Real.exp_pos 1).ne', Real.log_exp]
+  have hlogB : Real.log B ≤ (Real.log 24 + 2) * Real.log (q * (|T| + 3)) := by
+    rw [hB, Real.log_mul (by positivity) (by positivity), Real.log_mul (by norm_num) (by positivity)]
+    have hsplit : Real.log (q * (|T| + 3)) = Real.log q + Real.log (|T| + 3) :=
+      Real.log_mul (by positivity) (by positivity)
+    have hlq : 0 ≤ Real.log q := Real.log_nonneg hq1
+    have hl24 : 0 ≤ Real.log 24 := Real.log_nonneg (by norm_num)
+    rw [hsplit] at hlogqT ⊢
     nlinarith
-  have hlogB : Real.log B ≤ (|Real.log (6 * C)| + 2 * A') * Real.log |T| := by
-    rw [hB, Real.log_mul (by positivity) (by positivity),
-      Real.log_rpow (by positivity : (0:ℝ) < |T| + 5)]
-    have h1 := le_abs_self (Real.log (6 * C))
-    have h2 : |Real.log (6 * C)| ≤ |Real.log (6 * C)| * Real.log |T| :=
-      le_mul_of_one_le_right (abs_nonneg _) hlogT
-    have h3 : A' * Real.log (|T| + 5) ≤ A' * (2 * Real.log |T|) :=
-      mul_le_mul_of_nonneg_left hlog5 hA'0
-    linarith
   calc ((reZeroSetL χ T).ncard : ℝ) ≤ (Z.card : ℝ) := hcard
     _ ≤ _ := hsum
     _ ≤ 1 / Real.log (R / r) * Real.log B := by exact_mod_cast hZ
-    _ ≤ 1 / Real.log (R / r) * ((|Real.log (6 * C)| + 2 * A') * Real.log |T|) :=
+    _ ≤ 1 / Real.log (R / r) * ((Real.log 24 + 2) * Real.log (q * (|T| + 3))) :=
         mul_le_mul_of_nonneg_left hlogB (by positivity)
     _ = _ := by ring
 
+/-- **Backlund's bound for L(s,χ), q-uniform** (absolute C; all q, all χ ≠ 1, all T). -/
+theorem backlund_horizontalChi_uniform : ∃ C : ℝ, ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q),
+    χ ≠ 1 → ∀ T : ℝ, (∀ ρ, IsNontrivialZeroL χ ρ → ρ.im ≠ T) →
+      |(∫ σ in (1 / 2 : ℝ)..2, logDeriv χ.LFunction (σ + T * I)).im|
+        ≤ C * Real.log (q * (|T| + 3)) := by
+  obtain ⟨C, hC⟩ := reZeroSetL_card_le_uniform
+  refine ⟨2 * Real.pi * (C + 1), fun q _ χ hχ1 T hord => ?_⟩
+  obtain ⟨hfin, hcount⟩ := hC q χ hχ1 T
+  have hq1 : (1:ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  have hqT : (3:ℝ) ≤ q * (|T| + 3) := by nlinarith [abs_nonneg T]
+  have hlog : 1 ≤ Real.log (q * (|T| + 3)) := by
+    rw [← Real.log_exp 1]
+    exact Real.log_le_log (Real.exp_pos 1) (by linarith [Real.exp_one_lt_d9.trans (by norm_num : (2.7182818286 : ℝ) < 3)])
+  have h := im_integral_logDeriv_le hχ1 (LFunction_ne_zero_on_segment hχ1 hord) hfin
+  refine h.trans ?_
+  have hπ := Real.pi_pos
+  nlinarith [hcount, hlog, mul_nonneg hπ.le (sub_nonneg.mpr hlog)]
+
+
+/-! ## Per-χ forms -/
+
+/-- **(J) the Jensen half of Backlund's bound for L(s,χ)**: #{σ ∈ [1/2,2] : Re L(σ+iT,χ) = 0} ≪_χ log |T|
+(per-χ form; from the q-uniform bound, since q(|T|+3) ≤ |T|² once |T| ≥ 2q + 6). -/
+theorem reZeroSetL_card_le (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ |T| →
+    (reZeroSetL χ T).Finite ∧ ((reZeroSetL χ T).ncard : ℝ) ≤ C * Real.log |T| := by
+  obtain ⟨C, hC⟩ := reZeroSetL_card_le_uniform
+  have hq1 : (1:ℝ) ≤ q := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne q)
+  refine ⟨2 * |C|, 2 * q + 6, fun T hT => ?_⟩
+  obtain ⟨hfin, hcount⟩ := hC q χ hχ1 T
+  refine ⟨hfin, hcount.trans ?_⟩
+  have hT3 : (3:ℝ) ≤ |T| := by linarith
+  have hqT : (q:ℝ) * (|T| + 3) ≤ |T| ^ 2 := by
+    nlinarith [mul_nonneg (sub_nonneg.2 hT) (by positivity : (0:ℝ) ≤ |T| + 3)]
+  have hpos : (0:ℝ) < q * (|T| + 3) := by positivity
+  have hlog : Real.log (q * (|T| + 3)) ≤ 2 * Real.log |T| :=
+    calc Real.log (q * (|T| + 3)) ≤ Real.log (|T| ^ 2) := Real.log_le_log hpos hqT
+      _ = 2 * Real.log |T| := by rw [Real.log_pow]; norm_num
+  have hlog0 : 0 ≤ Real.log (q * (|T| + 3)) := Real.log_nonneg (by nlinarith)
+  calc C * Real.log (q * (|T| + 3)) ≤ |C| * Real.log (q * (|T| + 3)) :=
+        mul_le_mul_of_nonneg_right (le_abs_self C) hlog0
+    _ ≤ |C| * (2 * Real.log |T|) := mul_le_mul_of_nonneg_left hlog (abs_nonneg C)
+    _ = 2 * |C| * Real.log |T| := by ring
 
 /-- **Backlund's bound for L(s,χ)**: two-sided in T; constants depend on χ. -/
 theorem backlund_horizontalChi (hχ1 : χ ≠ 1) : ∃ C T₀ : ℝ, ∀ T : ℝ, T₀ ≤ |T| →

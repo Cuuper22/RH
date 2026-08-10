@@ -5,19 +5,19 @@ SPDX-License-Identifier: Apache-2.0
 -/
 /-
 Zeta23 — [lem:ends], the two one-dimensional ν-weighted ψ estimates feeding the 𝓔₂ bound
-(the paper, §5.3).  Consumed by Zeta23/PrimeSideA/EndsE2.lean.
+(§5.3 of the paper).  Consumed by Zeta23/PrimeSideA/EndsE2.lean.
 
 * N1 `nu_weight_bound` (§5.3: "In the second factor, the range |τ'−τ_k| ≤ 2T has |τ'| ≤ 4T and
   contributes at most 2Ψ₀B; on |τ'−τ_k| =: r > 2T we have |τ'| ≤ 2r, |ν_X(τ')| ≤ B + log(r/T) and
   ψ(r) ≤ c_ϱ r⁻², contributing ≪ B/T. So the second factor is ≤ 3Ψ₀B uniformly in k."):
-      ∫_ℝ ψ(τ−a) |ν_X(τ)| dτ ≤ (2Ψ + 7c_ϱ)·B   for a ∈ I = [T,2T],  Ψ := 4 + 2 log(c_ϱL/4w) ≥ Ψ₀.
+      ∫_ℝ ψ(τ−a) |ν_X(τ)| dτ ≤ (2Ψ + 5c_ϱ)·B   for a ∈ I = [T,2T],  Ψ := 4 + 2 log(c_ϱL/4w) ≥ Ψ₀.
   Route (constants only differ): |ν_X(τ)| ≤ B + log⁺(|τ|/4T) ≤ B + 2√(|τ|/4T) ≤ B + 2 + 2√(|τ−a|/4T)
   for |a| ≤ 2T, so the integral is ≤ (B+2)∫ψ + T^{-1/2}∫ψ(r)√|r| dr ≤ (B+2)·2Ψ + 2L + 4c_ϱ/w.
 * N2 `nu_grid_bound` (§5.3: "The sum over k of the first factor equals ∫_{τ∉I}|ν_X(τ)|σ(τ)dτ with
   σ(τ) := Σ_{k<d} ψ(τ−τ_k) … Hence ∫_{τ∉I}|ν_X|σ ≪ BLl"):
       ∫_{ℝ∖I} |ν_X(τ)| σ(τ) dτ ≤ CN2(c_ϱ)·B·L·l.
 Here ψ = `psiA cϱ p` [eq:psidef], B = `B` = l + 4√X and `NuBound p` = [eq:Bdef]
-(discharged by `nuX_abs_le`), all from Zeta23/PrimeSideA/EndsCore.lean.
+(discharged by nuX_abs_le), all from Zeta23/PrimeSideA/EndsCore.lean.
 -/
 import Zeta23.PrimeSideA.EndsWeighted
 
@@ -96,10 +96,11 @@ theorem integral_psiA_mul_sqrt_le (hF : LocalHypsCoreW cϱ p F) :
   rw [hsplit]
   linarith
 
-/-- **N1** (§5.3, "the second factor is ≤ 3Ψ₀B uniformly in k"): for a ∈ [T,2T],
-  ∫_ℝ ψ(τ−a)|ν_X(τ)| dτ ≤ (2(4 + 2 log(c_ϱL/4w)) + 7c_ϱ)·B. -/
-theorem nu_weight_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
-    (hBl : p.l ≤ B) (hL2l : p.L ≤ 2 * p.l)
+/-- **N1, master form** (§5.3, "the second factor is ≤ 3Ψ₀B uniformly in k"): for a ∈ [T,2T] and any level
+`B` with `L ≤ 2B`, `4 ≤ B`,   ∫_ℝ ψ(τ−a)|ν(τ)| dτ ≤ (2(4 + 2 log(c_ϱL/4w)) + 7c_ϱ)·B.
+(The two paper regimes are the corollaries `nu_weight_bound` (B ≥ l ≥ L/2) and `nu_weight_bound_L` (B ≥ L).) -/
+theorem nu_weight_bound_of_L_le_two_B (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
+    (hL2B : p.L ≤ 2 * B) (hB4 : 4 ≤ B)
     (hT : 1 ≤ p.T) {a : ℝ} (ha : a ∈ Icc p.T (2 * p.T)) :
     ∫ τ : ℝ, psiA cϱ p (τ - a) * |ν τ|
       ≤ (2 * (4 + 2 * Real.log (cϱ * p.L / (4 * p.w))) + 7 * cϱ) * B := by
@@ -109,8 +110,7 @@ theorem nu_weight_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (h�
   have hw : 0 < p.w := by linarith
   have hc4 := hF.four_le_cϱ
   have hc : (0 : ℝ) ≤ cϱ := by linarith
-  have hl1 : 1 ≤ p.l := hF.one_le_l
-  have hB1 : 1 ≤ B := le_trans hl1 hBl
+  have hB1 : 1 ≤ B := by linarith
   have hB0 : 0 ≤ B := by linarith
   -- pointwise domination (same as in integrable_psiA_shift_mul_nu)
   have hpt : ∀ τ, psiA cϱ p (τ - a) * |ν τ|
@@ -171,29 +171,35 @@ theorem nu_weight_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (h�
     calc (2 * p.L + 4 * (cϱ / p.w)) / Real.sqrt p.T ≤ 2 * p.L + 4 * (cϱ / p.w) :=
           div_le_self (by positivity) hsT
       _ ≤ 2 * p.L + 4 * cϱ := by linarith
-  have hLl : p.L ≤ 2 * p.l := hL2l
   have harg : 0 < cϱ * p.L / (4 * p.w) := by positivity
   have hlog : Real.log (cϱ * p.L / (4 * p.w)) ≤ cϱ * p.L / 4 - 1 := by
     have h1 := Real.log_le_sub_one_of_pos harg
     have h2 : cϱ * p.L / (4 * p.w) ≤ cϱ * p.L / 4 := by
       apply div_le_div_of_nonneg_left (by positivity) (by norm_num) (by linarith)
     linarith
-  have hX1 : 1 ≤ Real.sqrt p.X := by
-    rw [← Real.sqrt_one]
-    exact Real.sqrt_le_sqrt (by have := Real.add_one_le_exp p.L; unfold Setting.X; linarith)
-  have hl4 : 4 ≤ p.l := by linarith [hF.eight_le_L]
-  have hcB : cϱ * p.l ≤ cϱ * B := mul_le_mul_of_nonneg_left hBl hc
-  have hcl : cϱ * p.L ≤ cϱ * (2 * p.l) := mul_le_mul_of_nonneg_left hLl hc
-  have h4l : 4 * p.l ≤ cϱ * p.l := mul_le_mul_of_nonneg_right hc4 (by linarith)
-  have hcX : cϱ ≤ cϱ * Real.sqrt p.X := le_mul_of_one_le_right hc hX1
-  have hΨ0 : 0 ≤ 4 + 2 * Real.log (cϱ * p.L / (4 * p.w)) := by
-    have : 1 ≤ cϱ * p.L / (4 * p.w) := by
-      rw [le_div_iff₀ (by positivity)]
-      have := hF.w_le; nlinarith
-    have := Real.log_nonneg this; linarith
+  -- endgame: 4Ψ + 2L + 4c ≤ 8 + 2cL + 2L + 4c ≤ 8 + 4c + 5cB ≤ 7cB  (Ψ ≤ 2 + cL/2, L ≤ 2B, 4 ≤ c, 4 ≤ B)
+  have hcL : cϱ * p.L ≤ 2 * (cϱ * B) := by nlinarith
+  have h2L : 2 * p.L ≤ cϱ * B := by nlinarith
+  have h8c : 8 + 4 * cϱ ≤ 2 * (cϱ * B) := by nlinarith
+  nlinarith [hmain, htail, hlog, hcL, h2L, h8c, hB0]
 
-  have hcB4 : 16 ≤ cϱ * B := by nlinarith
-  nlinarith [hmain, htail, hlog, hcl, h4l, hcB, hΨ0, hB0, hBl, hLl, hl4, hc4, hcB4]
+/-- **N1** (§5.3, "the second factor is ≤ 3Ψ₀B uniformly in k"): for a ∈ [T,2T],
+  ∫_ℝ ψ(τ−a)|ν_X(τ)| dτ ≤ (2(4 + 2 log(c_ϱL/4w)) + 7c_ϱ)·B   (paper regime B ≥ l, L ≤ 2l). -/
+theorem nu_weight_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
+    (hBl : p.l ≤ B) (hL2l : p.L ≤ 2 * p.l)
+    (hT : 1 ≤ p.T) {a : ℝ} (ha : a ∈ Icc p.T (2 * p.T)) :
+    ∫ τ : ℝ, psiA cϱ p (τ - a) * |ν τ|
+      ≤ (2 * (4 + 2 * Real.log (cϱ * p.L / (4 * p.w))) + 7 * cϱ) * B := by
+  have hl4 : 4 ≤ p.l := by linarith [hF.eight_le_L]
+  exact nu_weight_bound_of_L_le_two_B hνc hF hν (by linarith) (by linarith) hT ha
+
+/-- **N1, L-intrinsic form** (no bandwidth cap; the absorbing hypothesis is `L ≤ B`). -/
+theorem nu_weight_bound_L (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
+    (hBL : p.L ≤ B)
+    (hT : 1 ≤ p.T) {a : ℝ} (ha : a ∈ Icc p.T (2 * p.T)) :
+    ∫ τ : ℝ, psiA cϱ p (τ - a) * |ν τ|
+      ≤ (2 * (4 + 2 * Real.log (cϱ * p.L / (4 * p.w))) + 7 * cϱ) * B := by
+  exact nu_weight_bound_of_L_le_two_B hνc hF hν (by linarith [hF.L_pos]) (by linarith [hF.eight_le_L]) hT ha
 
 
 /-! ### N2: reduction to the half-line and the majorant -/
@@ -235,7 +241,7 @@ def Sgrid (cϱ : ℝ) (p : Setting) (Δ : ℝ) : ℝ :=
 lemma Setting.h_pos (hL : 0 < p.L) : 0 < p.h := by
   unfold Setting.h; positivity
 
-lemma Setting.h_inv (hL : 0 < p.L) : (p.h)⁻¹ = p.L / (2 * π) := by
+lemma Setting.h_inv (_hL : 0 < p.L) : (p.h)⁻¹ = p.L / (2 * π) := by
   unfold Setting.h; rw [inv_div]
 
 /-- near range (§5.3): S(Δ) ≤ ψ(Δ) + h⁻¹∫_Δ^∞ ψ. -/
@@ -261,7 +267,7 @@ lemma Sgrid_le_far (hF : LocalHypsCoreW cϱ p F) {Δ : ℝ} (hΔ : 0 ≤ Δ) :
     _ = p.d * psiA cϱ p Δ := by rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
 
 lemma Sgrid_nonneg (hF : LocalHypsCoreW cϱ p F) (Δ : ℝ) : 0 ≤ Sgrid cϱ p Δ :=
-  Finset.sum_nonneg fun j _ => psiA_nonneg_of hF _
+  Finset.sum_nonneg fun _ _ => psiA_nonneg_of hF _
 
 /-- σ(τ) = S(T−τ) for τ ≤ T;  σ(τ) ≤ S(τ−2T) for τ ≥ 2T. -/
 lemma sigma_eq_left (τ : ℝ) :
@@ -388,7 +394,7 @@ lemma dom_right (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν) (hT : 0 < p
 
 /-! ### N2: integrating the majorant -/
 
-lemma Mnear_integrableOn (hF : LocalHypsCoreW cϱ p F) (hT : 0 < p.T) :
+lemma Mnear_integrableOn (hF : LocalHypsCoreW cϱ p F) (_hT : 0 < p.T) :
     IntegrableOn (Mnear cϱ p B) (Ioc 0 (2 * p.T)) := by
   have hΨ0 : 0 ≤ ∫ r in Ioi 0, psiA cϱ p r :=
     setIntegral_nonneg measurableSet_Ioi fun r _ => psiA_nonneg_of hF r
@@ -420,7 +426,7 @@ lemma Mfar_eq_rpow (hT : 0 < p.T) {Δ : ℝ} (hΔ : 0 < Δ) :
   have : Real.sqrt p.T ≠ 0 := (Real.sqrt_pos.mpr hT).ne'
   field_simp
 
-lemma Mfar_integrableOn (hF : LocalHypsCoreW cϱ p F) (hT : 0 < p.T) :
+lemma Mfar_integrableOn (_hF : LocalHypsCoreW cϱ p F) (hT : 0 < p.T) :
     IntegrableOn (Mfar cϱ p B) (Ioi (2 * p.T)) := by
   have h2T : 0 < 2 * p.T := by linarith
   have hg : IntegrableOn (fun Δ : ℝ => p.d * (cϱ / p.w) *
@@ -606,13 +612,14 @@ lemma log_two_mul_T_le (hT : 0 < p.T) : Real.log (2 * p.T) ≤ p.l + 12 := by
   rw [h2]
   linarith
 
-set_option maxHeartbeats 800000 in
-/-- **N2** (§5.3, "∫_{τ∉I}|ν_X|σ ≪ BLl", σ(τ) := Σ_{k<d} ψ(τ−τ_k)). -/
-theorem nu_grid_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
-    (hBl : p.l ≤ B) (hL2l : p.L ≤ 2 * p.l)
-    (hT : 2 * π * Real.exp 8 ≤ p.T) :
+/-- **N2, raw form** (§5.3): the common core of `nu_grid_bound` / `nu_grid_bound_L` — the majorant
+integrated on both half-lines, before the polynomial endgame:
+  ∫_{τ∉I}|ν|σ ≤ 2·(B·(2 + 2L + (25/2)c_ϱL + c_ϱL²/2 + c_ϱLl) + L·c_ϱ·B),   any level B ≥ 8. -/
+theorem nu_grid_bound_raw (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
+    (hB8 : 8 ≤ B) (hT : 2 * π * Real.exp 8 ≤ p.T) :
     ∫ τ in (p.I)ᶜ, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
-      ≤ CN2 cϱ * (B * (p.L * p.l)) := by
+      ≤ 2 * (B * (2 + 2 * p.L + 25 / 2 * cϱ * p.L + cϱ * p.L ^ 2 / 2 + cϱ * p.L * p.l)
+          + p.L * cϱ * B) := by
   have hl8 : 8 ≤ p.l := Setting.le_l_of_T hT
   have hT1 : 1 ≤ p.T := Setting.one_le_T (by norm_num) hT
   have hT0 : 0 < p.T := by linarith
@@ -622,10 +629,7 @@ theorem nu_grid_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν 
   have hc : (0:ℝ) ≤ cϱ := by linarith
   have hw1 := hF.one_le_w
   have hw : 0 < p.w := by linarith
-  have hX1 : 0 ≤ Real.sqrt p.X := Real.sqrt_nonneg _
-
   have hB : 0 ≤ B := by linarith
-  have hLl : p.L ≤ 2 * p.l := hL2l
   -- the set-up
   have hint := integrableOn_sigma_mul_abs_nuX hνc hF hν hT1
   have hcompl : (p.I)ᶜ = Iio p.T ∪ Ioi (2 * p.T) := by
@@ -702,6 +706,21 @@ theorem nu_grid_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν 
         + p.L * cϱ * B := by
     refine hM.trans (add_le_add (hnear.trans (le_of_eq ?_)) hfar)
     ring
+  linarith [hleft, hright, hside]
+
+/-- **N2** (§5.3, "∫_{τ∉I}|ν_X|σ ≪ BLl", σ(τ) := Σ_{k<d} ψ(τ−τ_k))  (paper regime B ≥ l, L ≤ 2l). -/
+theorem nu_grid_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
+    (hBl : p.l ≤ B) (hL2l : p.L ≤ 2 * p.l)
+    (hT : 2 * π * Real.exp 8 ≤ p.T) :
+    ∫ τ in (p.I)ᶜ, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
+      ≤ CN2 cϱ * (B * (p.L * p.l)) := by
+  have hl8 : 8 ≤ p.l := Setting.le_l_of_T hT
+  have hL8 : 8 ≤ p.L := hF.eight_le_L
+  have hL := hF.L_pos
+  have hc4 := hF.four_le_cϱ
+  have hc : (0:ℝ) ≤ cϱ := by linarith
+  have hB : 0 ≤ B := by linarith
+  have hLl : p.L ≤ 2 * p.l := hL2l
   have hpoly : 2 * (B * (2 + 2 * p.L + 25 / 2 * cϱ * p.L + cϱ * p.L ^ 2 / 2 + cϱ * p.L * p.l)
         + p.L * cϱ * B) ≤ 100 * (1 + cϱ) * (B * (p.L * p.l)) := by
     have hLl64 : 64 ≤ p.L * p.l := by
@@ -739,113 +758,13 @@ theorem nu_grid_bound (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν 
     rw [CN2_def, abs_of_nonneg hc]
     have := abs_nonneg (Real.log cϱ)
     nlinarith
-  calc (∫ τ in Iio p.T, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|)
-        + ∫ τ in Ioi (2 * p.T), (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
-      ≤ 2 * ∫ Δ in Ioi 0, Mtot cϱ p B Δ := by linarith
-    _ ≤ 2 * (B * (2 + 2 * p.L + 25 / 2 * cϱ * p.L + cϱ * p.L ^ 2 / 2 + cϱ * p.L * p.l)
-        + p.L * cϱ * B) := by linarith
+  calc ∫ τ in (p.I)ᶜ, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
+      ≤ 2 * (B * (2 + 2 * p.L + 25 / 2 * cϱ * p.L + cϱ * p.L ^ 2 / 2 + cϱ * p.L * p.l)
+          + p.L * cϱ * B) := nu_grid_bound_raw hνc hF hν (by linarith) hT
     _ ≤ 100 * (1 + cϱ) * (B * (p.L * p.l)) := hpoly
     _ ≤ CN2 cϱ * (B * (p.L * p.l)) :=
         mul_le_mul_of_nonneg_right hCN2 (by positivity)
 
-/-! ### L-intrinsic forms (no bandwidth cap), for the small-T family regime -/
-
-/-- **N1, L-intrinsic form** (no bandwidth cap; the absorbing hypothesis is `L ≤ B`). -/
-theorem nu_weight_bound_L (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
-    (hBL : p.L ≤ B)
-    (hT : 1 ≤ p.T) {a : ℝ} (ha : a ∈ Icc p.T (2 * p.T)) :
-    ∫ τ : ℝ, psiA cϱ p (τ - a) * |ν τ|
-      ≤ (2 * (4 + 2 * Real.log (cϱ * p.L / (4 * p.w))) + 7 * cϱ) * B := by
-  have hT0 : 0 < p.T := by linarith
-  have hL := hF.L_pos
-  have hw1 := hF.one_le_w
-  have hw : 0 < p.w := by linarith
-  have hc4 := hF.four_le_cϱ
-  have hc : (0 : ℝ) ≤ cϱ := by linarith
-  have hL8 : 8 ≤ p.L := hF.eight_le_L
-  have hB1 : 1 ≤ B := by linarith
-  have hB0 : 0 ≤ B := by linarith
-  -- pointwise domination (same as in integrable_psiA_shift_mul_nu)
-  have hpt : ∀ τ, psiA cϱ p (τ - a) * |ν τ|
-      ≤ psiA cϱ p (τ - a) * (B + 2)
-        + psiA cϱ p (τ - a) * Real.sqrt |τ - a| / Real.sqrt p.T := by
-    intro τ
-    have hν1 : |ν τ| ≤ B + 2 * Real.sqrt (|τ| / (4 * p.T)) :=
-      abs_nuX_le_B_add_sqrt hν hT0 τ
-    have hsh : Real.sqrt (|τ| / (4 * p.T)) ≤ 1 + Real.sqrt (|τ - a| / (4 * p.T)) := by
-      have := sqrt_shift_le (a := a) (r := τ - a) (T' := p.T) hT0 (by
-        rw [abs_of_nonneg (by linarith [ha.1] : (0:ℝ) ≤ a)]
-        linarith [ha.2])
-      simpa using this
-    have hsq : Real.sqrt (|τ - a| / (4 * p.T)) = Real.sqrt |τ - a| / (2 * Real.sqrt p.T) := by
-      rw [Real.sqrt_div (abs_nonneg _), show (4 : ℝ) * p.T = 2 ^ 2 * p.T by norm_num,
-        Real.sqrt_mul (by positivity), Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 2)]
-    have hs0 : 0 < Real.sqrt p.T := Real.sqrt_pos.mpr hT0
-    have h2 : 2 * Real.sqrt (|τ - a| / (4 * p.T)) = Real.sqrt |τ - a| / Real.sqrt p.T := by
-      rw [hsq]; field_simp
-    have hbound : |ν τ| ≤ (B + 2) + Real.sqrt |τ - a| / Real.sqrt p.T := by
-      calc |ν τ| ≤ B + 2 * Real.sqrt (|τ| / (4 * p.T)) := hν1
-        _ ≤ B + 2 * (1 + Real.sqrt (|τ - a| / (4 * p.T))) := by gcongr
-        _ = (B + 2) + 2 * Real.sqrt (|τ - a| / (4 * p.T)) := by ring
-        _ = (B + 2) + Real.sqrt |τ - a| / Real.sqrt p.T := by rw [h2]
-    calc psiA cϱ p (τ - a) * |ν τ|
-        ≤ psiA cϱ p (τ - a) * ((B + 2) + Real.sqrt |τ - a| / Real.sqrt p.T) :=
-          mul_le_mul_of_nonneg_left hbound (psiA_nonneg_of hF _)
-      _ = _ := by ring
-  have hI1 := integrable_psiA_shift_mul_nu hνc hF hν hB1 hT ha
-  have hI2 : Integrable (fun τ => psiA cϱ p (τ - a) * (B + 2)) :=
-    (psiA_shift_integrable hF a).mul_const _
-  have hI3 : Integrable (fun τ => psiA cϱ p (τ - a) * Real.sqrt |τ - a| / Real.sqrt p.T) :=
-    ((integrable_psiA_mul_sqrt hF).comp_sub_right a).div_const _
-  have hΨ := integral_psiA_le hF
-  have hS := integral_psiA_mul_sqrt_le hF
-  have hmain : ∫ τ : ℝ, psiA cϱ p (τ - a) * |ν τ|
-      ≤ (B + 2) * (2 * (4 + 2 * Real.log (cϱ * p.L / (4 * p.w))))
-        + (2 * p.L + 4 * (cϱ / p.w)) / Real.sqrt p.T := by
-    calc ∫ τ : ℝ, psiA cϱ p (τ - a) * |ν τ|
-        ≤ ∫ τ : ℝ, (psiA cϱ p (τ - a) * (B + 2)
-            + psiA cϱ p (τ - a) * Real.sqrt |τ - a| / Real.sqrt p.T) :=
-          integral_mono hI1 (hI2.add hI3) hpt
-      _ = ((B + 2) * ∫ r, psiA cϱ p r)
-          + (∫ r, psiA cϱ p r * Real.sqrt |r|) / Real.sqrt p.T := by
-          have hshift : ∫ τ : ℝ, psiA cϱ p (τ - a) * Real.sqrt |τ - a|
-              = ∫ r : ℝ, psiA cϱ p r * Real.sqrt |r| :=
-            integral_sub_right_eq_self (fun r => psiA cϱ p r * Real.sqrt |r|) a
-          rw [integral_add hI2 hI3, integral_mul_const, integral_div, integral_psiA_shift,
-            mul_comm, hshift]
-      _ ≤ (B + 2) * (2 * (4 + 2 * Real.log (cϱ * p.L / (4 * p.w))))
-          + (2 * p.L + 4 * (cϱ / p.w)) / Real.sqrt p.T :=
-          add_le_add (mul_le_mul_of_nonneg_left hΨ (by positivity))
-            (div_le_div_of_nonneg_right hS (Real.sqrt_nonneg _))
-  -- the arithmetic:  4Ψ + (2L + 4c/w)/√T ≤ 5cB
-  have hsT : 1 ≤ Real.sqrt p.T := by rw [← Real.sqrt_one]; exact Real.sqrt_le_sqrt hT
-  have hcw : cϱ / p.w ≤ cϱ := div_le_self hc hw1
-  have htail : (2 * p.L + 4 * (cϱ / p.w)) / Real.sqrt p.T ≤ 2 * p.L + 4 * cϱ := by
-    calc (2 * p.L + 4 * (cϱ / p.w)) / Real.sqrt p.T ≤ 2 * p.L + 4 * (cϱ / p.w) :=
-          div_le_self (by positivity) hsT
-      _ ≤ 2 * p.L + 4 * cϱ := by linarith
-  have harg : 0 < cϱ * p.L / (4 * p.w) := by positivity
-  have hlog : Real.log (cϱ * p.L / (4 * p.w)) ≤ cϱ * p.L / 4 - 1 := by
-    have h1 := Real.log_le_sub_one_of_pos harg
-    have h2 : cϱ * p.L / (4 * p.w) ≤ cϱ * p.L / 4 := by
-      apply div_le_div_of_nonneg_left (by positivity) (by norm_num) (by linarith)
-    linarith
-  have hX1 : 1 ≤ Real.sqrt p.X := by
-    rw [← Real.sqrt_one]
-    exact Real.sqrt_le_sqrt (by have := Real.add_one_le_exp p.L; unfold Setting.X; linarith)
-  have hcB : cϱ * p.L ≤ cϱ * B := mul_le_mul_of_nonneg_left hBL hc
-  have h4B : 4 * B ≤ cϱ * B := mul_le_mul_of_nonneg_right hc4 hB0
-  have hcX : cϱ ≤ cϱ * Real.sqrt p.X := le_mul_of_one_le_right hc hX1
-  have hΨ0 : 0 ≤ 4 + 2 * Real.log (cϱ * p.L / (4 * p.w)) := by
-    have : 1 ≤ cϱ * p.L / (4 * p.w) := by
-      rw [le_div_iff₀ (by positivity)]
-      have := hF.w_le; nlinarith
-    have := Real.log_nonneg this; linarith
-
-  have hcB32 : 32 ≤ cϱ * B := by nlinarith
-  nlinarith [hmain, htail, hlog, hcB, h4B, hΨ0, hB0, hBL, hL8, hc4, hcB32]
-
-set_option maxHeartbeats 800000 in
 /-- **N2, L-intrinsic form**: ∫_{τ∉I}|ν|σ ≤ CN2·B·L·(L + l)  (l = log(T/2π) carries the
 genuine log T from the window geometry; no bandwidth cap, absorbing hypothesis `L ≤ B`). -/
 theorem nu_grid_bound_L (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν)
@@ -854,93 +773,11 @@ theorem nu_grid_bound_L (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (h�
     ∫ τ in (p.I)ᶜ, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
       ≤ CN2 cϱ * (B * (p.L * (p.L + p.l))) := by
   have hl8 : 8 ≤ p.l := Setting.le_l_of_T hT
-  have hT1 : 1 ≤ p.T := Setting.one_le_T (by norm_num) hT
-  have hT0 : 0 < p.T := by linarith
   have hL8 : 8 ≤ p.L := hF.eight_le_L
   have hL := hF.L_pos
   have hc4 := hF.four_le_cϱ
   have hc : (0:ℝ) ≤ cϱ := by linarith
-  have hw1 := hF.one_le_w
-  have hw : 0 < p.w := by linarith
-  have hX1 : 0 ≤ Real.sqrt p.X := Real.sqrt_nonneg _
-
   have hB : 0 ≤ B := by linarith
-  -- the set-up
-  have hint := integrableOn_sigma_mul_abs_nuX hνc hF hν hT1
-  have hcompl : (p.I)ᶜ = Iio p.T ∪ Ioi (2 * p.T) := by
-    ext x
-    simp only [Setting.I, Zeta23.Iwin, Set.mem_compl_iff, Set.mem_Icc, Set.mem_union, Set.mem_Iio,
-      Set.mem_Ioi, not_and_or, not_le]
-  rw [hcompl] at hint ⊢
-  have hintL := hint.mono_set Set.subset_union_left
-  have hintR := hint.mono_set Set.subset_union_right
-  have hdisj : Disjoint (Iio p.T) (Ioi (2 * p.T)) :=
-    Set.disjoint_left.mpr fun x hx hx' => by
-      simp only [Set.mem_Iio, Set.mem_Ioi] at hx hx'; linarith
-  rw [setIntegral_union hdisj measurableSet_Ioi hintL hintR]
-  -- each side ≤ ∫_0^∞ Mtot
-  have hleft : ∫ τ in Iio p.T, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
-      ≤ ∫ Δ in Ioi 0, Mtot cϱ p B Δ := by
-    calc ∫ τ in Iio p.T, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
-        ≤ ∫ τ in Iio p.T, Mtot cϱ p B (p.T - τ) :=
-          setIntegral_mono_on hintL ((Mtot_integrable (B := B) hF hT0).comp_sub_left p.T).integrableOn
-            measurableSet_Iio (fun τ hτ => dom_left hF hν hT0 hτ)
-      _ = ∫ Δ in Ioi 0, Mtot cϱ p B Δ := setIntegral_Iio_comp_sub_left _ _
-  have hright : ∫ τ in Ioi (2 * p.T), (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
-      ≤ ∫ Δ in Ioi 0, Mtot cϱ p B Δ := by
-    calc ∫ τ in Ioi (2 * p.T), (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
-        ≤ ∫ τ in Ioi (2 * p.T), Mtot cϱ p B (τ - 2 * p.T) :=
-          setIntegral_mono_on hintR ((Mtot_integrable (B := B) hF hT0).comp_sub_right (2 * p.T)).integrableOn
-            measurableSet_Ioi (fun τ hτ => dom_right hF hν hT0 hτ)
-      _ = ∫ Δ in Ioi 0, Mtot cϱ p B Δ := setIntegral_Ioi_comp_sub_right _ _
-  -- the majorant's integral
-  set Ψ' := ∫ r in Ioi 0, psiA cϱ p r with hΨ'
-  have hΨ0 : 0 ≤ Ψ' := setIntegral_nonneg measurableSet_Ioi fun r _ => psiA_nonneg_of hF r
-  have hM : ∫ Δ in Ioi 0, Mtot cϱ p B Δ
-      ≤ B * (Ψ' + p.L / (2 * π) * (Ψ' + cϱ / p.w * Real.log (2 * p.T)))
-        + p.d / p.T * (cϱ / p.w) * (B / 2 + 4) := by
-    rw [integral_Mtot_eq hF hT0]
-    exact add_le_add (integral_Mnear_le hF hB hT1) (integral_Mfar_le hF hB hT1)
-  -- elementary bounds on the ingredients
-  have hΨ1 : Ψ' ≤ 2 + cϱ * p.L / 2 := by
-    have h1 : Ψ' ≤ 4 + 2 * Real.log (cϱ * p.L / (4 * p.w)) := hF.integral_psi_Ioi_le
-    have harg : 0 < cϱ * p.L / (4 * p.w) := by positivity
-    have h2 := Real.log_le_sub_one_of_pos harg
-    have h3 : cϱ * p.L / (4 * p.w) ≤ cϱ * p.L / 4 :=
-      div_le_div_of_nonneg_left (by positivity) (by norm_num) (by linarith)
-    linarith
-  have hlog := log_two_mul_T_le (p := p) hT0
-  have hcw : cϱ / p.w ≤ cϱ := div_le_self hc hw1
-  have hdT : p.d / p.T ≤ p.L := by
-    rw [div_le_iff₀ hT0]
-    have := p.d_le (by positivity : 0 ≤ p.L * p.T)
-    refine this.trans ?_
-    rw [div_le_iff₀ (by positivity)]
-    nlinarith [Real.pi_gt_three, mul_pos hL hT0]
-  have h2π : p.L / (2 * π) ≤ p.L := by
-    rw [div_le_iff₀ (by positivity)]; nlinarith [Real.pi_gt_three]
-  have hB2 : B / 2 + 4 ≤ B := by linarith
-  -- near ≤ B (Ψ₁ + L (Ψ₁ + c (l + 12))),  Ψ₁ = 2 + cL/2
-  have hinner : Ψ' + cϱ / p.w * Real.log (2 * p.T) ≤ (2 + cϱ * p.L / 2) + cϱ * (p.l + 12) := by
-    have hlog0 : 0 ≤ Real.log (2 * p.T) := Real.log_nonneg (by linarith)
-    have : cϱ / p.w * Real.log (2 * p.T) ≤ cϱ * (p.l + 12) :=
-      mul_le_mul hcw hlog hlog0 hc
-    linarith
-  have hinner0 : 0 ≤ Ψ' + cϱ / p.w * Real.log (2 * p.T) := by
-    have hlog0 : 0 ≤ Real.log (2 * p.T) := Real.log_nonneg (by linarith)
-    positivity
-  have hnear : B * (Ψ' + p.L / (2 * π) * (Ψ' + cϱ / p.w * Real.log (2 * p.T)))
-      ≤ B * ((2 + cϱ * p.L / 2) + p.L * ((2 + cϱ * p.L / 2) + cϱ * (p.l + 12))) := by
-    refine mul_le_mul_of_nonneg_left (add_le_add hΨ1 ?_) hB
-    exact mul_le_mul h2π hinner hinner0 hL.le
-  have hfar : p.d / p.T * (cϱ / p.w) * (B / 2 + 4) ≤ p.L * cϱ * B := by
-    apply mul_le_mul (mul_le_mul hdT hcw (by positivity) hL.le) hB2 (by positivity) (by positivity)
-  -- polynomial endgame
-  have hside : ∫ Δ in Ioi 0, Mtot cϱ p B Δ
-      ≤ B * (2 + 2 * p.L + 25 / 2 * cϱ * p.L + cϱ * p.L ^ 2 / 2 + cϱ * p.L * p.l)
-        + p.L * cϱ * B := by
-    refine hM.trans (add_le_add (hnear.trans (le_of_eq ?_)) hfar)
-    ring
   have hpoly : 2 * (B * (2 + 2 * p.L + 25 / 2 * cϱ * p.L + cϱ * p.L ^ 2 / 2 + cϱ * p.L * p.l)
         + p.L * cϱ * B) ≤ 100 * (1 + cϱ) * (B * (p.L * (p.L + p.l))) := by
     set M := p.L * (p.L + p.l) with hM
@@ -973,11 +810,9 @@ theorem nu_grid_bound_L (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (h�
     rw [CN2_def, abs_of_nonneg hc]
     have := abs_nonneg (Real.log cϱ)
     nlinarith
-  calc (∫ τ in Iio p.T, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|)
-        + ∫ τ in Ioi (2 * p.T), (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
-      ≤ 2 * ∫ Δ in Ioi 0, Mtot cϱ p B Δ := by linarith
-    _ ≤ 2 * (B * (2 + 2 * p.L + 25 / 2 * cϱ * p.L + cϱ * p.L ^ 2 / 2 + cϱ * p.L * p.l)
-        + p.L * cϱ * B) := by linarith
+  calc ∫ τ in (p.I)ᶜ, (∑ k ∈ Finset.range p.d, psiA cϱ p (τ - p.tau k)) * |ν τ|
+      ≤ 2 * (B * (2 + 2 * p.L + 25 / 2 * cϱ * p.L + cϱ * p.L ^ 2 / 2 + cϱ * p.L * p.l)
+          + p.L * cϱ * B) := nu_grid_bound_raw hνc hF hν (by linarith) hT
     _ ≤ 100 * (1 + cϱ) * (B * (p.L * (p.L + p.l))) := hpoly
     _ ≤ CN2 cϱ * (B * (p.L * (p.L + p.l))) :=
         mul_le_mul_of_nonneg_right hCN2 (by positivity)

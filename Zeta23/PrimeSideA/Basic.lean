@@ -4,14 +4,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-  Part of the Zeta23 formalization of the paper
+Part of the Zeta23 formalization of
   "More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
-  Bracketed labels ([prop:cross], [eq:Msplit], …) and section numbers (§5.4, …) refer to that paper.
 -/
 import Zeta23.PrimeSideA.Defs
 
--- Zeta23/PrimeSideA/Basic.lean — interface for the prime side, split out so that
--- downstream files depend only on this file and not on PrimeSideA.lean's Results section.
+
 -- Contains: LocalHyps, EventuallyAt, the 𝓜-bilinearity/sup-bound lemmas, the large-T regime
 -- lemmas, and all per-grid-point lemmas for [prop:trace].
 
@@ -21,7 +19,7 @@ import Zeta23.PrimeSideA.Defs
 Seam with `PrimeSideB.lean` ([prop:PP], [thm:traces]): see the header of
 `Zeta23/PrimeSideA/Defs.lean`.  Everything here is ζ-free: the zeros never
 appear in §5 ("In this section the zeros play no role", §5); `N(T,2T)` enters [prop:trace]
-only through [eq:muints] + [eq:RvM], which are taken as hypotheses on an abstract real `N`.
+only through [eq:muints] + [eq:RvM], which we take as hypotheses on an abstract real `N`.
 
 ## Shape of the results
 All error terms are explicit inequalities, uniform in `T`:
@@ -30,9 +28,9 @@ where `EventuallyAt cϱ lam P` means: there is `T₀` such that `P p F` holds fo
 `p` with `p.lam = lam`, `T₀ ≤ p.T` and every taper datum `F` satisfying `LocalHyps cϱ p F`.
 So `C` and `T₀` may depend on `c_ϱ`, on the constants inside H-Γ/H-cheb, and on `λ` — the paper
 has `C` depending on ϱ only and `T₀ = T₀(λ)` (§5.5); ours is the (weaker, sufficient at fixed λ)
-reading.  This is a deviation from the paper's formulation.
+reading.  This is a deviation from the paper.
 
-## Hypotheses consumed (all discharged elsewhere in the repository; none is a Lean axiom)
+## Hypotheses consumed (all proved elsewhere in the repository; none is a Lean axiom)
 * `Zeta23.GammaFacts` (H-Γ [eq:mufacts]+[eq:muints]) and `Zeta23.ChebyshevMertens` (H-cheb
   [lem:cheb]) — Zeta23/Hypotheses.lean, verbatim (fields of `PaperInputs`).
 * `LocalHyps cϱ p F` — taper/test-family facts [eq:psidef], [eq:abdef], [eq:gbounds], [eq:Phi2FT],
@@ -61,7 +59,8 @@ def psiA (cϱ : ℝ) (p : Setting) (r : ℝ) : ℝ :=
 
 /-- The facts about the test family at parameters `p` used in §5, each tagged with
 its paper label; `cϱ` is the profile constant `c_ϱ = 4‖ϱ'‖_∞ + 4‖ϱ''‖₁ ≥ 4` of [eq:phinorms]
-(= `Zeta23.Params.crho`).  This structure is instantiated elsewhere in the repository (a theorem
+(= `Zeta23.Params.crho`).  These facts are supplied by Taper.lean / Poisson.lean and
+PiFacts.lean: this structure is instantiated elsewhere in the repository (a theorem
 `LocalHyps P.crho ⟨T, P.lam, P.w⟩ ⟨P.phiHatR T, P.PhiR T, P.Aphi T, P.g T, P.a T, P.b T⟩` for
 valid `P` and large `T`), not assumed. -/
 structure LocalHyps (cϱ : ℝ) (p : Setting) (F : LocalFun) : Prop where
@@ -144,7 +143,7 @@ structure LocalHyps (cϱ : ℝ) (p : Setting) (F : LocalFun) : Prop where
   phiHat_le_psi : ∀ r, |F.phiHat r| ≤ psiA cϱ p r
   Phi_le_psi : ∀ r, |F.Phi r| ≤ psiA cϱ p r
   /-- Π_X is continuous and [eq:PiPfacts] `|Π_X(τ)| ≤ 3√X/(1+|τ|)` (§2.1), for the concrete
-  `Zeta23.PiX X` [eq:Pidef] — `PiX_bound` (holds for all `X ≥ 1`) / `PiX_continuous`. -/
+  `Zeta23.PiX X` [eq:Pidef] — via `PiX_bound` (holds for all `X ≥ 1`) and `PiX_continuous`. -/
   PiX_cont : Continuous (Zeta23.PiX p.X)
   PiX_bound : ∀ τ, |Zeta23.PiX p.X τ| ≤ 3 * Real.sqrt p.X / (1 + |τ|)
 
@@ -354,8 +353,9 @@ lemma LocalHyps.PiX_le_on_I (hF : LocalHyps cϱ p F) (hT : 0 < p.T) :
 "Nothing in Sections 4–5 used that φ is flat-topped" — except the [eq:gbounds] plateau lower
 bound and the [eq:abdef] lower bound on b.  LocalHypsCore is LocalHyps minus exactly those two
 facts, with the window-generic replacements g_nonneg and b_ge_half (both hold for the
-Montgomery–Taylor window of [thm:D], which does NOT satisfy LocalHyps).  Surviving field names
-are identical to LocalHyps'.  The window-generic §5 results are typed over this structure. -/
+Montgomery–Taylor window of [thm:D], which does not satisfy LocalHyps).  Surviving field names
+are identical to LocalHyps'.  The window-generic §5 results can be re-typed over this
+structure; the structure itself is purely additive. -/
 
 structure LocalHypsCore (cϱ : ℝ) (p : Setting) (F : LocalFun) : Prop where
   /-- [eq:phinorms] `c_ϱ ≥ 4`. -/
@@ -393,7 +393,7 @@ structure LocalHypsCore (cϱ : ℝ) (p : Setting) (F : LocalFun) : Prop where
   `∫ φ̂(r)² cos(ry) dr = 2π A_φ(y)` (`φ̂²` even, `A_φ` even, continuous, supported in `[−L,L]`). -/
   phiHat_sq_fourier : ∀ y, ∫ r, F.phiHat r ^ 2 * Real.cos (r * y) = 2 * π * F.Aphi y
   /-- window-generic remnant of [eq:gbounds]: `g ≥ 0` and `g ≤ A_φ ≤ (L−|y|)₊`
-  (the flat-top plateau lower bound `(L−2w−|y|)₊ ≤ g` is not here — §7.1). -/
+  (the flat-top plateau lower bound `(L−2w−|y|)₊ ≤ g` is NOT here — see §7.1). -/
   g_nonneg : ∀ y, 0 ≤ F.g y
   g_le_Aphi : ∀ y, F.g y ≤ F.Aphi y
   Aphi_le : ∀ y, F.Aphi y ≤ max (p.L - |y|) 0
@@ -440,7 +440,7 @@ structure LocalHypsCore (cϱ : ℝ) (p : Setting) (F : LocalFun) : Prop where
   phiHat_le_psi : ∀ r, |F.phiHat r| ≤ psiA cϱ p r
   Phi_le_psi : ∀ r, |F.Phi r| ≤ psiA cϱ p r
   /-- Π_X is continuous and [eq:PiPfacts] `|Π_X(τ)| ≤ 3√X/(1+|τ|)` (§2.1), for the concrete
-  `Zeta23.PiX X` [eq:Pidef] — `PiX_bound` (holds for all `X ≥ 1`) / `PiX_continuous`. -/
+  `Zeta23.PiX X` [eq:Pidef] — see `PiX_bound` (holds for all `X ≥ 1`) and `PiX_continuous`. -/
   PiX_cont : Continuous (Zeta23.PiX p.X)
   PiX_bound : ∀ τ, |Zeta23.PiX p.X τ| ≤ 3 * Real.sqrt p.X / (1 + |τ|)
 
@@ -551,15 +551,15 @@ lemma LocalHypsCore.phiHat_sq_mul_integrable_of_bdd (hF : LocalHypsCore cϱ p F)
   simpa only [mul_comm] using this
 
 
-/-- Window-generic taper facts without the bandwidth cap λ ≤ 1, for the regime
-λ = L/l ∈ (1, 2) (family window L = log(qT/2π), so L > l).
-Beyond-paper regime: §5's statements all assume λ ≤ 1; nothing Core-typed is re-typed here —
-this is a purely additive split: fields = LocalHypsCore's minus lam_le_one, and
-LocalHypsCore.toCoreW below.  Consumed (only) by the family-window statements. -/
+/-- Window-generic taper facts without the bandwidth cap λ ≤ 1 — the family regime is
+λ = L/l ∈ (1, 2) (family window L = log(qT/2π), so L > l; see Zeta23/ThmE/FamilyPrimeSide.lean).
+This regime goes beyond the paper: §5's statements all assume λ ≤ 1; nothing Core-typed is
+re-typed here — this is a purely additive split: fields = LocalHypsCore's minus lam_le_one, and
+LocalHypsCore.toCoreW below.  Consumed only by the family-average statements. -/
 structure LocalHypsCoreW (cϱ : ℝ) (p : Setting) (F : LocalFun) : Prop where
   /-- [eq:phinorms] `c_ϱ ≥ 4`. -/
   four_le_cϱ : 4 ≤ cϱ
-  /-- `0 < λ` [Notation] (no cap `λ ≤ 1` in this structure). -/
+  /-- `0 < λ` [Notation] (no upper cap here). -/
   lam_pos : 0 < p.lam
   /-- [eq:wrange] `1 ≤ w ≤ L/8` (forces `L ≥ 8`). -/
   one_le_w : 1 ≤ p.w
@@ -591,7 +591,7 @@ structure LocalHypsCoreW (cϱ : ℝ) (p : Setting) (F : LocalFun) : Prop where
   `∫ φ̂(r)² cos(ry) dr = 2π A_φ(y)` (`φ̂²` even, `A_φ` even, continuous, supported in `[−L,L]`). -/
   phiHat_sq_fourier : ∀ y, ∫ r, F.phiHat r ^ 2 * Real.cos (r * y) = 2 * π * F.Aphi y
   /-- window-generic remnant of [eq:gbounds]: `g ≥ 0` and `g ≤ A_φ ≤ (L−|y|)₊`
-  (the flat-top plateau lower bound `(L−2w−|y|)₊ ≤ g` is not here — §7.1). -/
+  (the flat-top plateau lower bound `(L−2w−|y|)₊ ≤ g` is NOT here — see §7.1). -/
   g_nonneg : ∀ y, 0 ≤ F.g y
   g_le_Aphi : ∀ y, F.g y ≤ F.Aphi y
   Aphi_le : ∀ y, F.Aphi y ≤ max (p.L - |y|) 0
@@ -638,7 +638,7 @@ structure LocalHypsCoreW (cϱ : ℝ) (p : Setting) (F : LocalFun) : Prop where
   phiHat_le_psi : ∀ r, |F.phiHat r| ≤ psiA cϱ p r
   Phi_le_psi : ∀ r, |F.Phi r| ≤ psiA cϱ p r
   /-- Π_X is continuous and [eq:PiPfacts] `|Π_X(τ)| ≤ 3√X/(1+|τ|)` (§2.1), for the concrete
-  `Zeta23.PiX X` [eq:Pidef] — `PiX_bound` (holds for all `X ≥ 1`) / `PiX_continuous`. -/
+  `Zeta23.PiX X` [eq:Pidef] — see `PiX_bound` (holds for all `X ≥ 1`) / `PiX_continuous`. -/
   PiX_cont : Continuous (Zeta23.PiX p.X)
   PiX_bound : ∀ τ, |Zeta23.PiX p.X τ| ≤ 3 * Real.sqrt p.X / (1 + |τ|)
 
@@ -712,7 +712,7 @@ lemma PX_abs_le (hcheb : Zeta23.ChebyshevMertens) :
     _ = Real.sqrt X := one_mul _
 
 /-- H-Γ [eq:mufacts] ⇒ for `T ≥ T₀`: `|μ(τ)| ≤ l` on `I = [T,2T]` (the paper's `0 < μ ≤ l on I`,
-§5.4/606; we only need the two-sided bound). -/
+§5.4; only the two-sided bound is needed). -/
 lemma mu_abs_le_l (hΓ : Zeta23.GammaFacts) : ∃ T₀ : ℝ, ∀ p : Setting, T₀ ≤ p.T →
     ∀ τ ∈ Set.Icc p.T (2 * p.T), |Zeta23.mu τ| ≤ p.l := by
   obtain ⟨C, hC⟩ := hΓ.stirling
@@ -1146,7 +1146,7 @@ lemma P_part_eq (hF : LocalHypsCore cϱ p F) (t : ℝ) :
     funext r
     rw [PX_eq, Finset.mul_sum, Finset.mul_sum]
     exact Finset.sum_congr rfl fun n _ => by ring
-  rw [h1, integral_finset_sum _ (fun n _ =>
+  rw [h1, integral_finsetSum _ (fun n _ =>
     ((hF.phiHat_sq_mul_integrable_of_bdd (by fun_prop) (fun x => Real.abs_cos_le_one _)).const_mul _))]
   simp_rw [integral_const_mul, integral_phiHat_sq_mul_cos_shift hF]
   rw [Finset.mul_sum]

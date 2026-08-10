@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23 — prime side, [lem:ends] "End effects" (the paper §5, §5.3), with [eq:Kdef],
+Zeta23 — prime side, [lem:ends] "End effects" (§5, §5.3 of the paper), with [eq:Kdef],
 [eq:trG2int], [eq:Kbounds].
 
 TARGET (consumed by thm:traces):
@@ -32,16 +32,16 @@ ROUTE (paper's, §5.3, with two simplifications that only change absolute consta
   second factor ≤ 3Ψ₀B, Σ_k first factor = ∫_{I^c}|ν|σ ≪ BLl via the grid bound
   σ(τ) ≤ ψ(Δ) + h⁻¹∫_Δ^∞ψ, σ ≤ d ψ(Δ); for the far range we use log⁺x ≤ 2√x instead of
   integrating logarithms (constants only).
-* [eq:Bdef] |ν_X(τ)| ≤ B + log⁺(|τ|/4T), B = l + 4√X (Zeta23/PiFacts.lean,
-  from H-Γ + H-cheb); B² ≤ 2l² + 32X.
+* [eq:Bdef] |ν_X(τ)| ≤ B + log⁺(|τ|/4T), B = l + 4√X: Zeta23/PiFacts.lean
+  (from H-Γ + H-cheb); B² ≤ 2l² + 32X.
 All constants C may depend on c_ϱ and λ (PrimeSideA convention); T₀ likewise.
 
 FILE LAYOUT:
   EndsCore.lean (this file) — defs, continuity/integrability, [eq:trG2int],
      decomposition, ψ toolkit, [eq:Kbounds] pointwise;
-  EndsE1.lean  — calE1_bound;   EndsE2.lean (1-D estimates N1/N2 in EndsNu.lean,
+  EndsE1.lean — calE1_bound;   EndsE2.lean (1-D estimates N1/N2 in EndsNu.lean,
      weights in EndsWeighted.lean) — calE2_bound;
-  Ends.lean  — assembly lem_ends' / lem_ends (proved from the two bounds).
+  Ends.lean — assembly lem_ends' / lem_ends (proved from the two bounds).
 -/
 import Zeta23.PrimeSideA.Basic
 import Zeta23.PiFacts
@@ -68,8 +68,8 @@ def Bconst (p : Setting) : ℝ := p.l + 4 * Real.sqrt p.X
 
 variable {cϱ : ℝ} (p : Setting) (F : LocalFun) (ν : ℝ → ℝ)
 
-/-! ν-generic layer (for Theorem E): every object below that involves the density is
-stated for an abstract `ν : ℝ → ℝ` (hypotheses: `Continuous ν` and `NuBound p B ν` for a free
+/-! ν-GENERIC LAYER (for Theorem E): every object below that involves the density is
+stated for an ABSTRACT `ν : ℝ → ℝ` (hypotheses: `Continuous ν` and `NuBound p B ν` for a free
 `B ≥ 0`); ζ is the instantiation `ν := Zeta23.nuX p.X`, `B := Bconst p` (bridges by `rfl`). -/
 
 /-- `G_{kl}` for an abstract density ν (`GentryA p F k l = GentryNu (Zeta23.nuX p.X) p F k l`, rfl). -/
@@ -274,7 +274,7 @@ theorem trG2integrand_integrable (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ
   have hT1 : 1 ≤ p.T := by linarith [Real.pi_gt_three]
   have h : Integrable (fun q : ℝ × ℝ => ∑ k : Fin p.d, ∑ l : Fin p.d,
       gkl p F ν k l q.1 * gkl p F ν k l q.2) := by
-    refine integrable_finset_sum _ fun k _ => integrable_finset_sum _ fun l _ => ?_
+    refine integrable_finsetSum _ fun k _ => integrable_finsetSum _ fun l _ => ?_
     exact (gkl_integrable hνc hF hν hT1 hB k l).mul_prod (gkl_integrable hνc hF hν hT1 hB k l)
   exact h.congr (Filter.Eventually.of_forall fun q => sum_gkl_mul_gkl q)
 
@@ -294,10 +294,10 @@ theorem eq_trG2int (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hν : N
   have hinner : ∀ k : Fin p.d, ∑ l : Fin p.d, GentryNu ν p F k l ^ 2
       = ∫ q : ℝ × ℝ, ∑ l : Fin p.d, gkl p F ν k l q.1 * gkl p F ν k l q.2 := by
     intro k
-    rw [integral_finset_sum _ (fun l _ => hI k l)]
+    rw [integral_finsetSum _ (fun l _ => hI k l)]
     exact Finset.sum_congr rfl fun l _ => hsq k l
   rw [Finset.sum_congr rfl fun k _ => hinner k,
-    ← integral_finset_sum _ (fun k _ => integrable_finset_sum _ fun l _ => hI k l)]
+    ← integral_finsetSum _ (fun k _ => integrable_finsetSum _ fun l _ => hI k l)]
   exact integral_congr_ae (Filter.Eventually.of_forall fun q => sum_gkl_mul_gkl q)
 
 /-- `∬_{I×I} K_∞² νν' = L² 𝓜` (§5.3 "note …"). -/
@@ -324,7 +324,7 @@ end Structure
 
 section PsiToolkit
 /-! ## ψ toolkit  (generic facts about `psiA cϱ p` = min(L, 2/|r|, c/(w r²)) [eq:psidef]).
-Statements consumed by EndsE1/EndsE2. -/
+Statements are consumed by EndsE1/EndsE2. -/
 variable {cϱ : ℝ} {p : Setting} {F : LocalFun}
 
 theorem psiA_of_ne_zero {r : ℝ} (hr : r ≠ 0) :
@@ -354,14 +354,13 @@ theorem psiA_nonneg (hL : 0 ≤ p.L) (hc : 0 ≤ cϱ) (hw : 0 < p.w) (r : ℝ) :
     refine le_min hL (le_min (by positivity) (by positivity))
 
 
-
 theorem psiA_abs (r : ℝ) : psiA cϱ p |r| = psiA cϱ p r := by
   rcases le_or_gt 0 r with h | h
   · rw [abs_of_nonneg h]
   · rw [abs_of_neg h, psiA_even]
 
 /-- ψ is antitone on [0, ∞). -/
-theorem psiA_antitoneOn (hL : 0 ≤ p.L) (hc : 0 ≤ cϱ) (hw : 0 < p.w) :
+theorem psiA_antitoneOn (_hL : 0 ≤ p.L) (hc : 0 ≤ cϱ) (hw : 0 < p.w) :
     AntitoneOn (psiA cϱ p) (Set.Ici 0) := by
   intro a ha b hb hab
   simp only [Set.mem_Ici] at ha hb
@@ -375,7 +374,7 @@ theorem psiA_antitoneOn (hL : 0 ≤ p.L) (hc : 0 ≤ cϱ) (hw : 0 < p.w) :
         (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ ha hab 2) hw.le)
 
 /-- ∫_ℝ ψ = 2 ∫_{(0,∞)} ψ (ψ even). -/
-theorem integral_psiA_eq_two_mul (hF : LocalHypsCoreW cϱ p F) :
+theorem integral_psiA_eq_two_mul (_hF : LocalHypsCoreW cϱ p F) :
     ∫ r, psiA cϱ p r = 2 * ∫ r in Set.Ioi 0, psiA cϱ p r := by
   have h := integral_comp_abs (f := psiA cϱ p)
   simp only [psiA_abs] at h
@@ -462,7 +461,7 @@ theorem sum_grid_le_of_antitoneOn {f : ℝ → ℝ} (hf : AntitoneOn f (Set.Ici 
           rw [intervalIntegral.integral_of_le h0m]
           exact setIntegral_mono_set hint
             (ae_restrict_of_forall_mem measurableSet_Ioi fun x hx => h0 x (hΔ.trans (le_of_lt hx)))
-            (HasSubset.Subset.eventuallyLE fun x hx => lt_of_le_of_lt (hΔa 0) hx.1)
+            (LE.le.eventuallyLE fun x hx => lt_of_le_of_lt (hΔa 0) hx.1)
 
 /-- grid sum vs integral (ψ antitone): Σ_{j<n} ψ(Δ + j h) ≤ ψ(Δ) + h⁻¹ ∫_{(Δ,∞)} ψ. -/
 theorem sum_psiA_grid_le (hF : LocalHypsCoreW cϱ p F) {Δ h : ℝ} (hΔ : 0 ≤ Δ) (hh : 0 < h) (n : ℕ) :
@@ -487,7 +486,7 @@ theorem sum_psiA_sq_grid_le (hF : LocalHypsCoreW cϱ p F) {Δ h : ℝ} (hΔ : 0 
     ∑ j ∈ Finset.range n, psiA cϱ p (Δ + j * h) ^ 2
       ≤ psiA cϱ p Δ ^ 2 + h⁻¹ * ∫ r in Set.Ioi Δ, psiA cϱ p r ^ 2 :=
   sum_grid_le_of_antitoneOn (f := fun r => psiA cϱ p r ^ 2) (psiA_sq_antitoneOn hF)
-    (fun x _ => sq_nonneg _) hΔ hh hF.psi_sq_integrable.integrableOn n
+    (fun _ _ => sq_nonneg _) hΔ hh hF.psi_sq_integrable.integrableOn n
 
 /-- tail for ψ²: ∫_{(Δ,∞)} ψ² ≤ (c_ϱ/w)²/(3Δ³) for Δ > 0. -/
 theorem setIntegral_psiA_sq_Ioi_le_div (hF : LocalHypsCoreW cϱ p F) {Δ : ℝ} (hΔ : 0 < Δ) :
@@ -514,7 +513,7 @@ theorem setIntegral_psiA_sq_Ioi_le_div (hF : LocalHypsCoreW cϱ p F) {Δ : ℝ} 
 theorem setIntegral_psiA_sq_Ioi_le (hF : LocalHypsCoreW cϱ p F) (Δ : ℝ) :
     ∫ r in Set.Ioi Δ, psiA cϱ p r ^ 2 ≤ 8 * p.L :=
   le_trans (setIntegral_le_integral hF.psi_sq_integrable
-    (Filter.Eventually.of_forall fun r => sq_nonneg _)) hF.integral_psi_sq_le
+    (Filter.Eventually.of_forall fun _ => sq_nonneg _)) hF.integral_psi_sq_le
 
 /-- `|φ̂(r)| ≤ ψ(r)` [eq:psidef] (LocalHyps field). -/
 theorem abs_phiHat_le_psiA (hF : LocalHypsCoreW cϱ p F) (r : ℝ) : |F.phiHat r| ≤ psiA cϱ p r :=
@@ -530,7 +529,6 @@ end PsiToolkit
 section Kbounds
 /-! ## [eq:Kbounds] pointwise (§5.3) -/
 variable {cϱ : ℝ} {p : Setting} {F : LocalFun}
-
 
 
 lemma sum_Ico_int_eq (p : Setting) (F : LocalFun) (τ : ℝ) :

@@ -43,6 +43,12 @@ atoms with integer multiplicities m_j ≤ c on orthonormal vectors together with
 2c·tr(P+Q) − ‖P+Q‖_F² = Σ_j k_c(m_j) + c²·b, i.e. the inequality cannot be improved using only these quantities
 (`Zeta23.ZeroSide.TightMult.lemmaR_tight`, `Zeta23/ZeroSide/TightMult.lean`; cited in the paper's appendix).
 
+Also included, beyond Theorems A–E (each group has its own trusted statement file under [`comparator/`](comparator/) or, where noted, is checked with `#print axioms` only):
+
+* **The zeros of ξ′** (`Zeta23/XiPrime/`, comparator topic `XiPrime`, six statements): unconditionally, at least 0.85838 of the zeros of ξ′ (the derivative of the completed zeta function) with ordinates in (T, 2T] are simple and on the critical line and at least 0.92919 are distinct (flat window; 0.86864 / 0.93432 with the quartic window), all zeros of ξ′ lie in the open critical strip, and Re ξ′/ξ > 0 on Re s ≥ 1 — `Zeta23.XiPrime.xiDeriv_simple_on_line`(`_cumulative`, `_quartic_std`) in `Zeta23/XiPrime/Final.lean`. The argument is the one of Theorem B with ξ′ in place of ζ (the rank–trace device applied to the Farmer–Gonek(–Lee)/Montgomery argument for ξ′; Farmer–Gonek, arXiv:0803.0425 = Farmer–Gonek–Lee, J. London Math. Soc. (2) 90 (2014)). In the docstrings under `Zeta23/XiPrime/`, labels of the form `[XF′ Lemma 6.1]`, `[XF′ Thm 8.2]`, `[XF′ (Z3)]` refer to the authors' technical supplement on the explicit formula for ξ′/ξ and the two-trace transfer, which is not included in this repository; these labels record provenance only — what is relied upon is in each case the Lean statement that the docstring introduces. (The counting functions in `comparator/ChallengeDeps/XiPrime.lean` are finite sums / cardinalities over the set of zeros of ξ′ in a height window; that set is finite because every zero of ξ′ lies in the open critical strip — the first of the six statements — and the zeros of an entire function are isolated.)
+
+* **The bandwidth-one ceiling** (`Zeta23/PairCeiling/`, no comparator topic; `#print axioms` audit below): the stability inequality behind the paper's remark on the optimality of the method — for every certificate (c₀, r) of the type used in Theorem B (r ∈ C¹[0,1], r′ differentiable off a countable set with integrable derivative) that is valid against a configuration whose form-factor measure has grid masses s_j and simple-point fraction p, one has c₀ + ∫₀¹ r(x)·x dx ≤ p + |r(1)|·|D(1)| + |r′(1)|·|E(1)| + (sup|E|)·∫₀¹|r″| (`Zeta23.PairCeiling.ceiling_stability`, `Zeta23/PairCeiling/Stability.lean`, two integrations by parts) — and its instance at an explicit 256-periodic law (`Zeta23.PairCeiling.ceiling_law256`, `ceiling_law256_decimal`, `ceiling_nearCUE_signed`, `ceiling_law256_signed`; files `NearCUE.lean`, `RowCert.lean`, `LawN256.lean`, `CeilingLaw256.lean`, `Signed.lean`): every bandwidth-one certificate certifies a proportion of simple zeros at most 0.6818287 + 2.55·10⁻⁶·(|r′(1)| + ∫|r″|). The ONE displayed hypothesis of these theorems is `EnclOK`: that the law's form factor S(j), j = 1…256, lies in the 256 integer enclosures recorded in `LawN256.lean` (obtained outside Lean by interval arithmetic from an exact-rational certificate, sha256 `cc3de9917db4d14d844630a4e97dda8387fd6e257e52b6967f430b8914584eb8`, available from the authors); everything downstream of the enclosures — the 255 near-CUE row inequalities |256·S(j) − j| ≤ 3·10⁻⁴⁰ (0 < j < 256), the edge bound |D(1)| ≤ 0.82395317, the sign of the edge term — is checked in the kernel by `decide` (`LawN256_check`, `LawN256_edge`), and the analytic inequality is proved in Lean.
+
 How the two comparator configurations cover this: [`comparator/config.json`](comparator/config.json) (fifteen statements,
 [`comparator/Challenge.lean`](comparator/Challenge.lean)) contains Theorem A together with the *Cauchy–Schwarz forms* of
 B–E — N₀ˢ/N ≥ 1/2, N_d/N ≥ 3/4, and with the optimal window 2c₁* − 1 (= 0.50659…) and c₁*, for ζ and for L(s,χ)
@@ -72,7 +78,11 @@ Zeta23/MV/             Montgomery–Vaughan generalized Hilbert inequality
 Zeta23/PrimeSideA/, PrimeSideB/, Poisson.lean, Taper/   the prime side: traces of the Gram matrix (paper §§4–5)
 Zeta23/ZeroSide/, Tail/                the zero side: block structure, tail bounds (paper §§2, 6)
 Zeta23/Assembly/, Main.lean            assembly of the certificate (paper §6)
+Zeta23/XiPrime/         zeros of ξ′: explicit formula for ξ′/ξ, coefficient system, certificates, headline theorems (XiPrime/Final.lean)
+Zeta23/PairCeiling/     the bandwidth-one ceiling: definitions, stability inequality (Stability.lean), near-CUE constants, integer row certificates, the N = 256 law instance
 ```
+
+Throughout the docstrings of `Zeta23/`, bracketed labels such as `[prop:PP]`, `[eq:tr2]`, `[thm:E]`, `[lem:R]` are the LaTeX labels of the corresponding statements and equations in the paper's source; they identify which step of the paper a declaration formalizes.
 
 ## Building and checking
 
@@ -84,12 +94,13 @@ lake exe cache get        # fetch prebuilt Mathlib for the pinned commit (a few 
                           # for your platform / offline), just proceed: the next step builds Mathlib from
                           # source, which takes several hours of CPU time but needs nothing else.
 lake build                # builds library Zeta23 (the default target imports exactly the headline modules)
-lake build Solution Solution.Multiplicity
-lake env lean comparator/PrintAxioms.lean; lake env lean comparator/PrintAxioms/Multiplicity.lean   # axiom audit of the 15 + 12 theorems
+lake build Solution Solution.Multiplicity Solution.XiPrime
+lake env lean comparator/PrintAxioms.lean; lake env lean comparator/PrintAxioms/Multiplicity.lean; lake env lean comparator/PrintAxioms/XiPrime.lean   # axiom audit of the 15 + 12 + 6 theorems
+lake env lean comparator/PrintAxioms/PairCeiling.lean   # axiom audit of the ceiling theorems (no trusted statement file; see AUDIT.md)
 ```
 
 Expected: no errors, no `sorry` warnings from `Zeta23/` or `Solution` (the only `sorry`s in the repository
-are the deliberate ones in the trusted challenge files under `comparator/`), and 27 lines of the
+are the deliberate ones in the trusted challenge files under `comparator/`), and 33 lines of the
 form `'two_thirds_on_critical_line' depends on axioms: [propext, Classical.choice, Quot.sound]`.
 For the strongest independent check — statement equality against the trusted challenge plus kernel replay —
 run comparator as described in [`comparator/README.md`](comparator/README.md).

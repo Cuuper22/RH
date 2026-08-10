@@ -4,9 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/Chebyshev.lean — the Chebyshev–Mertens estimates [lem:cheb].
+Zeta23/Chebyshev.lean — discharge of the Chebyshev-type hypothesis H-cheb.
 
-The paper, Lemma [lem:cheb], displays [eq:cheb1]–[eq:cheb2]:
+Paper: "More than two thirds of the zeros of the Riemann zeta function lie on
+the critical line", Lemma [lem:cheb], displays [eq:cheb1]–[eq:cheb2]:
 
   "For x ≥ 2,
      Σ_{n≤x} Λ(n) ≪ x,   Σ_{n≤x} Λ(n)/√n ≤ 3√x  (x ≥ x₀),
@@ -14,17 +15,17 @@ The paper, Lemma [lem:cheb], displays [eq:cheb1]–[eq:cheb2]:
      Σ_{n≤x} Λ(n)²/n = (log x)²/2 + O(log x),
      Σ_{n≤x} Λ(n)²/n (log x − log n) = (log x)³/6 + O((log x)²).       [eq:cheb2]"
 
-These are classical [MV07 §2.2].  All sums here run over n ∈ Finset.Ioc 0 ⌊x⌋₊,
+H-cheb is classical [MV07 §2.2].  All sums here run over n ∈ Finset.Ioc 0 ⌊x⌋₊,
 matching Mathlib's `Chebyshev.psi`.  The ≪-bounds are stated with explicit
 existential constants; the paper's "≤ 3√x eventually" is provided in the robust
 ∃-constant form (the constant is not load-bearing downstream — [eq:Bdef] only
-needs *some* B = l + C√X), together with an explicit-threshold version.
+needs *some* B = l + C√X).
 
 The two [eq:cheb2] asymptotics need Mertens' first theorem
 Σ_{n≤x} Λ(n)/n = log x + O(1), which is not in Mathlib; it is supplied by
-Zeta23/FromPNTPlus/Mertens.lean (ported from PrimeNumberTheoremAnd).
+`mertensFirst` below, via Zeta23/FromPNTPlus/Mertens.lean.
 
-Everything else follows from Mathlib (NumberTheory.Chebyshev ψ-bounds +
+Everything else comes from Mathlib (NumberTheory.Chebyshev ψ-bounds +
 elementary induction/splitting arguments).
 -/
 import Mathlib.NumberTheory.Chebyshev
@@ -271,7 +272,7 @@ theorem sum_vonMangoldt_div_sqrt_le {x : ℝ} (hx : 1 ≤ x) :
   have h2log : 2 * Real.log x ≤ 8 * Real.sqrt x := by nlinarith [hlog, h14, h14nn]
   nlinarith [h, hsq, h2log]
 
-/-- [eq:cheb1].2 with the threshold explicit: the witness of
+/-- [eq:cheb1].2 with the threshold explicit (effective version): the witness of
 `sum_vonMangoldt_div_sqrt_le_three` is `x₀ = max 1 ((48/(3 − 2 log 4))⁴)` (≤ 2.0·10⁹). -/
 theorem sum_vonMangoldt_div_sqrt_le_three_explicit {x : ℝ}
     (hx : max 1 ((48 / (3 - 2 * Real.log 4)) ^ 4) ≤ x) :
@@ -493,11 +494,10 @@ theorem sum_vonMangoldt_sq_le {x : ℝ} (hx : 1 ≤ x) :
     _ = (Real.log 4 + 4) * x * Real.log x := by ring
 
 
-
 /-! ## [eq:cheb2]: the two Mertens-type asymptotics
 
-Mertens' first theorem Σ_{n≤x} Λ(n)/n = log x + O(1) is supplied by the ported
-PrimeNumberTheoremAnd proof (`Mertens.sum_mangoldt_div_eq_log`, see
+Mertens' first theorem Σ_{n≤x} Λ(n)/n = log x + O(1) is supplied by
+`Mertens.sum_mangoldt_div_eq_log` (see
 Zeta23/FromPNTPlus/Mertens.lean), so both [eq:cheb2] bounds are unconditional. -/
 
 section Cheb2
@@ -505,8 +505,7 @@ section Cheb2
 open MeasureTheory
 
 /-- Mertens' first theorem (von Mangoldt form): |Σ_{n≤x} Λ(n)/n − log x| ≤ log 4 + 4
-for x ≥ 1.  Paper [lem:cheb] cites it as "Mertens' formula"; classical [MV07 §2.2];
-proof ported from PrimeNumberTheoremAnd. -/
+for x ≥ 1.  Paper [lem:cheb] cites it as "Mertens' formula"; classical [MV07 §2.2]. -/
 theorem mertensFirst {x : ℝ} (hx : 1 ≤ x) :
     |(∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n / n) - Real.log x| ≤ Real.log 4 + 4 :=
   Mertens.sum_mangoldt_div_eq_log hx
@@ -928,66 +927,8 @@ lemma tsum_rpow_neg_seven_quarters_le :
       have h2 : 0 < 2 / Real.sqrt M := by positivity
       linarith
 
-/-- The defect sum is bounded by an absolute constant. -/
-private lemma defect_bounded :
-    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ,
-      ∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n * (Real.log n - Λ n) / n ≤ C := by
-  have hsum74 : Summable (fun m : ℕ => ((m : ℝ) ^ ((7 : ℝ) / 4))⁻¹) :=
-    Real.summable_nat_rpow_inv.mpr (by norm_num)
-  set B : ℝ := ∑' m : ℕ, ((m : ℝ) ^ ((7 : ℝ) / 4))⁻¹ with hB
-  have hBnn : (0 : ℝ) ≤ B := tsum_nonneg fun m => by positivity
-  refine ⟨512 * B + 1, by positivity, fun x => ?_⟩
-  rcases lt_or_ge x 0 with hxneg | hx0
-  · rw [Nat.floor_of_nonpos hxneg.le]
-    simp only [Finset.Ioc_self, Finset.sum_empty]
-    positivity
-  have hvanish : ∀ n ∈ Ioc 0 ⌊x⌋₊, Λ n * (Real.log n - Λ n) / n ≠ 0 → IsPrimePow n := by
-    intro n _ hne
-    by_contra hnot
-    rw [vonMangoldt_eq_zero_iff.mpr hnot] at hne
-    simp at hne
-  rw [← Finset.sum_filter_of_ne hvanish,
-    Chebyshev.sum_PrimePow_eq_sum_sum (fun n => Λ n * (Real.log n - Λ n) / n) hx0]
-  have hinner : ∀ k ∈ Icc 1 ⌊Real.log x / Real.log 2⌋₊,
-      (∑ p ∈ Ioc 0 ⌊x ^ ((1 : ℝ) / k)⌋₊ with p.Prime,
-        Λ (p ^ k) * (Real.log ((p ^ k : ℕ) : ℝ) - Λ (p ^ k)) / ((p ^ k : ℕ) : ℝ))
-        ≤ 256 * B * ((k : ℝ) * (2⁻¹) ^ k) := by
-    intro k hk
-    have hk1 : 1 ≤ k := (Finset.mem_Icc.mp hk).1
-    have hk0 : k ≠ 0 := by omega
-    have hstep : ∑ p ∈ Ioc 0 ⌊x ^ ((1 : ℝ) / k)⌋₊ with p.Prime,
-        Λ (p ^ k) * (Real.log ((p ^ k : ℕ) : ℝ) - Λ (p ^ k)) / ((p ^ k : ℕ) : ℝ)
-        ≤ ∑ p ∈ Ioc 0 ⌊x ^ ((1 : ℝ) / k)⌋₊ with p.Prime,
-          256 * ((k : ℝ) * (2⁻¹) ^ k) * ((p : ℝ) ^ ((7 : ℝ) / 4))⁻¹ := by
-      refine Finset.sum_le_sum fun p hp => ?_
-      have hpp : p.Prime := (Finset.mem_filter.mp hp).2
-      have hΛ : Λ (p ^ k) = Real.log p := by
-        rw [vonMangoldt_apply_pow hk0, vonMangoldt_apply_prime hpp]
-      have hlg : Real.log ((p ^ k : ℕ) : ℝ) = (k : ℝ) * Real.log p := by
-        rw [Nat.cast_pow, Real.log_pow]
-      have heq : Λ (p ^ k) * (Real.log ((p ^ k : ℕ) : ℝ) - Λ (p ^ k)) / ((p ^ k : ℕ) : ℝ)
-          = ((k : ℝ) - 1) * Real.log p ^ 2 / (p : ℝ) ^ k := by
-        rw [hΛ, hlg, Nat.cast_pow]
-        ring
-      rw [heq]
-      exact defect_term_le hk1 hpp
-    refine hstep.trans ?_
-    rw [← Finset.mul_sum]
-    have hs : (∑ p ∈ Ioc 0 ⌊x ^ ((1 : ℝ) / k)⌋₊ with p.Prime,
-        ((p : ℝ) ^ ((7 : ℝ) / 4))⁻¹) ≤ B :=
-      hsum74.sum_le_tsum _ fun i _ => by positivity
-    calc 256 * ((k : ℝ) * (2⁻¹) ^ k)
-          * (∑ p ∈ Ioc 0 ⌊x ^ ((1 : ℝ) / k)⌋₊ with p.Prime, ((p : ℝ) ^ ((7 : ℝ) / 4))⁻¹)
-        ≤ 256 * ((k : ℝ) * (2⁻¹) ^ k) * B :=
-          mul_le_mul_of_nonneg_left hs (by positivity)
-      _ = 256 * B * ((k : ℝ) * (2⁻¹) ^ k) := by ring
-  refine le_trans (Finset.sum_le_sum hinner) ?_
-  rw [← Finset.mul_sum]
-  have h2 := sum_k_mul_half_pow_le ⌊Real.log x / Real.log 2⌋₊
-  nlinarith [h2, hBnn]
-
-/-- The defect sum bounded by the explicit numeral 1537 = 512·3 + 1
-(uses the √-telescoping bound Σ' m^{−7/4} ≤ 3 above). -/
+/-- The defect sum bounded by the explicit numeral 1537 = 512·3 + 1 (effective version;
+uses the √-telescoping bound ζ-style Σ' m^{−7/4} ≤ 3 above). -/
 lemma defect_bounded_explicit : ∀ x : ℝ,
     ∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n * (Real.log n - Λ n) / n ≤ 1537 := by
   intro x
@@ -1047,39 +988,11 @@ lemma defect_bounded_explicit : ∀ x : ℝ,
   have h2 := sum_k_mul_half_pow_le ⌊Real.log x / Real.log 2⌋₊
   nlinarith [h2, hBnn, hB3]
 
-/-- [eq:cheb2].1: Σ_{n≤x} Λ(n)²/n = (log x)²/2 + O(log x).
-Paper [lem:cheb]: "Σ_{n≤x} Λ(n)²/n = Σ_{n≤x} Λ(n) log n/n + O(1) ..., and partial
-summation from Mertens' formula gives Σ_{n≤x} Λ(n) log n/n = ½log²x + O(log x)." -/
-theorem sum_vonMangoldt_sq_div_eq :
-    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x →
-      |(∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n ^ 2 / n) - Real.log x ^ 2 / 2| ≤ C * Real.log x := by
-  obtain ⟨CD, hCD0, hCD⟩ := defect_bounded
-  have hlog2pos : (0 : ℝ) < Real.log 2 := Real.log_pos one_lt_two
-  refine ⟨2 * (Real.log 4 + 4) + CD / Real.log 2, by positivity, fun x hx => ?_⟩
-  have hx1 : (1 : ℝ) ≤ x := by linarith
-  have h1 := abs_le.mp (sum_log_mul_vonMangoldt_div_bound hx1)
-  have hdiff : (∑ n ∈ Ioc 0 ⌊x⌋₊, Real.log n * (Λ n / n))
-        - ∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n ^ 2 / n
-      = ∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n * (Real.log n - Λ n) / n := by
-    rw [← Finset.sum_sub_distrib]
-    exact Finset.sum_congr rfl fun n _ => by ring
-  have hD0 : 0 ≤ ∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n * (Real.log n - Λ n) / n :=
-    Finset.sum_nonneg fun n _ =>
-      div_nonneg (mul_nonneg vonMangoldt_nonneg (sub_nonneg.mpr vonMangoldt_le_log))
-        (Nat.cast_nonneg n)
-  have hDle := hCD x
-  have hlog2 : Real.log 2 ≤ Real.log x := Real.log_le_log two_pos hx
-  have hCDlog : CD ≤ CD / Real.log 2 * Real.log x := by
-    have hkey : CD / Real.log 2 * Real.log 2 = CD := div_mul_cancel₀ CD hlog2pos.ne'
-    calc CD = CD / Real.log 2 * Real.log 2 := hkey.symm
-      _ ≤ CD / Real.log 2 * Real.log x :=
-          mul_le_mul_of_nonneg_left hlog2 (by positivity)
-  have hnn : (0 : ℝ) ≤ CD / Real.log 2 * Real.log x :=
-    mul_nonneg (by positivity) (Real.log_nonneg hx1)
-  rw [abs_le]
-  constructor
-  · nlinarith [h1.1, h1.2, hdiff, hD0, hDle, hCDlog, hnn]
-  · nlinarith [h1.1, h1.2, hdiff, hD0, hDle, hCDlog, hnn]
+/-- The defect sum is bounded by an absolute constant (from the explicit bound). -/
+private lemma defect_bounded :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ,
+      ∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n * (Real.log n - Λ n) / n ≤ C :=
+  ⟨1537, by norm_num, defect_bounded_explicit⟩
 
 /-- [eq:cheb2].1 with the constant explicit: C2a = 2(log 4 + 4) + 1537/log 2 (≤ 2230). -/
 theorem sum_vonMangoldt_sq_div_eq_explicit : ∀ x : ℝ, 2 ≤ x →
@@ -1119,132 +1032,16 @@ theorem sum_vonMangoldt_sq_div_eq_explicit : ∀ x : ℝ, 2 ≤ x →
   · nlinarith [h1.1, h1.2, hdiff, hD0, hDle, hCDlog, hnn]
   · nlinarith [h1.1, h1.2, hdiff, hD0, hDle, hCDlog, hnn]
 
-/-- [eq:cheb2].2: Σ_{n≤x} (Λ(n)²/n)(log x − log n) = (log x)³/6 + O((log x)²).
-Paper [lem:cheb]: "The second formula is ∫₁ˣ (Σ_{n≤t} Λ(n)²/n) dt/t." -/
-theorem sum_vonMangoldt_sq_div_mul_log_sub_eq :
+/-- [eq:cheb2].1: Σ_{n≤x} Λ(n)²/n = (log x)²/2 + O(log x).
+Paper [lem:cheb]: "Σ_{n≤x} Λ(n)²/n = Σ_{n≤x} Λ(n) log n/n + O(1) ..., and partial
+summation from Mertens' formula gives Σ_{n≤x} Λ(n) log n/n = ½log²x + O(log x)."
+(From the explicit-constant version.) -/
+theorem sum_vonMangoldt_sq_div_eq :
     ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x →
-      |(∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n ^ 2 / n * (Real.log x - Real.log n)) -
-          Real.log x ^ 3 / 6| ≤ C * Real.log x ^ 2 := by
-  obtain ⟨C2, hC20, hC2⟩ := sum_vonMangoldt_sq_div_eq
+      |(∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n ^ 2 / n) - Real.log x ^ 2 / 2| ≤ C * Real.log x := by
   have hlog2pos : (0 : ℝ) < Real.log 2 := Real.log_pos one_lt_two
-  refine ⟨C2 / 2 + 1 / Real.log 2, by positivity, fun x hx => ?_⟩
-  have hx1 : (1 : ℝ) ≤ x := by linarith
-  have hlx : (0 : ℝ) < Real.log x := Real.log_pos (by linarith)
-  -- the target sum equals ∫ t⁻¹ M2sum t
-  have habel := abel_log_M2sum hx1
-  have hident : ∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n ^ 2 / n * (Real.log x - Real.log n)
-      = ∫ t in Set.Ioc 1 x, t⁻¹ * M2sum t := by
-    have e1 : ∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n ^ 2 / n * (Real.log x - Real.log n)
-        = Real.log x * (∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n ^ 2 / n)
-          - ∑ n ∈ Ioc 0 ⌊x⌋₊, Real.log n * (Λ n ^ 2 / n) := by
-      rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
-      exact Finset.sum_congr rfl fun n _ => by ring
-    rw [e1, habel]
-    ring
-  rw [hident]
-  -- pointwise bound for the error density on (1, x]
-  have hM2b : ∀ t ∈ Set.Ioc (1 : ℝ) x,
-      |M2sum t - Real.log t ^ 2 / 2| ≤ C2 * Real.log t + 1 := by
-    intro t ht
-    have hlt0 : (0 : ℝ) ≤ Real.log t := Real.log_nonneg ht.1.le
-    rcases le_or_gt 2 t with h2 | h2
-    · have h := hC2 t h2
-      rw [M2sum_eq_Ioc]
-      have hC2log : (0 : ℝ) ≤ C2 * Real.log t := mul_nonneg hC20.le hlt0
-      calc |(∑ n ∈ Ioc 0 ⌊t⌋₊, Λ n ^ 2 / n) - Real.log t ^ 2 / 2| ≤ C2 * Real.log t := h
-        _ ≤ C2 * Real.log t + 1 := by linarith
-    · have ht1 : (1 : ℝ) < t := ht.1
-      have hfl : ⌊t⌋₊ = 1 := by
-        rw [Nat.floor_eq_iff (by linarith : (0 : ℝ) ≤ t)]
-        constructor
-        · exact_mod_cast ht1.le
-        · exact_mod_cast (by linarith : t < 1 + 1)
-      have hM20 : M2sum t = 0 := by
-        rw [M2sum_eq_Ioc, hfl]
-        rw [show Finset.Ioc 0 1 = {1} from rfl]
-        simp [vonMangoldt_apply_one]
-      rw [hM20, zero_sub, abs_neg, abs_of_nonneg (by positivity)]
-      have hlt2 : Real.log t ≤ Real.log 2 := Real.log_le_log (by linarith) h2.le
-      have hl21 : Real.log 2 < 1 := by nlinarith [Real.log_two_lt_d9]
-      nlinarith [mul_nonneg hC20.le hlt0]
-  -- integrabilities
-  have hcont_logsq : IntegrableOn (fun t : ℝ => t⁻¹ * (Real.log t ^ 2 / 2)) (Set.Ioc 1 x) := by
-    refine (ContinuousOn.integrableOn_Icc ?_).mono_set Set.Ioc_subset_Icc_self
-    have hlogcont : ContinuousOn Real.log (Set.Icc 1 x) := fun t ht =>
-      (Real.continuousAt_log (by nlinarith [ht.1])).continuousWithinAt
-    refine ContinuousOn.mul ?_ ((hlogcont.pow 2).div_const 2)
-    exact continuousOn_inv₀.mono fun t ht => by
-      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-      nlinarith [ht.1]
-  have hint_M2 : IntegrableOn (fun t : ℝ => t⁻¹ * M2sum t) (Set.Ioc 1 x) :=
-    integrableOn_inv_mul_mono M2sum_mono M2sum_nonneg hx1
-  have hint_diff : IntegrableOn
-      (fun t : ℝ => t⁻¹ * (M2sum t - Real.log t ^ 2 / 2)) (Set.Ioc 1 x) :=
-    ((hint_M2.sub hcont_logsq).congr_fun
-      (fun t _ => by simp only [Pi.sub_apply]; ring) measurableSet_Ioc)
-  have hsplit : ∫ t in Set.Ioc 1 x, t⁻¹ * M2sum t
-      = (∫ t in Set.Ioc 1 x, t⁻¹ * (Real.log t ^ 2 / 2))
-        + ∫ t in Set.Ioc 1 x, t⁻¹ * (M2sum t - Real.log t ^ 2 / 2) := by
-    rw [← MeasureTheory.integral_add hcont_logsq hint_diff]
-    exact setIntegral_congr_fun measurableSet_Ioc fun t _ => by ring
-  have hval : ∫ t in Set.Ioc 1 x, t⁻¹ * (Real.log t ^ 2 / 2) = Real.log x ^ 3 / 6 := by
-    have e : ∫ t in Set.Ioc 1 x, t⁻¹ * (Real.log t ^ 2 / 2)
-        = ∫ t in Set.Ioc 1 x, (t⁻¹ * Real.log t ^ 2) * (1 / 2) :=
-      setIntegral_congr_fun measurableSet_Ioc fun t _ => by ring
-    rw [e, MeasureTheory.integral_mul_const, integral_inv_mul_log_sq hx1]
-    ring
-  -- error bound
-  have hint_invlog : IntegrableOn (fun t : ℝ => t⁻¹ * Real.log t) (Set.Ioc 1 x) := by
-    refine (ContinuousOn.integrableOn_Icc ?_).mono_set Set.Ioc_subset_Icc_self
-    refine ContinuousOn.mul ?_ ?_
-    · exact continuousOn_inv₀.mono fun t ht => by
-        simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-        nlinarith [ht.1]
-    · exact fun t ht => (Real.continuousAt_log (by nlinarith [ht.1])).continuousWithinAt
-  have hint_inv : IntegrableOn (fun t : ℝ => t⁻¹) (Set.Ioc 1 x) := by
-    refine (ContinuousOn.integrableOn_Icc ?_).mono_set Set.Ioc_subset_Icc_self
-    exact continuousOn_inv₀.mono fun t ht => by
-      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-      nlinarith [ht.1]
-  have hE : |∫ t in Set.Ioc 1 x, t⁻¹ * (M2sum t - Real.log t ^ 2 / 2)|
-      ≤ C2 * (Real.log x ^ 2 / 2) + Real.log x := by
-    have hg_int : IntegrableOn (fun t : ℝ => C2 * (t⁻¹ * Real.log t) + t⁻¹) (Set.Ioc 1 x) :=
-      (hint_invlog.const_mul C2).add hint_inv
-    have hb : ∀ᵐ t ∂(volume.restrict (Set.Ioc 1 x)),
-        ‖t⁻¹ * (M2sum t - Real.log t ^ 2 / 2)‖ ≤ C2 * (t⁻¹ * Real.log t) + t⁻¹ := by
-      filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht
-      have ht1 : (1 : ℝ) ≤ t := ht.1.le
-      have ht0 : (0 : ℝ) < t := lt_of_lt_of_le one_pos ht1
-      have hti : (0 : ℝ) ≤ t⁻¹ := by positivity
-      rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg hti]
-      calc t⁻¹ * |M2sum t - Real.log t ^ 2 / 2| ≤ t⁻¹ * (C2 * Real.log t + 1) :=
-            mul_le_mul_of_nonneg_left (hM2b t ht) hti
-        _ = C2 * (t⁻¹ * Real.log t) + t⁻¹ := by ring
-    calc |∫ t in Set.Ioc 1 x, t⁻¹ * (M2sum t - Real.log t ^ 2 / 2)|
-        ≤ ∫ t in Set.Ioc 1 x, (C2 * (t⁻¹ * Real.log t) + t⁻¹) := by
-          rw [← Real.norm_eq_abs]
-          exact norm_integral_le_of_norm_le hg_int hb
-      _ = C2 * (∫ t in Set.Ioc 1 x, t⁻¹ * Real.log t) + ∫ t in Set.Ioc 1 x, t⁻¹ := by
-          rw [MeasureTheory.integral_add (hint_invlog.const_mul C2) hint_inv,
-            MeasureTheory.integral_const_mul]
-      _ = C2 * (Real.log x ^ 2 / 2) + Real.log x := by
-          rw [integral_inv_mul_log hx1, integral_inv_Ioc hx1]
-  -- assemble
-  rw [hsplit, hval]
-  have harr : Real.log x ^ 3 / 6
-        + (∫ t in Set.Ioc 1 x, t⁻¹ * (M2sum t - Real.log t ^ 2 / 2))
-        - Real.log x ^ 3 / 6
-      = ∫ t in Set.Ioc 1 x, t⁻¹ * (M2sum t - Real.log t ^ 2 / 2) := by ring
-  rw [harr]
-  have hlogx2 : Real.log x ≤ Real.log x ^ 2 / Real.log 2 := by
-    rw [le_div_iff₀ hlog2pos]
-    have : Real.log 2 ≤ Real.log x := Real.log_le_log two_pos hx
-    nlinarith [hlx]
-  calc |∫ t in Set.Ioc 1 x, t⁻¹ * (M2sum t - Real.log t ^ 2 / 2)|
-      ≤ C2 * (Real.log x ^ 2 / 2) + Real.log x := hE
-    _ ≤ C2 * (Real.log x ^ 2 / 2) + Real.log x ^ 2 / Real.log 2 := by linarith
-    _ = (C2 / 2 + 1 / Real.log 2) * Real.log x ^ 2 := by
-        field_simp
+  have hlog4pos : (0 : ℝ) < Real.log 4 := Real.log_pos (by norm_num)
+  exact ⟨_, by positivity, sum_vonMangoldt_sq_div_eq_explicit⟩
 
 /-- [eq:cheb2].2 with the constant explicit: C2b = C2a/2 + 1/log 2. -/
 theorem sum_vonMangoldt_sq_div_mul_log_sub_eq_explicit : ∀ x : ℝ, 2 ≤ x →
@@ -1382,10 +1179,20 @@ theorem sum_vonMangoldt_sq_div_mul_log_sub_eq_explicit : ∀ x : ℝ, 2 ≤ x �
     _ = (C2 / 2 + 1 / Real.log 2) * Real.log x ^ 2 := by
         field_simp
 
-/-- The full package [lem:cheb], instantiating the `Zeta23.ChebyshevMertens`
-hypothesis structure of Hypotheses.lean.  Everything is unconditional: Mathlib's
-Chebyshev ψ-bound + Abel summation + the ported Mertens theorem
-(Zeta23/FromPNTPlus/Mertens.lean). -/
+/-- [eq:cheb2].2: Σ_{n≤x} (Λ(n)²/n)(log x − log n) = (log x)³/6 + O((log x)²).
+Paper [lem:cheb]: "The second formula is ∫₁ˣ (Σ_{n≤t} Λ(n)²/n) dt/t."  (From the explicit-constant version.) -/
+theorem sum_vonMangoldt_sq_div_mul_log_sub_eq :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : ℝ, 2 ≤ x →
+      |(∑ n ∈ Ioc 0 ⌊x⌋₊, Λ n ^ 2 / n * (Real.log x - Real.log n)) -
+          Real.log x ^ 3 / 6| ≤ C * Real.log x ^ 2 := by
+  have hlog2pos : (0 : ℝ) < Real.log 2 := Real.log_pos one_lt_two
+  have hlog4pos : (0 : ℝ) < Real.log 4 := Real.log_pos (by norm_num)
+  exact ⟨_, by positivity, sum_vonMangoldt_sq_div_mul_log_sub_eq_explicit⟩
+
+/-- The full H-cheb package [lem:cheb], instantiating the
+`Zeta23.ChebyshevMertens` hypothesis structure of Hypotheses.lean.  Everything is
+unconditional: Mathlib's Chebyshev ψ-bound + Abel summation + the Mertens
+theorem (Zeta23/FromPNTPlus/Mertens.lean). -/
 theorem chebyshevMertens : ChebyshevMertens where
   cheb1a := ⟨Real.log 4 + 4, fun x hx => sum_vonMangoldt_le (by linarith)⟩
   cheb1b := sum_vonMangoldt_div_sqrt_le_three

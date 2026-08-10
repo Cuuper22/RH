@@ -27,7 +27,7 @@ variable {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q}
 
 /-- −L'/L = the twisted Dirichlet series on Re s > 1 (glue of Mathlib's
 LSeries_twist_vonMangoldt_eq with the LFunction/LSeries identification). -/
-theorem neg_logDeriv_LFunction_eq (hχ1 : χ ≠ 1) {s : ℂ} (hs : 1 < s.re) :
+theorem neg_logDeriv_LFunction_eq (_hχ1 : χ ≠ 1) {s : ℂ} (hs : 1 < s.re) :
     -logDeriv χ.LFunction s = LSeries (fun n => (χ n : ℂ) * (Λ n : ℂ)) s := by
   have hds : deriv χ.LFunction s = deriv (LSeries (fun n => (χ n : ℂ))) s := by
     refine Filter.EventuallyEq.deriv_eq ?_
@@ -53,9 +53,10 @@ theorem integrand_eq_tsum_chi (hχ1 : χ ≠ 1) {k : ℝ → ℂ} {c : ℝ} (hc1
     simpa using hc1
   rw [Hfn_line, neg_logDeriv_LFunction_eq hχ1 hre, LSeries, ← tsum_mul_left]
 
+omit [NeZero q] in
 /-- Per-n line integral, twisted: the χ(n)-coefficient rides through the tilted inversion. -/
 theorem per_n_line_integral_chi {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasCompactSupport k)
-    {c : ℝ} (hc1 : 1 < c) (n : ℕ) :
+    {c : ℝ} (n : ℕ) :
     (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ,
         paperFT (tilt k (c - 1/2)) t
           * LSeries.term (fun n => (χ n : ℂ) * (Λ n : ℂ)) (((c:ℝ):ℂ) + t * I) n
@@ -118,8 +119,9 @@ theorem per_n_line_integral_chi {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc :
       _ = (χ n : ℂ) * ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (Real.log n) := by
           rw [hpow, hsqrt, mul_one_div]
 
+omit [NeZero q] in
 /-- Twisted tsum/integral swap (domination: ‖χ(n)‖ ≤ 1 reduces to the ζ-side majorant). -/
-theorem line_integral_swap_chi (hχ1 : χ ≠ 1) {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k)
+theorem line_integral_swap_chi (_hχ1 : χ ≠ 1) {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k)
     (hkc : HasCompactSupport k) {c : ℝ} (hc1 : 1 < c) :
     ∫ t : ℝ, (∑' n : ℕ, paperFT (tilt k (c - 1/2)) t
         * LSeries.term (fun n => (χ n : ℂ) * (Λ n : ℂ)) (((c:ℝ):ℂ) + t * I) n)
@@ -200,7 +202,7 @@ theorem line_integral_swap_chi (hχ1 : χ ≠ 1) {k : ℝ → ℂ} (hk : ContDif
 
 /-- **The twisted prime side**: (1/2π)∫ H(c+it)(−L'/L)(c+it)dt = Σ Λ(n)χ(n)n^{−1/2}k(log n). -/
 theorem prime_side_line_chi (hχ1 : χ ≠ 1) {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k)
-    (hkc : HasCompactSupport k) {c : ℝ} (hc1 : 1 < c) (hc2 : c ≤ 3/2) :
+    (hkc : HasCompactSupport k) {c : ℝ} (hc1 : 1 < c) :
     (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ, Hfn k ((c:ℝ) + t * I)
         * (-logDeriv χ.LFunction (((c:ℝ):ℂ) + t * I))
       = ∑' n : ℕ, (χ n : ℂ) * ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (Real.log n) := by
@@ -220,7 +222,7 @@ theorem prime_side_line_chi (hχ1 : χ ≠ 1) {k : ℝ → ℂ} (hk : ContDiff �
           * LSeries.term (fun n => (χ n : ℂ) * (Λ n : ℂ)) (((c:ℝ):ℂ) + t * I) n := by
         rw [← tsum_mul_left]
     _ = ∑' n : ℕ, (χ n : ℂ) * ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (Real.log n) :=
-        tsum_congr fun n => per_n_line_integral_chi hk hkc hc1 n
+        tsum_congr fun n => per_n_line_integral_chi hk hkc n
 
 end ThmE
 end Zeta23

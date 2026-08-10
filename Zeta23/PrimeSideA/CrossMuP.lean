@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-  Part of the Zeta23 formalization of the paper
+Part of the Zeta23 formalization of
   "More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
-  Bracketed labels ([prop:cross], [eq:Msplit], …) and section numbers (§5.4, …) refer to that paper.
+Imported by PrimeSideA.lean.
 -/
 import Zeta23.PrimeSideA.Basic
 import Zeta23.PrimeSideA.CrossMuPCore
@@ -39,7 +39,6 @@ namespace Zeta23
 namespace PrimeSide
 
 
-
 /-! ## [prop:cross] (i) -/
 
 section CrossMuP
@@ -57,7 +56,7 @@ lemma Mform_mu_PX_eq {p : Setting} {F : LocalFun} (hΦ : Continuous F.Phi) (hμ 
     funext q
     rw [PX_eq, Finset.mul_sum, Finset.mul_sum]
     exact Finset.sum_congr rfl fun n _ => by ring
-  rw [h1, integral_finset_sum]
+  rw [h1, integral_finsetSum]
   · refine Finset.sum_congr rfl fun n _ => ?_
     rw [integral_const_mul]
   · intro n _
@@ -65,8 +64,8 @@ lemma Mform_mu_PX_eq {p : Setting} {F : LocalFun} (hΦ : Continuous F.Phi) (hμ 
     have := (Mform_integrableOn (T := p.T) hΦ hμ hv).const_mul (-(1 / Real.pi) * acoef n)
     simpa only using this
 
-/-- **[prop:cross] (i)** (§5.4): `𝓜[μ,P_X] ≪ l√X` — with the exact statement shape of
-`PrimeSideA.lean`'s results (`∃ C, EventuallyAt cϱ lam …`); `PrimeSideA.lean` imports this file. -/
+/-- **[prop:cross] (i)** (§5.4): `𝓜[μ,P_X] ≪ l√X`, stated in the `∃ C, EventuallyAtCore cϱ lam …`
+form used by the results of `PrimeSideA.lean` (which imports this file). -/
 theorem prop_cross_muP (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMertens)
     (hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>

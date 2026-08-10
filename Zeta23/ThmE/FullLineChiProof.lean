@@ -3,12 +3,6 @@ Copyright (c) 2026 Anthropic, PBC. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
-/-
-Zeta23/ThmE/FullLineChiProof.lean — χ-EF endgame: the archimedean line shift
-`gamma_line_shift_chi` for L(s,χ) (statements in Zeta23/ThmE/FullLineChi.lean; MainChi
-consumes the primed theorems here).  Templates: Zeta23/WeilEF/VerticalLine.lean
-gamma_line_shift made G-generic; Zeta23/WeilEF/FullLine*.lean (majorant pack + assembly).
--/
 import Zeta23.ThmE.FullLineChi
 import Zeta23.WeilEF.FullLine
 import Zeta23.ThmE.FoldChi
@@ -47,7 +41,7 @@ theorem digamma_growth_wide : ∃ C : ℝ, 0 < C ∧ ∀ s : ℂ, 1/4 ≤ s.re �
       refine Complex.differentiableAt_Gamma w fun m => ?_
       intro h
       rw [h] at hw
-      simp only [Set.mem_setOf_eq, Complex.neg_re, Complex.natCast_re] at hw
+      simp only [Complex.neg_re, Complex.natCast_re] at hw
       nlinarith [Nat.cast_nonneg (α := ℝ) m]
     have hΓne : Complex.Gamma s ≠ 0 := Complex.Gamma_ne_zero hzero
     have hψan : AnalyticAt ℂ Complex.digamma s := by
@@ -201,7 +195,7 @@ theorem digamma_growth_wide : ∃ C : ℝ, 0 < C ∧ ∀ s : ℂ, 1/4 ≤ s.re �
 
 /-! ## The archimedean log-derivative G_{q,κ} := logDeriv (s ↦ q^{s/2} Γℝ(s+κ)) -/
 
-/-- parity lemma (restated here to keep this file's imports light):
+/-- parity bookkeeping:
 gammaFactor χ = Γℝ(· + κ) for κ = 0 (even) or 1 (odd). -/
 lemma exists_parity' {N : ℕ} (χ : DirichletCharacter ℂ N) :
     ∃ κ : ℕ, κ ≤ 1 ∧ ∀ s, gammaFactor χ s = Complex.Gammaℝ (s + κ) := by
@@ -368,7 +362,7 @@ theorem integrable_mul_logDeriv_L_of_decay (hχ1 : χ ≠ 1) {φ : ℝ → ℂ} 
       ≤ (C / (1 + t ^ 2)) * M := mul_le_mul (hφ t) (hM t) (norm_nonneg _) (by positivity)
     _ = C * M * (1 + t ^ 2)⁻¹ := by ring
 
-/-- **Integrability of `H(c+it)·L'/L(χ)(c+it)`** on re = c ∈ (1, 3/2]. -/
+/-- **Integrability of `H(c+it)·L'/L(χ)(c+it)`** on re = c ∈ (1, 3/2] (`hintL`). -/
 theorem integrable_Hfn_mul_logDeriv_L (hχ1 : χ ≠ 1) {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k)
     (hkc : HasCompactSupport k) {c : ℝ} (hc1 : 1 < c) (hc2 : c ≤ 3 / 2) :
     Integrable (fun t : ℝ => Hfn k ((c : ℂ) + t * I) * logDeriv χ.LFunction ((c : ℂ) + t * I)) := by
@@ -413,6 +407,7 @@ theorem integrable_mul_logDeriv_archChi_of_decay (κ : ℕ) (hκ : κ ≤ 1) {φ
         mul_le_mul (hC t) hL (norm_nonneg _) (by positivity)
     _ = K * ((1 : ℝ) + ‖t‖ ^ 2) ^ (-(3 / 2 : ℝ) / 2) := hpow
 
+omit [NeZero q] in
 /-- gammaFactor in terms of the parity: `gammaFactor χ s = Γℝ(s + parity χ)`. -/
 theorem gammaFactor_eq_parity (χ : DirichletCharacter ℂ q) (s : ℂ) :
     gammaFactor χ s = Complex.Gammaℝ (s + parity χ) := by
@@ -422,6 +417,7 @@ theorem gammaFactor_eq_parity (χ : DirichletCharacter ℂ q) (s : ℂ) :
   · have ho : χ.Odd := (χ.even_or_odd.resolve_left h)
     rw [ho.gammaFactor_def, if_neg h]; norm_num
 
+omit [NeZero q] in
 theorem parity_le_one' (χ : DirichletCharacter ℂ q) : parity χ ≤ 1 := by
   unfold parity; split_ifs <;> norm_num
 
@@ -434,7 +430,7 @@ theorem logDeriv_completedLSym_sub_L (hq : 1 < q) (hχ1 : χ ≠ 1) {s : ℂ} (h
     funext z; rw [gammaFactor_eq_parity]; rfl
   rw [hfun]; ring
 
-/-- the arch difference is the same for χ and χ⁻¹ (equal gammaFactor). -/
+/-- the arch difference is the same for χ and χ⁻¹ (equal gammaFactor) — `harchdiff`. -/
 theorem logDeriv_completedLSym_sub_L_inv (hq : 1 < q) (hχ1 : χ ≠ 1) (hχ1' : χ⁻¹ ≠ 1) {s : ℂ}
     (hre : 0 < s.re) (hL : χ.LFunction s ≠ 0) (hL' : χ⁻¹.LFunction s ≠ 0) :
     logDeriv (completedLSym χ⁻¹) s - logDeriv χ⁻¹.LFunction s
@@ -443,7 +439,7 @@ theorem logDeriv_completedLSym_sub_L_inv (hq : 1 < q) (hχ1 : χ ≠ 1) (hχ1' :
     gammaFactor_inv]
   ring
 
-/-- **Integrability of `(H₁+H₂)·(Λ_sym'/Λ_sym − L'/L)`** on the c-line. -/
+/-- **Integrability of `(H₁+H₂)·(Λ_sym'/Λ_sym − L'/L)`** on the c-line (`hintΓ`). -/
 theorem integrable_Hsum_mul_archDiff (hq : 1 < q) (hχ1 : χ ≠ 1) {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k)
     (hkc : HasCompactSupport k) {c : ℝ} (hc1 : 1 < c) (hc2 : c ≤ 3 / 2) :
     Integrable (fun t : ℝ => (Hfn k ((c : ℂ) + t * I) + Hfn k (1 - c - t * I))

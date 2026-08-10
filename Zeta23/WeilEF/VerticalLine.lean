@@ -4,11 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/WeilEF/VerticalLine.lean — Vertical-line integrals for the EF contour.
+Zeta23/WeilEF/VerticalLine.lean.  Vertical-line integrals for the EF contour.
 
-Key device (no contour shifting needed on the prime side): for s = c + it on a vertical line,
+KEY DEVICE (no contour shifting needed on the prime side): for s = c + it on a vertical line,
 H(s) := h((s−1/2)/i) = paperFT k (t − i·b) with b := c − 1/2, and
-  paperFT k (t − i·b) = paperFT k_b t,  where k_b(u) := k(u)·e^{b·u}  (the tilted test function,
+  paperFT k (t − i·b) = paperFT k_b t,  where k_b(u) := k(u)·e^{b·u}  (the TILTED test function,
 still C_c²).  Hence the line integral (1/2π)∫ H(c+it)·n^{−c−it} dt is, by Fourier inversion of
 k_b (Zeta23.EF.paper_inversion, proved in Zeta23/ExplicitFormula.lean, with integrability from
 Zeta23/ExplicitFormula/Bridge.lean's integrable_fourier_of_contDiff_two),
@@ -97,7 +97,7 @@ theorem integrand_eq_tsum {k : ℝ → ℂ} {c : ℝ} (hc1 : 1 < c) (t : ℝ) :
 /-- Step 2 (per-n line integral): (1/2π)∫ paperFT(tilt k b) t · term_n(c+it) dt
   = Λ(n) n^{−1/2} k(log n). -/
 theorem per_n_line_integral {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasCompactSupport k)
-    {c : ℝ} (hc1 : 1 < c) (n : ℕ) :
+    {c : ℝ} (n : ℕ) :
     (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ,
         paperFT (tilt k (c - 1/2)) t * LSeries.term (fun n => (Λ n : ℂ)) (c + t * I) n
       = ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (Real.log n) := by
@@ -175,13 +175,9 @@ theorem line_integral_swap {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasC
   have hnorm : ∀ (n : ℕ) (t : ℝ), ‖LSeries.term (fun n => (Λ n : ℂ)) ((c:ℂ) + t * I) n‖
       = if n = 0 then (0:ℝ) else (Λ n : ℝ) * ((n:ℝ) ^ (-c)) := by
     intro n t
-    rcases eq_or_ne n 0 with rfl | hn
-    · simp [LSeries.term_zero]
-    · rw [LSeries.term_of_ne_zero hn, norm_div,
-        Complex.norm_natCast_cpow_of_pos (Nat.pos_of_ne_zero hn), hre, if_neg hn,
-        Complex.norm_real, Real.norm_eq_abs,
-        abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg,
-        Real.rpow_neg (Nat.cast_nonneg n), div_eq_mul_inv]
+    rw [LSeries.norm_term_eq, hre, Complex.norm_real, Real.norm_eq_abs,
+      abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg, Real.rpow_neg (Nat.cast_nonneg n),
+      div_eq_mul_inv]
   have hcont : ∀ n : ℕ, Continuous (fun t : ℝ =>
       LSeries.term (fun n => (Λ n : ℂ)) ((c:ℂ) + t * I) n) := by
     intro n
@@ -214,13 +210,7 @@ theorem line_integral_swap {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasC
     have hns : Summable (fun n : ℕ => ‖LSeries.term (fun n => (Λ n : ℂ)) (c : ℂ) n‖) :=
       summable_norm_iff.mpr hs
     refine hns.congr fun n => ?_
-    rcases eq_or_ne n 0 with rfl | hn
-    · simp [LSeries.term_zero]
-    · rw [LSeries.term_of_ne_zero hn, norm_div,
-        Complex.norm_natCast_cpow_of_pos (Nat.pos_of_ne_zero hn), Complex.ofReal_re,
-        if_neg hn, Complex.norm_real, Real.norm_eq_abs,
-        abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg,
-        Real.rpow_neg (Nat.cast_nonneg n), div_eq_mul_inv]
+    simpa using hnorm n 0
   have hsum : Summable (fun n : ℕ => ∫ t : ℝ, ‖paperFT (tilt k (c - 1/2)) t
       * LSeries.term (fun n => (Λ n : ℂ)) ((c:ℂ) + t * I) n‖) := by
     refine ((hcn.mul_left (∫ t : ℝ, ‖paperFT (tilt k (c - 1/2)) t‖)).congr fun n => ?_)
@@ -230,7 +220,7 @@ theorem line_integral_swap {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasC
 /-- **Prime side on Re s = c ∈ (1, 3/2]**:
 (1/2π)∫_ℝ H(c+it)·(−ζ'/ζ)(c+it) dt = Σ_{n≥1} Λ(n) n^{−1/2} k(log n). -/
 theorem prime_side_line {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasCompactSupport k)
-    {c : ℝ} (hc1 : 1 < c) (hc2 : c ≤ 3/2) :
+    {c : ℝ} (hc1 : 1 < c) :
     (1 / (2 * Real.pi) : ℂ) * ∫ t : ℝ, Hfn k (c + t * I) * (-logDeriv riemannZeta (c + t * I))
       = ∑' n : ℕ, ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (Real.log n) := by
   have h1 : ∀ t : ℝ, Hfn k (c + t * I) * (-logDeriv riemannZeta (c + t * I))
@@ -247,11 +237,11 @@ theorem prime_side_line {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasComp
           * LSeries.term (fun n => (Λ n : ℂ)) (c + t * I) n := by
         rw [← tsum_mul_left]
     _ = ∑' n : ℕ, ((Λ n / Real.sqrt n : ℝ) : ℂ) * k (Real.log n) :=
-        tsum_congr fun n => per_n_line_integral hk hkc hc1 n
+        tsum_congr fun n => per_n_line_integral hk hkc n
 
 /-- Coarse digamma growth on the right half-plane strip (consumed by the Γℝ line shift and the
-horizontal-segment estimates; any polynomial bound works — obtained here from the vertical
-Stirling estimate together with a compactness bound near the real axis). -/
+horizontal-segment estimates; any polynomial bound works — dischargeable via a Stirling-type
+estimate or directly). -/
 theorem digamma_growth_strip : ∃ C : ℝ, 0 < C ∧ ∀ s : ℂ, 1/4 ≤ s.re → s.re ≤ 1 →
     ‖Complex.digamma s‖ ≤ C * Real.log (2 + |s.im|) := by
   -- differentiability of ψ on the right half-plane
@@ -269,7 +259,7 @@ theorem digamma_growth_strip : ∃ C : ℝ, 0 < C ∧ ∀ s : ℂ, 1/4 ≤ s.re 
       refine Complex.differentiableAt_Gamma w fun m => ?_
       intro h
       rw [h] at hw
-      simp only [Set.mem_setOf_eq, Complex.neg_re, Complex.natCast_re] at hw
+      simp only [Complex.neg_re, Complex.natCast_re] at hw
       nlinarith [Nat.cast_nonneg (α := ℝ) m]
     have hΓne : Complex.Gamma s ≠ 0 := Complex.Gamma_ne_zero hzero
     have hψan : AnalyticAt ℂ Complex.digamma s := by
@@ -349,7 +339,7 @@ theorem digamma_growth_strip : ∃ C : ℝ, 0 < C ∧ ∀ s : ℂ, 1/4 ≤ s.re 
             linarith [abs_nonneg (Complex.arg s)]
     have hlog_abs : |Real.log ‖s‖| ≤ Real.log 4 + Real.log (2 + |s.im|) := by
       rcases le_or_gt (Real.log ‖s‖) 0 with hneg | hpos
-      · -- log ‖s‖ ≤ 0: |log| = −log ≤ log 4 since ‖s‖ ≥ 1/4
+      · -- ‖s‖ ≤ 1-ish: |log| = −log ≤ log 4 since ‖s‖ ≥ 1/4
         have h1 : Real.log (1/4 : ℝ) ≤ Real.log ‖s‖ := Real.log_le_log (by norm_num) hsnorm_lo
         have h2 : Real.log (1/4 : ℝ) = -Real.log 4 := by
           rw [show (1/4 : ℝ) = 4⁻¹ by norm_num, Real.log_inv]
@@ -420,8 +410,20 @@ theorem digamma_growth_strip : ∃ C : ℝ, 0 < C ∧ ∀ s : ℂ, 1/4 ≤ s.re 
                 le_max_right _ _
             _ ≤ max (M / Real.log 2) (1 + K₀ / Real.log 2) + 1 := by linarith
 
+/-- continuity ⇒ integrability on vertical lines under a majorant (used by vertical_line_shift). -/
+lemma integrable_line {f : ℂ → ℂ} {σ : ℝ} (hf : ∀ t : ℝ, DifferentiableAt ℂ f (σ + t * I))
+    {φ : ℝ → ℝ} (hφ : Integrable φ) (hb : ∀ t : ℝ, ‖f (σ + t * I)‖ ≤ φ t) :
+    Integrable (fun t : ℝ => f (σ + t * I)) := by
+  have hc : Continuous (fun t : ℝ => f (σ + t * I)) := by
+    refine continuous_iff_continuousAt.mpr fun t => ?_
+    have hg : Continuous (fun t : ℝ => (σ : ℂ) + t * I) := by fun_prop
+    show ContinuousAt (f ∘ fun t : ℝ => (σ : ℂ) + t * I) t
+    exact ContinuousAt.comp_of_eq (hf t).continuousAt hg.continuousAt rfl
+  exact hφ.mono' hc.aestronglyMeasurable (Filter.Eventually.of_forall hb)
+
 /-- General vertical-line shift for an analytic function with an integrable, uniformly-decaying
-majorant on a closed strip (Cauchy on rectangles + horizontal vanishing + dominated limits). -/
+majorant on a closed strip (Cauchy on rectangles + horizontal vanishing + dominated limits).
+Proof route: RectangleIntegral machinery (HolomorphicOn.vanishesOnRectangle). -/
 theorem vertical_line_shift {f : ℂ → ℂ} {a b : ℝ} (hab : a ≤ b)
     (hf : ∀ s : ℂ, a ≤ s.re → s.re ≤ b → DifferentiableAt ℂ f s)
     {φ : ℝ → ℝ} (hφ : Integrable φ)
@@ -429,17 +431,9 @@ theorem vertical_line_shift {f : ℂ → ℂ} {a b : ℝ} (hab : a ≤ b)
     (hφtop : Filter.Tendsto φ Filter.atTop (nhds 0))
     (hφbot : Filter.Tendsto φ Filter.atBot (nhds 0)) :
     ∫ t : ℝ, f (b + t * I) = ∫ t : ℝ, f (a + t * I) := by
-  -- continuity / integrability on the vertical lines
-  have hcont : ∀ σ : ℝ, a ≤ σ → σ ≤ b → Continuous (fun t : ℝ => f (σ + t * I)) := by
-    intro σ h1 h2
-    refine continuous_iff_continuousAt.mpr fun t => ?_
-    have hd := hf (σ + t * I) (by simp [h1]) (by simp [h2])
-    have hg : Continuous (fun t : ℝ => (σ : ℂ) + t * I) := by fun_prop
-    show ContinuousAt (f ∘ fun t : ℝ => (σ : ℂ) + t * I) t
-    exact ContinuousAt.comp_of_eq hd.continuousAt hg.continuousAt rfl
+  -- integrability on the vertical lines
   have hint : ∀ σ : ℝ, a ≤ σ → σ ≤ b → Integrable (fun t : ℝ => f (σ + t * I)) := fun σ h1 h2 =>
-    hφ.mono' (hcont σ h1 h2).aestronglyMeasurable
-      (Filter.Eventually.of_forall fun t => hbound σ t h1 h2)
+    integrable_line (fun t => hf _ (by simp [h1]) (by simp [h2])) hφ (fun t => hbound σ t h1 h2)
   have hφnn : ∀ t, 0 ≤ φ t := fun t => (norm_nonneg _).trans (hbound a t le_rfl hab)
   -- Cauchy on the rectangles [a,b] × [−R, R]
   have hrect : ∀ R : ℝ, (∫ y in (-R)..R, f (b + y * I)) - (∫ y in (-R)..R, f (a + y * I))
@@ -497,15 +491,6 @@ theorem vertical_line_shift {f : ℂ → ℂ} {a b : ℝ} (hab : a ≤ b)
   have := tendsto_nhds_unique hlim1 hlim0
   exact sub_eq_zero.mp this
 
-
-/-- The critical-line Γℝ bracket is EF_lit's Γ-integrand: for real t,
-logDeriv Γℝ(1/2+it) + logDeriv Γℝ(1/2−it) = Re ψ(1/4+it/2) − log π  (ψ = digamma;
-Γℝ(s) = π^{−s/2}Γ(s/2), logDeriv Γℝ(s) = −(log π)/2 + ψ(s/2)/2, conj symmetry). -/
-theorem gammaR_bracket (t : ℝ) :
-    logDeriv Complex.Gammaℝ (1/2 + t * I) + logDeriv Complex.Gammaℝ (1/2 - t * I)
-      = (((Complex.digamma (1/4 + t/2 * I)).re - Real.log Real.pi : ℝ) : ℂ) :=
-  -- proved in Zeta23/WeilEF/GammaRBracket.lean
-  gammaR_bracket' t
 
 /-- paperFT of a continuous compactly supported function is entire (differentiation under the
 integral sign); needed for all contour arguments (H = Hfn k analytic in s). -/
@@ -651,17 +636,6 @@ lemma norm_logDeriv_Gammaℝ_le : ∃ C : ℝ, 0 < C ∧ ∀ σ t : ℝ, 1 / 2 �
     _ ≤ Real.log Real.pi * Real.log (2 + |t|) * 2 + C * Real.log (2 + |t|) := by
         nlinarith [hC.le, hloght, Real.log_nonneg (show (1:ℝ) ≤ 2 + |t/2| by linarith [abs_nonneg (t/2)])]
     _ = (2 * Real.log Real.pi + C) * Real.log (2 + |t|) := by ring
-
-/-- continuity ⇒ integrability on vertical lines under a majorant (the step inside vertical_line_shift). -/
-lemma integrable_line {f : ℂ → ℂ} {σ : ℝ} (hf : ∀ t : ℝ, DifferentiableAt ℂ f (σ + t * I))
-    {φ : ℝ → ℝ} (hφ : Integrable φ) (hb : ∀ t : ℝ, ‖f (σ + t * I)‖ ≤ φ t) :
-    Integrable (fun t : ℝ => f (σ + t * I)) := by
-  have hc : Continuous (fun t : ℝ => f (σ + t * I)) := by
-    refine continuous_iff_continuousAt.mpr fun t => ?_
-    have hg : Continuous (fun t : ℝ => (σ : ℂ) + t * I) := by fun_prop
-    show ContinuousAt (f ∘ fun t : ℝ => (σ : ℂ) + t * I) t
-    exact ContinuousAt.comp_of_eq (hf t).continuousAt hg.continuousAt rfl
-  exact hφ.mono' hc.aestronglyMeasurable (Filter.Eventually.of_forall hb)
 
 /-- **Archimedean line shift**: the Γℝ'/Γℝ-part of the two
 vertical lines shifts to the critical line (rectangle with no poles of Γℝ'/Γℝ in Re s > 0,

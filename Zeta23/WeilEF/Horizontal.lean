@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 /-
 Zeta23/WeilEF/Horizontal.lean — the horizontal sides of the explicit-formula rectangle vanish along
-good heights.
+good heights (a sub-piece of `full_line_identity`).
 
 For `s = x ± iR_j`, `x ∈ [1−c, c] ⊂ [−1/2, 3/2]`:  `‖H(s)‖ ≤ C_H/(1+R_j²)` (`norm_Hfn_le`), and
 `‖Λ'/Λ(s)‖ ≤ K·log²(j+10)`: for `re s ≥ 1/2` split `Λ'/Λ = Γℝ'/Γℝ + ζ'/ζ` (`logDeriv_completedZeta`),
@@ -23,7 +23,7 @@ namespace WeilEF
 
 open Complex Topology Filter Set MeasureTheory
 
-/-- **Horizontal sides vanish** (used by `full_line_identity`). -/
+/-- **Horizontal sides vanish** (interface for `full_line_identity`). -/
 theorem horizontal_vanish {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasCompactSupport k)
     {c : ℝ} (hc1 : 1 < c) (hc2 : c ≤ 3/2) {Cg : ℝ} (hCg : 0 < Cg) {R : ℕ → ℝ}
     (hR : ∀ j : ℕ, (j : ℝ) + 7 ≤ R j ∧ R j ≤ (j : ℝ) + 8 ∧
@@ -60,7 +60,7 @@ theorem horizontal_vanish {k : ℝ → ℂ} (hk : ContDiff ℝ 2 k) (hkc : HasCo
     have hs1 : s ≠ 1 := fun h => by rw [h] at him7; norm_num at him7
     obtain ⟨hζ, hLζ⟩ := hRs s hsim hre1 hre2
     have hre0 : 0 < s.re := by linarith
-    rw [logDeriv_completedZeta s hs0 hs1 hζ hre0, logDeriv_Gammaℝ hre0]
+    rw [logDeriv_completedZeta s hs1 hζ hre0, logDeriv_Gammaℝ hre0]
     have hψs : ‖Complex.digamma (s / 2)‖ ≤ Cψ * Real.log (2 + |(s / 2).im|) :=
       hψ (s / 2) (by simp; linarith) (by simp; linarith)
     have hlog2 : Real.log (2 + |(s / 2).im|) ≤ Lg j := by

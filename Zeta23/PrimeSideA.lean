@@ -4,9 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-  Part of the Zeta23 formalization of the paper
+Part of the Zeta23 formalization of
   "More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
-  Bracketed labels ([prop:cross], [eq:Msplit], …) and section numbers (§5.4, …) refer to that paper.
 -/
 import Zeta23.PrimeSideA.Basic
 import Zeta23.PrimeSideA.MuMu
@@ -19,7 +18,7 @@ import Zeta23.PrimeSideA.Ends
 Seam with `PrimeSideB.lean` ([prop:PP], [thm:traces]): see the header of
 `Zeta23/PrimeSideA/Defs.lean`.  Everything here is ζ-free: the zeros never
 appear in §5 ("In this section the zeros play no role", §5); `N(T,2T)` enters [prop:trace]
-only through [eq:muints] + [eq:RvM], which are taken as hypotheses on an abstract real `N`.
+only through [eq:muints] + [eq:RvM], which we take as hypotheses on an abstract real `N`.
 
 ## Shape of the results
 All error terms are explicit inequalities, uniform in `T`:
@@ -27,10 +26,10 @@ All error terms are explicit inequalities, uniform in `T`:
 where `EventuallyAt cϱ lam P` means: there is `T₀` such that `P p F` holds for every parameter set
 `p` with `p.lam = lam`, `T₀ ≤ p.T` and every taper datum `F` satisfying `LocalHyps cϱ p F`.
 So `C` and `T₀` may depend on `c_ϱ`, on the constants inside H-Γ/H-cheb, and on `λ` — the paper
-has `C` depending on ϱ only and `T₀ = T₀(λ)` (§5.5); the present reading is weaker but
-sufficient at fixed λ.  This deviation from the paper is intentional.
+has `C` depending on ϱ only and `T₀ = T₀(λ)` (§5.5); ours is the (weaker, sufficient at fixed λ)
+reading.  This is a deviation from the paper.
 
-## Hypotheses consumed (taken as hypotheses here; none is a Lean axiom)
+## Hypotheses consumed (all proved elsewhere in the repository; none is a Lean axiom)
 * `Zeta23.GammaFacts` (H-Γ [eq:mufacts]+[eq:muints]) and `Zeta23.ChebyshevMertens` (H-cheb
   [lem:cheb]) — Zeta23/Hypotheses.lean, verbatim (fields of `PaperInputs`).
 * `LocalHyps cϱ p F` — taper/test-family facts [eq:psidef], [eq:abdef], [eq:gbounds], [eq:Phi2FT],
@@ -370,6 +369,7 @@ theorem prop_trace (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMertens)
 
 -- **[lem:ends]** is proved in Zeta23/PrimeSideA/Ends.lean:
 -- `Zeta23.PrimeSide.lem_ends` (§5.3) — imported by this module.
+#check @lem_ends
 
 /-! ## [eq:Msplit]  (§5.4) -/
 
@@ -395,16 +395,18 @@ theorem eq_Msplit (hΓ : Zeta23.GammaFacts) (p : Setting) (F : LocalFun) (hF : L
 PrimeSideB.)  We write `log L` as in the paper; note `log L ≤ log l` since `λ ≤ 1`. -/
 -- **[prop:mumu]** is proved in Zeta23/PrimeSideA/MuMu.lean:
 -- `Zeta23.PrimeSide.prop_mumu` — imported by this module, so available here under the same name.
+#check @prop_mumu
 
 /-! ## [prop:cross]  (§5.4) -/
 
 -- **[prop:cross] (i)** is proved in Zeta23/PrimeSideA/CrossMuP.lean:
 -- `Zeta23.PrimeSide.prop_cross_muP` (§5.4: 𝓜[μ,P_X] ≪ l√X) — imported by this module.
+#check @prop_cross_muP
 
 /-- **[prop:cross] (ii)** (§5.4): `𝓜[μ,Π_X] ≪ l L √X`.  Proof (§5.4): `0<μ≤l` and
 `|Π_X| ≤ 3√X/T` on `I`, inserted into the sup-bound: `≤ l·(3√X/T)·T·2πbL ≤ 6π·lL√X`. -/
-theorem prop_cross_muPi (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMertens)
-    (hlam : 0 < lam ∧ lam ≤ 1) :
+theorem prop_cross_muPi (hΓ : Zeta23.GammaFacts) (_hcheb : Zeta23.ChebyshevMertens)
+    (_hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>
       |Mform F.Phi p.T Zeta23.mu (Zeta23.PiX p.X)| ≤ C * (p.l * p.L * Real.sqrt p.X)) := by
   obtain ⟨T₁, hT₁⟩ := mu_abs_le_l hΓ
@@ -423,7 +425,7 @@ theorem prop_cross_muPi (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMerte
 
 /-- **[prop:cross] (iii)** (§5.4): `𝓜[P_X,Π_X] ≪ L X`.  Proof (§5.4): `|P_X| ≤ √X` (H-cheb) and
 `|Π_X| ≤ 3√X/T` on `I`: `≤ √X·(3√X/T)·T·2πbL ≤ 6π·LX`. -/
-theorem prop_cross_PPi (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMertens)
+theorem prop_cross_PPi (_hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMertens)
     (hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>
       |Mform F.Phi p.T (Zeta23.PX p.X) (Zeta23.PiX p.X)| ≤ C * (p.L * p.X)) := by
@@ -444,8 +446,8 @@ theorem prop_cross_PPi (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMerten
 
 /-- **[prop:cross] (iv)** (§5.4): `𝓜[Π_X,Π_X] ≪ L X / T`.  Proof (§5.4): `|Π_X| ≤ 3√X/T` on
 `I` twice: `≤ (3√X/T)²·T·2πbL ≤ 18π·LX/T`. -/
-theorem prop_cross_PiPi (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMertens)
-    (hlam : 0 < lam ∧ lam ≤ 1) :
+theorem prop_cross_PiPi (_hΓ : Zeta23.GammaFacts) (_hcheb : Zeta23.ChebyshevMertens)
+    (_hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>
       |Mform F.Phi p.T (Zeta23.PiX p.X) (Zeta23.PiX p.X)| ≤ C * (p.L * p.X / p.T)) := by
   refine ⟨18 * π, 1, fun p F _ hT hF => ?_⟩
@@ -464,7 +466,7 @@ theorem prop_cross_PiPi (hΓ : Zeta23.GammaFacts) (hcheb : Zeta23.ChebyshevMerte
 end Results
 
 /-!
-## Summary of §5-A results
+## Contents
 Proved in this file:
 * eq_Msplit — [eq:Msplit]
 * prop_cross_muPi / _PPi / _PiPi — [prop:cross] (ii)(iii)(iv)

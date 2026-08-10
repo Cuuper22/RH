@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23/ThmD/Concrete.lean — the concrete FactsD instance for [thm:D].
+Zeta23/ThmD/Concrete.lean — the concrete FactsD instance.
 Mirror of Zeta23/PrimeSideB/Traces.lean's concreteData/concreteFacts for the Montgomery–Taylor
 window (paper §7.1): plugs BridgeD (P.localFunD, localHypsCoreD_eventually) and the
 Core-flipped §5 results into the DataD/FactsD interface of Zeta23/ThmD/Traces.lean, with the
@@ -79,7 +79,7 @@ lemma evBound_of_eventuallyAtCoreD (hLoc : LocalHypsCoreDEventually P)
 
 /-- vanishing of the autocorrelation beyond the support width. -/
 private lemma autocorr_eq_zero_of_support {h : ℝ → ℝ} {M : ℝ}
-    (hsupp : ∀ u : ℝ, M ≤ |u| → h u = 0) {y : ℝ} (hy : 2 * M ≤ |y|) (hM : 0 ≤ M) :
+    (hsupp : ∀ u : ℝ, M ≤ |u| → h u = 0) {y : ℝ} (hy : 2 * M ≤ |y|) (_hM : 0 ≤ M) :
     Params.autocorr h y = 0 := by
   show ∫ u, h u * h (u + y) = 0
   have hz : ∀ u : ℝ, h u * h (u + y) = 0 := by

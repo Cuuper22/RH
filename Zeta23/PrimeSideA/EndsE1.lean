@@ -4,8 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Zeta23 — [lem:ends], bound for 𝓔₁ (§5.3).  Leaf integrals W1a–d/W3/Ig are proved
-below (partly via Zeta23.Defs.LeafIntegrals).  Statement `calE1_bound` consumed by
+Zeta23 — [lem:ends], bound for 𝓔₁ (§5.3).  Statement `calE1_bound` consumed by
 Zeta23/PrimeSideA/Ends.lean.
 
 ROUTE.  On I×I: |ν|,|ν'| ≤ B;  |K + K_∞| ≤ 2L² (abs_Kfun_le, abs_Kinf_le);
@@ -50,11 +49,10 @@ def gwt (p : Setting) (τ : ℝ) : ℝ := ((1 + distB p τ) ^ 2)⁻¹
 
 /-- (Ig) `∫_I g ≤ 2`. -/
 theorem setIntegral_gwt_le (hT : 0 < p.T) : ∫ τ in Icc p.T (2 * p.T), gwt p τ ≤ 2 := by
-  -- via `Zeta23.LeafIntegrals.Ig_core`
+  
   have := Zeta23.LeafIntegrals.Ig_core p.T hT
   unfold gwt distB
   exact this
-
 
 
 theorem W1a (hF : LocalHypsCoreW cϱ p F) :
@@ -111,12 +109,11 @@ theorem W1b (hF : LocalHypsCoreW cϱ p F) (hT : 1 ≤ p.T) :
     _ = 4 * (cϱ / p.w) ^ 2 := mul_one _
 
 
-
 /-- J(u) := ∫_{(u,∞)} ψ² is antitone in u (ψ² ≥ 0). -/
 theorem antitone_setIntegral_psiA_sq_Ioi (hF : LocalHypsCoreW cϱ p F) :
-    Antitone (fun u : ℝ => ∫ r in Set.Ioi u, psiA cϱ p r ^ 2) := fun u v huv =>
+    Antitone (fun u : ℝ => ∫ r in Set.Ioi u, psiA cϱ p r ^ 2) := fun _ _ huv =>
   setIntegral_mono_set hF.psi_sq_integrable.integrableOn
-    (Filter.Eventually.of_forall fun r => sq_nonneg _) (Set.Ioi_subset_Ioi huv).eventuallyLE
+    (Filter.Eventually.of_forall fun _ => sq_nonneg _) (Set.Ioi_subset_Ioi huv).eventuallyLE
 
 /-- (W1c) ∫_0^1 J(u)(1+u)² du ≤ 32L, J(u) := ∫_{(u,∞)}ψ² ≤ 8L. -/
 theorem W1c (hF : LocalHypsCoreW cϱ p F) :
@@ -167,7 +164,7 @@ theorem W1d (hF : LocalHypsCoreW cϱ p F) (hT : 1 ≤ p.T) :
 theorem W3 (hF : LocalHypsCoreW cϱ p F) :
     Integrable (fun r => psiA cϱ p r ^ 2 * (2 + |r|) ^ 2) ∧
     ∫ r, psiA cϱ p r ^ 2 * (2 + |r|) ^ 2 ≤ 18 * p.L ^ 2 + 18 * (cϱ / p.w) ^ 2 :=
-  -- via `Zeta23.LeafIntegrals.W3_core`
+  
   Zeta23.LeafIntegrals.W3_core (psiA cϱ p) p.L cϱ p.w (by linarith [hF.one_le_w]) psiA_abs
     (psiA_nonneg_of hF) psiA_le_L (fun r hr => psiA_le_div_sq hr) hF.psi_sq_integrable
 
@@ -263,7 +260,7 @@ theorem abs_E1integrand_le (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν) 
 /-! ### The majorant for ρ on I -/
 
 /-- `τ_d = T + d h > 2T − h` (since `d = ⌊T/h⌋`). -/
-theorem tau_d_gt (hL : 0 < p.L) (hT : 0 < p.T) : 2 * p.T - p.h < p.tau p.d := by
+theorem tau_d_gt (hL : 0 < p.L) (_hT : 0 < p.T) : 2 * p.T - p.h < p.tau p.d := by
   have hh : 0 < p.h := by unfold Setting.h; positivity
   have hd : p.d = ⌊p.T / p.h⌋₊ := Setting.d_eq_floor p hL
   have hlt : p.T / p.h < (p.d : ℝ) + 1 := by rw [hd]; exact Nat.lt_floor_add_one _
@@ -431,9 +428,8 @@ theorem rho_le_majorant (hF : LocalHypsCoreW cϱ p F) (hT : 0 < p.T) {τ : ℝ}
 /-! ### The weight integrals -/
 
 
-
 /-- `∫_I ρ/g ≤ 2[W1a+W1b+h⁻¹(W1c+W1d)] + W3`-type bound:  `∫_I ρ(τ)(1+min(τ−T,2T−τ))² dτ ≤ RHS`. -/
-theorem setIntegral_rho_div_gwt_le (hF : LocalHypsCoreW cϱ p F) (hν : NuBound p B ν) (hT : 1 ≤ p.T) :
+theorem setIntegral_rho_div_gwt_le (hF : LocalHypsCoreW cϱ p F) (_hν : NuBound p B ν) (hT : 1 ≤ p.T) :
     ∫ τ in Icc p.T (2 * p.T), rho p F τ / gwt p τ
       ≤ 2 * (4 * p.L ^ 2 + 4 * (cϱ / p.w) ^ 2
             + (p.h)⁻¹ * (32 * p.L + 4 / 3 * (cϱ / p.w) ^ 2 * Real.log p.T))
@@ -845,7 +841,7 @@ section BoundsCor
 variable {cϱ : ℝ} {p : Setting} {F : LocalFun} {ν : ℝ → ℝ} {B : ℝ}
 
 /-- `|𝓔₁(ν)| ≤ ∬_{I×I} majK1(ν)`. -/
-theorem abs_calE1_le_maj (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (hT : 0 < p.T) :
+theorem abs_calE1_le_maj (hνc : Continuous ν) (hF : LocalHypsCoreW cϱ p F) (_hT : 0 < p.T) :
     |calE1 p F ν| ≤ ∫ q in sqI p, majK1 p F ν q := by
   have hcpt : IsCompact (sqI p) := isCompact_sqI
   have hfi : IntegrableOn (fun q => trG2integrand p F ν q - KinfIntegrand p F ν q) (sqI p) :=

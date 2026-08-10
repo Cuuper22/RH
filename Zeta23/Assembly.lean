@@ -4,9 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-  Part of the Zeta23 formalization of the paper
+Part of the Zeta23 formalization of
   "More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
-  Bracketed labels ([prop:cross], [eq:Msplit], …) and section numbers (§5.4, …) refer to that paper.
 -/
 import Zeta23.LinAlg
 import Zeta23.Defs
@@ -23,20 +22,19 @@ import Mathlib.Analysis.Real.Pi.Bounds
 /-!
 # §4 "The counting inequalities" and §6 "Proofs of Theorems A, B, C" — assembly
 
-Reference text: **the paper**, labels `prop:zeroside-rank`, `eq:zeroside-rank`,
+Reference: the paper, labels `prop:zeroside-rank`, `eq:zeroside-rank`,
 `prop:zeroside`, `eq:zeroside`, `eq:zeroside2`, and `sec:proofs` (proofs of `thm:A`, `thm:B`, `thm:C`).
 
 Design:
 * Parts A–E of this file are **ζ-free and Defs-free**: theorems about Hermitian matrices
   (Part A, consuming the `RHLinalg` §3 lemmas) and about real numbers / explicit real
-  functions (Parts B–E).  Every analytic or combinatorial input proved in another file
+  functions (Parts B–E).  Every analytic or combinatorial input produced elsewhere
   (prop:block — `ZeroSide.lean`; prop:tail — `Tail.lean`; thm:traces — `PrimeSideTemp.lean`'s
   `TracesBounds`; Riemann–von Mangoldt and the local count — `Hypotheses.lean`; taper facts —
   `Taper.lean`) enters as an explicit, named hypothesis whose docstring quotes the paper label.
 * Part F instantiates A–E with the concrete objects of `Defs.lean`: `thmA_abstract`, `thmB_abstract`,
   `thmC_abstract` (Theorems A–C at fixed `λ < 1` for an abstract `ZeroConfig`, taking prop:block / prop:tail /
-  the H-EF bridge / [eq:abdef] / thm:traces as named inputs); `Zeta23/Main.lean`  plugs the sibling
-  files' theorems into those inputs and instantiates at ζ.
+  the H-EF bridge / [eq:abdef] / thm:traces as named inputs).
 * Error terms are explicit inequalities with named constants throughout Parts A–D; filters /
   `Tendsto` appear only in the final `ε`-wrappers (Part E).
 
@@ -82,7 +80,7 @@ lemma posIndex_le_rank {A : Matrix n n 𝕜} (hA : A.IsHermitian) : posIndex hA 
   simp only [mem_filter, mem_univ, true_and]
   exact ne_of_gt
 
-/-- **prop:zeroside-rank, first assertion** (the paper `prop:zeroside-rank`):
+/-- **prop:zeroside-rank, first assertion** (the paper, `prop:zeroside-rank`):
 "`s₁ + s₂ ≥ 4 tr Â − 2 N(I′) − ‖Â‖_F²`".
 
 Stated over the abstract output of prop:block(ii) — `Â = P + Q`, `P ⪰ 0`, `rank P ≤ r`
@@ -142,7 +140,7 @@ lemma frobSq_sub_le (G E : Matrix n n 𝕜) :
   rw [frobSq_eq_norm_sq, ← norm_eq_sqrt_frobSq, ← norm_eq_sqrt_frobSq]
   exact pow_le_pow_left₀ (norm_nonneg _) (norm_sub_le G E) 2
 
-/-- **prop:zeroside-rank, perturbation step** (the paper, proof of `prop:zeroside-rank`):
+/-- **prop:zeroside-rank, perturbation step** (proof of `prop:zeroside-rank` in the paper):
 "`Â = Ĝ − Ê` with `|tr Ê| ≤ ‖Ê‖₁` and `‖Â‖_F ≤ ‖Ĝ‖_F + ‖Ê‖_F ≤ ‖Ĝ‖_F + ‖Ê‖₁`, so …
 `4 tr Â − ‖Â‖_F² ≥ 4 tr Ĝ − ‖Ĝ‖_F² − O(θ₀ L⁻¹ (1 + ‖Ĝ‖_F))`".
 
@@ -173,7 +171,7 @@ section MatrixLevel2
 variable {𝕜 : Type*} [RCLike 𝕜]
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
-/-- **prop:zeroside, [eq:zeroside]** (the paper `prop:zeroside`): "For every `θ ≥ θ₀`,
+/-- **prop:zeroside, [eq:zeroside]** (the paper's `prop:zeroside`): "For every `θ ≥ θ₀`,
 `s₁ ≥ 2 n₊^θ(G̃) − N(I′)` and `#𝒵(I′) ≥ n₊^θ(G̃)`."
 
 Inputs, as in the paper's proof: lem:weyl (`RHLinalg.weyl_posIndexAbove_le`, needs
@@ -200,7 +198,7 @@ lemma posIndexAbove_congr {A B : Matrix n n 𝕜} (hA : A.IsHermitian) (hB : B.I
     (h : A = B) (θ : ℝ) : posIndexAbove hA θ = posIndexAbove hB θ := by
   subst h; rfl
 
-/-- **[eq:nplus-lower]** (the paper, proof of `thm:B`): lem:CS (`RHLinalg.cauchySchwarz_count`)
+/-- **[eq:nplus-lower]** (proof of `thm:B` in the paper): lem:CS (`RHLinalg.cauchySchwarz_count`)
 applied to `R = G̃`, `θ = θ₀`: if `tr G̃ > θ₀ d` then
 `n₊^{θ₀}(G̃) ≥ (tr G̃ − θ₀ d)² / tr G̃²`.  (`d = Fintype.card n`; `tr G̃² = ‖G̃‖_F² = frobSq G̃` for
 Hermitian `G̃`.  This is `cauchySchwarz_count` verbatim, re-exported under the paper's equation
@@ -540,60 +538,51 @@ theorem err_isLittleO {N R₁ R₂ NII B cl : ℝ → ℝ} {K : ℝ}
     simpa using hB1.mul_isBigO hbr
   exact (((hR₁.const_mul_left 4).add hR₂).add (hNII.const_mul_left 3)).add hlast
 
+/-- **sup over λ ∈ [1/2, 1)** (the common `λ → 1⁻` step): if the `ε`-form holds with constant `c(λ)`
+for every `λ ∈ [1/2, 1)` and `C − η ≤ c(λ)` for some such `λ`, for every `η > 0`, then it holds with constant `C`. -/
+theorem eps_form_sup_half {c : ℝ → ℝ} {C : ℝ}
+    (hc : ∀ η > (0:ℝ), ∃ lam : ℝ, 1 / 2 ≤ lam ∧ lam < 1 ∧ C - η ≤ c lam)
+    {N lower : ℝ → ℝ} (hN : ∀ T, 0 ≤ N T)
+    (h : ∀ lam : ℝ, 1 / 2 ≤ lam → lam < 1 →
+      ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (c lam - ε) * N T ≤ lower T) :
+    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (C - ε) * N T ≤ lower T := by
+  intro ε hε
+  obtain ⟨lam, h0, h1, h2⟩ := hc (ε / 2) (by linarith)
+  obtain ⟨T₀, hT₀⟩ := h lam h0 h1 (ε / 2) (by linarith)
+  exact ⟨T₀, fun T hT => le_trans (mul_le_mul_of_nonneg_right (by linarith) (hN T)) (hT₀ T hT)⟩
+
+/-- a point of `[1/2, 1)` within `δ` of `1`. -/
+lemma exists_lam_near_one {δ : ℝ} (hδ : 0 < δ) : ∃ lam : ℝ, 1 / 2 ≤ lam ∧ lam < 1 ∧ 1 - lam ≤ δ :=
+  ⟨max (1 / 2) (1 - δ), le_max_left _ _, max_lt (by norm_num) (by linarith),
+    by have := le_max_right (1 / 2) (1 - δ); linarith⟩
+
 /-- E3. The `λ → 1⁻` step: if for every `λ ∈ [1/2, 1)` the `ε`-form holds with
 constant `H(λ)`, then it holds with constant `2/3 = sup_{λ<1} H(λ)`. -/
 theorem eps_form_twoThirds {N lower : ℝ → ℝ} (hN : ∀ T, 0 ≤ N T)
     (h : ∀ lam : ℝ, 1 / 2 ≤ lam → lam < 1 →
       ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (Hfun lam - ε) * N T ≤ lower T) :
-    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (2 / 3 - ε) * N T ≤ lower T := by
-  intro ε hε
-  -- choose λ = max(1/2, 1 − 3ε/10), so that (5/3)(1 − λ) ≤ ε/2
-  set lam := max (1 / 2) (1 - 3 * ε / 10) with hlam
-  have h1 : 1 / 2 ≤ lam := le_max_left _ _
-  have h2 : lam < 1 := max_lt (by norm_num) (by linarith)
-  have h3 : 5 / 3 * (1 - lam) ≤ ε / 2 := by
-    have : 1 - 3 * ε / 10 ≤ lam := le_max_right _ _
-    linarith
-  obtain ⟨T₀, hT₀⟩ := h lam h1 h2 (ε / 2) (by linarith)
-  refine ⟨T₀, fun T hT => ?_⟩
-  have hH := Hfun_ge_near_one lam h1 h2.le
-  have := hT₀ T hT
-  have hNT := hN T
-  nlinarith
+    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (2 / 3 - ε) * N T ≤ lower T :=
+  eps_form_sup_half (fun η hη => by
+    obtain ⟨lam, h1, h2, h3⟩ := exists_lam_near_one (show 0 < 3 * η / 5 by linarith)
+    exact ⟨lam, h1, h2, by linarith [Hfun_ge_near_one lam h1 h2.le]⟩) hN h
 
 /-- Same for `F`: constant `3/4 = sup_{λ<1} F(λ)` (Thm C), given the `ε`-forms with `F(λ)`. -/
 theorem eps_form_threeQuarters {N lower : ℝ → ℝ} (hN : ∀ T, 0 ≤ N T)
     (h : ∀ lam : ℝ, 1 / 2 ≤ lam → lam < 1 →
       ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (Ffun lam - ε) * N T ≤ lower T) :
-    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (3 / 4 - ε) * N T ≤ lower T := by
-  intro ε hε
-  set lam := max (1 / 2) (1 - ε / 2) with hlam
-  have h1 : 1 / 2 ≤ lam := le_max_left _ _
-  have h2 : lam < 1 := max_lt (by norm_num) (by linarith)
-  have h3 : 1 - lam ≤ ε / 2 := by have : 1 - ε / 2 ≤ lam := le_max_right _ _; linarith
-  obtain ⟨T₀, hT₀⟩ := h lam h1 h2 (ε / 2) (by linarith)
-  refine ⟨T₀, fun T hT => ?_⟩
-  have hF := Ffun_ge_near_one lam (by linarith) h2.le
-  have := hT₀ T hT
-  have hNT := hN T
-  nlinarith
+    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (3 / 4 - ε) * N T ≤ lower T :=
+  eps_form_sup_half (fun η hη => by
+    obtain ⟨lam, h1, h2, h3⟩ := exists_lam_near_one hη
+    exact ⟨lam, h1, h2, by linarith [Ffun_ge_near_one lam (by linarith) h2.le]⟩) hN h
 
 /-- Same for `2F − 1`: constant `1/2 = sup_{λ<1} (2F(λ) − 1)` (Thm B). -/
 theorem eps_form_half {N lower : ℝ → ℝ} (hN : ∀ T, 0 ≤ N T)
     (h : ∀ lam : ℝ, 1 / 2 ≤ lam → lam < 1 →
       ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (2 * Ffun lam - 1 - ε) * N T ≤ lower T) :
-    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (1 / 2 - ε) * N T ≤ lower T := by
-  intro ε hε
-  set lam := max (1 / 2) (1 - ε / 4) with hlam
-  have h1 : 1 / 2 ≤ lam := le_max_left _ _
-  have h2 : lam < 1 := max_lt (by norm_num) (by linarith)
-  have h3 : 1 - lam ≤ ε / 4 := by have : 1 - ε / 4 ≤ lam := le_max_right _ _; linarith
-  obtain ⟨T₀, hT₀⟩ := h lam h1 h2 (ε / 2) (by linarith)
-  refine ⟨T₀, fun T hT => ?_⟩
-  have hF := Ffun_ge_near_one lam (by linarith) h2.le
-  have := hT₀ T hT
-  have hNT := hN T
-  nlinarith
+    ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (1 / 2 - ε) * N T ≤ lower T :=
+  eps_form_sup_half (c := fun lam => 2 * Ffun lam - 1) (fun η hη => by
+    obtain ⟨lam, h1, h2, h3⟩ := exists_lam_near_one (half_pos hη)
+    exact ⟨lam, h1, h2, by linarith [Ffun_ge_near_one lam (by linarith) h2.le]⟩) hN h
 
 /-- E4. **Dyadic summation** (the paper §6, end of the proof of Thm A: "the statement for
 `N₀*(T)/N(T)` by summing over dyadic intervals: given `ε>0` choose `T₁` with
@@ -734,7 +723,7 @@ lemma eventually_N_ge (Z : ZeroConfig) (hR : RiemannVonMangoldt Z) :
     nlinarith [abs_nonneg C]
   have h3 : T / (2 * π) * l T ≤ T / (2 * π) * ell1 T :=
     mul_le_mul_of_nonneg_left hℓ (by positivity)
-  -- N ≥ T l/2π − 2|C| l ≥ T l/4π once T ≥ 8π|C|
+  -- N ≥ T l/2π − 2|C| l ≥ T l/4π  once T ≥ 16π|C|... (T l/(4π) ≥ 2|C| l ⟸ T ≥ 8π|C|)
   have h4 : 2 * |C| * l T ≤ T * l T / (4 * π) := by
     rw [le_div_iff₀ (by positivity)]
     nlinarith [abs_nonneg C, Real.pi_pos]
@@ -1023,8 +1012,8 @@ end Windows
 /-! ### F1.  Fixed-`T` assembly with the concrete matrices `Ĝ = P.hat T (Z.Gz P T)` etc.
 
 The inputs from prop:block (ZeroSide.lean) and prop:tail (Tail.lean) are packaged as the two
-Prop-structures `BlockInputs` and `TailInputs`, whose fields are exactly the statements those files
-prove; they are discharged in those files' instantiation sections. -/
+Prop-structures below, whose fields are exactly the statements those files announce; they are
+discharged in those files' instantiation sections. -/
 
 section FixedTConcrete
 
@@ -1111,8 +1100,8 @@ end FixedTConcrete
 
 The theorems are proved over an abstract error function `Err` (only: eventually nonnegative and
 `→ 0`) in place of the concrete `Params.calE` — the `_err` versions below — so that alternative
-prime-side chains (e.g. an MV-free one with an enlarged error) plug in directly; the original
-`calE` statements are kept, verbatim, as specializations. -/
+prime-side chains (e.g. an MV-free one with an enlarged error) plug in directly; the
+`calE` statements are kept as specializations. -/
 
 section Main
 open Filter Asymptotics Topology
@@ -1135,15 +1124,17 @@ lemma isLittleO_of_bdd_mul {f g N : ℝ → ℝ} (hf : f =O[atTop] (fun _ => (1:
     (hg : g =o[atTop] N) : (fun T => f T * g T) =o[atTop] N := by
   simpa using hf.mul_isLittleO hg
 
-/-- **Theorem A at fixed `λ ∈ (0,1)`, for an abstract zero configuration** (the paper [thm:A] with
-§6's proof, `ε`-form):
+/-- **Theorem A at fixed `λ ∈ (0,1)`, for an abstract zero configuration** ([thm:A] with
+§6's proof, in `ε`-form):
 for every `ε > 0`, `N₀*(T,2T) ≥ (H(λ) − ε) N(T,2T)` for all `T ≥ T₀`.
 
-Hypotheses: Riemann–von Mangoldt `hRvM` and the thm:traces package `hTr` (with an abstract
-error rate `Err`, see `TracesBoundsE`), together with the named inputs proved in sibling files:
+Genuine hypotheses: the published inputs `H : PaperInputs Z` (only H-RvM is used directly here;
+the others enter through the inputs below) and the thm:traces package
+`hTr : ThmTracesHyp P Z`.
+Named inputs:
 `hBlock` (prop:block, ZeroSide), `hTail`/`hθ₀` (prop:tail, Tail), `hNII` (boundary count
 `N(I′∖I) ≪ D₀ l`, Tail), `hGzGp` (the H-EF bridge `G^{zero} = G^{prime}`, [eq:Gdef]), `ha` ([eq:abdef],
-Taper), `hcalE` (`Err → 0`). -/
+Taper), `hcalE` (`𝓔_T → 0`, PrimeSideB). -/
 theorem thmA_abstract_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Params) (hP : P.Valid)
     (hlam : P.lam < 1) (Err : ℝ → ℝ)
     (hTr : TracesBoundsE P Err P.a P.trGtilde P.trGtildeSq (fun T => (Z.N T (2 * T) : ℝ)))
@@ -1187,9 +1178,7 @@ theorem thmA_abstract_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Pa
       simpa using tendsto_const_nhds.add hcE0
     have h2 : Tendsto (fun T => P.a T ^ 2) atTop (𝓝 1) := by simpa using ha1.pow 2
     simpa [hK, Pi.div_def] using h1.div h2 one_ne_zero
-  ------------------------------------------------------------------
   -- (1) the main inequality, eventually in T
-  ------------------------------------------------------------------
   have hmain : ∀ᶠ T in atTop, Hfun P.lam * N T - err T ≤ (Z.N0star T (2 * T) : ℝ) := by
     filter_upwards [hBlock, hTail, hGzGp, hapos, eventually_ge_atTop T₁,
       eventually_ge_atTop T₂, eventually_ge_atTop T₃, eventually_ge_atTop (0:ℝ), eventually_l_pos,
@@ -1199,9 +1188,7 @@ theorem thmA_abstract_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Pa
     have hLpos : 0 < P.L T := by simp only [Params.L]; positivity
     have hℓ₁ := ell1_pos hl
     have hKnn : 0 ≤ 1 + C₂ * Err T := by linarith
-    -- Seam A
     have hA := seamA hT0 hB hTl hapos' hLpos
-    -- Seam B
     have htr2' : P.trGtildeSq T - P.mainTr2 T ≤ C₂ * Err T * P.mainTr2 T := by
       have := htr2 T hT₂
       simp only at this
@@ -1226,9 +1213,7 @@ theorem thmA_abstract_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Pa
       mul_le_mul_of_nonneg_right hH hN0
     simp only [herr, hR₁, hR₂, hBdef, hcl, hK, hNdef] at h hHN ⊢
     linarith
-  ------------------------------------------------------------------
   -- (2) err = o(N)
-  ------------------------------------------------------------------
   have hNtop : Tendsto N atTop atTop := tendsto_N_atTop Z hRvM
   -- R₁ = o(N)
   have o1 : R₁ =o[atTop] N := by
@@ -1293,9 +1278,7 @@ theorem thmA_abstract_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Pa
   have o6 : (fun T => 1 / (P.lam * l T) * N T) =o[atTop] N :=
     isLittleO_of_tendsto_zero_mul (tendsto_const_nhds.div_atTop (tendsto_l_atTop.const_mul_atTop hlam0))
   have herr_o : err =o[atTop] N := o5.add o6
-  ------------------------------------------------------------------
   -- (3) conclude
-  ------------------------------------------------------------------
   exact eps_form_of_isLittleO hmain (Eventually.of_forall fun T => Nat.cast_nonneg _) herr_o
 
 /-- **Theorem A at fixed `λ ∈ (0,1)`, abstract zero configuration** — the `Err := P.calE`
@@ -1387,9 +1370,9 @@ theorem nplus_ge_explicit {nplus trG trG2 θd FN CE : ℝ}
 
 /-- **Theorems B and C at fixed `λ ∈ (0,1)`, for an abstract zero configuration — common core.**
 There is `R = o(N)` with, eventually in `T`:  `(2F(λ) − 1)N − 2R ≤ N₀ˢ(T,2T)` and
-`F(λ)N − R ≤ N_d(T,2T)`  (the paper §6, proofs of thm:B, thm:C: prop:tail `θ₀ ≪ lT^{λ/2−1}`, prop:trace
+`F(λ)N − R ≤ N_d(T,2T)`  (paper §6, proofs of thm:B, thm:C: prop:tail `θ₀ ≪ lT^{λ/2−1}`, prop:trace
 `tr G̃ ≫ dl` hence `tr G̃ > θ₀d`, lem:CS + [eq:ratio] ⇒ [eq:nplus-lower], then [eq:zeroside2] and
-`F(λ₁) ≥ F(λ) − 1/l`).  Same named inputs as `thmA_abstract` (without `ha`). -/
+`F(λ₁) ≥ F(λ) − 1/l`).  Same displayed inputs as `thmA_abstract` (without `ha`). -/
 theorem thmBC_core_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Params) (hP : P.Valid)
     (hlam : P.lam < 1) (Err : ℝ → ℝ)
     (hTr : TracesBoundsE P Err P.a P.trGtilde P.trGtildeSq (fun T => (Z.N T (2 * T) : ℝ)))
@@ -1461,9 +1444,7 @@ theorem thmBC_core_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Param
     simp only [hxdef] at hx1
     rwa [div_lt_one htrGpos] at hx1
   refine ⟨R, ?_, ?_⟩
-  ------------------------------------------------------------------
   -- R = o(N)
-  ------------------------------------------------------------------
   · have hFN : (fun T => Ffun (P.lam1 T) * N T) =O[atTop] N := by
       refine IsBigO.of_bound 1 ?_
       filter_upwards [eventually_l_pos] with T hl
@@ -1497,9 +1478,7 @@ theorem thmBC_core_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Param
     have o4 : (fun T => 1 / l T * N T) =o[atTop] N :=
       isLittleO_of_tendsto_zero_mul (tendsto_const_nhds.div_atTop tendsto_l_atTop)
     exact ((o1.add o2).add o3).add o4
-  ------------------------------------------------------------------
   -- the inequalities, eventually
-  ------------------------------------------------------------------
   · filter_upwards [hBlock, hTail, hGzGp, hx, eventually_ge_atTop T₃, eventually_ge_atTop (0:ℝ),
       eventually_l_pos, hErr0]
       with T hB hTl hGG hxT hT₃ hT0 hl hE0
@@ -1528,7 +1507,7 @@ theorem thmBC_core_err (Z : ZeroConfig) (hRvM : RiemannVonMangoldt Z) (P : Param
     simp only [hRdef, hxdef, hNdef] at hnp hFN hZ ⊢
     constructor <;> nlinarith [hZ.1, hZ.2, hnp, hFN]
 
-/-- `thmBC_core`, the concrete-rate wrapper `Err := P.calE`
+/-- `thmBC_core`, the concrete-rate wrapper: `Err := P.calE`
 (the `Err`-parametric generalization is `thmBC_core_err` above). -/
 theorem thmBC_core (Z : ZeroConfig) (H : PaperInputs Z) (P : Params) (hP : P.Valid)
     (hlam : P.lam < 1) (hTr : ThmTracesHyp P Z)
@@ -1598,9 +1577,6 @@ lemma X_le_T (P : Params) (hlam1 : P.lam ≤ 1) {T : ℝ} (hT : 2 * π ≤ T) : 
 /-- **`𝓔_T → 0`** as `T → ∞`, for fixed `0 < λ ≤ 1` and fixed `w ≥ 0`
 (`𝓔_T := w/L + (l²+X) log l/(Tl) + T^{λ/2−1}`, [thm:traces]).  Bound used:
 `𝓔_T ≤ w/L + (log T)²/T + log l/l + T^{λ/2−1}` for `T ≥ 2π`, `l ≥ 1`. -/
--- Note: the same statement is proved independently in Zeta23/PrimeSideB.lean
--- (`Zeta23.PaperParams.calE_tendsto_zero`).  It is kept here so that this file
--- does not need to import the §5 files.
 theorem calE_tendsto_zero (P : Params) (hlam : 0 < P.lam) (hlam1 : P.lam ≤ 1) (hw : 0 ≤ P.w) :
     Tendsto P.calE atTop (𝓝 0) := by
   have h1 : Tendsto (fun T => P.w / P.L T) atTop (𝓝 0) :=

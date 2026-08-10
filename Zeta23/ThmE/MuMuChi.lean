@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 /-
 Zeta23/ThmE/MuMuChi.lean — [prop:mumu] for Dirichlet characters (Theorem E, paper sec 7.2):
-the diagonal mu_chi-evaluation, transplanted from Zeta23/PrimeSideA/MuMu.lean.
+the diagonal mu_chi-evaluation.
 
 Differences from the zeta-version: mu -> muq kappa q; window sup-bound |mu_chi| <= C_a * l
 (muq_abs_le) instead of |mu| <= l, so the core lemmas carry an abstract bound A (>= 0); the
@@ -116,11 +116,11 @@ theorem abs_inner_sub_le_chi (hΓq : GammaFactsChi κ q) (hT2 : 2 ≤ p.T)
         _ = A * (K * (|x| + x ^ 2)) := mul_one _
     have hcomp : |(∫ τ' in Ix p.T x, muq κ q τ' ^ 2)
         - ∫ τ' in Icc p.T (2 * p.T), muq κ q τ' ^ 2| ≤ A ^ 2 * |x| := by
-      rw [abs_sub_comm, ← setIntegral_diff hIxmeas hIInt2 hIxI]
+      rw [abs_sub_comm, ← setIntegral_sdiff hIxmeas hIInt2 hIxI]
       have hdvol : (volume : Measure ℝ).real (Icc p.T (2 * p.T) \ Ix p.T x) = |x| := by
         have hsub : volume (Icc p.T (2 * p.T) \ Ix p.T x)
             = volume (Icc p.T (2 * p.T)) - volume (Ix p.T x) :=
-          measure_diff hIxI hIxmeas.nullMeasurableSet hIxfin
+          measure_sdiff hIxI hIxmeas.nullMeasurableSet hIxfin
         rw [measureReal_def, hsub]
         unfold Ix
         rw [Real.volume_Icc, Real.volume_Icc,
@@ -132,7 +132,7 @@ theorem abs_inner_sub_le_chi (hΓq : GammaFactsChi κ q) (hT2 : 2 ≤ p.T)
         fun τ' hτ' => hsq_bound τ' hτ'.1
       have h := norm_setIntegral_le_of_norm_le_const (μ := volume)
         (s := Icc p.T (2 * p.T) \ Ix p.T x) (f := fun τ' => muq κ q τ' ^ 2)
-        (lt_of_le_of_lt (measure_mono diff_subset)
+        (lt_of_le_of_lt (measure_mono Set.sdiff_subset)
           (by rw [Real.volume_Icc]; exact ENNReal.ofReal_lt_top)) hb
       rw [Real.norm_eq_abs, hdvol] at h
       exact h
@@ -208,8 +208,8 @@ variable (cϱ lam : ℝ)
 
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1000000 in
-/-- [prop:mumu]_chi: the diagonal mu_chi evaluation with O_q(l^2 log L) error.  Proof of the
-statement used in Zeta23/ThmE/PrimeSideChi.lean. -/
+/-- [prop:mumu]_chi: the diagonal mu_chi evaluation with O_q(l^2 log L) error; proof of the
+statement recorded in Zeta23/ThmE/PrimeSideChi.lean. -/
 theorem prop_mumu_chi {κ q : ℕ} {c : ℕ → ℂ} (hΓq : GammaFactsChi κ q) (hc : CoeffOK q c)
     (hq : 1 ≤ q) (hlam : 0 < lam ∧ lam ≤ 1) :
     ∃ C : ℝ, EventuallyAtCore cϱ lam (fun p F =>

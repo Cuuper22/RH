@@ -9,7 +9,7 @@ import Mathlib
 /-!
 # MV step 0 — spacing lemmas for admissible weights
 
-For an injective `freq : ι → ℝ` on a finite index type with admissible weights `δ`
+For an injective `freq : ι → ℝ` on a finite index type with ADMISSIBLE weights `δ`
 (`0 < δ r` and `δ r ≤ |freq r − freq s|` for all `s ≠ r` — the shape of Zeta23.MVHilbert),
 the open intervals `I_t = (freq t − δ t/2, freq t + δ t/2)` are pairwise disjoint, giving
 by comparison with `∫ |u − freq s|^{−σ} du`:
@@ -45,6 +45,7 @@ variable {freq δ : ι → ℝ} (h : Adm freq δ)
 /-- The interval `I_t`. -/
 def itv (t : ι) : Set ℝ := Set.Ioo (freq t - δ t / 2) (freq t + δ t / 2)
 
+omit [Fintype ι] [DecidableEq ι] in
 /-- Centers are far apart: `(δ t + δ t')/2 ≤ |freq t − freq t'|` for `t ≠ t'`. -/
 lemma centers_far (h : Adm freq δ) {t t' : ι} (htt : t ≠ t') :
     (δ t + δ t') / 2 ≤ |freq t - freq t'| := by
@@ -64,6 +65,7 @@ lemma itv_disjoint (h : Adm freq δ) :
   rcases abs_cases (freq t - freq t') with ⟨he, _⟩ | ⟨he, _⟩ <;> rw [he] at hfar <;>
     linarith [hu.1, hu.2, hu'.1, hu'.2]
 
+omit [Fintype ι] [DecidableEq ι] in
 /-- For `u ∈ I_t`, `t ≠ s`: `|freq s − u| ≤ (3/2)|freq s − freq t|` and `δ s/2 ≤ |u − freq s|`. -/
 lemma abs_le_of_mem_itv (h : Adm freq δ) {s t : ι} (hts : t ≠ s) {u : ℝ}
     (hu : u ∈ Adm.itv (freq := freq) (δ := δ) t) :
@@ -122,6 +124,7 @@ lemma integral_inv_four_Icc {a b c : ℝ} (hab : a ≤ b) (hc : c < a ∨ b < c)
   set B := ((a - c) ^ (3:ℕ))⁻¹
   linarith
 
+omit [Fintype ι] [DecidableEq ι] in
 /-- Closed-interval version of the membership bounds (for use on closures `J t`). -/
 lemma abs_bounds_closed (h : Adm freq δ) {s t : ι} (hts : t ≠ s) {u : ℝ}
     (hut : |u - freq t| ≤ δ t / 2) :
@@ -163,7 +166,8 @@ private lemma mem_window (h : Adm freq δ) {s t : ι} (hts : t ≠ s) {R : ℝ}
     rw [abs_of_nonneg (by linarith : 0 ≤ u - freq s)] at hb
     exact ⟨by linarith [hb.2], by linarith⟩
 
-private lemma window_integrable {s : ι} {R : ℝ} (hδs : 0 < δ s) {k : ℕ} (hk : k ≠ 0) :
+omit [Fintype ι] [DecidableEq ι] in
+private lemma window_integrable {s : ι} {R : ℝ} (hδs : 0 < δ s) {k : ℕ} (_hk : k ≠ 0) :
     MeasureTheory.IntegrableOn (fun u => ((u - freq s) ^ k)⁻¹) (window freq δ s R) := by
   have hcompact : IsCompact (window freq δ s R) := (isCompact_Icc).union isCompact_Icc
   refine ContinuousOn.integrableOn_compact hcompact ?_
@@ -258,7 +262,7 @@ theorem spacing_sq (h : Adm freq δ) (s : ι) :
       ≤ ∫ u in window freq δ s R, g u := by
     apply MeasureTheory.setIntegral_mono_set hintW
     · exact Filter.Eventually.of_forall fun u => by positivity
-    · exact Filter.Eventually.of_forall hUsub  
+    · exact Filter.Eventually.of_forall hUsub
   -- evaluate the window integral
   have hwindow : ∫ u in window freq δ s R, g u ≤ 4 / δ s := by
     have hd : Disjoint (Set.Icc (freq s - R) (freq s - δ s / 2))

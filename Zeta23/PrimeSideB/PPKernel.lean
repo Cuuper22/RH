@@ -4,15 +4,16 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-  Part of the Zeta23 formalization of the paper
-  "More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
-  Bracketed labels ([prop:cross], [eq:Msplit], …) and section numbers (§5.4, …) refer to that paper.
+Part of the Zeta23 formalization of the paper
+"More than two thirds of the zeros of the Riemann zeta function lie on the critical line".
 -/
 import Zeta23.PrimeSideA.Defs
 
 /-!
-# Kernel lemmas for [prop:PP] (§5.4) — Pure measure-theory / trigonometric-integral / H-MV-application lemmas used by
-`Zeta23/PrimeSideB/PP.lean`, kept independent of `Zeta23/PrimeSideA.lean` so they build separately.
+# Kernel lemmas for [prop:PP] (§5.4)
+
+Pure measure-theory / trigonometric-integral / H-MV-application lemmas used by
+`Zeta23/PrimeSideB/PP.lean`.
 
 * `sqIntegral_shear`: the substitution `τ = τ' + x` on the square `I×I` (§5.4).
 * `intervalIntegral_cos_linear*`: `∫_α^β cos(θt + c) dt` closed forms and the bound `2/|θ|` (§5.4).
@@ -182,7 +183,7 @@ lemma integrable_sq_mul_inner (hΦ : Continuous Φ) {G : ℝ × ℝ → ℝ} (hG
 
 /-- For `T ≥ 0` the window `I∩(I−x)` is empty unless `|x| ≤ T`; so the `x`-integral may be
 restricted to `[−T, T]` (§5.4 "which is empty for |x| ≥ T"). -/
-lemma Ix_eq_empty (hT : 0 ≤ T) {x : ℝ} (hx : T < |x|) : Ix T x = ∅ := by
+lemma Ix_eq_empty (_hT : 0 ≤ T) {x : ℝ} (hx : T < |x|) : Ix T x = ∅ := by
   unfold Ix
   apply Set.Icc_eq_empty
   intro hle
