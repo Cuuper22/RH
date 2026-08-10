@@ -25,7 +25,7 @@ ell1 ↦ ell1q q, nu_X ↦ nu_{X,chi} = mu_{kappa,q} + P_{X,c} (no pole term: [e
 terms), [prop:PP] main sum ↦ sumA2gCoprime.  The real-variable pointwise lemmas tr2_pointwise and
 ratio_pointwise (PrimeSideB.lean) are reused verbatim — they take the density-log as a free real,
 and ell1q slots in (l ≤ ell1q for q ≥ 1).  Constants may depend on q (q fixed in [thm:E]; the
-q-uniformity question for [rem:otherL](i) is addressed in Zeta23/ThmE/Hybrid.lean).
+q-uniformity question for [rem:otherL](i) is not addressed in this file).
 
 Inputs: prop_trace_chi, eq_Msplit_chi (PrimeSideChi.lean);
 prop_mumu_chi (MuMuChi.lean); prop_cross_muP_chi_proved (CrossMuPChi.lean);

@@ -13,7 +13,7 @@ certificate windows ("Certified constants").
   jWin (D1trunc 9) 1 vQuartic = 29965280330934234270211/285991090937677125000000.
 
 Device: a polynomial given by a coefficient list integrates to a finite rational sum
-(polyEval / polyInt, as in Zeta23/BandLS/Quartic.lean); every closed form is computer-algebra-generated
+(polyEval / polyInt); every closed form is computer-algebra-generated
 and Lean-checked by ring / norm_num.
 -/
 import Zeta23.XiPrime.Certificate.D1

@@ -552,7 +552,7 @@ lemma LocalHypsCore.phiHat_sq_mul_integrable_of_bdd (hF : LocalHypsCore cϱ p F)
 
 
 /-- Window-generic taper facts without the bandwidth cap λ ≤ 1 — the family regime is
-λ = L/l ∈ (1, 2) (family window L = log(qT/2π), so L > l; see Zeta23/ThmE/FamilyPrimeSide.lean).
+λ = L/l ∈ (1, 2) (family window L = log(qT/2π), so L > l).
 This regime goes beyond the paper: §5's statements all assume λ ≤ 1; nothing Core-typed is
 re-typed here — this is a purely additive split: fields = LocalHypsCore's minus lam_le_one, and
 LocalHypsCore.toCoreW below.  Consumed only by the family-average statements. -/
