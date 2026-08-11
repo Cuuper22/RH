@@ -33,8 +33,12 @@ conditional on a missing R1a construction.  The A2.1 paraunitary proposal is
 now finished and killed for the exact finite common-lattice, critical-channel
 class used by cycle 3: a fiber-rank obstruction below shows that no choice of
 real signs or complex phases can retain the claimed distinguished block.
-This does not exclude an oversampled or noncommensurable system with a newly
-derived coefficient count, and it does not affect the separately proved
+The A2.2 one-window-per-interval fallback is also finished and killed in
+docs/audit/r1a_alias_free_fallback.md: the global hat normalization inserts
+an omitted factor \(1/\sigma\), and the honest degree-four moment problem has
+value zero after that correction.  These results do not exclude an
+oversampled or noncommensurable system with a newly derived coefficient
+count and trace budget, and they do not affect the separately proved
 stability inequality.
 
 ## Archive inventory
@@ -211,6 +215,15 @@ systems, noncommensurable periods, or a different modulation architecture.
 
 ### Application to the claimed blocks
 
+This subsection isolates the A2.1 alias equation by provisionally granting
+the source's favorable allocation convention \(r\leq V_\sigma\).  The A2.2
+audit subsequently shows that this convention is itself mis-scaled in the
+base paper's hat units: a mean-one literal compression requires
+\(\sigma r\leq V_\sigma\).  Thus the terminal blocks fail normalization
+before the rank obstruction is needed.  The argument below remains a valid
+independent statement: even under the more favorable source convention, no
+critical-count common-lattice PB/TDAC completion exists.
+
 For terminal file 24, equations (28)--(29) construct
 \(V_\sigma(x)=\sigma u_\sigma(x)/M\).  Solving the displayed continuity
 system gives, with \(b=(2-\sigma)/2\) and \(d=b-1/2\),
@@ -337,12 +350,12 @@ Consequently there is **no** zero-alias average obstruction; the earlier
 unnormalized comparison would be false.  The obstruction is precisely the
 full paraunitary rank budget (15)--(16).
 
-## What would still be sufficient
+## What remains outside the two killed classes
 
-One of the following must be constructed and checked.
+The originally requested fallback no longer survives.
 
-1. **An alias-free redesign (A2.2).**  For every \(j\) and every
-   \(m\ne0\),
+1. **A2.2 is killed at normalization.**  Requiring, for every \(j\) and
+   every \(m\ne0\),
 
    \[
     \varphi_j(u)\overline{\varphi_j(u-mL_j)}=0
@@ -350,18 +363,19 @@ One of the following must be constructed and checked.
    \tag{6}
    \]
 
-   Together with (1), this proves equation (28) of cycle 3.  To escape
-   (16), the allocation must make the residual vanish on the full
-   \(L_0\)-cell occupied by the distinguished window.  The base-paper
-   mechanism does this by assigning one window to each interval, with
-   support length equal to its modulation period.  Its distinguished symbol
-   is the corresponding restriction of \(v\), not the mean-one flat or
-   terminal top-hat symbol.  The step/smoothing loss and all four replacement
-   moments must therefore be computed before any resulting constant is
-   stated; any resulting constants are new rungs.
+   does prove the alias-free form of cycle-3 equation (28).  The exact
+   interval construction and its taper loss are given in the A2.2 audit.
+   However, with \(L=\sigma\ell\), global normalization by \(aL^2\), and
+   periods summing to \(L\), its literal block symbol is the intrinsic
+   restriction divided by \(\sigma\).  A mean-one block requires the correct
+   cap \(\sigma r\leq V_\sigma\), which fails already because
+   \(\sup V_\sigma=1200/1031<143/100\leq\sigma\).  For the honest block
+   \(C=H/\sigma\), a rational five-atom law matching the paper-derived
+   closed moments makes the corrected degree-four stability tail zero.
+   Thus this route yields no replacement quartic rung.
 
-2. **A paraunitary multi-window system outside the killed class.**  For every
-   nonzero alias class,
+2. **A paraunitary multi-window system outside both killed classes.**  For
+   every nonzero alias class,
    the full cyclic symbol must vanish:
 
    \[
@@ -373,10 +387,10 @@ One of the following must be constructed and checked.
 
    with the appropriate common-lattice form when the \(L_j\) are
    commensurable.  Equation (1) is only the zero-alias row of this system.
-   By (16), it must change the cycle-3 count by oversampling the complement
-   by at least \(n_0\), make the residual vanish on at least \(n_0\) fibers
-   by changing the distinguished symbol, or use a separately derived
-   noncommensurable modulation system.
+   By (16) and the A2.2 scaling calculation, it must change the cycle-3 count
+   and rederive the zero-side trace normalization, make the residual vanish
+   on at least \(n_0\) fibers while satisfying \(\sigma r\leq V_\sigma\), or
+   use a separately derived noncommensurable modulation system.
 
 In addition, the distinguished block needs its own Gram symbol to be the
 claimed mean-one flat symbol (or a proved asymptotic replacement).  A smooth
@@ -391,19 +405,22 @@ For the profile used in the run,
 
 Thus smooth windows supported in a genuinely disjoint interval partition
 all vanish at an internal boundary and cannot satisfy (1) pointwise there.
-The boundaries are null for the Gram integral, but a smooth replacement has
-a quantitative seam loss that A2.2 must carry.  Overlapping ramps can satisfy
-(1), but they reintroduce precisely the nonzero terms in (4).  A construction
-outside the killed class proving (7), or the alias-free redesign with its
-loss and replacement moments, is the missing dependency.
+The boundaries are null for the Gram integral; the A2.2 audit gives the
+explicit absolute normalization loss \(10w/(\sigma\ell)\), relative
+full-energy loss \(10w/(A\sigma\ell)\), and intrinsic block-mean loss
+\(2w/(A\mu\ell)\).
+Overlapping ramps can satisfy (1), but they reintroduce precisely the
+nonzero terms in (4).  A construction outside both killed classes, with a
+new coefficient count and trace normalization proved from its actual grids,
+is the remaining R1a dependency.
 
 ## Consequence for the program
 
-The contradiction above indicts the claimed common-lattice construction
-premise, not the stability or trimmed-moment algebra.  R1a remains open only
-through the explicitly surviving redesigns above.  The nested-quartic
-numerical rungs must remain conditional until a valid construction supplies
-both:
+The contradictions indict the claimed construction and normalization
+premises, not the stability algebra.  A2.1 and A2.2 are both closed as exact
+method classes; R1a remains open only through an architecture outside them.
+The nested-quartic numerical rungs must remain conditional until a valid
+construction supplies both:
 
 - the exact or asymptotically controlled principal compression; and
 - the cyclic block symbol from which the moments (2) follow.

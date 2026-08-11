@@ -86,8 +86,25 @@ complement needs rank \(N\) but the cycle-3 count supplies at most
 residual for the file-15, R-8686, and R-9506 symbols.  This indicts the
 construction premise, not the stability or moment algebra.  No replacement
 principal-block input has been added; the frozen quartic rungs remain at
-their existing conditional status while the A2.2 alias-free redesign is
-tested.
+their existing conditional status.
+
+Phase A2.2 also changes no headline dependency.  In the base hat
+normalization, a one-window-per-interval block with intrinsic mean one is
+the literal compression \(C=H/\sigma\); the terminal cap \(r\leq V_\sigma\)
+omits the required factor \(\sigma\).  The quadratic profile has
+\(\sup V_\sigma=1200/1031<143/100\), so no mean-one block exists in the
+stated class.  For the honest block, a positive rational five-atom law
+matches the paper-derived closed moments through degree four below the
+corrected threshold \(Y=\sigma-1\), making the sharp corrected tail value
+zero.
+RH/Zeta85/Discharge/AliasFallback.lean verifies the rational moment
+reconstruction, weight positivity, support inequalities, scaling identity,
+and zero tails for the paper-derived closed moment definitions, without
+adding a field or primitive declaration.  Equality of those definitions
+with Mathlib integrals and the RS specialization remains unformalized.
+Every headline printed by
+comparator/PrintAxioms/AliasFallback.lean depends exactly on
+[propext, Classical.choice, Quot.sound].
 
 ---
 

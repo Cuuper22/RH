@@ -760,9 +760,83 @@ normalized central average is
 
 This kills A2.1 only for finite commensurable systems with the cycle-3
 coefficient count and the claimed distinguished symbols.  It does not rule
-out oversampling, a separately derived noncommensurable architecture, or the
-A2.2 base-paper alias-free redesign.  The latter must change the
-distinguished symbol to the restriction of the full profile, carry the exact
-step/smoothing loss, and recompute all moments.  Any resulting constants are
-new rungs; every frozen quartic rung remains conditional on its own missing
-R1a construction.
+out oversampling or a separately derived noncommensurable architecture.
+A2.2 has now been tested separately and killed at the base normalization;
+every frozen quartic rung remains conditional on its own missing R1a
+construction.
+
+---
+
+## 20. A2.2 R1a alias-free fallback — normalization and quartic class killed
+
+The base Lemma 2.2 mechanism does give an exact alias-free construction:
+partition the full length \(L=\sigma\ell\) into intervals, use one window
+supported in each interval, and set its period equal to that interval's
+length.  The obstruction is the global hat normalization, not aliasing.
+For a cell of period \(L_j=\mu_j\ell\), cycle 3 uses amplitude
+\((L/L_j)^{1/2}\).  Poisson and division by \(aL^2\) give block mean
+
+\[
+ \frac1{a\sigma L_j}\int|\varphi_j|^2
+ =\frac1\sigma\int_{-1/2}^{1/2}r_j(t)\,dt.
+\]
+
+Thus an intrinsic mean-one block is the literal compression \(C=H/\sigma\),
+and a prescribed mean-one symbol requires \(\sigma r\leq V_\sigma\), not
+the terminal condition \(r\leq V_\sigma\).  For the quadratic profile,
+\(\sup V_\sigma=1200/1031<143/100\), so no mean-one interval block exists
+at any support in scope.
+
+The requested restriction can nevertheless be constructed intrinsically.
+With
+
+\[
+ x_0^2=\frac{\sigma^2-\mu^2}{12},\qquad
+ r(t)=V_\sigma(x_0+\mu t),
+\]
+
+its intrinsic mean is exactly one.  The five-interval sharp partition is
+alias-free almost everywhere.  Tapering its ten endpoints over physical
+width \(w\) changes the global normalization by at most
+\(10w/(\sigma\ell)\); after division by \(A=1031/1200\), the relative
+full-energy loss is at most \(10w/(A\sigma\ell)\) and the distinguished
+intrinsic mean loss is at most \(2w/(A\mu\ell)\).  These vanish for
+\(w=o(\ell)\) but do not change the fixed factor \(1/\sigma\).
+
+For \(Y=H-I\), the honest stability threshold is
+
+\[
+ (C-I)_+^2=\sigma^{-2}(Y-(\sigma-1))_+^2.
+\]
+
+The common rational atoms
+
+\[
+ \left(-\frac7{10},-\frac15,-\frac1{10},\frac3{10},\frac25\right)
+\]
+
+have positive weights \(>1/25\) matching the paper-derived rational closed
+moments through degree four at every relevant strict parameter pair.  Their
+largest atom is \(2/5\), below the smallest threshold \(43/100\), and
+\(1+y\geq3/10\).  Hence the corrected primal tail is zero even before
+trimming.  Nonnegativity and the zero polynomial show that both the sharp
+degree-four primal and dual values are exactly zero.  A2.2 therefore yields
+no quartic increment; its exact recomputed outputs are only the two-trace
+baselines listed in docs/audit/r1a_alias_free_fallback.md.
+
+RH/Zeta85/Discharge/AliasFallback.lean proves the generic rational
+moment reconstruction, all parameter-specific positivity and support
+checks, the scaling identity, and the strict-support zero tails for the
+paper-derived closed moment definitions.  It does not prove that those
+definitions equal Mathlib integrals or the RS specialization to formula
+(18); that analytic bridge remains open.  The independent exact-plus-
+numerical verifier is verify/a2_2_alias_free_scaling.py with committed
+output verify/a2_2_alias_free_scaling.out.
+
+Exact blocker after A2.2: within the finite one-window interval class,
+periods summing to \(L\), unchanged cycle-3 coefficient
+count, and normalization by \(aL^2\), no mean-one literal principal block
+exists; the honest degree-four replacement has tail optimum zero.  Escaping
+this statement requires a new coefficient count/normalization and zero-side
+trace proof, a modulation system outside A2.1 and A2.2, or spectral input
+beyond four moments.  No frozen rung changes status.

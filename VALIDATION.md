@@ -363,3 +363,46 @@ zero-row obstruction.
 This is a method-class impossibility audit, not a Lean discharge or a new
 analytic input.  No declaration, headline dependency, or frozen rung status
 changes.
+
+## 17. A2.2 normalization and corrected-tail audit
+
+The exact independent verifier is reproduced by:
+
+```bash
+python3 -m pip install -r verify/requirements.txt
+cmp -s verify/a2_2_alias_free_scaling.out \
+  <(python3 verify/a2_2_alias_free_scaling.py)
+```
+
+All proof decisions use `fractions.Fraction`.  The script:
+
+- derives \(A=1031/1200\) and
+  \(\sup V_\sigma=1200/1031<143/100\);
+- recomputes the saturated quadratic costs at
+  \(143/100\), \(1.499999\), \(1.4999\), \(1.9999\), and the diagnostic
+  endpoint \(2\);
+- reconstructs the paper-derived rational closed moments
+  \(M_2,M_3,M_4\) from the restriction parameters;
+- inverts the rational five-node Vandermonde matrix, whose determinant is
+  \(99/500000\), and checks every weight is \(>1/25\);
+- checks exact moment equality through degree four and the strict support
+  gap \(2/5<\sigma-1\); and
+- independently evaluates terminal formula (18), including its crossing
+  contraction, by 55-digit tensor Gauss--Legendre quadrature.  The largest
+  committed calibration discrepancy is below \(2\cdot10^{-56}\).
+
+The corresponding kernel audit is:
+
+```bash
+lake build RH.Zeta85.Discharge.AliasFallback RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/AliasFallback.lean
+bash verify/check_axioms.sh
+```
+
+`RH/Zeta85/Discharge/AliasFallback.lean` contains no proof placeholder or
+primitive assumption.  Its public audit headlines report exactly
+`[propext, Classical.choice, Quot.sound]`.  This validates the finite
+rational countermodel conditional on the paper-derived closed moment
+formulas; it does not formalize their equality with Mathlib integrals or the
+RS bridge to formula (18), add a principal-block input, or alter a frozen
+rung.

@@ -1,0 +1,63 @@
+A2.2 alias-free normalization and corrected-tail audit
+A = 1031/1200
+sup V = 1/A = 1200/1031 = 1.163918525703
+Vandermonde determinant = 99/500000 > 0
+atoms = (Fraction(-7, 10), Fraction(-1, 5), Fraction(-1, 10), Fraction(3, 10), Fraction(2, 5))
+min(1 + atom) = 3/10 > 0
+
+[R-850 support] sigma=143/100, mu=499/1000, strict_RS=True
+moments M2,M3,M4 = 0.09357378835803, 0.0002921243211971, 0.01969975667745
+weights = 0.04676588413305, 0.4328888388603, 0.1613233207679, 0.08162563753498, 0.2773963187037
+all weights > 1/25: PASS
+exact moment reconstruction through degree 4: PASS
+threshold gap sigma-1-max(atom) = 3/100 > 0
+corrected positive tail before trimming = 0
+D_sigma = 2561811364469143/2227707598259143
+2-D_sigma = 1893603832049143/2227707598259143
+direct-quadrature max error = 1.147e-56
+
+[file-15 strict support] sigma=1499999/1000000, mu=499/1000, strict_RS=True
+moments M2,M3,M4 = 0.09270932688866, 0.0003159306348011, 0.01943021658327
+weights = 0.04610361044588, 0.4293760868039, 0.1659126467851, 0.08704053034629, 0.2715671256188
+all weights > 1/25: PASS
+exact moment reconstruction through degree 4: PASS
+threshold gap sigma-1-max(atom) = 99999/1000000 > 0
+corrected positive tail before trimming = 0
+D_sigma = 96150315442952061415650847745050283464440727/84754191966816092204313678624469283464440727
+2-D_sigma = 73358068490680122992976509503888283464440727/84754191966816092204313678624469283464440727
+direct-quadrature max error = 1.2745e-56
+
+[R-8686 support] sigma=14999/10000, mu=4999/10000, strict_RS=True
+moments M2,M3,M4 = 0.09303751344712, 0.000318028291967, 0.01956797363778
+weights = 0.04644889812027, 0.4282735672308, 0.1673082767279, 0.08287933365273, 0.2750899242683
+all weights > 1/25: PASS
+exact moment reconstruction through degree 4: PASS
+threshold gap sigma-1-max(atom) = 999/10000 > 0
+corrected positive tail before trimming = 0
+D_sigma = 96113968095064133944342067010727/84720634821781091664283967010727
+2-D_sigma = 73327301548498049384225867010727/84720634821781091664283967010727
+direct-quadrature max error = 1.4019e-56
+
+[R-9506 support] sigma=19999/10000, mu=4999/10000, strict_RS=True
+moments M2,M3,M4 = 0.08902272751615, 0.0003102219277718, 0.01833840562642
+weights = 0.04358401796721, 0.4112654241187, 0.1885034025831, 0.1104662447332, 0.2461809105978
+all weights > 1/25: PASS
+exact moment reconstruction through degree 4: PASS
+threshold gap sigma-1-max(atom) = 5999/10000 > 0
+corrected positive tail before trimming = 0
+D_sigma = 509004667099686324441527220200727/476063683898154328323469120200727
+2-D_sigma = 443122700696622332205411020200727/476063683898154328323469120200727
+direct-quadrature max error = 1.2745e-56
+
+[endpoint calibration] sigma=2, mu=1/2, strict_RS=False
+moments M2,M3,M4 = 0.08905741712134, 0.0003104485380536, 0.01835276146242
+weights = 0.04361988742031, 0.4111625345782, 0.1886339029277, 0.1100365162689, 0.2465471588049
+all weights > 1/25: PASS
+exact moment reconstruction through degree 4: PASS
+threshold gap sigma-1-max(atom) = 3/5 > 0
+corrected positive tail before trimming = 0
+D_sigma = 318220981/297629080
+2-D_sigma = 277037179/297629080
+direct-quadrature max error = 1.5294e-56
+
+RESULT: A2.2 mean-one cap fails and the honest degree-four tail optimum is 0.

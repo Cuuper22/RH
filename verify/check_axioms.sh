@@ -32,6 +32,30 @@ actual_stability() {
 
 diff -u <(expected_stability) <(actual_stability)
 
+expected_alias_fallback() {
+  cat <<'EOF'
+'RH.Zeta85.AliasFallback.moment_reconstruction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.vandermonde_det' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.weights_gt_one_25_143' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.weights_gt_one_25_1499999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.weights_gt_one_25_14999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.weights_gt_one_25_19999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.weights_gt_one_25_endpoint_two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.intrinsic_atoms_nonnegative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.atoms_below_14999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.atoms_below_19999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.cycle3_scaling_identity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.corrected_tail_zero_14999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.AliasFallback.corrected_tail_zero_19999' depends on axioms: [propext, Classical.choice, Quot.sound]
+EOF
+}
+
+actual_alias_fallback() {
+  lake env lean comparator/PrintAxioms/AliasFallback.lean 2>&1
+}
+
+diff -u <(expected_alias_fallback) <(actual_alias_fallback)
+
 for audit in \
   comparator/PrintAxioms.lean \
   comparator/PrintAxioms/Multiplicity.lean \
