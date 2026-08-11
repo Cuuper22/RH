@@ -28,6 +28,15 @@ against fresh output from `comparator/PrintAxioms/Zeta85.lean`, and also runs
 all four base `PrintAxioms` files.  Changing a compiled rung's dependency list
 without updating this audit therefore fails CI.
 
+Phase A1.1 changes no declaration or dependency.  It kills only the method
+class “published \(d_4\) progression mean value + residue norm +
+absolute/Cauchy modulus aggregation”; it does not discharge or replace
+`signedPair_traceGrade_lt_3_2`.  The exact remaining statement is the signed,
+weighted cross-residue progression estimate `(EDB)` and its blockwise
+main-term identity, as recorded in `docs/audit/log_budget_routes.md`, Route 5.
+No cited theorem is transcribed as an `Inputs95` field because none has that
+statement.
+
 ---
 
 ## 1. `#print axioms` — verbatim

@@ -238,13 +238,173 @@ simultaneous cancellation in the retained Möbius factorization and the
 \(h\)- or \(q\)-average; it cannot be obtained by completing one variable
 and summing the rest absolutely.
 
+## Route 5: evaluate the progression sums instead of bounding them
+
+This route asks whether the \((\log T)^{K-1}\) in the Shiu majorant can be
+removed by evaluating the depth-four progression sums, then cancelling their
+main terms against the singular-series subtraction already present in the
+signed aggregate.
+
+At the cycle-5 endpoint \(\eta=43/100\), suppressing the summable \(d\)- and
+\(\ell\)-weights, the exact scales are
+
+\[
+ P=T^{93/100},\qquad Q=T^{1/2},\qquad H=T^{43/100},
+ \qquad P=HQ,
+\tag{15}
+\]
+
+so \(Q=P^{50/93}\) and \(\log P/\log Q=93/50\).  After a progression main
+term has been subtracted, a literal \(C=0\) estimate must in particular
+control an aggregate of the form
+
+\[
+ \boxed{
+ \sum_{q\asymp Q} e_q
+  \sum_{r\bmod q}^{*}
+  S_H(\ell\bar r/q)E_c(P;q,r)
+  \ll PQ.}
+\tag{EDB}
+\]
+
+Here \(c\) and \(e\) are the actual signed, smoothly truncated
+Möbius/Heath--Brown convolutions and \(E_c\) is their *centred* progression
+sum.  In addition to `(EDB)`, the route needs a pointwise identity matching
+the main terms of every signed Heath--Brown block and gcd splitting with the
+prime-pair singular-series subtraction.  Neither requirement may be replaced
+by the corresponding statement for the nonnegative majorant \(d_4\).
+
+### The available published mean values
+
+Nguyen's Theorem 3 states, for \(k\geq4\),
+
+\[
+ \sum_{d\leq D}\sum_{(a,d)=1}
+ |\Delta(\tau_k;X,d,a)|^2
+ \ll
+ \left(D+X^{1-1/(6(k+2))}\right)
+ X(\log X)^{k^2-1}.
+\tag{16}
+\]
+
+See [Nguyen, *Generalized divisor functions in arithmetic progressions: I*,
+Theorem 3](https://arxiv.org/pdf/2308.06839).  At \(k=4\) this contains the
+term \(P^{35/36}P(\log P)^{15}\).
+
+For prime \(q\leq x^{4/7}\), Parry's Theorems 1--2 give, in his additive
+notation,
+
+\[
+ \sum_{a=1}^{q}|\Delta(a/q)|^2
+ \ll x^{3/2+\varepsilon}q^{7/8},
+ \qquad
+ \sum_{a=1}^{q}|E_x(q,a)|
+ \ll x^{3/4+\varepsilon}q^{7/16}.
+\tag{17}
+\]
+
+See [Parry, *The distribution of \(d_4(n)\) in arithmetic progressions*,
+Theorems 1--2](https://arxiv.org/pdf/2404.04749).  The range includes the
+needed exponent because \(4/7-50/93=22/651>0\).
+
+Wei--Xue--Zhang's fixed-residue theorem for appropriately smooth squarefree
+moduli stops at exponent \(293/584\); it misses the required modulus exponent
+by
+
+\[
+ \frac{50}{93}-\frac{293}{584}=\frac{1951}{54312}>0.
+\tag{18}
+\]
+
+See [Wei--Xue--Zhang, *General divisor functions in arithmetic progressions
+to large moduli*, Theorem 1](https://arxiv.org/pdf/1512.01470).  The
+unconditional range in Rodgers--Soundararajan's Theorem 1 is
+\(\log X/\log Q\leq(k+2)/k-\delta\), hence below \(3/2\) for \(k=4\), while
+the required ratio is \(93/50\).  Their extension to this ratio assumes GRH.
+See [Rodgers--Soundararajan, *The variance of divisor sums in arithmetic
+progressions*, Theorem 1](https://arxiv.org/pdf/1610.06900).
+
+### Exact loss after the necessary norm bounds
+
+If \((\ell,q)=1\), \(H<q\), and \(w\) is supported on an interval of length
+\(H\) with \(|w|\leq1\), discrete Parseval gives the explicit construction
+
+\[
+\begin{aligned}
+ \sum_{r\bmod q}^{*}|S_H(\ell\bar r/q)|^2
+ &\leq \sum_{a\bmod q}|S_H(a/q)|^2\\
+ &=q\sum_{h_1\equiv h_2\pmod q}
+     w(h_1/H)\overline{w(h_2/H)}\\
+ &=q\sum_h|w(h/H)|^2
+ \leq q(\lceil H\rceil+1).
+\end{aligned}
+\tag{19}
+\]
+
+The third line uses the support length \(<q\), so congruent supported
+integers are equal.  Combining (16) and (19) by Cauchy, even after replacing
+the actual coefficients by \(d_4\), setting \(e_q=1\), and granting all
+needed smooth uniformity, produces
+
+\[
+ QH^{1/2}P^{71/72}(\log P)^{15/2}
+ =T^{3917/2400}(\log T)^{15/2}.
+\tag{20}
+\]
+
+This exceeds \(PQ=T^{143/100}\) by
+\(T^{97/480}(\log T)^{15/2}\).  Likewise, (17), Parseval, (19), and absolute
+summation over \(q\asymp Q\) give
+
+\[
+ P^{3/4+\varepsilon}H^{1/2}Q^{23/16}
+ =T^{261/160+\varepsilon},
+\tag{21}
+\]
+
+which exceeds \(PQ\) by \(T^{161/800+\varepsilon}\).  Even a hypothetical
+natural-order variance \(\ll QP(\log P)^{15}\) gives exactly
+\(PQ(\log P)^{15/2}\) after (19): it has zero power margin and retains a
+positive logarithmic loss.
+
+There are also two statement mismatches.  The published results concern
+\(d_4\), not the signed truncated coefficients \(c\); pointwise domination
+recovers the Shiu loss instead of evaluating \(E_c\).  Parry's main term
+
+\[
+ M_x(q,a)=\frac1q\sum_{d\mid q}c_d(a)F_x(d)
+\tag{22}
+\]
+
+comes from an additive Estermann series for \(d_4\).  No cited result or
+in-repository derivation identifies the aggregate of these main terms for
+the actual signed blocks with the prime-pair singular-series subtraction.
+
+**Route-5 verdict:** the exact method class “published \(d_4\) progression
+mean value, followed by a norm bound in the residue variable and
+absolute/Cauchy aggregation in \(q\)” is impossible at (15): it misses by a
+fixed power before the coefficient and main-term mismatches are addressed.
+This does **not** disprove `(EDB)`.  It proves that `(EDB)` needs a new
+estimate correlated with \(S_H(\ell\bar r/q)\), the signs of \(e_q\), or the
+simultaneous Heath--Brown factorization.  Those are the cross-\(Y\) and
+`(WG-HB)` routes, not a consequence of the cited divisor-progression
+theorems.  The exact fractions are independently recomputed by
+`verify/a1_1_method_kill.py`, with committed output in
+`verify/a1_1_method_kill.out`.
+
 ## Program status
 
 The target remains frozen.  The support-\(143/100\) theorem still depends on
 `signedPair_traceGrade_lt_3_2`.  The ordered attack narrows the analytic gap
-to either:
+as follows:
 
-1. a cross-\(Y\) signed estimate together with a coefficient construction
-   whose total log exponent is below the resulting threshold; or
-2. the fixed-power inverse-residue estimate `(WG-HB)` for the actual
-   depth-four coefficients.
+1. A constructed per-block estimate with literal exponent \(C=0\) closes
+   the budget **by itself**, because it contributes \(T(\log T)^2\), which
+   is \(o(T(\log T)^3)\).  No cross-\(Y\) estimate is needed in that case.
+   Route 5 kills only the published-\(d_4\)-plus-norm method class for
+   obtaining this estimate; `(EDB)` itself remains the exact resisted
+   statement.
+2. Failing that, prove the cross-\(Y\) signed estimate (6), with all
+   logarithmic exponents explicit.
+3. Failing that, prove the fixed-power inverse-residue estimate `(WG-HB)`
+   for the actual depth-four coefficients.

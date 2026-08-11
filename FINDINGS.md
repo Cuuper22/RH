@@ -446,3 +446,53 @@ Lean action, fetches the Mathlib cache, builds `Zeta23`, `RH.Zeta85.Main`, and
 proof-level `sorry`/`admit` outside comparator challenge files.  This is a
 reproduction guard only: it discharges no mathematical input and changes no
 rung status.
+
+---
+
+## 14. A1.1 evaluate-don't-bound — one exact method class killed
+
+At \(P=T^{93/100}\), \(Q=T^{1/2}\), and \(H=T^{43/100}\), the literal
+\(C=0\) target is the signed weighted progression estimate
+
+\[
+ \sum_{q\asymp Q} e_q\sum_{r\bmod q}^{*}
+ S_H(\ell\bar r/q)E_c(P;q,r)\ll PQ,
+\]
+
+together with an identity matching every signed Heath--Brown progression
+main term to the prime-pair singular-series subtraction.  If proved, this
+target closes the literal log budget alone:
+\(T(\log T)^2=o(T(\log T)^3)\).  The earlier Program status that also
+required a cross-\(Y\) estimate in the \(C=0\) case was incorrect and is
+corrected in `docs/audit/log_budget_routes.md`.
+
+The published \(d_4\) mean-value route does not prove the target.  The exact
+residue Parseval bound
+
+\[
+ \sum_{r\bmod q}^{*}|S_H(\ell\bar r/q)|^2
+ \leq q(\lceil H\rceil+1)
+\]
+
+combined with Nguyen's Theorem 3 and Cauchy gives
+\(T^{3917/2400}(\log T)^{15/2}\), exceeding
+\(PQ=T^{143/100}\) by \(T^{97/480}(\log T)^{15/2}\).  Parry's Theorem 1,
+Parseval, and absolute summation over the moduli give
+\(T^{261/160+\varepsilon}\), exceeding \(PQ\) by
+\(T^{161/800+\varepsilon}\).  Wei--Xue--Zhang's modulus range misses the
+required exponent by \(1951/54312\); the unconditional
+Rodgers--Soundararajan variance range stops below
+\(\log P/\log Q=93/50\).
+
+This is a finish-or-kill result only for the stated method class:
+
+> published \(d_4\) progression mean value + norm bound in residues +
+> absolute/Cauchy aggregation in \(q\).
+
+It is not an impossibility result for the signed target itself.  Two further
+statement gaps remain before exponents are considered: the actual
+coefficients are signed, smoothly truncated Möbius/Heath--Brown convolutions,
+not \(d_4\), and no cited theorem identifies the resulting blockwise main
+terms with the singular-series subtraction.  Therefore no new `Inputs95`
+field is attributed to the cited papers.  The next ordered route is A1.2,
+the cross-\(Y\) signed estimate; `(WG-HB)` remains the final route.

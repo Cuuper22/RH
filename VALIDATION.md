@@ -193,3 +193,32 @@ The workflow and extraction logic were inspected locally; this environment has
 no Lean executable, so the authoritative build result is the GitHub-hosted run
 triggered by the Phase 0d commit.  Phase 0c's DigitalOcean reproduction was
 waived explicitly by the user and was not performed.
+
+## 11. A1.1 exact exponent audit
+
+`verify/a1_1_method_kill.py` uses `fractions.Fraction` throughout to
+recompute the Phase A1.1 scales and every claimed exponent difference.  Its
+committed output is `verify/a1_1_method_kill.out`.  A byte-for-byte rerun is
+checked with:
+
+```bash
+cmp -s verify/a1_1_method_kill.out <(python3 verify/a1_1_method_kill.py)
+```
+
+The script asserts:
+
+- \(P=HQ\), \(Q=P^{50/93}\), and \(PQ=T^{143/100}\);
+- Nguyen plus residue Parseval/Cauchy has exponent \(3917/2400\), an
+  excess of \(97/480\);
+- Parry plus Parseval and absolute modulus summation has exponent
+  \(261/160\), an excess of \(161/800\);
+- Parry's \(4/7\) range margin is \(22/651\), while the
+  Wei--Xue--Zhang range deficit is \(1951/54312\);
+- natural-order variance plus Cauchy has exactly zero power margin; and
+- a literal \(C=0\) contribution has log exponent 2, strictly below the
+  trace-normalization exponent 3.
+
+The analytic premises used in those exponent substitutions were checked
+against the primary theorem statements linked in
+`docs/audit/log_budget_routes.md`, Route 5.  The audit changes no Lean
+declaration and introduces no axiom or `Inputs95` field.
