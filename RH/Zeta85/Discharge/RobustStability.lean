@@ -49,6 +49,18 @@ theorem error_accounting_identity (s b : ℕ)
         2 * ((s : ℝ) + 2 * b - zeroScale) := by
   ring
 
+/-- Error-accounting identity when the count inequality itself has additive
+error `countErr`.  Under `s + 2b ≤ zeroScale + countErr`, the last term is
+nonpositive and the robust bound acquires exactly `2 * countErr`. -/
+theorem error_accounting_withCountError_identity (s b : ℕ)
+    (zeroScale D pTraceErr traceErr frobErr countErr : ℝ) :
+    D * zeroScale + frobErr - 4 * (zeroScale - traceErr) + s +
+        2 * ((s : ℝ) + pTraceErr) + 4 * b =
+      (s : ℝ) - (2 - D) * zeroScale + 2 * pTraceErr +
+        4 * traceErr + frobErr + 2 * countErr +
+        2 * ((s : ℝ) + 2 * b - zeroScale - countErr) := by
+  ring
+
 /-- Robust finite stability with the one-sided trace estimate actually used
 by the proof.  No sign assumptions on the three error variables are needed:
 their defining upper/lower bounds are the complete hypotheses. -/
@@ -93,6 +105,52 @@ theorem robust_stability_inequality {d s b : ℕ}
     linarith
   exact robust_stability_inequality_oneSided hP hQ hrank htraceP hposQ
     hcount htraceLower hfrobG
+
+/-! ### Additive error in the count inequality -/
+
+/-- Robust finite stability when the finite count comparison is known only
+up to the explicit additive error `countErr`. -/
+theorem robust_stability_inequality_withCountError_oneSided {d s b : ℕ}
+    {zeroScale D pTraceErr traceErr frobErr countErr : ℝ}
+    {P Q : Matrix (Fin d) (Fin d) 𝕜}
+    (hP : P.PosSemidef) (hQ : Q.IsHermitian)
+    (hrank : P.rank ≤ s)
+    (htraceP : rtrace P ≤ (s : ℝ) + pTraceErr)
+    (hposQ : posIndex hQ ≤ b)
+    (hcount : (s : ℝ) + 2 * b ≤ zeroScale + countErr)
+    (htraceG : zeroScale - traceErr ≤ rtrace (P + Q))
+    (hfrobG : frobSq (P + Q) ≤ D * zeroScale + frobErr) :
+    tailExcessSq (hP.isHermitian.add hQ) b ≤
+      (s : ℝ) - (2 - D) * zeroScale + 2 * pTraceErr +
+        4 * traceErr + frobErr + 2 * countErr := by
+  have hpre := stability_prebound hP hQ hrank htraceP hposQ
+  calc
+    tailExcessSq (hP.isHermitian.add hQ) b
+        ≤ frobSq (P + Q) - 4 * rtrace (P + Q) + s +
+            2 * ((s : ℝ) + pTraceErr) + 4 * b := hpre
+    _ ≤ (s : ℝ) - (2 - D) * zeroScale + 2 * pTraceErr +
+          4 * traceErr + frobErr + 2 * countErr := by
+      linarith
+
+/-- Symmetric trace-error form with additive count error. -/
+theorem robust_stability_inequality_withCountError {d s b : ℕ}
+    {zeroScale D pTraceErr traceErr frobErr countErr : ℝ}
+    {P Q : Matrix (Fin d) (Fin d) 𝕜}
+    (hP : P.PosSemidef) (hQ : Q.IsHermitian)
+    (hrank : P.rank ≤ s)
+    (htraceP : rtrace P ≤ (s : ℝ) + pTraceErr)
+    (hposQ : posIndex hQ ≤ b)
+    (hcount : (s : ℝ) + 2 * b ≤ zeroScale + countErr)
+    (htraceG : |rtrace (P + Q) - zeroScale| ≤ traceErr)
+    (hfrobG : frobSq (P + Q) ≤ D * zeroScale + frobErr) :
+    tailExcessSq (hP.isHermitian.add hQ) b ≤
+      (s : ℝ) - (2 - D) * zeroScale + 2 * pTraceErr +
+        4 * traceErr + frobErr + 2 * countErr := by
+  have htraceLower : zeroScale - traceErr ≤ rtrace (P + Q) := by
+    have hneg := (abs_le.mp htraceG).1
+    linarith
+  exact robust_stability_inequality_withCountError_oneSided
+    hP hQ hrank htraceP hposQ hcount htraceLower hfrobG
 
 /-! ## 2. Isometric and principal compressions -/
 
@@ -176,6 +234,94 @@ theorem robust_stability_inequality_principalCompression
     have hneg := (abs_le.mp htraceG).1
     linarith
   exact robust_stability_inequality_principalCompression_oneSided
+    hP hQ e hrank htraceP hposQ hcount htraceLower hfrobG
+
+/-! ### Compressions with additive count error -/
+
+/-- Isometric-compression form with additive count error and one-sided trace
+control. -/
+theorem robust_stability_inequality_isometricCompression_withCountError_oneSided
+    {m d s b : ℕ} {zeroScale D pTraceErr traceErr frobErr countErr : ℝ}
+    {P Q : Matrix (Fin d) (Fin d) 𝕜}
+    (hP : P.PosSemidef) (hQ : Q.IsHermitian)
+    (B : Matrix (Fin d) (Fin m) 𝕜) (hB : Bᴴ * B = 1)
+    (hrank : P.rank ≤ s)
+    (htraceP : rtrace P ≤ (s : ℝ) + pTraceErr)
+    (hposQ : posIndex hQ ≤ b)
+    (hcount : (s : ℝ) + 2 * b ≤ zeroScale + countErr)
+    (htraceG : zeroScale - traceErr ≤ rtrace (P + Q))
+    (hfrobG : frobSq (P + Q) ≤ D * zeroScale + frobErr) :
+    tailExcessSq
+        (isHermitian_conjTranspose_mul_mul B (hP.isHermitian.add hQ)) b ≤
+      (s : ℝ) - (2 - D) * zeroScale + 2 * pTraceErr +
+        4 * traceErr + frobErr + 2 * countErr :=
+  (tailExcessSq_isometricCompression_le (hP.isHermitian.add hQ) B hB).trans
+    (robust_stability_inequality_withCountError_oneSided
+      hP hQ hrank htraceP hposQ hcount htraceG hfrobG)
+
+/-- Symmetric trace-error isometric-compression form with additive count
+error. -/
+theorem robust_stability_inequality_isometricCompression_withCountError
+    {m d s b : ℕ} {zeroScale D pTraceErr traceErr frobErr countErr : ℝ}
+    {P Q : Matrix (Fin d) (Fin d) 𝕜}
+    (hP : P.PosSemidef) (hQ : Q.IsHermitian)
+    (B : Matrix (Fin d) (Fin m) 𝕜) (hB : Bᴴ * B = 1)
+    (hrank : P.rank ≤ s)
+    (htraceP : rtrace P ≤ (s : ℝ) + pTraceErr)
+    (hposQ : posIndex hQ ≤ b)
+    (hcount : (s : ℝ) + 2 * b ≤ zeroScale + countErr)
+    (htraceG : |rtrace (P + Q) - zeroScale| ≤ traceErr)
+    (hfrobG : frobSq (P + Q) ≤ D * zeroScale + frobErr) :
+    tailExcessSq
+        (isHermitian_conjTranspose_mul_mul B (hP.isHermitian.add hQ)) b ≤
+      (s : ℝ) - (2 - D) * zeroScale + 2 * pTraceErr +
+        4 * traceErr + frobErr + 2 * countErr := by
+  have htraceLower : zeroScale - traceErr ≤ rtrace (P + Q) := by
+    have hneg := (abs_le.mp htraceG).1
+    linarith
+  exact robust_stability_inequality_isometricCompression_withCountError_oneSided
+    hP hQ B hB hrank htraceP hposQ hcount htraceLower hfrobG
+
+/-- Principal-compression form with additive count error and one-sided trace
+control. -/
+theorem robust_stability_inequality_principalCompression_withCountError_oneSided
+    {m d s b : ℕ} {zeroScale D pTraceErr traceErr frobErr countErr : ℝ}
+    {P Q : Matrix (Fin d) (Fin d) 𝕜}
+    (hP : P.PosSemidef) (hQ : Q.IsHermitian)
+    (e : Fin m ↪ Fin d)
+    (hrank : P.rank ≤ s)
+    (htraceP : rtrace P ≤ (s : ℝ) + pTraceErr)
+    (hposQ : posIndex hQ ≤ b)
+    (hcount : (s : ℝ) + 2 * b ≤ zeroScale + countErr)
+    (htraceG : zeroScale - traceErr ≤ rtrace (P + Q))
+    (hfrobG : frobSq (P + Q) ≤ D * zeroScale + frobErr) :
+    tailExcessSq ((hP.isHermitian.add hQ).submatrix e) b ≤
+      (s : ℝ) - (2 - D) * zeroScale + 2 * pTraceErr +
+        4 * traceErr + frobErr + 2 * countErr :=
+  (tailExcessSq_principalCompression_le (hP.isHermitian.add hQ) e).trans
+    (robust_stability_inequality_withCountError_oneSided
+      hP hQ hrank htraceP hposQ hcount htraceG hfrobG)
+
+/-- Symmetric trace-error principal-compression form with additive count
+error. -/
+theorem robust_stability_inequality_principalCompression_withCountError
+    {m d s b : ℕ} {zeroScale D pTraceErr traceErr frobErr countErr : ℝ}
+    {P Q : Matrix (Fin d) (Fin d) 𝕜}
+    (hP : P.PosSemidef) (hQ : Q.IsHermitian)
+    (e : Fin m ↪ Fin d)
+    (hrank : P.rank ≤ s)
+    (htraceP : rtrace P ≤ (s : ℝ) + pTraceErr)
+    (hposQ : posIndex hQ ≤ b)
+    (hcount : (s : ℝ) + 2 * b ≤ zeroScale + countErr)
+    (htraceG : |rtrace (P + Q) - zeroScale| ≤ traceErr)
+    (hfrobG : frobSq (P + Q) ≤ D * zeroScale + frobErr) :
+    tailExcessSq ((hP.isHermitian.add hQ).submatrix e) b ≤
+      (s : ℝ) - (2 - D) * zeroScale + 2 * pTraceErr +
+        4 * traceErr + frobErr + 2 * countErr := by
+  have htraceLower : zeroScale - traceErr ≤ rtrace (P + Q) := by
+    have hneg := (abs_le.mp htraceG).1
+    linarith
+  exact robust_stability_inequality_principalCompression_withCountError_oneSided
     hP hQ e hrank htraceP hposQ hcount htraceLower hfrobG
 
 /-! ## 3. Uniform finite laws and exact trimming -/

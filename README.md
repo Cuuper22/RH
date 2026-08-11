@@ -15,10 +15,10 @@ theorem status.
 | R-679 | 0.67924886307 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`, `traceTransfer_saturated`; compiled headline exists |
 | R-797 | 0.79721415286134 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`, `traceTransfer_saturated`; compiled headline exists |
 | R-850 | 1893603832049143/2227707598259143 | **CONDITIONAL ON** `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated`; compiled headline exists |
-| R-8657 | 0.865674254456636 | **SOURCE CLAIM ONLY**; no Lean headline theorem or `Inputs95` field decomposition yet |
-| R-8686 | 0.86855250 | **SOURCE CLAIM ONLY**; B-3 finite dual/window arithmetic proved, but A1/R1a/R1b bridges are absent; no Lean headline theorem or `Inputs95` decomposition yet |
-| R-9383 | 0.938313327050949 | **SOURCE CLAIM ONLY**; its flat three-atom endpoint is exactly `< 0.9383133270509488848`, and B4 kills the literal support-`<2` relabelling step; no stronger construction or Lean headline exists |
-| R-9506 | 0.95063832187565 | **SOURCE CLAIM ONLY**; B-3 finite dual/window arithmetic proved, but A1/R1a/R1b and the B4 enlarged coefficient identity are absent; no Lean headline theorem yet |
+| R-8657 | 0.865674254456636 | **SOURCE CLAIM ONLY**; the strict `1.4999` branch now has an explicit `Inputs95` boundary, but no assembled Lean headline theorem |
+| R-8686 | 0.86855250 | **SOURCE CLAIM ONLY**; B-3 finite arithmetic is proved and the exact A1/trace/zero-side/R1a/RS/R1b obligations are named in `Inputs95`, with no instance or headline theorem |
+| R-9383 | 0.938313327050949 | **SOURCE CLAIM ONLY**; its flat endpoint is exactly `< 0.9383133270509488848`; the strict `1.9999` replacement has an explicit input boundary but no assembled headline |
+| R-9506 | 0.95063832187565 | **SOURCE CLAIM ONLY**; B-3 finite arithmetic is proved and the exact strict-`1.9999` analytic obligations are named in `Inputs95`, with no instance or headline theorem |
 
 No extension rung currently meets the unconditional target standard.  The
 unconditional `Zeta23` base remains separate and unchanged.

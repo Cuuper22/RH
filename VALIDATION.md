@@ -510,13 +510,14 @@ cmp -s verify/robust_stability.out <(python3 verify/robust_stability.py)
 with committed hashes:
 
 ```text
-d07973a097662499e668ef28398b01e37637ea76fd283aadc20f4192e6ab8888  verify/robust_stability.py
-b99d160bed2f55d2f9cb4ce0d36186c7b0a0075d53c46c4ee3b26834dd7db52c  verify/robust_stability.out
+8510ca4748e26e9310c3f89a5df1ef95d5f015761bec86f41b8e545fd04454bc  verify/robust_stability.py
+8d2cf177b0104dc0872591fde5da73f950415b56b185ed68917451d90931117b  verify/robust_stability.out
 ```
 
 The verifier uses only integers and `fractions.Fraction`.  It independently
-expands the finite prebound, checks the error vector `(2,4,1)` and exact count
-slack, evaluates three rational substitutions, and checks sorted-head
+expands the finite prebound, checks the error vector `(2,4,1,2)` and exact
+count slack `2*(s+2*b-zeroScale-countErr)`, evaluates three rational
+substitutions, and checks sorted-head
 cardinality, removed mass, and residual identities on explicit finite
 spectra.
 
@@ -534,3 +535,31 @@ the four-moment adapter.  Every line is diffed against exactly
 `[propext, Classical.choice, Quot.sound]`.  Source scans find no declaration
 using `axiom`, `sorry`, or `admit`.  No analytic moment equality or limiting
 statement is asserted by this milestone, so no frozen rung changes status.
+
+## 21. Phase-C `Inputs95` boundary
+
+The formal gate is:
+
+```bash
+lake build RH.Zeta85.Inputs95 RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/Inputs95.lean
+bash verify/check_axioms.sh
+```
+
+The isolated printer reports:
+
+```text
+'RH.Zeta85.profileSaturatedCost_v8686' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.profileSaturatedCost_v9506' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.QuarticGramFamily.G_eq_A_add_E' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.StableZeroSide.block_isHermitian' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.core_count_le_dyadic_add_edge' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.robustBlockTailBound_eventually' depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+The family types contain the exact B-3 profiles.  The matrix definitions use
+the actual full zero sum and finite `ZIprime` truncation, and the robust
+adapter concludes on that truncation's literal principal block.  Source scans
+find no declaration using `axiom`, `sorry`, or `admit`.  No `Inputs95`
+instance, constructor theorem, or quartic rung headline exists, so this gate
+validates the hypothesis boundary and its finite adapters only.

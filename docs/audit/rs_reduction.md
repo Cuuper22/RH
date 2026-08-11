@@ -482,14 +482,17 @@ bridge to the real prime-side matrix.
 
 ## 9. Exact remaining formal blockers
 
-1. **Published input interface.**  There is no `Inputs95` structure or Lean
-   definition of the all-tuples RS correlation, the gauge-fixed test, or the
-   disjoint-pair main term.  Theorem 3.1 must be transcribed with its exact
-   \(O(T)\), support, smoothness, and multiplicity clauses.
+1. **Published input interface -- stated, not instantiated.**
+   `RH/Zeta85/Inputs95.lean` now defines the gauge-fixed all-tuples test,
+   disjoint-pair main term, height factor, and multiplicity-weighted tuple
+   sum.  `RS1996ZetaInputs.theorem31` transcribes Theorem 3.1 with its exact
+   \(O(T)\), strict support, smoothness, summability, and multiplicity clauses.
+   It remains a Prop field with no constructed instance.
 
-2. **Dirac-delta rendering.**  The full Fourier identity is distributional.
-   Lean needs a zero-sum lift or one-coordinate gauge; silently interpreting
-   the delta as an ordinary integral would be false.
+2. **Dirac-delta rendering -- interface discharged.**  `rsZeroSumLift` and
+   `rsGaugeTest` eliminate one coordinate explicitly; the delta is not
+   interpreted as an ordinary Bochner integral.  Applying the published
+   field to the terminal tests remains part of the R1b derivation.
 
 3. **R1a block identification.**  The scalar identity
    \(\sum_j\varphi_j^2=v\) still does not construct a distinguished finite
@@ -497,6 +500,9 @@ bridge to the real prime-side matrix.
 
 4. **Complex Poisson extension.**  The existing Poisson theorem covers real
    arguments only, whereas off-line zeros give complex \(\gamma_\rho\).
+   `BlockMomentLimits` now exposes the exact missing statement: summability
+   and cancellation of the complex alias family at every pair of actual
+   zeros in `ZIprime T`.  No proof or instance is supplied.
 
 5. **Higher finite-grid errors.**  Absolute convergence, Fubini, and
    \(o(N)\) end errors exist only for the second trace.  They must be proved
@@ -521,9 +527,12 @@ bridge to the real prime-side matrix.
    convergence for every term in (18).  No uniform \(O(T)\) in \(\eta\) may
    be assumed without proof.
 
-9. **Machine-checked contraction algebra.**  Equations (23), (27), the six
-   one-pair classifications, the three perfect matchings, and the centering
-   calculation (28) are currently prose mathematics, not Lean theorems.
+9. **Machine-checked contraction algebra -- scalar layer discharged.**
+   `TopHatMoments.lean` proves the formula-(21) scalar contractions, including
+   the determinant-one crossing reduction, and `TrimmedMoment.lean` proves
+   the terminal quartic algebra.  The remaining blocker is the actual
+   finite-grid/block limit recorded by `BlockMomentLimits.moments`, not a
+   missing scalar integral.
 
 ## Audit conclusion
 

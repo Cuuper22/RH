@@ -981,18 +981,19 @@ limit notation.
 \]
 
 If `tr P <= s + eP`, `|tr G - N0| <= eT`,
-`||G||_F^2 <= D*N0 + eF`, and `s+2b <= N0`, then
-`RobustStability.robust_stability_inequality` gives
+`||G||_F^2 <= D*N0 + eF`, and `s+2b <= N0+eC`, then
+`RobustStability.robust_stability_inequality_withCountError` gives
 
 \[
  \operatorname{Tail}_b(G)
- \leq s-(2-D)N_0+2e_P+4e_T+e_F.
+ \leq s-(2-D)N_0+2e_P+4e_T+e_F+2e_C.
 \]
 
 Here the ambient dimension `d` and real scale `N0` are independent.  The
 same bound is proved for isometric and principal compressions.  The
-coefficients `(2,4,1)` and the remaining count slack
-`2(s+2b-N0)` are exact, not asymptotic conventions.
+coefficients `(2,4,1,2)` and the remaining count slack
+`2(s+2b-N0-eC)` are exact, not asymptotic conventions.  The original
+zero-count-error APIs remain unchanged.
 
 The finite spectral bridge is also explicit.  The uniform centered
 eigenvalue law, after deleting the first `b` decreasing eigenvalues, has
@@ -1002,3 +1003,51 @@ therefore needs only four named equalities between the actual finite spectral
 moments and the analytic target moments.  It introduces no spectral-law or
 limit field itself.  Those four same-block moment identifications remain the
 precise R1b/grid interface for Phase C.
+
+---
+
+## 24. Phase-C `Inputs95` boundary — same matrices, exact profiles, no instance
+
+`RH/Zeta85/Inputs95.lean` now records the honest analytic boundary without
+declaring a Lean axiom or constructing an instance.  Each family is indexed
+by its exact support, distinguished bandwidth, fill, and B-3 profile.  The
+two exact rewrite theorems identify the literal saturated costs with
+`QuarticWindowWitnesses.D8686` and `D9506`; there is no free numeric cost
+field.
+
+For each height, the displayed windows and modulation columns define the
+full all-zero matrix `G`, the finite enlarged-window `ZIprime` sum `A`, and
+the tail `E=G-A`.  The distinguished block is definitionally a principal
+compression of `A`.  `StableZeroSide` requires the same `A` to decompose as
+`P+Q`.  The proved base population identity supplies
+
+\[
+ s_1+2(s_2+p)\leq N(T,2T)+N_{II}(T),
+\]
+
+so the robust block-tail adapter incurs exactly `2*NII` through the proved
+count-error coefficient.  The ambient matrix dimension is never identified
+with the dyadic zero count.
+
+`PrincipalCyclicBlock` is the exact R1a construction obligation: literal
+smooth compact windows, positive periods, critical grids, pointwise full
+energy reconstruction, real alias cancellation, corrected distinguished
+energy fraction tending to `mu` (not `mu/sigma`), positive distinguished
+energy, a mean-one supported local profile, and integrable locally uniform
+translated-product convergence through degree four.  No common-lattice or
+one-window construction is asserted; the two requested construction classes
+remain killed by §§19--20.
+
+`RS1996ZetaInputs.theorem31` separately records the published smoothed
+all-tuples theorem.  `BlockMomentLimits` then states the still-unproved R1b
+bridge for the actual block: complex alias summability and exact cancellation
+at every pair of actual enlarged-window zeros, followed by convergence of
+the first four centered block moments to the proved formula-(21) integrals.
+The pair-trace field does not derive the trace limits, and the published RS
+field does not derive the block-moment limits.  Those separations prevent a
+provenance citation from silently becoming an analytic proof.
+
+The top-level `Inputs95` bundle has eleven fields: two pair fields, two trace
+fields, two zero-side fields, one shared RS field, two R1a fields, and two
+R1b fields.  No frozen rung changes status at this milestone because no
+bundle instance or quartic headline theorem exists.

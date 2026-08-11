@@ -85,6 +85,7 @@ normalize_axiom_output() {
 
 for audit in \
   comparator/PrintAxioms/EtaClosure.lean \
+  comparator/PrintAxioms/Inputs95.lean \
   comparator/PrintAxioms/QuarticWindowWitnesses.lean \
   comparator/PrintAxioms/R9383ExactEndpoint.lean \
   comparator/PrintAxioms/RobustStability.lean \

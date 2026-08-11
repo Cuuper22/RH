@@ -15,12 +15,12 @@ the deliberate ones in the trusted challenge files under `comparator/`).
 
 ## Phase 0b source-intake status
 
-Phase 0b adds archived 95/100 analysis material only.  It changes no Lean
-declaration, discharges no legacy assumption, and introduces no `Inputs95`
-structure.  The compiled dependency graph and verbatim outputs below therefore
-remain the current status.  Claims in the newly ingested files are evidence to
-audit, not assumptions or theorems; `docs/run/100/FINAL_100_RESULT.md` is
-withdrawn and has no formal dependency.
+Phase 0b added archived 95/100 analysis material only and changed no Lean
+declaration.  Phase C now defines an explicit Prop-valued `Inputs95` boundary,
+but constructs no instance and no quartic headline theorem.  Consequently the
+compiled rung dependency graph in §§1.1--1.3 is unchanged.  Claims in the
+ingested files remain evidence to audit, not assumptions or theorems;
+`docs/run/100/FINAL_100_RESULT.md` is withdrawn and has no formal dependency.
 
 The Phase 0d workflow runs `verify/check_axioms.sh` on every push and pull
 request.  That script extracts §§1.1–1.3 directly from this file, diffs them
@@ -45,19 +45,19 @@ recombination: `LogBudget.blockwise_triangle_sharp` constructs aligned
 errors that saturate every individual bound.  The actual surviving input is
 the common-scale, coefficient-sensitive \(o(T(\log T)^2)\) estimate (14) in
 `docs/audit/log_budget_routes.md`, but the repository does not yet
-construct the indexed Heath--Brown coefficient family needed even to state it
-as an `Inputs95` field.  Therefore
+construct the indexed Heath--Brown coefficient family needed to prove the
+explicit `PairTraceGrade95` field.  Therefore
 `signedPair_traceGrade_lt_3_2` remains unchanged.
 
-The B-2 Rudnick--Sarnak audit likewise changes no compiled dependency.
-Theorem 3.1 at \(m=1\) is a published unconditional smoothed correlation
-input, and its disjoint-pair main term has been specialized on paper to the
-flat and weighted cyclic symbols.  It has not yet been introduced as an
-`Inputs95` field: the repository still lacks a formal all-tuples
-correlation object, a gauge-fixed rendering of the distributional identity,
-the R1a principal-block bridge, complex Poisson and \(k=3,4\) finite-grid
-estimates, and the required simultaneous height-smoothing limit.  The
-existing headline dependency lists therefore remain exact.
+The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
+dependency.  `RS1996ZetaInputs.theorem31` now records the published
+unconditional smoothed Theorem 3.1 at \(m=1\), with a gauge-fixed zero-sum
+test, multiplicities, strict support below two, and its explicit \(O(T)\)
+error.  It is deliberately separate from `BlockMomentLimits`: the R1a
+principal construction, complex Poisson identity at the actual
+enlarged-window zeros, \(k=3,4\) finite-grid estimates, and simultaneous
+height-smoothing limit are not derived from the published theorem.  No
+`RS1996ZetaInputs` instance is constructed.
 
 Phase B-1 is discharged without an input field.
 `RH/Zeta85/Stability.lean` proves the exact quartic stability bound,
@@ -84,9 +84,11 @@ distinguished window whose residual symbol is positive on every fiber, the
 complement needs rank \(N\) but the cycle-3 count supplies at most
 \(N-n_0\).  Certified rational-interval evaluation verifies the positive
 residual for the file-15, R-8686, and R-9506 symbols.  This indicts the
-construction premise, not the stability or moment algebra.  No replacement
-principal-block input has been added; the frozen quartic rungs remain at
-their existing conditional status.
+construction premise, not the stability or moment algebra.
+`PrincipalCyclicBlock` now names the exact replacement obligation, including
+literal windows, critical grids, pointwise energy reconstruction, a mean-one
+distinguished profile, and integrable translated-product limits; no instance
+is constructed.  The frozen quartic rungs remain source claims.
 
 Phase A2.2 also changes no headline dependency.  In the base hat
 normalization, a one-window-per-interval block with intrinsic mean one is
@@ -236,9 +238,17 @@ delegates to) are identical.
 'RH.Zeta85.EtaClosure.literal_log_budget_C1_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.stability_prebound' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RobustStability.robust_stability_inequality' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RobustStability.robust_stability_inequality_withCountError' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RobustStability.robust_stability_inequality_principalCompression' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RobustStability.robust_stability_inequality_principalCompression_withCountError' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RobustStability.spectral_residualTail_eq_tailExcessSq_div' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RobustStability.principal_spectral_headTrimmedMomentInputs_of_moments' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.profileSaturatedCost_v8686' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.profileSaturatedCost_v9506' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.QuarticGramFamily.G_eq_A_add_E' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.StableZeroSide.block_isHermitian' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.core_count_le_dyadic_add_edge' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.robustBlockTailBound_eventually' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ---
@@ -502,8 +512,33 @@ class remains an unasserted statement in
 The Phase-C robust stability bridge is likewise proved without a primitive
 assumption.  `RobustStability.lean` separates ambient matrix dimension from
 the real zero-count scale, proves the exact error term
-`2*pTraceErr + 4*traceErr + frobErr`, and constructs the uniform sorted-head
+`2*pTraceErr + 4*traceErr + frobErr + 2*countErr`, and constructs the uniform sorted-head
 spectral trim as an explicit `TrimmedMomentInputs` object.  Its residual is
 exactly the matrix tail energy divided by the block dimension.  The only
 remaining analytic identification at this interface is the list of four
 finite spectral-moment equalities; no theorem asserts those equalities.
+
+`RH/Zeta85/Inputs95.lean` adds no primitive declaration.  It fixes the two
+proved B-3 profiles in the types of the strict-support families, defines the
+full Gram matrix `G`, the finite enlarged-window sum `A`, the tail `E`, and
+the distinguished principal block from literal windows and zero sums, and
+proves the finite core-plus-edge count and robust block-tail adapter.  Its
+Prop-valued structures are an explicit boundary only; there is no instance
+and no quartic headline theorem.
+
+The complete bundle has eleven named top-level fields:
+
+| field(s) | exact obligation |
+|---|---|
+| `pair14999`, `pair19999` | smooth signed pair trace with every logarithmic exponent explicit |
+| `trace14999`, `trace19999` | trace and Frobenius limits for the same finite matrix `A` |
+| `zeroSide14999`, `zeroSide19999` | actual `A=P+Q` decomposition, rank/trace/index bounds |
+| `rs1996` | published smoothed RS Theorem 3.1, `m=1`, in gauge-fixed form |
+| `r1a14999`, `r1a19999` | literal windows, grids, aliases, energy allocation, and translated products |
+| `r1b14999`, `r1b19999` | complex alias identity at actual `ZIprime` zeros and block-moment limits |
+
+`PairTraceGrade95` does not imply `FullTraceLimits` in the current code, and
+`RS1996ZetaInputs` does not imply `BlockMomentLimits`; those derivation
+bridges remain separate exact blockers.  The B-1 stability theorem, B-3
+window costs, formula-(21) integrals, dual polynomials, and crossing reduction
+are proved theorems and are not reintroduced as fields.

@@ -7,10 +7,10 @@ prebound
 
     F - 4 T + s + 2 traceCap + 4 b
 
-with ``F = D N + e_F``, ``T = N - e_T``, and
-``traceCap = s + e_P``.  It checks the robust error coefficients and the
-remaining count slack symbolically, then replays exact rational samples and
-the finite sorted-head trimming construction used in Lean.
+with ``F = D N + e_F``, ``T = N - e_T``, ``traceCap = s + e_P``, and
+``s + 2 b <= N + e_C``.  It checks the four robust error coefficients and
+the remaining count slack symbolically, then replays exact rational samples
+and the finite sorted-head trimming construction used in Lean.
 """
 
 from __future__ import annotations
@@ -27,6 +27,7 @@ VARIABLES = (
     "pTraceErr",
     "traceErr",
     "frobErr",
+    "countErr",
 )
 INDEX = {name: position for position, name in enumerate(VARIABLES)}
 Monomial = tuple[int, ...]
@@ -106,6 +107,7 @@ def sample_values(
     p_trace_error: Q,
     trace_error: Q,
     frob_error: Q,
+    count_error: Q,
 ) -> dict[str, Q]:
     return {
         "D": D,
@@ -115,6 +117,7 @@ def sample_values(
         "pTraceErr": p_trace_error,
         "traceErr": trace_error,
         "frobErr": frob_error,
+        "countErr": count_error,
     }
 
 
@@ -125,6 +128,7 @@ b = variable("b")
 e_p = variable("pTraceErr")
 e_t = variable("traceErr")
 e_f = variable("frobErr")
+e_c = variable("countErr")
 
 frob_upper = add(mul(D, N), e_f)
 trace_lower = sub(N, e_t)
@@ -136,28 +140,29 @@ substituted_prebound = add(
 )
 robust_target = add(
     add(s, mul(sub(D, constant(2)), N)),
-    add(scale(2, e_p), add(scale(4, e_t), e_f)),
+    add(scale(2, e_p), add(scale(4, e_t), add(e_f, scale(2, e_c)))),
 )
-count_slack = scale(2, sub(add(s, scale(2, b)), N))
+count_slack = scale(2, sub(sub(add(s, scale(2, b)), N), e_c))
 
 assert sub(substituted_prebound, robust_target) == count_slack
 coefficient_vector = (
     linear_coefficient(robust_target, "pTraceErr"),
     linear_coefficient(robust_target, "traceErr"),
     linear_coefficient(robust_target, "frobErr"),
+    linear_coefficient(robust_target, "countErr"),
 )
-assert coefficient_vector == (Q(2), Q(4), Q(1))
+assert coefficient_vector == (Q(2), Q(4), Q(1), Q(2))
 
 print("Robust stability exact symbolic audit")
 print("finite prebound substitution = PASS")
-print("prebound - robust target = 2 * (s + 2*b - zeroScale)")
-print("error coefficient vector (pTraceErr, traceErr, frobErr) = (2, 4, 1)")
+print("prebound - robust target = 2 * (s + 2*b - zeroScale - countErr)")
+print("error coefficient vector (pTraceErr, traceErr, frobErr, countErr) = (2, 4, 1, 2)")
 
 
 samples = (
-    sample_values(Q(7, 5), Q(12), 5, 3, Q(2, 7), Q(1, 11), Q(3, 13)),
-    sample_values(Q(11, 8), Q(5), 0, 2, Q(1, 9), Q(2, 15), Q(4, 17)),
-    sample_values(Q(3, 2), Q(13), 7, 3, Q(0), Q(0), Q(0)),
+    sample_values(Q(7, 5), Q(12), 5, 3, Q(2, 7), Q(1, 11), Q(3, 13), Q(1, 5)),
+    sample_values(Q(11, 8), Q(5), 0, 2, Q(1, 9), Q(2, 15), Q(4, 17), Q(-1, 4)),
+    sample_values(Q(3, 2), Q(11), 7, 3, Q(0), Q(0), Q(0), Q(2)),
 )
 
 print("\nexact rational substitutions")
@@ -166,7 +171,7 @@ for index, values in enumerate(samples, start=1):
     target_value = evaluate(robust_target, values)
     slack_value = evaluate(count_slack, values)
     assert prebound_value - target_value == slack_value
-    assert values["s"] + 2 * values["b"] <= values["zeroScale"]
+    assert values["s"] + 2 * values["b"] <= values["zeroScale"] + values["countErr"]
     assert slack_value <= 0
     print(
         f"sample {index}: prebound={show_q(prebound_value)}, "

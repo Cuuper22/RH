@@ -1,0 +1,94 @@
+# Phase-C `Inputs95` boundary
+
+Status: **interface proved; no analytic instance and no quartic headline**.
+
+This note records exactly what `RH/Zeta85/Inputs95.lean` defines and what it
+does not prove.  The purpose is to keep every frozen rung attached to one
+literal matrix family while the open analytic work remains visible as
+Prop-valued structure fields.
+
+## 1. Fixed data
+
+The strict branches are fixed in their types:
+
+| branch | support | block bandwidth | fill | full profile |
+|---|---:|---:|---:|---|
+| `Family14999` | `14999/10000` | `4999/10000` | `89/100` | `QuarticWindowWitnesses.v8686` |
+| `Family19999` | `19999/10000` | `4999/10000` | `83/100` | `QuarticWindowWitnesses.v9506` |
+
+Theorems, rather than fields, rewrite the corresponding saturated costs to
+the exact B-3 values `D8686` and `D9506`.  Thus neither a profile nor a cost
+can drift while a rung is assembled.
+
+For each height, the displayed channel windows and column addresses define:
+
+* the hat denominator `L * integral (sum_j window_j^2)`;
+* the full all-zero Gram matrix `G`;
+* the finite enlarged-window sum `A` over `ZIprime`;
+* the tail `E = G - A`; and
+* the distinguished block as a literal principal compression of `A`.
+
+`G=A+E` is proved by unfolding.  No unrelated matrix witness is accepted.
+
+## 2. Proved finite adapters
+
+The base zero populations give, with no research field,
+
+\[
+ s_1(T)+2(s_2(T)+p(T))
+ \leq N(T,2T)+N_{II}(T).
+\]
+
+If the trace and zero-side structures hold, the proved robust theorem yields
+
+\[
+ \operatorname{Tail}_{s_2+p}(\operatorname{block} A)
+ \leq s_1-(2-D)N+2e_P+4e_T+e_F+2N_{II}.
+\]
+
+The coefficient two on `NII` is the exact count-error coefficient, not an
+asymptotic convention.  Hermiticity of the block is derived from the same
+decomposition `A=P+Q`.
+
+## 3. Analytic fields
+
+The top-level bundle has eleven fields:
+
+| fields | content | present status |
+|---|---|---|
+| `pair14999`, `pair19999` | smooth signed pair trace with explicit arbitrary log saving | open A1 |
+| `trace14999`, `trace19999` | trace and Frobenius limits for the displayed `A` | open pair-to-matrix bridge |
+| `zeroSide14999`, `zeroSide19999` | actual `A=P+Q`, rank, trace-cap, and positive-index bounds | open new-window zero side |
+| `rs1996` | published smoothed RS Theorem 3.1, `m=1`, gauge fixed | stated field; no instance |
+| `r1a14999`, `r1a19999` | literal windows, critical grids, full-energy reconstruction, real aliases, corrected allocation, and translated products | open; requested construction classes killed |
+| `r1b14999`, `r1b19999` | complex alias identity on actual enlarged-window zeros and first four block-moment limits | open RS/grid passage |
+
+The pair fields do not imply the trace fields in the current code.  The
+published RS field does not imply the R1b fields.  Those are deliberate
+separations: citations record provenance, while the missing derivations stay
+named blockers.
+
+## 4. Corrected R1a normalization
+
+The distinguished window has period `mu * log(T/2pi)`.  Its energy fraction
+in the full system must tend to `mu`, not `mu/sigma`, for the literal
+principal block to have mean one in hat units.  `PrincipalCyclicBlock`
+therefore requires:
+
+* positive distinguished energy;
+* a nonnegative, supported, mean-one local profile;
+* pointwise full-energy reconstruction by all windows; and
+* integrable, locally uniform `L1` convergence of every translated product
+  through degree four to the exact top hat of fill `p`.
+
+The translated-product integrability clause prevents Mathlib's totalized
+integral from making a nonintegrable error estimate vacuous.  No scalar
+`L1` convergence is used to infer a fourth moment.
+
+## 5. Honest status
+
+The module constructs no `Inputs95` value.  It proves no pair trace, no
+R1a window system, no RS-to-grid passage, and no frozen rung.  Consequently
+R-8657, R-8686, R-9383, and R-9506 remain source claims at this milestone.
+Any later headline must list the exact structures it consumes; defining this
+boundary alone does not change a rung's status.

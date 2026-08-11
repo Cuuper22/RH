@@ -221,7 +221,7 @@ dimension, and suppose
 \[
  \operatorname{tr}P\leq s+e_P,\qquad
  |T_G-N_0|\leq e_T,\qquad
- F_G\leq DN_0+e_F,\qquad s+2b\leq N_0.
+ F_G\leq DN_0+e_F,\qquad s+2b\leq N_0+e_C.
 \tag{20}
 \]
 
@@ -229,15 +229,16 @@ Substitution into (19) gives
 
 \[
  \boxed{\operatorname{Tail}_b(G)
- \leq s-(2-D)N_0+2e_P+4e_T+e_F.}
+ \leq s-(2-D)N_0+2e_P+4e_T+e_F+2e_C.}
 \tag{21}
 \]
 
 Indeed the difference between the substituted prebound and the displayed
-right side is exactly \(2(s+2b-N_0)\leq0\).  Thus the error coefficients are
-exactly \((2,4,1)\), respectively.  No sign condition on an error variable is
-needed beyond the one-sided inequalities in (20).  The same proof is
-formalized for isometric and principal compressions in
+right side is exactly \(2(s+2b-N_0-e_C)\leq0\).  Thus the error coefficients
+are exactly \((2,4,1,2)\), respectively.  No sign condition on an error
+variable is needed beyond the one-sided inequalities in (20).  The original
+zero-count-error theorem remains available by setting \(e_C=0\).  The same
+proof is formalized for isometric and principal compressions in
 `RH/Zeta85/Discharge/RobustStability.lean`.
 
 For a Hermitian principal block of dimension \(m>0\), that file also builds

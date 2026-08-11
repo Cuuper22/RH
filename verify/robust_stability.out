@@ -1,12 +1,12 @@
 Robust stability exact symbolic audit
 finite prebound substitution = PASS
-prebound - robust target = 2 * (s + 2*b - zeroScale)
-error coefficient vector (pTraceErr, traceErr, frobErr) = (2, 4, 1)
+prebound - robust target = 2 * (s + 2*b - zeroScale - countErr)
+error coefficient vector (pTraceErr, traceErr, frobErr, countErr) = (2, 4, 1, 2)
 
 exact rational substitutions
-sample 1: prebound=-15186/5005, target=-5176/5005, count_slack=-2 = PASS
-sample 2: prebound=-25301/6120, target=-13061/6120, count_slack=-2 = PASS
-sample 3: prebound=1/2, target=1/2, count_slack=0 = PASS
+sample 1: prebound=-15186/5005, target=-3174/5005, count_slack=-12/5 = PASS
+sample 2: prebound=-25301/6120, target=-16121/6120, count_slack=-3/2 = PASS
+sample 3: prebound=11/2, target=11/2, count_slack=0 = PASS
 
 finite sorted-head cardinality and mass checks
 d=7, b=3: retained=4, removed=3, mass=3/7 <= 3/7 = PASS
