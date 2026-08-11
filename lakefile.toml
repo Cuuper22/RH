@@ -1,6 +1,6 @@
 name = "Zeta23"
 version = "0.1.0"
-defaultTargets = ["Zeta23"]
+defaultTargets = ["Zeta23", "RH"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -13,6 +13,11 @@ rev = "51e6992efd06126df61a496bebf8f49482a4e129"
 
 [[lean_lib]]
 name = "Zeta23"
+
+# --- the conditional 85% layer (RH/Zeta85/, see AXIOMS.md). Depends on Zeta23 and on the named
+# axioms of RH/Zeta85/Hypotheses.lean; nothing under Zeta23/ depends on it.
+[[lean_lib]]
+name = "RH"
 
 # --- comparator challenge/solution layer (comparator/README.md). Trusted: ChallengeDeps + Challenge
 # (Mathlib-only). Untrusted: Solution (imports Zeta23). Not in defaultTargets; build with

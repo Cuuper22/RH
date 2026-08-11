@@ -1,0 +1,153 @@
+# VALIDATION.md — build and audit record for the 85 % layer
+
+Environment: Linux x86-64, Lean `v4.33.0-rc2` (installed via `elan`), Mathlib
+`51e6992efd06126df61a496bebf8f49482a4e129` (pinned in `lake-manifest.json`, fetched with
+`lake exe cache get`).  Base commit before this change: `3635e74`.
+
+---
+
+## 1. Build
+
+```
+$ lake exe cache get
+… Decompressed 8681 file(s)                                    (exit 0)
+
+$ lake build
+Build completed successfully (9023 jobs).
+
+$ lake build Solution Solution.Multiplicity Solution.XiPrime Solution.Zeta85
+Build completed successfully (9010 jobs).
+```
+
+`lake build` now covers `defaultTargets = ["Zeta23", "RH"]`; the `RH` library is the conditional
+85 % layer (`lakefile.toml`).
+
+**Zero errors.**  Warnings are the pre-existing Mathlib deprecation notices of the base repository
+(`Set.mem_setOf_eq`, `MeasureTheory.integral_finset_sum`) plus unused-variable hints; none originate
+in `RH/`.
+
+## 2. `sorry` audit
+
+```
+$ grep -rn "sorry" --include=*.lean Zeta23/ RH/ comparator/ | grep -v "^comparator/Challenge"
+Zeta23/FromPNTPlus/Mertens.lean:31,32     (prose in a module docstring)
+Zeta23/FromPNTPlus/StrongPNTPrefix.lean:4 (prose in a module docstring)
+comparator/PrintAxioms.lean:10            (prose in a module docstring)
+RH/Zeta85/Discharge/SignedShift.lean:10   (prose in a module docstring: "no axioms, no `sorry`")
+```
+
+No `sorry` in any proof under `Zeta23/` or `RH/`.  The only proof-level `sorry`s in the repository
+are the deliberate ones in the trusted challenge files — `comparator/Challenge.lean`,
+`comparator/Challenge/Multiplicity.lean`, `comparator/Challenge/XiPrime.lean` and the new
+`comparator/Challenge/Zeta85.lean` (8 of them, one per statement), exactly as the base repository
+does.
+
+## 3. `axiom` audit
+
+```
+$ grep -rn "^axiom " --include=*.lean Zeta23/ RH/ comparator/
+RH/Zeta85/Hypotheses.lean:87   axiom bblr_error_bound : BBLRErrorBound
+RH/Zeta85/Hypotheses.lean:119  axiom bblr_poisson_blocks : BBLRPoissonBlocks
+RH/Zeta85/Hypotheses.lean:151  axiom shiu_majorant : …
+RH/Zeta85/Hypotheses.lean:185  axiom signedPair_traceGrade_lt_5_4 : …
+RH/Zeta85/Hypotheses.lean:232  axiom signedPair_traceGrade_lt_3_2 : …
+RH/Zeta85/Hypotheses.lean:266  axiom windowCost_101 : …
+RH/Zeta85/Hypotheses.lean:291  axiom windowCost_125 : …
+RH/Zeta85/Hypotheses.lean:335  axiom traceTransfer_saturated : …
+```
+
+Eight axioms, all in the single file `RH/Zeta85/Hypotheses.lean`, as required.  (The two `axiom`
+lines in `Zeta23/FromPNTPlus/Tactic/AdditiveCombination.lean` sit inside a fenced code block in a
+docstring and are not declarations — this is the point `AUDIT.md` already records for the base
+repository.)
+
+## 4. The base repository is unchanged
+
+```
+$ lake env lean comparator/PrintAxioms.lean
+$ lake env lean comparator/PrintAxioms/Multiplicity.lean
+$ lake env lean comparator/PrintAxioms/XiPrime.lean
+$ lake env lean comparator/PrintAxioms/PairCeiling.lean
+```
+
+43 lines in total.  Every line of the first three files reads
+`'<name>' depends on axioms: [propext, Classical.choice, Quot.sound]`; the `PairCeiling` file
+reports, as before, `'Zeta23.PairCeiling.LawN256_check' depends on axioms: [propext]` and
+`'Zeta23.PairCeiling.LawN256_edge' does not depend on any axioms`.  No base theorem acquired a new
+axiom: nothing under `Zeta23/` imports anything under `RH/`.
+
+## 5. The conditional topic's axiom audit
+
+```
+$ lake env lean comparator/PrintAxioms/Zeta85.lean
+```
+
+Output reproduced verbatim in `AXIOMS.md` §1.  Summary: each of the eight statements depends on
+`propext`, `Classical.choice`, `Quot.sound` and on four of the eight axioms of
+`RH/Zeta85/Hypotheses.lean` — the two lower rungs on
+`{bblr_error_bound, signedPair_traceGrade_lt_5_4, windowCost_101|windowCost_125,
+traceTransfer_saturated}`, the 85 % statements on
+`{bblr_poisson_blocks, shiu_majorant, signedPair_traceGrade_lt_3_2, traceTransfer_saturated}`.
+Nothing else appears.
+
+## 6. Statement equality, challenge ↔ solution
+
+The `comparator` binary, `landrun` and `lean4export` are **not available in this environment** (no
+outbound GitHub access beyond the repository itself, so the release tarballs cannot be fetched).
+The full comparator run is therefore recorded here as *not executed*; the commands to run it are
+
+```bash
+lake exe cache get
+systemd-run --property=RestrictAddressFamilies=~AF_UNIX --user --pty -E PATH="$PATH" \
+  --working-directory "$(pwd)" -- \
+  bash -c 'lake env /path/to/comparator/.lake/build/bin/comparator comparator/config-zeta85.json'
+```
+
+with `comparator/config-zeta85.json` as shipped (it lists the eight `RH.Zeta85.Hypotheses` axioms in
+`permitted_axioms` alongside the standard three — see §7).
+
+What **was** executed is the repository's own documented substitute ("Quick check (no extra
+tooling)", `comparator/README.md`) — `lake build Solution.Zeta85` plus the axiom audit above — and,
+in addition, a mechanical statement-equality check of the kind comparator performs:
+
+```
+$ cat /tmp/tychal.lean          # import Challenge.Zeta85; #check @… for all eight names
+$ cat /tmp/tysol.lean           # the same with  import Solution.Zeta85
+$ diff <(lake env lean /tmp/tychal.lean | grep -v "declaration uses") \
+       <(lake env lean /tmp/tysol.lean)
+                                # no output
+STATEMENT TYPES IDENTICAL
+```
+
+with `set_option pp.numericTypes true`, so that every numeral's type is displayed.  The elaborated
+types printed on both sides are, for instance,
+
+```
+zeta85_rung_support_101_over_100 : ∀ ε > (0 : ℝ),
+  ∃ T₀, ∀ T ≥ T₀, ((67924886307 / 100000000000 : ℝ) - ε) * ↑(Ncount T ((2 : ℝ) * T))
+    ≤ ↑(N0simple T ((2 : ℝ) * T))
+```
+
+This checks the statement-equality half of a comparator run (the solution proves *exactly* the
+challenge statements, with every constant coinciding).  It does **not** substitute for the export +
+kernel-replay half, which requires the missing tooling.
+
+## 7. Deviation from the base comparator conventions, declared
+
+`comparator/README.md`, "Rules for the trusted side", rule (5): *a statement enters a challenge file
+only when the Zeta23 theorem it delegates to is sorry-free with `#print axioms` = the standard
+three.*
+
+The topic `Zeta85` **deviates** from rule (5), deliberately and visibly: its theorems are conditional
+on the eight named axioms, and `comparator/config-zeta85.json` lists those axioms in
+`permitted_axioms`.  This is the only such topic in the repository; the base four files
+(`Challenge.lean`, `Solution.lean`, `config.json`, `PrintAxioms.lean`) and the topics `Multiplicity`
+and `XiPrime` are untouched and remain unconditional.  A reader auditing the 85 % claim must read
+`RH/Zeta85/Hypotheses.lean` in addition to `comparator/Challenge/Zeta85.lean`.
+
+## 8. Numerical cross-checks performed outside Lean
+
+Recorded in `FINDINGS.md` §4 (exact-rational verification of the whole Phase-A certificate chain, and
+double-precision verification of the two transcendental window costs).  The Phase-A chain is *also*
+proved inside Lean, so its external check is only corroboration; the two transcendental costs are
+axioms precisely because their external check could not be internalized.

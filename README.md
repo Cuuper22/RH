@@ -106,6 +106,72 @@ For the strongest independent check — statement equality against the trusted c
 run comparator as described in [`comparator/README.md`](comparator/README.md).
 
 
+## The conditional layer: `RH/Zeta85/` — the statement hierarchy up to 85 %
+
+Everything described above is **unconditional**. The directory [`RH/`](RH/) adds a separate,
+**conditional** layer: a formalization of a research run extending the 2 − 1/c₁* = 0.6725007… result
+to 0.8500235…, in which the prime-side inputs the run could not establish are isolated as eight named
+axioms in the single file [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean). Nothing under
+`Zeta23/` imports anything under `RH/`, so the unconditional results are untouched (re-verified:
+`VALIDATION.md` §4). The source documents of the run are unpacked in [`docs/run/`](docs/run/).
+
+`lake build` builds both libraries (`defaultTargets = ["Zeta23", "RH"]`).
+
+### Statement hierarchy
+
+All four rows are `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ c` and the cumulative `liminf N₀ˢ(T)/N(T) ≥ c`,
+in the repository's ε-form, over the counting functions of `comparator/ChallengeDeps.lean`.
+
+| | support σ | c | Lean name (`Solution.Zeta85`) | underlying theorem | axioms |
+|---|---|---|---|---|---:|
+| base | ≤ 1 | 2 − 1/c₁* = 0.6725007… | `montgomery_taylor_simple_on_critical_line_mult` | `Zeta23.ThmD.thmD₀_simple_mult` | **0** |
+| rung 1 | 101/100 | 0.67924886307 | `zeta85_rung_support_101_over_100`(`_cumulative`) | `RH.Zeta85.rung101`(`_cumulative`) | 4 |
+| rung 2 | 5/4 | 0.79721415286134 | `zeta85_rung_support_5_over_4`(`_cumulative`) | `RH.Zeta85.rung125`(`_cumulative`) | 4 |
+| rung 3 | 143/100 | 1893603832049143/2227707598259143 = 0.8500235101… | `zeta85_simple_on_critical_line`(`_cumulative`) | `RH.Zeta85.rung143`(`_cumulative`) | 4 |
+| corollary | 143/100 | 17/20 | `zeta85_eighty_five_percent`(`_cumulative`) | `RH.Zeta85.eightyFive`(`_cumulative`) | 4 |
+
+Rung 3's constant is exact: `2 − 1/c_pc` with `c_pc = λA²/(B + λJ) = 2227707598259143/2561811364469143`
+for the window `v(s) = 1 − (169/100)s²` at `λ = 143/100`, whose three moments
+`A = 1031/1200`, `B = 1809683/2400000`, `J = 970487502160963/3017889594720000` are **proved** by
+Mathlib interval integration in [`RH/Zeta85/Window.lean`](RH/Zeta85/Window.lean). It clears `17/20`
+by `1047470577429/44554151965182860`. Rungs 1 and 2 carry the truncated decimals of their sources,
+whose optimal windows are transcendental (`FINDINGS.md` §4).
+
+Rungs 1 and 2 depend on the **published** BBLR error bound and on the `η < 1/4` block closure, which
+is power-saving; rung 3 depends instead on the run's cycle-5 claim, which is only
+polylogarithmically saving. The two branches are disjoint — see `AXIOMS.md` §2.
+
+### One-line status of each axiom
+
+| axiom (`RH.Zeta85.Hypotheses.…`) | status |
+|---|---|
+| `bblr_error_bound` | **[PUBLISHED LITERATURE: Bettin–Bui–Li–Radziwiłł, JEMS 22 (2020) 3953–3980, Proposition 3.1, error bound — with the first factor `AB`, not `(AB)^{1/2}`]** |
+| `bblr_poisson_blocks` | **[PUBLISHED LITERATURE: BBLR ibid., proof of Proposition 3.1, equation (14)]**, with the per-block bound of `docs/run/12` (6), (11), (17) |
+| `shiu_majorant` | **[RUN CLAIM: `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` §2 eq. (14), undischarged]** |
+| `signedPair_traceGrade_lt_5_4` | **[RUN CLAIM: `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §2 (T1)–(T5), undischarged]** |
+| `signedPair_traceGrade_lt_3_2` | **[RUN CLAIM: `docs/run/12_…_86p5674.md` eq. (2) and §5, undischarged — and its logarithmic budget does not close: `FINDINGS.md` §7]** |
+| `windowCost_101` | **[RUN CLAIM: `docs/run/07_root_gain_support_1p01.md`, numerical certificate, undischarged]** |
+| `windowCost_125` | **[RUN CLAIM: `docs/run/08_…_79p7214.md` §3 eqs. (11)–(16), numerical certificate, undischarged]** |
+| `traceTransfer_saturated` | **[RUN CLAIM: `docs/run/01_arithmetic_cycle1.md` §2, `docs/run/02_certificate_cycle2.md` §2, `docs/run/12` §5, undischarged for the support-beyond-one part only; the σ ≤ 1 case is PROVEN IN REPO as `Zeta23.ThmD.tracesBoundsD_concrete`]** |
+
+Proved outright inside the conditional layer, with no axiom: the whole Phase-A certificate; the count
+lemma of `docs/run/01_hybrid_cycle1.md` (1)–(3); the two-trace ⇒ ε-form derivation; the signed-shift
+reciprocal lemma `|S_{H₀}(θ)| ≪_J H₀(1+H₀‖θ‖)^{−J}` with an explicit constant; the whole exponent
+bookkeeping of arithmetic cycles 3–5; and the logarithmic-power audit — which **shows that the
+cycle-5 route's `(log T)^C` does not fit the trace budget**. See `AXIOMS.md` §4 and `FINDINGS.md` §7.
+
+### Reading order
+
+[`AXIOMS.md`](AXIOMS.md) — what is assumed, `#print axioms` verbatim, provenance of each axiom.
+[`FINDINGS.md`](FINDINGS.md) — every place the run's documents were wrong, imprecise or unprovable.
+[`VALIDATION.md`](VALIDATION.md) — build, `sorry`/axiom audits, statement-equality check.
+[`docs/REUSE_MAP.md`](docs/REUSE_MAP.md) — every `Zeta23` declaration the layer reuses.
+
+Comparator topic `Zeta85` (`comparator/config-zeta85.json`, eight statements): unlike every other
+topic it is **conditional**, so its `permitted_axioms` lists the eight axioms above alongside
+`propext`, `Classical.choice`, `Quot.sound`. That is a deliberate, documented deviation from rule (5)
+of `comparator/README.md`; see `VALIDATION.md` §7.
+
 ## Provenance and attribution
 
 Files under `Zeta23/FromPNTPlus/` are ported from the
