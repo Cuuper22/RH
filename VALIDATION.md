@@ -776,3 +776,39 @@ This validates only the killed fixed-scale literal-slot method class.  It
 does not supply an actual-scale all-block estimate, a smooth superposition
 identity, a higher-dimensional divisor theorem, `(EDB)`, `(WG-HB)`, or an
 A1 trace input, and it changes no frozen rung status.
+
+## 26. A1 actual-scale BBLR positive-majorant method classes
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.ActualScaleBBLR RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/ActualScaleBBLR.lean
+python3 verify/a1_actual_scale_bblr.py
+diff -u verify/a1_actual_scale_bblr.out \
+  <(python3 verify/a1_actual_scale_bblr.py)
+bash verify/check_axioms.sh
+```
+
+`ActualScaleBBLR.lean` proves the exact actual-block geometry, both BBLR
+Proposition 3.1 error exponents and their positive excesses, the equation
+(14) Fourier physical scale and frequency-cutoff cancellation, the exact
+\(d=1\) progression lengths, the \(PQ\) obstruction, and the harmless
+\(PH\) and \(H^2\) terms.  It declares no premise and contains no proof
+placeholder.  `RH.Zeta85.Main` imports the module.
+
+The printer selects 13 public theorems.  Every line is exactly
+`[propext, Classical.choice, Quot.sound]`; the printer is included in
+`verify/check_axioms.sh`.  The independent verifier uses exact
+`fractions.Fraction` arithmetic.  Its committed hashes are:
+
+```text
+e7c25c211113adc8a0ab51a7e348073f6c4ffacb96ae05785f9d16199d3adb2a  verify/a1_actual_scale_bblr.py
+5c0514d743c30ae1b1d89420bb4ff295c01534031d41e2f004b176dcb7f00c42  verify/a1_actual_scale_bblr.out
+```
+
+This validates only the failure of direct Proposition 3.1 and of the run-12
+progression majorant applied after equation (14) on the exact symmetric
+block.  It does not prove a lower bound for the original signed remainder,
+exclude simultaneous coefficient cancellation before the majorant, supply
+an A1 trace input, or change a frozen rung status.

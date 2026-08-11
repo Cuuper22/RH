@@ -113,6 +113,19 @@ axiom or rung status.  It leaves open an actual-scale all-block estimate, a
 proved superposition identity with derivative and recombination control, or
 a higher-dimensional divisor theorem retaining all factor variables.
 
+`RH/Zeta85/Discharge/ActualScaleBBLR.lean` then audits the surviving exact
+\((2/5,3/5)\) symmetric block without introducing a premise.  Direct BBLR
+Proposition 3.1 has error exponents \(179/100\) and \(161/100\), exceeding
+the trace exponent by \(9/25\) and \(9/50\).  Separately, the run-12
+progression majorant applied after equation (14) has \(d=1\) lengths
+\(P=Q=T^{83/100}\): its \(PQ\) term exceeds trace by \(23/100\), while its
+\(PH\) term saves \(17/100\).  The physical Fourier scale
+\(T^{-23/100}\) is exactly offset by the \(T^{23/100}\) nonzero-frequency
+cutoff.  These results kill only those two displayed positive-majorant
+method classes.  They do not bound the original signed remainder from below
+or exclude simultaneous cancellation before the progression majorant, so
+no frozen rung status or compiled headline axiom dependency changes.
+
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
 unconditional smoothed Theorem 3.1 at \(m=1\), with a gauge-fixed zero-sum
@@ -366,6 +379,19 @@ delegates to) are identical.
 'RH.Zeta85.HBToBBLRSmoothGrouping.twoUnitSlotMultiplicity_four' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBToBBLRSmoothGrouping.two_unit_slot_collapse_not_constant' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBToBBLRSmoothGrouping.zeta_sq_eq_twoUnitSlotMultiplicity' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.block_geometry_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.blackBox_exponents_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.blackBoxAB_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.blackBoxWatt_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.blackBox_not_traceGrade' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.blackBox_not_traceGrade_with_slack' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.source_fourier_exponents_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.source_lengths_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.progression_majorant_is_PQ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.progressionPQ_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.progressionPH_saving' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.progression_majorant_not_traceGrade' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.ActualScaleBBLR.taylor_H_sq_saving' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]

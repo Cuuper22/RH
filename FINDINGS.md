@@ -1316,3 +1316,43 @@ control, or a higher-dimensional divisor estimate retaining the separate
 factor variables.  None of those survivors is constructed, so `(EDB)`,
 the common-scale estimate, `(WG-HB)`, and the A1 pair-trace field remain
 undischarged.  Frozen rung statuses do not change.
+
+---
+
+## 29. A1 actual-scale BBLR block — two positive-majorant classes killed
+
+`RH/Zeta85/Discharge/ActualScaleBBLR.lean` audits the exact symmetric block
+left after the fixed asymmetric literal grouping is removed:
+
+\[
+A=B=H=T^{43/100},\qquad
+M_1=N_1=T^{2/5},\qquad M_2=N_2=T^{3/5}.
+\]
+
+Each side has trace exponent \(143/100\).  Direct substitution into BBLR
+Proposition 3.1 gives the two error exponents \(179/100\) and \(161/100\),
+exceeding trace by \(9/25\) and \(9/50\).  The module also proves that
+adding any nonnegative exponent slack cannot repair either comparison.
+
+This is separate from the run-12 progression majorant applied after equation
+(14).  At \(d=1\), its exact lengths are
+\(P=AM_1=T^{83/100}\) and \(Q=BN_1=T^{83/100}\).  Hence the \(PQ\) term
+has exponent \(83/50\), exceeding trace by \(23/100\), while \(PH\) has
+exponent \(63/50\), saving \(17/100\).  The Fourier-integral physical
+exponent \(-23/100\) is exactly cancelled by the \(23/100\) exponent of
+the source nonzero-frequency cutoff.  The preliminary \(H^2\) Taylor term
+saves \(57/100\) and is not the obstruction.
+
+These conclusions finish and kill exactly two method classes: applying the
+displayed Proposition 3.1 errors blockwise, and applying the absolute
+\(P_d(Q_d+H_d)\) progression majorant after equation (14).  They prove no
+lower bound for the signed remainder and do not rule out cancellation jointly
+in \(p,q,h,\ell\) before that majorant, signed recombination across smooth
+blocks, or a higher-dimensional coefficient-sensitive estimate.  Thus A1
+and `signedPair_traceGrade_lt_3_2` remain open, and no frozen rung status
+changes.
+
+The exact `Fraction` verifier reproduces every exponent, excess, saving, and
+Fourier-cutoff cancellation.  The dedicated dependency printer selects 13
+public theorems; every one reports exactly
+`[propext, Classical.choice, Quot.sound]`.

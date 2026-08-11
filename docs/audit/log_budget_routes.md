@@ -25,6 +25,15 @@ At the 85-percent exponent the depth condition still gives \(K\ge4\), and
 the run's divisor-majorant accounting gives \(C\ge K-1\ge3\).  Hence this
 correction does not close the budget.
 
+On the exact legal actual-scale block
+\((A,B,H;M_1,M_2,N_1,N_2)=(43/100,43/100,43/100;
+2/5,3/5,2/5,3/5)\) in exponent notation, two further positive-majorant
+routes fail before logarithms matter.  Direct BBLR Proposition 3.1 misses
+trace by at least \(9/50\), and the run-12 progression majorant applied
+after equation (14) misses by \(23/100\) at \(d=1\).  These are
+method-class failures only; a coefficient-sensitive estimate retaining
+simultaneous cancellation before that majorant remains open.
+
 ## Route 1: adjudicate generous versus dyadic accounting
 
 On \(n\asymp Y\) and \(h\asymp H_Y=Y/T\), equation (10) of certificate
@@ -467,13 +476,33 @@ The established arbitrary-coefficient theorems also miss:
 
 - The valid all-modulus/Kuznetsov architecture is
   [Bettin--Bui--Li--Radziwiłł, Proposition 3.1](https://arxiv.org/abs/1609.02539).
-  At \(A=B=H\), \(M=N=T\), its two cycle-5 errors have exponents
-  \(1/2+3\eta=179/100\) and
-  \(3/4+2\eta=161/100\), both above \(143/100\).
+  On the exact actual-scale block
+  \(A=B=H=T^{43/100}\),
+  \(M_1=N_1=T^{2/5}\), and \(M_2=N_2=T^{3/5}\), so
+  \(M=M_1M_2=N=N_1N_2=T\).  Its two errors have exponents
+  \(179/100\) and \(161/100\), exceeding \(143/100\) by \(9/25\) and
+  \(9/50\).  `ActualScaleBBLR.lean` proves these exact substitutions,
+  including every nonnegative exponent slack.
   A direct Deshouillers--Iwaniec substitution after completing \(m\) is not
   valid: it produces \(S(k,\ell h\bar a;q)\), whose index and coefficient
   support vary with \(q\).  Reindexing \(\bar a\bmod q\) does not create the
   fixed sequences required by Kuznetsov.
+
+The separate run-12 progression majorant applied after equation (14) also
+fails on this actual-scale block.  At \(d=1\), the exact reduced lengths are
+
+\[
+ P=A M_1=T^{83/100},\qquad Q=B N_1=T^{83/100}.
+\]
+
+Thus \(PQ\) has exponent \(83/50\), which exceeds trace by \(23/100\),
+whereas \(PH\) has exponent \(63/50\), saving \(17/100\).  The physical
+Fourier-integral scale \(T^{-23/100}\) does not repair the first comparison:
+equation (14)'s nonzero-frequency cutoff has exponent \(23/100\), so the two
+powers cancel when those frequencies are summed.  This kills exactly the
+blockwise absolute/progression class \(P_d(Q_d+H_d)\), not the signed
+Poisson remainder or an estimate which cancels jointly in
+\(p,q,h,\ell\) before that majorant.
 
 Recent preprints do not enlarge this conclusion into a theorem about the
 actual coefficients:
@@ -759,5 +788,9 @@ as follows:
    block.  The formerly claimed fixed asymmetric literal-slot identification
    is not available: `HBToBBLRSmoothGrouping.no_asymmetric_literal_grouping`
    proves its exact obstruction below exponent cushion \(1/10\).
-   This is the terminal A1 blocker;
+   On the surviving actual-scale block, direct Proposition 3.1 and the
+   run-12 progression majorant applied after equation (14) are also killed
+   by fixed excesses \(9/50\) and \(23/100\), respectively.  The terminal
+   A1 blocker is therefore a source-identified estimate retaining
+   simultaneous coefficient cancellation before that majorant;
    `signedPair_traceGrade_lt_3_2` is not discharged.

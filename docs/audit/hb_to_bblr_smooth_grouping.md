@@ -174,8 +174,12 @@ before them.  The surviving constructions are narrower and must be supplied
 explicitly:
 
 1. retain the actual block-dependent smooth scales (for (1), \(2/5\) and
-   \(3/5\)) and prove a uniform all-scale estimate strong enough after
-   summing every dyadic block;
+   \(3/5\)) and prove a uniform all-scale estimate which preserves
+   simultaneous cancellation before a progression majorant is taken.  On
+   this exact block, `ActualScaleBBLR.lean` proves that direct use of BBLR
+   Proposition 3.1 misses trace by \(9/50\) even in its smaller error term,
+   while the run-12 progression majorant applied after equation (14) misses
+   by \(23/100\) at \(d=1\);
 2. prove a new exact coefficient identity expressing each HB block as a
    controlled finite or integrable superposition of BBLR forms with the
    desired inner scales, including pointwise equality, support, derivative

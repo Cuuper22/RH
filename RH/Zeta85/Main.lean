@@ -25,6 +25,7 @@ At `Ïƒ = 143/100`, `D = D_pc = 2561811364469143/2227707598259143 = 1.1499764899â
 import RH.Zeta85.Hypotheses
 import RH.Zeta85.Discharge.AliasFallback
 import RH.Zeta85.Discharge.AliasRankObstruction
+import RH.Zeta85.Discharge.ActualScaleBBLR
 import RH.Zeta85.Discharge.BBLRGCDAllocation
 import RH.Zeta85.Discharge.EtaClosure
 import RH.Zeta85.Discharge.HBDepthFour
