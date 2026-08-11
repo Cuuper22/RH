@@ -122,7 +122,29 @@ dyadic prime scales `Y`, while the inner `h`-sum is kept intact.  This gives
 `T·(log T)^{C+2}`. -/
 def contributionPrimeDyadic (C T : ℝ) : ℝ := T * (Real.log T) ^ (C + 2)
 
-/-! ## 2. The three dichotomies -/
+/-! ## 2. Why blockwise bounds cannot manufacture cross-scale cancellation -/
+
+/-- The triangle inequality is sharp under only independent blockwise magnitude bounds.
+
+This is the exact abstract obstruction to deriving the cross-`Y` estimate (6) in
+`docs/audit/log_budget_routes.md` from the current per-block Shiu/Poisson inputs.  For any
+nonnegative scale weights `a` and bounds `B`, the admissible choice `E = B` aligns every block and
+saturates the sum of the individual bounds.  Thus any improvement must use an additional relation
+between the actual errors on different scales; it cannot follow from their separate absolute
+bounds. -/
+theorem blockwise_triangle_sharp {ι : Type*} [Fintype ι]
+    (a B : ι → ℝ) (ha : ∀ i, 0 ≤ a i) (hB : ∀ i, 0 ≤ B i) :
+    ∃ E : ι → ℝ,
+      (∀ i, |E i| ≤ B i) ∧
+      |∑ i, a i * E i| = ∑ i, a i * B i := by
+  refine ⟨B, ?_, ?_⟩
+  · intro i
+    simp [abs_of_nonneg (hB i)]
+  · have hsum : 0 ≤ ∑ i, a i * B i := by
+      exact Finset.sum_nonneg fun i _ => mul_nonneg (ha i) (hB i)
+    simp [abs_of_nonneg hsum]
+
+/-! ## 3. The three dichotomies -/
 
 private lemma log_rpow_tendsto_zero {p : ℝ} (hp : p < 0) :
     Tendsto (fun T : ℝ => (Real.log T) ^ p) atTop (𝓝 0) := by
@@ -227,7 +249,16 @@ theorem verdict_all {C : ℝ} (hC : 3 ≤ C) :
   ⟨budget_fails (by linarith), budget_primeDyadic_fails (by linarith),
     budget_dyadic_fails (by linarith)⟩
 
-/-! ## 3. Why the two lower rungs are unaffected -/
+/-- Even if the dyadic prime scales are recombined before absolute values, equation (6) only
+returns the generous contribution `T * (log T)^(C+1)`.  At the forced depth-four exponent
+`C ≥ 3`, that contribution still fails the `T * (log T)^3` trace budget.  Cross-scale
+recombination is therefore not a standalone closure route; it would also have to lower the
+effective coefficient exponent below `2`. -/
+theorem crossScale_recombination_fails {C : ℝ} (hC : 3 ≤ C) :
+    ∀ᶠ T : ℝ in atTop, 1 ≤ contribution C T / budget T :=
+  budget_fails (by linarith)
+
+/-! ## 4. Why the two lower rungs are unaffected -/
 
 /-- **A fixed power beats every fixed logarithmic loss**: for `δ > 0` and every real `C`,
 `T^{−δ}·(log T)^C → 0`.  This is the sense in which the power-saving BBLR errors of `08` (5)–(6) at

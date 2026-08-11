@@ -117,9 +117,138 @@ with the sum taken before absolute values.  Neither the Shiu majorant nor the
 per-block Poisson estimate implies (6); both take absolute values inside the
 \(Y\)-sum.
 
-**Route-2 verdict:** the optional shift-scale logarithm can be removed, but
-the prime-scale logarithm cannot be removed from the available hypotheses.
-The remaining threshold is \(C<1\).
+### Exact size and threshold of (6)
+
+Write \(Y=T^{1+\theta}\).  On every cycle-5 block,
+
+\[
+ H=T^\theta,\qquad P=H\sqrt T,\qquad Q=\sqrt T,
+ \qquad PQ=Y,\qquad \frac{PH}{Y}=\frac{H}{Q}.
+\tag{7}
+\]
+
+For \(\theta\le43/100\), the \(PH\) term therefore has the fixed power
+saving \(T^{-7/100}\); only \(PQ\) is critical.  This is not an endpoint-only
+phenomenon.  Even in the depth-four-compatible top band
+
+\[
+ \frac{143}{400}+\varepsilon<\theta<\frac{43}{100},
+\]
+
+the number of dyadic critical blocks is
+
+\[
+ J(T)=\frac{29/400-\varepsilon}{\log 2}\log T+O(1).
+\tag{8}
+\]
+
+Put \(A_j=(T/Y_j)E_{Y_j}\) and \(L=\log T\).  The block estimate gives
+
+\[
+ |A_j|\ll TL^C.
+\tag{9}
+\]
+
+If (6) were proved with the same exponent \(C\), its trace contribution
+would be \(O(TL^{C+1})\), because the trace coefficient still contributes
+one further \(L\).  Thus (6) closes exactly when \(C<2\), not when \(C<1\).
+At the available \(C\ge3\) it gives at least \(TL^4\), still larger than the
+\(o(TL^3)\) budget by one logarithm.  The estimate actually required at the
+forced depth is
+
+\[
+ \left|\sum_j A_j\right|=o(TL^2).
+\tag{10}
+\]
+
+Even ideal square-root cancellation among \(J(T)\asymp L\) blocks gives
+\(TL^{C+1/2}\), and hence would close only for \(C<3/2\).
+
+### Five exact method-class obstructions
+
+1. **After equation (16), sign recovery is impossible.**  That inequality
+   has already put absolute values around the products
+   \(c_{d,p}e_{d,q}S_H\).  For nonnegative weights \(a_j\) and independent
+   bounds \(B_j\), the admissible choice \(E_j=B_j\) gives
+
+   \[
+    \left|\sum_j a_jE_j\right|=\sum_j a_jB_j.
+   \tag{11}
+   \]
+
+   This sharp countermodel is formalized as
+   RH.Zeta85.LogBudget.blockwise_triangle_sharp.  No theorem using only the
+   post-absolute-value outputs can improve the factor \(J(T)\).
+
+2. **The endpoint phase need not vary with scale.**  Choose integers
+   \((n_j,h_j)=(2^jn_0,2^jh_0)\).  Then
+
+   \[
+    T\log(1+h_j/n_j)=T\log(1+h_0/n_0)
+   \tag{12}
+   \]
+
+   exactly on the whole dyadic orbit.  Phase-only van der Corput in
+   \(\log Y\) therefore has no uniform derivative to exploit.
+
+3. **A dyadic partition transmits the Mellin zero mode.**  If
+   \(\sum_j\psi(2^{-j}x)=1\), integration over \(1\le x\le2\) with measure
+   \(dx/x\) gives
+
+   \[
+    \int_0^\infty\psi(u)\,\frac{du}{u}=\log2\ne0.
+   \tag{13}
+   \]
+
+   Mellin orthogonality away from frequency zero cannot control (6) without
+   a separate zero-mode estimate.
+
+4. **Cauchy and square functions do not supply the missing saving.**  From
+   (9), \(\sum_j|A_j|^2\le J(T)(TL^C)^2\), and Cauchy returns the original
+   \(J(T)TL^C\).  Even a new bound \(\sum_j|A_j|^2\ll(TL^C)^2\) returns
+   \(\sqrt{J(T)}TL^C\).  Reaching \(TL^C\) by this route would require
+   \(\sum_j|A_j|^2\ll(TL^C)^2/J(T)\), already a new cross-scale theorem.
+
+5. **Abel summation is a reformulation, not a saving.**  It requires the
+   stronger prefix estimate
+   \(\sup_k|\sum_{j\le k}A_j|\ll TL^C\).  The current block inputs give only
+   \(kTL^C\).  A Littlewood--Paley difference decomposition leaves the same
+   obstruction in its scaling, or zero-frequency, term.
+
+### Missing object and surviving statement
+
+The repository has no common-index family on which to state cancellation
+for the actual coefficients.  The symbols \(c_{d,p}\) and \(e_{d,q}\) occur
+only in prose in docs/run/12; BBLRPoissonBlocks existentially quantifies
+scalar blocks and exposes no \(Y,j,d,\ell,p,q,c,e,F\) data.  Fixed-cutoff
+progression theorems used in Route 5 provide neither covariance between two
+cutoffs nor compatibility between the changing Heath--Brown groupings.
+
+The surviving route must first construct one signed Heath--Brown identity
+and compatible factor partitions at all scales, giving explicit
+\(c_{j,d,p}\), \(e_{j,d,q}\), and \(F_{j,d,\ell}\), and must match the zero
+terms pointwise with the singular-series subtraction before any Shiu or
+triangle step.  With \(P_j=H_jQ\) and \(Q=\sqrt T\), the exact leading-family
+target is
+
+\[
+ \left|\sum_j\frac{Q}{P_j}
+  \sum_{\substack{d,\ell\\q\asymp Q/d\\p\asymp P_j/d}}
+  c_{j,d,p}e_{j,d,q}F_{j,d,\ell}(p,q)
+  S_{H_j/d}(\ell\bar p/q)\right|=o(TL^2),
+\tag{14}
+\]
+
+with every \(d\)- and \(\ell\)-weight explicit.  A mere \(O(TL^3)\) version
+of (6) is insufficient.
+
+**Route-2 verdict:** the optional shift-scale logarithm is removed.  The
+post-absolute-value, endpoint-phase, Mellin-away-from-zero, present
+square-function, and Abel-without-prefix-bound method classes are finished
+and killed by (11)--(13) and the exact log count.  The actual coefficient
+estimate (14) is neither proved nor disproved because the common-scale
+coefficient family is absent.  It remains the precise blocking statement,
+not an inference from the current hypotheses.
 
 ## Route 3: reduce Heath--Brown depth
 
@@ -127,21 +256,21 @@ At \(\eta=43/100\), the raw depth-\(K\) atom has exponent
 
 \[
  \frac{1+\eta}{K}.
-\tag{7}
+\tag{15}
 \]
 
 Depth three is too long by the exact amount
 
 \[
  \frac{143}{300}-\frac{43}{100}=\frac7{150}>0,
-\tag{8}
+\tag{16}
 \]
 
 whereas depth four is shorter than the shift scale by
 
 \[
  \frac{43}{100}-\frac{143}{400}=\frac{29}{400}>0.
-\tag{9}
+\tag{17}
 \]
 
 These equalities are formalized as `depth_three_excess` and
@@ -167,7 +296,7 @@ is exactly at the natural scale
 
 \[
  P_dQ_d\asymp T^{1+\eta}d^{-2}.
-\tag{10}
+\tag{18}
 \]
 
 Before the coefficient \(p\) is collapsed, its relevant scales are
@@ -175,7 +304,7 @@ Before the coefficient \(p\) is collapsed, its relevant scales are
 \[
  p=am,\qquad a\asymp H=T^\eta,\qquad
  m\asymp q\asymp Q=T^{1/2}.
-\tag{11}
+\tag{19}
 \]
 
 There is an important failed shortcut.  Expand the signed transform back
@@ -186,7 +315,7 @@ resulting complete inverse sum, absolute summation over
 
 \[
  H^2Q^{3/2}=T^{2\eta+3/4}.
-\tag{12}
+\tag{20}
 \]
 
 At \(\eta=43/100\), this is worse than the natural scale
@@ -195,7 +324,7 @@ At \(\eta=43/100\), this is worse than the natural scale
 \[
  \left(2\eta+\frac34\right)-(1+\eta)
  =\eta-\frac14=\frac9{50}.
-\tag{13}
+\tag{21}
 \]
 
 The last equality is formalized as `fixed_modulus_weil_excess`.  Thus a
@@ -210,7 +339,7 @@ the remaining variables.  Write the factorized fixed-modulus block as
  =\sum_{a\asymp H}\alpha_a
    \sum_{m\asymp Q}\beta_m F_{q,\ell}(a,m)
    S_H\!\left(\ell\overline{am}/q\right).
-\tag{14}
+\tag{22}
 \]
 
 After restoring the summable \(d\)- and \(\ell\)-weights from cycle 5, the
@@ -251,7 +380,7 @@ At the cycle-5 endpoint \(\eta=43/100\), suppressing the summable \(d\)- and
 \[
  P=T^{93/100},\qquad Q=T^{1/2},\qquad H=T^{43/100},
  \qquad P=HQ,
-\tag{15}
+\tag{23}
 \]
 
 so \(Q=P^{50/93}\) and \(\log P/\log Q=93/50\).  After a progression main
@@ -284,7 +413,7 @@ Nguyen's Theorem 3 states, for \(k\geq4\),
  \ll
  \left(D+X^{1-1/(6(k+2))}\right)
  X(\log X)^{k^2-1}.
-\tag{16}
+\tag{24}
 \]
 
 See [Nguyen, *Generalized divisor functions in arithmetic progressions: I*,
@@ -300,7 +429,7 @@ notation,
  \qquad
  \sum_{a=1}^{q}|E_x(q,a)|
  \ll x^{3/4+\varepsilon}q^{7/16}.
-\tag{17}
+\tag{25}
 \]
 
 See [Parry, *The distribution of \(d_4(n)\) in arithmetic progressions*,
@@ -313,7 +442,7 @@ by
 
 \[
  \frac{50}{93}-\frac{293}{584}=\frac{1951}{54312}>0.
-\tag{18}
+\tag{26}
 \]
 
 See [Wei--Xue--Zhang, *General divisor functions in arithmetic progressions
@@ -338,33 +467,33 @@ If \((\ell,q)=1\), \(H<q\), and \(w\) is supported on an interval of length
  &=q\sum_h|w(h/H)|^2
  \leq q(\lceil H\rceil+1).
 \end{aligned}
-\tag{19}
+\tag{27}
 \]
 
 The third line uses the support length \(<q\), so congruent supported
-integers are equal.  Combining (16) and (19) by Cauchy, even after replacing
+integers are equal.  Combining (24) and (27) by Cauchy, even after replacing
 the actual coefficients by \(d_4\), setting \(e_q=1\), and granting all
 needed smooth uniformity, produces
 
 \[
  QH^{1/2}P^{71/72}(\log P)^{15/2}
  =T^{3917/2400}(\log T)^{15/2}.
-\tag{20}
+\tag{28}
 \]
 
 This exceeds \(PQ=T^{143/100}\) by
-\(T^{97/480}(\log T)^{15/2}\).  Likewise, (17), Parseval, (19), and absolute
+\(T^{97/480}(\log T)^{15/2}\).  Likewise, (25), Parseval, (27), and absolute
 summation over \(q\asymp Q\) give
 
 \[
  P^{3/4+\varepsilon}H^{1/2}Q^{23/16}
  =T^{261/160+\varepsilon},
-\tag{21}
+\tag{29}
 \]
 
 which exceeds \(PQ\) by \(T^{161/800+\varepsilon}\).  Even a hypothetical
 natural-order variance \(\ll QP(\log P)^{15}\) gives exactly
-\(PQ(\log P)^{15/2}\) after (19): it has zero power margin and retains a
+\(PQ(\log P)^{15/2}\) after (27): it has zero power margin and retains a
 positive logarithmic loss.
 
 There are also two statement mismatches.  The published results concern
@@ -373,7 +502,7 @@ recovers the Shiu loss instead of evaluating \(E_c\).  Parry's main term
 
 \[
  M_x(q,a)=\frac1q\sum_{d\mid q}c_d(a)F_x(d)
-\tag{22}
+\tag{30}
 \]
 
 comes from an additive Estermann series for \(d_4\).  No cited result or
@@ -382,7 +511,7 @@ the actual signed blocks with the prime-pair singular-series subtraction.
 
 **Route-5 verdict:** the exact method class “published \(d_4\) progression
 mean value, followed by a norm bound in the residue variable and
-absolute/Cauchy aggregation in \(q\)” is impossible at (15): it misses by a
+absolute/Cauchy aggregation in \(q\)” is impossible at (23): it misses by a
 fixed power before the coefficient and main-term mismatches are addressed.
 This does **not** disprove `(EDB)`.  It proves that `(EDB)` needs a new
 estimate correlated with \(S_H(\ell\bar r/q)\), the signs of \(e_q\), or the
@@ -404,7 +533,10 @@ as follows:
    Route 5 kills only the published-\(d_4\)-plus-norm method class for
    obtaining this estimate; `(EDB)` itself remains the exact resisted
    statement.
-2. Failing that, prove the cross-\(Y\) signed estimate (6), with all
-   logarithmic exponents explicit.
-3. Failing that, prove the fixed-power inverse-residue estimate `(WG-HB)`
-   for the actual depth-four coefficients.
+2. Route 2 is finished for the available method classes.  Equation (6)
+   improves the threshold only to \(C<2\), so it is insufficient at
+   \(C\ge3\).  The stronger common-scale target (14) survives, but the
+   repository lacks the compatible coefficient family required to state it
+   for the actual Heath--Brown decomposition.
+3. The next ordered route is the fixed-power inverse-residue estimate
+   `(WG-HB)` for the actual depth-four coefficients.

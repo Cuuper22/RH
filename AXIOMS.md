@@ -37,6 +37,18 @@ main-term identity, as recorded in `docs/audit/log_budget_routes.md`, Route 5.
 No cited theorem is transcribed as an `Inputs95` field because none has that
 statement.
 
+Phase A1.2 also changes no compiled dependency.  Recombining prime scales
+before absolute values would close only for an effective coefficient exponent
+\(C<2\); the currently forced \(C\ge3\) still misses the trace budget by at
+least one logarithm.  The present per-block hypotheses cannot imply such a
+recombination: `LogBudget.blockwise_triangle_sharp` constructs aligned
+errors that saturate every individual bound.  The actual surviving input is
+the common-scale, coefficient-sensitive \(o(T(\log T)^2)\) estimate (14) in
+`docs/audit/log_budget_routes.md`, but the repository does not yet
+construct the indexed Heath--Brown coefficient family needed even to state it
+as an `Inputs95` field.  Therefore
+`signedPair_traceGrade_lt_3_2` remains unchanged.
+
 ---
 
 ## 1. `#print axioms` — verbatim

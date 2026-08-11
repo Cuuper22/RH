@@ -496,3 +496,66 @@ not \(d_4\), and no cited theorem identifies the resulting blockwise main
 terms with the singular-series subtraction.  Therefore no new `Inputs95`
 field is attributed to the cited papers.  The next ordered route is A1.2,
 the cross-\(Y\) signed estimate; `(WG-HB)` remains the final route.
+
+---
+
+## 15. A1.2 cross-scale signs — current method classes killed
+
+On a local block \(Y=T^{1+\theta}\), cycle 5 has
+
+\[
+ H=T^\theta,\qquad P=H\sqrt T,\qquad Q=\sqrt T,
+ \qquad PQ=Y,\qquad PH/Y=H/Q.
+\]
+
+Thus \(PH\) has a \(T^{-7/100}\) saving for
+\(\theta\le43/100\), while \(PQ\) is critical.  The depth-four-compatible
+band \(143/400+\varepsilon<\theta<43/100\) alone contains
+
+\[
+ \frac{29/400-\varepsilon}{\log2}\log T+O(1)
+\]
+
+dyadic critical blocks.  If \(A_j=(T/Y_j)E_{Y_j}\), the current premise is
+only \(|A_j|\ll T(\log T)^C\).  An all-positive family saturates the
+triangle inequality exactly, as proved by
+`RH.Zeta85.LogBudget.blockwise_triangle_sharp`.
+
+Equation (6) of the route document, even if granted verbatim, produces a
+trace error \(O(T(\log T)^{C+1})\).  It closes only for \(C<2\).  At the
+forced \(C\ge3\), it still exceeds the \(o(T(\log T)^3)\) budget by at least
+one logarithm; `RH.Zeta85.LogBudget.crossScale_recombination_fails`
+formalizes this comparison.  Even root-number-of-blocks cancellation closes
+only for \(C<3/2\).
+
+Five exact method classes are therefore finished and killed:
+
+- recombination after cycle 5 has taken absolute values, because all
+  cross-scale signs have already been erased;
+- endpoint-phase cancellation, because
+  \((n_j,h_j)=(2^jn_0,2^jh_0)\) makes
+  \(T\log(1+h_j/n_j)\) constant in \(j\);
+- Mellin orthogonality away from zero, because every dyadic partition of
+  unity has Mellin zero mode \(\int\psi(u)du/u=\log2\);
+- Cauchy/square-function arguments from the present per-block energy, which
+  return the same full logarithm (or, with an idealized energy input, only
+  its square root); and
+- Abel summation without a new uniform dyadic-prefix bound, because that
+  prefix bound is stronger than equation (6).
+
+This is not an impossibility theorem for the actual signed Heath--Brown
+coefficients.  Those coefficients are not constructed as a common-scale
+object in the repository: \(c_{d,p}\) and \(e_{d,q}\) occur only in prose,
+while `BBLRPoissonBlocks` hides scalar blocks existentially.  The exact
+surviving statement is equation (14) of
+`docs/audit/log_budget_routes.md`: construct compatible signed
+families \(c_{j,d,p},e_{j,d,q},F_{j,d,\ell}\), cancel their zero terms
+pointwise against the singular series before absolute values, and prove the
+resulting common-scale leading family is \(o(T(\log T)^2)\).
+
+The supplied archives and linked Drive folder contain no script or explicit
+coefficient construction for the historical five-scale prime experiment.
+The only Python source found in that Drive intake is
+`sixth_block_search.py`.  Consequently the quoted z-scores
+\(-0.15,-0.43,0.14,0.78,0.46\) cannot be rerun from supplied material and
+are not used as evidence; no replacement experiment was fabricated.

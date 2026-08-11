@@ -222,3 +222,36 @@ The analytic premises used in those exponent substitutions were checked
 against the primary theorem statements linked in
 `docs/audit/log_budget_routes.md`, Route 5.  The audit changes no Lean
 declaration and introduces no axiom or `Inputs95` field.
+
+## 12. A1.2 cross-scale audit
+
+`verify/a1_2_cross_scale.py` uses exact rational arithmetic to
+recompute the local cycle-5 scales and the logarithmic comparison.  Its
+committed output is `verify/a1_2_cross_scale.out`; a byte-for-byte
+rerun is checked with:
+
+```bash
+cmp -s verify/a1_2_cross_scale.out <(python3 verify/a1_2_cross_scale.py)
+```
+
+The script asserts
+
+- \(P=T^{93/100}\), \(Q=T^{1/2}\), \(PQ=T^{143/100}=Y\);
+- \(PH=T^{34/25}\), giving the secondary term the exact power saving
+  \(T^{-7/100}\);
+- at the forced \(C=3\), literal dyadic summation has log exponent 5,
+  cross-\(Y\) recombination has exponent 4, and the budget has exponent 3;
+  hence equation (6) still misses by exactly one log power; and
+- a five-block aligned family attains the sum of the five individual bounds.
+
+The last statement is generalized in Lean by
+`RH.Zeta85.LogBudget.blockwise_triangle_sharp`; the forced-exponent
+budget failure after recombination is
+`RH.Zeta85.LogBudget.crossScale_recombination_fails`.  No analytic
+input or new field is introduced.  The exact actual-coefficient blocker is
+equation (14) of `docs/audit/log_budget_routes.md`.
+
+The requested historical signed-prime experiment could not be reproduced:
+no generating script or coefficient construction is present in the supplied
+archives or connected Drive intake.  This negative inventory result is
+recorded rather than substituting a different experiment.
