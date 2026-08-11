@@ -1648,7 +1648,78 @@ status changes.
 
 ---
 
-## 35. A1 SQ4 correlated-moment audit — audited fixed-family theorem classes finished; four-sign level moment survives
+## 35. A1 SQ4 CRT/conductor strata — exact finite algebra discharged; coupled signed moment survives
+
+`RH/Zeta85/Discharge/SQ4CRTConductor.lean` continues the finite transform
+without adding an input or an analytic premise.  For coprime positive moduli
+it proves CRT factorization of each generalized shifted Gauss sum for
+arbitrary shifts.  The complementary-modulus twists are retained explicitly;
+dropping them would give the wrong local additive characters.
+
+Let \(\chi^*\) be a primitive complex Dirichlet character modulo \(f\), let
+\(q=f\ell\), and let \(\chi\) be its literal Mathlib `changeLevel` to
+modulus \(q\).  The module proves
+
+\[
+ G_q(\chi;t)=G_f(\chi^*;1)
+ \sum_{\substack{s\mid\ell,\ s\mid t\\(\ell/s,f)=1}}
+ \mu(\ell/s)\chi^*(\ell/s)s\,
+ \overline{\chi^*(t/s)}.                              \tag{34}
+\]
+
+The coprimality condition may be omitted when \(\chi^*\) is extended by
+zero off the units.  The initially proved divisor-\(d\) form, the
+complementary-divisor reindex \(s=\ell/d\), the inverse-to-conjugate phase,
+and the unit-supported specialization are separate formal theorems.  Thus
+(34) covers nonunit shifts, shared primes between \(f\) and \(\ell\), and
+nonreal complex characters; the independent finite checker is only a
+3,336-case real-character calibration and is not used as its proof.
+
+The same module proves the exact support restriction
+
+\[
+ G_q(\chi;k)G_q(\chi;r)\ne0
+ \Longrightarrow
+ f\mid\gcd\!\left({q\over(q,k)},{q\over(q,r)}\right),
+\]
+
+and proves that primitive characters kill nonunit shifts.  For squarefree
+outer variables it also proves, with \(g=(u_1,u_2)\),
+
+\[
+ u_1=ga,\qquad u_2=gb,\qquad u_1u_2=g^2ab,
+ \qquad \mu(u_1)\mu(u_2)=\mu(a)\mu(b),
+\]
+
+where \(g,a,b\) are pairwise coprime.  The duplicated Möbius sign cancels,
+but the factor \(g^2\) remains in the modulus.  The smallest source stratum
+\(u_1=u_2=2\) is formalized together with
+\(\mathbb Z/4\mathbb Z\not\simeq
+\mathbb Z/2\mathbb Z\times\mathbb Z/2\mathbb Z\), ruling out a CRT split
+over the displayed, noncoprime slots.
+
+After (34), the two Gauss factors share the same quotient \(\ell\), while
+the local conductor support is coupled to \(g^2abm\), both shifts, and the
+joint dyadic source weight.  Only the bare Möbius signs factor locally; the
+four source slots do not become independent character polynomials.  The
+exact analytic survivor is unchanged:
+
+\[
+ \left|\mathfrak M_4(T,x)\right|
+ \ll_{\varepsilon,\mathbf W}
+ T^{48/25+\varepsilon}(\log T)^0.                    \tag{35}
+\]
+
+It must retain all four Möbius factors, the varying modulus, every
+conductor/divisor stratum, and the joint source weight before Cauchy.  The
+separate smooth source-identification/recombination bridge also remains
+open.  Consequently no A1 field is discharged,
+`signedPair_traceGrade_lt_3_2` remains open, and no frozen rung or README
+status changes.
+
+---
+
+## 36. A1 SQ4 correlated-moment audit — audited fixed-family theorem classes finished; four-sign level moment survives
 
 The audit in docs/audit/sq4_correlated_moment.md continues from family (33)
 without replacing any of its four Möbius factors by absolute values.  The

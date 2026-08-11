@@ -1,0 +1,33 @@
+import RH.Zeta85.Discharge.SQ4CRTConductor
+
+#print axioms RH.Zeta85.SQ4CRTConductor.unitGaussSum_prod
+#print axioms RH.Zeta85.SQ4CRTConductor.crt_unitCharacter_factor
+#print axioms RH.Zeta85.SQ4CRTConductor.crt_addChar_factor
+#print axioms RH.Zeta85.SQ4CRTConductor.unitGaussSum_crt
+#print axioms RH.Zeta85.SQ4CRTConductor.gauss_product_crt
+#print axioms RH.Zeta85.SQ4CRTConductor.unitGaussSum_eq_gaussSum
+#print axioms RH.Zeta85.SQ4CRTConductor.factorsThrough_of_unitGaussSum_ne_zero
+#print axioms RH.Zeta85.SQ4CRTConductor.conductor_dvd_of_unitGaussSum_ne_zero
+#print axioms RH.Zeta85.SQ4CRTConductor.standard_shift_killed
+#print axioms RH.Zeta85.SQ4CRTConductor.conductor_dvd_quotient_gcd_of_unitGaussSum_ne_zero
+#print axioms RH.Zeta85.SQ4CRTConductor.conductor_dvd_gcd_of_gauss_product_ne_zero
+#print axioms RH.Zeta85.SQ4CRTConductor.conductor_dvd_quotient_gcd_of_residue_gauss_ne_zero
+#print axioms RH.Zeta85.SQ4CRTConductor.conductor_dvd_gcd_of_residue_gauss_product_ne_zero
+#print axioms RH.Zeta85.SQ4CRTConductor.primitive_nonunit_shift_vanishes
+#print axioms RH.Zeta85.SQ4CRTConductor.sum_stdAddChar_shift
+#print axioms RH.Zeta85.SQ4CRTConductor.periodicSum_eq
+#print axioms RH.Zeta85.SQ4CRTConductor.induced_apply_eq_coprime_indicator
+#print axioms RH.Zeta85.SQ4CRTConductor.coprime_indicator_eq_moebius_sum
+#print axioms RH.Zeta85.SQ4CRTConductor.mobius_coprime_weighted_sum
+#print axioms RH.Zeta85.SQ4CRTConductor.stdAddChar_cancel_divisor
+#print axioms RH.Zeta85.SQ4CRTConductor.stdAddChar_cancel_divisor_of_dvd
+#print axioms RH.Zeta85.SQ4CRTConductor.sum_divisors_complement
+#print axioms RH.Zeta85.SQ4CRTConductor.gaussSum_changeLevel_eq_conductor_formula
+#print axioms RH.Zeta85.SQ4CRTConductor.gaussSum_changeLevel_eq_conductor_formula_conj
+#print axioms RH.Zeta85.SQ4CRTConductor.gaussSum_changeLevel_eq_conductor_formula_s
+#print axioms RH.Zeta85.SQ4CRTConductor.unitGaussSum_changeLevel_eq_conductor_formula_conj
+#print axioms RH.Zeta85.SQ4CRTConductor.unitGaussSum_changeLevel_eq_conductor_formula_s
+#print axioms RH.Zeta85.SQ4CRTConductor.squarefree_gcd_decomposition
+#print axioms RH.Zeta85.SQ4CRTConductor.moebius_pair_shared_gcd_cancellation
+#print axioms RH.Zeta85.SQ4CRTConductor.shared_moebius_prime_counterexample
+#print axioms RH.Zeta85.SQ4CRTConductor.zmod_four_not_crt_two_two

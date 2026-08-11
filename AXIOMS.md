@@ -182,13 +182,45 @@ inverse-character Fourier transform of
 Dirichlet-character inversion is also proved.  Only when both shifted
 arguments are units does this product specialize to
 \(\chi(kr)^{-1}G_q(\chi;1)^2\).  Thus nonzero \(k,r\) do not justify a
-full-family Gauss-square replacement, and the actual modulus
-\(p=u_1u_2m\) still requires conductor, prime-power, and shared-gcd strata.
+full-family Gauss-square replacement.  The finite CRT, conductor, and
+shared-gcd algebra needed to stratify the actual modulus \(p=u_1u_2m\) at
+distinct prime powers is discharged by the companion module below.
 The exact pre-completion analytic target is the signed moment (14) in
 `docs/audit/sq4_gauss_square_transform.md`, bounded by
 \(T^{48/25+\varepsilon}(\log T)^0\) before coefficient-blind Cauchy.  This analytic
 estimate and the separate smooth source identification remain unproved; no
 A1 field is discharged and no frozen rung status changes.
+
+`RH/Zeta85/Discharge/SQ4CRTConductor.lean` now proves the exact finite CRT
+and conductor continuation without introducing a premise.  Coprime CRT
+factorization retains both complementary-modulus twists and works for
+arbitrary, including nonunit, shifts.  For a primitive complex Dirichlet
+character \(\chi^*\) modulo \(f\), its explicit `changeLevel` to
+\(q=f\ell\) satisfies the fully formal imprimitive formula
+
+\[
+ G_q(\chi;t)=G_f(\chi^*;1)
+ \sum_{\substack{s\mid(\ell,t)}}
+ \mu(\ell/s)\chi^*(\ell/s)s\,
+ \overline{\chi^*(t/s)},
+\]
+
+where zero extension of \(\chi^*\) removes the terms with
+\((\ell/s,f)>1\).  The equivalent divisor-\(d\) form, conjugation phase,
+unit-supported specialization, conductor-support consequences, and
+complementary-divisor reindex are all proved in Lean.  For squarefree
+\(u_1,u_2\), the module proves
+\(u_1u_2=g^2ab\) with \(g=(u_1,u_2)\), the cancellation of the duplicated
+Möbius sign, and the smallest obstruction
+\(\mathbb Z/4\mathbb Z\not\simeq\mathbb Z/2\mathbb Z\times
+\mathbb Z/2\mathbb Z\).  The shared prime remains coupled to the modulus,
+conductor, shifts, and joint source weight, so the four Möbius slots do not
+factor into independent local polynomials.  The exact analytic survivor is
+still the signed moment
+\(\lvert\mathfrak M_4(T,x)\rvert\ll_{\varepsilon,\mathbf W}
+T^{48/25+\varepsilon}(\log T)^0\), together with the smooth source bridge.
+Neither is proved or assumed; no A1 field is discharged and no frozen rung
+status changes.
 
 `RH/Zeta85/Discharge/SQ4CorrelatedMoment.lean` finishes the exact exponent
 and logarithmic bookkeeping for the surviving family without adding a
@@ -566,6 +598,37 @@ delegates to) are identical.
 'RH.Zeta85.SQ4GaussSquareTransform.kloosterman_transform_eq_gauss_square' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4GaussSquareTransform.dirichlet_fourier_inversion' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4GaussSquareTransform.kloosterman_kernel_character_inversion' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.unitGaussSum_prod' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.crt_unitCharacter_factor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.crt_addChar_factor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.unitGaussSum_crt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.gauss_product_crt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.unitGaussSum_eq_gaussSum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.factorsThrough_of_unitGaussSum_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.conductor_dvd_of_unitGaussSum_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.standard_shift_killed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.conductor_dvd_quotient_gcd_of_unitGaussSum_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.conductor_dvd_gcd_of_gauss_product_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.conductor_dvd_quotient_gcd_of_residue_gauss_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.conductor_dvd_gcd_of_residue_gauss_product_ne_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.primitive_nonunit_shift_vanishes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.sum_stdAddChar_shift' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.periodicSum_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.induced_apply_eq_coprime_indicator' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.coprime_indicator_eq_moebius_sum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.mobius_coprime_weighted_sum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.stdAddChar_cancel_divisor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.stdAddChar_cancel_divisor_of_dvd' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.sum_divisors_complement' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.gaussSum_changeLevel_eq_conductor_formula' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.gaussSum_changeLevel_eq_conductor_formula_conj' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.gaussSum_changeLevel_eq_conductor_formula_s' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.unitGaussSum_changeLevel_eq_conductor_formula_conj' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.unitGaussSum_changeLevel_eq_conductor_formula_s' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.squarefree_gcd_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.moebius_pair_shared_gcd_cancellation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.shared_moebius_prime_counterexample' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CRTConductor.zmod_four_not_crt_two_two' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4CorrelatedMoment.source_scales_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4CorrelatedMoment.character_norms_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4CorrelatedMoment.character_cauchy_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -641,6 +704,16 @@ specialization, and Dirichlet-character inversion only.  They do not assert
 the signed generalized-Gauss moment bound, any primitive or imprimitive
 Gauss-sum estimate, a CRT recombination of the literal source factors,
 `(SQ4-HB)`, or the smooth source-identification bridge.
+
+The 31 `SQ4CRTConductor` lines are the exact normalized output of
+`comparator/PrintAxioms/SQ4CRTConductor.lean`; all have the standard three
+dependencies.  They prove the finite coprime CRT identities, the general
+primitive-`changeLevel` conductor formula in equivalent divisor coordinates,
+its complex conjugation phase, conductor support, the squarefree shared-gcd
+decomposition, and the minimal false-factorization counterexample.  They do
+not assert an Euler factorization of the joint source weight, an analytic
+bound for the signed \(\mathfrak M_4\) moment, `(SQ4-HB)`, or the smooth
+source-identification bridge.
 
 The 15 `SQ4CorrelatedMoment` lines are the exact normalized output of
 `comparator/PrintAxioms/SQ4CorrelatedMoment.lean`; all have the standard

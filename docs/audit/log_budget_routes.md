@@ -692,6 +692,7 @@ and \(|k|<p\) do not imply \((k,p)=1\), and \(r\) may share factors
 with \(p\).  Imprimitive characters retain conductor/gcd conditions.
 Moreover \(p=u_1u_2m\) is not a coprime factorization, so any CRT
 continuation must stratify prime powers and shared gcds before localizing.
+The companion continuation below now proves that finite stratification.
 
 With \(\mathfrak M_4=(P/M)\mathcal Z_{33}^{\rm nz}\), the exact
 pre-completion analytic target sufficient for `(SQ4-HB)` is
@@ -709,6 +710,66 @@ remaining estimate is equation (14) of the dedicated audit: it retains all
 four Möbius factors, the Gauss-square phase on unit strata, the generalized
 shifted products on nonunit conductor/gcd strata, and the varying
 factorized composite modulus before Cauchy.  It is not proved or assumed.
+
+### Exact CRT and conductor stratification
+
+`docs/audit/sq4_crt_conductor_strata.md` and
+`RH/Zeta85/Discharge/SQ4CRTConductor.lean` finish the finite CRT/conductor
+algebra without introducing an input.  Coprime CRT factorization is proved
+for arbitrary shifts and retains the two complementary-modulus twists.  It
+therefore applies to nonunit \(k,r\), but it does not split the displayed
+source factors \(u_1,u_2,m\) when they share primes.
+
+For a primitive complex Dirichlet character \(\chi^*\) modulo \(f\), its
+explicit `changeLevel` \(\chi\) to \(q=f\ell\) satisfies the formally proved
+identity
+
+\[
+ G_q(\chi;t)=G_f(\chi^*;1)
+ \sum_{\substack{s\mid\ell,\ s\mid t\\(\ell/s,f)=1}}
+ \mu(\ell/s)\chi^*(\ell/s)s\,
+ \overline{\chi^*(t/s)}.
+\]
+
+Equivalently, zero extension of \(\chi^*\) removes the displayed
+coprimality condition.  Lean first proves the divisor-\(d\) form and then
+proves the complementary-divisor reindex \(s=\ell/d\), the complex
+conjugation phase, and the unit-supported specialization.  Thus the displayed formula is not
+inferred from the finite real-character calibration; it is a general theorem
+covering shared primes between \(f\) and \(\ell\), nonunit shifts, and
+nonreal characters.
+
+If \(u_1,u_2\) are squarefree and \(g=(u_1,u_2)\), the same module proves
+
+\[
+ u_1=ga,\qquad u_2=gb,\qquad u_1u_2=g^2ab,
+ \qquad \mu(u_1)\mu(u_2)=\mu(a)\mu(b),
+\]
+
+with \(g,a,b\) pairwise coprime.  The repeated sign cancels, but the common
+prime remains squared in the modulus.  The stratum \(u_1=u_2=2\) and the
+finite-ring obstruction
+\(\mathbb Z/4\mathbb Z\not\simeq
+\mathbb Z/2\mathbb Z\times\mathbb Z/2\mathbb Z\) are formalized.  Hence
+only distinct prime-power factors may be separated by CRT.
+
+Substitution of the conductor formula into the two generalized Gauss factors produces two
+divisor sums sharing the same quotient \(\ell\) and the phase
+\(G_f(\chi^*;1)^2\).  Their local conductor support remains coupled to
+\(g^2abm\), both shifts, and the joint source weight.  No pointwise
+factorization of that weight is available, so the four Möbius slots do not
+become independent local character polynomials.  The exact analytic target
+is unchanged:
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0.
+\]
+
+This signed level moment, with every conductor/divisor stratum and all four
+Möbius factors retained before Cauchy, remains unproved.  The smooth
+source-identification/recombination bridge remains a separate blocker.  No
+A1 field is discharged and no frozen rung status changes.
 
 ### Correlated-moment theorem classes
 
@@ -1064,8 +1125,12 @@ as follows:
    fixed-index Kuznetsov and the direct moving-index divisor switch are
    structurally inapplicable.  Poisson makes the zero mode power-safe, but
    leaves the exact nonzero family (33), with the explicit truncation loss
-   \(T^{\eta+\varepsilon}\) for \(0<\eta<2/5\).  The terminal A1 blocker
-   on the granted source-shaped block is therefore the signed
+   \(T^{\eta+\varepsilon}\) for \(0<\eta<2/5\).  The finite coprime CRT,
+   general primitive-`changeLevel` conductor formula, nonunit support, and
+   shared-gcd decomposition are now formally proved.  They expose two
+   divisor sums coupled through the same conductor quotient and joint source
+   weight; they do not provide cancellation.  The terminal A1 blocker on the
+   granted source-shaped block is therefore the signed
    generalized-Gauss moment of
    `docs/audit/sq4_correlated_moment.md`, bounded at explicit pre-completion
    scale \(T^{48/25+\varepsilon}(\log T)^0\), or another correlated estimate

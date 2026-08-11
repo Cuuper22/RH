@@ -1047,7 +1047,69 @@ coefficient-blind Cauchy.  The required bound and the separate smooth
 source-identification/recombination identity remain unproved.  No A1 field
 is discharged and no frozen rung status changes.
 
-## 32. A1 SQ4 correlated-moment and published-family gates
+## 32. A1 SQ4 CRT/conductor and shared-gcd gates
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.SQ4CRTConductor RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/SQ4CRTConductor.lean
+python3 verify/a1_sq4_crt_conductor.py
+diff -u verify/a1_sq4_crt_conductor.out \
+  <(python3 verify/a1_sq4_crt_conductor.py)
+bash verify/check_axioms.sh
+```
+
+`SQ4CRTConductor.lean` contains 38 theorem or lemma declarations.  It proves
+coprime CRT factorization with the complementary-modulus twists, arbitrary
+nonunit-shift conductor support, the general complex primitive-`changeLevel`
+imprimitive Gauss formula in equivalent divisor-\(d\) and divisor-\(s\)
+coordinates, the inverse-to-conjugate phase, the unit-supported formula, the
+squarefree shared-gcd decomposition, Möbius-sign cancellation, and the
+minimal \(\mathbb Z/4\mathbb Z\) false-CRT counterexample.  It asserts no
+analytic estimate, source-weight factorization, `(SQ4-HB)`, or smooth source
+bridge.
+
+The dedicated printer selects 31 public results and is included in the
+generic standard-three loop in `verify/check_axioms.sh`.  Every normalized
+line is exactly `[propext, Classical.choice, Quot.sound]`.
+`RH.Zeta85.Main` imports the module.  The targeted build, Main build,
+printer, independent-output diff, full axiom gate, source scans, and
+`git diff --check` all exit zero.
+
+The independent exact checker uses integer polynomial arithmetic in
+\(\mathbb Q[x]/\Phi_q(x)\), not floating-point roots of unity.  It calibrates
+3,336 imprimitive identities for selected primitive real characters,
+including zero shifts and shared-prime quotient levels, checks 1,208 nonzero
+conductor-support instances, and enumerates 3,721 squarefree shared-gcd
+strata.  The general nonreal complex conjugation phase is proved by Lean and
+is explicitly outside the finite checker's scope.  `fractions.Fraction`
+also verifies
+
+\[
+ {48\over25}-{43\over100}={149\over100},\qquad
+ {121\over50}-{48\over25}={1\over2}.
+\]
+
+The exact artifact hashes are:
+
+```text
+7e42a5cdad131001fdc411d66229f5aa845a63da42b92334579f0e309853b2b3  RH/Zeta85/Discharge/SQ4CRTConductor.lean
+217ff71194a7769b45be368239db747f37627ab061054a26f57795423342f8cd  comparator/PrintAxioms/SQ4CRTConductor.lean
+47a4f858b284e2106051d6dc5a3ef1d50a1aed27ce89730bda27dd9d6d0181ea  docs/audit/sq4_crt_conductor_strata.md
+43291f853513881dfba2aa432a59993364257be3756f406bf00c2ac5d62bf02f  verify/a1_sq4_crt_conductor.py
+78ed2cedad32d5ebd348aaa034f98bda5676804ab9691b7cb963752eceeb24e1  verify/a1_sq4_crt_conductor.out
+```
+
+The exact analytic target remains
+\(\lvert\mathfrak M_4(T,x)\rvert
+\ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0\), with all
+four Möbius factors, the shared conductor/divisor coupling, and the joint
+source weight retained before Cauchy.  The smooth source bridge remains a
+separate blocker.  No A1 field is discharged and no frozen rung status
+changes.
+
+## 33. A1 SQ4 correlated-moment and published-family gates
 
 The formal and independent gates are:
 
