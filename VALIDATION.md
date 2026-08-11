@@ -498,3 +498,39 @@ same line-wrap normalizer used for B-3.  The new Lean file has no declaration
 using `axiom`, `sorry`, or `admit`.  These checks establish the unconditional
 exponent and method-class audit only.  They do not assert the missing
 pointwise convolution identity `(EF_eta)` or change a frozen rung's status.
+
+## 20. Phase-C robust stability and spectral normalization
+
+The independent exact replay is:
+
+```bash
+cmp -s verify/robust_stability.out <(python3 verify/robust_stability.py)
+```
+
+with committed hashes:
+
+```text
+d07973a097662499e668ef28398b01e37637ea76fd283aadc20f4192e6ab8888  verify/robust_stability.py
+b99d160bed2f55d2f9cb4ce0d36186c7b0a0075d53c46c4ee3b26834dd7db52c  verify/robust_stability.out
+```
+
+The verifier uses only integers and `fractions.Fraction`.  It independently
+expands the finite prebound, checks the error vector `(2,4,1)` and exact count
+slack, evaluates three rational substitutions, and checks sorted-head
+cardinality, removed mass, and residual identities on explicit finite
+spectra.
+
+The formal gate is:
+
+```bash
+lake build RH.Zeta85.Discharge.RobustStability RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/RobustStability.lean
+bash verify/check_axioms.sh
+```
+
+The comparator covers the public finite prebound, base/isometric/principal
+robust inequalities, uniform trim construction, exact residual identity, and
+the four-moment adapter.  Every line is diffed against exactly
+`[propext, Classical.choice, Quot.sound]`.  Source scans find no declaration
+using `axiom`, `sorry`, or `admit`.  No analytic moment equality or limiting
+statement is asserted by this milestone, so no frozen rung changes status.

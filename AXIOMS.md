@@ -234,6 +234,11 @@ delegates to) are identical.
 'RH.Zeta85.EtaClosure.balanced_j2_no_asymmetric_M1' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.EtaClosure.balanced_signedShift_misses' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.EtaClosure.literal_log_budget_C1_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.stability_prebound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RobustStability.robust_stability_inequality' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RobustStability.robust_stability_inequality_principalCompression' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RobustStability.spectral_residualTail_eq_tailExcessSq_div' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RobustStability.principal_spectral_headTrimmedMomentInputs_of_moments' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ---
@@ -493,3 +498,12 @@ misses trace scale and that every explicit literal log exponent `C >= 1`
 fails.  The exact enlarged convolution identity needed to leave this killed
 class remains an unasserted statement in
 `docs/audit/eta_gt_half_factorization.md`.
+
+The Phase-C robust stability bridge is likewise proved without a primitive
+assumption.  `RobustStability.lean` separates ambient matrix dimension from
+the real zero-count scale, proves the exact error term
+`2*pTraceErr + 4*traceErr + frobErr`, and constructs the uniform sorted-head
+spectral trim as an explicit `TrimmedMomentInputs` object.  Its residual is
+exactly the matrix tail energy divided by the block dimension.  The only
+remaining analytic identification at this interface is the list of four
+finite spectral-moment equalities; no theorem asserts those equalities.

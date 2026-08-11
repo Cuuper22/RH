@@ -406,6 +406,104 @@ private lemma exact_stability_slack {N s b : ℕ}
     simpa [rtrace] using h
   linarith
 
+/-- The same exact slack estimate with an arbitrary real upper bound for
+`rtrace P`.  Keeping the rank budget `s` and the trace budget `traceCap`
+separate is what makes finite normalization errors visible. -/
+private lemma exact_stability_slack_traceCap {N s b : ℕ} {traceCap : ℝ}
+    {P Q : Matrix (Fin N) (Fin N) 𝕜}
+    (hP : P.PosSemidef) (hQ : Q.IsHermitian)
+    (htraceP : rtrace P ≤ traceCap) (hposQ : posIndex hQ ≤ b) :
+    let Qm := hermNegPart hQ
+    let R := P - Qm
+    frobSq R - 2 * rtrace R + s
+      ≤ frobSq (P + Q) - 4 * rtrace (P + Q) + s + 2 * traceCap + 4 * b := by
+  dsimp only
+  let Qp := hermPosPart hQ
+  let Qm := hermNegPart hQ
+  let R := P - Qm
+  have hQdec : Q = Qp - Qm := by
+    exact (hermPosPart_sub_hermNegPart hQ).symm
+  have hQp_psd : Qp.PosSemidef := hermPosPart_posSemidef hQ
+  have hQm_psd : Qm.PosSemidef := hermNegPart_posSemidef hQ
+  have hQmQp : Qm * Qp = 0 := hermNegPart_mul_hermPosPart hQ
+  have hR : R.IsHermitian := hP.isHermitian.sub hQm_psd.isHermitian
+  have hGR : P + Q = R + Qp := by
+    rw [hQdec]
+    dsimp only [R]
+    abel
+  have hRQp : R * Qp = P * Qp := by
+    dsimp only [R]
+    rw [sub_mul, hQmQp]
+    simp
+  have hfrob : frobSq (P + Q)
+      = frobSq R + 2 * RCLike.re (P * Qp).trace + frobSq Qp := by
+    rw [hGR, frobSq_add_hermitian hR hQp_psd.isHermitian, hRQp]
+  have htraceR : rtrace R = rtrace P - rtrace Qm := by
+    dsimp only [R]
+    exact rtrace_sub P Qm
+  have htraceG : rtrace (P + Q) = rtrace P + rtrace Qp - rtrace Qm := by
+    rw [hGR, rtrace_add, htraceR]
+    ring
+  have hcross : 0 ≤ RCLike.re (P * Qp).trace :=
+    trace_mul_nonneg_of_posSemidef hP hQp_psd
+  have htraceQm : 0 ≤ rtrace Qm := by
+    dsimp only [Qm]
+    rw [rtrace_hermNegPart]
+    exact Finset.sum_nonneg fun _ _ => negPart_nonneg _
+  have hposQp : posIndex hQp_psd.isHermitian ≤ b := by
+    rw [posIndex_eq_rank_of_posSemidef hQp_psd]
+    dsimp only [Qp]
+    rw [rank_hermPosPart]
+    exact hposQ
+  have hQpcharge : 4 * rtrace Qp - 4 * (b : ℝ) ≤ frobSq Qp := by
+    have h := rank_trace_ineq_two
+      (P := (0 : Matrix (Fin N) (Fin N) 𝕜)) (Q := Qp)
+      Matrix.PosSemidef.zero hQp_psd.isHermitian
+      (r := 0) (b := b) (by simp) hposQp
+    simpa [rtrace] using h
+  linarith
+
+/-- The exact finite stability prebound before trace normalization, Frobenius
+normalization, or the count inequality is applied.  This is the reusable form
+of the stability argument when the matrix dimension and zero-count scale are
+not definitionally equal. -/
+theorem stability_prebound {N s b : ℕ} {traceCap : ℝ}
+    {P Q : Matrix (Fin N) (Fin N) 𝕜}
+    (hP : P.PosSemidef) (hQ : Q.IsHermitian)
+    (hrank : P.rank ≤ s) (htraceP : rtrace P ≤ traceCap)
+    (hposQ : posIndex hQ ≤ b) :
+    tailExcessSq (hP.isHermitian.add hQ) b
+      ≤ frobSq (P + Q) - 4 * rtrace (P + Q) + s + 2 * traceCap + 4 * b := by
+  let Qp := hermPosPart hQ
+  let Qm := hermNegPart hQ
+  let R := P - Qm
+  have hQdec : Q = Qp - Qm := by
+    exact (hermPosPart_sub_hermNegPart hQ).symm
+  have hQp_psd : Qp.PosSemidef := hermPosPart_posSemidef hQ
+  have hQm_psd : Qm.PosSemidef := hermNegPart_posSemidef hQ
+  have hR : R.IsHermitian := hP.isHermitian.sub hQm_psd.isHermitian
+  have hGR : P + Q = R + Qp := by
+    rw [hQdec]
+    dsimp only [R]
+    abel
+  have hrankQp : Qp.rank ≤ b := by
+    dsimp only [Qp]
+    rw [rank_hermPosPart]
+    exact hposQ
+  have htail0 := tailExcessSq_add_psd_le_full hR hQp_psd hrankQp
+  have htail : tailExcessSq (hP.isHermitian.add hQ) b ≤ fullExcessSq hR := by
+    calc
+      tailExcessSq (hP.isHermitian.add hQ) b
+          = tailExcessSq (hR.add hQp_psd.isHermitian) b :=
+            tailExcessSq_congr hGR (hP.isHermitian.add hQ)
+              (hR.add hQp_psd.isHermitian) b
+      _ ≤ fullExcessSq hR := htail0
+  have hposR : posIndex hR ≤ s :=
+    (posIndex_sub_le_rank hP hQm_psd).trans hrank
+  have hfull := fullExcessSq_le hR hposR
+  have hslack := exact_stability_slack_traceCap (s := s) hP hQ htraceP hposQ
+  exact htail.trans (hfull.trans hslack)
+
 /-- **Quartic stability inequality.**  Under the accepted zero-side decomposition
 `G = P + Q`, the positive excess remaining after `b` free directions is bounded by
 `s - (2-D)N`.  This is equation (4) of the audited proof. -/

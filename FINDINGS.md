@@ -961,3 +961,44 @@ effective log exponent `C < 1`; `C = 0` closes without a cross-scale estimate,
 while `EtaClosure.literal_log_budget_fails` proves every `C >= 1` fails.
 No such identity is present or asserted.  The exact method class, witness,
 and blocking statement are in `docs/audit/eta_gt_half_factorization.md`.
+
+---
+
+## 23. Phase-C robust stability and finite spectral trim
+
+The exact B-1 theorem used the same integer `N` for ambient dimension, trace
+normalization, and zero-count scale.  The analytic assembly only supplies the
+latter two asymptotically, and the distinguished principal block has a
+different dimension.  This mismatch is now removed rather than hidden in a
+limit notation.
+
+`RH.Zeta85.stability_prebound` proves the finite estimate
+
+\[
+ \operatorname{Tail}_b(G)
+ \leq \lVert G\rVert_F^2-4\operatorname{tr}G+s
+      +2\operatorname{traceCap}+4b.
+\]
+
+If `tr P <= s + eP`, `|tr G - N0| <= eT`,
+`||G||_F^2 <= D*N0 + eF`, and `s+2b <= N0`, then
+`RobustStability.robust_stability_inequality` gives
+
+\[
+ \operatorname{Tail}_b(G)
+ \leq s-(2-D)N_0+2e_P+4e_T+e_F.
+\]
+
+Here the ambient dimension `d` and real scale `N0` are independent.  The
+same bound is proved for isometric and principal compressions.  The
+coefficients `(2,4,1)` and the remaining count slack
+`2(s+2b-N0)` are exact, not asymptotic conventions.
+
+The finite spectral bridge is also explicit.  The uniform centered
+eigenvalue law, after deleting the first `b` decreasing eigenvalues, has
+removed mass at most `b/d`; its residual positive-square moment is exactly
+`tailExcessSq/d`.  `principal_spectral_headTrimmedMomentInputs_of_moments`
+therefore needs only four named equalities between the actual finite spectral
+moments and the analytic target moments.  It introduces no spectral-law or
+limit field itself.  Those four same-block moment identifications remain the
+precise R1b/grid interface for Phase C.

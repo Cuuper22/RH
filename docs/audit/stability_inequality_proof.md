@@ -197,3 +197,63 @@ arguments rather than taking them as fields.  Its five public stability and
 compression headlines have dependency output
 `[propext, Classical.choice, Quot.sound]`, checked on every CI run by
 `comparator/PrintAxioms/Stability.lean`.
+
+## 5. Robust finite form used by the asymptotic assembly
+
+The exact proof above can be stopped before inserting the normalizations.
+If
+
+\[
+ \tau\geq\operatorname{tr}P,\qquad
+ T_G=\operatorname{tr}G,\qquad F_G=\lVert G\rVert_F^2,
+\]
+
+then `RH.Zeta85.stability_prebound` proves
+
+\[
+ \operatorname{Tail}_b(G)\leq F_G-4T_G+s+2\tau+4b.
+\tag{19}
+\]
+
+Let \(N_0\) now be a real zero-count scale, independent of the ambient matrix
+dimension, and suppose
+
+\[
+ \operatorname{tr}P\leq s+e_P,\qquad
+ |T_G-N_0|\leq e_T,\qquad
+ F_G\leq DN_0+e_F,\qquad s+2b\leq N_0.
+\tag{20}
+\]
+
+Substitution into (19) gives
+
+\[
+ \boxed{\operatorname{Tail}_b(G)
+ \leq s-(2-D)N_0+2e_P+4e_T+e_F.}
+\tag{21}
+\]
+
+Indeed the difference between the substituted prebound and the displayed
+right side is exactly \(2(s+2b-N_0)\leq0\).  Thus the error coefficients are
+exactly \((2,4,1)\), respectively.  No sign condition on an error variable is
+needed beyond the one-sided inequalities in (20).  The same proof is
+formalized for isometric and principal compressions in
+`RH/Zeta85/Discharge/RobustStability.lean`.
+
+For a Hermitian principal block of dimension \(m>0\), that file also builds
+the uniform law of the centered eigenvalues \(\lambda_i-1\).  Deleting the
+first \(b\) decreasing eigenvalues removes mass at most \(b/m\), and the
+residual is exactly
+
+\[
+ \frac1m\sum_{i>b}(\lambda_i-1)_+^2.
+\tag{22}
+\]
+
+Consequently the finite stability output feeds the proved quartic weak-dual
+theorem with no measure-limit assumption.  The remaining analytic interface
+is exactly four equalities identifying the finite centered spectral moments
+with the moments supplied by the R1b grid calculation.  Those equalities are
+parameters of
+`principal_spectral_headTrimmedMomentInputs_of_moments`; they are not asserted
+by the robust layer.
