@@ -1181,3 +1181,55 @@ This gate does not prove the required
 moment, cover the nonsquarefree \(g\nmid k\) strata by the Ramanujan lift, or
 supply the separate smooth source-identification/recombination identity.
 No A1 field is discharged and no frozen rung status changes.
+
+## 34. A1 SQ4 published-literature gate
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.SQ4PublishedLiterature RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/SQ4PublishedLiterature.lean
+python3 verify/a1_sq4_published_literature.py
+diff -u verify/a1_sq4_published_literature.out \
+  <(python3 verify/a1_sq4_published_literature.py)
+bash verify/check_axioms.sh
+```
+
+`SQ4PublishedLiterature.lean` proves the common pre-completion normalization,
+the exact outputs and positive target gaps for the reviewed numerical method
+classes, and their normalized/raw fixed-log inventories.  It asserts no
+cited analytic theorem, literature-applicability statement, favourable
+coefficient grant, full-source moment estimate, `(SQ4-HB)`, or smooth source
+bridge.
+
+The dedicated printer selects all six public theorems and is included in the
+generic standard-three loop in `verify/check_axioms.sh`.  Every normalized
+line is exactly `[propext, Classical.choice, Quot.sound]`.
+`RH.Zeta85.Main` imports the module.  The targeted build, Main build, printer,
+independent-output diff, full axiom gate, source scans, and
+`git diff --check` all exit zero.
+
+The exact verifier checks the pre-completion target \(48/25\), completion
+prefactor \(-43/100\), and the audited outputs \(121/50\), \(111/50\),
+\(553/200\), \(2071/800\), \(1017/400\), \(977/360\), \(507/200\),
+\(139/50\), and \(599/200\), together with every displayed gap.  It
+reconstructs fixed-log exponents from primitive sources: standard
+normalized/raw \(0/2\), literal Pascadi \(1/3\), and conditional Pascadi
+\(2/4\).
+
+The exact artifact hashes are:
+
+```text
+246f5fbfa341df4fd90c1cea2ea7ee2092cb30cdf75bf812cdbdb9d8640aa5d4  RH/Zeta85/Discharge/SQ4PublishedLiterature.lean
+3cca37c88b5f70eb138f6df8c9fcbf2819daa6accf32788f5daf86be2abaf52e  comparator/PrintAxioms/SQ4PublishedLiterature.lean
+4d80e51bb81bab4687058cc6d9d9b508157ec047a37b2a1b5499c621a8a2a8a3  docs/audit/sq4_published_literature.md
+5917882577253cf755f96685a16680d92ee2b240512c6d7cc6220e60a1ff63a6  verify/a1_sq4_published_literature.py
+2585a510a4eb651c62521d58ba6ddab8753d22f0f54a2f73b24d9e95c8c598be  verify/a1_sq4_published_literature.out
+```
+
+The source audit finds no published theorem in the audited classes with the
+literal full-\(\mathfrak M_4\) left-hand side.  This is not a universal
+nonexistence claim.  The required
+\(T^{48/25+\varepsilon}(\log T)^0\) bound and the separate smooth source
+identification/recombination identity remain unproved.  No A1 field is
+discharged and no frozen rung status changes.

@@ -838,6 +838,33 @@ moment before Cauchy, or a new estimate coupling at least one outer
 modulus/level slot, remains the analytic blocker; the smooth
 source-identification/recombination statement remains a separate blocker.
 
+### Published-theorem source audit
+
+The source-first continuation in `docs/audit/sq4_published_literature.md`
+widens the explicit literature check without changing the target.  All
+outputs are compared before completion with \(48/25\).  Shparlinski 2019
+Theorem 2.1 gives \(2071/800\) even under favourable unit/coprime and
+coefficient-norm grants; its excess is \(107/160\).  The good-modulus part of
+Theorem 2.2 at moment two gives \(1017/400+\varepsilon\), with excess
+\(249/400+\varepsilon\), but supplies no bound for exceptional source mass.
+The audited KSWX and published Pascadi classes retain their positive gaps,
+while primitive Gauss-sum and order-dividing-four character results have
+literal family or left-hand-side mismatches.
+
+No published theorem was found in these audited classes whose literal
+left-hand side is the full signed conductor-stratified source moment.  This
+is a finish/kill result only for the sources and theorem classes listed in
+that audit, not a universal nonexistence claim.  The analytic survivor and
+fixed logarithmic target remain
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0,
+\]
+
+and the smooth source-identification/recombination bridge remains separately
+unproved.
+
 ### Canonical BBLR collapse proved; smooth Heath--Brown identification missing
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` now constructs the exact sharp-cutoff
@@ -1132,11 +1159,11 @@ as follows:
    weight; they do not provide cancellation.  The terminal A1 blocker on the
    granted source-shaped block is therefore the signed
    generalized-Gauss moment of
-   `docs/audit/sq4_correlated_moment.md`, bounded at explicit pre-completion
+   `docs/audit/sq4_published_literature.md`, bounded at explicit pre-completion
    scale \(T^{48/25+\varepsilon}(\log T)^0\), or another correlated estimate
    for (33), or a proved geometry-changing completion/reindex.  The audited
-   fixed-family theorem classes do not supply it: the locally applicable
-   Blomer--Pascadi preprint loses the outer signs; the published KSWX map
+   published-theorem classes audited there do not supply it: the locally
+   applicable Blomer--Pascadi preprint loses the outer signs; the published KSWX map
    requires favourable coprimality/energy grants and still misses; and
    published Pascadi Corollary 5.11 is either literal only on its squarefree
    lifted strata with a larger recombination cost, or conditional on an

@@ -90,6 +90,7 @@ for audit in \
   comparator/PrintAxioms/SQ4GaussSquareTransform.lean \
   comparator/PrintAxioms/SQ4CRTConductor.lean \
   comparator/PrintAxioms/SQ4CorrelatedMoment.lean \
+  comparator/PrintAxioms/SQ4PublishedLiterature.lean \
   comparator/PrintAxioms/AliasRankObstruction.lean \
   comparator/PrintAxioms/BBLRGCDAllocation.lean \
   comparator/PrintAxioms/EtaClosure.lean \

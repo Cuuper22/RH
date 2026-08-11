@@ -247,6 +247,19 @@ logarithmic exponents \(0/2\); the literal and favourable Pascadi
 recombinations have \(1/3\) and \(2/4\), respectively.  Thus A1 and every
 frozen rung status remain unchanged.
 
+`RH/Zeta85/Discharge/SQ4PublishedLiterature.lean` normalizes the reviewed
+published-theorem audit to the same pre-completion target \(48/25\), without
+adding a premise.  Shparlinski's published 2019 Theorem 2.1 is already
+power-killed at \(2071/800\) under favourable unit/coprime and coefficient-
+norm grants; the good-modulus part of Theorem 2.2 is power-killed at
+\(1017/400+\varepsilon\), while its exceptional source mass is uncontrolled.
+The other audited published classes have either a positive power gap or a
+literal source-structure mismatch.  Thus no published theorem was found in
+the audited classes whose literal left-hand side is the full source moment;
+this is not a universal nonexistence claim.  The analytic survivor remains
+\(T^{48/25+\varepsilon}(\log T)^0\), together with the smooth source bridge.
+No A1 field is discharged and no frozen rung status changes.
+
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
 unconditional smoothed Theorem 3.1 at \(m=1\), with a gauge-fixed zero-sum
@@ -644,6 +657,12 @@ delegates to) are identical.
 'RH.Zeta85.SQ4CorrelatedMoment.pascadi_lifted_integrated_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4CorrelatedMoment.literal_cor511_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4CorrelatedMoment.correlated_route_log_exponents_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4PublishedLiterature.precompletion_target_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4PublishedLiterature.existing_benchmark_precompletion_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4PublishedLiterature.shparlinski19_t21_terms_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4PublishedLiterature.shparlinski19_t22_good_part_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4PublishedLiterature.other_precompletion_outputs_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4PublishedLiterature.audited_log_exponents_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -723,6 +742,14 @@ preprint nor either published theorem, neither favourable grant, no
 Ramanujan-lift coverage beyond the source-audited method class, no analytic
 bound for family (33), no `(SQ4-HB)`, and no smooth source-identification
 bridge.
+
+The six `SQ4PublishedLiterature` lines are the exact normalized output of
+`comparator/PrintAxioms/SQ4PublishedLiterature.lean`; all have the standard
+three dependencies.  They prove only rational normalization, target gaps,
+and the fixed-log inventory for the audited theorem classes.  They assert no
+cited analytic theorem, no applicability statement or favourable grant, no
+bound for the exceptional-modulus source mass, no full-source moment bound,
+no `(SQ4-HB)`, and no smooth source-identification bridge.
 
 ### 1.5 Conditional quartic headlines
 

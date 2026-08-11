@@ -1783,3 +1783,37 @@ coupling at least one outer modulus/level slot, and separately the missing
 smooth source-identification/recombination bridge.  Hence A1,
 `signedPair_traceGrade_lt_3_2`, and every frozen rung status remain
 unchanged.
+
+---
+
+## 37. A1 SQ4 published-theorem audit — listed classes finished; full source moment survives
+
+`docs/audit/sq4_published_literature.md` checks the literal hypotheses and
+left-hand sides of the reviewed published theorem classes against the exact
+conductor-stratified source moment.  Its common pre-completion target is
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0. \tag{36}
+\]
+
+The exact normalization and gaps are formalized in
+`RH/Zeta85/Discharge/SQ4PublishedLiterature.lean` and independently replayed
+with `fractions.Fraction`.  The coefficient-blind, ideal fixed-\((p,v)\)
+square-root, and direct Weil-triangle classes give respectively
+\(121/50\), \(111/50\), and \(553/200\) before completion.  Under favourable
+unit/coprime and coefficient-norm grants, Shparlinski 2019 Theorem 2.1 gives
+\(2071/800\), an excess \(107/160\).  The good-modulus part of Theorem 2.2 at
+moment two gives \(1017/400+\varepsilon\), an excess
+\(249/400+\varepsilon\), and does not control the exceptional source mass.
+The reviewed KSWX and published Pascadi routes are likewise power-killed on
+their favourable or literal strata; primitive one-Gauss-sum and quartic-
+character results have explicit left-hand-side or family mismatches.
+
+Consequently, no published theorem was found in the audited classes whose
+literal left-hand side contains the full signed moment.  This finishes only
+those listed theorem classes and is not a universal nonexistence statement.
+The survivor is still (36), with all conductor/divisor strata and the joint
+source coefficient retained, plus the separate smooth source-identification
+and recombination bridge.  No A1 field is discharged and no frozen rung or
+README status changes.
