@@ -10,9 +10,13 @@ that section only relabels factors, and a legal balanced `K=3`, `j=2`
 Heath--Brown block has no whole-factor subproduct of the requested length.
 Thus the relabel-only method is finished with a precise counterexample.  This
 does not rule out a new coefficient identity which genuinely refactors the
-balanced block.  Such an identity is stated exactly below.  Independently,
-even a repaired factorization would still have to meet the literal logarithmic
-threshold `C < 1`.
+balanced block.  The finite support-model audit now rules out the narrower
+class in which every first factor of such a signed superposition remains in
+one divisor-free asymmetric short box, but it does not identify the model
+with an actual terminal Heath--Brown coefficient.  The actual coefficient
+identity therefore remains open and is stated exactly below.  Independently,
+even a repaired factorization would still have to meet the literal
+logarithmic threshold `C < 1`.
 
 Throughout this note, `eta` is fixed with
 
@@ -305,7 +309,42 @@ No such construction is present in the run or in this repository.  Until it
 is proved, file 18 section 2 does not discharge the support-`sigma<2`
 prime-side layer.
 
-## 8. Machine checks
+## 8. Finite support-model obstruction and exact analytic survivor
+
+`RH/Zeta85/Discharge/EtaSuperpositionObstruction.lean` proves a necessary
+support warning for `(EF_eta)`.  At `eta=3/4` and `T=625`, the balanced
+`[25,50]` box has coefficient two at `899=29*31`, but 899 has no divisor in
+the asymmetric short box `[5,10]`.  Every finite signed superposition whose
+first factors are all supported in that short box is therefore zero at the
+witness.  Signs, overlap, cardinality, and scale-dependent coefficients do
+not change the pointwise-zero conclusion.  The scale-free prime-square
+theorem proves the same mechanism whenever the first support is strictly
+between 1 and the model prime.
+
+No theorem identifies this balanced model coefficient with an actual
+terminal Heath--Brown coefficient.  Accordingly the result does not kill
+`(EF_eta)`: a pointwise decomposition may survive by using
+divisor-dependent or exceptional pieces outside the excluded box, and a
+retained-variable or non-pointwise analytic recombination lies outside the
+formalized finite class.
+
+The exact surviving retained-variable theorem is per outer dyadic prime
+scale `Y`.  With the full signed `h`-sum at `H_Y=Y/T` taken before absolute
+values and the actual Poisson zero modes subtracted and matched within that
+same scale, it must prove
+
+\[
+ |R_{\rm HD}(Y,T,\eta)|
+   \ll_{\eta,\mathcal W}Y(\log T)^C,\qquad C<1. \tag{HD_eta}
+\]
+
+The `C<1` threshold is the literal outer-`Y`-dyadic threshold from (18)--(19).
+If the remainder were instead defined after the outer `Y`-sum, that scale
+could not be charged again and the generous threshold would be `C<2`.
+Neither analytic theorem is asserted.  The missing actual HB source
+identification, `(EF_eta)`, A1, and every frozen-rung status remain unchanged.
+
+## 9. Machine checks
 
 The exact rational verifier and its committed output are
 `verify/b4_eta_closure.py` and `verify/b4_eta_closure.out`.  Reproduce them
@@ -319,3 +358,9 @@ The unconditional algebra is in
 `RH/Zeta85/Discharge/EtaClosure.lean`; its isolated dependency audit is
 `comparator/PrintAxioms/EtaClosure.lean`.  There are no declarations using
 `axiom`, `sorry`, or `admit` in the new Lean file.
+
+The finite support obstruction is in
+`RH/Zeta85/Discharge/EtaSuperpositionObstruction.lean`; its twelve-theorem
+dependency audit is
+`comparator/PrintAxioms/EtaSuperpositionObstruction.lean`, and its independent
+exact replay is `verify/b4_eta_superposition_obstruction.py`.

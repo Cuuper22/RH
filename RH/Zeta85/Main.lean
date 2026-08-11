@@ -29,6 +29,7 @@ import RH.Zeta85.Discharge.ActualScaleBBLR
 import RH.Zeta85.Discharge.PreMajorantDI
 import RH.Zeta85.Discharge.BBLRGCDAllocation
 import RH.Zeta85.Discharge.EtaClosure
+import RH.Zeta85.Discharge.EtaSuperpositionObstruction
 import RH.Zeta85.Discharge.FourMuKloosterman
 import RH.Zeta85.Discharge.SQ4SimultaneousRoutes
 import RH.Zeta85.Discharge.SQ4GaussSquareTransform

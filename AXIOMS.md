@@ -507,6 +507,18 @@ delegates to) are identical.
 'RH.Zeta85.EtaClosure.balanced_j2_no_asymmetric_M1' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.EtaClosure.balanced_signedShift_misses' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.EtaClosure.literal_log_budget_C1_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.convolutionCoeff_eq_zero_of_no_supported_divisor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.no_prime_sq_divisor_between' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.pointIndicator_convolution_sq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.no_primePointModel_finiteSuperposition' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.no_short_box_divisor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.convolutionCoeff_899_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.finiteSuperposition_899_eq_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.balancedBoxModelCoeff_899' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.no_balancedBoxModel_finiteSuperposition' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.balanced_progression_PQ_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.balanced_progression_PH_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaSuperpositionObstruction.balanced_progression_requires_cancellation' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.stability_prebound' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RobustStability.robust_stability_inequality' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RobustStability.robust_stability_inequality_withCountError' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -758,6 +770,13 @@ contradiction, both exact rational gaps, and uninhabitability of
 `PrincipalCyclicBlock` for `Family14999` and `Family19999`.  They introduce
 no replacement family, change no frozen constant, and do not alter the
 conditional quartic theorem statements.
+
+The twelve `EtaSuperpositionObstruction` lines are the exact normalized
+output of `comparator/PrintAxioms/EtaSuperpositionObstruction.lean`; all have
+the standard three dependencies.  They prove only the finite common-support
+obstruction and the exact balanced positive-majorant excesses.  They do not
+identify an actual terminal Heath--Brown coefficient, prove `(EF_eta)`
+false, or assert the per-`Y` analytic survivor `(HD_eta)`.
 
 The 15 `PreMajorantDI` lines are the exact normalized output of
 `comparator/PrintAxioms/PreMajorantDI.lean`.  They audit only rational
@@ -1109,6 +1128,20 @@ misses trace scale and that every explicit literal log exponent `C >= 1`
 fails.  The exact enlarged convolution identity needed to leave this killed
 class remains an unasserted statement in
 `docs/audit/eta_gt_half_factorization.md`.
+
+`EtaSuperpositionObstruction.lean` further proves an exact finite
+support-model obstruction without adding a premise.  At
+`eta = 3/4`, `T = 625`, every finite signed superposition whose first factors
+are supported in `[5,10]` vanishes at `899`, whereas the balanced `[25,50]`
+box model has coefficient two.  Its prime-square theorem gives the analogous
+scale-free support gap.  This does not identify the balanced model with an
+actual terminal Heath--Brown coefficient and therefore does not disprove or
+discharge `(EF_eta)`.  The surviving actual-coefficient theorem is the
+per-outer-scale bound `(HD_eta)`,
+`|R_HD(Y,T,eta)| <= C_eta,W * Y * (log T)^C` with `C < 1`, after the signed
+`h`-sum and actual zero-mode subtraction but before the outer dyadic
+`Y`-sum.  No such theorem is asserted; B-4, A1, and every frozen rung status
+remain unchanged.
 
 The Phase-C robust stability bridge is likewise proved without a primitive
 assumption.  `RobustStability.lean` separates ambient matrix dimension from

@@ -94,6 +94,7 @@ for audit in \
   comparator/PrintAxioms/AliasRankObstruction.lean \
   comparator/PrintAxioms/BBLRGCDAllocation.lean \
   comparator/PrintAxioms/EtaClosure.lean \
+  comparator/PrintAxioms/EtaSuperpositionObstruction.lean \
   comparator/PrintAxioms/HBDepthFour.lean \
   comparator/PrintAxioms/HBToBBLRSmoothGrouping.lean \
   comparator/PrintAxioms/Inputs95.lean \

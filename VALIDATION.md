@@ -1340,3 +1340,55 @@ This gate does not change any frozen theorem statement or constant.  The
 quartic theorem declarations remain conditional implications, but their
 current `PrincipalCyclicBlock` premise is formally uninhabited for both
 exact family types.  No valid current-interface construction exists.
+
+## 37. B-4 eta-superposition support-model gate
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.EtaSuperpositionObstruction RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/EtaSuperpositionObstruction.lean
+python3 verify/b4_eta_superposition_obstruction.py
+diff -u verify/b4_eta_superposition_obstruction.out \
+  <(python3 verify/b4_eta_superposition_obstruction.py)
+bash verify/check_axioms.sh
+```
+
+The Lean module proves the generic no-supported-divisor convolution lemma,
+its scale-free prime-square specialization, and the concrete
+`eta=3/4`, `T=625`, `n=899` regression.  The balanced `[25,50]` box model
+has coefficient two at 899, whereas every finite signed superposition with
+all first supports in `[5,10]` vanishes there.  It also proves that the
+retained balanced positive progression majorant misses trace by exactly
+`eta` in `PQ` and `eta - 1/2` in `PH`.
+
+The dedicated printer selects twelve public theorems and is included in the
+generic standard-three loop in `verify/check_axioms.sh`.  Every normalized
+line is exactly `[propext, Classical.choice, Quot.sound]`.
+`RH.Zeta85.Main` imports the module.  The targeted/Main build, printer,
+exact-output diff, full axiom gate, source scans, and `git diff --check` all
+exit zero.
+
+The independent verifier uses only integer arithmetic and
+`fractions.Fraction`.  It enumerates all ordered divisors of 899, reconstructs
+the three exact boxes and both supported-pair lists, and recomputes the `PQ`
+and `PH` excesses.  It does not verify a logarithmic budget; the cited
+`C<1` threshold is supplied by the existing `LogBudget`/`EtaClosure`
+theorems.
+
+The exact artifact hashes are:
+
+```text
+5d21ff3339fa654268dd84821ddc1dacd67320b6d75e6bb217fb9dd8e4cfd73c  RH/Zeta85/Discharge/EtaSuperpositionObstruction.lean
+06f6d413afbf765dae6e40c6a919192f779fa7187e6613ac50919d6146b29570  comparator/PrintAxioms/EtaSuperpositionObstruction.lean
+d4ed1194ea882921581ee3e08f2430df1aa4e451fd1cff1c2f9f3206a8fac9cd  docs/audit/eta_superposition_obstruction.md
+343f2a70ae558f83be9529b3f5864478b5245ad6326fdaaee9717ecf9055a965  verify/b4_eta_superposition_obstruction.py
+373ba96868de9bc757c0d181d1e2f23d8f88a1361b80b0a0cf835f1616ee678d  verify/b4_eta_superposition_obstruction.out
+```
+
+This gate does not identify the model coefficient with an actual terminal
+Heath--Brown coefficient, kill `(EF_eta)`, or assert `(HD_eta)`.  The exact
+survivor remains the actual-coefficient per-`Y` estimate
+`|R_HD(Y,T,eta)| << Y(log T)^C` with `C<1`, after the signed `h`-sum and
+actual zero-mode subtraction but before the outer dyadic `Y`-sum.  A1 and
+every frozen-rung status remain unchanged.

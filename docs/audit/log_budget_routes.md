@@ -69,6 +69,22 @@ misses the trace budget.
 between the previously recorded \(C<2\) and \(C<0\) readings.  The
 \(C\ge3\) obstruction survives.
 
+For the distinct B-4 `eta>1/2` balanced-block survivor, the same middle
+threshold applies to the explicitly per-`Y` formulation `(HD_eta)`:
+
+\[
+ |R_{\rm HD}(Y,T,\eta)|
+   \ll_{\eta,\mathcal W}Y(\log T)^C,\qquad C<1.
+\]
+
+Here the signed `h`-sum and actual zero-mode subtraction occur within one
+outer prime scale before absolute values, and the dyadic `Y`-sum is still to
+be taken.  Defining `R_HD` only after that outer recombination would instead
+use the generous `C<2` line.  The finite support theorem in
+`docs/audit/eta_superposition_obstruction.md` does not prove either analytic
+estimate or identify an actual HB coefficient.  This cross-reference does
+not change the separate A1 survivor or any frozen-rung status.
+
 ## Route 2: retain signs across scales
 
 ### Shift scales

@@ -1,0 +1,21 @@
+B4 eta-superposition support-model exact audit
+eta = 3/4
+trace exponent = 7/4
+balanced atom exponent = 1/2
+short/long exponents = 1/4, 3/4
+base scale T = 625
+short box = [5,10]
+balanced box = [25,50]
+long box = [125,250]
+witness ordered products = 29*31, 31*29 = 899
+ordered factor pairs = [(1, 899), (29, 31), (31, 29), (899, 1)]
+balanced supported pairs = [(29, 31), (31, 29)]
+short-long supported pairs = []
+common-short-support finite support model = POINTWISE IMPOSSIBLE
+P exponent = 5/4
+Q exponent = 5/4
+H exponent = 3/4
+PQ exponent/excess = 5/2, 3/4
+PH exponent/excess = 2, 1/4
+positive P(Q+H) majorant = POWER-INCOMPATIBLE
+survivor = piece leaving excluded box, retained variables, or non-pointwise identity

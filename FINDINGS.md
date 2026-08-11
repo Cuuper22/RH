@@ -1897,3 +1897,49 @@ count, or oversampling cannot help.  A surviving redesign must change at
 least one consumed energy/profile/translated-product semantic and reprove
 the affected principal-compression, trace-normalization, and block-moment
 steps.  No frozen constant or theorem statement changes.
+
+---
+
+## 40. B-4 eta superposition — finite common-support model killed; actual coefficient route survives
+
+`RH/Zeta85/Discharge/EtaSuperpositionObstruction.lean` formalizes a narrow
+pointwise support obstruction at the exact witness
+
+\[
+ \eta=\frac34,\qquad T=625,\qquad 899=29\cdot31.
+\]
+
+Both ordered factors `(29,31)` and `(31,29)` lie in the balanced box
+`[25,50]^2`, so the balanced-box model coefficient at 899 is exactly two.
+No divisor of 899 lies in the asymmetric short box `[5,10]`.  Consequently
+every finite signed sum of Dirichlet convolutions whose first factors all
+remain in that box vanishes at 899, regardless of signs, overlap, the number
+of pieces, or their second factors.  A prime-square theorem proves the same
+support mechanism at every prime-square scale.
+
+This is a theorem about an exact finite support model, not the actual
+terminal Heath--Brown coefficient.  No theorem identifies that coefficient
+with the balanced model or proves it nonzero at the witness.  Thus `(EF_eta)`
+is neither proved nor disproved, and merely allowing a scale-dependent finite
+index does not evade the obstruction while every first support remains in
+the excluded box.  A pointwise survivor must leave that box through, for
+example, divisor-dependent or exceptional support; retained-variable and
+non-pointwise recombination routes also remain outside the killed class.
+
+For retained balanced variables, the same positive progression majorant
+still exceeds the trace exponent by exactly `eta` in `PQ` and
+`eta - 1/2` in `PH`.  The precise surviving analytic target is therefore a
+per-outer-dyadic-scale theorem for the actual coefficient family:
+
+\[
+ |R_{\rm HD}(Y,T,\eta)|
+   \ll_{\eta,\mathcal W}Y(\log T)^C,\qquad C<1. \tag{HD_eta}
+\]
+
+Here the full signed `h`-sum at `H_Y=Y/T` and the actual Poisson zero-mode
+subtraction occur before the absolute value, while the outer `Y`-sum remains
+outside.  The threshold `C<1` is exactly the literal prime-dyadic budget; if
+the remainder were defined only after recombining the outer scales, the
+corresponding generous threshold would be `C<2`.  Neither version is proved.
+There is no `EF_eta` discharge, actual HB source identification, A1 status
+change, or frozen-rung status change.
