@@ -88,6 +88,7 @@ for audit in \
   comparator/PrintAxioms/BBLRGCDAllocation.lean \
   comparator/PrintAxioms/EtaClosure.lean \
   comparator/PrintAxioms/HBDepthFour.lean \
+  comparator/PrintAxioms/HBToBBLRSmoothGrouping.lean \
   comparator/PrintAxioms/Inputs95.lean \
   comparator/PrintAxioms/QuarticMain.lean \
   comparator/PrintAxioms/QuarticTransfer.lean \

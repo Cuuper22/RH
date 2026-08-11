@@ -98,6 +98,21 @@ multiplicity subproblem for supplied BBLR inputs; it does not construct the
 smooth Heath--Brown grouping, any A1 estimate, or the frequency \(\ell=0\)
 singular-series recombination.
 
+`RH/Zeta85/Discharge/HBToBBLRSmoothGrouping.lean` finishes and kills the
+fixed asymmetric **literal-slot** grouping claimed in run 12.  The legal
+zero-based component `j = 1` block
+\((43/200,43/200,2/5,3/5)\) has total exponent \(143/100\), its two
+truncated Möbius slots give the requested outer exponent \(43/100\), and its
+only literal smooth slots remain \(2/5,3/5\).  Their left-target gap is
+exactly \(1/10\), while every right-target gap is at least \(33/100\), so no
+\(T^{o(1)}\) cushion yields the prescribed \((1/2,1/2)\) and
+\((7/100,93/100)\) pairs.  The module separately proves that collapsing two
+coefficient-one slots produces the nonconstant divisor multiplicity
+\(\zeta*\zeta\), rather than another literal smooth slot.  This changes no
+axiom or rung status.  It leaves open an actual-scale all-block estimate, a
+proved superposition identity with derivative and recombination control, or
+a higher-dimensional divisor theorem retaining all factor variables.
+
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
 unconditional smoothed Theorem 3.1 at \(m=1\), with a gauge-fixed zero-sum
@@ -336,6 +351,21 @@ delegates to) are identical.
 'RH.Zeta85.BBLRGCDAllocation.collapsedCoeff_two_two_unit' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.BBLRGCDAllocation.rawCollapsedCoeff_two_two_unit' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.BBLRGCDAllocation.collapsedKernelSum_eq_originalFibers' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.hb_component_one_inventory' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.hb_component_one_scalar' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.muCut_ne_coefficientOne' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.bblr_allocation_preserves_supplied_smooth' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.terminal_component_one_legal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.left_literal_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.right_short_literal_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.right_long_literal_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.no_left_literal_grouping' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.no_right_literal_grouping' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.no_asymmetric_literal_grouping' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.twoUnitSlotMultiplicity_two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.twoUnitSlotMultiplicity_four' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.two_unit_slot_collapse_not_constant' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBToBBLRSmoothGrouping.zeta_sq_eq_twoUnitSlotMultiplicity' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]

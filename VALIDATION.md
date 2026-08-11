@@ -734,3 +734,45 @@ smooth signed Heath--Brown grouping, prove `(EDB)` or `(WG-HB)`, evaluate the
 frequency \(\ell=0\) integrals against the Ramanujan singular series, or
 change any frozen rung status.  The exact boundary is recorded in
 `docs/audit/bblr_gcd_allocation.md`.
+
+## 25. A1 fixed asymmetric smooth-grouping method class
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.HBToBBLRSmoothGrouping RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/HBToBBLRSmoothGrouping.lean
+python3 verify/a1_smooth_grouping.py
+diff -u verify/a1_smooth_grouping.out \
+  <(python3 verify/a1_smooth_grouping.py)
+bash verify/check_axioms.sh
+```
+
+`HBToBBLRSmoothGrouping.lean` checks the zero-based `j = 1` component
+inventory and scalar, proves that its truncated Möbius atoms are not
+coefficient-one slots, verifies the exact terminal exponent block, and
+proves the fixed left, right, and two-sided literal-slot assignments
+impossible below their exact gaps.  It also proves that collapsing two
+coefficient-one slots creates the nonconstant convolution
+`zeta * zeta`, rather than a literal BBLR smooth variable.
+
+The independent `Fraction` replay checks the signed component coefficient,
+the Möbius/coefficient-one distinction at (2), every exponent identity and
+gap, and the divisor multiplicities at (2) and (4).  Its committed hashes
+are:
+
+```text
+67550b74daf9ae0ed31ad37729fbf35ba52a64ddd245a2860ada0da65df42793  verify/a1_smooth_grouping.py
+fd1fa689b25c6dfdc9545b6bf248cd9079126b8c07ad681ece66262cb1f8c5bb  verify/a1_smooth_grouping.out
+```
+
+The dependency printer selects 15 public theorems.  Every line is exactly
+`[propext, Classical.choice, Quot.sound]`; the printer is included in
+`verify/check_axioms.sh`, and `RH.Zeta85.Main` imports the module.  Source
+scans find no `axiom`, `sorry`, `admit`, or `unsafe` in the module or
+printer.
+
+This validates only the killed fixed-scale literal-slot method class.  It
+does not supply an actual-scale all-block estimate, a smooth superposition
+identity, a higher-dimensional divisor theorem, `(EDB)`, `(WG-HB)`, or an
+A1 trace input, and it changes no frozen rung status.

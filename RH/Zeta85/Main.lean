@@ -28,6 +28,7 @@ import RH.Zeta85.Discharge.AliasRankObstruction
 import RH.Zeta85.Discharge.BBLRGCDAllocation
 import RH.Zeta85.Discharge.EtaClosure
 import RH.Zeta85.Discharge.HBDepthFour
+import RH.Zeta85.Discharge.HBToBBLRSmoothGrouping
 import RH.Zeta85.Discharge.QuarticWindowWitnesses
 import RH.Zeta85.Discharge.R9383ExactEndpoint
 import RH.Zeta85.Discharge.RobustStability

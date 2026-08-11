@@ -1270,3 +1270,49 @@ a39f77ac554d281b32612bcfa5f37012cecebad0eac75d313f687030cd2407a2  verify/bblr_gc
 The dedicated printer selects five core theorems, each with exactly
 `[propext, Classical.choice, Quot.sound]`; `verify/check_axioms.sh` includes
 that printer.
+
+---
+
+## 28. A1 smooth HB-to-BBLR grouping — fixed literal-slot class killed
+
+`RH/Zeta85/Discharge/HBToBBLRSmoothGrouping.lean` audits the exact
+fixed-scale grouping asserted before the BBLR estimate.  In the proved sharp
+depth-four identity, the zero-based component `j = 1` has scalar (-6) and
+literal nonidentity atoms
+
+\[
+                 \mu_Z,\quad\mu_Z,\quad\zeta,\quad\log.
+\]
+
+The legal dyadic exponent block
+
+\[
+       \left(\frac{43}{200},\frac{43}{200},\frac25,\frac35\right)
+\]
+
+has total exponent (143/100).  Both truncated Möbius atoms lie below the
+(K=4) cap (143/400) and together give the required outer exponent
+(43/100).  The theorem `muCut_ne_coefficientOne` also proves that, once
+(Z\ge2), those atoms cannot be reclassified as coefficient-one smooth
+slots.  The only literal inner scales are therefore (2/5) and (3/5).
+
+For the requested left pair ((1/2,1/2)), each available scale has exact
+gap (1/10).  For the requested right pair ((7/100,93/100)), every
+relevant gap is at least (33/100).  Hence
+`no_asymmetric_literal_grouping` proves that no exponent cushion below
+(1/10), in particular no (T^{o(1)}) cushion, realizes the fixed
+asymmetric literal-slot assignment.
+
+Multiplying original slots does not repair that exact class:
+`zeta_sq_eq_twoUnitSlotMultiplicity` identifies the collapse of two
+coefficient-one slots with the divisor multiplicity (d_2), and the module
+proves its values are (2) at (2) and (3) at (4).  Such a collapse is
+coefficient-bearing and is not a single BBLR inner smooth variable.
+
+This is a finish-or-kill statement only for the fixed literal-slot method
+class.  It does not rule out a theorem uniform in the actual block scales, a
+new exact superposition identity with support/derivative/recombination
+control, or a higher-dimensional divisor estimate retaining the separate
+factor variables.  None of those survivors is constructed, so `(EDB)`,
+the common-scale estimate, `(WG-HB)`, and the A1 pair-trace field remain
+undischarged.  Frozen rung statuses do not change.

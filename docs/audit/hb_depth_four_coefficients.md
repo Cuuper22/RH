@@ -200,9 +200,13 @@ Run 12 equations (5)--(11) do not specify:
 
 1. the cutoff \(Z=Z(T,Y)\) or a proof that its smoothly truncated identity
    equals the sharp identity above on every relevant integer;
-2. the scale-dependent grouping plan and smooth dyadic partition that map
-   the eight slots to supplied BBLR outer sequences and genuine smooth inner
-   variables carrying \(W_1,W_3\);
+2. a surviving scale-dependent grouping theorem and smooth dyadic partition
+   that map the eight slots to supplied BBLR outer sequences and genuine
+   smooth inner variables carrying \(W_1,W_3\).  The fixed asymmetric
+   literal-slot version is impossible: the exact component-`j=1` block
+   \((43/200,43/200,2/5,3/5)\) proved in
+   `HBToBBLRSmoothGrouping.lean` has only inner scales \(2/5,3/5\), a fixed
+   \(1/10\) away from the requested left pair;
 3. the instantiation of the proved canonical \((p,q)\) collapse with those
    actual grouped sequences and the integrated Fourier factor
    \(F_{d,\ell}\), including its derivative bounds and infinite-frequency
@@ -212,9 +216,11 @@ Run 12 equations (5)--(11) do not specify:
    prime-pair singular-series term, including the non-exact replacement
    errors.
 
-The narrow missing construction is therefore an explicit plan and smooth
-partition together with a proved equality from each signed Heath--Brown
-block to the supplied outer/smooth inputs of `collapsedCoeff`, followed by an
+The narrow missing construction is therefore an explicit surviving plan --
+using actual block-dependent scales, a controlled superposition, or a
+higher-dimensional divisor theorem -- together with a smooth partition and
+proved equality from each signed Heath--Brown block to the supplied
+outer/smooth inputs of `collapsedCoeff`, followed by an
 instantiation of `collapsedKernelSum_eq_originalFibers` with the full BBLR
 equation (14) kernel and a constructed zeroModeHB satisfying an identity of
 the form

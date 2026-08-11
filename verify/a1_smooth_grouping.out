@@ -1,0 +1,20 @@
+A1 smooth HB-to-BBLR grouping exact audit
+eta = 43/100 = 0.430000000000000
+trace exponent = 143/100 = 1.430000000000000
+K=4 irregular-atom cap = 143/400 = 0.357500000000000
+Type-I threshold X/H = 1 = 1.000000000000000
+counterexample mu exponents = (Fraction(43, 200), Fraction(43, 200))
+counterexample smooth exponents = (Fraction(2, 5), Fraction(3, 5))
+zero-based HB component j=1 scalar = -6
+mu_Z(2) vs coefficient-one at 2 = -1 vs 1
+counterexample total = 143/100 = 1.430000000000000
+counterexample outer mu product = 43/100 = 0.430000000000000
+counterexample terminal legality = PASS
+minimum left literal-inner gap = 1/10 = 0.100000000000000
+minimum right literal-inner gap = 33/100 = 0.330000000000000
+left (1/2,1/2) literal grouping = IMPOSSIBLE
+right (7/100,93/100) literal grouping = IMPOSSIBLE
+two-sided asymmetric literal grouping = IMPOSSIBLE
+two-slot collapse multiplicity at 2 = 2
+two-slot collapse multiplicity at 4 = 3
+two-slot collapse is coefficient-bearing = PASS

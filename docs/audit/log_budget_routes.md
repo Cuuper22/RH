@@ -742,14 +742,22 @@ as follows:
    \(C\ge3\).  The stronger common-scale target (14) survives, but the
    sharp compatible coefficient family is still only an algebraic candidate.
    Reduced-residue centering and the canonical BBLR gcd collapse for supplied
-   sequences are proved, but the source's smooth Heath--Brown grouping,
-   analytic kernel bounds, frequency \(\ell=0\) integrals, and signed
+   sequences are proved.  The fixed asymmetric literal-slot grouping is now
+   killed by the exact legal block
+   \((43/200,43/200,2/5,3/5)\): its only literal smooth scales miss the
+   requested left pair by \(1/10\).  A source construction would therefore
+   need actual block-dependent scales, a proved superposition identity, or a
+   higher-dimensional divisor theorem.  Those alternatives, the analytic
+   kernel bounds, frequency \(\ell=0\) integrals, and signed
    Ramanujan evaluation required to make (14) its actual decomposition
    remain absent.
 3. Route 4 kills the one-shot arbitrary-coefficient class
    \(\mathcal W_1\).  The coefficient-sensitive `(WG-HB)` estimate
    would close with the explicit net saving \(7/400\) under (25), but the
-   repository lacks the smooth Heath--Brown identification and analytic
-   kernel estimates needed to apply such a theorem to the actual block.
+   repository lacks a surviving smooth Heath--Brown identification and
+   analytic kernel estimates needed to apply such a theorem to the actual
+   block.  The formerly claimed fixed asymmetric literal-slot identification
+   is not available: `HBToBBLRSmoothGrouping.no_asymmetric_literal_grouping`
+   proves its exact obstruction below exponent cushion \(1/10\).
    This is the terminal A1 blocker;
    `signedPair_traceGrade_lt_3_2` is not discharged.
