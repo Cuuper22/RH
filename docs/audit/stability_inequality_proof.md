@@ -184,3 +184,16 @@ The stability inequality is algebraically valid under assumptions (1)--(3).
 Its proof uses only spectral positive/negative parts, Weyl and Cauchy
 interlacing, and the exact nonnegative slack (13).  It does not depend on the
 R1a Gabor nesting construction.
+
+## Machine verification
+
+The argument is formalized in `RH/Zeta85/Stability.lean`.  The
+headline `RH.Zeta85.stability_inequality` is equation (4);
+`stability_inequality_isometricCompression` and
+`stability_inequality_principalCompression` give equation (5).
+
+The file proves the two interlacing inputs from threshold-count and rank
+arguments rather than taking them as fields.  Its five public stability and
+compression headlines have dependency output
+`[propext, Classical.choice, Quot.sound]`, checked on every CI run by
+`comparator/PrintAxioms/Stability.lean`.

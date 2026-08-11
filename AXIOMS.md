@@ -59,6 +59,14 @@ the R1a principal-block bridge, complex Poisson and \(k=3,4\) finite-grid
 estimates, and the required simultaneous height-smoothing limit.  The
 existing headline dependency lists therefore remain exact.
 
+Phase B-1 is discharged without an input field.
+`RH/Zeta85/Stability.lean` proves the exact quartic stability bound,
+its isometric-compression form, and its principal-compression form from
+finite-dimensional hypotheses alone.  No analytic assumption is imported
+and no legacy hypothesis is used.  The dedicated CI audit
+`comparator/PrintAxioms/Stability.lean` checks the standard dependency set
+verbatim.
+
 ---
 
 ## 1. `#print axioms` — verbatim
@@ -160,6 +168,11 @@ delegates to) are identical.
 'RH.Zeta85.LogBudget.fixed_modulus_weil_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.LogBudget.power_beats_log' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.Exponents.bblr_blackbox_ceiling' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.stability_inequality' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.tailExcessSq_isometricCompression_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.tailExcessSq_principalCompression_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.stability_inequality_isometricCompression' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.stability_inequality_principalCompression' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ---

@@ -16,6 +16,22 @@ actual_zeta85() {
 
 diff -u <(expected_zeta85) <(actual_zeta85)
 
+expected_stability() {
+  cat <<'EOF'
+'RH.Zeta85.stability_inequality' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.tailExcessSq_isometricCompression_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.tailExcessSq_principalCompression_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.stability_inequality_isometricCompression' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.stability_inequality_principalCompression' depends on axioms: [propext, Classical.choice, Quot.sound]
+EOF
+}
+
+actual_stability() {
+  lake env lean comparator/PrintAxioms/Stability.lean 2>&1
+}
+
+diff -u <(expected_stability) <(actual_stability)
+
 for audit in \
   comparator/PrintAxioms.lean \
   comparator/PrintAxioms/Multiplicity.lean \

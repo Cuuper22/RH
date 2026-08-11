@@ -275,3 +275,24 @@ This is a source-and-derivation audit, not a Lean discharge.  It adds no
 declaration, axiom, or `Inputs95` field.  The nine remaining formal
 bridges are listed verbatim in `FINDINGS.md` §16 and
 `docs/audit/rs_reduction.md` §9.
+
+## 14. B-1 stability proof
+
+`RH/Zeta85/Stability.lean` is imported by
+`RH/Zeta85/Main.lean`.  The CI build target
+`lake build Zeta23 RH.Zeta85.Main Solution.Zeta85` therefore checks
+the full stability module.
+
+`comparator/PrintAxioms/Stability.lean` prints the five public
+stability and compression headlines.  `verify/check_axioms.sh`
+performs an exact diff against:
+
+```text
+[propext, Classical.choice, Quot.sound]
+```
+
+for each theorem.  The source scan also covers the new module and rejects
+`sorry` or `admit`.  No new field or primitive declaration is
+introduced.  The GitHub workflow run attached to this milestone is the
+authoritative build in the current environment, where `lake` is not
+available on the shell path.

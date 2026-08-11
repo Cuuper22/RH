@@ -616,3 +616,43 @@ This derivation does not yet discharge B-2.  Its exact formal blockers are:
 
 No `Inputs95` field is added at this milestone because the formal
 objects in item 1 do not yet exist.  No rung status or dependency changes.
+
+---
+
+## 17. B-1 quartic stability inequality — discharged
+
+`RH/Zeta85/Stability.lean` proves the exact finite-dimensional
+statement from `docs/audit/stability_inequality_proof.md`.  For
+\(G=P+Q\), with \(P\succeq0\),
+\(\operatorname{rank}P\le s\), \(\operatorname{tr}P\le s\),
+\(n_+(Q)\le b\), \(s+2b\le N\),
+\(\operatorname{tr}G=N\), and
+\(\lVert G\rVert_F^2\le DN\), it proves
+
+\[
+ \sum_{i>b}(\lambda_i(G)-1)_+^2\le s-(2-D)N.
+\]
+
+The formal proof constructs rather than assumes both interlacing steps:
+
+- a threshold-count rank-update theorem for adding a positive-semidefinite
+  matrix, yielding the rank-\(b\) Weyl inequality; and
+- a threshold-count hard-Sylvester theorem for isometric compressions,
+  yielding Cauchy interlacing and the principal-compression bound.
+
+It then formalizes the scalar positive-excess estimate, the bound
+\(n_+(P-Q_-)\le\operatorname{rank}P\), and the exact nonnegative slack
+decomposition using
+\(\operatorname{tr}(PQ_+)\ge0\) and the rank--trace square inequality.
+The public theorems
+`stability_inequality`,
+`tailExcessSq_isometricCompression_le`,
+`tailExcessSq_principalCompression_le`,
+`stability_inequality_isometricCompression`, and
+`stability_inequality_principalCompression` introduce no field and
+depend only on `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+This discharges the stability inequality only.  It does not supply the R1a
+principal block to which the compression theorem would be applied, so the
+quartic rung statuses remain unchanged.
