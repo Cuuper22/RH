@@ -990,3 +990,58 @@ The audit makes the Poisson zero mode power-safe but does not prove
 source-identification/recombination identity, and the required correlated
 estimate remain open.  No A1 field is discharged and no frozen rung status
 changes.
+
+## 31. A1 SQ4 finite Gauss-transform and inversion gates
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.SQ4GaussSquareTransform RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/SQ4GaussSquareTransform.lean
+python3 verify/a1_sq4_gauss_square_transform.py
+diff -u verify/a1_sq4_gauss_square_transform.out \
+  <(python3 verify/a1_sq4_gauss_square_transform.py)
+bash verify/check_axioms.sh
+```
+
+`SQ4GaussSquareTransform.lean` proves six exact finite-algebra results:
+the abstract correlation transform; the product of two generalized shifted
+Gauss sums for arbitrary residues; the unit-shift scaling identity; its
+Gauss-square specialization; full Dirichlet-character Fourier inversion
+for every positive modulus, including composite moduli; and the exact
+Kloosterman-kernel character inversion.  It states no complete-sum bound,
+primitivity assumption, CRT recombination, analytic moment, `(SQ4-HB)`, or
+placeholder.
+
+The dedicated printer selects those six theorems and is included in the
+generic standard-three loop in `verify/check_axioms.sh`.  Every normalized
+line is exactly `[propext, Classical.choice, Quot.sound]`.
+`RH.Zeta85.Main` imports the module.  The targeted build, Main build,
+printer, independent-output diff, full axiom gate, source scans, and
+`git diff --check` all exit zero.
+
+The independent `fractions.Fraction` verifier reconstructs the source
+scales, the completion exponent \(-43/100\), the exact pre-completion
+`(SQ4-HB)` target \(48/25\), the weaker literal target \(209/100\), and
+the coefficient-blind pre-completion output \(121/50\).  The latter
+misses the two targets by exactly \(1/2\) and \(33/100\).  It also
+records the raw two-long-slot logarithmic exponent \(2\).  These are
+power comparisons only, not analytic estimates.
+
+The exact artifact hashes are:
+
+```text
+1c58791ca5d3f2f2879c6e5e6ae60ebb3b9efd9b1f9c0ae90ae1c73aa72dc3e5  RH/Zeta85/Discharge/SQ4GaussSquareTransform.lean
+99359bb5bc9cd5de16edac3cf369deed8def95e8b4129dd18dae8ef58d8e2db2  comparator/PrintAxioms/SQ4GaussSquareTransform.lean
+03a629e8e1c522c8f84766b4f06e49d9ef5fb8154fa5564d617eb545533a1dac  docs/audit/sq4_gauss_square_transform.md
+387225f5f613fcf79be7412f308f2859b255eefade6237ed2ddfd3432e337981  verify/a1_sq4_gauss_square_transform.py
+89168a2503baea412b3bc96b465ff7f7335ac700f41e23ddbe6190cb63d718d0  verify/a1_sq4_gauss_square_transform.out
+```
+
+The exact unresolved analytic object is equation (14) of
+`docs/audit/sq4_gauss_square_transform.md`.  It retains all four Möbius
+factors, the generalized shifted Gauss products on every nonunit
+conductor/gcd stratum, and the varying factorized composite modulus before
+coefficient-blind Cauchy.  The required bound and the separate smooth
+source-identification/recombination identity remain unproved.  No A1 field
+is discharged and no frozen rung status changes.

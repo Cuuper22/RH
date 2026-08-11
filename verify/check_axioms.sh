@@ -87,6 +87,7 @@ for audit in \
   comparator/PrintAxioms/ActualScaleBBLR.lean \
   comparator/PrintAxioms/PreMajorantDI.lean \
   comparator/PrintAxioms/SQ4SimultaneousRoutes.lean \
+  comparator/PrintAxioms/SQ4GaussSquareTransform.lean \
   comparator/PrintAxioms/AliasRankObstruction.lean \
   comparator/PrintAxioms/BBLRGCDAllocation.lean \
   comparator/PrintAxioms/EtaClosure.lean \

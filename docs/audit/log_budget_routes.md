@@ -672,6 +672,44 @@ or geometry-changing trace formula bounding (33) is supplied.  Thus neither
 the analytic `(SQ4-HB)` estimate nor the separate smooth
 source-identification/recombination statement is discharged.
 
+### Exact finite Gauss transform; signed level moment open
+
+`docs/audit/sq4_gauss_square_transform.md` and
+`RH/Zeta85/Discharge/SQ4GaussSquareTransform.lean` now prove the exact
+multiplicative transform of (33).  For every positive modulus \(p\),
+including composite moduli, and arbitrary residue classes \(k,r\),
+
+\[
+ \sum_{v\bmod p}^{*}\chi(v)^{-1}S(k\bar v,r;p)
+ =G_p(\chi;k)G_p(\chi;r).
+\]
+
+Full Dirichlet-character inversion is also proved.  On the unit stratum
+\((kr,p)=1\) the product is exactly
+\(\chi(kr)^{-1}G_p(\chi;1)^2\), without a primitivity assumption.
+This specialization is not valid on the full nonzero family: \(k\ne0\)
+and \(|k|<p\) do not imply \((k,p)=1\), and \(r\) may share factors
+with \(p\).  Imprimitive characters retain conductor/gcd conditions.
+Moreover \(p=u_1u_2m\) is not a coprime factorization, so any CRT
+continuation must stratify prime powers and shared gcds before localizing.
+
+With \(\mathfrak M_4=(P/M)\mathcal Z_{33}^{\rm nz}\), the exact
+pre-completion analytic target sufficient for `(SQ4-HB)` is
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}.
+\]
+
+Restoring \(M/P=T^{-43/100}\) gives \(149/100+\varepsilon\).
+The coefficient-blind character chain has pre-completion exponent
+\(121/50\), exceeding this target by exactly \(1/2\).  This is a
+method-class comparison, not a lower bound for the source moment.  The
+remaining estimate is equation (14) of the dedicated audit: it retains all
+four Möbius factors, the Gauss-square phase on unit strata, the generalized
+shifted products on nonunit conductor/gcd strata, and the varying
+factorized composite modulus before Cauchy.  It is not proved or assumed.
+
 ### Canonical BBLR collapse proved; smooth Heath--Brown identification missing
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` now constructs the exact sharp-cutoff
@@ -960,8 +998,12 @@ as follows:
    structurally inapplicable.  Poisson makes the zero mode power-safe, but
    leaves the exact nonzero family (33), with the explicit truncation loss
    \(T^{\eta+\varepsilon}\) for \(0<\eta<2/5\).  The terminal A1 blocker
-   is therefore a source-identified correlated estimate for (33), or a
-   proved geometry-changing completion/reindex, together with the missing
-   smooth source-identification/recombination identity;
+   on the granted source-shaped block is therefore the signed
+   generalized-Gauss moment (14) of
+   `docs/audit/sq4_gauss_square_transform.md`, bounded at pre-completion
+   exponent \(48/25+\varepsilon\), or another correlated estimate for
+   (33), or a proved geometry-changing completion/reindex.  A full A1
+   discharge additionally requires the missing smooth
+   source-identification/recombination identity;
    `signedPair_traceGrade_lt_3_2` is not discharged, and no frozen rung
    status changes.

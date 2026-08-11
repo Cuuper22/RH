@@ -1572,3 +1572,76 @@ such estimate is proved or assumed.  The smooth source-identification and
 recombination gap also remains.  Consequently no A1 field is discharged,
 `signedPair_traceGrade_lt_3_2` remains open, and no frozen rung or README
 status changes.
+
+---
+
+## 34. A1 SQ4 finite Gauss transform — exact algebra discharged; signed level moment open
+
+`RH/Zeta85/Discharge/SQ4GaussSquareTransform.lean` proves, for a
+commutative ring with finite unit group, the exact correlation change of
+variables
+
+\[
+ (v,z)\longmapsto(v^{-1}z,z^{-1}).
+\]
+
+For every positive integer modulus \(q\), including composite \(q\), this
+specializes to
+
+\[
+ \sum_{v\bmod q}^{*}\chi(v)^{-1}S(k\bar v,r;q)
+ =G_q(\chi;k)G_q(\chi;r),
+\]
+
+for arbitrary residue classes \(k,r\bmod q\).  The module also proves the
+full Dirichlet-character inversion
+
+\[
+ S(k\bar v,r;q)={1\over\varphi(q)}
+ \sum_{\chi\bmod q}\chi(v)G_q(\chi;k)G_q(\chi;r).
+\]
+
+If \(k,r\) are units, the shifted product is exactly
+\(\chi(kr)^{-1}G_q(\chi;1)^2\); the scaling step does not require
+primitivity.  This is a Gauss square, not
+\(G_q(\chi;1)G_q(\bar\chi;1)\), so ordinary character orthogonality does not
+erase its phase.
+
+The unit specialization cannot replace the full source family.  The
+Poisson condition \(k\ne0\), even with \(|k|<p\), does not imply
+\((k,p)=1\), and the numerator \(r\) may also share factors with \(p\).
+Imprimitive characters carry conductor- and gcd-dependent generalized
+Gauss sums.  Moreover, the literal modulus \(p=u_1u_2m\) has shared prime
+factors between its displayed variables, so a local CRT continuation first
+requires a prime-power and shared-gcd stratification; directly treating the
+three factors as coprime would delete source strata.
+
+Writing
+
+\[
+ \mathfrak M_4(T,x)={P\over M}\mathcal Z_{33}^{\rm nz}(T,x),
+ \qquad {P\over M}=T^{43/100},
+\]
+
+the exact remaining estimate sufficient for `(SQ4-HB)` is
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}.
+\]
+
+Its character representation is equation (14) of
+`docs/audit/sq4_gauss_square_transform.md`: it retains the two outer
+Möbius factors, the two Möbius factors inside the character coefficient,
+the varying factorized composite modulus, and every nonunit
+conductor/gcd stratum before Cauchy.  Restoring the completion exponent
+\(-43/100\) yields \(149/100+\varepsilon\).  The previously audited
+coefficient-blind chain has pre-completion exponent \(121/50\), missing this
+target by exactly \(1/2\); this comparison is not a lower bound for the
+source moment.
+
+The finite transform and inversion are therefore discharged, but the
+signed analytic moment and smooth source-identification/recombination
+bridge are not.  No A1 field is discharged,
+`signedPair_traceGrade_lt_3_2` remains open, and no frozen rung or README
+status changes.

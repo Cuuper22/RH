@@ -1,0 +1,8 @@
+import RH.Zeta85.Discharge.SQ4GaussSquareTransform
+
+#print axioms RH.Zeta85.SQ4GaussSquareTransform.correlation_transform_factorization
+#print axioms RH.Zeta85.SQ4GaussSquareTransform.kloosterman_transform_eq_gauss_product
+#print axioms RH.Zeta85.SQ4GaussSquareTransform.unitGaussSum_unit_scale
+#print axioms RH.Zeta85.SQ4GaussSquareTransform.kloosterman_transform_eq_gauss_square
+#print axioms RH.Zeta85.SQ4GaussSquareTransform.dirichlet_fourier_inversion
+#print axioms RH.Zeta85.SQ4GaussSquareTransform.kloosterman_kernel_character_inversion

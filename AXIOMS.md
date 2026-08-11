@@ -174,6 +174,22 @@ transformed family (33) in `docs/audit/sq4_simultaneous_routes.md` is the
 exact survivor.  No A1 field is discharged and no frozen rung status
 changes.
 
+`RH/Zeta85/Discharge/SQ4GaussSquareTransform.lean` now proves the exact
+finite multiplicative transform of that survivor, without introducing a
+premise.  For every positive modulus, including composite moduli, the
+inverse-character Fourier transform of
+\(S(k\bar v,r;q)\) is the product of the two generalized shifted Gauss sums;
+Dirichlet-character inversion is also proved.  Only when both shifted
+arguments are units does this product specialize to
+\(\chi(kr)^{-1}G_q(\chi;1)^2\).  Thus nonzero \(k,r\) do not justify a
+full-family Gauss-square replacement, and the actual modulus
+\(p=u_1u_2m\) still requires conductor, prime-power, and shared-gcd strata.
+The exact pre-completion analytic target is the signed moment (14) in
+`docs/audit/sq4_gauss_square_transform.md`, bounded by
+\(T^{48/25+\varepsilon}\) before coefficient-blind Cauchy.  This analytic
+estimate and the separate smooth source identification remain unproved; no
+A1 field is discharged and no frozen rung status changes.
+
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
 unconditional smoothed Theorem 3.1 at \(m=1\), with a gauge-fixed zero-sum
@@ -519,6 +535,12 @@ delegates to) are identical.
 'RH.Zeta85.SQ4SimultaneousRoutes.poisson_weil_triangle_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4SimultaneousRoutes.poisson_weil_triangle_integrated_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4SimultaneousRoutes.route_log_exponents_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4GaussSquareTransform.correlation_transform_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4GaussSquareTransform.kloosterman_transform_eq_gauss_product' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4GaussSquareTransform.unitGaussSum_unit_scale' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4GaussSquareTransform.kloosterman_transform_eq_gauss_square' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4GaussSquareTransform.dirichlet_fourier_inversion' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4GaussSquareTransform.kloosterman_kernel_character_inversion' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -571,6 +593,14 @@ three dependencies.  They prove only rational scale, excess, Poisson-profile,
 and normalized/raw logarithmic bookkeeping.  They do not assert the large
 sieves, Ramanujan or Weil estimates, Poisson summation, a Kuznetsov
 application, `(SQ4-HB)`, or a bound for the surviving nonzero family (33).
+
+The six `SQ4GaussSquareTransform` lines are the exact normalized output of
+`comparator/PrintAxioms/SQ4GaussSquareTransform.lean`; all have the standard
+three dependencies.  They prove the finite transform, its unit-stratum
+specialization, and Dirichlet-character inversion only.  They do not assert
+the signed generalized-Gauss moment bound, any primitive or imprimitive
+Gauss-sum estimate, a CRT recombination of the literal source factors,
+`(SQ4-HB)`, or the smooth source-identification bridge.
 
 ### 1.5 Conditional quartic headlines
 
