@@ -418,17 +418,23 @@ explicit absolute normalization loss \(10w/(\sigma\ell)\), relative
 full-energy loss \(10w/(A\sigma\ell)\), and intrinsic block-mean loss
 \(2w/(A\mu\ell)\).
 Overlapping ramps can satisfy (1), but they reintroduce precisely the
-nonzero terms in (4).  A construction outside both killed classes, with a
-new coefficient count and trace normalization proved from its actual grids,
-is the remaining R1a dependency.
+nonzero terms in (4).  This audit originally left a construction outside
+both killed classes as the remaining R1a dependency.  The later
+`r1a_allocation_nogo.md` audit closes that possibility inside the current
+`PrincipalCyclicBlock` interface for both exact frozen families.
 
 ## Consequence for the program
 
 The contradictions indict the claimed construction and normalization
 premises, not the stability algebra.  A2.1 and A2.2 are both closed as exact
-method classes; R1a remains open only through an architecture outside them.
-The nested-quartic numerical rungs must remain conditional until a valid
-construction supplies both:
+method classes.  The stronger allocation-capacity theorem now proves that
+the current `PrincipalCyclicBlock` premise itself is uninhabited for
+`Family14999` and `Family19999`, regardless of lattice commensurability,
+phases, channel count, or oversampling.  The nested-quartic theorem
+declarations remain conditional implications, but no valid construction can
+supply their present R1a premise.  A replacement architecture must change at
+least one consumed energy/profile/translated-product semantic and then
+rederive both:
 
 - the exact or asymptotically controlled principal compression; and
 - the cyclic block symbol from which the moments (2) follow.

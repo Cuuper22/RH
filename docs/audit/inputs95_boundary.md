@@ -1,7 +1,8 @@
 # Phase-C `Inputs95` boundary
 
-Status: **interface and conditional transfer proved; no analytic instance and
-no unconditional quartic headline**.
+Status: **interface and conditional transfer proved; the current R1a premise
+is uninhabited for both frozen family types; no unconditional quartic
+headline**.
 
 This note records exactly what `RH/Zeta85/Inputs95.lean` defines and what it
 does not prove.  The purpose is to keep every frozen rung attached to one
@@ -61,7 +62,7 @@ The top-level bundle has eleven fields:
 | `trace14999`, `trace19999` | trace and Frobenius limits for the displayed `A` | open pair-to-matrix bridge |
 | `zeroSide14999`, `zeroSide19999` | actual `A=P+Q`, rank, trace-cap, and positive-index bounds | open new-window zero side |
 | `rs1996` | published smoothed RS Theorem 3.1, `m=1`, gauge fixed | stated field; no instance |
-| `r1a14999`, `r1a19999` | literal windows, critical grids, full-energy reconstruction, real aliases, corrected allocation, and translated products | open; requested construction classes killed |
+| `r1a14999`, `r1a19999` | literal windows, critical grids, full-energy reconstruction, real aliases, corrected allocation, and translated products | formally uninhabited for the exact frozen family types under the current interface |
 | `r1b14999`, `r1b19999` | complex alias identity on actual enlarged-window zeros and first four block-moment limits | open RS/grid passage |
 
 The pair fields do not imply the trace fields in the current code.  The
@@ -80,7 +81,7 @@ the normalized one- and two-pair formula.  This removes no field here:
 degree-three/four finite-grid/end estimates, and identification with the
 actual principal block.
 
-## 4. Corrected R1a normalization
+## 4. Corrected R1a normalization and capacity obstruction
 
 The distinguished window has period `mu * log(T/2pi)`.  Its energy fraction
 in the full system must tend to `mu`, not `mu/sigma`, for the literal
@@ -89,7 +90,7 @@ therefore requires:
 
 * positive distinguished energy;
 * a nonnegative, supported, mean-one local profile;
-* pointwise full-energy reconstruction by all windows; and
+* almost-everywhere full-energy reconstruction by all windows; and
 * integrable, locally uniform `L1` convergence of every translated product
   through degree four to the exact top hat of fill `p`.
 
@@ -97,10 +98,21 @@ The translated-product integrability clause prevents Mathlib's totalized
 integral from making a nonintegrable error estimate vacuous.  No scalar
 `L1` convergence is used to infer a fourth moment.
 
+The companion audit `docs/audit/r1a_allocation_nogo.md` now proves that these
+requirements are mutually incompatible for both exact family types.  The
+degree-one translated-product limit puts at least \(99/100\) of the
+distinguished normalized mass in the active top-hat cell, while the energy
+ratio eventually exceeds \(2/5\).  Almost-everywhere reconstruction and the
+frozen profile cap give the opposite finite capacity bound.  Exact rational
+arithmetic closes the contradiction.  The resulting Lean theorems are
+`R1aAllocationNoGo.no_principal14999` and `no_principal19999`.
+
 ## 5. Honest status
 
-The module constructs no `Inputs95` value.  It proves no pair trace, no
-R1a window system, and no RS-to-grid passage.  The separate proved modules
+The module constructs no `Inputs95` value.  More strongly, the allocation
+no-go proves that no R1a window system can satisfy the current
+`PrincipalCyclicBlock` interface for either exact frozen family type.  It
+proves no pair trace or RS-to-grid passage.  The separate proved modules
 `Discharge/QuarticTransfer.lean` and `QuarticMain.lean` now assemble dyadic
 and cumulative frozen-rung statements, but each theorem takes exactly four
 structures for its displayed family:
@@ -110,7 +122,7 @@ structures for its displayed family:
 * `PrincipalCyclicBlock`; and
 * `BlockMomentLimits`.
 
-Thus `rung8657` and `rung8686` are conditional on those four structures for
+Thus `rung8657` and `rung8686` are conditional implications on those four structures for
 `Family14999`, while `rung9383` and `rung9506` are conditional on them for
 `Family19999`; each has a `_cumulative` companion.  R-8657 is a monotone
 consequence of the strict R-8686 branch.  R-9383 is a monotone consequence of
@@ -120,5 +132,9 @@ its exact endpoint lies below the frozen decimal.
 `PairTraceGrade95` and `RS1996ZetaInputs` are upstream proposed routes for
 proving `FullTraceLimits` and `BlockMomentLimits`; neither is a premise of the
 compiled headlines and neither is silently substituted for the required
-structure.  Since no instance of the four structures is constructed, all
-four frozen rungs remain conditional, not unconditional.
+structure.  Since the required `PrincipalCyclicBlock` structure is formally
+uninhabited for both displayed family types, these theorem declarations have
+no valid current-interface construction.  They remain conditional
+implications, not unconditional headlines.  Any replacement must change at
+least one consumed energy/profile/translated-product semantic and rederive
+the affected trace and moment adapters.

@@ -1851,3 +1851,49 @@ common height smoothing, exact \(\log T\) normalization, complex Poisson,
 and the degree-three/four finite-grid and end estimates remain open.  No
 `BlockMomentLimits` instance is constructed, B-2 is not discharged, and no
 frozen rung or README status changes.
+
+---
+
+## 39. A2 R1a allocation capacity — current principal-block interface proved uninhabitable
+
+`RH/Zeta85/Discharge/R1aAllocationNoGo.lean` derives a contradiction from
+the actual `PrincipalCyclicBlock` fields, with no common-lattice or alias-free
+assumption.  At one sufficiently large height, almost-everywhere full-energy
+reconstruction gives
+
+\[
+ W_T=\sigma\ell(T)A,
+\]
+
+the energy-ratio limit gives \(E_T>(2/5)W_T\), and the degree-one,
+zero-shift translated-product clause gives active local mass at least
+\(99/100\).  Exact local-profile scaling and the frozen central profile cap
+give
+
+\[
+ \operatorname{mass}_T E_T\leq \mu\ell(T)p\,v(0).
+\]
+
+These inequalities contradict the exact rational gaps
+
+\[
+ \mu p v(0)<\frac{99}{100}\frac25\sigma A
+\]
+
+for both frozen families.  Lean therefore proves, for arbitrary `Z` and
+every family value,
+
+```text
+F : Family14999 Z  ->  not PrincipalCyclicBlock F
+F : Family19999 Z  ->  not PrincipalCyclicBlock F.
+```
+
+The compiled R-8657, R-8686, R-9383, and R-9506 theorem declarations are
+unchanged conditional implications, but their exact current
+`PrincipalCyclicBlock` premise cannot be instantiated.  Consequently there
+is no valid construction for the frozen family types under the current
+interface.  Changing periods, lattice commensurability, phases, channel
+count, or oversampling cannot help.  A surviving redesign must change at
+least one consumed energy/profile/translated-product semantic and reprove
+the affected principal-compression, trace-normalization, and block-moment
+steps.  No frozen constant or theorem statement changes.

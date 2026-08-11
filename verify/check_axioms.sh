@@ -101,6 +101,7 @@ for audit in \
   comparator/PrintAxioms/QuarticTransfer.lean \
   comparator/PrintAxioms/QuarticWindowWitnesses.lean \
   comparator/PrintAxioms/R9383ExactEndpoint.lean \
+  comparator/PrintAxioms/R1aAllocationNoGo.lean \
   comparator/PrintAxioms/RobustStability.lean \
   comparator/PrintAxioms/RSPairIntegrals.lean \
   comparator/PrintAxioms/RSReduction.lean \

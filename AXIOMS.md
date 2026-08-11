@@ -334,7 +334,7 @@ only `[propext, Classical.choice, Quot.sound]`.  The transcendental
 nonvanishing assertions for the two terminal Euler profiles remain certified
 by `verify/a2_1_tdac_rank.py`, not by this algebraic module.
 `PrincipalCyclicBlock` now names the exact replacement obligation, including
-literal windows, critical grids, pointwise energy reconstruction, a mean-one
+literal windows, critical grids, almost-everywhere energy reconstruction, a mean-one
 distinguished profile, and integrable translated-product limits; no instance
 is constructed.  The frozen quartic rungs therefore remain conditional on
 that structure and the other three exact per-support premises.
@@ -356,6 +356,21 @@ with Mathlib integrals and the RS specialization remains unformalized.
 Every headline printed by
 comparator/PrintAxioms/AliasFallback.lean depends exactly on
 [propext, Classical.choice, Quot.sound].
+
+The terminal R1a status is now stronger.  The exact finite capacity theorem
+in `RH/Zeta85/Discharge/R1aAllocationCapacity.lean`, together with the
+measure-theoretic derivation in `R1aAllocationNoGo.lean`, proves
+`¬ PrincipalCyclicBlock F` for every `F : Family14999 Z` and every
+`F : Family19999 Z`.  It uses only the current energy reconstruction,
+distinguished-period and energy-ratio normalization, the degree-one
+translated-product limit, and elementary window integrability.  It assumes
+no common lattice, alias cancellation, grid count, or block dimension.  Thus
+the compiled quartic implications retain their theorem statements and four
+explicit premises, but one premise is formally uninhabited for each exact
+frozen family type.  No valid current-interface construction exists; a new
+route must change at least one consumed energy/profile/translated-product
+semantic and then rederive the trace and moment adapters.  No frozen constant
+or theorem statement changes.
 
 ---
 
@@ -480,6 +495,13 @@ delegates to) are identical.
 'RH.Zeta85.TrimmedMoment.Terminal9506.density_gt_frozen' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.TrimmedMoment.Terminal8686.density_gt_frozen' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.R9383ExactEndpoint.endpoint_box_separation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.R1aAllocationCapacity.v8686_active_le_center' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.R1aAllocationCapacity.v9506_active_le_center' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.R1aAllocationCapacity.no_finite_capacity_configuration' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.R1aAllocationCapacity.family14999_capacity_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.R1aAllocationCapacity.family19999_capacity_gap' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.R1aAllocationNoGo.no_principal14999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.R1aAllocationNoGo.no_principal19999' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.EtaClosure.preliminary_with_log_is_o' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.EtaClosure.balanced_j2_K3_legal' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.EtaClosure.balanced_j2_no_asymmetric_M1' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -729,6 +751,14 @@ alias summability or cancellation, cyclic-symbol admissibility, the
 published-theorem application, common height smoothing, or the higher
 finite-grid/end estimates.
 
+The seven `R1aAllocationNoGo` printer lines are the exact normalized output
+of `comparator/PrintAxioms/R1aAllocationNoGo.lean`; all have the standard
+three dependencies.  They prove the two profile caps, the abstract capacity
+contradiction, both exact rational gaps, and uninhabitability of
+`PrincipalCyclicBlock` for `Family14999` and `Family19999`.  They introduce
+no replacement family, change no frozen constant, and do not alter the
+conditional quartic theorem statements.
+
 The 15 `PreMajorantDI` lines are the exact normalized output of
 `comparator/PrintAxioms/PreMajorantDI.lean`.  They audit only rational
 exponent arithmetic and the finite \(\mathbb Z/5\mathbb Z\) mismatch.  They
@@ -796,7 +826,10 @@ cumulative theorem names:
 This standard-three output means that the transfer and assembly add no Lean
 axiom.  It does **not** make the results unconditional: every theorem takes
 exactly `FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, and
-`BlockMomentLimits` for its support family.  The 21 public transfer theorems
+`BlockMomentLimits` for its support family.  The allocation no-go now proves
+that `PrincipalCyclicBlock` is uninhabited for both exact support families,
+so these declarations remain valid implications but have no valid
+current-interface construction.  The 21 public transfer theorems
 in `comparator/PrintAxioms/QuarticTransfer.lean` have the same standard-three
 output.  The exact independent replay is `verify/quartic_transfer.py` with
 committed hashes:

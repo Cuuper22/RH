@@ -1288,3 +1288,55 @@ adapter.  `UncenteredRSBlockLimits`, both complex-alias clauses, and the
 underlying analytic RS-to-actual-block derivation remain unproved.  No
 `BlockMomentLimits` instance is constructed and no frozen rung status
 changes.
+
+## 36. A2 R1a allocation-capacity no-go gate
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.R1aAllocationCapacity \
+  RH.Zeta85.Discharge.R1aAllocationNoGo RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/R1aAllocationNoGo.lean
+python3 verify/r1a_allocation_nogo.py
+diff -u verify/r1a_allocation_nogo.out \
+  <(python3 verify/r1a_allocation_nogo.py)
+bash verify/check_axioms.sh
+```
+
+The capacity module proves the two exact active-cell profile caps, an
+abstract finite contradiction, and both frozen rational gaps.  The NoGo
+module derives every finite hypothesis from the current
+`PrincipalCyclicBlock` fields using the almost-everywhere reconstruction
+identity, exact full-profile scaling, the distinguished energy-ratio limit,
+and the degree-one zero-shift translated-product limit.  It proves
+`no_principal14999` and `no_principal19999` for arbitrary `ZeroConfig` and
+every value of the corresponding exact family type.
+
+The dedicated printer selects seven public theorems and is included in the
+generic standard-three loop in `verify/check_axioms.sh`.  Every normalized
+line is exactly `[propext, Classical.choice, Quot.sound]`.
+`RH.Zeta85.Main` imports the module.  The targeted/Main build, printer,
+exact-output diff, full axiom gate, source scans, and `git diff --check` all
+exit zero.
+
+The independent verifier copies the raw polynomial and frozen family
+constants, then reconstructs both profile integrals, active edges,
+Bernstein-basis monotonicity certificates, capacity sides, and strict gaps
+with integer arithmetic and `fractions.Fraction`.  The gaps are derived, not
+hardcoded.
+
+The exact artifact hashes are:
+
+```text
+c5d5d0f8fd939a97477189ceedeef0d3af112894b246bbe44fe377cad393c6d2  RH/Zeta85/Discharge/R1aAllocationCapacity.lean
+7a53acb3a61e1af357a10dab696e70a472b321400a325ca553d423b33c5737db  RH/Zeta85/Discharge/R1aAllocationNoGo.lean
+368a1907abcbcb0ba6c874ddb218fa3df4e9663dfc0352dee4fef9bb3ae1953e  comparator/PrintAxioms/R1aAllocationNoGo.lean
+03454e0c3ba7dee4037e658836299459c4a91c03ea1f7921d51a6421a209f4fc  docs/audit/r1a_allocation_nogo.md
+866b8275b81b6bc49ea63b2d6fb60a7df4335a0a45fcd13f206e6f95cda47143  verify/r1a_allocation_nogo.py
+ea2d1f902975651b6b23c58195568401f9e2f9e14bb72bc17be52ce525c1fc96  verify/r1a_allocation_nogo.out
+```
+
+This gate does not change any frozen theorem statement or constant.  The
+quartic theorem declarations remain conditional implications, but their
+current `PrincipalCyclicBlock` premise is formally uninhabited for both
+exact family types.  No valid current-interface construction exists.
