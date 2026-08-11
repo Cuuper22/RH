@@ -234,6 +234,36 @@ is worse than the natural trace exponent `1 + η` by exactly `9/50`. -/
 theorem fixed_modulus_weil_excess :
     (2 * ((43 : ℝ) / 100) + 3 / 4) - (1 + 43 / 100) = 9 / 50 := by norm_num
 
+/-- The larger exponent in the proposed simultaneous quadratic-dispersion bound is below the
+natural `T^(143/100)` scale by exactly `7/200`. -/
+theorem wg_hb_candidate_saving :
+    (1 + (43 : ℝ) / 100) - (3 / 4 + 3 * (43 / 100) / 2) = 7 / 200 := by
+  norm_num
+
+/-- Reserving `ε = 7/400` in that candidate estimate leaves the explicit net saving `7/400`. -/
+theorem wg_hb_net_saving :
+    (1 + (43 : ℝ) / 100) - (3 / 4 + 3 * (43 / 100) / 2) - 7 / 400 = 7 / 400 := by
+  norm_num
+
+/-- The dominant Bettin--Chandee substitution exceeds the natural scale by `767/2000`. -/
+theorem bettin_chandee_excess :
+    (3627 : ℝ) / 2000 - 143 / 100 = 767 / 2000 := by norm_num
+
+/-- The first BBLR error at the endpoint exceeds the natural scale by `9/25`. -/
+theorem bblr_endpoint_first_excess :
+    (1 / 2 + 3 * ((43 : ℝ) / 100)) - (1 + 43 / 100) = 9 / 25 := by norm_num
+
+/-- The required length `q^(43/50)` lies above the Blomer--Pascadi equal-length range by
+`83/300` in the modulus exponent. -/
+theorem blomer_pascadi_range_excess :
+    (43 : ℝ) / 50 - 7 / 12 = 83 / 300 := by norm_num
+
+/-- Both Milićević--Qin--Wu length conditions fail at `M = N = q^(43/50)`. -/
+theorem mqw_range_excesses :
+    (12 / 5 : ℝ) * (43 / 50) - 3 / 2 = 141 / 250 ∧
+      2 * (43 / 50 : ℝ) - 5 / 4 = 47 / 100 := by
+  constructor <;> norm_num
+
 /-- Consequently, with `C ≥ 3`, both the generous threshold `C < 2` and the fully triangle-summed
 threshold `C < 0` are violated, and `budget_fails` / `budget_dyadic_fails` apply. -/
 theorem verdict {C : ℝ} (hC : 3 ≤ C) :

@@ -360,12 +360,153 @@ sufficient target, not a claimed estimate.  It is deliberately stated for
 the actual depth-four coefficients and smooth factor \(F_{q,\ell}\); an
 arbitrary divisor-bounded operator norm cannot supply it.
 
-**Route-4 verdict:** the isolated fixed-modulus Weil bound fails by the exact
-power \(T^{9/50}\).  The averaged target `(WG-HB)` would close the hole, but
-it is not supplied by the current Shiu or BBLR inputs.  Proving it requires
-simultaneous cancellation in the retained Möbius factorization and the
-\(h\)- or \(q\)-average; it cannot be obtained by completing one variable
-and summing the rest absolutely.
+### Quantitative sufficiency
+
+If a bound
+
+\[
+ |\mathcal R_j|\ll Y_jT^{-\delta}L^B
+\tag{23}
+\]
+
+holds uniformly on the \(O(L)\) prime scales, then
+
+\[
+ \sum_j\frac{T}{Y_j}|\mathcal R_j|
+ \ll T^{1-\delta}L^{B+1}=o(TL^2).
+\tag{24}
+\]
+
+The remaining height-kernel logarithm is therefore \(o(TL^3)\).  Thus every
+fixed \(\delta>0\), with every fixed explicit \(B\), is sufficient.
+
+The candidate simultaneous quadratic-dispersion estimate (CSQD) in
+`docs/run/12` has the proposed right side
+
+\[
+ T^{1/2+2\eta+\varepsilon}
+ +T^{3/4+3\eta/2+\varepsilon}.
+\tag{25}
+\]
+
+At \(\eta=43/100\), the two exponents are \(34/25\) and \(279/200\).
+The larger is below \(143/100\) by \(7/200\); choosing
+\(\varepsilon=7/400\) leaves the explicit net saving
+\(\delta=7/400\).  This verifies that the displayed CSQD would imply
+`(WG-HB)`; it does not prove CSQD.
+
+### The one-shot arbitrary-coefficient class
+
+Define \(\mathcal W_1\) to consist of arguments that, after exposing the
+\(h,a,m,q\) sum, do one of the following:
+
+1. replace progression or residue cells independently by size bounds;
+2. complete at most one variable, apply Weil, and sum the others by
+   triangle/Cauchy with divisor or \(L^2\) norms;
+3. collapse the variables into one arbitrary-coefficient trilinear
+   Kloosterman-fraction estimate; or
+4. apply one fixed-modulus arbitrary-coefficient bilinear Kloosterman
+   theorem.
+
+The class does not use two retained Heath--Brown/Möbius factors
+simultaneously and imposes no coefficient relation across \(q\).
+
+Independent cell estimates cannot give a fixed power saving.  For prime
+\(q\), \(2H<q\), and a fixed nonzero smooth \(w\), Parseval gives
+
+\[
+ \sum_{r\bmod q}|S_H(r/q)|^2
+ =q\sum_h|w(h/H)|^2\asymp qH.
+\tag{26}
+\]
+
+Because \(|S_H(0)|^2=O(H^2)=o(qH)\) and
+\(\max_r|S_H(r/q)|\ll H\), it follows that
+
+\[
+ \sum_{r\ne0}|S_H(r/q)|\gg q.
+\tag{27}
+\]
+
+The Shiu cell size is \(P/q\asymp H\).  The admissible independent-cell
+choice
+
+\[
+ A_{q,r}=H\,\overline{S_H(r/q)}/|S_H(r/q)|
+\]
+
+on nonzero cells aligns every phase and contributes \(\gg Hq\) per modulus,
+hence \(\gg HQ^2/\log Q\) over primes \(q\asymp Q\).  No fixed
+\(T^{-\delta}\), even with fixed logarithmic factors, follows from
+independent cell sizes.  This is not a counterexample to the actual
+factorized coefficients.
+
+The established arbitrary-coefficient theorems also miss:
+
+- [Bettin--Chandee, Theorem 1](https://arxiv.org/abs/1502.00769) has
+  variables \(A=H\), \(M=P\), \(N=Q\).  Even granting perfect separability
+  and that its extra front factor is \(O(1)\), for bounded coefficients the
+  product of the three \(L^2\) norms has exponent
+  \((HPQ)^{1/2}=P=T^{93/100}\), while \(AMN=P^2\).  Its two terms are
+
+  \[
+  P(P^2)^{7/20}P^{1/4}=T^{3627/2000},
+  \qquad
+  P(P^2)^{3/8}(HP)^{1/8}=T^{719/400}.
+  \tag{28}
+  \]
+
+  The larger exceeds \(T^{143/100}\) by \(T^{767/2000}\).
+
+- The valid all-modulus/Kuznetsov architecture is
+  [Bettin--Bui--Li--Radziwiłł, Proposition 3.1](https://arxiv.org/abs/1609.02539).
+  At \(A=B=H\), \(M=N=T\), its two cycle-5 errors have exponents
+  \(1/2+3\eta=179/100\) and
+  \(3/4+2\eta=161/100\), both above \(143/100\).
+  A direct Deshouillers--Iwaniec substitution after completing \(m\) is not
+  valid: it produces \(S(k,\ell h\bar a;q)\), whose index and coefficient
+  support vary with \(q\).  Reindexing \(\bar a\bmod q\) does not create the
+  fixed sequences required by Kuznetsov.
+
+Recent preprints do not enlarge this conclusion into a theorem about the
+actual coefficients:
+
+- [Blomer--Pascadi, Theorem 1.1](https://arxiv.org/abs/2607.24311)
+  is nontrivial for equal lengths only in
+  \(q^{13/28+\varepsilon}<N<q^{7/12-\varepsilon}\).
+  Here \(H=q^{43/50}\), exceeding the upper endpoint by \(83/300\).
+- [Milićević--Qin--Wu, Theorem 1.1](https://arxiv.org/abs/2511.07550)
+  requires \(M^{7/5}N<q^{3/2}\) and \(MN\le q^{5/4}\).
+  At \(M=N=H=q^{43/50}\), the left exponents are
+  \(258/125\) and \(43/25\), so both conditions fail.
+- [Wright, Theorem 2.1](https://arxiv.org/abs/2604.25177) improves the
+  Bettin--Chandee bound when the denominator has a useful fixed factor
+  \(R>1\).  The unavoidable \(d=1\) block has \(R=1\), where this mechanism
+  gives no improvement over the Bettin--Chandee class.
+
+### Missing coefficient object
+
+The actual depth-four route cannot yet be submitted to any of these
+theorems.  The repository lacks:
+
+- an explicit depth-four expansion of both von Mangoldt factors;
+- signed formulas and support/norm bounds for
+  \(c_p=\sum_{am=p}\alpha_a\beta_m\) and \(e_q\);
+- common \(d\)- and gcd bookkeeping across blocks;
+- the exact \(F_{q,\ell}(a,m)\), including separability and derivative
+  bounds required by a cited theorem; and
+- a pointwise equality between its zero mode and the singular-series
+  subtraction.
+
+**Route-4 verdict:** the exact class \(\mathcal W_1\) is finished and killed.
+Fixed-modulus completion already fails by \(T^{9/50}\); independent cells,
+Bettin--Chandee, and the valid BBLR/Kuznetsov architecture fail as quantified
+above, while the cited recent preprints are out of range or give no
+\(d=1\) improvement.  A genuinely coefficient-sensitive simultaneous
+\(a,m,h,q\) estimate remains sufficient, with net
+\(\delta=7/400\) under (25), but is neither proved nor disproved.  It is
+presently unstateable for the actual coefficients because the listed
+construction is absent.
 
 ## Route 5: evaluate the progression sums instead of bounding them
 
@@ -380,7 +521,7 @@ At the cycle-5 endpoint \(\eta=43/100\), suppressing the summable \(d\)- and
 \[
  P=T^{93/100},\qquad Q=T^{1/2},\qquad H=T^{43/100},
  \qquad P=HQ,
-\tag{23}
+\tag{29}
 \]
 
 so \(Q=P^{50/93}\) and \(\log P/\log Q=93/50\).  After a progression main
@@ -413,7 +554,7 @@ Nguyen's Theorem 3 states, for \(k\geq4\),
  \ll
  \left(D+X^{1-1/(6(k+2))}\right)
  X(\log X)^{k^2-1}.
-\tag{24}
+\tag{30}
 \]
 
 See [Nguyen, *Generalized divisor functions in arithmetic progressions: I*,
@@ -429,7 +570,7 @@ notation,
  \qquad
  \sum_{a=1}^{q}|E_x(q,a)|
  \ll x^{3/4+\varepsilon}q^{7/16}.
-\tag{25}
+\tag{31}
 \]
 
 See [Parry, *The distribution of \(d_4(n)\) in arithmetic progressions*,
@@ -442,7 +583,7 @@ by
 
 \[
  \frac{50}{93}-\frac{293}{584}=\frac{1951}{54312}>0.
-\tag{26}
+\tag{32}
 \]
 
 See [Wei--Xue--Zhang, *General divisor functions in arithmetic progressions
@@ -467,33 +608,33 @@ If \((\ell,q)=1\), \(H<q\), and \(w\) is supported on an interval of length
  &=q\sum_h|w(h/H)|^2
  \leq q(\lceil H\rceil+1).
 \end{aligned}
-\tag{27}
+\tag{33}
 \]
 
 The third line uses the support length \(<q\), so congruent supported
-integers are equal.  Combining (24) and (27) by Cauchy, even after replacing
+integers are equal.  Combining (30) and (33) by Cauchy, even after replacing
 the actual coefficients by \(d_4\), setting \(e_q=1\), and granting all
 needed smooth uniformity, produces
 
 \[
  QH^{1/2}P^{71/72}(\log P)^{15/2}
  =T^{3917/2400}(\log T)^{15/2}.
-\tag{28}
+\tag{34}
 \]
 
 This exceeds \(PQ=T^{143/100}\) by
-\(T^{97/480}(\log T)^{15/2}\).  Likewise, (25), Parseval, (27), and absolute
+\(T^{97/480}(\log T)^{15/2}\).  Likewise, (31), Parseval, (33), and absolute
 summation over \(q\asymp Q\) give
 
 \[
  P^{3/4+\varepsilon}H^{1/2}Q^{23/16}
  =T^{261/160+\varepsilon},
-\tag{29}
+\tag{35}
 \]
 
 which exceeds \(PQ\) by \(T^{161/800+\varepsilon}\).  Even a hypothetical
 natural-order variance \(\ll QP(\log P)^{15}\) gives exactly
-\(PQ(\log P)^{15/2}\) after (27): it has zero power margin and retains a
+\(PQ(\log P)^{15/2}\) after (33): it has zero power margin and retains a
 positive logarithmic loss.
 
 There are also two statement mismatches.  The published results concern
@@ -502,7 +643,7 @@ recovers the Shiu loss instead of evaluating \(E_c\).  Parry's main term
 
 \[
  M_x(q,a)=\frac1q\sum_{d\mid q}c_d(a)F_x(d)
-\tag{30}
+\tag{36}
 \]
 
 comes from an additive Estermann series for \(d_4\).  No cited result or
@@ -511,7 +652,7 @@ the actual signed blocks with the prime-pair singular-series subtraction.
 
 **Route-5 verdict:** the exact method class “published \(d_4\) progression
 mean value, followed by a norm bound in the residue variable and
-absolute/Cauchy aggregation in \(q\)” is impossible at (23): it misses by a
+absolute/Cauchy aggregation in \(q\)” is impossible at (29): it misses by a
 fixed power before the coefficient and main-term mismatches are addressed.
 This does **not** disprove `(EDB)`.  It proves that `(EDB)` needs a new
 estimate correlated with \(S_H(\ell\bar r/q)\), the signs of \(e_q\), or the
@@ -538,5 +679,9 @@ as follows:
    \(C\ge3\).  The stronger common-scale target (14) survives, but the
    repository lacks the compatible coefficient family required to state it
    for the actual Heath--Brown decomposition.
-3. The next ordered route is the fixed-power inverse-residue estimate
-   `(WG-HB)` for the actual depth-four coefficients.
+3. Route 4 kills the one-shot arbitrary-coefficient class
+   \(\mathcal W_1\).  The coefficient-sensitive `(WG-HB)` estimate
+   would close with the explicit net saving \(7/400\) under (25), but the
+   repository lacks the signed common coefficient object needed to apply or
+   even faithfully state such a theorem.  This is the terminal A1 blocker;
+   `signedPair_traceGrade_lt_3_2` is not discharged.

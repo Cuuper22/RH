@@ -67,6 +67,16 @@ and no legacy hypothesis is used.  The dedicated CI audit
 `comparator/PrintAxioms/Stability.lean` checks the standard dependency set
 verbatim.
 
+Phase A1.3 changes no headline dependency.  The exact one-shot
+arbitrary-coefficient class \(\mathcal W_1\) is killed: independent
+progression cells admit a phase-aligned countermodel, fixed-modulus Weil
+completion misses by \(T^{9/50}\), and the applicable Bettin--Chandee and
+BBLR bounds miss by fixed powers.  A simultaneous coefficient-sensitive
+`(WG-HB)` estimate would close with net saving \(7/400\) under the
+displayed candidate bound, but the repository lacks the signed depth-four
+coefficient object needed to state that input faithfully.  Therefore
+`signedPair_traceGrade_lt_3_2` remains unchanged.
+
 ---
 
 ## 1. `#print axioms` — verbatim
@@ -166,6 +176,12 @@ delegates to) are identical.
 'RH.Zeta85.LogBudget.depth_three_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.LogBudget.depth_four_margin' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.LogBudget.fixed_modulus_weil_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.wg_hb_candidate_saving' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.wg_hb_net_saving' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.bettin_chandee_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.bblr_endpoint_first_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.blomer_pascadi_range_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.mqw_range_excesses' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.LogBudget.power_beats_log' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.Exponents.bblr_blackbox_ceiling' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.stability_inequality' depends on axioms: [propext, Classical.choice, Quot.sound]

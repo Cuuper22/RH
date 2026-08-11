@@ -656,3 +656,62 @@ depend only on `propext`, `Classical.choice`, and
 This discharges the stability inequality only.  It does not supply the R1a
 principal block to which the compression theorem would be applied, so the
 quartic rung statuses remain unchanged.
+
+---
+
+## 18. A1.3 Weil-grade HB — one-shot class killed, simultaneous route open
+
+At
+\[
+ \eta=\frac{43}{100},\qquad H=T^\eta,\qquad Q=T^{1/2},
+ \qquad P=HQ,\qquad HQ^2=T^{143/100},
+\]
+any bound
+\[
+ \sum_{q\asymp Q}|\mathcal R_{q,\ell}|
+ \ll HQ^2T^{-\delta}(\log T)^B
+\]
+with fixed \(\delta>0\) closes the log budget.  Summing the \(O(\log T)\)
+prime blocks after multiplying by \(T/Y\) gives
+\(T^{1-\delta}(\log T)^{B+1}=o(T(\log T)^2)\), leaving the trace contribution
+\(o(T(\log T)^3)\).
+
+The proposed simultaneous quadratic-dispersion right side
+\[
+ T^{1/2+2\eta+\varepsilon}+T^{3/4+3\eta/2+\varepsilon}
+\]
+has exponents \(34/25+\varepsilon\) and
+\(279/200+\varepsilon\).  Its limiting saving is \(7/200\);
+\(\varepsilon=7/400\) leaves the explicit net
+\(\delta=7/400\).  This is a sufficient conditional calculation, not a
+proof of the estimate.
+
+The exact class \(\mathcal W_1\) is finished and killed.  It consists of
+arguments that use independent progression-cell sizes, complete at most one
+variable and sum the rest by triangle/Cauchy, or apply one
+arbitrary-coefficient trilinear/fixed-modulus bilinear Kloosterman theorem
+without simultaneously exploiting two retained Heath--Brown factors.
+
+- Parseval gives
+  \(\sum_r|S_H(r/q)|^2\asymp qH\) and hence
+  \(\sum_{r\ne0}|S_H(r/q)|\gg q\).  Independent admissible cell phases of
+  size \(P/q\asymp H\) align to give
+  \(\gg HQ^2/\log Q\), ruling out every fixed power saving in that class.
+- One completion plus Weil gives \(T^{161/100}\), an excess \(T^{9/50}\).
+- Bettin--Chandee Theorem 1 gives
+  \(T^{3627/2000}\) and \(T^{719/400}\); its larger term exceeds the target
+  by \(T^{767/2000}\).
+- The applicable BBLR/Kuznetsov architecture gives
+  \(T^{179/100}\) and \(T^{161/100}\), again above the target.
+- The 2025--2026 Blomer--Pascadi and Milićević--Qin--Wu preprints are outside
+  the required length \(H=q^{43/50}\); Wright's fixed-denominator gain does
+  not improve the unavoidable \(d=1\), \(R=1\) block.
+
+This is not an impossibility theorem for simultaneous coefficient-sensitive
+cancellation.  The repository does not define the needed object: it lacks
+the signed depth-four expansions of both von Mangoldt factors, formulas and
+norms for \(\alpha_a,\beta_m,e_q\), common divisor bookkeeping, the exact
+\(F_{q,\ell}(a,m)\) with theorem-compatible regularity, and the pointwise
+zero-mode/singular-series identity.  The exact surviving statement is
+`(WG-HB)` in `docs/audit/log_budget_routes.md`; it remains
+unproved and cannot yet be faithfully made an `Inputs95` field.

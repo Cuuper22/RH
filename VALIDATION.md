@@ -296,3 +296,32 @@ for each theorem.  The source scan also covers the new module and rejects
 introduced.  The GitHub workflow run attached to this milestone is the
 authoritative build in the current environment, where `lake` is not
 available on the shell path.
+
+## 15. A1.3 exact exponent audit
+
+`verify/a1_3_wg_hb.py` uses `fractions.Fraction` throughout
+and recomputes every exponent recorded for the final log-budget route.  Its
+committed output is `verify/a1_3_wg_hb.out`; reproduce it with:
+
+```bash
+cmp -s verify/a1_3_wg_hb.out <(python3 verify/a1_3_wg_hb.py)
+```
+
+The script constructs, rather than hard-codes, the two Bettin--Chandee
+exponents from the theorem's \(L^2\)-norm and bracket factors.  It also
+checks:
+
+- the candidate simultaneous-dispersion saving \(7/200\) and net saving
+  \(7/400\);
+- the fixed-Weil excess \(9/50\);
+- the BBLR endpoint excesses;
+- the Blomer--Pascadi range gap \(83/300\); and
+- the two Milićević--Qin--Wu condition gaps \(141/250\) and \(47/100\).
+
+The matching arithmetic identities are formalized in
+`RH/Zeta85/Discharge/LogBudget.lean` as
+`wg_hb_candidate_saving`, `wg_hb_net_saving`,
+`bettin_chandee_excess`, `bblr_endpoint_first_excess`,
+`blomer_pascadi_range_excess`, and
+`mqw_range_excesses`.  This validates the method-class audit only;
+it does not add the missing analytic estimate.
