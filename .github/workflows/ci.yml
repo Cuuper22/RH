@@ -32,7 +32,9 @@ jobs:
         run: lake exe cache get
 
       - name: Build base and extension headlines
-        run: lake build Zeta23 RH.Zeta85.Main Solution.Zeta85
+        run: >-
+          lake build Zeta23 RH.Zeta85.Main
+          Solution Solution.Multiplicity Solution.XiPrime Solution.Zeta85
 
       - name: Check headline axiom output
         run: bash verify/check_axioms.sh
