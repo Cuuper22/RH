@@ -939,3 +939,54 @@ This validates exponent bookkeeping and the exact narrow method-class
 verdict only.  The simultaneous analytic estimate `(SQ4-HB)` and the smooth
 source-identification/recombination identity remain unproved.  No A1 field
 is discharged and no frozen rung status changes.
+
+## 30. A1 simultaneous SQ4 route gates
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.SQ4SimultaneousRoutes RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/SQ4SimultaneousRoutes.lean
+python3 verify/a1_sq4_simultaneous_routes.py
+diff -u verify/a1_sq4_simultaneous_routes.out \
+  <(python3 verify/a1_sq4_simultaneous_routes.py)
+bash verify/check_axioms.sh
+```
+
+`SQ4SimultaneousRoutes.lean` proves the exact rational source scales; the
+fixed-\(x\) and integrated outputs and excesses of the character-large-sieve,
+coefficient-uniform norm-only, additive-large-sieve, Poisson zero-mode, and
+Poisson-Weil/triangle calculations; the reciprocal profile, completion
+prefactor, and dual length; and normalized/raw logarithmic exponents \(0\)
+and \(2\).  It states no analytic estimate or placeholder.  In particular,
+it does not assert Poisson summation, the character or additive large sieve,
+the Ramanujan or Weil estimates, a Kuznetsov application, `(SQ4-HB)`, or a
+bound for the nonzero transformed family (33).
+
+The dedicated printer selects 13 public theorems and is included in the
+generic standard-three loop in `verify/check_axioms.sh`.  Every normalized
+line is exactly `[propext, Classical.choice, Quot.sound]`.
+`RH.Zeta85.Main` imports the module.  Source scans find no `axiom`, `sorry`,
+`admit`, or `unsafe` in the module or printer.
+
+The independent `fractions.Fraction` verifier checks all fixed and
+integrated outputs and excesses, the profile and truncation scales, the
+explicit nonzero loss \(T^{\eta+\varepsilon}\) with \(0<\eta<2/5\), and
+the normalized/raw long-log exponents \(0\) and \(2\); it also records the
+six route labels.  The two structural-applicability verdicts are instead
+source-audited in `docs/audit/sq4_simultaneous_routes.md`.  The exact artifact
+hashes are:
+
+```text
+3ff0acf59b6a0f828f5d0e00fe8af3a4ef9225a8d3456f3877f2193b1c52c661  RH/Zeta85/Discharge/SQ4SimultaneousRoutes.lean
+eaa5e835a79bdcfe051811a8c9d8e690ca5d6fbe1895fbf973909c9470da910b  comparator/PrintAxioms/SQ4SimultaneousRoutes.lean
+c87497add008c3113efb23528c07df9f39f45c8867278209f7f3fe49008c08c5  docs/audit/sq4_simultaneous_routes.md
+fe11015425ec5312fd1894144ff17b6bcb8cfd303735c5774068e8554c04cd6a  verify/a1_sq4_simultaneous_routes.py
+ece3e6a0dd1de6ba8100c90e2d59ba1caf4af77de6ea72283b0acf79945932b8  verify/a1_sq4_simultaneous_routes.out
+```
+
+The audit makes the Poisson zero mode power-safe but does not prove
+`(SQ4-HB)`.  The nonzero transformed family (33), the smooth
+source-identification/recombination identity, and the required correlated
+estimate remain open.  No A1 field is discharged and no frozen rung status
+changes.

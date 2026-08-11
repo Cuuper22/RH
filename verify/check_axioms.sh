@@ -86,6 +86,7 @@ normalize_axiom_output() {
 for audit in \
   comparator/PrintAxioms/ActualScaleBBLR.lean \
   comparator/PrintAxioms/PreMajorantDI.lean \
+  comparator/PrintAxioms/SQ4SimultaneousRoutes.lean \
   comparator/PrintAxioms/AliasRankObstruction.lean \
   comparator/PrintAxioms/BBLRGCDAllocation.lean \
   comparator/PrintAxioms/EtaClosure.lean \

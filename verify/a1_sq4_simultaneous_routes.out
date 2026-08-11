@@ -1,0 +1,61 @@
+A1 SQ4 simultaneous-route exact exponent audit
+product side P = 83/100 (0.830000000000)
+product side Q = 83/100 (0.830000000000)
+numerator R = 33/50 (0.660000000000)
+physical x = -23/100 (-0.230000000000)
+fixed target = 83/50 (1.660000000000)
+integrated target = 143/100 (1.430000000000)
+
+multiplicative Fourier + one all-modulus character large sieve
+conductor factor sqrt(Q^2+P) = 83/100 (0.830000000000)
+fixed-x output after triangle in r = 58/25 (2.320000000000)
+fixed-x excess = 33/50 (0.660000000000)
+integrated output = 209/100 (2.090000000000)
+integrated excess = 33/50 (0.660000000000)
+normalized extra log exponent granted = 0 (0.000000000000)
+raw long-slot log exponent = 2 (2.000000000000)
+
+coefficient-uniform two-sided norm-only operator
+unavoidable single-column operator exponent = 83/200 (0.415000000000)
+fixed-x output after triangle in r = 381/200 (1.905000000000)
+fixed-x excess = 49/200 (0.245000000000)
+integrated output = 67/40 (1.675000000000)
+integrated excess = 49/200 (0.245000000000)
+normalized extra log exponent granted = 0 (0.000000000000)
+raw long-slot log exponent = 2 (2.000000000000)
+
+one additive large sieve in r on reciprocal Farey points
+factor sqrt(R+Q^2) = 83/100 (0.830000000000)
+fixed-x output = 199/100 (1.990000000000)
+fixed-x excess = 33/100 (0.330000000000)
+integrated output = 44/25 (1.760000000000)
+integrated excess = 33/100 (0.330000000000)
+normalized extra log exponent granted = 0 (0.000000000000)
+raw long-slot log exponent = 2 (2.000000000000)
+
+reciprocity + Poisson in one smooth slot
+dual frequency K=P-M = 43/100 (0.430000000000)
+completion prefactor M-P = -43/100 (-0.430000000000)
+normalized long-profile argument = 0 (0.000000000000)
+reciprocity profile parameter = -1 (-1.000000000000)
+truncation ratio K/P before eta = -2/5 (-0.400000000000)
+zero-mode fixed-x power = 149/100 (1.490000000000)
+zero-mode margin = 17/100 (0.170000000000)
+zero-mode integrated power = 63/50 (1.260000000000)
+zero-mode integrated margin = 17/100 (0.170000000000)
+nonzero Weil-triangle fixed-x output = 467/200 (2.335000000000)
+nonzero Weil-triangle excess = 27/40 (0.675000000000)
+nonzero Weil-triangle integrated output = 421/200 (2.105000000000)
+nonzero Weil-triangle integrated excess = 27/40 (0.675000000000)
+zero-mode divisor losses recorded as T^epsilon, log exponent = 0
+nonzero truncation/divisor power loss = eta + epsilon
+nonzero truncation/divisor log exponent = 0 (0.000000000000)
+raw long-slot log exponent = 2 (2.000000000000)
+
+verdict char-single-large-sieve = POWER-KILLED
+verdict prescribed-crude-norm-two-sided = POWER-KILLED
+verdict additive-r-large-sieve = POWER-KILLED
+verdict literal reciprocal-completed classical Kuznetsov = STRUCTURALLY INAPPLICABLE
+verdict direct moving-index divisor-switch = STRUCTURALLY INAPPLICABLE
+verdict reciprocal-Poisson-Weil-triangle = POWER-KILLED
+survivor = correlated four-slot moment or geometry-changing trace formula

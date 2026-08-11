@@ -621,6 +621,57 @@ source-shaped block, together with support, derivative, zero-frequency,
 tail, and explicit dyadic-log bounds.  That source-identification gap is
 separate from the analytic proof of `(SQ4-HB)`.
 
+### Simultaneous SQ4 route tests
+
+`docs/audit/sq4_simultaneous_routes.md` tests six exact method classes on
+the granted source-shaped block.  The verdicts are deliberately narrow:
+
+1. multiplicative Fourier, one all-modulus character large sieve, favourable
+   coefficient energies, and numerator triangle inequality is power-killed
+   at fixed-\(x\) exponent \(58/25\), excess \(33/50\);
+2. the prescribed coefficient-uniform two-sided norm-only chain is
+   power-killed at \(381/200\), excess \(49/200\); its single-column witness
+   concerns arbitrary ambient coefficient vectors, not the source vector;
+3. one additive large sieve in the numerator is power-killed at \(199/100\),
+   excess \(33/100\);
+4. literal reciprocal-completed classical Kuznetsov is structurally
+   inapplicable because \(k\bar v\pmod p\) varies with the modulus \(p\);
+5. the direct switch \(va_p-k=jp\) is structurally inapplicable because it
+   does not produce a modulus-\(j\) complete sum; and
+6. reciprocity, one smooth Poisson completion, pointwise Weil, and triangle
+   inequality is power-killed at \(467/200\), excess \(27/40\), before its
+   additional positive power loss.
+
+The Poisson completion has prefactor exponent \(-43/100\) and dual length
+\(K=T^{43/100}\).  For any fixed \(0<\eta<2/5\), rapid decay truncates
+at \(|k|\le KT^\eta\), with \(KT^\eta/p=T^{-2/5+\eta}<1\); the direct
+nonzero Weil chain therefore has an explicit additional
+\(T^{\eta+\varepsilon}\) loss for \(\varepsilon>0\).  Its normalized
+auxiliary logarithmic exponent is \(0\), and the two raw long slots have
+exact logarithmic exponent \(2\).
+
+The \(k=0\) Ramanujan mode is separately power-safe at fixed-\(x\) exponent
+\(149/100+\varepsilon\), or integrated exponent
+\(63/50+\varepsilon\), with pre-loss margin \(17/100\).  Allocating
+\(17/400\) to this divisor power loss and \(17/400\) to dominate the exact
+\((\log T)^2\) restores a margin \(17/200\).  This does not prove
+`(SQ4-HB)`, because it treats only the zero dual frequency.
+
+The exact survivor after the valid geometry change is the nonzero family
+
+\[
+ {M\over p}
+ \sum_{u_1,u_2,m}\sum_{v_1,v_2}\sum_r\sum_{k\ne0}
+ \mu(u_1)\mu(u_2)\mu(v_1)\mu(v_2)
+ \Gamma_{\sigma,x}(r)\,\mathcal W_{T,x}(\cdots)
+ S(k\overline{v_1v_2},\sigma r;u_1u_2m).                \tag{33}
+\]
+
+No correlated four-slot moment, coefficient-sensitive operator estimate,
+or geometry-changing trace formula bounding (33) is supplied.  Thus neither
+the analytic `(SQ4-HB)` estimate nor the separate smooth
+source-identification/recombination statement is discharged.
+
 ### Canonical BBLR collapse proved; smooth Heath--Brown identification missing
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` now constructs the exact sharp-cutoff
@@ -902,10 +953,15 @@ as follows:
    still leaves the one-sided fixed-modulus/square-root/triangle class
    power-incompatible by \(49/200\).  The simultaneous candidate
    `(SQ4-HB)` has normalized/raw long-log exponents \(0\) and \(2\) and
-   would close with literal \(C=0\), but it is unproved and the smooth
-   source-identification/recombination identity is absent.  The terminal A1
-   blocker is therefore a source-identified estimate retaining simultaneous
-   coefficient cancellation before that majorant, or a proved source-faithful
-   completion/reindex that meets every cited theorem hypothesis;
+   would close with literal \(C=0\), but it is unproved.  Of the six exact
+   simultaneous-route classes, the character, coefficient-uniform norm,
+   additive, and Poisson-Weil/triangle chains are power-killed, while literal
+   fixed-index Kuznetsov and the direct moving-index divisor switch are
+   structurally inapplicable.  Poisson makes the zero mode power-safe, but
+   leaves the exact nonzero family (33), with the explicit truncation loss
+   \(T^{\eta+\varepsilon}\) for \(0<\eta<2/5\).  The terminal A1 blocker
+   is therefore a source-identified correlated estimate for (33), or a
+   proved geometry-changing completion/reindex, together with the missing
+   smooth source-identification/recombination identity;
    `signedPair_traceGrade_lt_3_2` is not discharged, and no frozen rung
    status changes.

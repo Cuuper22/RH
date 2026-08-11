@@ -30,6 +30,7 @@ import RH.Zeta85.Discharge.PreMajorantDI
 import RH.Zeta85.Discharge.BBLRGCDAllocation
 import RH.Zeta85.Discharge.EtaClosure
 import RH.Zeta85.Discharge.FourMuKloosterman
+import RH.Zeta85.Discharge.SQ4SimultaneousRoutes
 import RH.Zeta85.Discharge.HBDepthFour
 import RH.Zeta85.Discharge.HBToBBLRSmoothGrouping
 import RH.Zeta85.Discharge.QuarticWindowWitnesses

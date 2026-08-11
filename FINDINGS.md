@@ -1498,3 +1498,77 @@ every required Heath--Brown block with its four retained Möbius slots, plus
 all derivative, support, frequency-zero, and explicit dyadic-log controls.
 Accordingly A1 and `signedPair_traceGrade_lt_3_2` remain open, and no frozen
 rung or README status changes.
+
+---
+
+## 33. A1 simultaneous SQ4 routes — six exact classes finished; transformed nonzero family survives
+
+`docs/audit/sq4_simultaneous_routes.md` starts from the granted
+source-shaped four-Möbius block of Section 32 and tests six explicitly
+delimited method classes.  None of these verdicts is a lower bound for the
+source sum or a statement about a method outside the named class.
+
+1. The **single character-large-sieve class** applies multiplicative Fourier
+   inversion, Cauchy, one all-modulus character large sieve, favourable
+   coefficient-energy bounds, and triangle inequality in the numerator.  Its
+   fixed-\(x\) output is \(58/25\), exceeding \(83/50\) by \(33/50\);
+   the integrated output is \(209/100\), with the same excess.
+2. The **coefficient-uniform two-sided norm-only class** grants an operator
+   upper bound at the unavoidable single-column exponent \(83/200\), grants
+   the crude favourable coefficient norms, and triangle-sums the numerator.
+   Its outputs are \(381/200\) and \(67/40\), exceeding their targets by
+   \(49/200\).  The column witness applies to arbitrary ambient sequences,
+   not to the literal Möbius coefficient vector.
+3. The **one-additive-large-sieve-in-the-numerator class** uses only the
+   three \(L^2\) norms and the reciprocal-Farey spacing \(Q^{-2}\).  Its
+   outputs are \(199/100\) and \(44/25\), with excess \(33/100\).
+4. The **literal reciprocal-completed classical Kuznetsov class** is
+   structurally inapplicable because the completed first index
+   \(k\overline v\pmod p\) varies with the modulus \(p\).
+5. The **direct moving-index divisor-switch class** is structurally
+   inapplicable: \(va_p-k=jp\) exchanges variables but does not produce a
+   modulus-\(j\) Kloosterman sum to which the classical trace formula can be
+   applied.
+6. The **reciprocal-Poisson/Weil/triangle class** applies Weil to each
+   nonzero complete sum and triangle inequality in every remaining variable.
+   Before its additional positive loss, its outputs are \(467/200\) and
+   \(421/200\), exceeding their targets by \(27/40\).
+
+The reciprocity profile is uniformly smooth at the exact source scales.
+Poisson completion has prefactor exponent \(-43/100\) and dual-frequency
+length \(K=T^{43/100}\).  For any fixed
+\(0<\eta<2/5\), rapid decay truncates the nonzero frequencies at
+\(|k|\le KT^\eta\), with \(KT^\eta/p=T^{-2/5+\eta}<1\) and an
+\(O_B(T^{-B})\) tail after choosing the integration-by-parts order.  The
+Weil/triangle output therefore carries the explicit additional power
+\(T^{\eta+\varepsilon}\), for \(\varepsilon>0\); it has no hidden
+logarithmic saving.
+
+The Poisson zero mode is a Ramanujan sum and is power-safe: its fixed-\(x\)
+and integrated powers are \(149/100+\varepsilon\) and
+\(63/50+\varepsilon\), each with pre-loss margin \(17/100\).  The
+normalized auxiliary logarithmic exponent throughout the optimistic route
+tests is explicitly \(0\), while restoring the two raw long Heath--Brown
+slots contributes exactly \((\log T)^2\), logarithmic exponent \(2\).
+Allocating \(17/400\) to the zero-mode divisor \(T^\varepsilon\) loss and
+\(17/400\) to dominate that log square still leaves margin \(17/200\).
+This proves only that the zero mode is not the power obstruction; it does
+not prove the whole-block estimate `(SQ4-HB)`.
+
+The exact unresolved nonzero transformed family is
+
+\[
+ {M\over p}
+ \sum_{u_1,u_2,m}\sum_{v_1,v_2}\sum_r\sum_{k\ne0}
+ \mu(u_1)\mu(u_2)\mu(v_1)\mu(v_2)
+ \Gamma_{\sigma,x}(r)\,\mathcal W_{T,x}(\cdots)
+ S(k\overline{v_1v_2},\sigma r;u_1u_2m).                \tag{33}
+\]
+
+A correlated four-slot moment, a coefficient-sensitive operator estimate,
+a genuine geometry-changing trace formula for this moving-index family, or
+cancellation between the two reciprocal completions remains required.  No
+such estimate is proved or assumed.  The smooth source-identification and
+recombination gap also remains.  Consequently no A1 field is discharged,
+`signedPair_traceGrade_lt_3_2` remains open, and no frozen rung or README
+status changes.

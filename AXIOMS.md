@@ -155,6 +155,25 @@ unchanged.  Its dependency printer has twelve standard-three lines; the
 elementary non-primality theorem has the smaller exact dependency set
 `[propext, Quot.sound]`, which the CI gate preserves verbatim.
 
+`RH/Zeta85/Discharge/SQ4SimultaneousRoutes.lean` finishes six narrower
+method classes without adding a premise.  Multiplicative Fourier followed by
+one all-modulus character large sieve, the prescribed coefficient-uniform
+two-sided norm chain, and one additive large sieve in the numerator are
+power-killed at fixed-\(x\) exponents \(58/25\), \(381/200\), and
+\(199/100\).  Literal reciprocal-completed classical Kuznetsov and the
+direct moving-index divisor switch are structurally inapplicable: their
+index varies with the old modulus, and the switch does not construct a new
+modulus-\(j\) complete sum.  Finally, reciprocity, one smooth Poisson
+completion, Weil, and triangle inequality is power-killed at
+\(467/200+\eta+\varepsilon\), for \(0<\eta<2/5\) and
+\(\varepsilon>0\).  The same Poisson decomposition makes its zero mode
+power-safe at \(149/100+\varepsilon\), but this does not prove `(SQ4-HB)`.
+Every route grants normalized auxiliary log exponent \(0\); the two raw
+long slots contribute exactly \((\log T)^2\).  The generic nonzero
+transformed family (33) in `docs/audit/sq4_simultaneous_routes.md` is the
+exact survivor.  No A1 field is discharged and no frozen rung status
+changes.
+
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
 unconditional smoothed Theorem 3.1 at \(m=1\), with a gauge-fixed zero-sum
@@ -487,6 +506,19 @@ delegates to) are identical.
 'RH.Zeta85.PreMajorantDI.drappeau_oneShot_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.PreMajorantDI.drappeau_oneShot_not_traceGrade' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.PreMajorantDI.drappeau_oneShot_not_traceGrade_with_slack' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.source_scales_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.character_large_sieve_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.character_large_sieve_integrated_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.norm_only_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.norm_only_integrated_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.additive_large_sieve_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.additive_large_sieve_integrated_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.reciprocal_profile_scales_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.reciprocal_poisson_scales_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.poisson_zero_mode_integrated_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.poisson_weil_triangle_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.poisson_weil_triangle_integrated_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4SimultaneousRoutes.route_log_exponents_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -532,6 +564,13 @@ The 15 `PreMajorantDI` lines are the exact normalized output of
 exponent arithmetic and the finite \(\mathbb Z/5\mathbb Z\) mismatch.  They
 do not assert either cited analytic theorem, the missing Pascadi reindex, an
 A1 estimate, or a lower bound for the signed remainder.
+
+The 13 `SQ4SimultaneousRoutes` lines are the exact normalized output of
+`comparator/PrintAxioms/SQ4SimultaneousRoutes.lean`; all have the standard
+three dependencies.  They prove only rational scale, excess, Poisson-profile,
+and normalized/raw logarithmic bookkeeping.  They do not assert the large
+sieves, Ramanujan or Weil estimates, Poisson summation, a Kuznetsov
+application, `(SQ4-HB)`, or a bound for the surviving nonzero family (33).
 
 ### 1.5 Conditional quartic headlines
 
