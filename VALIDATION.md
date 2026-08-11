@@ -893,3 +893,49 @@ Pascadi map is structurally inapplicable.  The conditional Pascadi exponent
 substitution is not a bound.  A \((q,a)\)-dependent reindex with a separate
 \(k=0\) treatment remains open.  No A1 field is discharged and no frozen
 rung status changes.
+
+## 29. A1 four-Möbius-slot exponent and method-class gates
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.FourMuKloosterman RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/FourMuKloosterman.lean
+python3 verify/a1_four_mu_kloosterman.py
+diff -u verify/a1_four_mu_kloosterman.out \
+  <(python3 verify/a1_four_mu_kloosterman.py)
+bash verify/check_axioms.sh
+```
+
+`FourMuKloosterman.lean` proves the exact seven retained scales, the
+composite-modulus obstruction, the killed one-sided
+fixed-modulus/square-root/triangle output, and the arithmetic of the
+surviving simultaneous candidate.  It proves no analytic form of
+`(SQ4-HB)` and introduces no premise or placeholder.  The exact verifier
+checks fixed-\(x\) and integrated targets, the \(49/200\) one-sided misses,
+the \(149/100\) and \(63/50\) simultaneous candidate exponents, the
+\(17/400+17/400\) strict loss allocation, and the explicit normalized/raw
+long-log exponents \(0\) and \(2\).
+
+The dedicated printer selects 13 public theorems.  Twelve normalize exactly
+to `[propext, Classical.choice, Quot.sound]`.  The elementary theorem
+`source_modulus_not_prime` has the strictly smaller dependency set
+`[propext, Quot.sound]`; `verify/check_axioms.sh` records that line
+separately rather than inflating its expected dependencies.  `RH.Zeta85.Main`
+imports the module.  Source scans find no `axiom`, `sorry`, `admit`, or
+`unsafe` in the module or printer.
+
+The exact artifact hashes are:
+
+```text
+bc67127847ef877cf3d615a747df83e60da2fa7a046c0ed8ed372d18ca23601c  RH/Zeta85/Discharge/FourMuKloosterman.lean
+33a45b0dfa795ee0a88457710b50df1f9129a30e0e85b8905e4ef692e7476968  comparator/PrintAxioms/FourMuKloosterman.lean
+f3c697d60b70f32abb22748f7dd28219c2e656fc0efeaa5fd61d7af560436901  docs/audit/four_mu_kloosterman.md
+a8eb4b39fb9215c0af8b45449a036c8cee4c434a0906c3a9f6a55742e1146594  verify/a1_four_mu_kloosterman.py
+3c1abc99cb74c993323371b23ed806dad68ad76fc0472a665cb989a1f11e6977  verify/a1_four_mu_kloosterman.out
+```
+
+This validates exponent bookkeeping and the exact narrow method-class
+verdict only.  The simultaneous analytic estimate `(SQ4-HB)` and the smooth
+source-identification/recombination identity remain unproved.  No A1 field
+is discharged and no frozen rung status changes.

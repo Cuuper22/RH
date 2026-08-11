@@ -138,6 +138,23 @@ conditional arithmetic, not an analytic bound.  A source-faithful
 \((q,a)\)-dependent reindex with a separate zero-frequency term remains
 open.  No A1 field is discharged and no frozen rung status changes.
 
+`RH/Zeta85/Discharge/FourMuKloosterman.lean` continues this audit without
+introducing a premise.  On the literal four-Möbius-slot block, it proves the
+exact one-sided fixed-modulus/square-root/triangle output \(381/200\), which
+misses the fixed-\(x\) target by \(49/200\), and records the unproved
+simultaneous candidate `(SQ4-HB)` at \(149/100+\varepsilon\).  The latter's
+two unnormalized long logarithmic slots contribute exactly
+\((\log T)^2\); the normalized block has log exponent \(0\).  A proved
+`(SQ4-HB)` estimate would absorb those two logs within its \(17/100\) power
+margin and meet the literal budget with \(C=0\), but no such analytic
+theorem is declared or assumed.  The smooth partition and recombination
+identity identifying every actual Heath--Brown block with the displayed
+source-shaped four-slot block is also absent.  Thus A1,
+`signedPair_traceGrade_lt_3_2`, and every frozen rung status remain
+unchanged.  Its dependency printer has twelve standard-three lines; the
+elementary non-primality theorem has the smaller exact dependency set
+`[propext, Quot.sound]`, which the CI gate preserves verbatim.
+
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
 unconditional smoothed Theorem 3.1 at \(m=1\), with a gauge-fixed zero-sum

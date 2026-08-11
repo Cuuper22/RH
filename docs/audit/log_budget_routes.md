@@ -566,6 +566,61 @@ actual coefficients:
   \(R>1\).  The unavoidable \(d=1\) block has \(R=1\), where this mechanism
   gives no improvement over the Bettin--Chandee class.
 
+### Four retained Möbius slots
+
+`docs/audit/four_mu_kloosterman.md` keeps the four depth-four Möbius slots
+separate on the exact surviving block:
+
+\[
+ u_1,u_2,v_1,v_2:T^{43/200},\qquad m,n:T^{2/5},\qquad
+ r=|\ell|h:T^{33/50}.
+\]
+
+Each product side \(u_1u_2m\) and \(v_1v_2n\) has exponent \(83/100\).
+The source audit finds no direct application among its displayed published
+theorem families which both uses the literal composite modulus
+\(q=v_1v_2n\) and retains all four Möbius variables separately.  This is a
+narrow applicability conclusion for those cited families, not a universal
+nonexistence claim.
+
+The exact **one-sided fixed-modulus square-root/triangle class** is finished
+and killed.  Even granting square-root size for the whole \(u_1,u_2,m\)
+side with zero theorem and logarithmic loss, then triangle-summing the
+modulus side and numerator, gives
+
+\[
+ {83\over200}+{83\over100}+{33\over50}={381\over200}
+ ={83\over50}+{49\over200}.
+\]
+
+After the physical \(x\)-integration it gives \(67/40\), still exceeding
+\(143/100\) by \(49/200\).  These are outputs of that prescribed
+upper-bound chain, not lower bounds for the signed block.
+
+The exact surviving candidate is the genuinely simultaneous estimate
+
+\[
+ |\mathcal Z^{(0)}_{4,\sigma}(x)|
+ \ll_{\varepsilon,\mathbf W}T^{149/100+\varepsilon}.
+ \tag{SQ4-HB}
+\]
+
+It is not proved.  The normalized long-log exponent in this statement is
+exactly \(0\).  Restoring the two original long logarithmic slots gives
+exactly \(T^{149/100+\varepsilon}(\log T)^2\).  Allocating \(17/400\) to
+the analytic epsilon and \(17/400\) to dominate this explicit log square
+produces fixed-\(x\) exponent \(63/40\) and integrated exponent \(269/200\),
+each below its target by \(17/200\).  Thus a proof of `(SQ4-HB)` would meet
+the literal log budget with \(C=0<1\), without a separate cross-\(Y\)
+estimate.
+
+This candidate is not yet a statement about every actual cycle block.  The
+repository still lacks the smooth partition and pointwise recombination
+identity mapping all signed Heath--Brown components to the displayed
+source-shaped block, together with support, derivative, zero-frequency,
+tail, and explicit dyadic-log bounds.  That source-identification gap is
+separate from the analytic proof of `(SQ4-HB)`.
+
 ### Canonical BBLR collapse proved; smooth Heath--Brown identification missing
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` now constructs the exact sharp-cutoff
@@ -622,7 +677,9 @@ because run 12 does not provide:
 Fixed-modulus completion already fails by \(T^{9/50}\); independent cells,
 Bettin--Chandee, and the valid BBLR/Kuznetsov architecture fail as quantified
 above, while the cited recent preprints are out of range or give no
-\(d=1\) improvement.  A genuinely coefficient-sensitive simultaneous
+\(d=1\) improvement.  The narrower four-slot one-sided
+fixed-modulus/square-root/triangle class is also killed by the exact
+\(49/200\) power miss.  A genuinely coefficient-sensitive simultaneous
 \(a,m,h,q\) estimate remains sufficient, with net
 \(\delta=7/400\) under (25), but is neither proved nor disproved.  It is
 now stateable for supplied BBLR sequences through the canonical collapse,
@@ -841,8 +898,14 @@ as follows:
    at \(179/100\), an excess of \(9/25\).  The literal completed \(r=a\)
    Pascadi map is structurally inapplicable; its conditional \(179/100\)
    substitution is not a bound, and a \((q,a)\)-dependent reindex with a
-   separate \(k=0\) treatment remains open.  The terminal A1 blocker is
-   therefore a source-identified estimate retaining simultaneous
+   separate \(k=0\) treatment remains open.  Retaining all four Möbius slots
+   still leaves the one-sided fixed-modulus/square-root/triangle class
+   power-incompatible by \(49/200\).  The simultaneous candidate
+   `(SQ4-HB)` has normalized/raw long-log exponents \(0\) and \(2\) and
+   would close with literal \(C=0\), but it is unproved and the smooth
+   source-identification/recombination identity is absent.  The terminal A1
+   blocker is therefore a source-identified estimate retaining simultaneous
    coefficient cancellation before that majorant, or a proved source-faithful
    completion/reindex that meets every cited theorem hypothesis;
-   `signedPair_traceGrade_lt_3_2` is not discharged.
+   `signedPair_traceGrade_lt_3_2` is not discharged, and no frozen rung
+   status changes.

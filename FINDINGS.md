@@ -1436,3 +1436,65 @@ cancellation and signed cross-block recombination before absolute values.
 No A1 field is discharged, `signedPair_traceGrade_lt_3_2` remains open, and
 no frozen rung status changes.  The exact verifier hashes and standard-three
 dependency gate are recorded in `VALIDATION.md`.
+
+---
+
+## 32. A1 four-Möbius-slot route — one-sided class killed; simultaneous estimate open
+
+`RH/Zeta85/Discharge/FourMuKloosterman.lean` audits the literal seven-scale
+\(d=1\) geometry which remains after the collapsed pre-majorant routes:
+
+\[
+ u_1,u_2,v_1,v_2:T^{43/200},\qquad m,n:T^{2/5},\qquad
+ r=|\ell|h:T^{33/50}.
+\]
+
+Each full product side has exponent \(83/100\), the seven-variable tuple
+volume is \(58/25\), and the fixed-\(x\) and physically integrated targets
+are \(83/50\) and \(143/100\).  One individual Möbius slot has relative
+length \(43/166<1/2\) against the literal composite modulus
+\(q=v_1v_2n\).  The accompanying source audit finds no direct application
+among the stated Bourgain--Garaev, Gong--Jia, Korolev, Bettin--Chandee,
+Drappeau, and Pascadi theorem families which retains all four Möbius slots.
+This is an applicability verdict for those displayed families, not a claim
+that no theorem can treat the sum.
+
+The finished method class is the **one-sided fixed-modulus
+square-root/triangle class**: freeze \(v_1,v_2,n,r\), grant an ideal
+square-root bound for the entire \(u_1,u_2,m\) side with every theorem and
+logarithmic loss set to zero, and triangle-sum the frozen variables.  Its
+prescribed upper-bound output is
+
+\[
+ {83\over200}+{83\over100}+{33\over50}={381\over200}
+\]
+
+at fixed \(x\), and \(67/40\) after physical integration.  Both exceed the
+corresponding target by exactly \(49/200\).  This kills precisely that
+upper-bound architecture; it is not a lower bound for the signed source
+sum and does not exclude cancellation coupling the two product sides.
+
+The surviving statement is the explicitly unproved simultaneous estimate
+
+\[
+ |\mathcal Z^{(0)}_{4,\sigma}(x)|
+ \ll_{\varepsilon,\mathbf W}T^{149/100+\varepsilon}.
+ \tag{SQ4-HB}
+\]
+
+The normalized source-shaped block has long-log exponent \(0\); restoring
+the two unnormalized long logarithmic slots gives exactly
+\(T^{149/100+\varepsilon}(\log T)^2\), not an unspecified polylogarithm.
+Allocating \(17/400\) to the analytic epsilon and \(17/400\) to dominate
+that explicit \((\log T)^2\) gives exponent \(63/40<83/50\), or
+\(269/200<143/100\) after integration, with exact margin \(17/200\) in
+either comparison.  Hence a proof of `(SQ4-HB)` would meet the literal
+budget with \(C=0<1\), but no analytic theorem asserting it is added.
+
+There is also a separate source-identification gap.  The displayed
+source-shaped block is granted for this route audit: the repository still
+lacks a smooth partition and pointwise recombination identity identifying
+every required Heath--Brown block with its four retained Möbius slots, plus
+all derivative, support, frequency-zero, and explicit dyadic-log controls.
+Accordingly A1 and `signedPair_traceGrade_lt_3_2` remain open, and no frozen
+rung or README status changes.

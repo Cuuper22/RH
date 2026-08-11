@@ -107,6 +107,28 @@ do
     <(lake env lean "$audit" 2>&1 | normalize_axiom_output)
 done
 
+expected_four_mu_kloosterman() {
+  cat <<'EOF'
+'RH.Zeta85.FourMuKloosterman.seven_scales_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.one_mu_relative_to_modulus' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.source_modulus_not_prime' depends on axioms: [propext, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.oneSided_squareRoot_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.oneSided_fixedX_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.oneSided_integrated_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.oneSided_not_fixedX_grade_with_slack' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.simultaneous_candidate_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.simultaneous_candidate_integrated_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.simultaneous_gain_decomposition_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.simultaneous_candidate_with_power_slack' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.simultaneous_concrete_loss_allocation_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.FourMuKloosterman.long_log_exponents_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+EOF
+}
+
+diff -u \
+  <(expected_four_mu_kloosterman) \
+  <(lake env lean comparator/PrintAxioms/FourMuKloosterman.lean 2>&1 | normalize_axiom_output)
+
 for audit in \
   comparator/PrintAxioms.lean \
   comparator/PrintAxioms/Multiplicity.lean \
