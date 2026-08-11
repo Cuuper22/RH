@@ -51,11 +51,16 @@ factor groupings, divisor-split coefficient candidates, and a shared
 \((j,d,\ell,p,q)\) address.  Reduced-residue progression centering is now
 constructed for these candidate coefficients, but finite centering alone
 does not identify the source main term: BBLR's frequency \(\ell=0\)
-contribution is a gcd-weighted integral, not that residue mean.  Run 12 still
-supplies no equality selecting its smooth grouping and Fourier kernel, nor
-the signed Euler/Ramanujan evaluation of those integrals with an explicit
-error.  Thus estimate (14) is not yet a statement about source-identified
-coefficients and cannot prove the explicit `PairTraceGrade95` field.
+contribution is a gcd-weighted integral, not that residue mean.
+`BBLRGCDAllocation.lean` now proves the source's canonical allocation of a
+positive gcd, its multiplicity-one filtered coefficient collapse, and the
+two-sided finite \((p,q)\)-kernel reindexing for supplied outer sequences and
+inner smooth weights.  Run 12 still supplies no equality selecting such
+outer/smooth variables from every signed Heath--Brown block, nor the signed
+Euler/Ramanujan evaluation of the frequency \(\ell=0\) integrals with an
+explicit error.  Thus estimate (14) is not yet a statement about the actual
+source-identified Heath--Brown coefficients and cannot prove the explicit
+`PairTraceGrade95` field.
 Therefore `signedPair_traceGrade_lt_3_2` remains unchanged.
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` proves the exact remainder
@@ -80,6 +85,18 @@ singular-series recombination remain unconstructed.  The module asserts no
 estimate and no identification with run 12's `c_{d,p}`, `e_{d,q}`, or
 `F_{d,ell}`.  `SingularSeriesCentering` names only the zero-error special
 case without assuming it.
+
+`RH/Zeta85/Discharge/BBLRGCDAllocation.lean` separately proves the finite
+source map that `HBDepthFour.splitCoeff` lacks.  For \(d>0\), allocation by
+\(d_1=\gcd(A_0,d)\), \(d_2=d/d_1\) is an equivalence with the filtered
+splits \(d_1d_2=d\), \((a,d_2)=1\).  Applying it on both sides proves the
+condition \((am,bn)=1\), the converse gcd identity, the exact collapsed
+coefficients, and the original-fiber kernel sum.  The unit-weight regression
+at \(d=p=2\) is \(3\) canonical terms versus \(4\) terms for the unfiltered
+`HBDepthFour.splitCoeff` pattern.  This discharges the gcd allocation and
+multiplicity subproblem for supplied BBLR inputs; it does not construct the
+smooth Heath--Brown grouping, any A1 estimate, or the frequency \(\ell=0\)
+singular-series recombination.
 
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
@@ -116,11 +133,13 @@ completion misses by \(T^{9/50}\), and the applicable Bettin--Chandee and
 BBLR bounds miss by fixed powers.  A simultaneous coefficient-sensitive
 `(WG-HB)` estimate would close with net saving \(7/400\) under the
 displayed candidate bound, but the repository lacks the proved source
-identification for the signed depth-four object and the exact
-Fourier kernel, BBLR frequency \(\ell=0\) integral, and signed Ramanujan
-evaluation needed to state that input faithfully.  The sharp algebraic
-coefficient object and reduced-residue centering alone do not supply those
-missing equalities.  Therefore
+identification of every signed depth-four block with supplied BBLR outer
+sequences and inner smooth weights, together with the integrated Fourier
+kernel estimates, frequency \(\ell=0\) formula, and signed Ramanujan
+evaluation needed to apply that input faithfully.  The canonical gcd
+allocation is now proved, but the sharp algebraic coefficient object and
+reduced-residue centering do not supply those remaining equalities.
+Therefore
 `signedPair_traceGrade_lt_3_2` remains unchanged.
 
 Phase A2.1 also changes no compiled dependency.  The claimed cycle-3
@@ -312,6 +331,11 @@ delegates to) are identical.
 'RH.Zeta85.RSReduction.centeredContraction_eq_formula18' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSReduction.topHat_formula18_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSReduction.topHat_centeredContraction_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.BBLRGCDAllocation.sum_splitFiber_eq_divisorsAntidiagonal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.BBLRGCDAllocation.collapsedCoeff_eq_divisorSum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.BBLRGCDAllocation.collapsedCoeff_two_two_unit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.BBLRGCDAllocation.rawCollapsedCoeff_two_two_unit' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.BBLRGCDAllocation.collapsedKernelSum_eq_originalFibers' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]

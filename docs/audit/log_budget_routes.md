@@ -215,19 +215,21 @@ Even ideal square-root cancellation among \(J(T)\asymp L\) blocks gives
    \(kTL^C\).  A Littlewood--Paley difference decomposition leaves the same
    obstruction in its scaling, or zero-frequency, term.
 
-### Missing object and surviving statement
+### Missing actual block and surviving statement
 
-The repository has no common-index family on which to state cancellation
-for the actual coefficients.  The symbols \(c_{d,p}\) and \(e_{d,q}\) occur
-only in prose in docs/run/12; BBLRPoissonBlocks existentially quantifies
-scalar blocks and exposes no \(Y,j,d,\ell,p,q,c,e,F\) data.  Fixed-cutoff
-progression theorems used in Route 5 provide neither covariance between two
-cutoffs nor compatibility between the changing Heath--Brown groupings.
+The repository now has a sharp common-index candidate in `HBDepthFour.lean`
+and canonical source coefficients for supplied BBLR outer/smooth sequences
+in `BBLRGCDAllocation.lean`.  It still has no theorem identifying those
+supplied sequences with the actual signed Heath--Brown blocks at every
+scale.  `BBLRPoissonBlocks` existentially quantifies scalar blocks and
+exposes no \(Y,j,d,\ell,p,q,c,e,F\) data.  Fixed-cutoff progression theorems
+used in Route 5 provide neither covariance between two cutoffs nor
+compatibility between the changing Heath--Brown groupings.
 
-The surviving route must first construct one signed Heath--Brown identity
-and compatible factor partitions at all scales, giving explicit
-\(c_{j,d,p}\), \(e_{j,d,q}\), and \(F_{j,d,\ell}\), and must match the zero
-terms pointwise with the singular-series subtraction before any Shiu or
+The surviving route must first construct compatible smooth factor partitions
+at all scales, instantiate the proved canonical collapse to give the actual
+\(c_{j,d,p}\), \(e_{j,d,q}\), and \(F_{j,d,\ell}\), and match the frequency
+\(\ell=0\) terms with the singular-series subtraction before any Shiu or
 triangle step.  With \(P_j=H_jQ\) and \(Q=\sqrt T\), the exact leading-family
 target is
 
@@ -247,11 +249,13 @@ post-absolute-value, endpoint-phase, Mellin-away-from-zero, present
 square-function, and Abel-without-prefix-bound method classes are finished
 and killed by (11)--(13) and the exact log count.  The actual coefficient
 estimate (14) is neither proved nor disproved.  A sharp common-scale
-coefficient candidate now exists in `HBDepthFour.lean`, but the smooth
-source grouping, exact kernel, BBLR frequency \(\ell=0\) integrals, and
-signed Ramanujan evaluation needed to make it the actual cycle-5 family are
-absent.  Equation (14) remains the precise blocking statement, not an
-inference from the current hypotheses.
+coefficient candidate now exists in `HBDepthFour.lean`, and
+`BBLRGCDAllocation.lean` proves the canonical source collapse for supplied
+outer sequences and smooth inner weights.  The smooth Heath--Brown grouping,
+analytic kernel bounds, BBLR frequency \(\ell=0\) integrals, and signed
+Ramanujan evaluation needed to make it the actual cycle-5 family remain
+absent.  Equation (14) is the precise blocking estimate once that grouping
+is supplied, not an inference from the current hypotheses.
 
 ## Route 3: reduce Heath--Brown depth
 
@@ -487,7 +491,7 @@ actual coefficients:
   \(R>1\).  The unavoidable \(d=1\) block has \(R=1\), where this mechanism
   gives no improvement over the Bettin--Chandee class.
 
-### Constructed sharp coefficients; missing source identification
+### Canonical BBLR collapse proved; smooth Heath--Brown identification missing
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` now constructs the exact sharp-cutoff
 depth-four expansion, eight retained factor slots, arbitrary scale-indexed
@@ -504,17 +508,37 @@ signed four-component sum, and proves the corresponding centered sums
 vanish.  Exact countermodels show that the all-class and reduced-class means
 cannot be interchanged and that reduced centering alone cannot imply a
 singular-series main term.  These constructions are exact but are not yet
-the source's coefficients or BBLR frequency \(\ell=0\) main term.
+the source's coefficients or BBLR frequency \(\ell=0\) main term.  In
+particular, `HBDepthFour.splitCoeff` omits \((a,d_2)=1\) and is a raw
+divisor split.
+
+`RH/Zeta85/Discharge/BBLRGCDAllocation.lean` now proves the exact correction
+for supplied source sequences.  It allocates \(d\) canonically by a gcd,
+proves the allocation is a multiplicity-one equivalence, constructs the
+filtered coefficients
+
+\[
+ c_{d,p}=\sum_{d_1d_2=d}\sum_{\substack{am=p\\(a,d_2)=1}}
+   \alpha_{d_1a}W_1(d_2m/M_1),
+\]
+
+and proves the two-sided finite-kernel reindexing with
+\(\gcd(dp,dq)=d\iff(p,q)=1\).  Thus the gcd allocation, coprimality filters,
+and multiplicities are no longer part of the blocker.  What remains is to
+construct the supplied outer sequences and genuine smooth inner variables
+from every signed Heath--Brown block.
 
 The actual depth-four route still cannot be submitted to any cited estimate
 because run 12 does not provide:
 
 - a cutoff \(Z(T,Y)\) and smooth partition proved equal to the sharp
   expansion on every relevant integer;
-- the scale-dependent grouping/factor-allocation map selecting the BBLR
-  variables and weights;
-- the exact \(F_{q,\ell}(a,m)\) and signed \(h\)-sum, including separability
-  and derivative bounds required by a cited theorem; or
+- the scale-dependent grouping map proving that the irregular factors are
+  the supplied BBLR outer sequences while the residual variables carry the
+  genuine smooth \(W_1,W_3\) weights;
+- the instantiation of the proved finite \((p,q)\)-kernel reindexing with the
+  integrated \(F_{q,\ell}\) and signed \(h\)-sum, including separability,
+  derivative bounds, and the infinite-\(\ell\) tail; or
 - the BBLR frequency \(\ell=0\) gcd/integral formula for that same smooth
   allocation and its signed Euler/Ramanujan evaluation as the
   singular-series subtraction plus an explicitly bounded error.
@@ -526,8 +550,9 @@ above, while the cited recent preprints are out of range or give no
 \(d=1\) improvement.  A genuinely coefficient-sensitive simultaneous
 \(a,m,h,q\) estimate remains sufficient, with net
 \(\delta=7/400\) under (25), but is neither proved nor disproved.  It is
-presently unstateable for the actual source coefficients because the listed
-identification and kernel equalities are absent.
+now stateable for supplied BBLR sequences through the canonical collapse,
+but it cannot be applied to the actual signed Heath--Brown blocks because the
+smooth grouping and analytic kernel hypotheses listed above are absent.
 
 ## Route 5: evaluate the progression sums instead of bounding them
 
@@ -564,11 +589,14 @@ sum over reduced residue classes.  The finite reduced-centering identity is
 now formalized, but it does not identify the main term removed from the
 source calculation.  In BBLR Proposition 3.1 equation (14), frequency
 \(\ell=0\) is a gcd-weighted integral; the reduced variables occur only in
-the later split of the nonzero-frequency family.  In addition to `(EDB)`,
-the route therefore needs the actual smooth HB allocation into those
-integrals and a signed Euler/Ramanujan evaluation matching their aggregate
-with the prime-pair singular-series subtraction, including an explicit
-error and logarithmic exponent.  Neither requirement may be replaced by the
+the later split of the nonzero-frequency family.  The canonical filtered
+collapse and its multiplicity are now proved for supplied BBLR sequences;
+this does not construct the actual signed, smoothly grouped Heath--Brown
+sequences needed in `(EDB)`.  In addition to `(EDB)`, the route therefore
+needs that smooth HB allocation into the frequency \(\ell=0\) integrals and
+a signed Euler/Ramanujan evaluation matching their aggregate with the
+prime-pair singular-series subtraction, including an explicit error and
+logarithmic exponent.  Neither requirement may be replaced by the
 corresponding statement for the nonnegative majorant \(d_4\).
 
 ### The available published mean values
@@ -712,15 +740,16 @@ as follows:
 2. Route 2 is finished for the available method classes.  Equation (6)
    improves the threshold only to \(C<2\), so it is insufficient at
    \(C\ge3\).  The stronger common-scale target (14) survives, but the
-   sharp compatible coefficient family is now constructed only as an
-   algebraic candidate; reduced-residue centering is proved, but the source's
-   smooth grouping, kernel, BBLR frequency \(\ell=0\) integrals, and signed
-   Ramanujan evaluation required to make (14) its actual Heath--Brown
-   decomposition remain absent.
+   sharp compatible coefficient family is still only an algebraic candidate.
+   Reduced-residue centering and the canonical BBLR gcd collapse for supplied
+   sequences are proved, but the source's smooth Heath--Brown grouping,
+   analytic kernel bounds, frequency \(\ell=0\) integrals, and signed
+   Ramanujan evaluation required to make (14) its actual decomposition
+   remain absent.
 3. Route 4 kills the one-shot arbitrary-coefficient class
    \(\mathcal W_1\).  The coefficient-sensitive `(WG-HB)` estimate
    would close with the explicit net saving \(7/400\) under (25), but the
-   repository lacks the source-identification and analytic kernel equalities
-   needed to apply or faithfully state such a theorem for the actual block.
+   repository lacks the smooth Heath--Brown identification and analytic
+   kernel estimates needed to apply such a theorem to the actual block.
    This is the terminal A1 blocker;
    `signedPair_traceGrade_lt_3_2` is not discharged.

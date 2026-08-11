@@ -1134,7 +1134,7 @@ discharge those premises.
 
 ---
 
-## 26. A1 depth-four coefficient object — sharp algebra and reduced centering proved; source map open
+## 26. A1 depth-four coefficient object — sharp algebra and reduced centering proved; smooth source map open
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` proves the exact \(K=4\)
 Heath--Brown identity
@@ -1165,11 +1165,14 @@ of all four planned left components.  The exact example
 interchanged.  No log exponent, unspecified constant, or analytic estimate
 is asserted.
 
-The divisor split takes \(d\) as supplied data.  It does not yet prove the
-source change of variables \(d=\gcd(am_1,bn_1)\), its allocation
-multiplicities, or a bijection from the original factor variables.  Those are
-part of the source-identification blocker, not consequences of the generic
-coefficient sums.
+The divisor split in this module takes \(d\) as supplied data and omits the
+source conditions \((a,d_2)=1\), \((b,d_4)=1\).  It is therefore the raw,
+not the canonical BBLR, coefficient.  The separate
+`BBLRGCDAllocation.lean` module now proves the canonical gcd allocation,
+multiplicity-one bijection, filtered collapsed coefficients, and generic
+finite-kernel reindexing for supplied BBLR outer sequences and inner smooth
+weights.  It does not identify an `HBGroupingPlan` with those supplied
+sequences.
 
 The primary-source audit identifies a sharper boundary.  BBLR Proposition
 3.1 equation (14) has reciprocal phase
@@ -1185,7 +1188,8 @@ frequency \(\ell=0\) integrals, and their signed Euler/Ramanujan
 recombination.
 
 This does not close A1.  Run 12 omits the cutoff/smoothing equality, the
-scale-dependent grouping and factor weights, the exact Fourier/shift kernel,
+scale-dependent grouping and factor weights, the instantiation and analytic
+bounds for the primary-source Fourier/shift kernel on those grouped blocks,
 and the evaluation of the signed BBLR frequency \(\ell=0\) integrals as the
 prime-pair singular-series term plus an explicitly bounded error.
 `SingularSeriesCentering` names only the zero-error special case and supplies
@@ -1198,5 +1202,71 @@ additional source constraint.
 Therefore `(EDB)`, the cross-\(Y\) target, and `(WG-HB)` remain unproved for
 the actual source block, and `signedPair_traceGrade_lt_3_2` remains
 undischarged.  This milestone removes the absence of a sharp algebraic
-coefficient object; it does not remove the source-identification or analytic
-cancellation wall.
+coefficient object.  Together with the canonical allocation result below it
+removes the finite gcd/multiplicity subproblem, but not the smooth
+Heath--Brown grouping or analytic cancellation wall.
+
+---
+
+## 27. A1 BBLR gcd allocation — finite source collapse proved; smooth Heath--Brown instantiation open
+
+`RH/Zeta85/Discharge/BBLRGCDAllocation.lean` formalizes the exact allocation
+used after BBLR Proposition 3.1 equation (14).  For \(d>0\) and
+\(d\mid A_0M_0\), it sets
+
+\[
+ d_1=\gcd(A_0,d),\qquad d_2=d/d_1,\qquad
+ a=A_0/d_1,\qquad m=M_0/d_2.
+\]
+
+`allocationEquiv` proves this is an equivalence between original factor
+pairs and splits \(d_1d_2=d\) satisfying \((a,d_2)=1\).  Applying the
+allocation on both sides of \(d=\gcd(A_0M_0,B_0N_0)\) proves
+\((am,bn)=1\); conversely, the two filtered splits and this reduced-product
+coprimality reconstruct gcd exactly \(d\).
+
+The resulting one-side source coefficient is
+
+\[
+ c_{d,p}=\sum_{d_1d_2=d}\ \sum_{\substack{am=p\\(a,d_2)=1}}
+   \alpha_{d_1a}\,W_1(d_2m/M_1).
+\]
+
+For positive \(d,p\), `collapsedCoeff_eq_divisorSum` proves by an explicit
+finite bijection that this equals the original fiber sum over
+\(A_0M_0=dp\), with multiplicity one.  The two-sided theorem
+`collapsedKernelSum_eq_originalFibers` reindexes arbitrary finite positive
+\(p,q\) ranges and any supplied kernel, using the exact equivalence
+
+\[
+ \gcd(dp,dq)=d\quad\Longleftrightarrow\quad(p,q)=1.
+\]
+
+Thus it covers the primary-source factors
+\(W_0(dh/H)e(\mp\ell h\bar p/q)W_2(qx/M_2)W_4(px/N_2)e(\ell x)\)
+at fixed \(d,h,\ell,x\), while retaining the supplied \(W_1,W_3\) weights
+inside the collapsed coefficients.  The exact unit-weight regression at
+\(d=p=2\) is three canonical terms versus four raw terms; the duplicate raw
+representation is \((A_0,M_0)=(2,2)\).  This independently confirms that
+`HBDepthFour.splitCoeff`, which omits \((a,d_2)=1\), is not the BBLR
+coefficient.
+
+The finish boundary is exact.  The finite gcd allocation and supplied-input
+kernel reindexing are complete.  Still missing are a smooth partition and
+pointwise signed Heath--Brown identity that put the irregular grouped
+factors into BBLR's outer sequences while leaving genuine smooth variables
+for \(W_1,W_3\), the analytic nonzero-frequency estimate for those actual
+blocks, and the signed evaluation of the frequency \(\ell=0\) integrals as
+the Ramanujan singular-series subtraction with an explicit error and log
+exponent.  No A1 estimate or rung status changes.
+
+The independent enumeration and committed output hashes are
+
+```text
+a39f77ac554d281b32612bcfa5f37012cecebad0eac75d313f687030cd2407a2  verify/bblr_gcd_allocation.py
+00baec36747d13670caaba722fbf45731d55ce89e3e51da62b60a2a862f8df46  verify/bblr_gcd_allocation.out
+```
+
+The dedicated printer selects five core theorems, each with exactly
+`[propext, Classical.choice, Quot.sound]`; `verify/check_axioms.sh` includes
+that printer.

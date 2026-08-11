@@ -701,3 +701,36 @@ statement comparator, and no theorem identifies these sharp coefficients
 with run 12's smooth `c`, `e`, or `F`, evaluates the signed frequency
 \(\ell=0\) integrals against the Ramanujan singular series with an explicit
 error, proves an A1 estimate, or changes a frozen rung status.
+
+## 24. A1 BBLR gcd allocation and finite coefficient collapse
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.BBLRGCDAllocation RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/BBLRGCDAllocation.lean
+python3 verify/bblr_gcd_allocation.py
+diff -u verify/bblr_gcd_allocation.out \
+  <(python3 verify/bblr_gcd_allocation.py)
+bash verify/check_axioms.sh
+```
+
+`BBLRGCDAllocation.lean` proves the positive-\(d\) canonical allocation
+equivalence, both inverse identities, reduced-product coprimality and its
+converse gcd formula, the filtered one-side coefficient collapse with
+multiplicity one, and the two-sided finite-kernel reindexing.  The regression
+at \(d=p=2\) proves that the canonical unit coefficient has three terms while
+the unfiltered raw split has four; the independent Python enumeration matches
+the committed output exactly.
+
+The dedicated printer selects five core public theorems.  Every line is
+exactly `[propext, Classical.choice, Quot.sound]`, and the printer is included
+in `verify/check_axioms.sh`.  Source scans find no `axiom`, `sorry`, `admit`,
+or `unsafe` in the module or printer.  `RH.Zeta85.Main` imports the module.
+
+This validates only the finite source collapse for supplied BBLR outer
+sequences, inner smooth weights, and kernel.  It does not construct the
+smooth signed Heath--Brown grouping, prove `(EDB)` or `(WG-HB)`, evaluate the
+frequency \(\ell=0\) integrals against the Ramanujan singular series, or
+change any frozen rung status.  The exact boundary is recorded in
+`docs/audit/bblr_gcd_allocation.md`.

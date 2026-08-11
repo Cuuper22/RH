@@ -83,17 +83,38 @@ before taking an absolute value; its scale weight can carry the future
 \(Y\) targets are syntactically expressible on the constructed
 coefficients.  The infinite \(\ell\)-tail and its decay are not proved.
 plannedKernelTerm imposes \((p,q)=1\).  The kernel remains an explicit
-argument because run 12 does not construct its claimed \(F_{d,\ell}\),
-inverse-residue phase, or signed \(h\)-sum.
+argument in this module.  The primary-source inverse-residue phase and
+Poisson integral are now recorded in `bblr_gcd_allocation.md`, and its finite
+reindexing theorem accepts them as a supplied kernel, but the smooth
+Heath--Brown instantiation and analytic derivative/tail estimates are not
+constructed.
 
 The two nested sums in splitCoeff exactly expose
 \(d_1d_2=d\), respectively \(d_3d_4=d\), and the reduced products.
-They take \(d\) as supplied data: they do not prove
-\(d=\gcd(am_1,bn_1)\), a unique allocation/bijection, or the multiplicities
-of the source change of variables.  Nor do they insert source smooth weights
-or factor-allocation restrictions.  Those belong to the missing
-source-matched grouping and kernel construction; coprimality of \(p,q\) is
-imposed only later by plannedKernelTerm.
+They take \(d\) as supplied data and omit the canonical source restrictions
+\((a,d_2)=1\), respectively \((b,d_4)=1\).  Consequently splitCoeff and the
+planned block coefficients built from it are raw candidates, not BBLR's
+coefficients.  The regression in `BBLRGCDAllocation.lean` makes the defect
+literal: at \(d=p=2\) with unit weights, the raw sum has four terms while the
+canonical filtered sum has three.
+
+The separate module `RH/Zeta85/Discharge/BBLRGCDAllocation.lean` now proves
+the missing finite arithmetic for supplied BBLR sequences.  Allocation by
+\(d_1=\gcd(A_0,d)\), \(d_2=d/d_1\) is a multiplicity-one equivalence with
+the filtered splits, and the resulting coefficient is exactly
+
+\[
+ \sum_{d_1d_2=d}\sum_{\substack{am=p\\(a,d_2)=1}}
+   \alpha_{d_1a}\,W_1(d_2m/M_1)
+ =\sum_{A_0M_0=dp}\alpha_{A_0}W_1(M_0/M_1).
+\]
+
+The two-sided theorem also proves the finite \((p,q)\)-kernel reindexing and
+the equivalence \(\gcd(dp,dq)=d\iff(p,q)=1\).  This discharges the gcd
+allocation, bijection, and multiplicity subproblem.  It does not choose which
+sharp Heath--Brown factors become the supplied outer sequence \(\alpha\) and
+which residual factor is the genuine smooth variable carrying \(W_1\); that
+is still the source-matched grouping obstruction.
 
 The original progressionZeroMode is the mean of a generic family over all
 residue classes, and sum_centeredProgressionCell proves that its centered
@@ -137,7 +158,7 @@ of \(c_{d,p}\).  Their Poisson summation eliminates the long variable
 and its \(\ell=0\) term is the proposition's gcd/integral main term
 
 \[
- \sum_{(am_1,bn_1)=d}
+ \sum_{\substack{a,b,m_1,n_1,h,d\\(am_1,bn_1)=d}}
  \alpha_a\beta_b W_0(dh/H)W_1(m_1/M_1)W_3(n_1/N_1)
  \int_0^\infty
  W_2\!\left(\frac{bn_1x}{dM_2}\right)
@@ -180,28 +201,35 @@ Run 12 equations (5)--(11) do not specify:
 1. the cutoff \(Z=Z(T,Y)\) or a proof that its smoothly truncated identity
    equals the sharp identity above on every relevant integer;
 2. the scale-dependent grouping plan and smooth dyadic partition that map
-   the eight slots to the BBLR variables \(a,m_1,b,n_1\);
-3. the exact separated Fourier factor \(F_{d,\ell}\), including its
-   dependence on the selected grouping and divisor split; or
+   the eight slots to supplied BBLR outer sequences and genuine smooth inner
+   variables carrying \(W_1,W_3\);
+3. the instantiation of the proved canonical \((p,q)\) collapse with those
+   actual grouped sequences and the integrated Fourier factor
+   \(F_{d,\ell}\), including its derivative bounds and infinite-frequency
+   tail; or
 4. the BBLR \(\ell=0\) gcd/integral formula after the actual smooth HB
    allocation, and its full signed Euler/Ramanujan recombination with the
    prime-pair singular-series term, including the non-exact replacement
    errors.
 
 The narrow missing construction is therefore an explicit plan and smooth
-partition together with a proved equality from the resulting
-plannedLeftBlockCoeff/plannedRightBlockCoeff sum to BBLR equation (14),
-followed by a constructed zeroModeHB and an identity of the form
+partition together with a proved equality from each signed Heath--Brown
+block to the supplied outer/smooth inputs of `collapsedCoeff`, followed by an
+instantiation of `collapsedKernelSum_eq_originalFibers` with the full BBLR
+equation (14) kernel and a constructed zeroModeHB satisfying an identity of
+the form
 
     zeroModeHB h = S h * X * IV + zeroModeError h
 
 with a bound for the signed aggregate of zeroModeError at the exact required
 logarithmic exponent.  SingularSeriesCentering is only the zero-error special
 case; neither it nor the required error bound is asserted.  Until these
-identities are supplied, the module's coefficients must not be renamed as run 12's
-\(c_{d,p}\) and \(e_{d,q}\), and (EDB), the common-scale cross-\(Y\)
-target, and (WG-HB) are not statements about source-identified
-coefficients.
+identities are supplied, the coefficients in `HBDepthFour.lean` must not be
+renamed as run 12's \(c_{d,p}\) and \(e_{d,q}\).  The corrected
+`BBLRGCDAllocation.collapsedCoeff` is the source collapse for supplied
+sequences, but it is not yet instantiated by the actual signed
+Heath--Brown blocks.  Therefore (EDB), the common-scale cross-\(Y\) target,
+and (WG-HB) remain unproved for the cycle-5 coefficients.
 
 There is also an exact nonuniqueness result for product-only recovery.
 empty_singleton_groupings_distinct proves that the empty left grouping and
@@ -223,3 +251,6 @@ printer contain no declared research assumption or proof placeholder.
 
 No numerical verifier was added: this milestone contains exact finite
 convolution identities and no calibrated numerical claim.
+
+The canonical gcd-allocation correction and its independent \(d=p=2\)
+enumeration are audited separately in `docs/audit/bblr_gcd_allocation.md`.
