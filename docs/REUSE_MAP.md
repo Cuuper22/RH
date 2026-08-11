@@ -68,7 +68,7 @@ This is the *same* three-argument call the base repository makes for Theorems A�
 | `Zeta23.ThmD.N0star_lower_c` | `Zeta23/ThmD/AssemblyD.lean:41` | the pure real-arithmetic step Seam A + two trace bounds ⟹ `(2 − D)N − err ≤ N₀ˢ` |
 
 `RH/Zeta85/Transfer.lean` reuses `Zeta23.ThmD.N0star_lower_c` verbatim as the fixed-`T` algebra;
-`Zeta23.Assembly.seamA_mult2` is the shape that `RH.Zeta85.TwoTraceCert.zeroSide` records (see
+`Zeta23.Assembly.seamA_mult2` is the shape that `RH.Zeta85.TwoTraceData.zeroSide` records (see
 `RH/Zeta85/Transfer.lean` docstring — the seam itself carries **no** restriction `λ ≤ 1`; only the
 prime side does, which is exactly why the 85 % hypotheses are prime-side only).
 

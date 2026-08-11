@@ -79,7 +79,7 @@ logarithmic *saving*.  (12.2) supplies a logarithmic *loss* `(log T)^{+C}`.  The
 `(log T)^{C+A}` for every `A`; no rearrangement of (12.2) yields `(AS)`.
 
 This gap is **not** repaired anywhere in the run and is not repaired here.  It is the reason
-`RH.Zeta85.Hypotheses.signedPair_traceGrade_cycle5` is an axiom stated at the strength the transfer
+`RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2` is an axiom stated at the strength the transfer
 needs, rather than a theorem derived from (12.2).  See `AXIOMS.md` and `FINDINGS.md` §7.  The 85 %
 target is **not** weakened to accommodate it (R2): the target stays
 `1893603832049143/2227707598259143`, and the exact blocking statement is named.
