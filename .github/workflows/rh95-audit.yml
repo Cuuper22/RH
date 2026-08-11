@@ -1,0 +1,40 @@
+name: RH95 extension audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "Zeta23/Extensions/RH95.lean"
+      - "Zeta23/Extensions/RH95/**"
+      - ".github/workflows/rh95-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Build audited extension
+        run: lake build Zeta23.Extensions.RH95
+      - name: Check extension sources contain no placeholders or custom axioms
+        shell: bash
+        run: |
+          if grep -R -n -E '(^|[^A-Za-z_])(sorry|admit)([^A-Za-z_]|$)' Zeta23/Extensions/RH95.lean Zeta23/Extensions/RH95; then
+            echo "proof placeholder found" >&2
+            exit 1
+          fi
+          if grep -R -n -E '^[[:space:]]*(axiom|opaque)[[:space:]]' Zeta23/Extensions/RH95.lean Zeta23/Extensions/RH95; then
+            echo "custom axiom-like declaration found" >&2
+            exit 1
+          fi
+      - name: Print theorem axioms
+        run: lake env lean Zeta23/Extensions/RH95/PrintAxioms.lean
