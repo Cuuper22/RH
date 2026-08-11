@@ -7,20 +7,25 @@
 
 The target is the unconditional base-repository standard: comparator-validated
 headline theorems whose `#print axioms` output is exactly
-`[propext, Classical.choice, Quot.sound]`.  Phase 0 source intake changes no
-theorem status.
+`[propext, Classical.choice, Quot.sound]` and which have no undisclosed
+analytic premise.  The quartic headlines now have the standard axiom footprint,
+but remain conditional on four explicit per-support structures and do not yet
+have a separate trusted-statement comparator topic.
 
 | rung | frozen lower bound | status at HEAD |
 |---|---:|---|
 | R-679 | 0.67924886307 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`, `traceTransfer_saturated`; compiled headline exists |
 | R-797 | 0.79721415286134 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`, `traceTransfer_saturated`; compiled headline exists |
 | R-850 | 1893603832049143/2227707598259143 | **CONDITIONAL ON** `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated`; compiled headline exists |
-| R-8657 | 0.865674254456636 | **SOURCE CLAIM ONLY**; the strict `1.4999` branch now has an explicit `Inputs95` boundary, but no assembled Lean headline theorem |
-| R-8686 | 0.86855250 | **SOURCE CLAIM ONLY**; B-3 finite arithmetic is proved and the exact A1/trace/zero-side/R1a/RS/R1b obligations are named in `Inputs95`, with no instance or headline theorem |
-| R-9383 | 0.938313327050949 | **SOURCE CLAIM ONLY**; its flat endpoint is exactly `< 0.9383133270509488848`; the strict `1.9999` replacement has an explicit input boundary but no assembled headline |
-| R-9506 | 0.95063832187565 | **SOURCE CLAIM ONLY**; B-3 finite arithmetic is proved and the exact strict-`1.9999` analytic obligations are named in `Inputs95`, with no instance or headline theorem |
+| R-8657 | 0.865674254456636 | **CONDITIONAL ON** `FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, `BlockMomentLimits` for `Family14999`; compiled dyadic/cumulative headlines `RH.Zeta85.rung8657`(`_cumulative`), obtained monotonically from the strict R-8686 branch |
+| R-8686 | 0.86855250 | **CONDITIONAL ON** the same four `Family14999` structures; compiled dyadic/cumulative headlines `RH.Zeta85.rung8686`(`_cumulative`) |
+| R-9383 | 0.938313327050949 | **CONDITIONAL ON** the same four structures for `Family19999`; compiled dyadic/cumulative headlines `RH.Zeta85.rung9383`(`_cumulative`), obtained monotonically from R-9506; the direct flat branch remains killed by its upward-rounded endpoint |
+| R-9506 | 0.95063832187565 | **CONDITIONAL ON** `FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, `BlockMomentLimits` for `Family19999`; compiled dyadic/cumulative headlines `RH.Zeta85.rung9506`(`_cumulative`) |
 
-No extension rung currently meets the unconditional target standard.  The
+The signed-pair and Rudnick--Sarnak structures remain upstream routes for
+proving the trace and moment premises; they are not consumed by these
+headlines.  No analytic family instance is constructed.  Consequently no
+extension rung currently meets the unconditional target standard.  The
 unconditional `Zeta23` base remains separate and unchanged.
 
 Repository: <https://github.com/anthropics/zeta-23-lean>.
@@ -126,20 +131,24 @@ For the strongest independent check — statement equality against the trusted c
 run comparator as described in [`comparator/README.md`](comparator/README.md).
 
 
-## The currently compiled extension through R-850
+## The legacy axiom-based `Solution.Zeta85` comparator topic through R-850
 
-Everything described above is **unconditional**. The directory [`RH/`](RH/) adds a separate,
-**conditional** layer: a formalization of a research run extending the 2 − 1/c₁* = 0.6725007… result
-to 0.8500235…, in which the prime-side inputs the run could not establish are isolated as eight named
-axioms in the single file [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean). Nothing under
+The base-repository results described in the intervening sections above are
+**unconditional**. The directory [`RH/`](RH/) adds a separate,
+**conditional** legacy layer: a formalization of a research run extending the
+2 − 1/c₁* = 0.6725007… result to 0.8500235…, in which the prime-side inputs the
+run could not establish are isolated as eight named axioms in the single file
+[`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean).  The separate
+Prop-structured quartic headlines are listed in the top ladder; they are not
+part of this trusted-statement comparator topic.  Nothing under
 `Zeta23/` imports anything under `RH/`, so the unconditional results are untouched (re-verified:
 `VALIDATION.md` §4). The source documents of the run are unpacked in [`docs/run/`](docs/run/).
 
 `lake build` builds both libraries (`defaultTargets = ["Zeta23", "RH"]`).
 
-### Statement hierarchy
+### Legacy statement hierarchy
 
-The compiled extension rows are `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ c` and the cumulative `liminf N₀ˢ(T)/N(T) ≥ c`,
+The legacy comparator-topic rows are `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ c` and the cumulative `liminf N₀ˢ(T)/N(T) ≥ c`,
 in the repository's ε-form, over the counting functions of `comparator/ChallengeDeps.lean`.
 
 | | support σ | c | Lean name (`Solution.Zeta85`) | underlying theorem | axioms |

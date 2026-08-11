@@ -1,6 +1,7 @@
 # Phase-C `Inputs95` boundary
 
-Status: **interface proved; no analytic instance and no quartic headline**.
+Status: **interface and conditional transfer proved; no analytic instance and
+no unconditional quartic headline**.
 
 This note records exactly what `RH/Zeta85/Inputs95.lean` defines and what it
 does not prove.  The purpose is to keep every frozen rung attached to one
@@ -88,7 +89,25 @@ integral from making a nonintegrable error estimate vacuous.  No scalar
 ## 5. Honest status
 
 The module constructs no `Inputs95` value.  It proves no pair trace, no
-R1a window system, no RS-to-grid passage, and no frozen rung.  Consequently
-R-8657, R-8686, R-9383, and R-9506 remain source claims at this milestone.
-Any later headline must list the exact structures it consumes; defining this
-boundary alone does not change a rung's status.
+R1a window system, and no RS-to-grid passage.  The separate proved modules
+`Discharge/QuarticTransfer.lean` and `QuarticMain.lean` now assemble dyadic
+and cumulative frozen-rung statements, but each theorem takes exactly four
+structures for its displayed family:
+
+* `FullTraceLimits`;
+* `StableZeroSide`;
+* `PrincipalCyclicBlock`; and
+* `BlockMomentLimits`.
+
+Thus `rung8657` and `rung8686` are conditional on those four structures for
+`Family14999`, while `rung9383` and `rung9506` are conditional on them for
+`Family19999`; each has a `_cumulative` companion.  R-8657 is a monotone
+consequence of the strict R-8686 branch.  R-9383 is a monotone consequence of
+the R-9506 branch: the separate flat three-atom route remains invalid because
+its exact endpoint lies below the frozen decimal.
+
+`PairTraceGrade95` and `RS1996ZetaInputs` are upstream proposed routes for
+proving `FullTraceLimits` and `BlockMomentLimits`; neither is a premise of the
+compiled headlines and neither is silently substituted for the required
+structure.  Since no instance of the four structures is constructed, all
+four frozen rungs remain conditional, not unconditional.

@@ -839,7 +839,8 @@ count, and normalization by \(aL^2\), no mean-one literal principal block
 exists; the honest degree-four replacement has tail optimum zero.  Escaping
 this statement requires a new coefficient count/normalization and zero-side
 trace proof, a modulation system outside A2.1 and A2.2, or spectral input
-beyond four moments.  No frozen rung changes status.
+beyond four moments.  By itself, this A2.2 result discharges no frozen-rung
+premise; the later conditional assembly is recorded in §25.
 
 ---
 
@@ -917,11 +918,12 @@ gives a strict upper comparison.  The rational endgame is replayed in
 `RH/Zeta85/Discharge/R9383ExactEndpoint.lean`.
 
 This kills the exact flat three-atom endpoint certificate class, not the
-frozen target itself.  R-9383 therefore remains unchanged and conditional on
-a genuinely stronger construction.  R-8686 and R-9506 also remain source
-claims because A1, R1a, and R1b are still missing.  Full formulas, exact
-fractions, and reproduction commands are in
-`docs/audit/b3_certificate_layer.md`.
+frozen target itself.  The later Phase-C transfer does not revive that class:
+its conditional R-9383 theorem is instead a monotone consequence of the
+strict support-`19999/10000` R-9506 branch.  R-8686 and R-9506 likewise now
+have conditional headlines, while their four per-support analytic structures
+remain uninstantiated.  Full formulas, exact fractions, and reproduction
+commands are in `docs/audit/b3_certificate_layer.md`.
 
 ---
 
@@ -1049,5 +1051,66 @@ provenance citation from silently becoming an analytic proof.
 
 The top-level `Inputs95` bundle has eleven fields: two pair fields, two trace
 fields, two zero-side fields, one shared RS field, two R1a fields, and two
-R1b fields.  No frozen rung changes status at this milestone because no
-bundle instance or quartic headline theorem exists.
+R1b fields.  This boundary module itself constructs no bundle instance.  The
+subsequent transfer in §25 deliberately takes the four exact structures it
+uses rather than treating the complete bundle as an instance.
+
+---
+
+## 25. Phase-C quartic transfer — conditional frozen headlines assembled
+
+`RH/Zeta85/Discharge/QuarticTransfer.lean` now connects the proved finite
+stability and B-3 certificate layers to the exact asymptotic structure
+boundary.  For a block of dimension \(d\), trim budget \(b=s_2+p\), dual cap
+\(c\), and certified cost upper bound \(\bar D\), finite weak duality and robust
+stability give
+
+\[
+ dA_P+(2-\bar D-c/2)N
+ \leq (1-c/2)N_0^s
+   +2e_P+4e_T+e_F+3N_{II}.
+\]
+
+The coefficient three is exact.  Robust count slack contributes
+`2*NII`; replacing `s1` by `N0s+NII` contributes
+`(1-cap/2)*NII`; and controlling the trim count from
+`s1+2b <= N+NII` contributes `(cap/2)*NII`.  The cap-dependent pieces cancel.
+The cost inequality is used in the safe direction
+`profileSaturatedCost <= costUpper`.
+
+The base Riemann--von Mangoldt and local-count theorems prove
+`NII=o(N)` and eventual positivity of `N`.  The block-dimension limit and the
+four actual block-moment limits then yield the normalized transfer quotient.
+The exact rational certificates give strict margins above R-8686 and R-9506.
+R-8657 follows monotonically from R-8686, and R-9383 follows monotonically
+from R-9506; the upward-rounded flat R-9383 route remains killed.
+
+`RH/Zeta85/QuarticMain.lean` exposes the final theorem pairs
+`rung8657`(`_cumulative`), `rung8686`(`_cumulative`),
+`rung9383`(`_cumulative`), and `rung9506`(`_cumulative`).  Each takes exactly
+four structures for its support family:
+
+* `FullTraceLimits`;
+* `StableZeroSide`;
+* `PrincipalCyclicBlock`; and
+* `BlockMomentLimits`.
+
+The `PairTraceGrade95` and `RS1996ZetaInputs` structures are upstream routes
+for proving trace and moment limits, but are not consumed by the transfer or
+headline theorems.  This avoids substituting a provenance citation for the
+missing pair-to-matrix or RS-to-grid proof.  No instance of the four premises
+is constructed, so all four rungs remain conditional and none reaches the
+unconditional base-repository standard.
+
+The independent exact replay is `verify/quartic_transfer.py`; its committed
+hashes are
+
+```text
+dc99b510fdf1966f11535bf57a3dc53f4056c679e0275c8a649c01facf5f3bdf  verify/quartic_transfer.py
+05615d7eb1727532cb81a5c04598630ebd9c29408b729770d34e4b282b533cce  verify/quartic_transfer.out
+```
+
+The 21 public transfer theorems and eight final headline theorems all print
+exactly `[propext, Classical.choice, Quot.sound]`.  That dependency result
+certifies the formal derivation under the displayed premises; it does not
+discharge those premises.

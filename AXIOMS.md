@@ -15,12 +15,13 @@ the deliberate ones in the trusted challenge files under `comparator/`).
 
 ## Phase 0b source-intake status
 
-Phase 0b added archived 95/100 analysis material only and changed no Lean
-declaration.  Phase C now defines an explicit Prop-valued `Inputs95` boundary,
-but constructs no instance and no quartic headline theorem.  Consequently the
-compiled rung dependency graph in §§1.1--1.3 is unchanged.  Claims in the
-ingested files remain evidence to audit, not assumptions or theorems;
-`docs/run/100/FINAL_100_RESULT.md` is withdrawn and has no formal dependency.
+Phase 0b added archived 95/100 analysis material only.  Phase C now defines an
+explicit Prop-valued `Inputs95` boundary and proves conditional quartic transfer
+and headline theorems, but constructs no analytic instance.  The legacy rung
+dependency graph in §§1.1--1.3 is unchanged; the new quartic headlines are
+audited separately in §1.5.  Claims in the ingested files remain evidence to
+audit, not assumptions or theorems; `docs/run/100/FINAL_100_RESULT.md` is
+withdrawn and has no formal dependency.
 
 The Phase 0d workflow runs `verify/check_axioms.sh` on every push and pull
 request.  That script extracts §§1.1–1.3 directly from this file, diffs them
@@ -88,7 +89,8 @@ construction premise, not the stability or moment algebra.
 `PrincipalCyclicBlock` now names the exact replacement obligation, including
 literal windows, critical grids, pointwise energy reconstruction, a mean-one
 distinguished profile, and integrable translated-product limits; no instance
-is constructed.  The frozen quartic rungs remain source claims.
+is constructed.  The frozen quartic rungs therefore remain conditional on
+that structure and the other three exact per-support premises.
 
 Phase A2.2 also changes no headline dependency.  In the base hat
 normalization, a one-window-per-interval block with intrinsic mean one is
@@ -251,6 +253,35 @@ delegates to) are identical.
 'RH.Zeta85.robustBlockTailBound_eventually' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
+### 1.5 Conditional quartic headlines
+
+`comparator/PrintAxioms/QuarticMain.lean` prints the final dyadic and
+cumulative theorem names:
+
+```text
+'RH.Zeta85.rung8657' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.rung8657_cumulative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.rung8686' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.rung8686_cumulative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.rung9383' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.rung9383_cumulative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.rung9506' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.rung9506_cumulative' depends on axioms: [propext, Classical.choice, Quot.sound]
+```
+
+This standard-three output means that the transfer and assembly add no Lean
+axiom.  It does **not** make the results unconditional: every theorem takes
+exactly `FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, and
+`BlockMomentLimits` for its support family.  The 21 public transfer theorems
+in `comparator/PrintAxioms/QuarticTransfer.lean` have the same standard-three
+output.  The exact independent replay is `verify/quartic_transfer.py` with
+committed hashes:
+
+```text
+dc99b510fdf1966f11535bf57a3dc53f4056c679e0275c8a649c01facf5f3bdf  verify/quartic_transfer.py
+05615d7eb1727532cb81a5c04598630ebd9c29408b729770d34e4b282b533cce  verify/quartic_transfer.out
+```
+
 ---
 
 ## 2. Axiom count per rung
@@ -261,6 +292,19 @@ delegates to) are identical.
 | 1 | 0.67924886307 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`, `traceTransfer_saturated` | **4** |
 | 2 | 0.79721415286134 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`, `traceTransfer_saturated` | **4** |
 | 3 | 1893603832049143/2227707598259143 = 0.8500235101… | `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated` | **4** |
+
+The quartic headlines use no declared research axiom, but each is conditional
+on four Prop-valued structures:
+
+| rungs | family | explicit structure premises | declared research axioms | unconditional? |
+|---|---|---|---:|---|
+| R-8657, R-8686 | `Family14999` | `FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, `BlockMomentLimits` | **0** | no |
+| R-9383, R-9506 | `Family19999` | `FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, `BlockMomentLimits` | **0** | no |
+
+The pair-trace and published RS structures are upstream routes to the first
+and fourth premises respectively.  They are deliberately not arguments of
+the headline theorems, because the required derivation bridges have not been
+proved.
 
 The counts coincide but the **contents differ**, and that is the point:
 
@@ -523,8 +567,16 @@ proved B-3 profiles in the types of the strict-support families, defines the
 full Gram matrix `G`, the finite enlarged-window sum `A`, the tail `E`, and
 the distinguished principal block from literal windows and zero sums, and
 proves the finite core-plus-edge count and robust block-tail adapter.  Its
-Prop-valued structures are an explicit boundary only; there is no instance
-and no quartic headline theorem.
+Prop-valued structures are an explicit boundary only; there is no instance.
+
+`RH/Zeta85/Discharge/QuarticTransfer.lean` proves the finite dual scaling,
+the exact edge coefficient three, the `NII=o(N)` passage, and the strict
+R-8686/R-9506 arithmetic.  It obtains R-8657 monotonically from R-8686 and
+R-9383 monotonically from R-9506.  `RH/Zeta85/QuarticMain.lean` exposes all
+four frozen dyadic and cumulative statements with exactly the four premises
+listed in §1.5.  No theorem consumes `PairTraceGrade95` or
+`RS1996ZetaInputs`, and no theorem constructs any of the four required
+structures; hence these are conditional headlines, not unconditional ones.
 
 The complete bundle has eleven named top-level fields:
 

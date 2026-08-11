@@ -460,8 +460,9 @@ three-dimensional formula-(21) fourth moment without a field or named
 premise.  No B-3 source contains `axiom`, `sorry`, or `admit`.
 
 The finite R-8686 and R-9506 implications do not instantiate the missing A1,
-R1a, or R1b analytic bridges.  The README therefore keeps all frozen quartic
-rungs at source-claim status.
+R1a, or R1b analytic bridges.  At this B-3 gate alone there was therefore no
+quartic headline.  The later Phase-C transfer in §22 assembles conditional
+headlines under four explicit structures; it does not discharge them.
 
 ## 19. B-4 `eta > 1/2` factorization audit
 
@@ -529,12 +530,14 @@ lake env lean comparator/PrintAxioms/RobustStability.lean
 bash verify/check_axioms.sh
 ```
 
-The comparator covers the public finite prebound, base/isometric/principal
+The `PrintAxioms` dependency printer covers the public finite prebound, base/isometric/principal
 robust inequalities, uniform trim construction, exact residual identity, and
 the four-moment adapter.  Every line is diffed against exactly
 `[propext, Classical.choice, Quot.sound]`.  Source scans find no declaration
 using `axiom`, `sorry`, or `admit`.  No analytic moment equality or limiting
-statement is asserted by this milestone, so no frozen rung changes status.
+statement is asserted by this milestone.  By itself, the robust-stability
+result discharges no analytic premise; the later conditional assembly is
+validated in §22.
 
 ## 21. Phase-C `Inputs95` boundary
 
@@ -561,5 +564,74 @@ The family types contain the exact B-3 profiles.  The matrix definitions use
 the actual full zero sum and finite `ZIprime` truncation, and the robust
 adapter concludes on that truncation's literal principal block.  Source scans
 find no declaration using `axiom`, `sorry`, or `admit`.  No `Inputs95`
-instance, constructor theorem, or quartic rung headline exists, so this gate
-validates the hypothesis boundary and its finite adapters only.
+instance or constructor theorem exists.  This gate validates the hypothesis
+boundary and its finite adapters; the separate conditional headline gate is
+§22.
+
+## 22. Phase-C quartic transfer and conditional headlines
+
+The exact independent replay is:
+
+```bash
+cmp -s verify/quartic_transfer.out \
+  <(python3 verify/quartic_transfer.py)
+```
+
+with committed hashes:
+
+```text
+dc99b510fdf1966f11535bf57a3dc53f4056c679e0275c8a649c01facf5f3bdf  verify/quartic_transfer.py
+05615d7eb1727532cb81a5c04598630ebd9c29408b729770d34e4b282b533cce  verify/quartic_transfer.out
+```
+
+The script uses only exact `fractions.Fraction` arithmetic.  It checks the
+edge identity `2 + (1-cap/2) + cap/2 = 3`, both fixed-point quotient
+identities, both strict frozen-target margins, and the monotone comparisons
+R-8657 < R-8686 and R-9383 < R-9506.  Its output replays byte for byte.
+
+The formal gate is:
+
+```bash
+lake build \
+  RH.Zeta85.Discharge.QuarticTransfer \
+  RH.Zeta85.QuarticMain \
+  RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/QuarticTransfer.lean
+lake env lean comparator/PrintAxioms/QuarticMain.lean
+bash verify/check_axioms.sh
+```
+
+`QuarticTransfer.lean` proves the spectral-moment identity, exact finite
+dual scaling, edge coefficient three, `NII=o(N)`, normalized limit, generic
+epsilon transfer, and the four concrete zeta specializations.  The direct
+R-8686 and R-9506 branches have strict exact margins.  R-8657 is obtained
+monotonically from R-8686; R-9383 is obtained monotonically from R-9506, not
+from the killed upward-rounded flat branch.
+
+`QuarticMain.lean` exposes eight final statements:
+
+```text
+RH.Zeta85.rung8657
+RH.Zeta85.rung8657_cumulative
+RH.Zeta85.rung8686
+RH.Zeta85.rung8686_cumulative
+RH.Zeta85.rung9383
+RH.Zeta85.rung9383_cumulative
+RH.Zeta85.rung9506
+RH.Zeta85.rung9506_cumulative
+```
+
+Each takes exactly `FullTraceLimits`, `StableZeroSide`,
+`PrincipalCyclicBlock`, and `BlockMomentLimits` for its support family.
+Pair-trace and RS structures are upstream derivation routes and are not
+headline premises.  The transfer `PrintAxioms` dependency printer covers 21
+public theorems, and the headline dependency printer covers all eight
+statements; every line is exactly
+`[propext, Classical.choice, Quot.sound]`.  Source scans find no `axiom`,
+`sorry`, or `admit` in these files.  No separate trusted-statement
+comparator topic has yet been added for the quartic headlines.
+
+No instance of the four analytic structures is constructed.  The comparator
+dependency audit therefore confirms only their standard-three kernel
+footprint.  It neither supplies trusted-statement comparator equality nor
+makes R-8657, R-8686, R-9383, or R-9506 unconditional.

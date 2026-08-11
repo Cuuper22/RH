@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-RH/Zeta85/Statement.lean — **Phase B1**: the statement layer of the 85 % result and of the two
-intermediate rungs.
+RH/Zeta85/Statement.lean — **Phase B1**: the statement layer for the original three analytic rungs
+and four frozen quartic-rung targets.
 
 Only the counting functions of the trusted definition layer occur here: `Zeta23.Ncount` and
 `Zeta23.N0simple` (`Zeta23/Statement.lean` §1), which are character-for-character the `Ncount` and
@@ -17,7 +17,7 @@ Every statement is in the repository's ε-form for a liminf,
 in both the dyadic (`(T, 2T]`) and the cumulative (`(0, T]`) variants, exactly as
 `Zeta23/ThmD/Final.lean` states Theorem D.
 
-## The three rungs
+## Rung statements
 
 | rung | support σ | constant c | source |
 |---|---|---|---|
@@ -31,6 +31,11 @@ downward weakens the statement, never strengthens it.  This follows the reposito
 `comparator/Challenge/XiPrime.lean` states `0.85838`, `0.92919`, `0.86864`, `0.93432`.
 `FINDINGS.md` §4 records the numerical check that each truncation is on the safe side.
 Rung 3's constant is exact: `2 − 1/c_pc` with `c_pc` the rational of `RH/Zeta85/Certificate.lean`.
+
+The additional frozen statement literals are R-8657 (`0.865674254456636`), R-8686
+(`0.86855250`), R-9383 (`0.938313327050949`), and R-9506 (`0.95063832187565`), each in dyadic and
+cumulative form.  This file assigns no analytic provenance to those four targets.  Their conditional
+constructions, with the required per-support premises explicit, are in `RH/Zeta85/QuarticMain.lean`.
 -/
 import Zeta23.Statement
 
@@ -41,7 +46,7 @@ namespace Zeta85
 
 open Zeta23
 
-/-! ## 1. The three constants -/
+/-! ## 1. The constants -/
 
 /-- Rung 1's certified proportion, `2 − D_{1.01} = 0.67924886307`
 [07_root_gain_support_1p01.md, terminal result]. -/
@@ -54,6 +59,18 @@ def cRung125 : ℝ := 79721415286134 / 100000000000000
 /-- Rung 3's certified proportion, `2 − 1/c_pc = 1893603832049143/2227707598259143`
 (= 0.8500235101…)  [01_certificate_cycle1.md (11)]. -/
 def cRung143 : ℝ := 1893603832049143 / 2227707598259143
+
+/-- Frozen R-8657 proportion. -/
+def cRung8657 : ℝ := 865674254456636 / 1000000000000000
+
+/-- Frozen R-8686 proportion. -/
+def cRung8686 : ℝ := 86855250 / 100000000
+
+/-- Frozen R-9383 proportion. -/
+def cRung9383 : ℝ := 938313327050949 / 1000000000000000
+
+/-- Frozen R-9506 proportion. -/
+def cRung9506 : ℝ := 95063832187565 / 100000000000000
 
 theorem cRung101_lt_cRung125 : cRung101 < cRung125 := by
   simp only [cRung101, cRung125]; norm_num
@@ -70,7 +87,7 @@ below rung 1. -/
 theorem two_thirds_lt_cRung101 : (2 : ℝ) / 3 < cRung101 := by
   simp only [cRung101]; norm_num
 
-/-! ## 2. The statements -/
+/-! ## 2. The statement literals -/
 
 /-- **Rung 1, dyadic**: `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ 0.67924886307` — at least that proportion
 of the nontrivial zeros of ζ with `T < Im ρ ≤ 2T`, counted with multiplicity, are simple zeros on the
@@ -102,6 +119,48 @@ def Rung143_statement : Prop :=
 /-- **Rung 3, cumulative**. -/
 def Rung143_cumulative_statement : Prop :=
   ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (cRung143 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T
+
+/-! ## Frozen quartic-rung statements -/
+
+/-- **Frozen R-8657, dyadic form.** -/
+def Rung8657_statement : Prop :=
+  ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+    (cRung8657 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T)
+
+/-- **Frozen R-8657, cumulative form.** -/
+def Rung8657_cumulative_statement : Prop :=
+  ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+    (cRung8657 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T
+
+/-- **Frozen R-8686, dyadic form.** -/
+def Rung8686_statement : Prop :=
+  ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+    (cRung8686 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T)
+
+/-- **Frozen R-8686, cumulative form.** -/
+def Rung8686_cumulative_statement : Prop :=
+  ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+    (cRung8686 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T
+
+/-- **Frozen R-9383, dyadic form.** -/
+def Rung9383_statement : Prop :=
+  ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+    (cRung9383 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T)
+
+/-- **Frozen R-9383, cumulative form.** -/
+def Rung9383_cumulative_statement : Prop :=
+  ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+    (cRung9383 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T
+
+/-- **Frozen R-9506, dyadic form.** -/
+def Rung9506_statement : Prop :=
+  ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+    (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T)
+
+/-- **Frozen R-9506, cumulative form.** -/
+def Rung9506_cumulative_statement : Prop :=
+  ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+    (cRung9506 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T
 
 /-- **The 85 % corollary, dyadic**: `liminf N₀ˢ(T,2T)/N(T,2T) ≥ 17/20`. -/
 def EightyFivePercent_statement : Prop :=
