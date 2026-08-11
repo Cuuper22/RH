@@ -851,3 +851,45 @@ theorem-3.1 field, or discharge cyclic-symbol admissibility, common height
 smoothing, `log T` versus `ell(T) = log(T/2*pi)`, complex Poisson, the
 degree-three and degree-four finite-grid/end estimates, or the actual
 principal-block identification.  No frozen rung status changes.
+
+## 28. A1 pre-majorant DI one-shot gates
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.PreMajorantDI RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/PreMajorantDI.lean
+python3 verify/a1_premajorant_di.py
+diff -u verify/a1_premajorant_di.out \
+  <(python3 verify/a1_premajorant_di.py)
+bash verify/check_axioms.sh
+```
+
+`PreMajorantDI.lean` proves the exact source scales, collapsed coefficient
+norm exponent, all three Drappeau \(K^2\) exponents, the direct integrated
+exponent \(179/100\), and its exact \(9/25\) excess over trace.  It also
+formalizes the finite \(\mathbb Z/5\mathbb Z\) inverse mismatch and the
+candidate Pascadi factor arithmetic.  The latter is explicitly conditional
+arithmetic: the module asserts neither cited analytic theorem nor the
+missing source-faithful reindex.  `RH.Zeta85.Main` imports the module.
+
+The dedicated printer selects 15 public theorems and is included in the
+generic standard-three loop in `verify/check_axioms.sh`.  Every normalized
+line is exactly `[propext, Classical.choice, Quot.sound]`.  Source scans find
+no `axiom`, `sorry`, `admit`, or `unsafe` in the module or printer.
+
+The independent verifier uses exact `fractions.Fraction` arithmetic and
+checks every exponent, comparison, the finite inverse regression, and the
+separate literal-map applicability flag.  Its hashes are:
+
+```text
+1901eda16d2824e1692c1639eccf120d24cd40c1ddefbf631a55fccbb776db2b  verify/a1_premajorant_di.py
+0d95711e582c826ff0227daef45bd2bbf73885723d189f43283a06eb9a27756a  verify/a1_premajorant_di.out
+```
+
+This validates two distinct conclusions: the direct collapsed Drappeau
+class is power-killed at \(179/100\), while the literal completed \(r=a\)
+Pascadi map is structurally inapplicable.  The conditional Pascadi exponent
+substitution is not a bound.  A \((q,a)\)-dependent reindex with a separate
+\(k=0\) treatment remains open.  No A1 field is discharged and no frozen
+rung status changes.

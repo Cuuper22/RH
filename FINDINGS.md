@@ -1400,3 +1400,39 @@ The exact verifier independently enumerates the pairing counts and
 partial-sum profiles and checks `mu^3 -> mu^2` and `mu^5 -> mu^4`.  The
 dedicated printer selects 51 public theorems; every normalized output line is
 exactly `[propext, Classical.choice, Quot.sound]`.
+
+---
+
+## 31. A1 pre-majorant DI/Kuznetsov audit — two distinct verdicts
+
+`RH/Zeta85/Discharge/PreMajorantDI.lean` tests two source-audited one-shot
+routes on the same actual-scale \(d=1\) block, before the run-12 progression
+majorant is applied.  The verdicts are different and must not be conflated.
+
+For the **direct collapsed Drappeau class**, the two Möbius pairs are first
+collapsed into arbitrary outer coefficients, \((|\ell|,h)\) is collapsed into
+one numerator coefficient, Drappeau Theorem 2.1 is applied once at fixed
+\(x\), and its absolute bound is then integrated.  The exact fixed-\(x\)
+exponent is \(101/50\), and the physical \(x\)-integration gives
+\(179/100\).  This exceeds the trace exponent \(143/100\) by exactly
+\(9/25\).  Hence this prescribed upper-bound class is power-killed, even
+before its positive epsilon and logarithmic losses.  This is not a lower
+bound for the signed remainder.
+
+For the **literal completed \(r=a\) Pascadi map**, completion of the short
+smooth variable yields a first Kloosterman argument containing
+\(k\bar a\), whereas the proposed literal theorem map requires \(ka\).
+The checked \(\mathbb Z/5\mathbb Z\) example proves that these are not
+identical, and the completion frequency \(k=0\) is not in Pascadi's dyadic
+\(m\asymp M\) sum.  This literal map is therefore structurally inapplicable.
+The formal value \(179/100\) obtained by substituting candidate scales into
+the displayed Pascadi factors is conditional arithmetic only; it is not an
+analytic bound and is not part of the finish/kill verdict.
+
+A new source-faithful \((q,a)\)-dependent reindex, with proved dyadic support,
+smoothness, coefficient independence, fixed additive phase, and a separate
+\(k=0\) treatment, remains open.  So do simultaneous coefficient
+cancellation and signed cross-block recombination before absolute values.
+No A1 field is discharged, `signedPair_traceGrade_lt_3_2` remains open, and
+no frozen rung status changes.  The exact verifier hashes and standard-three
+dependency gate are recorded in `VALIDATION.md`.

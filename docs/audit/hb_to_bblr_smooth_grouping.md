@@ -188,6 +188,20 @@ explicitly:
    several HB factor variables and their arithmetic coefficients instead of
    forcing them into the two smooth BBLR slots.
 
+The source-audited one-shot tests in
+`docs/audit/premajorant_di_one_shot.md` further narrow the first survivor
+without eliminating it.  Collapsing the two Möbius pairs and
+\((|\ell|,h)\) into three arbitrary coefficient norms, applying Drappeau
+Theorem 2.1 once, and integrating gives exponent \(179/100\), an exact
+\(9/25\) excess over trace.  That direct collapsed class is power-killed.
+The different literal completed \(r=a\) Pascadi map is structurally
+inapplicable because completion supplies \(k\bar a\), not \(ka\), and its
+\(k=0\) term is outside the cited dyadic sum.  The conditional Pascadi
+exponent substitution is not a bound.  A source-faithful
+\((q,a)\)-dependent reindex with a separate zero-frequency treatment remains
+open, as does a simultaneous coefficient-sensitive estimate before those
+norms are taken.
+
 None of these survivors is constructed by the existing files, so the
 coefficient-sensitive `(WG-HB)` estimate remains unproved for the actual
 cycle-5 coefficients.

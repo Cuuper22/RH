@@ -126,6 +126,18 @@ method classes.  They do not bound the original signed remainder from below
 or exclude simultaneous cancellation before the progression majorant, so
 no frozen rung status or compiled headline axiom dependency changes.
 
+`RH/Zeta85/Discharge/PreMajorantDI.lean` audits two narrower attempts to
+estimate that remainder before the progression majorant.  The direct
+collapsed Drappeau one-shot chain has exact integrated exponent \(179/100\),
+exceeding trace by \(9/25\), so that prescribed upper-bound class is killed.
+The literal completed Pascadi map with \(r=a\) is instead structurally
+inapplicable: completion puts \(\bar a\) in the first Kloosterman argument,
+not \(a\), and the zero completion frequency is outside the cited theorem's
+dyadic variable.  The separately checked Pascadi exponent substitution is
+conditional arithmetic, not an analytic bound.  A source-faithful
+\((q,a)\)-dependent reindex with a separate zero-frequency term remains
+open.  No A1 field is discharged and no frozen rung status changes.
+
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
 unconditional smoothed Theorem 3.1 at \(m=1\), with a gauge-fixed zero-sum
@@ -443,6 +455,21 @@ delegates to) are identical.
 'RH.Zeta85.ActualScaleBBLR.progressionPH_saving' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.ActualScaleBBLR.progression_majorant_not_traceGrade' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.ActualScaleBBLR.taylor_H_sq_saving' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.source_scales_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.collapsed_coefficient_L2_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.drappeau_K_squared_terms_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.drappeau_K_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.drappeau_route_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.zmod_five_literal_outer_mismatch' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.pascadi_completion_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.pascadi_components_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.pascadi_theta_inactive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.pascadi_rational_factor_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.pascadi_candidate_arithmetic_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.pascadi_candidate_arithmetic_matches_direct' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.drappeau_oneShot_excess_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.drappeau_oneShot_not_traceGrade' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.PreMajorantDI.drappeau_oneShot_not_traceGrade_with_slack' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -482,6 +509,12 @@ does not construct `BlockMomentLimits` or discharge cyclic-symbol
 admissibility, the actual theorem-3.1 instance, common height smoothing,
 `log T` versus `ell(T) = log(T/2*pi)`, complex Poisson, the degree-three/four
 finite-grid/end estimates, or the actual principal-block bridge.
+
+The 15 `PreMajorantDI` lines are the exact normalized output of
+`comparator/PrintAxioms/PreMajorantDI.lean`.  They audit only rational
+exponent arithmetic and the finite \(\mathbb Z/5\mathbb Z\) mismatch.  They
+do not assert either cited analytic theorem, the missing Pascadi reindex, an
+A1 estimate, or a lower bound for the signed remainder.
 
 ### 1.5 Conditional quartic headlines
 

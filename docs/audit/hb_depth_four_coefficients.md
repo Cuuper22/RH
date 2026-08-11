@@ -216,6 +216,17 @@ Run 12 equations (5)--(11) do not specify:
    prime-pair singular-series term, including the non-exact replacement
    errors.
 
+Even after granting the candidate actual-scale \(d=1\) block, the
+source-audited direct collapsed Drappeau chain does not fill item 3: its
+integrated exponent is \(179/100\), exceeding trace by \(9/25\).  The
+separate literal completed \(r=a\) Pascadi map is not applicable because
+completion places \(\bar a\), rather than \(a\), in the first Kloosterman
+argument and also creates an untreated \(k=0\) term.  Its conditional
+\(179/100\) factor substitution is arithmetic only, not a bound.  A
+\((q,a)\)-dependent support-preserving reindex with separate zero-frequency
+treatment therefore remains among the possible source-faithful
+constructions; none is asserted by `PreMajorantDI.lean`.
+
 The narrow missing construction is therefore an explicit surviving plan --
 using actual block-dependent scales, a controlled superposition, or a
 higher-dimensional divisor theorem -- together with a smooth partition and

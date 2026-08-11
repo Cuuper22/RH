@@ -1,0 +1,51 @@
+A1 pre-majorant one-shot DI exact exponent audit
+trace exponent = 143/100 = 1.430000000000000
+outer exponents R=S = 43/100 = 0.430000000000000
+short smooth exponents C=D = 2/5 = 0.400000000000000
+long smooth exponents = 3/5 = 0.600000000000000
+shift exponent H = 43/100 = 0.430000000000000
+frequency exponent L = 23/100 = 0.230000000000000
+collapsed numerator exponent N=LH = 33/50 = 0.660000000000000
+physical x exponent = -23/100 = -0.230000000000000
+one outer mu-pair L2 power exponent = 43/200 = 0.215000000000000
+ell*h numerator L2 power exponent = 33/100 = 0.330000000000000
+collapsed coefficient L2 power exponent = 19/25 = 0.760000000000000
+source scale and collapsed L2 power = PASS
+Drappeau K^2 term 1 exponent = 63/25 = 2.520000000000000
+Drappeau K^2 term 2 exponent = 91/40 = 2.275000000000000
+Drappeau K^2 term 3 exponent = 73/50 = 1.460000000000000
+Drappeau K exponent = 63/50 = 1.260000000000000
+Drappeau fixed-x exponent = 101/50 = 2.020000000000000
+Drappeau integrated exponent = 179/100 = 1.790000000000000
+Drappeau excess over trace = 9/25 = 0.360000000000000
+Drappeau direct one-shot route = POWER-INCOMPATIBLE
+Pascadi candidate completed M exponent = 43/100 = 0.430000000000000
+completion prefactor exponent = -43/100 = -0.430000000000000
+Pascadi candidate CS*sqrt(R) exponent = 209/200 = 1.045000000000000
+Pascadi candidate sqrt(MN) exponent = 109/200 = 0.545000000000000
+Pascadi candidate C*sqrt(SM) exponent = 83/100 = 0.830000000000000
+Pascadi candidate C*sqrt(SN) exponent = 189/200 = 0.945000000000000
+Pascadi candidate theta denominator exponent = 129/100 = 1.290000000000000
+Pascadi candidate theta ratio exponent = -49/200 = -0.245000000000000
+Pascadi candidate theta power contribution = 0 = 0.000000000000000
+Pascadi candidate rational-factor exponent = 209/200 = 1.045000000000000
+Pascadi candidate sqrt(MRS) exponent = 129/200 = 0.645000000000000
+Pascadi candidate complete-sum exponent = 49/20 = 2.450000000000000
+Pascadi candidate fixed-x exponent = 101/50 = 2.020000000000000
+Pascadi candidate integrated exponent = 179/100 = 1.790000000000000
+Pascadi candidate excess over trace = 9/25 = 0.360000000000000
+Pascadi candidate lower-dual fixed-x intercept = 361/200 = 1.805000000000000
+literal completion phase = S(k, signed-n*a^{-1}; q)
+equivalent completion phase = S(k*a^{-1}, signed-n; q)
+Pascadi required phase = S(m*a, signed-n; q)
+ZMod 5 regression: a=2, a^(-1)=3, a^(-1)!=a
+support-preserving k-to-m reindex = NOT PROVED
+k=0 Ramanujan term outside m~M theorem sum = NOT TREATED
+Pascadi completed one-shot candidate = UNRESOLVED-APPLICABILITY
+one multiplicative-energy L2 log exponent = 1/2 = 0.500000000000000
+normalized coefficient log exponent = 3/2 = 1.500000000000000
+unnormalized coefficient log exponent = 7/2 = 3.500000000000000
+theorem loss = an additional explicit positive T^epsilon power
+direct Drappeau finish/kill exponent = 179/100 with excess 9/25
+Pascadi 179/100 arithmetic is excluded from the finish/kill claim
+survivor = four Moebius slots, cross-HB cancellation, or exact completion reindex

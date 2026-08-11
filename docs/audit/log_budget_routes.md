@@ -483,10 +483,11 @@ The established arbitrary-coefficient theorems also miss:
   \(179/100\) and \(161/100\), exceeding \(143/100\) by \(9/25\) and
   \(9/50\).  `ActualScaleBBLR.lean` proves these exact substitutions,
   including every nonnegative exponent slack.
-  A direct Deshouillers--Iwaniec substitution after completing \(m\) is not
-  valid: it produces \(S(k,\ell h\bar a;q)\), whose index and coefficient
-  support vary with \(q\).  Reindexing \(\bar a\bmod q\) does not create the
-  fixed sequences required by Kuznetsov.
+  The source-audited literal-completion test below makes the
+  Deshouillers--Iwaniec/Pascadi mismatch exact: completion produces
+  \(S(k\bar a,\pm \ell h;q)\), not the required \(S(ka,\pm \ell h;q)\).
+  A modulus- and outer-variable-dependent reindex is a separate open
+  construction, not an automatic fixed-sequence Kuznetsov input.
 
 The separate run-12 progression majorant applied after equation (14) also
 fails on this actual-scale block.  At \(d=1\), the exact reduced lengths are
@@ -503,6 +504,51 @@ powers cancel when those frequencies are summed.  This kills exactly the
 blockwise absolute/progression class \(P_d(Q_d+H_d)\), not the signed
 Poisson remainder or an estimate which cancels jointly in
 \(p,q,h,\ell\) before that majorant.
+
+### Pre-majorant one-shot DI tests
+
+`docs/audit/premajorant_di_one_shot.md` source-audits two narrower attempts
+to estimate the \(d=1\) sum before the progression majorant.  Their verdicts
+are distinct.
+
+The **direct collapsed Drappeau class** first collapses each pair of
+Möbius slots into one arbitrary outer coefficient and collapses
+\((|\ell|,h)\) into a numerator coefficient.  Applying Drappeau Theorem 2.1
+once at fixed \(x\), then integrating the absolute bound, gives the exact
+power exponent
+
+\[
+ \frac{179}{100}
+ =\frac{143}{100}+\frac9{25}.
+\]
+
+Thus that prescribed upper-bound chain is power-killed before its positive
+\(T^\varepsilon\) and logarithmic losses.  This is not a lower bound for the
+original signed remainder and says nothing about cancellation retained
+before the three coefficient norms are taken.
+
+The **literal completed \(r=a\) Pascadi map** fails for a structural reason,
+not an exponent comparison.  Completing the \(m_1\)-sum modulo \(q=bn_1\)
+gives
+
+\[
+ S(k,\pm|\ell|h\bar a;q)=S(k\bar a,\pm|\ell|h;q),
+\]
+
+whereas Pascadi Theorem 10.3 with \(r=a\) requires
+\(S(ma,\pm|\ell|h;q)\).  Matching them needs the
+\((q,a)\)-dependent congruence \(m\equiv k\bar a^2\pmod q\); no
+support-preserving, smooth, coefficient-independent reindex has been
+constructed.  Moreover the completion term \(k=0\) lies outside the
+theorem's \(m\asymp M\) sum and needs a separate treatment.  The exact
+\(\mathbb Z/5\mathbb Z\) regression in `PreMajorantDI.lean` disproves only
+the literal identification \(\bar a=a\).
+
+Substituting the candidate scales into Pascadi's displayed factors also
+returns \(179/100\), but this is conditional arithmetic only.  It is not a
+bound and is not used in either finish/kill verdict.  A source-faithful
+\((q,a)\)-dependent reindex with the \(k=0\) term, or a coefficient-sensitive
+simultaneous theorem that avoids this collapse, remains open.
 
 Recent preprints do not enlarge this conclusion into a theorem about the
 actual coefficients:
@@ -791,6 +837,12 @@ as follows:
    On the surviving actual-scale block, direct Proposition 3.1 and the
    run-12 progression majorant applied after equation (14) are also killed
    by fixed excesses \(9/50\) and \(23/100\), respectively.  The terminal
-   A1 blocker is therefore a source-identified estimate retaining
-   simultaneous coefficient cancellation before that majorant;
+   pre-majorant direct collapsed Drappeau class is separately power-killed
+   at \(179/100\), an excess of \(9/25\).  The literal completed \(r=a\)
+   Pascadi map is structurally inapplicable; its conditional \(179/100\)
+   substitution is not a bound, and a \((q,a)\)-dependent reindex with a
+   separate \(k=0\) treatment remains open.  The terminal A1 blocker is
+   therefore a source-identified estimate retaining simultaneous
+   coefficient cancellation before that majorant, or a proved source-faithful
+   completion/reindex that meets every cited theorem hypothesis;
    `signedPair_traceGrade_lt_3_2` is not discharged.
