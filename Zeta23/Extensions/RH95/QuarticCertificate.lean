@@ -71,8 +71,8 @@ theorem quarticP_nonpos {z : ℚ} (hz : z ≤ 0) : quarticP z ≤ 0 := by
   have hprod : 0 ≤ (100 * z + 81) ^ 2 *
       (254141875625 * z ^ 2 - 396896391260 * z + 24647314448) :=
     mul_nonneg (sq_nonneg _) hq.le
-  have hnum : -44 * ((100 * z + 81) ^ 2 *
-      (254141875625 * z ^ 2 - 396896391260 * z + 24647314448)) ≤ 0 := by
+  have hnum : -44 * (100 * z + 81) ^ 2 *
+      (254141875625 * z ^ 2 - 396896391260 * z + 24647314448) ≤ 0 := by
     nlinarith
   exact div_nonpos_of_nonpos_of_nonneg hnum (by norm_num)
 
@@ -130,7 +130,7 @@ theorem quartic_fixed_point_of_scalar_inequality {z : ℚ}
   have hc : 0 < 1 - quarticC0 := by
     norm_num [quarticC0, quarticMu, qLevel]
   rw [quarticFixed]
-  exact (div_le_iff₀ hc).2 h
+  exact (div_le_iff₀ hc).2 (by simpa [mul_comm] using h)
 
 end RH95Audit
 end Zeta23
