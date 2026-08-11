@@ -736,6 +736,14 @@ all remaining channels have rank at most
 \(\sum_{j>0}n_j=N-n_0<N\).  This contradiction is unchanged by arbitrary
 real signs or complex phases.
 
+`RH/Zeta85/Discharge/AliasRankObstruction.lean` machine-checks this finite
+rank argument.  It proves the rank bound for an explicit sum of residue
+outer products, the full-rank diagonal lemma, the full-minus-distinguished
+matrix form of (13)--(16), and the exact `19999/4999`, `14999/4999`, and
+`1499999/499000` count corollaries.  The analytic premise in those
+corollaries is exactly that every sampled residual entry is nonzero; it is
+not replaced by a stronger or conclusion-shaped assumption.
+
 `verify/a2_1_tdac_rank.py` reconstructs the terminal Euler profiles and
 certifies their signs using exact rational intervals for square roots and
 Taylor remainders.  It proves the conservative margins

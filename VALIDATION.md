@@ -360,9 +360,23 @@ the edge residual `42756493/1031000000 > 0` and the central average
 check prevents the unnormalized profile from being used to claim a false
 zero-row obstruction.
 
-This is a method-class impossibility audit, not a Lean discharge or a new
-analytic input.  No declaration, headline dependency, or frozen rung status
-changes.
+The finite rank core now has a separate Lean gate:
+
+```bash
+lake build RH.Zeta85.Discharge.AliasRankObstruction RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/AliasRankObstruction.lean
+bash verify/check_axioms.sh
+```
+
+It proves the explicit outer-product channel rank bound, full diagonal rank,
+critical-count contradiction, full-minus-distinguished formulation, and the
+three terminal integer count corollaries.  All nine printed theorems depend
+exactly on `[propext, Classical.choice, Quot.sound]`, with no declaration of
+`axiom`, `sorry`, or `admit`.  The two Euler-profile nonvanishing premises
+remain in the exact interval verifier above; the original quadratic edge
+margin is exact rational arithmetic there.  This formalizes the algebraic
+method-class impossibility without adding an analytic input, changing a
+headline dependency, or changing a frozen rung status.
 
 ## 17. A2.2 normalization and corrected-tail audit
 

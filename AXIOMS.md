@@ -86,6 +86,13 @@ complement needs rank \(N\) but the cycle-3 count supplies at most
 \(N-n_0\).  Certified rational-interval evaluation verifies the positive
 residual for the file-15, R-8686, and R-9506 symbols.  This indicts the
 construction premise, not the stability or moment algebra.
+`RH/Zeta85/Discharge/AliasRankObstruction.lean` now proves the finite
+linear-algebra core in Lean: each explicit residue channel has rank at most
+its residue count, a nonvanishing diagonal residual has full rank, and the
+three exact terminal count budgets are deficient.  Its public theorems print
+only `[propext, Classical.choice, Quot.sound]`.  The transcendental
+nonvanishing assertions for the two terminal Euler profiles remain certified
+by `verify/a2_1_tdac_rank.py`, not by this algebraic module.
 `PrincipalCyclicBlock` now names the exact replacement obligation, including
 literal windows, critical grids, pointwise energy reconstruction, a mean-one
 distinguished profile, and integrable translated-product limits; no instance

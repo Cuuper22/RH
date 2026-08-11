@@ -213,6 +213,14 @@ grids (27), the critical count (10), an alias-free distinguished block, and
 a full-support positive residual.  It is not a theorem about oversampled
 systems, noncommensurable periods, or a different modulation architecture.
 
+The finite linear-algebra implication (12)--(16) is machine-checked in
+`RH/Zeta85/Discharge/AliasRankObstruction.lean`.  In particular, the module
+builds each channel fiber as an explicit sum of rank-one outer products,
+proves its rank is at most `n_j`, proves a diagonal with no zero entry has
+rank `N`, and records the three terminal integer deficits.  The profile
+nonvanishing used to instantiate that theorem for the Euler symbols remains
+the exact rational-interval calculation below.
+
 ### Application to the claimed blocks
 
 This subsection isolates the A2.1 alias equation by provisionally granting
