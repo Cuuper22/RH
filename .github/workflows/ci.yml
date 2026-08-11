@@ -1,0 +1,50 @@
+name: Lean CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lean-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  formal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pinned Lean toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+
+      - name: Build base and extension headlines
+        run: lake build Zeta23 RH.Zeta85.Main Solution.Zeta85
+
+      - name: Check headline axiom output
+        run: bash verify/check_axioms.sh
+
+      - name: Reject proof placeholders outside comparator challenges
+        shell: bash
+        run: |
+          if rg -n '^\s*(sorry|admit)\b|:=\s*(sorry|by\s+sorry)\b|\bby\s+sorry\b' \
+            --glob '*.lean' \
+            --glob '!comparator/Challenge.lean' \
+            --glob '!comparator/Challenge/**' \
+            Zeta23 RH comparator; then
+            echo 'proof placeholder found outside comparator challenge files' >&2
+            exit 1
+          fi

@@ -172,3 +172,24 @@ silently promoted.
 This milestone changes documentation, archived sources, and verification
 artifacts only.  It does not constitute the Phase 0c build, comparator, or
 `#print axioms` rerun; those remain to be recorded separately.
+
+## 10. Phase 0d CI configuration
+
+The push, pull-request, and manual workflow at `.github/workflows/ci.yml` runs:
+
+```bash
+lake exe cache get
+lake build Zeta23 RH.Zeta85.Main Solution.Zeta85
+bash verify/check_axioms.sh
+```
+
+`verify/check_axioms.sh` extracts the expected 56 lines for the eight compiled
+Zeta85 headlines from `AXIOMS.md` §§1.1–1.3 and performs an exact diff against
+fresh Lean output.  It then runs the four base `PrintAxioms` audits.  A final
+source scan rejects proof-level `sorry` and `admit` outside the comparator
+challenge files.
+
+The workflow and extraction logic were inspected locally; this environment has
+no Lean executable, so the authoritative build result is the GitHub-hosted run
+triggered by the Phase 0d commit.  Phase 0c's DigitalOcean reproduction was
+waived explicitly by the user and was not performed.

@@ -22,6 +22,12 @@ remain the current status.  Claims in the newly ingested files are evidence to
 audit, not assumptions or theorems; `docs/run/100/FINAL_100_RESULT.md` is
 withdrawn and has no formal dependency.
 
+The Phase 0d workflow runs `verify/check_axioms.sh` on every push and pull
+request.  That script extracts §§1.1–1.3 directly from this file, diffs them
+against fresh output from `comparator/PrintAxioms/Zeta85.lean`, and also runs
+all four base `PrintAxioms` files.  Changing a compiled rung's dependency list
+without updating this audit therefore fails CI.
+
 ---
 
 ## 1. `#print axioms` — verbatim

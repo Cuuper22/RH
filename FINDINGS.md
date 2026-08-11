@@ -434,3 +434,15 @@ The simultaneous premises therefore describe an empty feasible class.  Their
 contradiction indicts the block/moment premise and cannot prove density one.
 The script output is committed as `verify/withdrawn_100_claim.out`; no theorem
 or rung depends on the withdrawn source.
+
+---
+
+## 13. Phase 0d continuous-integration gate
+
+`.github/workflows/ci.yml` installs the pinned Lean toolchain with the official
+Lean action, fetches the Mathlib cache, builds `Zeta23`, `RH.Zeta85.Main`, and
+`Solution.Zeta85`, diffs fresh Zeta85 headline axiom output against
+`AXIOMS.md`, runs every existing base headline axiom audit, and rejects
+proof-level `sorry`/`admit` outside comparator challenge files.  This is a
+reproduction guard only: it discharges no mathematical input and changes no
+rung status.
