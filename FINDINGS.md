@@ -603,17 +603,26 @@ polynomial theorem proves formula (27) centers to formula (18) through
 degree four.  Finally, the proved Mathlib top-hat integrals specialize this
 identity to the repository's formula (21).
 
+`RH/Zeta85/Discharge/RSPairIntegrals.lean` now discharges the internal
+analytic contraction layer as well.  It evaluates every one- and two-pair
+term through degree four, including the separated, nested, and crossing
+pairings, with raw powers `mu^3` and `mu^5` and normalized powers `mu^2` and
+`mu^4`.  Its final wrappers derive every Fubini/integrability premise from
+`0 < mu`, `Continuous r`, and `HasCompactSupport r`; no target-shaped
+integrability assumption remains in those wrappers.
+
 This does not yet discharge B-2.  The exact remaining blockers are:
 
-1. prove smoothness and strict support for an admissible smoothed cyclic
-   symbol and evaluate each displayed `rsPairIntegral`, thereby connecting
-   `rsMainTerm` to the uncentered contraction formula;
-2. instantiate the published `RS1996ZetaInputs.theorem31` field for zeta;
-3. supply the R1a principal-block identification for the weighted cyclic
-   symbol;
+1. prove smoothness and strict total Fourier support for the cyclic symbol
+   required by the published theorem;
+2. instantiate the actual published `RS1996ZetaInputs.theorem31` field for
+   zeta and apply it to that symbol;
+3. supply the R1a construction and identify the actual distinguished
+   principal block with the cyclic-symbol limit;
 4. extend the real-argument Poisson theorem to actual complex zero
    ordinates, or give another unconditional bridge;
-5. prove the \(k=3,4\) Fubini and finite-grid end estimates;
+5. prove the \(k=3,4\) finite-grid and end estimates (the continuous
+   contraction Fubini steps themselves are now proved);
 6. construct a simultaneous smooth-height limit whose normalization factors
    tend to one for \(1\le k\le4\);
 7. carry the exact conversion
@@ -1356,3 +1365,38 @@ The exact `Fraction` verifier reproduces every exponent, excess, saving, and
 Fourier-cutoff cancellation.  The dedicated dependency printer selects 13
 public theorems; every one reports exactly
 `[propext, Classical.choice, Quot.sound]`.
+
+---
+
+## 30. B-2 RS pair integrals — internal contractions through degree four discharged
+
+`RH/Zeta85/Discharge/RSPairIntegrals.lean` proves the change of variables,
+Fubini reductions, and exact evaluation of every contraction occurring in
+`rsMainTerm (weightedCyclicSymbol mu r)` for degrees one through four.  The
+six one-pair degree-four terms have multiplicities four adjacent plus two
+opposite.  The three two-pair terms are classified as separated, nested, and
+crossing and evaluate respectively to `mu^5 * P(r)`, `mu^5 * P(r)`, and
+`mu^5 * crossingFunctional r`.  Dividing the RS main term by `mu` gives the
+literal `mu^2` and `mu^4` coefficients in formula (27).
+
+The final degree-two, degree-three, and degree-four wrappers require only
+`0 < mu`, `Continuous r`, and `HasCompactSupport r`.  The module derives the
+integrability of every displayed one-pair and two-pair kernel, including the
+nested distance kernel, from those hypotheses.  Thus the complete internal
+RS contraction formula has no unproved analytic premise for a continuous
+compactly supported profile.
+
+This is not a `BlockMomentLimits` instance and does not identify the
+continuous RS main term with the repository's actual finite principal
+block.  The remaining R1b blockers are exactly cyclic-symbol smoothness and
+strict-support admissibility, actual instantiation and application of
+`RS1996ZetaInputs.theorem31`, the common height-smoothing limit, the
+`log T`/`ell(T) = log(T/2*pi)` normalization, complex-frequency Poisson
+summability at actual zeros, the degree-three and degree-four finite-grid/end
+estimates, and the actual R1a principal-block identification.  No frozen rung
+status changes.
+
+The exact verifier independently enumerates the pairing counts and
+partial-sum profiles and checks `mu^3 -> mu^2` and `mu^5 -> mu^4`.  The
+dedicated printer selects 51 public theorems; every normalized output line is
+exactly `[propext, Classical.choice, Quot.sound]`.

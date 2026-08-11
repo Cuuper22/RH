@@ -16,9 +16,14 @@ SHA-256
 Formal status: `RH/Zeta85/Discharge/RSReduction.lean` now proves the
 deterministic pairing enumeration, zero-sum contraction vectors,
 formula-(27)-to-(18) centering, and top-hat formula-(18)-to-(21)
-specialization.  It does not prove the analytic equality from the published
-RS main term to those contractions or the passage from tuple sums to the
-actual finite block.
+specialization.  `RH/Zeta85/Discharge/RSPairIntegrals.lean` additionally
+proves the full one- and two-pair analytic evaluation through degree four.
+The literal Fubini theorems retain explicit integrability hypotheses, and
+wrapper theorems derive all of them from `0 < mu`, `Continuous r`, and
+`HasCompactSupport r`.  It makes the normalization explicit: one-pair terms
+are \(\mu^3\) before and \(\mu^2\) after division by `mu`; two-pair terms are
+\(\mu^5\) before and \(\mu^4\) after.  No passage from tuple sums to the
+actual finite block is proved.
 
 The primary-source statement is the **smoothed** correlation theorem on
 pp. 284--285.  Write \(e(x)=e^{2\pi i x}\), let
@@ -534,16 +539,29 @@ bridge to the real prime-side matrix.
    convergence for every term in (18).  No uniform \(O(T)\) in \(\eta\) may
    be assumed without proof.
 
-9. **Machine-checked contraction algebra -- deterministic layer
-   discharged.** `RSReduction.lean` enumerates the RS pairings as
+9. **Machine-checked contraction algebra -- deterministic and analytic
+   contraction layers discharged.** `RSReduction.lean` enumerates the RS pairings as
    \(0,1,3,6+3\), proves their vectors are zero-sum, proves the centering from
    formula (27) to formula (18), and specializes the constructed top-hat
    integrals to formula (21).  `TopHatMoments.lean` supplies those scalar
    integrals, including the determinant-one crossing reduction, and
-   `TrimmedMoment.lean` proves the terminal quartic algebra.  What remains is
-   the smooth-symbol evaluation of each `rsPairIntegral` and the actual
-   finite-grid/block limit recorded by `BlockMomentLimits.moments`, not a
-   missing scalar polynomial identity.
+   `TrimmedMoment.lean` proves the terminal quartic algebra.
+   `RSPairIntegrals.lean` proves the change
+   \(w=\mu(y-x)\), the required Fubini reductions, every one-pair evaluation,
+   and the separated, nested, and crossing two-pair evaluations.  Before
+   normalization the one-pair terms carry \(\mu^3\) and the two-pair terms
+   carry \(\mu^5\); division by the block fraction gives exactly the
+   \(\mu^2\) and \(\mu^4\) coefficients in (27).  The literal evaluation
+   theorems retain explicit `Integrable` hypotheses.  Separate wrapper
+   theorems derive every such premise from `0 < mu`, `Continuous r`, and
+   `HasCompactSupport r`, and give the normalized `rsMainTerm` formulas
+   through degree four from only those primitive hypotheses.  Thus no
+   internal pair-integral evaluation remains.  The actual finite-grid/block
+   limit recorded by `BlockMomentLimits.moments` remains open; it is not a
+   missing scalar polynomial identity.  Independently,
+   `verify/rs_pair_integrals_exact.py` recomputes the pairing counts, every
+   partial-sum profile, and the powers \(\mu^3/\mu^2\) and
+   \(\mu^5/\mu^4\) before/after normalization.
 
 ## Audit conclusion
 
@@ -555,10 +573,14 @@ has the correct multiplicity semantics.  The flat constants
 RS without that construction.
 
 What is machine-verified at present is the finite pairing classification,
-centering, and scalar top-hat specialization.  The equality evaluating the
-published RS main term at the smoothed cyclic symbol is still open, as is its
-application to the nested finite block.  The certificate therefore remains
-conditional on the exact blockers in Section 9, especially R1a, complex
-Poisson, the \(k=3,4\) finite-grid estimates, and the unconditional
-height-smoothing limit.  A contradiction arising after assuming any of
-those bridges would indict that bridge, not establish a headline rung.
+the complete one- and two-pair analytic evaluation and normalization through
+degree four, centering, and scalar top-hat specialization.  For a continuous
+compactly supported profile, the published RS main term's internal
+contraction expression is fully evaluated as formula (27).  This statement
+does not assert that the cyclic symbol has yet been supplied to the published
+theorem or that its main term equals a finite nested block.  The certificate
+therefore remains conditional on the exact blockers in Section 9, especially
+R1a, cyclic-symbol admissibility, complex Poisson, the \(k=3,4\) finite-grid
+estimates, and the unconditional height-smoothing limit.  A contradiction
+arising after assuming any of those bridges would indict that bridge, not
+establish a headline rung.

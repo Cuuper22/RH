@@ -359,6 +359,57 @@ delegates to) are identical.
 'RH.Zeta85.RSReduction.centeredContraction_eq_formula18' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSReduction.topHat_formula18_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSReduction.topHat_centeredContraction_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.integral_abs_mul_shift_div' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.distanceIntegral_comm' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.onePairCoordinateIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.onePairIntegrand_integrable_of_continuous_compact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.distanceKernel_integrable_of_continuous_compact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_one_eq_coordinate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_one_eq_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.integral_fin_two' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_two_eq_coordinate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k2_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k3_01_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k3_02_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k3_12_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_01' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_02' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_03' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_12' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_13' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_23' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_01_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_02_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_03_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_12_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_13_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_23_distance' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.normalized_k4_onePairSum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_separated' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_nested' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.weightedCyclicSymbol_k4_crossing' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_separated_coordinate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_nested_coordinate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_crossing_coordinate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.separatedTwoPairSection_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.separatedTwoPairCoordinateIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.nestedTwoPairSection_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.nestedTwoPairCoordinateIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.crossingTwoPairCoordinateIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.separatedTwoPairFubiniKernel_integrable_of_continuous_compact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.nestedTwoPairFubiniKernel_integrable_of_continuous_compact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.crossingRawKernel_integrable_of_continuous_compact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.nestedDistanceKernel_integrable_of_continuous_compact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_separated_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_nested_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.rsPairIntegral_k4_crossing_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.normalizedRSMainTerm_k1' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.normalizedRSMainTerm_k2' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.normalizedRSMainTerm_k3' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.normalizedRSMainTerm_k4' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.normalizedRSMainTerm_k2_of_continuous_compactSupport' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.normalizedRSMainTerm_k3_of_continuous_compactSupport' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSPairIntegrals.normalizedRSMainTerm_k4_of_continuous_compactSupport' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.BBLRGCDAllocation.sum_splitFiber_eq_divisorsAntidiagonal' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.BBLRGCDAllocation.collapsedCoeff_eq_divisorSum' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.BBLRGCDAllocation.collapsedCoeff_two_two_unit' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -422,6 +473,15 @@ delegates to) are identical.
 'RH.Zeta85.HBDepthFour.hb4_eq_vonMangoldt' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent_eq_vonMangoldt' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
+
+The 51 `RSPairIntegrals` lines are the exact normalized output of
+`comparator/PrintAxioms/RSPairIntegrals.lean`.  They cover every one- and
+two-pair contraction through degree four and the continuous compact-support
+wrappers; all have the standard three dependencies.  This dependency status
+does not construct `BlockMomentLimits` or discharge cyclic-symbol
+admissibility, the actual theorem-3.1 instance, common height smoothing,
+`log T` versus `ell(T) = log(T/2*pi)`, complex Poisson, the degree-three/four
+finite-grid/end estimates, or the actual principal-block bridge.
 
 ### 1.5 Conditional quartic headlines
 

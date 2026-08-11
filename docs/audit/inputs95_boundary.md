@@ -69,6 +69,17 @@ published RS field does not imply the R1b fields.  Those are deliberate
 separations: citations record provenance, while the missing derivations stay
 named blockers.
 
+The internal analytic evaluation of the published RS contraction main term
+through degree four is now proved separately in
+`Discharge/RSPairIntegrals.lean`.  For a continuous compactly supported
+profile its final wrappers derive all Fubini/integrability premises and give
+the normalized one- and two-pair formula.  This removes no field here:
+`rs1996` still requires the actual theorem instance and `r1b14999`/
+`r1b19999` still require admissibility, common height smoothing, the
+`log T`/`ell(T) = log(T/2pi)` normalization, complex Poisson, the
+degree-three/four finite-grid/end estimates, and identification with the
+actual principal block.
+
 ## 4. Corrected R1a normalization
 
 The distinguished window has period `mu * log(T/2pi)`.  Its energy fraction

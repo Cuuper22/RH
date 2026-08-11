@@ -292,13 +292,14 @@ specialization.  All nine printed theorems depend exactly on
 `[propext, Classical.choice, Quot.sound]`; source scans find no `axiom`,
 `sorry`, or `admit` in the module.
 
-This is not the analytic R1b discharge.  In particular, no theorem identifies
-`rsMainTerm (weightedCyclicSymbol ...)` with the uncentered contraction
-formula, and no theorem transfers it to the actual principal block.  The
-remaining smooth-symbol pair-integral evaluation, published-field instance,
-height smoothing, \(\log T\)-normalization, off-RH complex Poisson, and
-\(k=3,4\) finite-grid/end estimates remain listed in `FINDINGS.md` §16 and
-`docs/audit/rs_reduction.md` §9.
+This deterministic milestone alone was not the analytic R1b discharge.  The
+later `RSPairIntegrals.lean` milestone now identifies
+`normalizedRSMainTerm` with the uncentered contraction formula for a
+continuous compactly supported profile.  No theorem transfers that formula
+to the actual principal block.  Cyclic-symbol admissibility, the actual
+published-field instance, common height smoothing, \(\log T\)-normalization,
+off-RH complex Poisson, and the \(k=3,4\) finite-grid/end estimates remain
+listed in `FINDINGS.md` §16 and `docs/audit/rs_reduction.md` §9.
 
 ## 14. B-1 stability proof
 
@@ -812,3 +813,41 @@ progression majorant applied after equation (14) on the exact symmetric
 block.  It does not prove a lower bound for the original signed remainder,
 exclude simultaneous coefficient cancellation before the majorant, supply
 an A1 trace input, or change a frozen rung status.
+
+## 27. B-2 RS pair-integral and compact-support gate
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.RSPairIntegrals RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/RSPairIntegrals.lean
+python3 verify/rs_pair_integrals_exact.py
+diff -u verify/rs_pair_integrals_exact.out \
+  <(python3 verify/rs_pair_integrals_exact.py)
+bash verify/check_axioms.sh
+```
+
+`RSPairIntegrals.lean` proves all one-pair and two-pair contractions through
+degree four, their exact normalization, and final wrappers which derive all
+kernel integrability from `0 < mu`, `Continuous r`, and
+`HasCompactSupport r`.  `RH.Zeta85.Main` imports the module.  The dedicated
+printer contains 51 selected public theorems and is included in the generic
+standard-three loop in `verify/check_axioms.sh`; every normalized line is
+exactly `[propext, Classical.choice, Quot.sound]`.  Source scans find no
+`axiom`, `sorry`, `admit`, or `unsafe` in the module or printer.
+
+The independent exact verifier enumerates the pairing counts and every
+partial-sum profile and checks the raw/normalized scaling powers.  Its
+committed hashes are:
+
+```text
+04b2a386bd83f19c39307ddf4b7ea36ffc62802f924efcf1d53292d5aa929833  verify/rs_pair_integrals_exact.py
+e090227f8f2768c2a75771ce9ac2fc157e45b1650e09f901530f0a76ab48f4f2  verify/rs_pair_integrals_exact.out
+```
+
+This gate discharges only the internal analytic RS main-term evaluation.  It
+does not construct `BlockMomentLimits`, instantiate the actual published
+theorem-3.1 field, or discharge cyclic-symbol admissibility, common height
+smoothing, `log T` versus `ell(T) = log(T/2*pi)`, complex Poisson, the
+degree-three and degree-four finite-grid/end estimates, or the actual
+principal-block identification.  No frozen rung status changes.
