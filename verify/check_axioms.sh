@@ -56,6 +56,44 @@ actual_alias_fallback() {
 
 diff -u <(expected_alias_fallback) <(actual_alias_fallback)
 
+expected_standard_three_from_printer() {
+  awk '
+    /^#print axioms / {
+      sub(/^#print axioms /, "")
+      print "\047" $0 "\047 depends on axioms: [propext, Classical.choice, Quot.sound]"
+    }
+  ' "$1"
+}
+
+normalize_axiom_output() {
+  awk '
+    {
+      line = $0
+      sub(/^[[:space:]]+/, "", line)
+      if (buffer == "") buffer = line
+      else buffer = buffer " " line
+      if (line ~ /\]$/) {
+        print buffer
+        buffer = ""
+      }
+    }
+    END {
+      if (buffer != "") print buffer
+    }
+  '
+}
+
+for audit in \
+  comparator/PrintAxioms/QuarticWindowWitnesses.lean \
+  comparator/PrintAxioms/R9383ExactEndpoint.lean \
+  comparator/PrintAxioms/TopHatMoments.lean \
+  comparator/PrintAxioms/TrimmedMoment.lean
+do
+  diff -u \
+    <(expected_standard_three_from_printer "$audit") \
+    <(lake env lean "$audit" 2>&1 | normalize_axiom_output)
+done
+
 for audit in \
   comparator/PrintAxioms.lean \
   comparator/PrintAxioms/Multiplicity.lean \

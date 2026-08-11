@@ -840,3 +840,85 @@ exists; the honest degree-four replacement has tail optimum zero.  Escaping
 this statement requires a new coefficient count/normalization and zero-side
 trace proof, a modulation system outside A2.1 and A2.2, or spectral input
 beyond four moments.  No frozen rung changes status.
+
+---
+
+## 21. B-3 terminal certificate layer — finite arithmetic discharged; frozen R-9383 endpoint obstructed
+
+The two terminal scalar cost claims now have explicit constructions.
+`RH/Zeta85/Discharge/QuarticWindowWitnesses.lean` defines even rational
+polynomials of degrees 18 and 10, proves strict positivity by exact Bernstein
+coefficients, evaluates their autocorrelations and saturated costs by Mathlib
+integration, and obtains
+
+\[
+ D_{14999/10000}<1.13434643,
+ \qquad
+ D_{19999/10000}<1.06772567.
+\]
+
+Exact derivative-quotient Bernstein bounds prove monotonicity on the whole
+allocation interval.  Together with the exact edge inequalities, this gives
+the pointwise top-hat caps, not a sampled check.  These theorems discharge
+the two scalar window-cost subtasks; a future `Inputs95` must not reintroduce
+them as fields.  They do not supply the R1a modulation/principal block, which
+was killed in both requested construction classes in §§19--20.
+
+`RH/Zeta85/Discharge/TopHatMoments.lean` starts from actual indicator and
+interval-integral definitions.  It proves the centered scalar moments through
+degree four, all four distance-potential contractions, and
+
+\[
+ \int r_p^2h_p^2=\frac{7p}{60},
+ \qquad
+ \mathcal X_{\mathrm{simplex}}(r_p)=\frac p{30}.
+\]
+
+It assembles the exact closed second, third, and fourth moments in terminal
+formula (21).  The original three-dimensional crossing functional is a
+separate definition.  `crossingReduction` proves its determinant-one
+substitution, exact support-intersection length, and four-quadrant reduction;
+`formula21M4Integral_eq` therefore proves the original fourth formula with no
+bridge proposition.  The R1b theorem that the actual grid/compression moments
+converge to formula (18), and the quantitative smooth-top-hat limit, remain
+absent.
+
+`RH/Zeta85/Discharge/TrimmedMoment.lean` proves finite trimmed quartic weak
+duality and checks both rational terminal quartics globally.  Each of
+`P`, `y²-P`, and `L-P` is factored exactly; rational sign and discriminant
+checks replace every sampled inequality.  The affine fixed-point arithmetic
+gives conditional finite outputs
+
+\[
+ 0.868552508285414235\ldots>0.86855250,
+ \qquad
+ 0.950638321875659418\ldots>0.95063832187565.
+\]
+
+The displayed rational duals are near-optimal rather than exact
+complementary-slackness pairs.  The proof correctly uses weak duality; the
+independent primal computations are labelled calibration and no equality is
+claimed.
+
+The flat R-9383 branch has a different verdict.  Exact rational Taylor and
+square-root enclosures in `verify/b3_r9383_exact_endpoint.py` isolate its
+unique fixed root and prove
+
+\[
+ 0.9383133270509488847
+ \leq r_{\mathrm{flat}}
+ \leq0.9383133270509488848
+ <0.938313327050949.
+\]
+
+Thus file 19 rounded the endpoint upward by at least
+`0.0000000000000001152`.  A second exact rational five-atom law independently
+gives a strict upper comparison.  The rational endgame is replayed in
+`RH/Zeta85/Discharge/R9383ExactEndpoint.lean`.
+
+This kills the exact flat three-atom endpoint certificate class, not the
+frozen target itself.  R-9383 therefore remains unchanged and conditional on
+a genuinely stronger construction.  R-8686 and R-9506 also remain source
+claims because A1, R1a, and R1b are still missing.  Full formulas, exact
+fractions, and reproduction commands are in
+`docs/audit/b3_certificate_layer.md`.

@@ -406,3 +406,59 @@ rational countermodel conditional on the paper-derived closed moment
 formulas; it does not formalize their equality with Mathlib integrals or the
 RS bridge to formula (18), add a principal-block input, or alter a frozen
 rung.
+
+## 18. B-3 terminal certificate layer
+
+The two independent verifiers replay byte for byte with:
+
+```bash
+python3 -m pip install -r verify/requirements.txt
+cmp -s verify/b3_certificate_audit.out \
+  <(python3 verify/b3_certificate_audit.py)
+cmp -s verify/b3_r9383_exact_endpoint.out \
+  <(python3 verify/b3_r9383_exact_endpoint.py)
+```
+
+Their committed SHA-256 values are:
+
+```text
+2f264e6637de2ec09ef5eae93f9f1368eb9a3c6ad0ea2e0c4b05c084f125ceab  verify/b3_certificate_audit.py
+f34b7ca98bebe570140778d1d7341f04ad3191c199153bbecffe17528d2eb130  verify/b3_certificate_audit.out
+3b01ca20b4c0b4ce54ac067050998796852be8417df57a204aa5ab20bc5b77ab  verify/b3_r9383_exact_endpoint.py
+aa8b584aaf771b15ea0b1aeea18df69b29dd4563b6246fa25cd0eda7b861aaad  verify/b3_r9383_exact_endpoint.out
+```
+
+`b3_certificate_audit.py` uses exact rational arithmetic for the terminal
+moments, dual-polynomial factor signs, fixed-point comparisons, Bernstein
+positivity, and polynomial window-cost integrations.  Its `mpmath`
+three-atom calculations are explicitly calibration only.  The second script
+uses only integer and `fractions.Fraction` operations: rational Taylor
+remainders, integer-square-root bounds, and interval automatic
+differentiation isolate the flat endpoint in
+`[0.9383133270509488847, 0.9383133270509488848]`, strictly below frozen
+R-9383.
+
+The formal build gate is:
+
+```bash
+lake build \
+  RH.Zeta85.Discharge.QuarticWindowWitnesses \
+  RH.Zeta85.Discharge.R9383ExactEndpoint \
+  RH.Zeta85.Discharge.TopHatMoments \
+  RH.Zeta85.Discharge.TrimmedMoment \
+  RH.Zeta85.Main
+bash verify/check_axioms.sh
+```
+
+The four isolated B-3 printers are diffed theorem by theorem against exactly
+`[propext, Classical.choice, Quot.sound]`.  The check normalizes only Lean's
+line wrapping; theorem names and dependency contents are compared verbatim.
+In particular, `TopHatMoments.crossingReduction` proves the full
+determinant-one change of variables, support-intersection calculation, and
+four-quadrant reduction, and `formula21M4Integral_eq` proves the original
+three-dimensional formula-(21) fourth moment without a field or named
+premise.  No B-3 source contains `axiom`, `sorry`, or `admit`.
+
+The finite R-8686 and R-9506 implications do not instantiate the missing A1,
+R1a, or R1b analytic bridges.  The README therefore keeps all frozen quartic
+rungs at source-claim status.

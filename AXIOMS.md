@@ -218,6 +218,17 @@ delegates to) are identical.
 'RH.Zeta85.tailExcessSq_principalCompression_le' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.stability_inequality_isometricCompression' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.stability_inequality_principalCompression' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.QuarticWindowWitnesses.windowCost_14999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.QuarticWindowWitnesses.windowCost_19999' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.TopHatMoments.formula21M2Integral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.TopHatMoments.formula21M3Integral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.TopHatMoments.formula21M4ReducedIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.TopHatMoments.crossingReduction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.TopHatMoments.formula21M4Integral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.TrimmedMoment.finite_trimmed_quartic_dual' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.TrimmedMoment.Terminal9506.density_gt_frozen' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.TrimmedMoment.Terminal8686.density_gt_frozen' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.R9383ExactEndpoint.endpoint_box_separation' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ---
@@ -445,3 +456,25 @@ Explicitly proved, not axiomatized (all reported as depending only on the standa
 * the logarithmic-power audit, including the two negative halves showing the budget does **not**
   close (`RH/Zeta85/Discharge/LogBudget.lean`);
 * the dyadic → cumulative passage, reused verbatim from `Zeta23.cumulative_of_dyadic`.
+
+The B-3 finite certificate layer also introduces no primitive assumption:
+
+* `QuarticWindowWitnesses.lean` constructs rational-polynomial windows at
+  supports `14999/10000` and `19999/10000`, proves their exact saturated
+  costs below `1.13434643` and `1.06772567`, and proves the full pointwise
+  top-hat caps;
+* `TopHatMoments.lean` proves the sharp top-hat scalar and distance-potential
+  integrals through degree four, including the determinant-one reduction of
+  the original three-dimensional crossing functional and the original
+  formula-(21) fourth moment;
+* `TrimmedMoment.lean` proves finite weak duality, both global rational
+  quartic inequalities, and the fixed arithmetic clearing the frozen
+  R-8686 and R-9506 constants under explicit finite bridge data; and
+* `R9383ExactEndpoint.lean` replays the rational endgame for the independently
+  certified interval which lies strictly below the frozen R-9383 decimal.
+
+The four isolated printers under `comparator/PrintAxioms/` audit every public
+B-3 headline.  Each reports only `propext`, `Classical.choice`, and
+`Quot.sound`.  These finite results do not assert the A1 pair trace, an R1a
+principal block, the R1b Rudnick--Sarnak specialization, or a smooth
+top-hat/grid limit.
