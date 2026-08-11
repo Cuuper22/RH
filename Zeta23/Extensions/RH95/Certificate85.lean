@@ -96,7 +96,7 @@ manufactures that estimate.
 -/
 theorem proportion85_of_rankTrace
     {N s tr sq : ℝ}
-    (hN : 0 ≤ N)
+    (_hN : 0 ≤ N)
     (hRankTrace : 4 * tr - 2 * N - sq ≤ s)
     (hTrace : N ≤ tr)
     (hSq : sq ≤ (((c85 : ℚ) : ℝ))⁻¹ * N) :
@@ -116,7 +116,7 @@ theorem eighty_five_percent_of_rankTrace
     (17 / 20 : ℝ) * N ≤ s := by
   have hcert := proportion85_of_rankTrace hN hRankTrace hTrace hSq
   have hconst : (17 / 20 : ℝ) < ((proportion85 : ℚ) : ℝ) := by
-    exact_mod_cast proportion85_gt_seventeen_twentieths
+    norm_num [proportion85, c85, sigma85, A85, B85, J85]
   nlinarith
 
 end RH95Audit
