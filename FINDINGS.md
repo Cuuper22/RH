@@ -1627,7 +1627,7 @@ the exact remaining estimate sufficient for `(SQ4-HB)` is
 
 \[
  |\mathfrak M_4(T,x)|
- \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}.
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0.
 \]
 
 Its character representation is equation (14) of
@@ -1645,3 +1645,70 @@ signed analytic moment and smooth source-identification/recombination
 bridge are not.  No A1 field is discharged,
 `signedPair_traceGrade_lt_3_2` remains open, and no frozen rung or README
 status changes.
+
+---
+
+## 35. A1 SQ4 correlated-moment audit — audited fixed-family theorem classes finished; four-sign level moment survives
+
+The audit in docs/audit/sq4_correlated_moment.md continues from family (33)
+without replacing any of its four Möbius factors by absolute values.  The
+full composite-modulus character transform remains the product of two
+generalized shifted Gauss sums.  Its Gauss-square specialization is
+available only when both shifted residues are units; nonzero integer indices
+do not imply this condition.  The exact sufficient pre-completion estimate
+remains
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0.
+\]
+
+It must retain the varying factorized modulus, all conductor and shared-gcd
+strata, and all four Möbius signs before Cauchy.  No theorem asserting this
+estimate is added.
+
+Two broad coefficient-blind classes are finished.  One character Cauchy
+followed by a coefficient-blind large sieve gives fixed-\(x\) exponent
+\(199/100\), exceeding the literal \(83/50\) budget by \(33/100\) and
+(SQ4-HB) by \(1/2\).  Even granting ideal joint square-root cancellation in
+\((k,r)\) after freezing \((p,v)\), then triangle-summing the two outer
+families, gives \(179/100\); it misses the two targets by \(13/100\) and
+\(3/10\).  The exact Parseval diagonal after Cauchy is the four-variable
+constraint \(v_1v_2=w_1w_2\): the literal equality diagonal becomes
+nonnegative coefficient energy, so a later coefficient-blind large sieve
+cannot recover the original unsquared sign correlation.  This is a
+methodological obstruction, not a lower bound for the signed moment.
+
+The primary theorem audit gives three distinct statuses:
+
+| Theorem | Literal source coverage | Finished output |
+|---|---|---|
+| Blomer--Pascadi, Theorem 5.5, arXiv:2607.24311v1 | **Preprint.** It applies literally to each fixed-\((p,v)\) \((k,r)\)-block after the exact \(t\)-integral separation, sign split, and zero-padding.  It does not average \(p\) or \(v\). | The five \(H\)-exponents are \(7/320,1/3200,27/500,71/900,-17/1500\); the inner exponent is \(2617/1800\), and outer triangle summation gives \(4111/1800\).  This misses the literal budget by \(1123/1800\) and (SQ4-HB) by \(1429/1800\). |
+| Kerr--Shparlinski--Wu--Xi, JLMS 108 (2023), Theorem 2.1 | **Published**, but the reduction from (33) is a favourable class: it explicitly grants \((\ell,p)=1\) and \(\|\alpha(t)\|_2\ll_\varepsilon T^{43/100+\varepsilon}\).  It is not a full-source application. | The best displayed \(\Delta_1\)-power is \(-43/200\), the per-\((p,\ell)\) output is \(59/40\), and the completed output is \(421/200\).  It misses the literal budget by \(89/200\) and (SQ4-HB) by \(123/200\). |
+| Pascadi, Forum Math. Pi 14 (2026), Corollary 5.11 (arXiv Corollary 17) | **Published.** On the squarefree-\(v\) stratum, the Ramanujan lift and separate fixed-\((d,a)\) applications are literal.  The stated theorem still has one fixed first-index phase and does not supply the unstated general-first-sequence recombination. | With the correct \(S\sqrt R\,C\) term in (5.32), the geometry powers are \(63/50,19/25,209/200,11/8\).  Literal separate recombination gives \(513/200\), missing the budget by \(181/200\) and (SQ4-HB) by \(43/40\).  The favourable unstated variant gives only conditional arithmetic \(47/20\), with misses \(69/100\) and \(43/50\). |
+
+For the KSWX reduction, replacing the residual reciprocity phase by \(1\)
+has base error exponent \(267/200\).  The explicit admissible allocations
+\(\eta=1/20\) for Poisson truncation and \(\varepsilon=1/20\) for all
+aggregate analytic losses give \(287/200\), leaving margin \(11/200\)
+below (SQ4-HB).  Thus that phase replacement is not the obstruction; the
+favourable energy/coprimality grant and the main \(421/200\) output are.
+
+The Ramanujan lift also has an exact full-family boundary.  If
+\(v_1=ga,\ v_2=gb\), then \(v=g^2ab\), and \(c_v(k)=0\) exactly when
+\(g\nmid k\).  Division by \(c_v(k)\) therefore cannot represent the
+nonsquarefree source strata with \(g\nmid k\).  The literal Corollary 5.11
+route has normalized/raw fixed logarithmic exponents \(1/3\); the favourable
+unstated general-first-sequence route has exponents \(2/4\).  The
+coefficient-blind, fixed-\((p,v)\), Blomer--Pascadi, and KSWX tests use
+normalized/raw exponents \(0/2\).  Every remaining theorem, divisor, Mellin,
+and truncation loss is written explicitly as \(T^\varepsilon\).
+
+No primary theorem audited here has the full left-hand side of family (33).
+This is the exact blocker found in the audited theorem classes, not a
+universal nonexistence claim.  A proof still requires the signed
+generalized-Gauss-product level moment before Cauchy, or another estimate
+coupling at least one outer modulus/level slot, and separately the missing
+smooth source-identification/recombination bridge.  Hence A1,
+`signedPair_traceGrade_lt_3_2`, and every frozen rung status remain
+unchanged.

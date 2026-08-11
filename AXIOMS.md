@@ -186,9 +186,34 @@ full-family Gauss-square replacement, and the actual modulus
 \(p=u_1u_2m\) still requires conductor, prime-power, and shared-gcd strata.
 The exact pre-completion analytic target is the signed moment (14) in
 `docs/audit/sq4_gauss_square_transform.md`, bounded by
-\(T^{48/25+\varepsilon}\) before coefficient-blind Cauchy.  This analytic
+\(T^{48/25+\varepsilon}(\log T)^0\) before coefficient-blind Cauchy.  This analytic
 estimate and the separate smooth source identification remain unproved; no
 A1 field is discharged and no frozen rung status changes.
+
+`RH/Zeta85/Discharge/SQ4CorrelatedMoment.lean` finishes the exact exponent
+and logarithmic bookkeeping for the surviving family without adding a
+premise.  One coefficient-blind character Cauchy chain gives \(199/100\),
+and even ideal joint square-root cancellation only in \((k,r)\) at fixed
+\((p,v)\) gives \(179/100\); both miss the required powers.  Blomer--Pascadi
+Theorem 5.5 (July 2026 **preprint**) applies literally to each fixed
+\((p,v)\) block after exact Fourier-parameter separation, but outer triangle
+summation gives \(4111/1800\).  The published Kerr--Shparlinski--Wu--Xi
+Type-I theorem gives \(421/200\) only under explicitly favourable
+coprime-frequency and coefficient-energy grants, so it is not a full-source
+application.  Published Pascadi Corollary 5.11 (Corollary 17 in the arXiv
+version) applies literally only after the squarefree-\(v\) Ramanujan lift
+and separate fixed-\((d,a)\) invocations,
+giving \(513/200\); the \(47/20\) calculation is conditional on an unstated
+general-first-sequence/recombination variant.  Nonsquarefree strata with
+\(\gcd(v_1,v_2)\nmid k\) are outside that lift.  These are source-audited
+method-class verdicts, not formal analytic bounds.  The signed
+generalized-Gauss-product level moment before Cauchy at exponent
+\(T^{48/25+\varepsilon}(\log T)^0\), and the smooth
+source-identification bridge, remain unproved.  The coefficient-blind,
+fixed-\((p,v)\), Blomer--Pascadi, and KSWX tests have normalized/raw fixed
+logarithmic exponents \(0/2\); the literal and favourable Pascadi
+recombinations have \(1/3\) and \(2/4\), respectively.  Thus A1 and every
+frozen rung status remain unchanged.
 
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
@@ -541,6 +566,21 @@ delegates to) are identical.
 'RH.Zeta85.SQ4GaussSquareTransform.kloosterman_transform_eq_gauss_square' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4GaussSquareTransform.dirichlet_fourier_inversion' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SQ4GaussSquareTransform.kloosterman_kernel_character_inversion' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.source_scales_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.character_norms_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.character_cauchy_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.character_cauchy_integrated_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.fixed_pv_square_root_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.blomer_pascadi_fixed_pv_terms_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.blomer_pascadi_fixed_pv_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.kswx_type_i_delta_terms_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.kswx_type_i_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.pascadi_parameters_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.pascadi_geometry_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.pascadi_lifted_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.pascadi_lifted_integrated_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.literal_cor511_output_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.SQ4CorrelatedMoment.correlated_route_log_exponents_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -601,6 +641,15 @@ specialization, and Dirichlet-character inversion only.  They do not assert
 the signed generalized-Gauss moment bound, any primitive or imprimitive
 Gauss-sum estimate, a CRT recombination of the literal source factors,
 `(SQ4-HB)`, or the smooth source-identification bridge.
+
+The 15 `SQ4CorrelatedMoment` lines are the exact normalized output of
+`comparator/PrintAxioms/SQ4CorrelatedMoment.lean`; all have the standard
+three dependencies.  They prove only rational exponent comparisons and the
+fixed logarithmic inventory.  They assert neither the Blomer--Pascadi
+preprint nor either published theorem, neither favourable grant, no
+Ramanujan-lift coverage beyond the source-audited method class, no analytic
+bound for family (33), no `(SQ4-HB)`, and no smooth source-identification
+bridge.
 
 ### 1.5 Conditional quartic headlines
 

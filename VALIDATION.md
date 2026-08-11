@@ -1022,7 +1022,8 @@ printer, independent-output diff, full axiom gate, source scans, and
 
 The independent `fractions.Fraction` verifier reconstructs the source
 scales, the completion exponent \(-43/100\), the exact pre-completion
-`(SQ4-HB)` target \(48/25\), the weaker literal target \(209/100\), and
+`(SQ4-HB)` target \(48/25\) with fixed log exponent \(0\), the weaker
+literal target \(209/100\), and
 the coefficient-blind pre-completion output \(121/50\).  The latter
 misses the two targets by exactly \(1/2\) and \(33/100\).  It also
 records the raw two-long-slot logarithmic exponent \(2\).  These are
@@ -1045,3 +1046,76 @@ conductor/gcd stratum, and the varying factorized composite modulus before
 coefficient-blind Cauchy.  The required bound and the separate smooth
 source-identification/recombination identity remain unproved.  No A1 field
 is discharged and no frozen rung status changes.
+
+## 32. A1 SQ4 correlated-moment and published-family gates
+
+The formal and independent gates are:
+
+    lake build RH.Zeta85.Discharge.SQ4CorrelatedMoment \
+      RH.Zeta85.Discharge.SQ4GaussSquareTransform RH.Zeta85.Main
+    lake env lean comparator/PrintAxioms/SQ4CorrelatedMoment.lean
+    python3 verify/a1_sq4_correlated_moment.py
+    diff -u verify/a1_sq4_correlated_moment.out \
+      <(python3 verify/a1_sq4_correlated_moment.py)
+    bash verify/check_axioms.sh
+
+SQ4CorrelatedMoment.lean proves the exact rational scales, fixed and
+integrated outputs, strict excesses, explicit KSWX reciprocity-error
+allocation, corrected Pascadi equation-(5.32) geometry, and every fixed
+logarithmic exponent for the correlated-moment audit.  It asserts none of
+the cited analytic theorems, no favourable grant, no estimate for family
+(33), no (SQ4-HB), and no source-identification bridge.
+
+The dedicated printer selects all 15 public theorems and is included in the
+generic standard-three loop in verify/check_axioms.sh.  Every normalized
+line is exactly [propext, Classical.choice, Quot.sound].
+RH.Zeta85.Main imports the module.  The targeted build, Main build, printer,
+independent-output diff, full axiom gate, source scans, and
+git diff --check all exit zero.
+
+The independent fractions.Fraction verifier checks the following distinct
+method-class outputs:
+
+- coefficient-blind character Cauchy: \(199/100\), with budget and
+  (SQ4-HB) excesses \(33/100\) and \(1/2\);
+- ideal fixed-\((p,v)\) square-root cancellation only in \((k,r)\):
+  \(179/100\), with excesses \(13/100\) and \(3/10\);
+- the locally applicable Blomer--Pascadi July 2026 preprint at fixed
+  \((p,v)\): \(H=71/900\), inner output \(2617/1800\), and
+  outer-triangled output \(4111/1800\);
+- the published KSWX favourable Type-I class: best
+  \(\Delta_1=-43/200\), completed output \(421/200\), and reciprocity-error
+  exponent \(287/200\) after the explicit allocations
+  \(\eta=\varepsilon=1/20\), leaving margin \(11/200\);
+- published Pascadi Corollary 5.11 (Corollary 17 in the arXiv version):
+  literal squarefree-\(v\), separate-\((d,a)\) output \(513/200\), versus
+  conditional \(47/20\) arithmetic under the unstated
+  general-first-sequence/recombination grant; and
+- normalized/raw fixed logarithmic exponents \(0/2\), literal Corollary
+  5.11 exponents \(1/3\), and favourable general-first-sequence exponents
+  \(2/4\).
+
+The primary-source map is recorded in the audit rather than asserted in
+Lean.  Blomer--Pascadi Theorem 5.5 is a preprint and genuinely applies only
+to the fixed block used here.  KSWX Theorem 2.1 and Pascadi Corollary 5.11
+are published, but the former source reduction has explicit favourable
+coprimality/energy grants, while the latter literal lift covers only the
+squarefree-\(v\) strata and pays the separate recombination cost.  Pascadi
+Corollary 5.9 and Assumption 5.4 are cited with their final journal
+numbering; the audit also records their arXiv numbers 16 and 14.  The
+arbitrary-coefficient Assumption-5.4 instance is derived directly from
+published Theorem 1.2 after the norm-preserving additive twist.
+
+The exact artifact hashes are:
+
+    8d3ea41ae50b37f089408aa78c56dcc0d84be18661fdc0fae2587c03556f7f66  RH/Zeta85/Discharge/SQ4CorrelatedMoment.lean
+    e9c09a9d0cd8e7963b1216cac2f3e0018dd8122e2866ab95b0a1577653c5d733  comparator/PrintAxioms/SQ4CorrelatedMoment.lean
+    65b9cb6d5f88b0b014e4425319c1518b4ba26d2430c7cb2e48745ab44e1ac659  docs/audit/sq4_correlated_moment.md
+    72b24b4ba09b195651192b03adef58aed7e3706541bf3abc76bfb0595105db31  verify/a1_sq4_correlated_moment.py
+    cc815831e1961a5853d628148ad9c84ed94753ac36597c9c7dc274e80f4064b5  verify/a1_sq4_correlated_moment.out
+
+This gate does not prove the required
+\(T^{48/25+\varepsilon}(\log T)^0\) signed generalized-Gauss-product level
+moment, cover the nonsquarefree \(g\nmid k\) strata by the Ramanujan lift, or
+supply the separate smooth source-identification/recombination identity.
+No A1 field is discharged and no frozen rung status changes.

@@ -698,7 +698,7 @@ pre-completion analytic target sufficient for `(SQ4-HB)` is
 
 \[
  |\mathfrak M_4(T,x)|
- \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}.
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0.
 \]
 
 Restoring \(M/P=T^{-43/100}\) gives \(149/100+\varepsilon\).
@@ -709,6 +709,73 @@ remaining estimate is equation (14) of the dedicated audit: it retains all
 four Möbius factors, the Gauss-square phase on unit strata, the generalized
 shifted products on nonunit conductor/gcd strata, and the varying
 factorized composite modulus before Cauchy.  It is not proved or assumed.
+
+### Correlated-moment theorem classes
+
+The audit in docs/audit/sq4_correlated_moment.md tests the exact surviving
+family before Cauchy.  The sufficient pre-completion target, with every
+logarithm displayed, is
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}
+ T^{48/25+\varepsilon}(\log T)^0.
+\]
+
+One coefficient-blind character Cauchy chain gives \(199/100\), exceeding
+the literal budget by \(33/100\) and (SQ4-HB) by \(1/2\).  Even ideal joint
+square-root cancellation in \((k,r)\) at each fixed \((p,v)\), followed by
+triangle inequality in both outer families, gives \(179/100\), with
+respective excesses \(13/100\) and \(3/10\).  Exact character Parseval
+identifies the diagonal \(v_1v_2=w_1w_2\) created by Cauchy: the original
+signs have become coefficient energy, so a subsequent coefficient-blind
+large sieve cannot recover their unsquared correlation.
+
+The applicable-theorem statuses are deliberately distinct.
+
+- Blomer--Pascadi Theorem 5.5, arXiv:2607.24311v1, is a July 2026
+  **preprint**.  After the exact \(t\)-integral separation, sign split, and
+  zero-padding, it applies literally to each fixed-\((p,v)\) block,
+  including nonunit \(k,r\).  Its five \(H\)-powers are
+  \(7/320,1/3200,27/500,71/900,-17/1500\); the fixed-block output is
+  \(2617/1800\).  Absolute summation in \(p,v\) gives \(4111/1800\), missing
+  the literal budget by \(1123/1800\) and (SQ4-HB) by \(1429/1800\).
+- Kerr--Shparlinski--Wu--Xi, JLMS 108 (2023), Theorem 2.1, is
+  **published**, but the map from (33) is conditional on the favourable
+  grants \((\ell,p)=1\) and
+  \(\|\alpha(t)\|_2\ll_\varepsilon T^{43/100+\varepsilon}\).  Under those
+  grants its best \(\Delta_1\)-power is \(-43/200\), its per-\((p,\ell)\)
+  output is \(59/40\), and its completed output is \(421/200\), exceeding
+  the two targets by \(89/200\) and \(123/200\).  Replacing the residual
+  reciprocity phase by \(1\) is power-safe: allocating
+  \(\eta=1/20\) and aggregate \(\varepsilon=1/20\) gives error
+  \(287/200\), still \(11/200\) below (SQ4-HB).
+- Pascadi, Forum Math. Pi 14 (2026), Corollary 5.11 (Corollary 17 in the
+  arXiv version), is **published**.  On the squarefree-\(v\) stratum, the
+  exact Ramanujan lift followed by separate fixed-\((d,a)\) invocations is
+  literal.  Equation (5.32) contains \(S\sqrt R\,C\), and the four geometry
+  powers are \(63/50,19/25,209/200,11/8\).  Literal recombination gives
+  \(513/200\), missing the targets by \(181/200\) and \(43/40\).  The
+  smaller \(47/20\) output is only conditional arithmetic under an
+  explicitly unstated general-first-sequence and no-cost recombination
+  grant; even then the misses are \(69/100\) and \(43/50\).
+
+The Pascadi lift does not cover the full family.  If
+\(v_1=ga,\ v_2=gb\), then \(v=g^2ab\) and \(c_v(k)=0\) exactly when
+\(g\nmid k\); division by the Ramanujan factor is impossible on those
+nonsquarefree source strata.  The coefficient-blind, fixed-\((p,v)\),
+Blomer--Pascadi, and KSWX tests have normalized/raw fixed log exponents
+\(0/2\).  Literal Corollary 5.11 recombination has exponents \(1/3\), and
+the favourable unstated general-first-sequence variant has \(2/4\).
+All theorem, divisor, Mellin, and truncation losses are explicit
+\(T^\varepsilon\) losses.
+
+No primary theorem audited in this continuation has the full left-hand side
+of (33).  This is a verdict for the displayed theorem classes, not a claim
+that no such theorem exists.  The signed generalized-Gauss-product level
+moment before Cauchy, or a new estimate coupling at least one outer
+modulus/level slot, remains the analytic blocker; the smooth
+source-identification/recombination statement remains a separate blocker.
 
 ### Canonical BBLR collapse proved; smooth Heath--Brown identification missing
 
@@ -999,10 +1066,16 @@ as follows:
    leaves the exact nonzero family (33), with the explicit truncation loss
    \(T^{\eta+\varepsilon}\) for \(0<\eta<2/5\).  The terminal A1 blocker
    on the granted source-shaped block is therefore the signed
-   generalized-Gauss moment (14) of
-   `docs/audit/sq4_gauss_square_transform.md`, bounded at pre-completion
-   exponent \(48/25+\varepsilon\), or another correlated estimate for
-   (33), or a proved geometry-changing completion/reindex.  A full A1
+   generalized-Gauss moment of
+   `docs/audit/sq4_correlated_moment.md`, bounded at explicit pre-completion
+   scale \(T^{48/25+\varepsilon}(\log T)^0\), or another correlated estimate
+   for (33), or a proved geometry-changing completion/reindex.  The audited
+   fixed-family theorem classes do not supply it: the locally applicable
+   Blomer--Pascadi preprint loses the outer signs; the published KSWX map
+   requires favourable coprimality/energy grants and still misses; and
+   published Pascadi Corollary 5.11 is either literal only on its squarefree
+   lifted strata with a larger recombination cost, or conditional on an
+   unstated general-first-sequence variant.  A full A1
    discharge additionally requires the missing smooth
    source-identification/recombination identity;
    `signedPair_traceGrade_lt_3_2` is not discharged, and no frozen rung
