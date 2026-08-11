@@ -1,0 +1,257 @@
+/-
+Copyright (c) 2026 Anthropic, PBC. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+SPDX-License-Identifier: Apache-2.0
+-/
+
+import RH.Zeta85.Inputs95
+
+/-!
+# Deterministic Rudnick--Sarnak contraction reduction
+
+This file proves the finite and scalar part of R3 without adding an analytic
+input.  It does four things.
+
+* `weightedCyclicSymbol` is the gauge-fixed cyclic symbol in formula (23).
+* `rsMainTerm_k1`--`rsMainTerm_k4` enumerate every disjoint pairing in the
+  existing `rsMainTerm` interface: `0`, `1`, `3`, and `6 + 3` contractions.
+* `centeredContraction_eq_formula18` proves that the uncentered contraction
+  formula (27), after the binomial centering in (28), is formula (18).
+* `topHat_centeredContraction_eq_formula21` specializes those scalar terms to
+  the already proved Mathlib integrals in `TopHatMoments` and obtains the
+  repository's `formula21Moment` for every `k <= 4`.
+
+The exact analytic bridge deliberately absent here is an equality between
+`rsMainTerm (weightedCyclicSymbol ...)` and `uncenteredContractionMoment`.
+Proving it requires smoothness and strict-support lemmas for the symbol and
+evaluation of the displayed `rsPairIntegral`s.  Applying that equality to an
+actual block additionally requires common height smoothing, the
+`log T` versus `l T` normalization, complex-frequency Poisson summability at
+off-line zeros, and the missing `k = 3, 4` finite-grid/Fubini/end estimates.
+The existing `RS1996ZetaInputs.theorem31` and the real-frequency `k = 2`
+Poisson/EndsCore API do not provide those steps.
+-/
+
+open MeasureTheory
+open scoped BigOperators Matrix
+
+noncomputable section
+
+namespace RH
+namespace Zeta85
+namespace RSReduction
+
+/-! ## The gauge-fixed weighted cyclic symbol -/
+
+/-- The partial sum `s_a = xi_0 + ... + xi_{a-1}` used in formula (23).
+In particular, `cyclicPartialSum xi 0 = 0`. -/
+def cyclicPartialSum {k : ℕ} (xi : Fin k -> ℝ) (a : Fin k) : ℝ :=
+  ∑ j with j < a, xi j
+
+/-- Formula (23), with the real scalar integral coerced to `Complex`.
+No smoothness or support claim is bundled into this definition. -/
+def weightedCyclicSymbol {k : ℕ} (mu : ℝ) (r : ℝ -> ℝ)
+    (xi : Fin k -> ℝ) : ℂ :=
+  (mu * ∫ x : ℝ,
+    ∏ a : Fin k, r (x + cyclicPartialSum xi a / mu) : ℝ)
+
+/-- At zero frequency, formula (23) is `mu * integral r^k`. -/
+theorem weightedCyclicSymbol_zero {k : ℕ} (mu : ℝ) (r : ℝ -> ℝ) :
+    weightedCyclicSymbol (k := k) mu r 0 =
+      (mu * ∫ x : ℝ, r x ^ k : ℝ) := by
+  simp [weightedCyclicSymbol, cyclicPartialSum]
+
+/-- Every vector used by a disjoint-pair contraction is exactly zero-sum.
+This requires no disjointness hypothesis: each contraction variable occurs
+once with each sign by construction. -/
+theorem rsPairVector_sum {n q : ℕ}
+    (pairing : (Fin q -> Fin (n + 1)) × (Fin q -> Fin (n + 1)))
+    (w : Fin q -> ℝ) :
+    ∑ i : Fin (n + 1), rsPairVector pairing w i = 0 := by
+  have hsum (i0 : Fin (n + 1)) (c : ℝ) :
+      ∑ i : Fin (n + 1), (if i0 = i then c else 0) = c := by
+    simp
+  have hpos :
+      (∑ i : Fin (n + 1), ∑ a : Fin q,
+        if pairing.1 a = i then w a else 0) = ∑ a : Fin q, w a := by
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl (fun a _ => hsum (pairing.1 a) (w a))
+  have hneg :
+      (∑ i : Fin (n + 1), ∑ a : Fin q,
+        if pairing.2 a = i then w a else 0) = ∑ a : Fin q, w a := by
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl (fun a _ => hsum (pairing.2 a) (w a))
+  simp only [rsPairVector, Finset.sum_sub_distrib]
+  rw [hpos, hneg, sub_self]
+
+/-! ## Exact enumeration of the RS disjoint-pair main term -/
+
+/-- The `k = 1` (`n = 0`) main term has no contraction. -/
+theorem rsMainTerm_k1 (Phi : (Fin 1 -> ℝ) -> ℂ) :
+    rsMainTerm (n := 0) Phi = Phi 0 := by
+  simp [rsMainTerm]
+
+/-- The `k = 2` (`n = 1`) main term has its unique one-pair contraction. -/
+theorem rsMainTerm_k2 (Phi : (Fin 2 -> ℝ) -> ℂ) :
+    rsMainTerm (n := 1) Phi =
+      Phi 0 + rsPairIntegral Phi (![0], ![1]) := by
+  rw [rsMainTerm]
+  norm_num
+  rw [show rsPairings 1 1 = {(![0], ![1])} by decide]
+  simp
+
+/-- The `k = 3` (`n = 2`) main term has all three one-pair contractions. -/
+theorem rsMainTerm_k3 (Phi : (Fin 3 -> ℝ) -> ℂ) :
+    rsMainTerm (n := 2) Phi =
+      Phi 0 +
+        (rsPairIntegral Phi (![0], ![1]) +
+         rsPairIntegral Phi (![0], ![2]) +
+         rsPairIntegral Phi (![1], ![2])) := by
+  rw [rsMainTerm]
+  norm_num
+  rw [show rsPairings 2 1 =
+    {(![0], ![1]), (![0], ![2]), (![1], ![2])} by decide]
+  simp
+  ring
+
+/-- The `k = 4` (`n = 3`) main term has six one-pair contractions and the
+three perfect matchings.  The order below is the canonical order encoded by
+`rsPairings`; no symmetry of `Phi` is assumed. -/
+theorem rsMainTerm_k4 (Phi : (Fin 4 -> ℝ) -> ℂ) :
+    rsMainTerm (n := 3) Phi = Phi 0 +
+      (rsPairIntegral Phi (![0], ![1]) +
+       rsPairIntegral Phi (![0], ![2]) +
+       rsPairIntegral Phi (![0], ![3]) +
+       rsPairIntegral Phi (![1], ![2]) +
+       rsPairIntegral Phi (![1], ![3]) +
+       rsPairIntegral Phi (![2], ![3])) +
+      (rsPairIntegral Phi (![0, 1], ![2, 3]) +
+       rsPairIntegral Phi (![0, 1], ![3, 2]) +
+       rsPairIntegral Phi (![0, 2], ![1, 3])) := by
+  rw [rsMainTerm]
+  rw [show Finset.Icc 1 2 = {1, 2} by decide]
+  norm_num
+  rw [show rsPairings 3 1 =
+    {(![0], ![1]), (![0], ![2]), (![0], ![3]),
+     (![1], ![2]), (![1], ![3]), (![2], ![3])} by decide]
+  rw [show rsPairings 3 2 =
+    {(![0, 1], ![2, 3]), (![0, 1], ![3, 2]),
+     (![0, 2], ![1, 3])} by decide]
+  simp
+  ring
+
+/-! ## Formula (27) to formula (18) -/
+
+/-- The ten scalar terms remaining after the individual pair integrals have
+been evaluated.  The names are the literal terms in formula (18):
+
+* `qMomentj = integral q^j`;
+* `rh`, `qrh`, and `qSquaredRh` are `integral r h`, `integral q r h`, and
+  `integral q^2 r h`;
+* `doubleQr` is the two-variable `q r` distance contraction;
+* `rSquaredHSquared` and `crossing` are the two `mu^4` contractions.
+
+This is scalar data, not a proposition about an RS tuple sum or a finite
+matrix block. -/
+structure R3ScalarTerms where
+  qMoment1 : ℝ
+  qMoment2 : ℝ
+  qMoment3 : ℝ
+  qMoment4 : ℝ
+  rh : ℝ
+  qrh : ℝ
+  qSquaredRh : ℝ
+  doubleQr : ℝ
+  rSquaredHSquared : ℝ
+  crossing : ℝ
+
+/-- Formula (27), rewritten using `r = q + 1` before centering.
+For example, `integral r^3 h = qSquaredRh + 2 * qrh + rh`, while the
+opposite-pair term is `doubleQr + 2 * qrh + rh`. -/
+def uncenteredContractionMoment (d : R3ScalarTerms) (mu : ℝ) : ℕ -> ℝ
+  | 0 => 1
+  | 1 => 1 + d.qMoment1
+  | 2 => 1 + 2 * d.qMoment1 + d.qMoment2 + mu ^ 2 * d.rh
+  | 3 => 1 + 3 * d.qMoment1 + 3 * d.qMoment2 + d.qMoment3 +
+      3 * mu ^ 2 * (d.qrh + d.rh)
+  | 4 => 1 + 4 * d.qMoment1 + 6 * d.qMoment2 + 4 * d.qMoment3 + d.qMoment4 +
+      4 * mu ^ 2 * (d.qSquaredRh + 2 * d.qrh + d.rh) +
+      2 * mu ^ 2 * (d.doubleQr + 2 * d.qrh + d.rh) +
+      2 * mu ^ 4 * d.rSquaredHSquared + mu ^ 4 * d.crossing
+  | _ => 0
+
+/-- The exact binomial centering transform in formula (28). -/
+def centeredTransform (c : ℕ -> ℝ) (k : ℕ) : ℝ :=
+  ∑ a ∈ Finset.range (k + 1),
+    (-1 : ℝ) ^ (k - a) * (Nat.choose k a : ℝ) * c a
+
+/-- The right side of formula (18), degree by degree. -/
+def formula18Moment (d : R3ScalarTerms) (mu : ℝ) : ℕ -> ℝ
+  | 0 => 1
+  | 1 => d.qMoment1
+  | 2 => d.qMoment2 + mu ^ 2 * d.rh
+  | 3 => d.qMoment3 + 3 * mu ^ 2 * d.qrh
+  | 4 => d.qMoment4 +
+      4 * mu ^ 2 * d.qSquaredRh +
+      2 * mu ^ 2 * d.doubleQr +
+      2 * mu ^ 4 * d.rSquaredHSquared + mu ^ 4 * d.crossing
+  | _ => 0
+
+/-- Machine-checked R3 centering: formula (27) implies formula (18) for
+every degree through four.  This is a polynomial identity and assumes no
+analytic or matrix conclusion. -/
+theorem centeredContraction_eq_formula18
+    (d : R3ScalarTerms) (mu : ℝ) (k : ℕ) (hk : k <= 4) :
+    centeredTransform (uncenteredContractionMoment d mu) k =
+      formula18Moment d mu k := by
+  interval_cases k <;>
+    norm_num [centeredTransform, uncenteredContractionMoment, formula18Moment,
+      Finset.sum_range_succ, Nat.choose] <;> ring
+
+/-! ## Formula (21): the constructed top-hat scalar specialization -/
+
+/-- The explicit formula-(18) scalar terms constructed from the actual
+Mathlib integrals already proved in `TopHatMoments`. -/
+def topHatR3Terms (p : ℝ) : R3ScalarTerms where
+  qMoment1 := TopHatMoments.centeredMoment 1 p
+  qMoment2 := TopHatMoments.centeredMoment 2 p
+  qMoment3 := TopHatMoments.centeredMoment 3 p
+  qMoment4 := TopHatMoments.centeredMoment 4 p
+  rh := TopHatMoments.rDistanceIntegral p
+  qrh := TopHatMoments.qrDistanceIntegral p
+  qSquaredRh := TopHatMoments.qSquaredRDistanceIntegral p
+  doubleQr := TopHatMoments.doubleQrDistanceIntegral p
+  rSquaredHSquared := TopHatMoments.squaredPotentialIntegral p
+  crossing := TopHatMoments.formulaCrossingIntegral p
+
+/-- Formula (18) for the constructed top-hat terms is exactly the
+repository's formula (21), for `1 <= k <= 4`. -/
+theorem topHat_formula18_eq_formula21 {p mu : ℝ}
+    (hp : 0 < p) (hp1 : p <= 1) (k : ℕ) (hk1 : 1 <= k) (hk4 : k <= 4) :
+    formula18Moment (topHatR3Terms p) mu k = formula21Moment k mu p := by
+  interval_cases k <;>
+    simp [formula18Moment, topHatR3Terms, formula21Moment,
+      TopHatMoments.formula21M2Integral,
+      TopHatMoments.formula21M3Integral,
+      TopHatMoments.formula21M4Integral,
+      TopHatMoments.centeredMoment_one hp hp1]
+
+/-- The complete unconditional scalar specialization: centering the
+formula-(27) contractions built from the proved top-hat integrals yields
+formula (21) through degree four. -/
+theorem topHat_centeredContraction_eq_formula21 {p mu : ℝ}
+    (hp : 0 < p) (hp1 : p <= 1) (k : ℕ) (hk1 : 1 <= k) (hk4 : k <= 4) :
+    centeredTransform (uncenteredContractionMoment (topHatR3Terms p) mu) k =
+      formula21Moment k mu p := by
+  calc
+    centeredTransform (uncenteredContractionMoment (topHatR3Terms p) mu) k =
+        formula18Moment (topHatR3Terms p) mu k :=
+      centeredContraction_eq_formula18 (topHatR3Terms p) mu k hk4
+    _ = formula21Moment k mu p :=
+      topHat_formula18_eq_formula21 hp hp1 k hk1 hk4
+
+end RSReduction
+end Zeta85
+end RH
+
+end

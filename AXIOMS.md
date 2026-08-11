@@ -60,6 +60,16 @@ enlarged-window zeros, \(k=3,4\) finite-grid estimates, and simultaneous
 height-smoothing limit are not derived from the published theorem.  No
 `RS1996ZetaInputs` instance is constructed.
 
+`RH/Zeta85/Discharge/RSReduction.lean` now discharges the deterministic
+finite part of that reduction.  It enumerates the disjoint pairings for
+\(k=1,2,3,4\) as \(0,1,3,6+3\), proves that every contraction vector is
+zero-sum, machine-checks the binomial centering from formula (27) to formula
+(18), and specializes the already formalized top-hat integrals to formula
+(21).  It deliberately does not identify `rsMainTerm` with those scalar
+contractions or identify either expression with an actual block.  Those
+remaining analytic bridges stay in `BlockMomentLimits`; no instance or new
+research axiom is introduced.
+
 Phase B-1 is discharged without an input field.
 `RH/Zeta85/Stability.lean` proves the exact quartic stability bound,
 its isometric-compression form, and its principal-compression form from
@@ -258,6 +268,15 @@ delegates to) are identical.
 'RH.Zeta85.StableZeroSide.block_isHermitian' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.core_count_le_dyadic_add_edge' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.robustBlockTailBound_eventually' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.weightedCyclicSymbol_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.rsPairVector_sum' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.rsMainTerm_k1' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.rsMainTerm_k2' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.rsMainTerm_k3' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.rsMainTerm_k4' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.centeredContraction_eq_formula18' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.topHat_formula18_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSReduction.topHat_centeredContraction_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ### 1.5 Conditional quartic headlines

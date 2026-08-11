@@ -593,29 +593,36 @@ bridge is in `Zeta23/Poisson.lean` and
 `Zeta23/PrimeSideA/EndsCore.lean`, not
 `Zeta23/Taper.lean`.
 
-This derivation does not yet discharge B-2.  Its exact formal blockers are:
+`RH/Zeta85/Discharge/RSReduction.lean` now discharges the deterministic
+finite layer.  It defines the gauge-fixed weighted cyclic symbol, proves its
+zero-frequency value, proves every `rsPairVector` is zero-sum, and enumerates
+the exact RS main terms for \(k=1,2,3,4\): no contraction, one pair, three
+pairs, and six one-pair plus three two-pair contractions.  A separate
+polynomial theorem proves formula (27) centers to formula (18) through
+degree four.  Finally, the proved Mathlib top-hat integrals specialize this
+identity to the repository's formula (21).
 
-1. define the all-tuples correlation and transcribe Theorem 3.1 as a
-   provenance-labelled `Inputs95` field with its \(O(T)\), support,
-   smoothness, and multiplicity clauses;
-2. replace the distributional Dirac delta by a gauge-fixed ordinary
-   integral in Lean;
+This does not yet discharge B-2.  The exact remaining blockers are:
+
+1. prove smoothness and strict support for an admissible smoothed cyclic
+   symbol and evaluate each displayed `rsPairIntegral`, thereby connecting
+   `rsMainTerm` to the uncentered contraction formula;
+2. instantiate the published `RS1996ZetaInputs.theorem31` field for zeta;
 3. supply the R1a principal-block identification for the weighted cyclic
    symbol;
-4. extend the real-argument Poisson theorem to the complex zero ordinates,
-   or give a different unconditional bridge;
+4. extend the real-argument Poisson theorem to actual complex zero
+   ordinates, or give another unconditional bridge;
 5. prove the \(k=3,4\) Fubini and finite-grid end estimates;
 6. construct a simultaneous smooth-height limit whose normalization factors
    tend to one for \(1\le k\le4\);
 7. carry the exact conversion
-   \(\mu_T=\mu\log(T/2\pi)/\log T\to\mu\);
-8. smooth the profile with the \(T\to\infty\) and smoothing limits in the
-   correct order; and
-9. machine-check the cyclic symbol, pair classification, contraction
-   integrals, and centering algebra.
+   \(\mu_T=\mu\log(T/2\pi)/\log T\to\mu\); and
+8. take the top-hat smoothing limit after \(T\to\infty\), with the required
+   uniform domination and strict admissibility margin.
 
-No `Inputs95` field is added at this milestone because the formal
-objects in item 1 do not yet exist.  No rung status or dependency changes.
+The remaining actual-block limit is still the explicit
+`BlockMomentLimits` structure.  No instance is constructed, no new research
+axiom is declared, and no rung status or dependency changes.
 
 ---
 

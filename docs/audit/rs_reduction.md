@@ -13,6 +13,13 @@ The audited primary copy is the
 SHA-256
 `83010c4f68efc5f5628a71a589ff3a374220b25902384e9c1a34b3d6cd0834d6`.
 
+Formal status: `RH/Zeta85/Discharge/RSReduction.lean` now proves the
+deterministic pairing enumeration, zero-sum contraction vectors,
+formula-(27)-to-(18) centering, and top-hat formula-(18)-to-(21)
+specialization.  It does not prove the analytic equality from the published
+RS main term to those contractions or the passage from tuple sums to the
+actual finite block.
+
 The primary-source statement is the **smoothed** correlation theorem on
 pp. 284--285.  Write \(e(x)=e^{2\pi i x}\), let
 \(g_j\in C_c^\infty(\mathbb R)\), and put
@@ -527,12 +534,16 @@ bridge to the real prime-side matrix.
    convergence for every term in (18).  No uniform \(O(T)\) in \(\eta\) may
    be assumed without proof.
 
-9. **Machine-checked contraction algebra -- scalar layer discharged.**
-   `TopHatMoments.lean` proves the formula-(21) scalar contractions, including
-   the determinant-one crossing reduction, and `TrimmedMoment.lean` proves
-   the terminal quartic algebra.  The remaining blocker is the actual
+9. **Machine-checked contraction algebra -- deterministic layer
+   discharged.** `RSReduction.lean` enumerates the RS pairings as
+   \(0,1,3,6+3\), proves their vectors are zero-sum, proves the centering from
+   formula (27) to formula (18), and specializes the constructed top-hat
+   integrals to formula (21).  `TopHatMoments.lean` supplies those scalar
+   integrals, including the determinant-one crossing reduction, and
+   `TrimmedMoment.lean` proves the terminal quartic algebra.  What remains is
+   the smooth-symbol evaluation of each `rsPairIntegral` and the actual
    finite-grid/block limit recorded by `BlockMomentLimits.moments`, not a
-   missing scalar integral.
+   missing scalar polynomial identity.
 
 ## Audit conclusion
 
@@ -543,10 +554,11 @@ has the correct multiplicity semantics.  The flat constants
 (18) have explicit constructions above; no constant is being attributed to
 RS without that construction.
 
-What is verified at present is the RS main-term specialization and the
-finite-dimensional contraction calculation.  Application to the nested
-certificate remains conditional on the exact blockers in Section 9,
-especially R1a, complex Poisson, the \(k=3,4\) finite-grid estimates, and the
-unconditional height-smoothing limit.  A contradiction arising after
-assuming any of those bridges would indict that bridge, not establish a
-headline rung.
+What is machine-verified at present is the finite pairing classification,
+centering, and scalar top-hat specialization.  The equality evaluating the
+published RS main term at the smoothed cyclic symbol is still open, as is its
+application to the nested finite block.  The certificate therefore remains
+conditional on the exact blockers in Section 9, especially R1a, complex
+Poisson, the \(k=3,4\) finite-grid estimates, and the unconditional
+height-smoothing limit.  A contradiction arising after assuming any of
+those bridges would indict that bridge, not establish a headline rung.

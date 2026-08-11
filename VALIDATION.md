@@ -277,9 +277,27 @@ Lemmas 4.2--4.3.  The cyclic symbol, flat contractions, weighted
 specialization to terminal formula (18), and corrected repository source map
 are explicit in that document.
 
-This is a source-and-derivation audit, not a Lean discharge.  It adds no
-declaration, axiom, or `Inputs95` field.  The nine remaining formal
-bridges are listed verbatim in `FINDINGS.md` §16 and
+The deterministic contraction layer is now checked by:
+
+```bash
+lake build RH.Zeta85.Discharge.RSReduction RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/RSReduction.lean
+bash verify/check_axioms.sh
+```
+
+`RSReduction.lean` proves the zero-frequency cyclic-symbol identity,
+zero-sum contraction vectors, the exact \(0,1,3,6+3\) pairing enumeration,
+formula-(27)-to-(18) centering, and the top-hat formula-(18)-to-(21)
+specialization.  All nine printed theorems depend exactly on
+`[propext, Classical.choice, Quot.sound]`; source scans find no `axiom`,
+`sorry`, or `admit` in the module.
+
+This is not the analytic R1b discharge.  In particular, no theorem identifies
+`rsMainTerm (weightedCyclicSymbol ...)` with the uncentered contraction
+formula, and no theorem transfers it to the actual principal block.  The
+remaining smooth-symbol pair-integral evaluation, published-field instance,
+height smoothing, \(\log T\)-normalization, off-RH complex Poisson, and
+\(k=3,4\) finite-grid/end estimates remain listed in `FINDINGS.md` §16 and
 `docs/audit/rs_reduction.md` §9.
 
 ## 14. B-1 stability proof
