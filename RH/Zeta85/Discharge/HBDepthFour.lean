@@ -20,11 +20,11 @@ their constructed mean; they are not identified with the planned block.
 
 Honesty boundary: docs/run/12 never supplies the sharp/smooth cutoff
 identification, its scale-dependent grouping plan, the Fourier factor
-F_{d,ell}, or the pointwise equality between its zero frequency and the
-prime-pair singular series.  Accordingly no definition below is claimed to
-be that source's c_{d,p} or e_{d,q}, and no cross-Y, EDB, WG-HB, or trace-grade
-estimate is asserted.  SingularSeriesCentering names the exact remaining
-pointwise equality without assuming it.
+F_{d,ell}, or an evaluated recombination between its frequency `ell = 0`
+integral and the prime-pair singular series.  Accordingly no definition
+below is claimed to be that source's c_{d,p} or e_{d,q}, and no cross-Y, EDB,
+WG-HB, or trace-grade estimate is asserted.  SingularSeriesCentering names
+only the zero-error pointwise schema without assuming it.
 -/
 import RH.Zeta85.Arith
 
@@ -439,7 +439,7 @@ def progressionCell (c : ℕ → ℝ) (X q r : ℕ) : ℝ :=
   ∑ n ∈ (sizeBlock X).filter (fun n => n % q = r % q), c n
 
 /-- The mean over all residue classes, not only reduced classes.  It is not
-claimed to be the zero mode of the source's coprime Poisson block. -/
+claimed to be the frequency `ell = 0` term of the source's Poisson block. -/
 def progressionZeroMode (c : ℕ → ℝ) (X q : ℕ) : ℝ :=
   if q = 0 then 0
   else (q : ℝ)⁻¹ * ∑ r ∈ Finset.range q, progressionCell c X q r
@@ -460,11 +460,142 @@ lemma centeredProgressionCell_eq_error (c : ℕ → ℝ) (X q r : ℕ) :
     centeredProgressionCell c X q r =
       progressionCell c X q r - progressionZeroMode c X q := rfl
 
-/-- The exact equality still required to identify a supplied BBLR zero-mode
-function with the singular-series subtraction in the signed pair aggregate.
-This is a named predicate, not an assumed fact or a field of the coefficient data. -/
+/-! ## Reduced residue cells
+
+The nonzero Poisson family in run 12 is supported on `(p,q)=1`.  The
+corresponding finite centering therefore averages over reduced residue
+classes, not over every class modulo `q`.  This remains only coefficient
+bookkeeping: BBLR's actual `ell = 0` term is a separate gcd/integral main
+term, and no theorem below identifies this mean with it or with the
+prime-pair singular series. -/
+
+def reducedResidues (q : ℕ) : Finset ℕ :=
+  (Finset.range q).filter (fun r => q.Coprime r)
+
+@[simp]
+lemma mem_reducedResidues {q r : ℕ} :
+    r ∈ reducedResidues q ↔ r < q ∧ q.Coprime r := by
+  simp [reducedResidues]
+
+lemma card_reducedResidues (q : ℕ) :
+    (reducedResidues q).card = Nat.totient q := by
+  rw [Nat.totient_eq_card_coprime]
+  rfl
+
+def reducedProgressionZeroMode (c : ℕ → ℝ) (X q : ℕ) : ℝ :=
+  if q = 0 then 0
+  else (Nat.totient q : ℝ)⁻¹ *
+    ∑ r ∈ reducedResidues q, progressionCell c X q r
+
+def reducedCenteredProgressionCell (c : ℕ → ℝ) (X q r : ℕ) : ℝ :=
+  progressionCell c X q r - reducedProgressionZeroMode c X q
+
+lemma sum_reducedCenteredProgressionCell (c : ℕ → ℝ) (X q : ℕ) (hq : q ≠ 0) :
+    ∑ r ∈ reducedResidues q, reducedCenteredProgressionCell c X q r = 0 := by
+  simp only [reducedCenteredProgressionCell, Finset.sum_sub_distrib]
+  rw [reducedProgressionZeroMode, if_neg hq]
+  simp only [Finset.sum_const, card_reducedResidues, nsmul_eq_mul]
+  have hphi : (Nat.totient q : ℝ) ≠ 0 := by
+    exact_mod_cast (Nat.totient_pos.mpr (Nat.pos_of_ne_zero hq)).ne'
+  field_simp
+  ring
+
+def plannedLeftCoeffSequence (G : CommonScaleGeometry) (plan : HBGroupingPlan)
+    (Z scale d : ℕ) (leftTerm : Fin 4) : ℕ → ℝ :=
+  fun p => localizedSplitCoeff (G.P scale / d)
+    (hbGroupedLeft Z leftTerm (plan.left scale leftTerm))
+    (hbGroupedRight Z leftTerm (plan.left scale leftTerm)) d p
+
+lemma plannedLeftCoeffSequence_apply (G : CommonScaleGeometry) (plan : HBGroupingPlan)
+    (Z scale d : ℕ) (ell : ℤ) (p q : ℕ) (leftTerm rightTerm : Fin 4) :
+    plannedLeftCoeffSequence G plan Z scale d leftTerm p =
+      plannedLeftBlockCoeff G plan Z
+        ⟨scale, d, ell, p, q, leftTerm, rightTerm⟩ := rfl
+
+def plannedLeftReducedZeroMode (G : CommonScaleGeometry) (plan : HBGroupingPlan)
+    (Z scale d q : ℕ) (leftTerm : Fin 4) : ℝ :=
+  reducedProgressionZeroMode
+    (plannedLeftCoeffSequence G plan Z scale d leftTerm)
+    (G.P scale / d) q
+
+def plannedLeftReducedCenteredCell (G : CommonScaleGeometry) (plan : HBGroupingPlan)
+    (Z scale d q r : ℕ) (leftTerm : Fin 4) : ℝ :=
+  reducedCenteredProgressionCell
+    (plannedLeftCoeffSequence G plan Z scale d leftTerm)
+    (G.P scale / d) q r
+
+lemma sum_plannedLeftReducedCenteredCell (G : CommonScaleGeometry)
+    (plan : HBGroupingPlan) (Z scale d q : ℕ) (leftTerm : Fin 4) (hq : q ≠ 0) :
+    ∑ r ∈ reducedResidues q,
+      plannedLeftReducedCenteredCell G plan Z scale d q r leftTerm = 0 := by
+  exact sum_reducedCenteredProgressionCell
+    (plannedLeftCoeffSequence G plan Z scale d leftTerm) (G.P scale / d) q hq
+
+/-- The signed sum of all four depth-four components on the left side of
+one supplied grouping plan.  This is still a sharp coefficient candidate:
+no theorem identifies it with the source's smoothly allocated `c_{d,p}`. -/
+def plannedLeftSignedCoeffSequence (G : CommonScaleGeometry) (plan : HBGroupingPlan)
+    (Z scale d : ℕ) : ℕ → ℝ :=
+  fun p => ∑ leftTerm : Fin 4,
+    plannedLeftCoeffSequence G plan Z scale d leftTerm p
+
+def plannedLeftSignedReducedZeroMode (G : CommonScaleGeometry)
+    (plan : HBGroupingPlan) (Z scale d q : ℕ) : ℝ :=
+  reducedProgressionZeroMode
+    (plannedLeftSignedCoeffSequence G plan Z scale d)
+    (G.P scale / d) q
+
+def plannedLeftSignedReducedCenteredCell (G : CommonScaleGeometry)
+    (plan : HBGroupingPlan) (Z scale d q r : ℕ) : ℝ :=
+  reducedCenteredProgressionCell
+    (plannedLeftSignedCoeffSequence G plan Z scale d)
+    (G.P scale / d) q r
+
+lemma sum_plannedLeftSignedReducedCenteredCell (G : CommonScaleGeometry)
+    (plan : HBGroupingPlan) (Z scale d q : ℕ) (hq : q ≠ 0) :
+    ∑ r ∈ reducedResidues q,
+      plannedLeftSignedReducedCenteredCell G plan Z scale d q r = 0 := by
+  exact sum_reducedCenteredProgressionCell
+    (plannedLeftSignedCoeffSequence G plan Z scale d) (G.P scale / d) q hq
+
+def residueSpikeAtTwo : ℕ → ℝ := fun n => if n = 2 then 1 else 0
+
+/-- Exact obstruction to substituting the old all-class mean for the reduced
+mean used by the coprime Poisson family: on `[1,2]` modulo `2`, the sole mass
+lies in the non-unit class. -/
+lemma allClass_zeroMode_ne_reduced_zeroMode :
+    progressionZeroMode residueSpikeAtTwo 1 2 = 1 / 2 ∧
+      reducedProgressionZeroMode residueSpikeAtTwo 1 2 = 0 := by
+  have hblock : sizeBlock 1 = {1, 2} := by decide
+  have hred : reducedResidues 2 = {1} := by decide
+  have hzeroResidues :
+      (Finset.range 2).filter (fun x => 0 = x % 2) = {0} := by decide
+  constructor <;>
+    norm_num [progressionZeroMode, reducedProgressionZeroMode,
+      progressionCell, hblock, hred, hzeroResidues, residueSpikeAtTwo]
+
+/-- A zero-error pointwise schema for identifying a supplied frequency
+`ell = 0` function with the singular-series subtraction in the signed pair aggregate.
+The actual smooth BBLR recombination may carry an explicit error.  This is a
+named predicate, not an assumed fact or a field of the coefficient data. -/
 def SingularSeriesCentering (zeroMode S : ℕ → ℝ) (X IV : ℝ) : Prop :=
   ∀ h : ℕ, zeroMode h = S h * X * IV
+
+/-- Reduced-class centering is finite zero-sum bookkeeping, but by itself it
+does not imply a singular-series main term.  This exact countermodel takes
+all coefficient cells to be zero while the proposed singular-series target
+is one. -/
+lemma reducedCentering_alone_not_sufficient :
+    (∑ r ∈ reducedResidues 2,
+      reducedCenteredProgressionCell (fun _ => 0) 1 2 r = 0) ∧
+      ¬SingularSeriesCentering
+        (fun _ => reducedProgressionZeroMode (fun _ => 0) 1 2)
+        (fun _ => 1) 1 1 := by
+  constructor
+  · exact sum_reducedCenteredProgressionCell (fun _ => 0) 1 2 (by norm_num)
+  · intro h
+    have h0 := h 0
+    norm_num [reducedProgressionZeroMode, progressionCell, SingularSeriesCentering] at h0
 
 def singularSeriesCenteringError (zeroMode S : ℕ → ℝ) (X IV : ℝ) (h : ℕ) : ℝ :=
   zeroMode h - S h * X * IV

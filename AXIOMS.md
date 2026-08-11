@@ -48,11 +48,15 @@ the common-scale, coefficient-sensitive \(o(T(\log T)^2)\) estimate (14) in
 `docs/audit/log_budget_routes.md`.  The repository now constructs an exact
 sharp-cutoff depth-four Heath--Brown expansion, arbitrary scale-indexed
 factor groupings, divisor-split coefficient candidates, and a shared
-\((j,d,\ell,p,q)\) address.  Run 12 still supplies no equality selecting its
-smooth grouping, Fourier kernel, or singular-series zero mode from this
-object, so estimate (14) is not yet a statement about source-identified
-coefficients and cannot prove the explicit `PairTraceGrade95` field.  Therefore
-`signedPair_traceGrade_lt_3_2` remains unchanged.
+\((j,d,\ell,p,q)\) address.  Reduced-residue progression centering is now
+constructed for these candidate coefficients, but finite centering alone
+does not identify the source main term: BBLR's frequency \(\ell=0\)
+contribution is a gcd-weighted integral, not that residue mean.  Run 12 still
+supplies no equality selecting its smooth grouping and Fourier kernel, nor
+the signed Euler/Ramanujan evaluation of those integrals with an explicit
+error.  Thus estimate (14) is not yet a statement about source-identified
+coefficients and cannot prove the explicit `PairTraceGrade95` field.
+Therefore `signedPair_traceGrade_lt_3_2` remains unchanged.
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` proves the exact remainder
 
@@ -66,11 +70,16 @@ grouping multiplies back to its signed component, builds the
 \(d_1d_2=d_3d_4=d\) coefficient sums with exact triangle majorants, and
 defines a finite nonzero-frequency cross-scale candidate before absolute
 values.  Its closed natural-number floor blocks are not a source partition,
-and its generic all-residue-class mean is not the reduced-class zero mode of
-the planned block.  It asserts no estimate and no identification with run
-12's `c_{d,p}`, `e_{d,q}`, or `F_{d,ell}`.
-`SingularSeriesCentering` names the missing pointwise equality without
-assuming it.
+and its generic all-residue-class mean is provably not interchangeable with
+the reduced-class mean.  The module constructs the latter and proves its
+centered cells sum to zero, including for a signed four-component candidate.
+It also proves by exact countermodels that the two means can differ and that
+reduced centering alone cannot imply `SingularSeriesCentering`.  BBLR's
+actual frequency \(\ell=0\) gcd/integral main term and its signed
+singular-series recombination remain unconstructed.  The module asserts no
+estimate and no identification with run 12's `c_{d,p}`, `e_{d,q}`, or
+`F_{d,ell}`.  `SingularSeriesCentering` names only the zero-error special
+case without assuming it.
 
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
@@ -108,9 +117,10 @@ BBLR bounds miss by fixed powers.  A simultaneous coefficient-sensitive
 `(WG-HB)` estimate would close with net saving \(7/400\) under the
 displayed candidate bound, but the repository lacks the proved source
 identification for the signed depth-four object and the exact
-Fourier/zero-mode kernel needed to state
-that input faithfully.  The sharp algebraic coefficient object alone does
-not supply those missing equalities.  Therefore
+Fourier kernel, BBLR frequency \(\ell=0\) integral, and signed Ramanujan
+evaluation needed to state that input faithfully.  The sharp algebraic
+coefficient object and reduced-residue centering alone do not supply those
+missing equalities.  Therefore
 `signedPair_traceGrade_lt_3_2` remains unchanged.
 
 Phase A2.1 also changes no compiled dependency.  The claimed cycle-3
@@ -321,6 +331,11 @@ delegates to) are identical.
 'RH.Zeta85.HBDepthFour.abs_plannedLeftBlockCoeff_le' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.abs_plannedRightBlockCoeff_le' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.sum_centeredProgressionCell' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.sum_reducedCenteredProgressionCell' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.sum_plannedLeftReducedCenteredCell' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.sum_plannedLeftSignedReducedCenteredCell' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.allClass_zeroMode_ne_reduced_zeroMode' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.reducedCentering_alone_not_sufficient' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.singularSeriesCentering_iff_error_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.zeta_mul_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.HBDepthFour.hb4_remainder' depends on axioms: [propext, Classical.choice, Quot.sound]

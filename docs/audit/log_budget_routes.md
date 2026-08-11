@@ -248,9 +248,10 @@ square-function, and Abel-without-prefix-bound method classes are finished
 and killed by (11)--(13) and the exact log count.  The actual coefficient
 estimate (14) is neither proved nor disproved.  A sharp common-scale
 coefficient candidate now exists in `HBDepthFour.lean`, but the smooth
-source grouping, exact kernel, and zero-mode identification needed to make
-it the actual cycle-5 family are absent.  Equation (14) remains the precise
-blocking statement, not an inference from the current hypotheses.
+source grouping, exact kernel, BBLR frequency \(\ell=0\) integrals, and
+signed Ramanujan evaluation needed to make it the actual cycle-5 family are
+absent.  Equation (14) remains the precise blocking statement, not an
+inference from the current hypotheses.
 
 ## Route 3: reduce Heath--Brown depth
 
@@ -497,9 +498,13 @@ defines the fixed-\(q\) norm and a finite nonzero-frequency cross-scale signed
 sum before absolute values.  Its planned support uses explicit closed
 natural-number floor blocks; it is not a reconstruction of the source's
 smooth partition, and no infinite-\(\ell\) tail estimate is included.  Its
-generic residue mean averages all classes, not the source's reduced classes,
-and is not connected to the planned coefficients.  These constructions are
-exact but are not yet the source's coefficients.
+generic residue mean averages all classes.  The module now also constructs
+the literal reduced-class mean for its planned left coefficients and their
+signed four-component sum, and proves the corresponding centered sums
+vanish.  Exact countermodels show that the all-class and reduced-class means
+cannot be interchanged and that reduced centering alone cannot imply a
+singular-series main term.  These constructions are exact but are not yet
+the source's coefficients or BBLR frequency \(\ell=0\) main term.
 
 The actual depth-four route still cannot be submitted to any cited estimate
 because run 12 does not provide:
@@ -510,8 +515,9 @@ because run 12 does not provide:
   variables and weights;
 - the exact \(F_{q,\ell}(a,m)\) and signed \(h\)-sum, including separability
   and derivative bounds required by a cited theorem; or
-- a pointwise equality between the zero mode of that same constructed block
-  and the singular-series subtraction.
+- the BBLR frequency \(\ell=0\) gcd/integral formula for that same smooth
+  allocation and its signed Euler/Ramanujan evaluation as the
+  singular-series subtraction plus an explicitly bounded error.
 
 **Route-4 verdict:** the exact class \(\mathcal W_1\) is finished and killed.
 Fixed-modulus completion already fails by \(T^{9/50}\); independent cells,
@@ -554,10 +560,16 @@ control an aggregate of the form
 
 Here \(c\) and \(e\) are the actual signed, smoothly truncated
 Möbius/Heath--Brown convolutions and \(E_c\) is their *centred* progression
-sum.  In addition to `(EDB)`, the route needs a pointwise identity matching
-the main terms of every signed Heath--Brown block and gcd splitting with the
-prime-pair singular-series subtraction.  Neither requirement may be replaced
-by the corresponding statement for the nonnegative majorant \(d_4\).
+sum over reduced residue classes.  The finite reduced-centering identity is
+now formalized, but it does not identify the main term removed from the
+source calculation.  In BBLR Proposition 3.1 equation (14), frequency
+\(\ell=0\) is a gcd-weighted integral; the reduced variables occur only in
+the later split of the nonzero-frequency family.  In addition to `(EDB)`,
+the route therefore needs the actual smooth HB allocation into those
+integrals and a signed Euler/Ramanujan evaluation matching their aggregate
+with the prime-pair singular-series subtraction, including an explicit
+error and logarithmic exponent.  Neither requirement may be replaced by the
+corresponding statement for the nonnegative majorant \(d_4\).
 
 ### The available published mean values
 
@@ -665,6 +677,14 @@ comes from an additive Estermann series for \(d_4\).  No cited result or
 in-repository derivation identifies the aggregate of these main terms for
 the actual signed blocks with the prime-pair singular-series subtraction.
 
+There is a separate exact finish/kill result for centering.  The method class
+that tries to infer the singular-series identity using only reduced-cell
+centering is killed by `reducedCentering_alone_not_sufficient`: centered
+unit-class cells may all sum to zero while any proposed nonzero singular
+target remains unmatched.  This does not kill the surviving method from the
+actual smooth HB allocation, BBLR frequency \(\ell=0\) integrals, and their
+signed Ramanujan recombination; that construction remains absent.
+
 **Route-5 verdict:** the exact method class “published \(d_4\) progression
 mean value, followed by a norm bound in the residue variable and
 absolute/Cauchy aggregation in \(q\)” is impossible at (29): it misses by a
@@ -693,8 +713,9 @@ as follows:
    improves the threshold only to \(C<2\), so it is insufficient at
    \(C\ge3\).  The stronger common-scale target (14) survives, but the
    sharp compatible coefficient family is now constructed only as an
-   algebraic candidate; the source's smooth grouping, kernel, and zero-mode
-   identifications required to make (14) its actual Heath--Brown
+   algebraic candidate; reduced-residue centering is proved, but the source's
+   smooth grouping, kernel, BBLR frequency \(\ell=0\) integrals, and signed
+   Ramanujan evaluation required to make (14) its actual Heath--Brown
    decomposition remain absent.
 3. Route 4 kills the one-shot arbitrary-coefficient class
    \(\mathcal W_1\).  The coefficient-sensitive `(WG-HB)` estimate

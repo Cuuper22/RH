@@ -720,8 +720,8 @@ cancellation.  `HBDepthFour.lean` now defines the sharp signed expansion,
 arbitrary factor grouping, divisor bookkeeping, coefficient candidates, and
 exact majorants.  What remains absent is the proved identification with run
 12's smooth factor allocation, the exact \(F_{q,\ell}(a,m)\) with
-theorem-compatible regularity, and the pointwise zero-mode/singular-series
-identity.  The exact surviving statement is
+theorem-compatible regularity, the BBLR frequency \(\ell=0\) integrals, and
+their signed Euler/Ramanujan evaluation with an explicit error.  The exact surviving statement is
 `(WG-HB)` in `docs/audit/log_budget_routes.md`; it remains
 unproved and cannot yet be faithfully made an `Inputs95` field.
 
@@ -1134,7 +1134,7 @@ discharge those premises.
 
 ---
 
-## 26. A1 depth-four coefficient object — sharp algebra proved; source map open
+## 26. A1 depth-four coefficient object — sharp algebra and reduced centering proved; source map open
 
 `RH/Zeta85/Discharge/HBDepthFour.lean` proves the exact \(K=4\)
 Heath--Brown identity
@@ -1157,10 +1157,13 @@ their exact absolute majorants, natural-number floor blocks, the shared
 nonzero-frequency cross-scale sum before absolute values.  Those closed
 floor blocks are not a reconstruction of the source's smooth partition, and
 the infinite \(\ell\)-tail is not estimated.  Generic residue cells have a
-canonical all-class mean and their centered sum is proved to vanish; that
-mean neither restricts to reduced classes nor is identified with the planned
-block's zero mode.  No log exponent, unspecified constant, or analytic
-estimate is asserted.
+canonical all-class mean, while `reducedProgressionZeroMode` constructs the
+literal mean over unit classes.  Both centered sums are proved to vanish,
+including the reduced sum for one planned component and for the signed sum
+of all four planned left components.  The exact example
+`allClass_zeroMode_ne_reduced_zeroMode` proves the two means cannot be
+interchanged.  No log exponent, unspecified constant, or analytic estimate
+is asserted.
 
 The divisor split takes \(d\) as supplied data.  It does not yet prove the
 source change of variables \(d=\gcd(am_1,bn_1)\), its allocation
@@ -1168,11 +1171,25 @@ multiplicities, or a bijection from the original factor variables.  Those are
 part of the source-identification blocker, not consequences of the generic
 coefficient sums.
 
+The primary-source audit identifies a sharper boundary.  BBLR Proposition
+3.1 equation (14) has reciprocal phase
+\(e(\mp\ell h\,\overline{am_1/d}/(bn_1/d))\); its frequency \(\ell=0\)
+contribution is the proposition's gcd-weighted integral main term.  Reduced
+residues appear only in the later split of the nonzero-frequency family.
+Thus a reduced progression mean is not the source's frequency \(\ell=0\)
+term.  `reducedCentering_alone_not_sufficient` gives an exact countermodel to
+deducing a singular-series identity from reduced-cell centering alone.  This
+finishes and kills only that inference class.  It does not rule out the
+surviving construction from a smooth HB allocation, the actual BBLR
+frequency \(\ell=0\) integrals, and their signed Euler/Ramanujan
+recombination.
+
 This does not close A1.  Run 12 omits the cutoff/smoothing equality, the
 scale-dependent grouping and factor weights, the exact Fourier/shift kernel,
-and the pointwise equality between its zero mode and the prime-pair singular
-series.  `SingularSeriesCentering` names the last equality but supplies no
-instance.  The product alone cannot recover the grouping:
+and the evaluation of the signed BBLR frequency \(\ell=0\) integrals as the
+prime-pair singular-series term plus an explicitly bounded error.
+`SingularSeriesCentering` names only the zero-error special case and supplies
+no instance.  The product alone cannot recover the grouping:
 `empty_singleton_groupings_distinct` exhibits two different left factors
 whose complementary factors reconstruct the same signed component.  This
 proves nonuniqueness from the product identity alone, not from every possible

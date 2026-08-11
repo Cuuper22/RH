@@ -682,10 +682,14 @@ bash verify/check_axioms.sh
 \(n\le Z^4\), arbitrary eight-slot grouping factorization, exact
 \(d_1d_2=d_3d_4=d\) coefficient sums, literal triangle majorants, dyadic
 support machinery, common \((j,d,\ell,p,q)\) indexing, and generic
-residue-cell centering.  The planned closed floor blocks are not claimed to
-be the source partition, and the all-class residue mean is not claimed to be
-the reduced-class source zero mode.  The dependency printer covers 24
-selected public theorems, all depending exactly on
+residue-cell centering.  It now also constructs the literal reduced-residue
+mean for one planned component and its signed four-component sum, proving
+each reduced centered sum is zero.  Exact countermodels prove that the old
+all-class mean cannot replace the reduced mean and that reduced centering
+alone cannot imply a singular-series main term.  The planned closed floor
+blocks are not claimed to be the source partition, and neither residue mean
+is claimed to be BBLR's frequency \(\ell=0\) gcd/integral term.  The
+dependency printer covers 29 selected public theorems, all depending exactly on
 `[propext, Classical.choice, Quot.sound]`.  Source scans find no `axiom`, `sorry`,
 `admit`, or `unsafe` in the module or printer.
 
@@ -694,5 +698,6 @@ calibrated numerical claim.  Its exact source-identification boundary is
 recorded in `docs/audit/hb_depth_four_coefficients.md`.  In particular, the
 printer is a dependency audit rather than a trusted Challenge/Solution
 statement comparator, and no theorem identifies these sharp coefficients
-with run 12's smooth `c`, `e`, or `F`, proves an A1 estimate, or changes a
-frozen rung status.
+with run 12's smooth `c`, `e`, or `F`, evaluates the signed frequency
+\(\ell=0\) integrals against the Ramanujan singular series with an explicit
+error, proves an A1 estimate, or changes a frozen rung status.

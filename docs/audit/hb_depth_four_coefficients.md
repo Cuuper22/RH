@@ -95,13 +95,83 @@ or factor-allocation restrictions.  Those belong to the missing
 source-matched grouping and kernel construction; coprimality of \(p,q\) is
 imposed only later by plannedKernelTerm.
 
-Finally, progressionZeroMode is the mean of a generic family over all
+The original progressionZeroMode is the mean of a generic family over all
 residue classes, and sum_centeredProgressionCell proves that its centered
-cells sum to zero.  The source Poisson block is supported on reduced classes,
-and no theorem connects this generic mean to plannedKernelTerm or proves
-unit-class cancellation.  SingularSeriesCentering names the pointwise
-equality that would identify a future zero mode from the actual BBLR block
-with the subtraction \(S(h)X I_V\); no instance is asserted.
+cells sum to zero.  The source nonzero Poisson block is supported on reduced
+classes.  Accordingly reducedResidues, reducedProgressionZeroMode, and
+reducedCenteredProgressionCell now construct the literal unit-class mean,
+with
+
+\[
+ \sum_{\substack{r\bmod q\\(r,q)=1}}
+   \left(C(q,r)-\frac1{\varphi(q)}
+     \sum_{\substack{s\bmod q\\(s,q)=1}}C(q,s)\right)=0.
+\]
+
+The theorem is specialized both to one planned left component and to the
+signed sum of all four planned left components.  The exact theorem
+allClass_zeroMode_ne_reduced_zeroMode shows that the two means cannot be
+interchanged: for mass supported at \(n=2\) on the block \([1,2]\) modulo
+\(2\), the all-class mean is \(1/2\), while the reduced-class mean is zero.
+
+This correction is finite coefficient bookkeeping, not an evaluation of the
+source's frequency \(\ell=0\) term.
+reducedCentering_alone_not_sufficient gives an exact logical countermodel to
+the inference from centered unit cells to SingularSeriesCentering.  No
+theorem connects either mean to the actual BBLR frequency \(\ell=0\) term or
+proves a singular-series identity.
+
+## Primary-source frequency \(\ell=0\) audit
+
+The frequency \(\ell=0\) term in [Bettin--Bui--Li--Radziwiłł, Proposition 3.1,
+equation (14)](https://arxiv.org/pdf/1609.02539) is not a residue-class mean
+of \(c_{d,p}\).  Their Poisson summation eliminates the long variable
+\(m_2\) modulo \(bn_1/d\), where \(d=(am_1,bn_1)\).  Before the later
+\(d_1d_2=d_3d_4=d\) split, equation (14) has frequency factor
+
+\[
+ e\!\left(\mp \ell h\frac{\overline{am_1/d}}{bn_1/d}\right)
+ F(a,b,m_1,n_1,d,\ell),
+\]
+
+and its \(\ell=0\) term is the proposition's gcd/integral main term
+
+\[
+ \sum_{(am_1,bn_1)=d}
+ \alpha_a\beta_b W_0(dh/H)W_1(m_1/M_1)W_3(n_1/N_1)
+ \int_0^\infty
+ W_2\!\left(\frac{bn_1x}{dM_2}\right)
+ W_4\!\left(\frac{am_1x}{dN_2}\right)\,dx.
+\]
+
+Reduced residues enter only after splitting \(d\) in the nonzero-frequency
+family: then \(p=(a/d_1)(m_1/d_2)\),
+\(q=(b/d_3)(n_1/d_4)\), and \((p,q)=1\).  Thus replacing the BBLR
+\(\ell=0\) integral by reducedProgressionZeroMode is the wrong literal
+method, even though reduced centering is the correct way to define the
+progression error in route EDB.
+
+The primary paper evaluates the four off-diagonal main terms only after
+Mellin inversion and full summation of the quadratic-divisor problem.  It
+does not state that an arbitrarily grouped, sharply truncated Heath--Brown
+coefficient has a pointwise residue mean equal to the prime-pair singular
+series.  The run archives likewise only assert that the four zero-frequency
+terms "recombine"; they do not supply the smooth HB allocation, the
+resulting \(\ell=0\) integral, or its Euler/Ramanujan evaluation.  In the
+formal repository the singular-series function in signedPairAggregate is
+existential data, not the Ramanujan series
+\(\sum_q\mu(q)^2\varphi(q)^{-2}c_q(h)\).
+
+Consequently the inference class using only reduced-cell centering is
+finished and killed by the exact countermodel.  This does not kill a proof
+from the actual smooth HB construction.  The surviving theorem would have
+to construct that block, prove equality to the full BBLR Poisson formula
+including its frequency \(\ell=0\) integral and the preliminary
+shift-replacement error, and then evaluate the signed sum of those integrals
+against the explicit Ramanujan singular series, with every remaining error
+and logarithmic exponent displayed.  No such construction or estimate is
+asserted here.  SingularSeriesCentering remains only a schema for the
+equality component of that missing theorem.
 
 ## Exact remaining blocker
 
@@ -113,18 +183,22 @@ Run 12 equations (5)--(11) do not specify:
    the eight slots to the BBLR variables \(a,m_1,b,n_1\);
 3. the exact separated Fourier factor \(F_{d,\ell}\), including its
    dependence on the selected grouping and divisor split; or
-4. the zero-frequency formula whose full signed recombination is to equal
-   the prime-pair singular-series term pointwise in \(h\).
+4. the BBLR \(\ell=0\) gcd/integral formula after the actual smooth HB
+   allocation, and its full signed Euler/Ramanujan recombination with the
+   prime-pair singular-series term, including the non-exact replacement
+   errors.
 
 The narrow missing construction is therefore an explicit plan and smooth
 partition together with a proved equality from the resulting
 plannedLeftBlockCoeff/plannedRightBlockCoeff sum to BBLR equation (14),
-followed by
+followed by a constructed zeroModeHB and an identity of the form
 
-    SingularSeriesCentering zeroModeHB S X IV
+    zeroModeHB h = S h * X * IV + zeroModeError h
 
-for the zero mode produced by that same equality.  Until these identities
-are supplied, the module's coefficients must not be renamed as run 12's
+with a bound for the signed aggregate of zeroModeError at the exact required
+logarithmic exponent.  SingularSeriesCentering is only the zero-error special
+case; neither it nor the required error bound is asserted.  Until these
+identities are supplied, the module's coefficients must not be renamed as run 12's
 \(c_{d,p}\) and \(e_{d,q}\), and (EDB), the common-scale cross-\(Y\)
 target, and (WG-HB) are not statements about source-identified
 coefficients.
@@ -143,9 +217,9 @@ grouping cannot be inferred from the product identity by itself.
     lake build RH.Zeta85.Discharge.HBDepthFour
     lake env lean comparator/PrintAxioms/HBDepthFour.lean
 
-The dependency printer covers 24 selected public theorems, each of which
-prints exactly [propext, Classical.choice, Quot.sound].  The module and printer contain no
-declared research assumption or proof placeholder.
+The dependency printer covers 29 selected public theorems, each of which
+prints exactly [propext, Classical.choice, Quot.sound].  The module and
+printer contain no declared research assumption or proof placeholder.
 
 No numerical verifier was added: this milestone contains exact finite
 convolution identities and no calibrated numerical claim.

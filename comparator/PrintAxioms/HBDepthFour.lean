@@ -19,6 +19,11 @@ import RH.Zeta85.Discharge.HBDepthFour
 #print axioms RH.Zeta85.HBDepthFour.abs_plannedLeftBlockCoeff_le
 #print axioms RH.Zeta85.HBDepthFour.abs_plannedRightBlockCoeff_le
 #print axioms RH.Zeta85.HBDepthFour.sum_centeredProgressionCell
+#print axioms RH.Zeta85.HBDepthFour.sum_reducedCenteredProgressionCell
+#print axioms RH.Zeta85.HBDepthFour.sum_plannedLeftReducedCenteredCell
+#print axioms RH.Zeta85.HBDepthFour.sum_plannedLeftSignedReducedCenteredCell
+#print axioms RH.Zeta85.HBDepthFour.allClass_zeroMode_ne_reduced_zeroMode
+#print axioms RH.Zeta85.HBDepthFour.reducedCentering_alone_not_sufficient
 #print axioms RH.Zeta85.HBDepthFour.singularSeriesCentering_iff_error_zero
 #print axioms RH.Zeta85.HBDepthFour.zeta_mul_injective
 #print axioms RH.Zeta85.HBDepthFour.hb4_remainder
