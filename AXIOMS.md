@@ -104,7 +104,12 @@ delegates to) are identical.
 'RH.Zeta85.SignedShift.four_nearInt_le_norm_cexp_sub_one' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.SignedShift.bdiffIter_le' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.LogBudget.budget_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.budget_primeDyadic_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.LogBudget.budget_dyadic_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.verdict_all' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.depth_three_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.depth_four_margin' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.LogBudget.fixed_modulus_weil_excess' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.LogBudget.power_beats_log' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.Exponents.bblr_blackbox_ceiling' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
@@ -239,11 +244,13 @@ the aggregate criterion `(AS)` holds at every fixed connected support `1 < σ = 
    `≪_A X(log X)^{−A}`; (2) supplies a logarithmic *loss* `(log T)^{+C}`.  The audit in
    `RH/Zeta85/Discharge/LogBudget.lean` computes the budget exactly: the free room for the error's
    logarithms is `(log T)^{<2}` in the most generous single-block reading
-   (`LogBudget.budget_closes`/`budget_fails`) and `(log T)^{<0}` with the dyadic multiplicities of
-   `docs/run/02_certificate_cycle2.md` (14) restored
+   (`LogBudget.budget_closes`/`budget_fails`), `(log T)^{<1}` under the literal `Y`-dyadic triangle
+   sum displayed in `docs/run/02_certificate_cycle2.md` (14)
+   (`budget_primeDyadic_closes`/`budget_primeDyadic_fails`), and `(log T)^{<0}` only in the fully
+   triangle-summed model that also dyadicizes the direct `h`-sum
    (`budget_dyadic_closes`/`budget_dyadic_fails`), while the Heath–Brown depth forced at
-   `η = 43/100` is `K ≥ 4` (`LogBudget.depth_at_85`), giving `C ≥ K − 1 ≥ 3`.  Both thresholds fail
-   (`LogBudget.verdict`).  See `FINDINGS.md` §7.
+   `η = 43/100` is `K ≥ 4` (`LogBudget.depth_at_85`), giving `C ≥ K − 1 ≥ 3`.  All three
+   thresholds fail (`LogBudget.verdict_all`).  See `FINDINGS.md` §7.
 
    Per R2 the 85 % target is **not** weakened to accommodate this: the target stays
    `1893603832049143/2227707598259143`, and this axiom states exactly the blocking statement at the

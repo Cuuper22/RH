@@ -242,33 +242,39 @@ Mangoldt factors are below the accepted `Tℓ³` trace normalization after recom
 2. hence an already-`h`-summed remainder of size `E` at length `Y` enters the second moment at scale
    `(T·L/Y)·E` (`01_arithmetic_cycle1.md` §4, which says "up to powers of L" and does not name the
    power — that is the imprecision);
-3. the sum of `02_certificate_cycle2.md` (14) runs over `O(log X)` dyadic prime scales and, inside
-   each, `O(log X)` dyadic shift scales, and `08` §2 adds `O_K((log X)^{O_K(1)})` identities and
-   subdivisions — at least **two** further powers.
+3. the displayed sum in `02_certificate_cycle2.md` (14) runs over `O(log X)` dyadic prime scales,
+   but its inner sum is directly over `h`; it does not display a second dyadic shift-scale sum.
+   Thus the literal blockwise triangle inequality costs **one** further power.  A second is charged
+   only in the more adversarial model that separately dyadicizes the `h`-sum and again uses triangle
+   inequality.  The Heath--Brown identities and subdivisions add further unspecified fixed powers.
 
 The budget's three logarithms are accounted for: the main term `T·L³/(2πλ²)·[…]` of
 `02_certificate_cycle2.md` (16) carries `L²` from the two von Mangoldt weights and one further `L`
 from the height kernel — the same `L` that reappears in 1.  So the two von Mangoldt logarithms are
 **spent** inside the main term; they are not free room for the error.  Substituting `E ≪ X(log T)^C`:
 
-    contribution ≍ (T·L/X)·X·(log T)^C = T·(log T)^{C+1}                    (generous, ignoring 3)
-    contribution ≍ (log T)²·T·(log T)^{C+1} = T·(log T)^{C+3}               (honest, with 3)
+    contribution ≍ (T·L/X)·X·(log T)^C = T·(log T)^{C+1}              (generous)
+    contribution ≍ (log T)·T·(log T)^{C+1} = T·(log T)^{C+2}         (literal Y-dyadic)
+    contribution ≍ (log T)²·T·(log T)^{C+1} = T·(log T)^{C+3}        (fully triangle-summed)
     budget       = T·(log T)³
 
-so the joint closes **iff `C < 2`** in the generous reading and **iff `C < 0`** in the honest one.
-Both dichotomies are proved in Lean, in both directions: `LogBudget.budget_closes` /
-`budget_fails`, `budget_dyadic_closes` / `budget_dyadic_fails`.
+Thus the three thresholds are respectively **`C < 2`**, **`C < 1`**, and **`C < 0`**.  All three
+dichotomies are proved in Lean, in both directions: `LogBudget.budget_closes` / `budget_fails`,
+`LogBudget.budget_primeDyadic_closes` / `budget_primeDyadic_fails`, and
+`LogBudget.budget_dyadic_closes` / `budget_dyadic_fails`.
 
-Neither threshold is available.  `08` §2 chooses the Heath–Brown depth `K` so that
+None of the three thresholds is available.  `08` §2 chooses the Heath–Brown depth `K` so that
 `X^{1/K} < H·T^{−10ε}`, which forces `K > (1+η)/η`; at `η = 43/100` that is `K > 143/43 > 3`, hence
 `K ≥ 4` (`LogBudget.depth_at_85`).  A depth-`K` identity replaces each von Mangoldt factor by `O(K)`
 divisor-type convolutions whose dyadic mean value is of size `(log X)^{K−1}`, and the BBLR weight
 hypotheses `W_i^{(j)} ≪ (ABMN)^ε` do not remove them.  So `C ≥ K − 1 ≥ 3`, and
-`C + 1 ≥ 4 > 3`, `C + 3 ≥ 6 > 3` (`LogBudget.verdict`).
+`C + 1 ≥ 4 > 3`, `C + 2 ≥ 5 > 3`, and `C + 3 ≥ 6 > 3` (`LogBudget.verdict_all`).
 
-There is a second, independent way to see the same gap, at the level of statements: `(AS)` demands a
-logarithmic *saving* `≪_A X(log X)^{−A}` for every `A`, while (2) supplies a logarithmic *loss*
-`(log T)^{+C}`.  No rearrangement of (2) produces (AS).
+At the level of the formal statement there is a stronger mismatch: `(AS)` demands a logarithmic
+*saving* `≪_A X(log X)^{−A}` for every `A`, while (2) supplies a logarithmic *loss*
+`(log T)^{+C}`.  No rearrangement of (2) produces `(AS)`.  This is not a second necessity argument,
+because `(AS)` is stronger than the exact weighted budget (18); it explains why the current Lean
+predicate cannot be discharged from (2).
 
 **What replaced it, and what was NOT done.**  Per R2 the target is **not** weakened: the 85 %
 statement remains `liminf N₀ˢ/N ≥ 1893603832049143/2227707598259143`.  Instead the exact blocking

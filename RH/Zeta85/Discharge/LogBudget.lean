@@ -32,10 +32,12 @@ scale.  Three facts from the sources, each with its equation number.
    (`01_arithmetic_cycle1.md` §4: "an aggregate correlation error `E(M,H)` … enters at scale roughly
    `(T/M)E(M,H)`, **up to powers of L**" — that parenthesis is the imprecision resolved here; the
    power is exactly one, from 1).
-3. **Multiplicity of blocks.**  The sum in `02_certificate_cycle2.md` (14) runs over `O(log X)`
-   dyadic prime scales `Y` and, inside each, over `O(log X)` dyadic shift scales; `08` §2 adds
-   `O_K((log X)^{O_K(1)})` Heath–Brown identities and dyadic subdivisions.  At least **two** further
-   powers of `log`.
+3. **Multiplicity of blocks.**  The displayed sum in `02_certificate_cycle2.md` (14) runs over
+   `O(log X)` dyadic prime scales `Y`, but its inner sum is directly over `h`; the formula does not
+   itself display a second dyadic shift-scale sum.  Thus a literal blockwise triangle inequality
+   costs **one** further logarithm.  A second logarithm is lost only if the `h`-sum is separately
+   dyadicized and the resulting estimates are again summed by triangle inequality.  The latter is
+   a useful fully adversarial model, but it is not forced by (14).
 
 Where the budget's three logarithms sit (this answers `12` §5 explicitly): the trace main term
 `T·L³/(2πλ²)·[∫v² + λ∬min(λ|s−t|,1)vv]` of `02_certificate_cycle2.md` (16) carries `L²` from the two
@@ -47,36 +49,37 @@ of `L`, and the entry scale in 2 already consumes it.
 Putting `E ≪ X·(log T)^C` (that is (12.2) at `Y = X`) into 2:
 
     contribution  ≍  (T·L/X)·X·(log T)^C  =  T·(log T)^{C+1}                         (generous)
-    contribution  ≍  (log T)^2 · T·(log T)^{C+1} = T·(log T)^{C+3}                   (with 3)
+    contribution  ≍  (log T)   · T·(log T)^{C+1} = T·(log T)^{C+2}        (literal Y-dyadic)
+    contribution  ≍  (log T)^2 · T·(log T)^{C+1} = T·(log T)^{C+3}        (fully triangle-summed)
 
 against `budget = T·(log T)^3`.  Hence
 
     generous single-block reading:   closes  ⟺  C + 1 < 3  ⟺  **C < 2**
-    honest reading including 3:      closes  ⟺  C + 3 < 3  ⟺  **C < 0**
+    literal Y-dyadic reading:        closes  ⟺  C + 2 < 3  ⟺  **C < 1**
+    fully triangle-summed reading:   closes  ⟺  C + 3 < 3  ⟺  **C < 0**
 
-`budget_closes` / `budget_fails` and `budget_dyadic_closes` / `budget_dyadic_fails` prove exactly
-these two dichotomies in Lean.
+The three pairs of `*_closes` / `*_fails` theorems below prove these dichotomies in Lean.
 
 ## The verdict (R2: state it, do not absorb)
 
-Neither threshold is available.  The terminal family of `08` §2 is produced by a Heath–Brown identity
+None of the three thresholds is available.  The terminal family of `08` §2 is produced by a Heath–Brown identity
 of a fixed depth `K` chosen so large that every truncated irregular factor has length at most
-`X^{1/K} < H·T^{−10ε}`; that forces `K > (1+η)/η` — `K ≥ 4` already at `η = 43/100`, `K ≥ 5` at
-`η = 1/4`.  A depth-`K` identity replaces each von Mangoldt factor by `O(K)` divisor-type
+`X^{1/K} < H·T^{−10ε}`; that forces `K > (1+η)/η` — `K ≥ 4` already at `η = 43/100`, and the strict
+inequality gives `K ≥ 6` at `η = 1/4`.  A depth-`K` identity replaces each von Mangoldt factor by `O(K)` divisor-type
 convolutions whose mean value over a dyadic block is of size `(log X)^{K−1}`, and the BBLR weight
 hypotheses `W_i^{(j)} ≪ (ABMN)^ε` do not remove them.  Hence `C ≥ K − 1 ≥ 3 > 2 > 0`:
 
-    C + 1 ≥ 4 > 3     and     C + 3 ≥ 6 > 3 .
+    C + 1 ≥ 4 > 3,    C + 2 ≥ 5 > 3,    C + 3 ≥ 6 > 3.
 
 **The log powers do not close.**  The `(log T)^C` of (12.2) exceeds the trace budget by at least
-`(log T)^{C−2} ≥ log T` in the most generous reading, and by `(log T)^C ≥ (log T)^3` in the honest
-one.
+`(log T)^{C−2} ≥ log T` in the most generous reading, by `(log T)^{C−1} ≥ (log T)^2` in the literal
+`Y`-dyadic reading, and by `(log T)^C ≥ (log T)^3` in the fully triangle-summed model.
 
-There is a second, independent way to see the same gap, at the level of statements rather than
-counting: the trace transfer consumes the aggregate criterion `(AS)` of `01_arithmetic_cycle1.md` §4
-(= `(18)` of `02_certificate_cycle2.md`), which demands `≪_A X·(log X)^{−A}` for **every** `A` — a
-logarithmic *saving*.  (12.2) supplies a logarithmic *loss* `(log T)^{+C}`.  The two differ by
-`(log T)^{C+A}` for every `A`; no rearrangement of (12.2) yields `(AS)`.
+There is also a stronger statement-level gap: the convenient aggregate criterion `(AS)` of
+`01_arithmetic_cycle1.md` §4 demands `≪_A X·(log X)^{−A}` for **every** `A`, whereas (12.2) supplies a
+logarithmic loss `(log T)^{+C}`.  `(AS)` is stronger than the exact weighted budget (18), so this is
+not an independent necessity argument; it explains why (12.2) cannot discharge the Lean predicate
+`SignedPairTraceGrade` as that predicate is presently stated.
 
 This gap is **not** repaired anywhere in the run and is not repaired here.  It is the reason
 `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2` is an axiom stated at the strength the transfer
@@ -110,11 +113,16 @@ single-block reading: the entry scale `(T·L/X)` of `01_arithmetic_cycle1.md` §
 one power of `L`, so the contribution is `T·(log T)^{C+1}`. -/
 def contribution (C T : ℝ) : ℝ := T * (Real.log T) ^ (C + 1)
 
-/-- The same with the `O(log X)` dyadic prime scales and `O(log X)` dyadic shift scales of
-`02_certificate_cycle2.md` (14) restored: `T·(log T)^{C+3}`. -/
+/-- The fully triangle-summed model, charging one logarithm for dyadic prime scales and another for
+an additional dyadic decomposition of the `h`-sum: `T·(log T)^{C+3}`. -/
 def contributionDyadic (C T : ℝ) : ℝ := T * (Real.log T) ^ (C + 3)
 
-/-! ## 2. The two dichotomies -/
+/-- The literal blockwise reading of `02_certificate_cycle2.md` (14): one `O(log X)` sum over
+dyadic prime scales `Y`, while the inner `h`-sum is kept intact.  This gives
+`T·(log T)^{C+2}`. -/
+def contributionPrimeDyadic (C T : ℝ) : ℝ := T * (Real.log T) ^ (C + 2)
+
+/-! ## 2. The three dichotomies -/
 
 private lemma log_rpow_tendsto_zero {p : ℝ} (hp : p < 0) :
     Tendsto (fun T : ℝ => (Real.log T) ^ p) atTop (𝓝 0) := by
@@ -147,8 +155,26 @@ theorem budget_fails {C : ℝ} (hC : 2 ≤ C) :
   rw [contribution, budget, ratio_eq hTpos hlog]
   exact Real.one_le_rpow hlog1 (by linarith)
 
-/-- **Honest reading (dyadic multiplicities restored): the budget closes iff `C < 0`** — positive
-half. -/
+/-- **Literal `Y`-dyadic reading: the budget closes iff `C < 1`** — positive half. -/
+theorem budget_primeDyadic_closes {C : ℝ} (hC : C < 1) :
+    Tendsto (fun T : ℝ => contributionPrimeDyadic C T / budget T) atTop (𝓝 0) := by
+  refine Tendsto.congr' ?_ (log_rpow_tendsto_zero (p := C + 2 - 3) (by linarith))
+  filter_upwards [eventually_gt_atTop (1 : ℝ)] with T hT
+  simp only [contributionPrimeDyadic, budget]
+  exact (ratio_eq (lt_trans zero_lt_one hT) (Real.log_pos hT)).symm
+
+/-- **Literal `Y`-dyadic reading: the budget closes iff `C < 1`** — negative half. -/
+theorem budget_primeDyadic_fails {C : ℝ} (hC : 1 ≤ C) :
+    ∀ᶠ T : ℝ in atTop, 1 ≤ contributionPrimeDyadic C T / budget T := by
+  filter_upwards [eventually_ge_atTop (Real.exp 1)] with T hT
+  have hTpos : (0 : ℝ) < T := lt_of_lt_of_le (Real.exp_pos 1) hT
+  have hlog1 : (1 : ℝ) ≤ Real.log T := (Real.le_log_iff_exp_le hTpos).mpr hT
+  have hlog : (0 : ℝ) < Real.log T := lt_of_lt_of_le zero_lt_one hlog1
+  rw [contributionPrimeDyadic, budget, ratio_eq hTpos hlog]
+  exact Real.one_le_rpow hlog1 (by linarith)
+
+/-- **Fully triangle-summed reading (both scale decompositions charged): the budget closes iff
+`C < 0`** — positive half. -/
 theorem budget_dyadic_closes {C : ℝ} (hC : C < 0) :
     Tendsto (fun T : ℝ => contributionDyadic C T / budget T) atTop (𝓝 0) := by
   refine Tendsto.congr' ?_ (log_rpow_tendsto_zero (p := C + 3 - 3) (by linarith))
@@ -156,7 +182,7 @@ theorem budget_dyadic_closes {C : ℝ} (hC : C < 0) :
   simp only [contributionDyadic, budget]
   exact (ratio_eq (lt_trans zero_lt_one hT) (Real.log_pos hT)).symm
 
-/-- **Honest reading: the budget closes iff `C < 0`** — negative half. -/
+/-- **Fully triangle-summed reading: the budget closes iff `C < 0`** — negative half. -/
 theorem budget_dyadic_fails {C : ℝ} (hC : 0 ≤ C) :
     ∀ᶠ T : ℝ in atTop, 1 ≤ contributionDyadic C T / budget T := by
   filter_upwards [eventually_ge_atTop (Real.exp 1)] with T hT
@@ -167,15 +193,39 @@ theorem budget_dyadic_fails {C : ℝ} (hC : 0 ≤ C) :
   exact Real.one_le_rpow hlog1 (by linarith)
 
 /-- **The verdict at the Heath–Brown depth actually forced.**  At `η = 43/100` the depth satisfies
-`K > (1+η)/η = 143/43 > 3`, so `K ≥ 4` and `C ≥ K − 1 ≥ 3`; both thresholds fail. -/
+`K > (1+η)/η = 143/43 > 3`, so `K ≥ 4` and `C ≥ K − 1 ≥ 3`; all three thresholds fail. -/
 theorem depth_at_85 : (3 : ℝ) < (1 + 43 / 100) / (43 / 100) := by norm_num
 
-/-- consequently, with `C ≥ 3`, the generous threshold `C < 2` and the honest threshold `C < 0` are
-both violated, and `budget_fails` / `budget_dyadic_fails` apply. -/
+/-- At the 85-percent exponent, a depth-three truncated factor has exponent `143/300`, exceeding
+the shift exponent `43/100` by exactly `7/150`. -/
+theorem depth_three_excess :
+    (1 + (43 : ℝ) / 100) / 3 - 43 / 100 = 7 / 150 := by norm_num
+
+/-- Depth four is the first integer depth whose raw atom is shorter than the shift scale; its
+exponent margin is exactly `29/400`. -/
+theorem depth_four_margin :
+    43 / 100 - (1 + (43 : ℝ) / 100) / 4 = 29 / 400 := by norm_num
+
+/-- Completing one inverse variable with a fixed-modulus square-root estimate and then summing the
+remaining `a`, `h`, and `q` variables absolutely has exponent `2η + 3/4`.  At `η = 43/100` this
+is worse than the natural trace exponent `1 + η` by exactly `9/50`. -/
+theorem fixed_modulus_weil_excess :
+    (2 * ((43 : ℝ) / 100) + 3 / 4) - (1 + 43 / 100) = 9 / 50 := by norm_num
+
+/-- Consequently, with `C ≥ 3`, both the generous threshold `C < 2` and the fully triangle-summed
+threshold `C < 0` are violated, and `budget_fails` / `budget_dyadic_fails` apply. -/
 theorem verdict {C : ℝ} (hC : 3 ≤ C) :
     (∀ᶠ T : ℝ in atTop, 1 ≤ contribution C T / budget T) ∧
     (∀ᶠ T : ℝ in atTop, 1 ≤ contributionDyadic C T / budget T) :=
   ⟨budget_fails (by linarith), budget_dyadic_fails (by linarith)⟩
+
+/-- At the forced `C ≥ 3`, all three accounting models fail. -/
+theorem verdict_all {C : ℝ} (hC : 3 ≤ C) :
+    (∀ᶠ T : ℝ in atTop, 1 ≤ contribution C T / budget T) ∧
+    (∀ᶠ T : ℝ in atTop, 1 ≤ contributionPrimeDyadic C T / budget T) ∧
+    (∀ᶠ T : ℝ in atTop, 1 ≤ contributionDyadic C T / budget T) :=
+  ⟨budget_fails (by linarith), budget_primeDyadic_fails (by linarith),
+    budget_dyadic_fails (by linarith)⟩
 
 /-! ## 3. Why the two lower rungs are unaffected -/
 

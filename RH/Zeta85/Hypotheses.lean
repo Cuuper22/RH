@@ -215,11 +215,13 @@ is a genuine gap in the source, not a formalization difficulty.
     trace main term is `≍ T·L³`, of which `L²` is spent on the two von Mangoldt weights and one `L`
     is consumed by the entry scale `(T·L/X)` of `docs/run/01_arithmetic_cycle1.md` §4, so the
     surviving room for the error's logarithms is `(log T)^{<2}` in the most generous single-block
-    reading and `(log T)^{<0}` once the `O(log X)` dyadic prime scales and `O(log X)` dyadic shift
-    scales of `docs/run/02_certificate_cycle2.md` (14) are restored
-    (`LogBudget.budget_closes` / `budget_fails`, `budget_dyadic_closes` / `budget_dyadic_fails`).
+    reading, `(log T)^{<1}` under the literal `Y`-dyadic triangle sum displayed in
+    `docs/run/02_certificate_cycle2.md` (14), and `(log T)^{<0}` only after an additional dyadic
+    decomposition of the direct `h`-sum is also charged by triangle inequality
+    (`LogBudget.budget_closes` / `budget_fails`, `budget_primeDyadic_closes` /
+    `budget_primeDyadic_fails`, `budget_dyadic_closes` / `budget_dyadic_fails`).
     The Heath–Brown depth forced at `η = 43/100` is `K ≥ 4` (`LogBudget.depth_at_85`), giving
-    `C ≥ K − 1 ≥ 3`; both thresholds fail (`LogBudget.verdict`).  `docs/run/12` §5's assertion that
+    `C ≥ K − 1 ≥ 3`; all three thresholds fail (`LogBudget.verdict_all`).  `docs/run/12` §5's assertion that
     "the two explicit logarithmic weights from the two von Mangoldt factors are below the accepted
     `Tℓ³` trace normalization after recombination" is therefore not established by the run.
 
