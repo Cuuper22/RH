@@ -544,10 +544,11 @@ Five exact method classes are therefore finished and killed:
   prefix bound is stronger than equation (6).
 
 This is not an impossibility theorem for the actual signed Heath--Brown
-coefficients.  Those coefficients are not constructed as a common-scale
-object in the repository: \(c_{d,p}\) and \(e_{d,q}\) occur only in prose,
-while `BBLRPoissonBlocks` hides scalar blocks existentially.  The exact
-surviving statement is equation (14) of
+coefficients.  The sharp-cutoff algebraic candidates are now constructed as
+a common-scale object in `HBDepthFour.lean`, but run 12 still gives no map
+identifying its smooth \(c_{d,p}\), \(e_{d,q}\), and \(F_{d,\ell}\) with
+that object; `BBLRPoissonBlocks` still hides scalar blocks existentially.
+The exact surviving statement is equation (14) of
 `docs/audit/log_budget_routes.md`: construct compatible signed
 families \(c_{j,d,p},e_{j,d,q},F_{j,d,\ell}\), cancel their zero terms
 pointwise against the singular series before absolute values, and prove the
@@ -715,11 +716,12 @@ without simultaneously exploiting two retained Heath--Brown factors.
   not improve the unavoidable \(d=1\), \(R=1\) block.
 
 This is not an impossibility theorem for simultaneous coefficient-sensitive
-cancellation.  The repository does not define the needed object: it lacks
-the signed depth-four expansions of both von Mangoldt factors, formulas and
-norms for \(\alpha_a,\beta_m,e_q\), common divisor bookkeeping, the exact
-\(F_{q,\ell}(a,m)\) with theorem-compatible regularity, and the pointwise
-zero-mode/singular-series identity.  The exact surviving statement is
+cancellation.  `HBDepthFour.lean` now defines the sharp signed expansion,
+arbitrary factor grouping, divisor bookkeeping, coefficient candidates, and
+exact majorants.  What remains absent is the proved identification with run
+12's smooth factor allocation, the exact \(F_{q,\ell}(a,m)\) with
+theorem-compatible regularity, and the pointwise zero-mode/singular-series
+identity.  The exact surviving statement is
 `(WG-HB)` in `docs/audit/log_budget_routes.md`; it remains
 unproved and cannot yet be faithfully made an `Inputs95` field.
 
@@ -1129,3 +1131,55 @@ The 21 public transfer theorems and eight final headline theorems all print
 exactly `[propext, Classical.choice, Quot.sound]`.  That dependency result
 certifies the formal derivation under the displayed premises; it does not
 discharge those premises.
+
+---
+
+## 26. A1 depth-four coefficient object — sharp algebra proved; source map open
+
+`RH/Zeta85/Discharge/HBDepthFour.lean` proves the exact \(K=4\)
+Heath--Brown identity
+
+\[
+ \Lambda=4\mu_Z*\log-6\mu_Z^2*\zeta*\log
+ +4\mu_Z^3*\zeta^2*\log-\mu_Z^4*\zeta^3*\log
+ \qquad(n\le Z^4),
+\]
+
+from the exact remainder
+\((\mu-\mu_Z)^4*\zeta^3*\log\).  Each signed component has eight literal
+factor slots.  An explicit `HBGroupingPlan` may select different left/right
+groups for each scale and component, and `hbGrouped_factorization` proves
+that every selection reconstructs the original component product.
+
+The module also constructs the \(d_1d_2=d_3d_4=d\) reduced coefficient sums,
+their exact absolute majorants, natural-number floor blocks, the shared
+\((j,d,\ell,p,q)\) index with coprimality, fixed-\(q\) norms, and a finite
+nonzero-frequency cross-scale sum before absolute values.  Those closed
+floor blocks are not a reconstruction of the source's smooth partition, and
+the infinite \(\ell\)-tail is not estimated.  Generic residue cells have a
+canonical all-class mean and their centered sum is proved to vanish; that
+mean neither restricts to reduced classes nor is identified with the planned
+block's zero mode.  No log exponent, unspecified constant, or analytic
+estimate is asserted.
+
+The divisor split takes \(d\) as supplied data.  It does not yet prove the
+source change of variables \(d=\gcd(am_1,bn_1)\), its allocation
+multiplicities, or a bijection from the original factor variables.  Those are
+part of the source-identification blocker, not consequences of the generic
+coefficient sums.
+
+This does not close A1.  Run 12 omits the cutoff/smoothing equality, the
+scale-dependent grouping and factor weights, the exact Fourier/shift kernel,
+and the pointwise equality between its zero mode and the prime-pair singular
+series.  `SingularSeriesCentering` names the last equality but supplies no
+instance.  The product alone cannot recover the grouping:
+`empty_singleton_groupings_distinct` exhibits two different left factors
+whose complementary factors reconstruct the same signed component.  This
+proves nonuniqueness from the product identity alone, not from every possible
+additional source constraint.
+
+Therefore `(EDB)`, the cross-\(Y\) target, and `(WG-HB)` remain unproved for
+the actual source block, and `signedPair_traceGrade_lt_3_2` remains
+undischarged.  This milestone removes the absence of a sharp algebraic
+coefficient object; it does not remove the source-identification or analytic
+cancellation wall.

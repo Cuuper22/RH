@@ -667,3 +667,32 @@ No instance of the four analytic structures is constructed.  The comparator
 dependency audit therefore confirms only their standard-three kernel
 footprint.  It neither supplies trusted-statement comparator equality nor
 makes R-8657, R-8686, R-9383, or R-9506 unconditional.
+
+## 23. A1 exact depth-four Heath--Brown coefficient layer
+
+The formal gate is:
+
+```bash
+lake build RH.Zeta85.Discharge.HBDepthFour RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/HBDepthFour.lean
+bash verify/check_axioms.sh
+```
+
+`HBDepthFour.lean` proves the exact four-term sharp-cutoff identity through
+\(n\le Z^4\), arbitrary eight-slot grouping factorization, exact
+\(d_1d_2=d_3d_4=d\) coefficient sums, literal triangle majorants, dyadic
+support machinery, common \((j,d,\ell,p,q)\) indexing, and generic
+residue-cell centering.  The planned closed floor blocks are not claimed to
+be the source partition, and the all-class residue mean is not claimed to be
+the reduced-class source zero mode.  The dependency printer covers 24
+selected public theorems, all depending exactly on
+`[propext, Classical.choice, Quot.sound]`.  Source scans find no `axiom`, `sorry`,
+`admit`, or `unsafe` in the module or printer.
+
+No numeric verifier is required for this milestone: it introduces no
+calibrated numerical claim.  Its exact source-identification boundary is
+recorded in `docs/audit/hb_depth_four_coefficients.md`.  In particular, the
+printer is a dependency audit rather than a trusted Challenge/Solution
+statement comparator, and no theorem identifies these sharp coefficients
+with run 12's smooth `c`, `e`, or `F`, proves an A1 estimate, or changes a
+frozen rung status.

@@ -1,0 +1,26 @@
+import RH.Zeta85.Discharge.HBDepthFour
+
+#print axioms RH.Zeta85.HBDepthFour.hbComponent_factorization
+#print axioms RH.Zeta85.HBDepthFour.sum_hbComponent
+#print axioms RH.Zeta85.HBDepthFour.hbAtom_product
+#print axioms RH.Zeta85.HBDepthFour.hbGrouped_factorization
+#print axioms RH.Zeta85.HBDepthFour.empty_singleton_groupings_distinct
+#print axioms RH.Zeta85.HBDepthFour.abs_muCut_le_one
+#print axioms RH.Zeta85.HBDepthFour.muCut_tail_four_zero
+#print axioms RH.Zeta85.HBDepthFour.inDyadicBlock_iff_log_eq
+#print axioms RH.Zeta85.HBDepthFour.sum_dyadicPart_apply
+#print axioms RH.Zeta85.HBDepthFour.reducedCoeff_eq_convolution
+#print axioms RH.Zeta85.HBDepthFour.abs_reducedCoeff_le
+#print axioms RH.Zeta85.HBDepthFour.abs_splitCoeff_le
+#print axioms RH.Zeta85.HBDepthFour.localizedSplitCoeff_support
+#print axioms RH.Zeta85.HBDepthFour.abs_localizedSplitCoeff_le
+#print axioms RH.Zeta85.HBDepthFour.plannedLeftBlockCoeff_support
+#print axioms RH.Zeta85.HBDepthFour.plannedRightBlockCoeff_support
+#print axioms RH.Zeta85.HBDepthFour.abs_plannedLeftBlockCoeff_le
+#print axioms RH.Zeta85.HBDepthFour.abs_plannedRightBlockCoeff_le
+#print axioms RH.Zeta85.HBDepthFour.sum_centeredProgressionCell
+#print axioms RH.Zeta85.HBDepthFour.singularSeriesCentering_iff_error_zero
+#print axioms RH.Zeta85.HBDepthFour.zeta_mul_injective
+#print axioms RH.Zeta85.HBDepthFour.hb4_remainder
+#print axioms RH.Zeta85.HBDepthFour.hb4_eq_vonMangoldt
+#print axioms RH.Zeta85.HBDepthFour.sum_hbComponent_eq_vonMangoldt

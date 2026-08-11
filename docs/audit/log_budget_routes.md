@@ -246,9 +246,11 @@ of (6) is insufficient.
 post-absolute-value, endpoint-phase, Mellin-away-from-zero, present
 square-function, and Abel-without-prefix-bound method classes are finished
 and killed by (11)--(13) and the exact log count.  The actual coefficient
-estimate (14) is neither proved nor disproved because the common-scale
-coefficient family is absent.  It remains the precise blocking statement,
-not an inference from the current hypotheses.
+estimate (14) is neither proved nor disproved.  A sharp common-scale
+coefficient candidate now exists in `HBDepthFour.lean`, but the smooth
+source grouping, exact kernel, and zero-mode identification needed to make
+it the actual cycle-5 family are absent.  Equation (14) remains the precise
+blocking statement, not an inference from the current hypotheses.
 
 ## Route 3: reduce Heath--Brown depth
 
@@ -484,19 +486,32 @@ actual coefficients:
   \(R>1\).  The unavoidable \(d=1\) block has \(R=1\), where this mechanism
   gives no improvement over the Bettin--Chandee class.
 
-### Missing coefficient object
+### Constructed sharp coefficients; missing source identification
 
-The actual depth-four route cannot yet be submitted to any of these
-theorems.  The repository lacks:
+`RH/Zeta85/Discharge/HBDepthFour.lean` now constructs the exact sharp-cutoff
+depth-four expansion, eight retained factor slots, arbitrary scale-indexed
+left/right groupings, the \(d_1d_2=d_3d_4=d\) reduced sums, dyadic support,
+literal triangle majorants, and a common
+\((j,d,\ell,p,q,\text{left term},\text{right term})\) address.  It also
+defines the fixed-\(q\) norm and a finite nonzero-frequency cross-scale signed
+sum before absolute values.  Its planned support uses explicit closed
+natural-number floor blocks; it is not a reconstruction of the source's
+smooth partition, and no infinite-\(\ell\) tail estimate is included.  Its
+generic residue mean averages all classes, not the source's reduced classes,
+and is not connected to the planned coefficients.  These constructions are
+exact but are not yet the source's coefficients.
 
-- an explicit depth-four expansion of both von Mangoldt factors;
-- signed formulas and support/norm bounds for
-  \(c_p=\sum_{am=p}\alpha_a\beta_m\) and \(e_q\);
-- common \(d\)- and gcd bookkeeping across blocks;
-- the exact \(F_{q,\ell}(a,m)\), including separability and derivative
-  bounds required by a cited theorem; and
-- a pointwise equality between its zero mode and the singular-series
-  subtraction.
+The actual depth-four route still cannot be submitted to any cited estimate
+because run 12 does not provide:
+
+- a cutoff \(Z(T,Y)\) and smooth partition proved equal to the sharp
+  expansion on every relevant integer;
+- the scale-dependent grouping/factor-allocation map selecting the BBLR
+  variables and weights;
+- the exact \(F_{q,\ell}(a,m)\) and signed \(h\)-sum, including separability
+  and derivative bounds required by a cited theorem; or
+- a pointwise equality between the zero mode of that same constructed block
+  and the singular-series subtraction.
 
 **Route-4 verdict:** the exact class \(\mathcal W_1\) is finished and killed.
 Fixed-modulus completion already fails by \(T^{9/50}\); independent cells,
@@ -505,8 +520,8 @@ above, while the cited recent preprints are out of range or give no
 \(d=1\) improvement.  A genuinely coefficient-sensitive simultaneous
 \(a,m,h,q\) estimate remains sufficient, with net
 \(\delta=7/400\) under (25), but is neither proved nor disproved.  It is
-presently unstateable for the actual coefficients because the listed
-construction is absent.
+presently unstateable for the actual source coefficients because the listed
+identification and kernel equalities are absent.
 
 ## Route 5: evaluate the progression sums instead of bounding them
 
@@ -677,11 +692,14 @@ as follows:
 2. Route 2 is finished for the available method classes.  Equation (6)
    improves the threshold only to \(C<2\), so it is insufficient at
    \(C\ge3\).  The stronger common-scale target (14) survives, but the
-   repository lacks the compatible coefficient family required to state it
-   for the actual Heath--Brown decomposition.
+   sharp compatible coefficient family is now constructed only as an
+   algebraic candidate; the source's smooth grouping, kernel, and zero-mode
+   identifications required to make (14) its actual Heath--Brown
+   decomposition remain absent.
 3. Route 4 kills the one-shot arbitrary-coefficient class
    \(\mathcal W_1\).  The coefficient-sensitive `(WG-HB)` estimate
    would close with the explicit net saving \(7/400\) under (25), but the
-   repository lacks the signed common coefficient object needed to apply or
-   even faithfully state such a theorem.  This is the terminal A1 blocker;
+   repository lacks the source-identification and analytic kernel equalities
+   needed to apply or faithfully state such a theorem for the actual block.
+   This is the terminal A1 blocker;
    `signedPair_traceGrade_lt_3_2` is not discharged.

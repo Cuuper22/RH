@@ -86,6 +86,7 @@ normalize_axiom_output() {
 for audit in \
   comparator/PrintAxioms/AliasRankObstruction.lean \
   comparator/PrintAxioms/EtaClosure.lean \
+  comparator/PrintAxioms/HBDepthFour.lean \
   comparator/PrintAxioms/Inputs95.lean \
   comparator/PrintAxioms/QuarticMain.lean \
   comparator/PrintAxioms/QuarticTransfer.lean \

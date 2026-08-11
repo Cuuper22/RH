@@ -26,6 +26,7 @@ import RH.Zeta85.Hypotheses
 import RH.Zeta85.Discharge.AliasFallback
 import RH.Zeta85.Discharge.AliasRankObstruction
 import RH.Zeta85.Discharge.EtaClosure
+import RH.Zeta85.Discharge.HBDepthFour
 import RH.Zeta85.Discharge.QuarticWindowWitnesses
 import RH.Zeta85.Discharge.R9383ExactEndpoint
 import RH.Zeta85.Discharge.RobustStability

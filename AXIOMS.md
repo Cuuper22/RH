@@ -45,10 +45,32 @@ least one logarithm.  The present per-block hypotheses cannot imply such a
 recombination: `LogBudget.blockwise_triangle_sharp` constructs aligned
 errors that saturate every individual bound.  The actual surviving input is
 the common-scale, coefficient-sensitive \(o(T(\log T)^2)\) estimate (14) in
-`docs/audit/log_budget_routes.md`, but the repository does not yet
-construct the indexed Heath--Brown coefficient family needed to prove the
-explicit `PairTraceGrade95` field.  Therefore
+`docs/audit/log_budget_routes.md`.  The repository now constructs an exact
+sharp-cutoff depth-four Heath--Brown expansion, arbitrary scale-indexed
+factor groupings, divisor-split coefficient candidates, and a shared
+\((j,d,\ell,p,q)\) address.  Run 12 still supplies no equality selecting its
+smooth grouping, Fourier kernel, or singular-series zero mode from this
+object, so estimate (14) is not yet a statement about source-identified
+coefficients and cannot prove the explicit `PairTraceGrade95` field.  Therefore
 `signedPair_traceGrade_lt_3_2` remains unchanged.
+
+`RH/Zeta85/Discharge/HBDepthFour.lean` proves the exact remainder
+
+\[
+ \Lambda-H_{4,Z}=(\mu-\mu_Z)^4*\zeta^3*\log
+\]
+
+and hence the four-term identity with coefficients \(4,-6,4,-1\) for every
+\(n\le Z^4\).  It retains eight literal factors, proves every supplied
+grouping multiplies back to its signed component, builds the
+\(d_1d_2=d_3d_4=d\) coefficient sums with exact triangle majorants, and
+defines a finite nonzero-frequency cross-scale candidate before absolute
+values.  Its closed natural-number floor blocks are not a source partition,
+and its generic all-residue-class mean is not the reduced-class zero mode of
+the planned block.  It asserts no estimate and no identification with run
+12's `c_{d,p}`, `e_{d,q}`, or `F_{d,ell}`.
+`SingularSeriesCentering` names the missing pointwise equality without
+assuming it.
 
 The B-2 Rudnick--Sarnak audit likewise changes no compiled headline
 dependency.  `RS1996ZetaInputs.theorem31` now records the published
@@ -84,8 +106,11 @@ progression cells admit a phase-aligned countermodel, fixed-modulus Weil
 completion misses by \(T^{9/50}\), and the applicable Bettin--Chandee and
 BBLR bounds miss by fixed powers.  A simultaneous coefficient-sensitive
 `(WG-HB)` estimate would close with net saving \(7/400\) under the
-displayed candidate bound, but the repository lacks the signed depth-four
-coefficient object needed to state that input faithfully.  Therefore
+displayed candidate bound, but the repository lacks the proved source
+identification for the signed depth-four object and the exact
+Fourier/zero-mode kernel needed to state
+that input faithfully.  The sharp algebraic coefficient object alone does
+not supply those missing equalities.  Therefore
 `signedPair_traceGrade_lt_3_2` remains unchanged.
 
 Phase A2.1 also changes no compiled dependency.  The claimed cycle-3
@@ -277,6 +302,30 @@ delegates to) are identical.
 'RH.Zeta85.RSReduction.centeredContraction_eq_formula18' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSReduction.topHat_formula18_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSReduction.topHat_centeredContraction_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.hbComponent_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.sum_hbComponent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.hbAtom_product' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.hbGrouped_factorization' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.empty_singleton_groupings_distinct' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.abs_muCut_le_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.muCut_tail_four_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.inDyadicBlock_iff_log_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.sum_dyadicPart_apply' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.reducedCoeff_eq_convolution' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.abs_reducedCoeff_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.abs_splitCoeff_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.localizedSplitCoeff_support' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.abs_localizedSplitCoeff_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.plannedLeftBlockCoeff_support' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.plannedRightBlockCoeff_support' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.abs_plannedLeftBlockCoeff_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.abs_plannedRightBlockCoeff_le' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.sum_centeredProgressionCell' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.singularSeriesCentering_iff_error_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.zeta_mul_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.hb4_remainder' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.hb4_eq_vonMangoldt' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.HBDepthFour.sum_hbComponent_eq_vonMangoldt' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ### 1.5 Conditional quartic headlines
