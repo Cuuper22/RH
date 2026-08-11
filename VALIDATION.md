@@ -255,3 +255,23 @@ The requested historical signed-prime experiment could not be reproduced:
 no generating script or coefficient construction is present in the supplied
 archives or connected Drive intake.  This negative inventory result is
 recorded rather than substituting a different experiment.
+
+## 13. B-2 Rudnick--Sarnak source audit
+
+`docs/audit/rs_reduction.md` was checked against the author-hosted
+primary PDF of Rudnick--Sarnak (1996), whose SHA-256 is
+
+```text
+83010c4f68efc5f5628a71a589ff3a374220b25902384e9c1a34b3d6cd0834d6
+```
+
+The audit records the exact unconditional scope of Theorem 3.1 at \(m=1\),
+the RH hypothesis in Theorem 3.2, and the narrower distributional content of
+Lemmas 4.2--4.3.  The cyclic symbol, flat contractions, weighted
+specialization to terminal formula (18), and corrected repository source map
+are explicit in that document.
+
+This is a source-and-derivation audit, not a Lean discharge.  It adds no
+declaration, axiom, or `Inputs95` field.  The nine remaining formal
+bridges are listed verbatim in `FINDINGS.md` §16 and
+`docs/audit/rs_reduction.md` §9.

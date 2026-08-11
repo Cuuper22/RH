@@ -559,3 +559,60 @@ The only Python source found in that Drive intake is
 `sixth_block_search.py`.  Consequently the quoted z-scores
 \(-0.15,-0.43,0.14,0.78,0.46\) cannot be rerun from supplied material and
 are not used as evidence; no replacement experiment was fabricated.
+
+---
+
+## 16. B-2 Rudnick--Sarnak reduction — source scope corrected, bridge open
+
+Rudnick--Sarnak (1996) Theorem 3.1, specialized to degree \(m=1\), is an
+unconditional **smoothed** all-tuples correlation theorem at strict total
+Fourier support below \(2\).  Its tuples include repetitions and zeros are
+counted with multiplicity, matching a matrix trace expansion.  The paper's
+Theorem 3.2 is the sharp-height variant and explicitly assumes RH; it cannot
+be substituted in an unconditional rung.
+
+The paper's Lemmas 4.2--4.3 give the distributional cyclic sinc transform and
+the translated-interval intersection length.  They do not state the nonflat
+profile formula or the constants \(1/3,7/60,1/30\).  In
+`docs/audit/rs_reduction.md`, those constants are instead constructed
+from the explicit cyclic symbol, and the disjoint-pair contractions are
+expanded through the weighted formula
+
+\[
+\begin{aligned}
+ M_2&=\int q^2+\mu^2\int rh,\\
+ M_3&=\int q^3+3\mu^2\int qrh,\\
+ M_4&=\int q^4+4\mu^2\int q^2rh\\
+ &\quad+2\mu^2\iint q(x)r(x)q(y)r(y)|x-y|\,dx\,dy\\
+ &\quad+2\mu^4\int r^2h^2+\mu^4\mathcal X(r),
+\end{aligned}
+\]
+
+which is formula (18) of terminal file 24.  The reusable \(k=2\) repository
+bridge is in `Zeta23/Poisson.lean` and
+`Zeta23/PrimeSideA/EndsCore.lean`, not
+`Zeta23/Taper.lean`.
+
+This derivation does not yet discharge B-2.  Its exact formal blockers are:
+
+1. define the all-tuples correlation and transcribe Theorem 3.1 as a
+   provenance-labelled `Inputs95` field with its \(O(T)\), support,
+   smoothness, and multiplicity clauses;
+2. replace the distributional Dirac delta by a gauge-fixed ordinary
+   integral in Lean;
+3. supply the R1a principal-block identification for the weighted cyclic
+   symbol;
+4. extend the real-argument Poisson theorem to the complex zero ordinates,
+   or give a different unconditional bridge;
+5. prove the \(k=3,4\) Fubini and finite-grid end estimates;
+6. construct a simultaneous smooth-height limit whose normalization factors
+   tend to one for \(1\le k\le4\);
+7. carry the exact conversion
+   \(\mu_T=\mu\log(T/2\pi)/\log T\to\mu\);
+8. smooth the profile with the \(T\to\infty\) and smoothing limits in the
+   correct order; and
+9. machine-check the cyclic symbol, pair classification, contraction
+   integrals, and centering algebra.
+
+No `Inputs95` field is added at this milestone because the formal
+objects in item 1 do not yet exist.  No rung status or dependency changes.

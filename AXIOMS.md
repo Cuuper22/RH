@@ -49,6 +49,16 @@ construct the indexed Heath--Brown coefficient family needed even to state it
 as an `Inputs95` field.  Therefore
 `signedPair_traceGrade_lt_3_2` remains unchanged.
 
+The B-2 Rudnick--Sarnak audit likewise changes no compiled dependency.
+Theorem 3.1 at \(m=1\) is a published unconditional smoothed correlation
+input, and its disjoint-pair main term has been specialized on paper to the
+flat and weighted cyclic symbols.  It has not yet been introduced as an
+`Inputs95` field: the repository still lacks a formal all-tuples
+correlation object, a gauge-fixed rendering of the distributional identity,
+the R1a principal-block bridge, complex Poisson and \(k=3,4\) finite-grid
+estimates, and the required simultaneous height-smoothing limit.  The
+existing headline dependency lists therefore remain exact.
+
 ---
 
 ## 1. `#print axioms` — verbatim
