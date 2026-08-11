@@ -229,6 +229,11 @@ delegates to) are identical.
 'RH.Zeta85.TrimmedMoment.Terminal9506.density_gt_frozen' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.TrimmedMoment.Terminal8686.density_gt_frozen' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.R9383ExactEndpoint.endpoint_box_separation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaClosure.preliminary_with_log_is_o' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaClosure.balanced_j2_K3_legal' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaClosure.balanced_j2_no_asymmetric_M1' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaClosure.balanced_signedShift_misses' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.EtaClosure.literal_log_budget_C1_fails' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 
 ---
@@ -478,3 +483,13 @@ B-3 headline.  Each reports only `propext`, `Classical.choice`, and
 `Quot.sound`.  These finite results do not assert the A1 pair trace, an R1a
 principal block, the R1b Rudnick--Sarnak specialization, or a smooth
 top-hat/grid limit.
+
+Phase B-4 also introduces no primitive assumption.  `EtaClosure.lean` proves
+the conditional asymmetric single-block exponent algebra and its positive
+power margin, then gives a legal depth-three, `j=2` balanced block which the
+literal relabel-only construction cannot put at lengths
+`T^(1-eta)` and `T^eta`.  It also proves the balanced signed-shift estimate
+misses trace scale and that every explicit literal log exponent `C >= 1`
+fails.  The exact enlarged convolution identity needed to leave this killed
+class remains an unasserted statement in
+`docs/audit/eta_gt_half_factorization.md`.

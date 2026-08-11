@@ -462,3 +462,39 @@ premise.  No B-3 source contains `axiom`, `sorry`, or `admit`.
 The finite R-8686 and R-9506 implications do not instantiate the missing A1,
 R1a, or R1b analytic bridges.  The README therefore keeps all frozen quartic
 rungs at source-claim status.
+
+## 19. B-4 `eta > 1/2` factorization audit
+
+The exact rational replay is:
+
+```bash
+cmp -s verify/b4_eta_closure.out <(python3 verify/b4_eta_closure.py)
+```
+
+with committed hashes:
+
+```text
+b934eab4fc22da185cda8a1bc2e11a10cdda3449b1479c435902d681997f008f  verify/b4_eta_closure.py
+441e426de1218676e6cf322f2971c8d403d9fd439d0f5973ac000ace9e3568b3  verify/b4_eta_closure.out
+```
+
+The script uses only `fractions.Fraction`.  At the exact witness
+`eta=3/4`, it verifies the legal depth-three, `j=2` block, exhausts all
+whole-variable groupings, checks the unavailable `M1` exponent, and
+recomputes both balanced-block power excesses.  It separately checks the
+positive preliminary margin and the literal `C<1` logarithmic threshold.
+
+The formal gate is:
+
+```bash
+lake build RH.Zeta85.Discharge.EtaClosure RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/EtaClosure.lean
+bash verify/check_axioms.sh
+```
+
+The isolated printer's fourteen headlines each report exactly
+`[propext, Classical.choice, Quot.sound]`; CI diffs that output through the
+same line-wrap normalizer used for B-3.  The new Lean file has no declaration
+using `axiom`, `sorry`, or `admit`.  These checks establish the unconditional
+exponent and method-class audit only.  They do not assert the missing
+pointwise convolution identity `(EF_eta)` or change a frozen rung's status.

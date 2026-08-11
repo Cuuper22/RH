@@ -922,3 +922,42 @@ a genuinely stronger construction.  R-8686 and R-9506 also remain source
 claims because A1, R1a, and R1b are still missing.  Full formulas, exact
 fractions, and reproduction commands are in
 `docs/audit/b3_certificate_layer.md`.
+
+---
+
+## 22. B-4 `eta > 1/2` factorization — conditional algebra proved; relabel-only class killed
+
+For a block already carrying the lengths asserted in file 18, the local
+power calculation is correct.  At fixed `1/2 < eta < 1`, choosing
+
+\[
+ M_1=T^{1-\eta},\quad M_2=T^\eta,\qquad N_1\asymp1,\quad N_2=T
+\]
+
+gives `PQ = PH = T^(1+eta)`.  The preliminary replacement has exponent
+`2 eta + (1+eta) epsilon` and is power-small whenever
+`epsilon < (1-eta)/(1+eta)`.  `EtaClosure.preliminary_with_log_is_o` proves
+this with every fixed logarithmic exponent explicit.
+
+The missing step is the asserted all-block factorization.  A legal
+depth-three, `j=2` block has two truncated atoms of exponent `eta/2` and two
+smooth atoms of exponent `1/2`.  The only whole-variable group of exponent
+`eta` is the pair of truncated atoms.  The remaining whole-factor exponents
+are `0`, `1/2`, and `1`, none equal to `1-eta`.  Thus literal relabelling
+cannot construct the requested `M1`.  Keeping the balanced block does not
+repair the estimate: its `PQ` and `PH` powers exceed trace scale by exactly
+`eta` and `eta-1/2`.  The Lean theorems
+`balanced_j2_K3_legal`, `balanced_j2_A_group_unique`,
+`balanced_j2_no_asymmetric_M1`, and `balanced_signedShift_misses` prove these
+statements for the full open interval.
+
+This kills only the exact relabel-only method class.  The surviving route is
+a pointwise finite signed convolution identity `(EF_eta)` which constructs
+the two asymmetric factors, preserves the logarithmic and coefficient
+weights, meets every BBLR support/derivative hypothesis, and recombines all
+zero modes with the singular-series subtraction before absolute values.
+Under the literal prime-dyadic accounting it must additionally produce an
+effective log exponent `C < 1`; `C = 0` closes without a cross-scale estimate,
+while `EtaClosure.literal_log_budget_fails` proves every `C >= 1` fails.
+No such identity is present or asserted.  The exact method class, witness,
+and blocking statement are in `docs/audit/eta_gt_half_factorization.md`.
