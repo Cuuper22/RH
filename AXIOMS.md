@@ -13,6 +13,17 @@ the deliberate ones in the trusted challenge files under `comparator/`).
 
 ---
 
+## Phase 0b source-intake status
+
+Phase 0b adds archived 95/100 analysis material only.  It changes no Lean
+declaration, discharges no legacy assumption, and introduces no `Inputs95`
+structure.  The compiled dependency graph and verbatim outputs below therefore
+remain the current status.  Claims in the newly ingested files are evidence to
+audit, not assumptions or theorems; `docs/run/100/FINAL_100_RESULT.md` is
+withdrawn and has no formal dependency.
+
+---
+
 ## 1. `#print axioms` — verbatim
 
 ### 1.1 The 0.679 theorem (support 101/100)

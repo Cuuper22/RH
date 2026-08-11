@@ -56,7 +56,8 @@ RH/Zeta85/Hypotheses.lean:291  axiom windowCost_125 : …
 RH/Zeta85/Hypotheses.lean:335  axiom traceTransfer_saturated : …
 ```
 
-Eight axioms, all in the single file `RH/Zeta85/Hypotheses.lean`, as required.  (The two `axiom`
+Eight legacy declarations, all in the single file `RH/Zeta85/Hypotheses.lean`.  This is the
+reproduced pre-mission state, not the target standard.  (The two `axiom`
 lines in `Zeta23/FromPNTPlus/Tactic/AdditiveCombination.lean` sit inside a fenced code block in a
 docstring and are not declarations — this is the point `AUDIT.md` already records for the base
 repository.)
@@ -138,12 +139,13 @@ kernel-replay half, which requires the missing tooling.
 only when the Zeta23 theorem it delegates to is sorry-free with `#print axioms` = the standard
 three.*
 
-The topic `Zeta85` **deviates** from rule (5), deliberately and visibly: its theorems are conditional
+The topic `Zeta85` **deviates** from rule (5), visibly: its theorems are conditional
 on the eight named axioms, and `comparator/config-zeta85.json` lists those axioms in
 `permitted_axioms`.  This is the only such topic in the repository; the base four files
 (`Challenge.lean`, `Solution.lean`, `config.json`, `PrintAxioms.lean`) and the topics `Multiplicity`
 and `XiPrime` are untouched and remain unconditional.  A reader auditing the 85 % claim must read
-`RH/Zeta85/Hypotheses.lean` in addition to `comparator/Challenge/Zeta85.lean`.
+`RH/Zeta85/Hypotheses.lean` in addition to `comparator/Challenge/Zeta85.lean`.  The exception is a
+current deficiency to discharge, not an accepted endpoint for the new mission.
 
 ## 8. Numerical cross-checks performed outside Lean
 
@@ -151,3 +153,22 @@ Recorded in `FINDINGS.md` §4 (exact-rational verification of the whole Phase-A 
 double-precision verification of the two transcendental window costs).  The Phase-A chain is *also*
 proved inside Lean, so its external check is only corroboration; the two transcendental costs are
 axioms precisely because their external check could not be internalized.
+
+## 9. Phase 0b inventory and status validation
+
+The four logical source batches are inventoried in `docs/run/MANIFEST.md`,
+which records each committed source file's byte size, SHA-256 digest, and
+role.  The exact terminal filenames required by the intake gate are present.
+
+The 100% terminal claim was checked independently with mpmath at 50 and 80
+decimal digits plus exact rational arithmetic in
+`verify/withdrawn_100_claim.py`; the committed output is
+`verify/withdrawn_100_claim.out`.  The calculation proves the endpoint
+contradiction.  It also shows that the handoff's $M₂ ≤ 0.3144$ bound does
+not follow from the pointwise cone written in the supplied sources, so that
+number remains an explicit missing-condition finding rather than being
+silently promoted.
+
+This milestone changes documentation, archived sources, and verification
+artifacts only.  It does not constitute the Phase 0c build, comparator, or
+`#print axioms` rerun; those remain to be recorded separately.

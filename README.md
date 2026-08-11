@@ -3,14 +3,34 @@
 > Research artifact. Not maintained and not accepting contributions.
 > A Lean 4 formalization released as a static companion artifact to the paper.
 
+## Frozen extension ladder — status at HEAD
+
+The target is the unconditional base-repository standard: comparator-validated
+headline theorems whose `#print axioms` output is exactly
+`[propext, Classical.choice, Quot.sound]`.  Phase 0 source intake changes no
+theorem status.
+
+| rung | frozen lower bound | status at HEAD |
+|---|---:|---|
+| R-679 | 0.67924886307 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`, `traceTransfer_saturated`; compiled headline exists |
+| R-797 | 0.79721415286134 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`, `traceTransfer_saturated`; compiled headline exists |
+| R-850 | 1893603832049143/2227707598259143 | **CONDITIONAL ON** `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated`; compiled headline exists |
+| R-8657 | 0.865674254456636 | **SOURCE CLAIM ONLY**; no Lean headline theorem or `Inputs95` field decomposition yet |
+| R-8686 | 0.86855250 | **SOURCE CLAIM ONLY**; no Lean headline theorem or `Inputs95` field decomposition yet |
+| R-9383 | 0.938313327050949 | **SOURCE CLAIM ONLY**; no Lean headline theorem or `Inputs95` field decomposition yet |
+| R-9506 | 0.95063832187565 | **SOURCE CLAIM ONLY**; no Lean headline theorem or `Inputs95` field decomposition yet |
+
+No extension rung currently meets the unconditional target standard.  The
+unconditional `Zeta23` base remains separate and unchanged.
+
 Repository: <https://github.com/anthropics/zeta-23-lean>.
 
 This repository accompanies the paper "More than two thirds of the zeros of the Riemann zeta function lie on the critical line" (Claude; Anthropic, San Francisco, 2026).
-It contains a complete, `sorry`-free Lean 4 / Mathlib formalization of Theorems A–E of that paper, including proofs
+The base `Zeta23` layer contains a complete, `sorry`-free Lean 4 / Mathlib formalization of Theorems A–E of that paper, including proofs
 of every analytic input the argument uses (Weil's explicit formula for ζ and for primitive Dirichlet L-functions,
 the Riemann–von Mangoldt zero-counting formulas, Stirling-type estimates for Γ′/Γ on vertical lines,
 Chebyshev–Mertens prime-sum estimates, and the Montgomery–Vaughan generalized Hilbert inequality). Nothing is
-assumed: the top-level theorems have no hypotheses, the repository declares no axioms, and `#print axioms` on each
+assumed by `Zeta23`: its top-level theorems have no hypotheses, `Zeta23` declares no axioms, and `#print axioms` on each
 headline theorem reports only Lean's three standard axioms `propext`, `Classical.choice`, `Quot.sound`.
 
 Toolchain: Lean `v4.33.0-rc2`, Mathlib commit `51e6992efd06126df61a496bebf8f49482a4e129` (Mathlib's tag `v4.33.0-rc2`; pinned in `lake-manifest.json`).
@@ -106,7 +126,7 @@ For the strongest independent check — statement equality against the trusted c
 run comparator as described in [`comparator/README.md`](comparator/README.md).
 
 
-## The conditional layer: `RH/Zeta85/` — the statement hierarchy up to 85 %
+## The currently compiled extension through R-850
 
 Everything described above is **unconditional**. The directory [`RH/`](RH/) adds a separate,
 **conditional** layer: a formalization of a research run extending the 2 − 1/c₁* = 0.6725007… result
@@ -119,7 +139,7 @@ axioms in the single file [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lea
 
 ### Statement hierarchy
 
-All four rows are `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ c` and the cumulative `liminf N₀ˢ(T)/N(T) ≥ c`,
+The compiled extension rows are `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ c` and the cumulative `liminf N₀ˢ(T)/N(T) ≥ c`,
 in the repository's ε-form, over the counting functions of `comparator/ChallengeDeps.lean`.
 
 | | support σ | c | Lean name (`Solution.Zeta85`) | underlying theorem | axioms |

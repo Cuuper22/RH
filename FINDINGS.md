@@ -7,7 +7,7 @@ note is recorded instead of an empty heading.  Source files are those unpacked i
 
 ## 1. Setup and reading (S1–S3) — affirmative
 
-All 21 markdown files and both PDFs were read.  The base repository builds clean at commit `3635e74`
+All 21 markdown files and both PDFs in the initial archive were read.  The base repository builds clean at commit `3635e74`
 (`lake build`, 9010 jobs, zero errors; the four `PrintAxioms` audits give the standard three axioms
 on all 43 headline theorems).  One discrepancy between the task description and the repository, with
 no consequence: the task refers to `Zeta23/ThmD/Final.lean` and `Zeta23/ThmD/Mult.lean` — both exist;
@@ -381,3 +381,56 @@ cycle-4/cycle-5 aggregate criteria, and the base repository's zero side.
 | 12 | window cost at `101/100` | `07` | axiom 6 (numerics) |
 | 13 | window cost at `5/4` | `08` §3 | axiom 7 (numerics) |
 | 14 | trace transfer at `1 < σ < 3/2` | `01`, `02`, `12` §5 | axiom 8 |
+
+---
+
+## 12. Phase 0 source intake and the withdrawn 100% terminal claim
+
+The supplied analysis material consists of two physical ZIP archives plus two
+logical loose-file batches from the supplied Google Drive folder.  All four
+logical batches were ingested.  The terminal 95 batch is present, including
+`24_TERMINAL_certificate95_cycle2_95p063832.md` and
+`00_FINAL_95_RESULT_95p063832.md`; their presence passes the intake gate but
+does not validate their claims.  The exact inventory is `docs/run/MANIFEST.md`.
+
+`docs/run/100/FINAL_100_RESULT.md` is **WITHDRAWN**.  Two independent issues
+are load-bearing.
+
+1. The wide-block moment has no verified principal-compression / alias-
+   cancelling construction.  The mission handoff additionally reports the
+   pointwise-admissible maximum $M₂ ≤ 0.3144$ at $μ=2/3$, but no supplied
+   file states the extra condition from which that number follows.  The
+   independent reconstruction in `verify/withdrawn_100_claim.py` shows that
+   the pointwise cone actually written in the source admits
+
+
+   \[
+   r(t)=V_{1.9999}(\mu t)\mathbf 1_{\{|t|\geq g/2\}},
+   \qquad \int r=1,
+   \]
+
+   with $0 ≤ r(t) ≤ V_{1.9999}(μt)$ identically and
+   $M₂=0.374347517070571…$.  The 50- and 80-decimal calculations agree
+   within $10^{-51}$.  Thus $0.3144$ is **not reproduced** by the stated
+   model and is not used as an established bound here.  An additional explicit
+   admissibility condition—plausibly the missing R1a paraunitary/alias
+   condition—is the exact blocker.
+2. Even without the unverified $0.3144$ cap, the file's own premise package
+   is inconsistent at $s/N=1$.  There $b/N=0$ and
+   $ε=D−1<3385873/50000000$.  The stronger quadratic printed in the
+   file and the charged stability inequality then force
+
+
+   \[
+   M_2<\frac{64517303}{172727100}
+      =0.373521601416338\ldots,
+   \]
+
+   while the file assumes $M₂>18717/50000=0.37434$.  The excess of the
+   assumed lower bound is exactly $70679807/86363550000>0$, and the direct
+   trace-score gap is $6425437/25000000000>0$.
+
+The simultaneous premises therefore describe an empty feasible class.  Their
+contradiction indicts the block/moment premise and cannot prove density one.
+The script output is committed as `verify/withdrawn_100_claim.out`; no theorem
+or rung depends on the withdrawn source.
