@@ -1817,3 +1817,37 @@ The survivor is still (36), with all conductor/divisor strata and the joint
 source coefficient retained, plus the separate smooth source-identification
 and recombination bridge.  No A1 field is discharged and no frozen rung or
 README status changes.
+
+---
+
+## 38. B-2 actual-block centering bridge — finite adapter discharged; analytic limits remain
+
+`RH/Zeta85/Discharge/RSBlockMomentBridge.lean` connects the literal finite
+principal block to the already formalized scalar centering calculation.  For
+every \(0\le k\le4\), including zero-dimensional blocks under Lean's total
+division convention, it proves
+
+\[
+ \frac{\operatorname{Re}\operatorname{tr}((\operatorname{block}(T)-I)^k)}
+      {\operatorname{blockDim}(T)}
+ =\sum_{a=0}^k(-1)^{k-a}{k\choose a}
+   \frac{\operatorname{Re}\operatorname{tr}(\operatorname{block}(T)^a)}
+        {\operatorname{blockDim}(T)}.                  \tag{37}
+\]
+
+The new `UncenteredRSBlockLimits F` boundary assumes that the actual raw
+block moments in degrees zero through four converge to the evaluated
+formula-(27) contractions.  The degree-zero clause carries the eventual
+positive-block-dimension requirement needed by centering.  From this
+boundary and `PrincipalCyclicBlock F`, finite-sum continuity plus
+`topHat_centeredContraction_eq_formula21` proves all four centered limits in
+`BlockMomentLimits.moments`.
+
+The constructor does not manufacture the remaining analytic inputs.  It
+takes complex-alias summability and cancellation at the actual `ZIprime`
+zeros as separate hypotheses, alongside `UncenteredRSBlockLimits F`.
+Consequently, the published RS application, cyclic-symbol admissibility,
+common height smoothing, exact \(\log T\) normalization, complex Poisson,
+and the degree-three/four finite-grid and end estimates remain open.  No
+`BlockMomentLimits` instance is constructed, B-2 is not discharged, and no
+frozen rung or README status changes.

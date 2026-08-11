@@ -280,6 +280,20 @@ contractions or identify either expression with an actual block.  Those
 remaining analytic bridges stay in `BlockMomentLimits`; no instance or new
 research axiom is introduced.
 
+`RH/Zeta85/Discharge/RSBlockMomentBridge.lean` now discharges the exact
+actual-matrix centering adapter without adding a premise.  For the literal
+finite principal block and every degree through four, it proves that the
+normalized trace of \((\operatorname{block}(T)-I)^k\) is the binomial
+transform of the normalized uncentered traces.  Assuming
+`UncenteredRSBlockLimits F` in degrees zero through four, finite-sum
+continuity and the existing contraction calculation give the centered
+formula-(21) limits.  The degree-zero raw clause retains the eventual
+positive-dimension obligation.  The final constructor still requires the
+two complex-alias summability and cancellation clauses separately.  It does
+not derive the raw limits from the published RS theorem, construct R1a, or
+discharge `BlockMomentLimits`; B-2 and every frozen rung status remain
+unchanged.
+
 Phase B-1 is discharged without an input field.
 `RH/Zeta85/Stability.lean` proves the exact quartic stability bound,
 its isometric-compression form, and its principal-compression form from
@@ -493,6 +507,9 @@ delegates to) are identical.
 'RH.Zeta85.RSReduction.centeredContraction_eq_formula18' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSReduction.topHat_formula18_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSReduction.topHat_centeredContraction_eq_formula21' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSBlockMomentBridge.centeredBlockMoment_eq_centeredTransform' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSBlockMomentBridge.centered_moment_limits' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RH.Zeta85.RSBlockMomentBridge.blockMomentLimits_of_uncenteredRS' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSPairIntegrals.integral_abs_mul_shift_div' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSPairIntegrals.distanceIntegral_comm' depends on axioms: [propext, Classical.choice, Quot.sound]
 'RH.Zeta85.RSPairIntegrals.onePairCoordinateIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound]
@@ -702,6 +719,15 @@ does not construct `BlockMomentLimits` or discharge cyclic-symbol
 admissibility, the actual theorem-3.1 instance, common height smoothing,
 `log T` versus `ell(T) = log(T/2*pi)`, complex Poisson, the degree-three/four
 finite-grid/end estimates, or the actual principal-block bridge.
+
+The three `RSBlockMomentBridge` lines are the exact normalized output of
+`comparator/PrintAxioms/RSBlockMomentBridge.lean`; all have the standard
+three dependencies.  They prove the finite actual-block binomial identity,
+the raw-to-centered finite-limit adapter, and the existing-structure
+constructor only.  They do not prove `UncenteredRSBlockLimits`, complex
+alias summability or cancellation, cyclic-symbol admissibility, the
+published-theorem application, common height smoothing, or the higher
+finite-grid/end estimates.
 
 The 15 `PreMajorantDI` lines are the exact normalized output of
 `comparator/PrintAxioms/PreMajorantDI.lean`.  They audit only rational

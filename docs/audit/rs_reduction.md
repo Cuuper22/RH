@@ -563,6 +563,22 @@ bridge to the real prime-side matrix.
    partial-sum profile, and the powers \(\mu^3/\mu^2\) and
    \(\mu^5/\mu^4\) before/after normalization.
 
+10. **Actual-block centering adapter -- finite layer discharged.**
+    `RSBlockMomentBridge.lean` proves directly on the literal finite
+    principal matrix that the normalized centered trace through degree four
+    is the binomial transform of its normalized uncentered traces.  Its
+    `centered_moment_limits` theorem passes assumed raw limits in degrees
+    zero through four through that finite transform and invokes the already
+    proved top-hat contraction identity to obtain formula (21).  The
+    assumption `UncenteredRSBlockLimits F` is exactly the still-open
+    actual-block/cyclic-contraction limit; its degree-zero clause retains
+    eventual positivity of the block dimension.  The final constructor also
+    takes complex-alias summability and cancellation as independent inputs.
+    Thus this adapter constructs no analytic instance and does not discharge
+    cyclic-symbol admissibility, the published RS application, common height
+    smoothing, normalization, complex Poisson, or higher finite-grid/end
+    estimates.
+
 ## Audit conclusion
 
 The primary-source theorem needed for R3 is genuinely unconditional for
@@ -574,7 +590,8 @@ RS without that construction.
 
 What is machine-verified at present is the finite pairing classification,
 the complete one- and two-pair analytic evaluation and normalization through
-degree four, centering, and scalar top-hat specialization.  For a continuous
+degree four, scalar centering and top-hat specialization, and the literal
+finite-block binomial adapter from raw to centered limits.  For a continuous
 compactly supported profile, the published RS main term's internal
 contraction expression is fully evaluated as formula (27).  This statement
 does not assert that the cyclic symbol has yet been supplied to the published

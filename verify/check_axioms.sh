@@ -104,6 +104,7 @@ for audit in \
   comparator/PrintAxioms/RobustStability.lean \
   comparator/PrintAxioms/RSPairIntegrals.lean \
   comparator/PrintAxioms/RSReduction.lean \
+  comparator/PrintAxioms/RSBlockMomentBridge.lean \
   comparator/PrintAxioms/TopHatMoments.lean \
   comparator/PrintAxioms/TrimmedMoment.lean
 do

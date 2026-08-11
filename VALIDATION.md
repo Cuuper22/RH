@@ -1233,3 +1233,58 @@ nonexistence claim.  The required
 \(T^{48/25+\varepsilon}(\log T)^0\) bound and the separate smooth source
 identification/recombination identity remain unproved.  No A1 field is
 discharged and no frozen rung status changes.
+
+## 35. B-2 actual-block centering bridge gate
+
+The formal and independent gates are:
+
+```bash
+lake build RH.Zeta85.Discharge.RSBlockMomentBridge RH.Zeta85.Main
+lake env lean comparator/PrintAxioms/RSBlockMomentBridge.lean
+python3 verify/rs_block_moment_bridge_exact.py
+diff -u verify/rs_block_moment_bridge_exact.out \
+  <(python3 verify/rs_block_moment_bridge_exact.py)
+bash verify/check_axioms.sh
+```
+
+`RSBlockMomentBridge.lean` proves the literal finite-matrix binomial identity
+through degree four, passes assumed uncentered actual-block limits through
+that finite transform, identifies the result with formula (21), and supplies
+a constructor for the existing `BlockMomentLimits` interface.  The raw
+degree-zero limit retains eventual positivity of the block dimension.
+
+The constructor boundary remains analytic: it assumes
+`UncenteredRSBlockLimits F` and separately assumes complex-alias summability
+and cancellation at the actual enlarged-window zeros.  It does not derive
+these clauses from `RS1996ZetaInputs`, construct a principal family, or prove
+the cyclic-symbol, height-removal, normalization, complex-Poisson, or higher
+finite-grid estimates.
+
+The dedicated printer selects all three public theorems and is included in
+the generic standard-three loop in `verify/check_axioms.sh`.  Every
+normalized line is exactly `[propext, Classical.choice, Quot.sound]`.
+`RH.Zeta85.Main` imports the module.  The targeted/Main build, printer,
+exact-output diff, full axiom gate, source scans, and `git diff --check` all
+exit zero.
+
+The Python verifier independently expands \((X-1)^k\) with integer
+polynomial multiplication and compares its coefficients with the binomial
+transform for \(0\le k\le4\).  Its printed analytic-interface inventory is
+descriptive; the Lean theorem statements and dependency printer validate
+that split.
+
+The exact artifact hashes are:
+
+```text
+1ee61b9737e3ce8bb4d70da268e88ff1a3446e2b1be33916f1d0b05028702836  RH/Zeta85/Discharge/RSBlockMomentBridge.lean
+d0b7a2a3ed973c7be5934dcd1c803148f890bf7be044bdafffc6a37a8138269a  comparator/PrintAxioms/RSBlockMomentBridge.lean
+205e99200cf09361563f850886409042fd6b6c4599fcb592cbf6f7a885ac9918  docs/audit/rs_block_moment_bridge.md
+87303ae07633c1402a83ea31845eaaacd9daab3172cc1841b78e57b54a72adc8  verify/rs_block_moment_bridge_exact.py
+4735ec2bb4334b0eecf172e0bc662df7dc0d29859ff7bc6392120806ac7f5b4a  verify/rs_block_moment_bridge_exact.out
+```
+
+This gate discharges only finite centering and the raw-to-centered limit
+adapter.  `UncenteredRSBlockLimits`, both complex-alias clauses, and the
+underlying analytic RS-to-actual-block derivation remain unproved.  No
+`BlockMomentLimits` instance is constructed and no frozen rung status
+changes.

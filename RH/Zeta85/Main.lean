@@ -42,6 +42,7 @@ import RH.Zeta85.Discharge.R9383ExactEndpoint
 import RH.Zeta85.Discharge.RobustStability
 import RH.Zeta85.Discharge.RSPairIntegrals
 import RH.Zeta85.Discharge.RSReduction
+import RH.Zeta85.Discharge.RSBlockMomentBridge
 import RH.Zeta85.Discharge.TopHatMoments
 import RH.Zeta85.Discharge.TrimmedMoment
 import RH.Zeta85.Inputs95
