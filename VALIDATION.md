@@ -179,7 +179,8 @@ The push, pull-request, and manual workflow at `.github/workflows/ci.yml` runs:
 
 ```bash
 lake exe cache get
-lake build Zeta23 RH.Zeta85.Main Solution.Zeta85
+lake build Zeta23 RH.Zeta85.Main \
+  Solution Solution.Multiplicity Solution.XiPrime Solution.Zeta85
 bash verify/check_axioms.sh
 ```
 
@@ -189,10 +190,15 @@ fresh Lean output.  It then runs the four base `PrintAxioms` audits.  A final
 source scan rejects proof-level `sorry` and `admit` outside the comparator
 challenge files.
 
-The workflow and extraction logic were inspected locally; this environment has
-no Lean executable, so the authoritative build result is the GitHub-hosted run
-triggered by the Phase 0d commit.  Phase 0c's DigitalOcean reproduction was
+The shell path initially exposed no Lean executable, so the GitHub-hosted run
+remains the authoritative CI record.  Phase 0c's DigitalOcean reproduction was
 waived explicitly by the user and was not performed.
+
+The audit harness was repaired at commit `810353e`: the stability module
+documentation now follows its `import`, as Lean requires, and every
+`Solution*` module imported by the base `PrintAxioms` files is built
+explicitly before the audit.  With the pinned local toolchain invoked by its
+full path, the expanded build and `verify/check_axioms.sh` both exit zero.
 
 ## 11. A1.1 exact exponent audit
 
@@ -280,7 +286,8 @@ bridges are listed verbatim in `FINDINGS.md` §16 and
 
 `RH/Zeta85/Stability.lean` is imported by
 `RH/Zeta85/Main.lean`.  The CI build target
-`lake build Zeta23 RH.Zeta85.Main Solution.Zeta85` therefore checks
+`lake build Zeta23 RH.Zeta85.Main Solution Solution.Multiplicity
+Solution.XiPrime Solution.Zeta85` therefore checks
 the full stability module.
 
 `comparator/PrintAxioms/Stability.lean` prints the five public
@@ -325,3 +332,34 @@ The matching arithmetic identities are formalized in
 `blomer_pascadi_range_excess`, and
 `mqw_range_excesses`.  This validates the method-class audit only;
 it does not add the missing analytic estimate.
+
+## 16. A2.1 common-lattice rank and profile audit
+
+`docs/audit/r1a_power_complementary_partition.md` gives the exact fiber-rank
+proof for the finite common-lattice PB/TDAC class.  The algebraic rank
+contradiction uses no numerical premise.  Its application to the claimed
+symbols is reproduced by:
+
+```bash
+python3 -m pip install -r verify/requirements.txt
+cmp -s verify/a2_1_tdac_rank.out \
+  <(python3 verify/a2_1_tdac_rank.py)
+```
+
+The script uses `fractions.Fraction` intervals, 90-decimal integer-square-root
+enclosures, and rational Taylor remainder bounds.  It reconstructs the
+matching constants \(A,B\), normalization \(M\), endpoint value, and edge
+margin from terminal file 24's equations (28)--(29); no reported profile
+constant is hard-coded.  Separate 60- and 100-decimal `mpmath` evaluations
+agree beyond 55 decimal places.  The committed output certifies positive
+residual margins greater than \(1/1000\), \(1/1000\), and \(1/10\) for
+R-9506, R-8686, and the file-15 Euler repair respectively, and checks the
+three exact rank deficits.  For the normalized quadratic profile it derives
+the edge residual `42756493/1031000000 > 0` and the central average
+`1157918831/1031000000 > 1` using exact rational arithmetic.  The latter
+check prevents the unnormalized profile from being used to claim a false
+zero-row obstruction.
+
+This is a method-class impossibility audit, not a Lean discharge or a new
+analytic input.  No declaration, headline dependency, or frozen rung status
+changes.

@@ -715,3 +715,54 @@ norms for \(\alpha_a,\beta_m,e_q\), common divisor bookkeeping, the exact
 zero-mode/singular-series identity.  The exact surviving statement is
 `(WG-HB)` in `docs/audit/log_budget_routes.md`; it remains
 unproved and cannot yet be faithfully made an `Inputs95` field.
+
+---
+
+## 19. A2.1 R1a alias construction — critical-density TDAC class killed
+
+The scalar power-complement identity in cycle 3 controls only the zero-alias
+row of the Poisson formula.  It does not imply the nonzero alias equations
+needed for the asserted Gram matrix.  A Princen--Bradley sign pair can cancel
+one cross alias, so positivity alone is not the obstruction.
+
+For the exact finite common-lattice class used by cycle 3, let the full
+support be \(S=Na\), the periods be \(L_j=n_ja\), and retain the asserted
+critical count \(\sum_j n_j=N\).  Fiberization modulo \(a\) expresses the
+\(j\)-th window contribution as a sum of \(n_j\) rank-one outer products,
+so it has rank at most \(n_j\).  The distinguished window is supported in
+one period and is therefore alias-free.  If its residual energy \(v-r\) is
+positive on every fiber, the complementary diagonal has rank \(N\), whereas
+all remaining channels have rank at most
+\(\sum_{j>0}n_j=N-n_0<N\).  This contradiction is unchanged by arbitrary
+real signs or complex phases.
+
+`verify/a2_1_tdac_rank.py` reconstructs the terminal Euler profiles and
+certifies their signs using exact rational intervals for square roots and
+Taylor remainders.  It proves the conservative margins
+
+\[
+ V_{19999/10000}\bigl(\mu(83/100)/2\bigr)-100/83>1/1000,
+ \qquad
+ V_{14999/10000}\bigl(\mu(89/100)/2\bigr)-100/89>1/1000,
+\]
+
+at \(\mu=4999/10000\), and the later Euler repair of file 15 has margin
+greater than \(1/10\).  For file 15's original quadratic profile, the
+hat-unit symbol is \(V=v/(1031/1200)\).  Its exact central edge residual is
+
+\[
+ V(\mu/2)-1=\frac{42756493}{1031000000}>0
+\]
+
+at \(\mu=499/1000\), so the rank obstruction applies directly.  The
+normalized central average is
+\(1157918831/1031000000>1\); there is no zero-row average contradiction.
+
+This kills A2.1 only for finite commensurable systems with the cycle-3
+coefficient count and the claimed distinguished symbols.  It does not rule
+out oversampling, a separately derived noncommensurable architecture, or the
+A2.2 base-paper alias-free redesign.  The latter must change the
+distinguished symbol to the restriction of the full profile, carry the exact
+step/smoothing loss, and recompute all moments.  Any resulting constants are
+new rungs; every frozen quartic rung remains conditional on its own missing
+R1a construction.

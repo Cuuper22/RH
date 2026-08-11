@@ -77,6 +77,18 @@ displayed candidate bound, but the repository lacks the signed depth-four
 coefficient object needed to state that input faithfully.  Therefore
 `signedPair_traceGrade_lt_3_2` remains unchanged.
 
+Phase A2.1 also changes no compiled dependency.  The claimed cycle-3
+power-complementary identity is impossible in the exact finite
+common-lattice, critical-channel PB/TDAC class: after removing an alias-free
+distinguished window whose residual symbol is positive on every fiber, the
+complement needs rank \(N\) but the cycle-3 count supplies at most
+\(N-n_0\).  Certified rational-interval evaluation verifies the positive
+residual for the file-15, R-8686, and R-9506 symbols.  This indicts the
+construction premise, not the stability or moment algebra.  No replacement
+principal-block input has been added; the frozen quartic rungs remain at
+their existing conditional status while the A2.2 alias-free redesign is
+tested.
+
 ---
 
 ## 1. `#print axioms` — verbatim
