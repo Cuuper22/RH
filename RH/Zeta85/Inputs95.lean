@@ -553,6 +553,22 @@ structure BlockMomentLimits {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     Tendsto (F.centeredBlockMoment k) atTop
       (nhds (formula21Moment k μ p))
 
+/-- The exact portion of the R1b package consumed by the quartic transfer.
+The complex-Poisson clauses remain available in `BlockMomentLimits` for the
+RS construction route, but are not hypotheses of the finite moment argument. -/
+structure BlockMomentConvergence
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) : Prop where
+  moments : ∀ k : ℕ, 1 ≤ k → k ≤ 4 →
+    Tendsto (F.centeredBlockMoment k) atTop
+      (nhds (formula21Moment k μ p))
+
+theorem BlockMomentLimits.toBlockMomentConvergence
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : BlockMomentLimits F) : BlockMomentConvergence F where
+  moments := h.moments
+
 /-! ## Explicit bundle -/
 
 abbrev Family14999 (Z : ZeroConfig) :=
