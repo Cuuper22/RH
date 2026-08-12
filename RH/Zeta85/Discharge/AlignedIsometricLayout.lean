@@ -369,7 +369,7 @@ structure RoutedFourierGrid
   period : ℝ → ι → ℝ
   supportRadius : ℝ → ι → ℝ
   window : ℝ → ι → ℝ → ℝ
-  frequency : ∀ T : ℝ, Fin (G.labelCount T) → ℤ
+  frequency : ∀ T : ℝ, ι → Fin (G.labelCount T) → ℤ
   product_eq :
     ∀ (T : ℝ) (r : ι) (k : Fin (G.labelCount T))
       (ρ ρ' : ℂ),
@@ -378,11 +378,11 @@ structure RoutedFourierGrid
         ((F.fullLength T : ℂ) / (period T r : ℂ)) *
           (paperFT (fun u => (window T r u : ℂ))
               (gammaOf ρ -
-                (T + (frequency T k : ℝ) *
+                (T + (frequency T r k : ℝ) *
                   (2 * Real.pi / period T r) : ℝ)) *
             paperFT (fun u => (window T r u : ℂ))
               (gammaOf ρ' -
-                (T + (frequency T k : ℝ) *
+                (T + (frequency T r k : ℝ) *
                   (2 * Real.pi / period T r) : ℝ)))
 
 /-- The regularity and closed-half-period support needed by the standalone
@@ -422,11 +422,11 @@ def routedVirtualFrequencyTail
     ∑ k : Fin (G.labelCount T),
       paperFT (fun u => (H.window T r u : ℂ))
           (gammaOf ρ -
-            (T + (H.frequency T k : ℝ) *
+            (T + (H.frequency T r k : ℝ) *
               (2 * Real.pi / H.period T r) : ℝ)) *
         paperFT (fun u => (H.window T r u : ℂ))
           (gammaOf ρ' -
-            (T + (H.frequency T k : ℝ) *
+            (T + (H.frequency T r k : ℝ) *
               (2 * Real.pi / H.period T r) : ℝ))
 
 /-- The routed pair sum is exactly the normalized finite Fourier grid. -/
@@ -444,11 +444,11 @@ theorem routedVirtualPairSum_eq_frequencyGrid
           ∑ k : Fin (G.labelCount T),
             paperFT (fun u => (H.window T r u : ℂ))
                 (gammaOf ρ -
-                  (T + (H.frequency T k : ℝ) *
+                  (T + (H.frequency T r k : ℝ) *
                     (2 * Real.pi / H.period T r) : ℝ)) *
               paperFT (fun u => (H.window T r u : ℂ))
                 (gammaOf ρ' -
-                  (T + (H.frequency T k : ℝ) *
+                  (T + (H.frequency T r k : ℝ) *
                     (2 * Real.pi / H.period T r) : ℝ)) := by
   unfold routedVirtualPairSum
   apply Finset.sum_congr rfl
