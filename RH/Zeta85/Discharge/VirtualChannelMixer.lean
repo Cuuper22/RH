@@ -123,6 +123,19 @@ theorem pointwise_parseval
     _ = ∑ r : ι, (virtual r x) ^ 2 := by
       simp only [pow_two]
 
+
+/-- The complete integrated window energy is unchanged.  This is the exact
+identity used by the hat normalization after all physical channels have been
+summed. -/
+theorem integrated_parseval
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → ℝ → ℝ) :
+    (∫ u : ℝ, ∑ j : ι, (synthesize C virtual j u) ^ 2) =
+      ∫ u : ℝ, ∑ r : ι, (virtual r u) ^ 2 := by
+  apply MeasureTheory.integral_congr_ae
+  filter_upwards [] with u
+  exact pointwise_parseval C virtual u
+
 /-- A family supported in a common set remains supported there after
 orthogonal synthesis. -/
 theorem synthesize_eq_zero
