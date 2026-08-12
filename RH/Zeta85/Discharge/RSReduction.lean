@@ -198,6 +198,23 @@ theorem weightedCyclicSymbol_k4_l1_bound
   rw [habssum]
   nlinarith
 
+/-- The quartic cyclic symbol, capped in the unused normal direction,
+satisfies the strict RS support condition whenever the four-bandwidth budget
+and cutoff radius leave a positive margin below two. -/
+theorem normalCutoffWeightedCyclicSymbol_k4_strictSupport
+    (mu a b eps : ℝ) (r : ℝ -> ℝ) (chi : ℝ -> ℂ)
+    (hmu : 0 < mu)
+    (hr : ∀ x, r x ≠ 0 -> a ≤ x ∧ x ≤ b)
+    (hchi : ∀ s, chi s ≠ 0 -> |s| ≤ eps)
+    (hmargin : 4 * mu * (b - a) + eps < 2) :
+    tsupport
+        (normalCutoffSymbol chi (weightedCyclicSymbol (k := 4) mu r)) ⊆
+      {xi | ∑ i : Fin 4, |xi i| < 2} := by
+  exact normalCutoffSymbol_strictSupport
+    chi (weightedCyclicSymbol (k := 4) mu r)
+    (4 * mu * (b - a)) eps hchi
+    (weightedCyclicSymbol_k4_l1_bound mu a b r hmu hr) hmargin
+
 /-! ## Compact normal-coordinate extension
 
 The cyclic symbol is only used on the zero-sum hyperplane.  Multiplying by a
