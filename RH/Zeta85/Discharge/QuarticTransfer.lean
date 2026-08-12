@@ -17,8 +17,10 @@ This file consumes only the explicit per-support analytic structures in
 are upstream routes for proving the trace and moment structures, not logical
 substitutes for them.
 
-The finite bridge is kept at the actual first four spectral moments.  Thus no
-finite matrix is asserted to have its limiting top-hat moments exactly.
+The finite bridge is evaluated at the actual first four spectral moments.
+Its asymptotic boundary is only the single scalar quartic score selected by
+the terminal certificate; no finite matrix is asserted to have its limiting
+top-hat moments exactly.
 -/
 
 open Filter Matrix Finset Unitary
@@ -97,6 +99,16 @@ def limitQuarticScore (q : Quartic) (μ p : ℝ) : ℝ :=
     q.p2 * formula21Moment 2 μ p +
     q.p3 * formula21Moment 3 μ p +
     q.p4 * formula21Moment 4 μ p
+
+/-- The target-specific analytic datum actually consumed by a quartic
+certificate: convergence of its one scalar score.  Separate convergence of
+all four moments is a sufficient construction route, not a logical
+requirement of the transfer. -/
+def QuarticScoreConvergence
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop :=
+  Tendsto (quarticScore q F) atTop
+    (nhds (limitQuarticScore q μ p))
 
 /-- All finite errors in the affine bridge.  The coefficient `3` on the
 enlarged-window edge count is exact: `2` comes from robust stability and
@@ -237,6 +249,16 @@ theorem quarticScore_tendsto
       (tendsto_const_nhds.mul h3)).add
       (tendsto_const_nhds.mul h4))
 
+/-- Four separate moment limits imply the one target-specific scalar limit.
+This keeps the stronger formula-(21) route available without forcing every
+future construction to prove unused coordinates. -/
+theorem quarticScoreConvergence_of_moments
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hmom : BlockMomentConvergence F) (q : Quartic) :
+    QuarticScoreConvergence q F :=
+  quarticScore_tendsto hmom q
+
 private theorem edgeCount_small
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) :
     (fun T => (Assembly.NII Z T : ℝ)) =o[atTop]
@@ -283,11 +305,12 @@ theorem normalizedTransfer_tendsto
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F) (hr1a : BlockDimensionLimit F)
-    (hmom : BlockMomentConvergence F) (q : Quartic) (cap Dbar : ℝ) :
+    (q : Quartic) (hscore : QuarticScoreConvergence q F)
+    (cap Dbar : ℝ) :
     Tendsto (normalizedTransfer q cap Dbar F) atTop
       (nhds ((μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2) /
         (1 - cap / 2))) := by
-  have hproduct := hr1a.block_dimension.mul (quarticScore_tendsto hmom q)
+  have hproduct := hr1a.block_dimension.mul hscore
   have herror := (transferError_small hRvM hfull hzero).tendsto_div_nhds_zero
   have hconstant : Tendsto (fun _ : ℝ => 2 - Dbar - cap / 2) atTop
       (nhds (2 - Dbar - cap / 2)) := tendsto_const_nhds
@@ -318,8 +341,8 @@ theorem asymptotic_eps_transfer
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F) (hr1a : BlockDimensionLimit F)
-    (hmom : BlockMomentConvergence F)
-    (q : Quartic) (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
+    (q : Quartic) (hscore : QuarticScoreConvergence q F)
+    (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 < 1) (hcost : profileSaturatedCost σ v ≤ Dbar)
     (hstrict : target <
       (μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2) /
@@ -329,7 +352,7 @@ theorem asymptotic_eps_transfer
         (Z.N0s T (2 * T) : ℝ) := by
   have hden : 0 < 1 - cap / 2 := sub_pos.mpr hcap
   have hlower : ∀ᶠ T in atTop, target < normalizedTransfer q cap Dbar F T :=
-    (normalizedTransfer_tendsto hRvM hfull hzero hr1a hmom q cap Dbar).eventually
+    (normalizedTransfer_tendsto hRvM hfull hzero hr1a q hscore cap Dbar).eventually
       (Ioi_mem_nhds hstrict)
   have hfinite := finite_affine_bridge hfull hzero hr1a q cap Dbar hdual
     hcap.le hcost
@@ -471,7 +494,8 @@ frozen R-8686 epsilon form. -/
 theorem eps_transfer_8686
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDimensionLimit F) (hmom : BlockMomentConvergence F) :
+    (hr1a : BlockDimensionLimit F)
+    (hscore : QuarticScoreConvergence Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
@@ -480,8 +504,8 @@ theorem eps_transfer_8686
         Terminal8686.costUpper := by
     rw [profileSaturatedCost_v8686]
     exact QuarticWindowWitnesses.D8686_lt.le
-  exact asymptotic_eps_transfer hRvM hfull hzero hr1a hmom
-    Terminal8686.dual Terminal8686.cap Terminal8686.costUpper
+  exact asymptotic_eps_transfer hRvM hfull hzero hr1a
+    Terminal8686.dual hscore Terminal8686.cap Terminal8686.costUpper
     (86855250 / 100000000) Terminal8686.dual_feasible
     Terminal8686.cap_slope hcost strict_transfer_8686
 
@@ -490,7 +514,8 @@ frozen R-9506 epsilon form. -/
 theorem eps_transfer_9506
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDimensionLimit F) (hmom : BlockMomentConvergence F) :
+    (hr1a : BlockDimensionLimit F)
+    (hscore : QuarticScoreConvergence Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -500,8 +525,8 @@ theorem eps_transfer_9506
         Terminal9506.costUpper := by
     rw [profileSaturatedCost_v9506]
     exact QuarticWindowWitnesses.D9506_lt.le
-  exact asymptotic_eps_transfer hRvM hfull hzero hr1a hmom
-    Terminal9506.dual Terminal9506.cap Terminal9506.costUpper
+  exact asymptotic_eps_transfer hRvM hfull hzero hr1a
+    Terminal9506.dual hscore Terminal9506.cap Terminal9506.costUpper
     (95063832187565 / 100000000000000) Terminal9506.dual_feasible
     Terminal9506.cap_slope hcost strict_transfer_9506
 
@@ -520,13 +545,14 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_8657
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDimensionLimit F) (hmom : BlockMomentConvergence F) :
+    (hr1a : BlockDimensionLimit F)
+    (hscore : QuarticScoreConvergence Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   intro ε hε
-  obtain ⟨T₀, hT₀⟩ := eps_transfer_8686 hRvM hfull hzero hr1a hmom ε hε
+  obtain ⟨T₀, hT₀⟩ := eps_transfer_8686 hRvM hfull hzero hr1a hscore ε hε
   refine ⟨T₀, ?_⟩
   intro T hT
   have hstrong := hT₀ T hT
@@ -538,13 +564,14 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_9383
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDimensionLimit F) (hmom : BlockMomentConvergence F) :
+    (hr1a : BlockDimensionLimit F)
+    (hscore : QuarticScoreConvergence Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   intro ε hε
-  obtain ⟨T₀, hT₀⟩ := eps_transfer_9506 hRvM hfull hzero hr1a hmom ε hε
+  obtain ⟨T₀, hT₀⟩ := eps_transfer_9506 hRvM hfull hzero hr1a hscore ε hε
   refine ⟨T₀, ?_⟩
   intro T hT
   have hstrong := hT₀ T hT
@@ -567,49 +594,53 @@ structures remain explicit. -/
 theorem zeta_eps_transfer_8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDimensionLimit F) (hmom : BlockMomentConvergence F) :
+    (hr1a : BlockDimensionLimit F)
+    (hscore : QuarticScoreConvergence Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero hr1a hmom)
+    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero hr1a hscore)
 
 /-- Concrete-zeta R-9506 epsilon form, conditional only on the four explicit
 per-support structures. -/
 theorem zeta_eps_transfer_9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDimensionLimit F) (hmom : BlockMomentConvergence F) :
+    (hr1a : BlockDimensionLimit F)
+    (hscore : QuarticScoreConvergence Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hr1a hmom)
+    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hr1a hscore)
 
 /-- Concrete-zeta R-8657, obtained monotonically from R-8686. -/
 theorem zeta_eps_transfer_8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDimensionLimit F) (hmom : BlockMomentConvergence F) :
+    (hr1a : BlockDimensionLimit F)
+    (hscore : QuarticScoreConvergence Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero hr1a hmom)
+    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero hr1a hscore)
 
 /-- Concrete-zeta R-9383, obtained monotonically from R-9506. -/
 theorem zeta_eps_transfer_9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDimensionLimit F) (hmom : BlockMomentConvergence F) :
+    (hr1a : BlockDimensionLimit F)
+    (hscore : QuarticScoreConvergence Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero hr1a hmom)
+    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero hr1a hscore)
 
 end QuarticTransfer
 end Zeta85
