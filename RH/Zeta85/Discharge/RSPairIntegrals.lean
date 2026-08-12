@@ -1438,7 +1438,7 @@ theorem RS1996ZetaInputs.unitIntervalQuartic_evaluated
           (((4999 / 10000 : ℝ) *
             quarticRSScalar (4999 / 10000 : ℝ)
               unitIntervalProfile : ℝ) : ℂ)‖ ≤ C * T := by
-  obtain ⟨C, T0, hC, hT0, hRS⟩ := hrs.unitIntervalQuartic g hg
+  obtain ⟨C, T0, hC, hT0, hRS⟩ := RSReduction.RS1996ZetaInputs.unitIntervalQuartic hrs g hg
   refine ⟨C, T0, hC, hT0, ?_⟩
   intro T hT
   obtain ⟨hSummable, hBound⟩ := hRS T hT
@@ -1465,7 +1465,7 @@ theorem RS1996ZetaInputs.frozenQuartic_evaluated
           (((4999 / 10000 : ℝ) *
             quarticRSScalar (4999 / 10000 : ℝ) r : ℝ) : ℂ)‖ ≤ C * T := by
   obtain ⟨C, T0, hC, hT0, hRS⟩ :=
-    hrs.frozenQuartic r hrc hrSmooth hrSupport g hg
+    RSReduction.RS1996ZetaInputs.frozenQuartic hrs r hrc hrSmooth hrSupport g hg
   refine ⟨C, T0, hC, hT0, ?_⟩
   intro T hT
   obtain ⟨hSummable, hBound⟩ := hRS T hT
