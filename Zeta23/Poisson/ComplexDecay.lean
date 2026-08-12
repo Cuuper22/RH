@@ -38,8 +38,8 @@ theorem paperFT_horizontal_decay
   have hfi : Integrable f :=
     hf.continuous.integrable_of_hasCompactSupport hcompact
   refine ⟨
-    Real.exp (|z.im| * Λ) * ∫ u, ‖f u‖ +
-      Real.exp (|z.im| * Λ) * ∫ u, ‖deriv (deriv f) u‖,
+    Real.exp (|z.im| * Λ) * (∫ u, ‖f u‖) +
+      Real.exp (|z.im| * Λ) * (∫ u, ‖deriv (deriv f) u‖),
     ?_⟩
   intro s
   let w : ℂ := z - s
@@ -56,19 +56,19 @@ theorem paperFT_horizontal_decay
     nlinarith [sq_nonneg w.im]
   have h2re :
       ‖paperFT f w‖ * (z.re - s) ^ 2 ≤
-        Real.exp (|z.im| * Λ) * ∫ u, ‖deriv (deriv f) u‖ := by
+        Real.exp (|z.im| * Λ) * (∫ u, ‖deriv (deriv f) u‖) := by
     exact
       (mul_le_mul_of_nonneg_left hre (norm_nonneg _)).trans h2
   change
     ‖paperFT f w‖ * (1 + (z.re - s) ^ 2) ≤
-      Real.exp (|z.im| * Λ) * ∫ u, ‖f u‖ +
-        Real.exp (|z.im| * Λ) * ∫ u, ‖deriv (deriv f) u‖
+      Real.exp (|z.im| * Λ) * (∫ u, ‖f u‖) +
+        Real.exp (|z.im| * Λ) * (∫ u, ‖deriv (deriv f) u‖)
   calc
     ‖paperFT f w‖ * (1 + (z.re - s) ^ 2) =
         ‖paperFT f w‖ +
           ‖paperFT f w‖ * (z.re - s) ^ 2 := by ring
-    _ ≤ Real.exp (|z.im| * Λ) * ∫ u, ‖f u‖ +
-          Real.exp (|z.im| * Λ) * ∫ u, ‖deriv (deriv f) u‖ :=
+    _ ≤ Real.exp (|z.im| * Λ) * (∫ u, ‖f u‖) +
+          Real.exp (|z.im| * Λ) * (∫ u, ‖deriv (deriv f) u‖) :=
       add_le_add h0 h2re
 
 /-- Along any nondegenerate affine real lattice, the complex-frequency
@@ -95,7 +95,7 @@ theorem summable_paperFT_affine_int
     (z : ℂ) (hh : h ≠ 0) :
     Summable (fun k : ℤ =>
       paperFT f (z - (T + (k : ℝ) * h : ℝ))) := by
-  have hO := paperFT_affine_horizontal_isBigO hf hsupp z hh
+  have hO := paperFT_affine_horizontal_isBigO (T := T) (h := h) hf hsupp z hh
   simpa only [Function.comp_apply] using
     (summable_of_isBigO
       (Real.summable_abs_int_rpow one_lt_two)
