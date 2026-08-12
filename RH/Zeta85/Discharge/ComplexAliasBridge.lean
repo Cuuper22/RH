@@ -141,6 +141,83 @@ theorem complexAliasTerm_zero
           cexp (I * (z - z') * (u : ℂ)) := by
   simp [QuarticGramFamily.complexAliasTerm]
 
+
+/-- A channel alias sum is its zero translation plus the sum over all
+nonzero translations. -/
+theorem channelAliasSum_eq_zero_add_nonzero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (z z' : ℂ)
+    (hsum : Summable
+      (fun m : ℤ => F.complexAliasTerm T z z' j m)) :
+    channelAliasSum F T j z z' =
+      F.complexAliasTerm T z z' j 0 +
+        ∑' m : {m : ℤ // m ≠ 0},
+          F.complexAliasTerm T z z' j m := by
+  classical
+  unfold channelAliasSum
+  simpa using
+    (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
+
+/-- Once the frozen off-RH alias family cancels, summing the full alias
+lattices over channels leaves exactly the zero translations. -/
+theorem sum_channelAliasSum_eq_sum_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (z z' : ℂ)
+    (hsum : ∀ j : Fin (F.channelCount T),
+      Summable (fun m : ℤ => F.complexAliasTerm T z z' j m))
+    (hfamily : Summable (F.complexAliasFamily T z z'))
+    (hoff : (∑' a : F.AliasIndex T,
+      F.complexAliasFamily T z z' a) = 0) :
+    (∑ j : Fin (F.channelCount T),
+        channelAliasSum F T j z z') =
+      ∑ j : Fin (F.channelCount T),
+        F.complexAliasTerm T z z' j 0 := by
+  classical
+  have hprod :
+      (∑' a : F.AliasIndex T,
+          F.complexAliasFamily T z z' a) =
+        ∑' j : Fin (F.channelCount T),
+          ∑' m : {m : ℤ // m ≠ 0},
+            F.complexAliasTerm T z z' j m := by
+    simpa only [QuarticGramFamily.complexAliasFamily] using
+      hfamily.tsum_prod
+  have hnonzero :
+      (∑ j : Fin (F.channelCount T),
+          ∑' m : {m : ℤ // m ≠ 0},
+            F.complexAliasTerm T z z' j m) = 0 := by
+    calc
+      (∑ j : Fin (F.channelCount T),
+          ∑' m : {m : ℤ // m ≠ 0},
+            F.complexAliasTerm T z z' j m) =
+          ∑' j : Fin (F.channelCount T),
+            ∑' m : {m : ℤ // m ≠ 0},
+              F.complexAliasTerm T z z' j m := by simp
+      _ = ∑' a : F.AliasIndex T,
+          F.complexAliasFamily T z z' a := hprod.symm
+      _ = 0 := hoff
+  calc
+    (∑ j : Fin (F.channelCount T),
+        channelAliasSum F T j z z') =
+      ∑ j : Fin (F.channelCount T),
+        (F.complexAliasTerm T z z' j 0 +
+          ∑' m : {m : ℤ // m ≠ 0},
+            F.complexAliasTerm T z z' j m) := by
+      apply Finset.sum_congr rfl
+      intro j hj
+      exact channelAliasSum_eq_zero_add_nonzero
+        F T j z z' (hsum j)
+    _ = (∑ j : Fin (F.channelCount T),
+          F.complexAliasTerm T z z' j 0) +
+        ∑ j : Fin (F.channelCount T),
+          ∑' m : {m : ℤ // m ≠ 0},
+            F.complexAliasTerm T z z' j m := by
+      rw [Finset.sum_add_distrib]
+    _ = ∑ j : Fin (F.channelCount T),
+        F.complexAliasTerm T z z' j 0 := by
+      rw [hnonzero, add_zero]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
