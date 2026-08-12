@@ -2302,6 +2302,30 @@ theorem tendsto_virtualSymmetricFrequencyTail_zero
       T L Λ f hL hΛ hsmooth hsupp heven z z')
   simpa only [virtualSymmetricFrequencyTail, sub_self] using htail
 
+/-- Pointwise lattice-tail convergence becomes simultaneous convergence on
+every finite complex-frequency sample.  This is the exact form consumed by a
+finite zero contraction: for a fixed height, one symmetric cutoff controls
+all sampled pairs at once. -/
+theorem eventually_virtualSymmetricFrequencyTail_mem_ball_on_finset
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (S : Finset ℂ) (ε : ℝ) (hε : 0 < ε) :
+    ∀ᶠ n in Filter.atTop,
+      ∀ z ∈ S, ∀ z' ∈ S,
+        virtualSymmetricFrequencyTail T L f z z' n ∈
+          Metric.ball (0 : ℂ) ε := by
+  rw [S.eventually_all]
+  intro z hz
+  rw [S.eventually_all]
+  intro z' hz'
+  exact
+    (tendsto_virtualSymmetricFrequencyTail_zero
+      T L Λ f hL hΛ hsmooth hsupp heven z z').eventually
+        (Metric.ball_mem_nhds (0 : ℂ) hε)
+
 end ComplexAliasBridge
 end Zeta85
 end RH
