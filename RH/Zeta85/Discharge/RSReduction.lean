@@ -34,7 +34,7 @@ The existing `RS1996ZetaInputs.theorem31` and the real-frequency `k = 2`
 Poisson/EndsCore API do not provide those steps.
 -/
 
-open MeasureTheory
+open MeasureTheory Zeta23
 open scoped BigOperators Matrix Convolution ContDiff
 
 noncomputable section
@@ -128,17 +128,31 @@ theorem weightedCyclicSymbol_k4_l1_bound
     apply hx
     dsimp only [I]
     exact Finset.prod_eq_zero (Finset.mem_univ j) h
+  have hcp1 : cyclicPartialSum xi (1 : Fin 4) = xi 0 := by
+    rw [cyclicPartialSum,
+      show Finset.filter (fun j : Fin 4 => j < (1 : Fin 4))
+          Finset.univ = {0} by decide]
+    simp
+  have hcp2 : cyclicPartialSum xi (2 : Fin 4) = xi 0 + xi 1 := by
+    rw [cyclicPartialSum,
+      show Finset.filter (fun j : Fin 4 => j < (2 : Fin 4))
+          Finset.univ = {0, 1} by decide]
+    simp
+  have hcp3 :
+      cyclicPartialSum xi (3 : Fin 4) = xi 0 + xi 1 + xi 2 := by
+    rw [cyclicPartialSum,
+      show Finset.filter (fun j : Fin 4 => j < (3 : Fin 4))
+          Finset.univ = {0, 1, 2} by decide]
+    simp
+    ring
   have hr0 : r x ≠ 0 := by
     simpa [cyclicPartialSum] using hfactor (0 : Fin 4)
   have hr1 : r (x + xi 0 / mu) ≠ 0 := by
-    convert hfactor (1 : Fin 4) using 1 <;>
-      norm_num [cyclicPartialSum, Fin.sum_univ_succ]
+    simpa only [hcp1] using hfactor (1 : Fin 4)
   have hr2 : r (x + (xi 0 + xi 1) / mu) ≠ 0 := by
-    convert hfactor (2 : Fin 4) using 1 <;>
-      norm_num [cyclicPartialSum, Fin.sum_univ_succ] <;> ring
+    simpa only [hcp2] using hfactor (2 : Fin 4)
   have hr3 : r (x + (xi 0 + xi 1 + xi 2) / mu) ≠ 0 := by
-    convert hfactor (3 : Fin 4) using 1 <;>
-      norm_num [cyclicPartialSum, Fin.sum_univ_succ] <;> ring
+    simpa only [hcp3] using hfactor (3 : Fin 4)
   rcases hr x hr0 with ⟨hx0a, hx0b⟩
   rcases hr (x + xi 0 / mu) hr1 with ⟨hx1a, hx1b⟩
   rcases hr (x + (xi 0 + xi 1) / mu) hr2 with ⟨hx2a, hx2b⟩
@@ -183,7 +197,7 @@ theorem weightedCyclicSymbol_k4_l1_bound
   have hsum :
       (∑ i : Fin 4, xi i) = xi 0 + xi 1 + xi 2 + xi 3 := by
     norm_num [Fin.sum_univ_succ]
-    ring
+    rw [show Fin.succ (2 : Fin 3) = (3 : Fin 4) by decide]
   have hlastEq :
       xi 3 = (∑ i : Fin 4, xi i) - (xi 0 + xi 1 + xi 2) := by
     linarith
@@ -201,7 +215,7 @@ theorem weightedCyclicSymbol_k4_l1_bound
       (∑ i : Fin 4, |xi i|) =
         |xi 0| + |xi 1| + |xi 2| + |xi 3| := by
     norm_num [Fin.sum_univ_succ]
-    ring
+    rw [show Fin.succ (2 : Fin 3) = (3 : Fin 4) by decide]
   rw [habssum]
   nlinarith
 
@@ -289,8 +303,8 @@ theorem normalCutoffSymbol_tsupport_subset {k : ℕ}
     tsupport (normalCutoffSymbol chi Phi) ⊆
       {xi | ∑ i : Fin k, |xi i| ≤ A + eps} := by
   change closure (Function.support (normalCutoffSymbol chi Phi)) ⊆ _
-  apply (isClosed_le (by fun_prop) (by fun_prop)).closure_subset_iff.mpr
-  intro xi hxi
+  apply closure_minimal
+  · intro xi hxi
   have hprod : chi (∑ i : Fin k, xi i) * Phi xi ≠ 0 := by
     simpa only [Function.mem_support, normalCutoffSymbol] using hxi
   have hc : chi (∑ i : Fin k, xi i) ≠ 0 := by
@@ -301,9 +315,10 @@ theorem normalCutoffSymbol_tsupport_subset {k : ℕ}
     intro hz
     apply hprod
     rw [hz, mul_zero]
-  have ht := hPhi xi hp
-  have hn := hchi (∑ i : Fin k, xi i) hc
-  linarith
+    have ht := hPhi xi hp
+    have hn := hchi (∑ i : Fin k, xi i) hc
+    exact ht.trans (add_le_add_left hn A)
+  · exact isClosed_le (by fun_prop) (by fun_prop)
 
 /-- A strict numerical margin converts the closed support bound into the
 strict total Fourier support required by RS Theorem 3.1. -/
@@ -343,7 +358,7 @@ theorem exists_smooth_normalCutoff (eps : ℝ) (heps : 0 < eps) :
       chi 0 = 1 ∧ ContDiff ℝ ∞ chi ∧
         ∀ s, chi s ≠ 0 -> |s| ≤ eps := by
   obtain ⟨f, hsupport, _hcompact, hsmooth, _hrange, hzero⟩ :=
-    exists_contDiff_tsupport_subset (n := ∞)
+    exists_contDiff_tsupport_subset (n := (⊤ : ℕ∞))
       (Metric.ball_mem_nhds (0 : ℝ) heps)
   refine ⟨Complex.ofRealCLM ∘ f, ?_, ?_, ?_⟩
   · simp [hzero]
@@ -354,7 +369,10 @@ theorem exists_smooth_normalCutoff (eps : ℝ) (heps : 0 < eps) :
       apply hs
       simp [Function.comp_apply, hz]
     have hball := hsupport (subset_tsupport f hfs)
-    simpa [Real.dist_eq] using hball.le
+    have hdist : dist s 0 < eps := Metric.mem_ball.mp hball
+    have habs : |s| < eps := by
+      simpa [Real.dist_eq] using hdist
+    exact habs.le
 
 /-- Smooth compactly supported profiles produce a smooth quartic cyclic
 symbol.  The fixed factor at cyclic position zero supplies one compact
@@ -403,7 +421,7 @@ theorem weightedCyclicSymbol_k4_contDiff
       ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ =>
         ((fun _x : ℝ => (1 : ℝ)) ⋆[
           ContinuousLinearMap.mul ℝ ℝ, volume] g xi) 0) := by
-    simpa only [Function.comp_apply] using
+    simpa [Function.comp_def] using
       hconv'.comp
         (by fun_prop :
           ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ => (xi, (0 : ℝ))))
