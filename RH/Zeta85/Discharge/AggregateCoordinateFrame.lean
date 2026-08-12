@@ -139,7 +139,7 @@ def coordinateSelectedFrequencyGrid
     let j := address.1
     let Lj := F.period T j
     let τ : ℝ := T + 2 * Real.pi * (address.2 : ℕ) / Lj
-    ((Real.sqrt (F.fullLength T / Lj) : ℂ) ^ 2) *
+    ((Real.sqrt (@QuarticGramFamily.fullLength σ T / Lj) : ℂ) ^ 2) *
       paperFT (fun u => (F.window T j u : ℂ)) (gammaOf ρ - τ) *
       paperFT (fun u => (F.window T j u : ℂ)) (gammaOf ρ' - τ)
 
@@ -166,7 +166,7 @@ def coordinateFullFrequencyLattice
     (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
   ∑ j : Fin (F.channelCount T),
-    ((Real.sqrt (F.fullLength T / F.period T j) : ℂ) ^ 2) *
+    ((Real.sqrt (@QuarticGramFamily.fullLength σ T / F.period T j) : ℂ) ^ 2) *
       ComplexAliasBridge.virtualFrequencyPairSum
         T (F.period T j) (F.window T j)
         (gammaOf ρ) (gammaOf ρ')
@@ -210,7 +210,7 @@ def coordinateEnergySum
     (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
   ∑ j : Fin (F.channelCount T),
-    ((Real.sqrt (F.fullLength T / F.period T j) : ℂ) ^ 2) *
+    ((Real.sqrt (@QuarticGramFamily.fullLength σ T / F.period T j) : ℂ) ^ 2) *
       (F.period T j : ℂ) *
       ∫ u : ℝ,
         (F.window T j u : ℂ) * F.window T j u *
@@ -426,10 +426,10 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : PhysicalWindowRegularity F)
-    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (T : ℝ) (hfull : 0 ≤ @QuarticGramFamily.fullLength σ T)
     (ρ ρ' : ℂ) :
     coordinateEnergySum F T ρ ρ' =
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (F.windowEnergy T u : ℂ) *
             Complex.exp
@@ -437,7 +437,7 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy
   unfold coordinateEnergySum
   calc
     (∑ j : Fin (F.channelCount T),
-      ((Real.sqrt (F.fullLength T / F.period T j) : ℂ) ^ 2) *
+      ((Real.sqrt (@QuarticGramFamily.fullLength σ T / F.period T j) : ℂ) ^ 2) *
         (F.period T j : ℂ) *
         ∫ u : ℝ,
           (F.window T j u : ℂ) * F.window T j u *
@@ -445,7 +445,7 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy
               (Complex.I *
                 (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
         ∑ j : Fin (F.channelCount T),
-          (F.fullLength T : ℂ) *
+          (@QuarticGramFamily.fullLength σ T : ℂ) *
             ∫ u : ℝ,
               (F.window T j u : ℂ) * F.window T j u *
                 Complex.exp
@@ -453,19 +453,19 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy
                     (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
       apply Finset.sum_congr rfl
       intro j _
-      have hquot : 0 ≤ F.fullLength T / F.period T j :=
+      have hquot : 0 ≤ @QuarticGramFamily.fullLength σ T / F.period T j :=
         div_nonneg hfull (h.period_pos T j).le
       have hreal :
-          Real.sqrt (F.fullLength T / F.period T j) ^ 2 *
+          Real.sqrt (@QuarticGramFamily.fullLength σ T / F.period T j) ^ 2 *
               F.period T j =
-            F.fullLength T := by
+            @QuarticGramFamily.fullLength σ T := by
         rw [Real.sq_sqrt hquot]
         exact div_mul_cancel₀ _ (h.period_pos T j).ne'
       have hcomplex :=
         congrArg (fun x : ℝ => (x : ℂ)) hreal
       push_cast at hcomplex
       rw [hcomplex]
-    _ = (F.fullLength T : ℂ) *
+    _ = (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∑ j : Fin (F.channelCount T),
           ∫ u : ℝ,
             (F.window T j u : ℂ) * F.window T j u *
@@ -473,7 +473,7 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy
                 (Complex.I *
                   (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
       rw [Finset.mul_sum]
-    _ = (F.fullLength T : ℂ) *
+    _ = (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (F.windowEnergy T u : ℂ) *
             Complex.exp
@@ -510,11 +510,11 @@ theorem literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : PhysicalWindowRegularity F)
-    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (T : ℝ) (hfull : 0 ≤ @QuarticGramFamily.fullLength σ T)
     (ρ ρ' : ℂ) :
     literalCoordinateEnergyTailPairKernel F T ρ ρ' =
       ((F.hatDenominator T)⁻¹ : ℂ) *
-        ((F.fullLength T : ℂ) *
+        ((@QuarticGramFamily.fullLength σ T : ℂ) *
             ∫ u : ℝ,
               (F.windowEnergy T u : ℂ) *
                 Complex.exp
