@@ -28,6 +28,7 @@ import RH.Zeta85.Discharge.AliasRankObstruction
 import RH.Zeta85.Discharge.ActualScaleBBLR
 import RH.Zeta85.Discharge.PreMajorantDI
 import RH.Zeta85.Discharge.BBLRGCDAllocation
+import RH.Zeta85.Discharge.BBLRStatements
 import RH.Zeta85.Discharge.EtaClosure
 import RH.Zeta85.Discharge.EtaSuperpositionObstruction
 import RH.Zeta85.Discharge.FourMuKloosterman
@@ -89,12 +90,13 @@ private theorem cumulative {c : ℝ}
 /-! ## 1. Rung 1 — support 101/100, at least 0.67924886307 -/
 
 /-- The two-trace certificate at support `101/100`.
-Axioms: `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`,
+Axioms: `signedPair_traceGrade_lt_5_4`, `windowCost_101`,
 `traceTransfer_saturated`. -/
 theorem cert101 : TwoTraceCert zetaZeroConfig (2 - cRung101) :=
   traceTransfer_saturated (101 / 100) (2 - cRung101) (by norm_num) (by norm_num)
     windowCost_101
-    (signedPair_traceGrade_lt_5_4 bblr_error_bound (101 / 100) (by norm_num) (by norm_num))
+    (signedPair_traceGrade_lt_5_4 BBLRStatements.bblrErrorBound
+      (101 / 100) (by norm_num) (by norm_num))
 
 /-- **Rung 1, dyadic**: `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ 0.67924886307`
 [docs/run/07_root_gain_support_1p01.md]. -/
@@ -107,13 +109,13 @@ theorem rung101_cumulative : Rung101_cumulative_statement := cumulative rung101
 /-! ## 2. Rung 2 — support 5/4, at least 0.79721415286134 -/
 
 /-- The two-trace certificate at a support just below `5/4`.
-Axioms: `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`,
+Axioms: `signedPair_traceGrade_lt_5_4`, `windowCost_125`,
 `traceTransfer_saturated` — the same four as rung 1, with `windowCost_101` replaced by
 `windowCost_125`. -/
 theorem cert125 : TwoTraceCert zetaZeroConfig (2 - cRung125) := by
   obtain ⟨σ, hσ1, hσ2, hσw⟩ := windowCost_125
   exact traceTransfer_saturated σ (2 - cRung125) hσ1 (by linarith) hσw
-    (signedPair_traceGrade_lt_5_4 bblr_error_bound σ hσ1 hσ2)
+    (signedPair_traceGrade_lt_5_4 BBLRStatements.bblrErrorBound σ hσ1 hσ2)
 
 /-- **Rung 2, dyadic**: `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ 0.79721415286134`
 [docs/run/08_arithmetic_cycle4_unconditional_79p7214.md (1), (16)]. -/
@@ -126,14 +128,14 @@ theorem rung125_cumulative : Rung125_cumulative_statement := cumulative rung125
 /-! ## 3. Rung 3 — support 143/100, at least 1893603832049143/2227707598259143 -/
 
 /-- The two-trace certificate at support `143/100`, cost `D_pc`.
-Axioms: `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`,
+Axioms: `shiu_majorant`, `signedPair_traceGrade_lt_3_2`,
 `traceTransfer_saturated`.  Note that the window cost is **not** an axiom here: it is
 `RH.Zeta85.windowCost_143`, proved in `RH/Zeta85/Certificate.lean` from the three exact window
 moments of `RH/Zeta85/Window.lean`. -/
 theorem cert143 : TwoTraceCert zetaZeroConfig DPC :=
   traceTransfer_saturated lam DPC (by norm_num [lam]) (by norm_num [lam])
     windowCost_143
-    (signedPair_traceGrade_lt_3_2 bblr_poisson_blocks shiu_majorant lam
+    (signedPair_traceGrade_lt_3_2 BBLRStatements.bblrPoissonBlocks shiu_majorant lam
       (by norm_num [lam]) (by norm_num [lam]))
 
 /-- **Rung 3 — the 85 % theorem, dyadic**:
