@@ -227,6 +227,58 @@ theorem reblock_densityLimit_8686
     exact QuarticWindowWitnesses.D8686_lt.le
   · norm_num
 
+/-- Canonical reblocking changes no ambient trace datum. -/
+theorem fullTraceLimits_reblock
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hfull : FullTraceLimits F) : FullTraceLimits (reblock F) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · filter_upwards [hfull.trace_bound] with T hT
+    rw [reblock_A, reblock_traceError]
+    exact hT
+  · filter_upwards [hfull.frob_bound] with T hT
+    rw [reblock_A, reblock_frobError]
+    exact hT
+  · have heq : (reblock F).traceError = F.traceError := by
+      funext T
+      exact reblock_traceError F T
+    rw [heq]
+    exact hfull.trace_small
+  · have heq : (reblock F).frobError = F.frobError := by
+      funext T
+      exact reblock_frobError F T
+    rw [heq]
+    exact hfull.frob_small
+
+/-- Canonical reblocking changes no ambient zero-side datum. -/
+theorem stableZeroSide_reblock
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hzero : StableZeroSide F) : StableZeroSide (reblock F) := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro T
+    rw [reblock_A, reblock_P, reblock_Q]
+    exact hzero.truncated_decomposition T
+  · intro T
+    rw [reblock_P]
+    exact hzero.p_psd T
+  · intro T
+    rw [reblock_Q]
+    exact hzero.q_hermitian T
+  · filter_upwards [hzero.simple_rank_bound] with T hT
+    rw [reblock_P]
+    exact hT
+  · filter_upwards [hzero.simple_trace_cap] with T hT
+    rw [reblock_P, reblock_pTraceError]
+    exact hT
+  · filter_upwards [hzero.bad_index_bound] with T hT
+    convert hT using 1 <;> simp only [reblock_dim, reblock_Q]
+  · have heq : (reblock F).pTraceError = F.pTraceError := by
+      funext T
+      exact reblock_pTraceError F T
+    rw [heq]
+    exact hzero.p_trace_small
+
 end RH.Zeta85.BlockDensity
 
 end
