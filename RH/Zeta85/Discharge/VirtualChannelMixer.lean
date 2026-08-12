@@ -285,6 +285,33 @@ theorem paperFT_synthesize
       intro r _
       rw [Zeta23.paperFT_def, Zeta23.integral_const_mul_C]
 
+
+/-- Coherent analysis of all physical Fourier atoms recovers the chosen
+virtual Fourier atom exactly. -/
+theorem analyzeComplex_paperFT_synthesize
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → ℝ → ℝ) (r : ι) (z : ℂ)
+    (hInt : ∀ s : ι, MeasureTheory.Integrable
+      (fun u : ℝ => (virtual s u : ℂ) *
+        Complex.exp (Complex.I * z * u))) :
+    analyzeComplex C
+        (fun j : ι =>
+          Zeta23.paperFT
+            (fun u : ℝ => (synthesize C virtual j u : ℂ)) z) r =
+      Zeta23.paperFT (fun u : ℝ => (virtual r u : ℂ)) z := by
+  have hphysical :
+      (fun j : ι =>
+        Zeta23.paperFT
+          (fun u : ℝ => (synthesize C virtual j u : ℂ)) z) =
+        synthesizeComplex C
+          (fun s : ι =>
+            Zeta23.paperFT (fun u : ℝ => (virtual s u : ℂ)) z) := by
+    funext j
+    simpa [synthesizeComplex] using
+      paperFT_synthesize C virtual j z hInt
+  rw [hphysical]
+  exact analyzeComplex_synthesizeComplex C _ r
+
 /-- The unweighted coherent sum of physical channels carries the column-sum
 amplitude of a single virtual channel. -/
 theorem sum_synthesize_singleChannel
