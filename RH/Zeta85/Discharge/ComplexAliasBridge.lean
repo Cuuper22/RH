@@ -2326,6 +2326,84 @@ theorem eventually_virtualSymmetricFrequencyTail_mem_ball_on_finset
       T L Λ f hL hΛ hsmooth hsupp heven z z').eventually
         (Metric.ball_mem_nhds (0 : ℂ) hε)
 
+/-! ## Symmetric virtual grids inside the finite quartic contraction -/
+
+/-- Hat-normalized pair kernel from the first symmetric virtual frequency
+grid.  Complex zero arguments are converted to their ordinates only here. -/
+def virtualHatNormalizedSymmetricPairKernel
+    (hatDenominator fullLength T L : ℝ) (f : ℝ → ℝ)
+    (n : ℕ) (ρ ρ' : ℂ) : ℂ :=
+  ((hatDenominator : ℂ)⁻¹) *
+    ((fullLength : ℂ) / (L : ℂ) *
+      virtualSymmetricFrequencyPartialSum
+        T L f (gammaOf ρ) (gammaOf ρ') n)
+
+/-- The evaluated energy pair kernel reached by the symmetric virtual grids. -/
+def virtualHatNormalizedEnergyPairKernel
+    (hatDenominator fullLength : ℝ) (f : ℝ → ℝ)
+    (ρ ρ' : ℂ) : ℂ :=
+  ((hatDenominator : ℂ)⁻¹) *
+    ((fullLength : ℂ) *
+      ∫ u : ℝ,
+        (f u : ℂ) * f u *
+          Complex.exp
+            (Complex.I *
+              (gammaOf ρ - gammaOf ρ') * (u : ℂ)))
+
+/-- Hat normalization preserves convergence of the symmetric virtual grids to
+the evaluated energy pair kernel. -/
+theorem tendsto_virtualHatNormalizedSymmetricPairKernel
+    (hatDenominator fullLength T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (ρ ρ' : ℂ) :
+    Tendsto
+      (fun n =>
+        virtualHatNormalizedSymmetricPairKernel
+          hatDenominator fullLength T L f n ρ ρ')
+      Filter.atTop
+      (nhds
+        (virtualHatNormalizedEnergyPairKernel
+          hatDenominator fullLength f ρ ρ')) := by
+  unfold virtualHatNormalizedSymmetricPairKernel
+    virtualHatNormalizedEnergyPairKernel
+  exact tendsto_const_nhds.mul
+    (tendsto_virtualNormalizedSymmetricFrequencyPartialSum_energy
+      fullLength T L Λ f hL hΛ hsmooth hsupp heven hhalf
+      (gammaOf ρ) (gammaOf ρ'))
+
+/-- Because the enlarged-window zero sample is finite, the entire quartic
+numerator of the symmetric virtual grids converges to the quartic numerator
+of the evaluated energy kernel. -/
+theorem tendsto_virtualHatNormalizedSymmetricQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : TrimmedMoment.Quartic}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hatDenominator fullLength T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2)) :
+    Tendsto
+      (fun n =>
+        QuarticTransfer.pairKernelQuarticNumerator q F T
+          (virtualHatNormalizedSymmetricPairKernel
+            hatDenominator fullLength T L f n))
+      Filter.atTop
+      (nhds
+        (QuarticTransfer.pairKernelQuarticNumerator q F T
+          (virtualHatNormalizedEnergyPairKernel
+            hatDenominator fullLength f))) := by
+  apply QuarticTransfer.tendsto_pairKernelQuarticNumerator
+  intro ρ hρ ρ' hρ'
+  exact tendsto_virtualHatNormalizedSymmetricPairKernel
+    hatDenominator fullLength T L Λ f
+    hL hΛ hsmooth hsupp heven hhalf ρ ρ'
+
 end ComplexAliasBridge
 end Zeta85
 end RH
