@@ -430,6 +430,21 @@ theorem exists_nonneg_support_abs_bound
   have hle : |u| ≤ max r 0 := hur.trans (le_max_left _ _)
   exact (not_lt_of_ge hle) hu
 
+/-- Compact-support form of the fourth-order two-factor horizontal decay
+bound, with the support radius eliminated from the statement. -/
+theorem paperFT_mul_horizontal_decay_of_hasCompactSupport
+    {φ : ℝ → ℂ}
+    (hφ : ContDiff ℝ 2 φ)
+    (hcompact : HasCompactSupport φ)
+    (z z' : ℂ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ s : ℝ,
+      ‖paperFT φ (z - s) * paperFT φ (z' - s)‖ *
+          ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) ≤ C := by
+  obtain ⟨Λ, _, hsupp⟩ := exists_nonneg_support_abs_bound hcompact
+  exact paperFT_mul_horizontal_decay hφ (fun u hu => by
+    by_contra hnot
+    exact hu (hsupp u (not_le.mp hnot))) z z'
+
 /-- Full complex Poisson summation stated directly for a compactly supported
 window, with the support radius chosen internally. -/
 theorem hasSum_paperFT_mul_paperFT_alias_of_hasCompactSupport
