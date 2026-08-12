@@ -66,10 +66,21 @@ theorem compression_isometry
         (L.rowEquiv T i) b) =
       (1 : Matrix (Fin (F.blockDim T))
         (Fin (F.blockDim T)) ℂ) a b
-  rw [Equiv.sum_comp (L.rowEquiv T)
-    (fun jk =>
-      star (routedMatrix L.frame (L.selected T) jk a) *
-        routedMatrix L.frame (L.selected T) jk b)]
+  have hsum :
+      (∑ i : Fin (F.dim T),
+        (fun jk =>
+          star (routedMatrix L.frame (L.selected T) jk a) *
+            routedMatrix L.frame (L.selected T) jk b)
+          (L.rowEquiv T i)) =
+        ∑ jk : ι × Fin (F.blockDim T),
+          (fun jk =>
+            star (routedMatrix L.frame (L.selected T) jk a) *
+              routedMatrix L.frame (L.selected T) jk b) jk :=
+    Equiv.sum_comp (L.rowEquiv T)
+      (fun jk =>
+        star (routedMatrix L.frame (L.selected T) jk a) *
+          routedMatrix L.frame (L.selected T) jk b)
+  rw [hsum]
   simpa only [Matrix.mul_apply, Matrix.conjTranspose_apply] using
     congrFun (congrFun
       (routed_isometry L.frame (L.selected T)) a) b
@@ -133,11 +144,24 @@ theorem mixedAtom_eq_selected
         (L.rowEquiv T i) a * F.atom T i ρ) =
       A.virtualAtom T (L.selected T a) a ρ
   simp_rw [A.atom_eq T]
-  rw [Equiv.sum_comp (L.rowEquiv T)
-    (fun jk =>
-      routedMatrix L.frame (L.selected T) jk a *
-        physicalAtom L.frame
-          (fun r k => A.virtualAtom T r k ρ) jk)]
+  have hsum :
+      (∑ i : Fin (F.dim T),
+        (fun jk =>
+          routedMatrix L.frame (L.selected T) jk a *
+            physicalAtom L.frame
+              (fun r k => A.virtualAtom T r k ρ) jk)
+          (L.rowEquiv T i)) =
+        ∑ jk : ι × Fin (F.blockDim T),
+          (fun jk =>
+            routedMatrix L.frame (L.selected T) jk a *
+              physicalAtom L.frame
+                (fun r k => A.virtualAtom T r k ρ) jk) jk :=
+    Equiv.sum_comp (L.rowEquiv T)
+      (fun jk =>
+        routedMatrix L.frame (L.selected T) jk a *
+          physicalAtom L.frame
+            (fun r k => A.virtualAtom T r k ρ) jk)
+  rw [hsum]
   exact recover_routed_virtual_atom
     L.frame (L.selected T)
       (fun r k => A.virtualAtom T r k ρ) a
