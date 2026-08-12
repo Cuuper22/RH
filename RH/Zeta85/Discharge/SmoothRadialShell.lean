@@ -1589,6 +1589,33 @@ theorem integral_supportedFullProfile_v9506_div_ne_zero
   rw [integral_supportedFullProfile_v9506_div L hL]
   exact mul_ne_zero hL.ne' (by norm_num)
 
+
+/-- Smoothness certificate for the exact R-8686 profile. -/
+theorem v8686_contDiff :
+    ContDiff ℝ ∞ QuarticWindowWitnesses.v8686 := by
+  unfold QuarticWindowWitnesses.v8686
+  fun_prop
+
+/-- Smoothness certificate for the exact R-9506 profile. -/
+theorem v9506_contDiff :
+    ContDiff ℝ ∞ QuarticWindowWitnesses.v9506 := by
+  unfold QuarticWindowWitnesses.v9506
+  fun_prop
+
+/-- Positivity certificate for the exact R-8686 profile on its normalized
+support. -/
+theorem v8686_pos_on_half
+    (x : ℝ) (hx : |x| ≤ (1 : ℝ) / 2) :
+    0 < QuarticWindowWitnesses.v8686 x :=
+  QuarticWindowWitnesses.v8686_pos hx
+
+/-- Positivity certificate for the exact R-9506 profile on its normalized
+support. -/
+theorem v9506_pos_on_half
+    (x : ℝ) (hx : |x| ≤ (1 : ℝ) / 2) :
+    0 < QuarticWindowWitnesses.v9506 x :=
+  QuarticWindowWitnesses.v9506_pos hx
+
 end SmoothRadialShell
 end Zeta85
 end RH
