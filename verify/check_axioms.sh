@@ -93,7 +93,9 @@ for audit in \
   comparator/PrintAxioms/SQ4PublishedLiterature.lean \
   comparator/PrintAxioms/AliasRankObstruction.lean \
   comparator/PrintAxioms/BBLRGCDAllocation.lean \
+  comparator/PrintAxioms/BBLRStatements.lean \
   comparator/PrintAxioms/EtaClosure.lean \
+  comparator/PrintAxioms/EtaDivisorRefinement.lean \
   comparator/PrintAxioms/EtaSuperpositionObstruction.lean \
   comparator/PrintAxioms/HBDepthFour.lean \
   comparator/PrintAxioms/HBToBBLRSmoothGrouping.lean \
@@ -101,6 +103,7 @@ for audit in \
   comparator/PrintAxioms/QuarticMain.lean \
   comparator/PrintAxioms/QuarticTransfer.lean \
   comparator/PrintAxioms/QuarticWindowWitnesses.lean \
+  comparator/PrintAxioms/RationalWindowCosts.lean \
   comparator/PrintAxioms/R9383ExactEndpoint.lean \
   comparator/PrintAxioms/R1aAllocationNoGo.lean \
   comparator/PrintAxioms/RobustStability.lean \
