@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 
+import Mathlib.MeasureTheory.Integral.CompactlySupported
 import RH.Zeta85.Inputs95
 import Zeta23.Poisson.ComplexAlias
 
@@ -422,6 +423,85 @@ theorem sum_channelNormalizedFrequencyPairSum_eq_energyIntegral
     F T Λ hΛ hL hsmooth hsupp heven z z' hfamily hoff]
   rw [sum_complexAliasTerm_zero_eq_integral_windowEnergy
     F T z z' hintegrable]
+
+
+/-- Smoothness and the channel support bound imply the integrability needed
+to commute the zero-alias channel sum with the Fourier integral. -/
+theorem integrable_zeroAliasIntegrand
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (Λ : ℝ)
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → F.window T j u = 0)
+    (z z' : ℂ) :
+    Integrable (fun u : ℝ =>
+      (F.window T j u : ℂ) * F.window T j u *
+        cexp (I * (z - z') * (u : ℂ))) := by
+  have hcontinuous :
+      Continuous (fun u : ℝ =>
+        (F.window T j u : ℂ) * F.window T j u *
+          cexp (I * (z - z') * (u : ℂ))) :=
+    (hsmooth.continuous.mul hsmooth.continuous).mul
+      (Complex.continuous_exp.comp
+        (continuous_const.mul Complex.continuous_ofReal))
+  have hcompactWindow :
+      HasCompactSupport (fun u : ℝ => (F.window T j u : ℂ)) := by
+    refine HasCompactSupport.intro
+      (K := Icc (-Λ) Λ) isCompact_Icc ?_
+    intro u hu
+    have habs : Λ < |u| := by
+      simp only [mem_Icc, not_and_or, not_le] at hu
+      rcases hu with hu | hu
+      · rw [abs_of_neg
+          (lt_of_lt_of_le hu (neg_nonpos.mpr hΛ))]
+        linarith
+      · rw [abs_of_pos (lt_of_le_of_lt hΛ hu)]
+        exact hu
+    simp [hsupp u habs]
+  have hcompact :
+      HasCompactSupport (fun u : ℝ =>
+        (F.window T j u : ℂ) * F.window T j u *
+          cexp (I * (z - z') * (u : ℂ))) := by
+    apply hcompactWindow.mono
+    intro u hu
+    change
+      (F.window T j u : ℂ) * F.window T j u *
+        cexp (I * (z - z') * (u : ℂ)) ≠ 0 at hu
+    change (F.window T j u : ℂ) ≠ 0
+    intro hzero
+    apply hu
+    simp [hzero]
+  exact hcontinuous.integrable_of_hasCompactSupport hcompact
+
+/-- The energy-integral form of normalized alias cancellation has no
+separate integrability premise: it follows from the Poisson hypotheses. -/
+theorem sum_channelNormalizedFrequencyPairSum_eq_energyIntegral_of_compact
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T Λ : ℝ) (hΛ : 0 ≤ Λ)
+    (hL : ∀ j : Fin (F.channelCount T), 0 < F.period T j)
+    (hsmooth : ∀ j : Fin (F.channelCount T),
+      ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ j : Fin (F.channelCount T), ∀ u,
+      Λ < |u| → F.window T j u = 0)
+    (heven : ∀ j : Fin (F.channelCount T), ∀ u,
+      F.window T j (-u) = F.window T j u)
+    (z z' : ℂ)
+    (hfamily : Summable (F.complexAliasFamily T z z'))
+    (hoff : (∑' a : F.AliasIndex T,
+      F.complexAliasFamily T z z' a) = 0) :
+    (∑ j : Fin (F.channelCount T),
+        channelNormalizedFrequencyPairSum F T j z z') =
+      (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.windowEnergy T u : ℂ) *
+            cexp (I * (z - z') * (u : ℂ)) := by
+  apply sum_channelNormalizedFrequencyPairSum_eq_energyIntegral
+    F T Λ hΛ hL hsmooth hsupp heven z z' hfamily hoff
+  intro j
+  exact integrable_zeroAliasIntegrand
+    F T j Λ hΛ (hsmooth j) (hsupp j) z z'
 
 end ComplexAliasBridge
 end Zeta85
