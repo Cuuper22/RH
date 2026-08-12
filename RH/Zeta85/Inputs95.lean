@@ -498,6 +498,26 @@ structure PrincipalCyclicBlock {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ
     (fun T => (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ))
       atTop (nhds μ)
 
+/-- The part of the block construction actually consumed by the quartic
+transfer: positive limiting density and convergence of the literal block
+dimension.  Keeping this interface separate prevents unrelated window and
+energy-allocation requirements from being smuggled into the density step. -/
+structure BlockDensityLimit {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) : Prop where
+  bandwidth_pos : 0 < μ
+  block_dimension : Tendsto
+    (fun T => (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ))
+      atTop (nhds μ)
+
+/-- Every full principal-block construction supplies the smaller density
+interface, although the converse deliberately does not hold. -/
+theorem PrincipalCyclicBlock.toBlockDensityLimit
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) : BlockDensityLimit F where
+  bandwidth_pos := h.bandwidth_pos
+  block_dimension := h.block_dimension
+
 /-- Formula-(21) target for a centered block moment. -/
 def formula21Moment (k : ℕ) (μ p : ℝ) : ℝ :=
   match k with
@@ -568,10 +588,10 @@ structure Inputs95 (Z : ZeroConfig) (X : Inputs95Data Z) : Prop where
   zeroSide19999 : StableZeroSide X.family19999
   /-- Published smoothed all-tuples theorem, shared by both blocks. -/
   rs1996 : RS1996ZetaInputs Z
-  /-- Literal R1a window/grid construction at `1.4999`. -/
-  r1a14999 : PrincipalCyclicBlock X.family14999
-  /-- Literal R1a window/grid construction at `1.9999`. -/
-  r1a19999 : PrincipalCyclicBlock X.family19999
+  /-- Literal block-density limit at `1.4999`. -/
+  blockDensity14999 : BlockDensityLimit X.family14999
+  /-- Literal block-density limit at `1.9999`. -/
+  blockDensity19999 : BlockDensityLimit X.family19999
   /-- Complete R1b actual-block moment passage at `1.4999`. -/
   r1b14999 : BlockMomentLimits X.family14999
   /-- Complete R1b actual-block moment passage at `1.9999`. -/
