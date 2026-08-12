@@ -1248,6 +1248,30 @@ theorem progressionSum_roughCoreAF_fiber_le (Z : ℕ) {R B a r q v : ℕ}
       unfold M
       ring
 
+/-- Shiu-shaped zero-logarithm estimate for the bounded-depth exceptional
+family.  The usual modulus range is used only to deduce `q ≤ P`; coprimality
+is harmless and no generic majorant hypothesis remains. -/
+theorem roughCoreAF_fiber_zero_log_majorant {eta : ℝ} (heta : 0 ≤ eta)
+    (Z : ℕ) {R B a r : ℕ} (hR : 0 < R)
+    (ha : a ∈ (Finset.Icc 1 R).filter (fun d => ¬R < d * B)) :
+    ∃ K T₁ : ℝ, ∀ T ≥ T₁, ∀ P : ℝ, 1 ≤ P →
+      ⌈2 * P⌉₊ < (B + 1) ^ r →
+      ∀ q v : ℕ, 0 < q → Nat.Coprime v q →
+        (q : ℝ) ≤ P * T ^ (-eta) →
+        progressionSum (normalizedRightSelector (hb4Core Z) R a 6) P q v ≤
+          K * (P / (Nat.totient q : ℝ)) * (Real.log T) ^ (0 : ℝ) := by
+  refine ⟨5 * (15 * (((2 : ℕ) ^ r : ℕ) : ℝ) ^ 6), 1, ?_⟩
+  intro T hT P hP hsize q v hq hcoprime hqRange
+  have hpow : T ^ (-eta) ≤ 1 :=
+    Real.rpow_le_one_of_one_le_of_nonpos hT (neg_nonpos.mpr heta)
+  have hPnonneg : 0 ≤ P := by linarith
+  have hqP : (q : ℝ) ≤ P := by
+    exact hqRange.trans
+      (calc
+        P * T ^ (-eta) ≤ P * 1 := mul_le_mul_of_nonneg_left hpow hPnonneg
+        _ = P := mul_one P)
+  simpa using progressionSum_roughCoreAF_fiber_le Z hR ha hP hq hqP hsize
+
 /-- Exact regular/rough partition at the arithmetic-function level, before
 absolute values and before the final logarithm convolution. -/
 theorem regularCoreAF_add_roughCoreAF (Z B : ℕ) {R : ℕ} (hR : 0 < R) :
