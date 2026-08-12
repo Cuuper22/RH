@@ -136,6 +136,47 @@ theorem integrated_parseval
   filter_upwards [] with u
   exact pointwise_parseval C virtual u
 
+
+/-- A constant-cardinality aligned channel system ready to be inserted into
+a quartic Gram family.  Every physical channel uses the same period. -/
+structure AlignedSystem (n : ℕ) where
+  frame : Data (Fin n)
+  commonPeriod : ℝ → ℝ
+  virtualWindow : ℝ → Fin n → ℝ → ℝ
+
+/-- Physical windows obtained from the virtual windows by the frame. -/
+def AlignedSystem.physicalWindow
+    {n : ℕ} (S : AlignedSystem n)
+    (T : ℝ) : Fin n → ℝ → ℝ :=
+  synthesize S.frame (S.virtualWindow T)
+
+/-- The common period viewed as one period for every physical channel. -/
+def AlignedSystem.physicalPeriod
+    {n : ℕ} (S : AlignedSystem n)
+    (T : ℝ) (_j : Fin n) : ℝ :=
+  S.commonPeriod T
+
+theorem AlignedSystem.physicalPeriod_eq
+    {n : ℕ} (S : AlignedSystem n)
+    (T : ℝ) (j : Fin n) :
+    S.physicalPeriod T j = S.commonPeriod T := by
+  rfl
+
+/-- The full physical stability profile is literally the sum of the virtual
+profiles; orthogonal synthesis creates no extra energy. -/
+theorem AlignedSystem.windowEnergy_eq
+    {n : ℕ} (S : AlignedSystem n) (T u : ℝ) :
+    (∑ j : Fin n, S.physicalWindow T j u ^ 2) =
+      ∑ r : Fin n, S.virtualWindow T r u ^ 2 := by
+  exact pointwise_parseval S.frame (S.virtualWindow T) u
+
+/-- The integrated normalization mass is also unchanged. -/
+theorem AlignedSystem.integratedWindowEnergy_eq
+    {n : ℕ} (S : AlignedSystem n) (T : ℝ) :
+    (∫ u : ℝ, ∑ j : Fin n, S.physicalWindow T j u ^ 2) =
+      ∫ u : ℝ, ∑ r : Fin n, S.virtualWindow T r u ^ 2 := by
+  exact integrated_parseval S.frame (S.virtualWindow T)
+
 /-- A family supported in a common set remains supported there after
 orthogonal synthesis. -/
 theorem synthesize_eq_zero
