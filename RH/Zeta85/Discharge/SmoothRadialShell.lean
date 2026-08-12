@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import RH.Zeta85.Discharge.RadialShellFamily
+import RH.Zeta85.Discharge.QuarticWindowWitnesses
 
 /-!
 # Explicit smooth radial shells
@@ -458,6 +459,99 @@ theorem ae_tendsto_shrinkingProfileWindow_sq
   · apply hleft
     rw [abs_of_nonpos (le_of_not_ge hu)] at hb
     linarith
+
+
+/-! ## Frozen profile specializations -/
+
+/-- The explicit shrinking smooth window for the R-8686 polynomial profile. -/
+def frozen8686Window
+    (L : ℝ) (n : ℕ) (hL : 0 < L) : ℝ → ℝ :=
+  shrinkingProfileWindow QuarticWindowWitnesses.v8686 L n hL
+
+/-- The explicit shrinking smooth window for the R-9506 polynomial profile. -/
+def frozen9506Window
+    (L : ℝ) (n : ℕ) (hL : 0 < L) : ℝ → ℝ :=
+  shrinkingProfileWindow QuarticWindowWitnesses.v9506 L n hL
+
+theorem frozen8686Window_contDiff
+    (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    ContDiff ℝ ∞ (frozen8686Window L n hL) := by
+  apply shrinkingProfileWindow_contDiff
+  · unfold QuarticWindowWitnesses.v8686
+    fun_prop
+  · intro x hx
+    exact QuarticWindowWitnesses.v8686_pos hx
+
+theorem frozen9506Window_contDiff
+    (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    ContDiff ℝ ∞ (frozen9506Window L n hL) := by
+  apply shrinkingProfileWindow_contDiff
+  · unfold QuarticWindowWitnesses.v9506
+    fun_prop
+  · intro x hx
+    exact QuarticWindowWitnesses.v9506_pos hx
+
+theorem frozen8686Window_even
+    (L : ℝ) (n : ℕ) (hL : 0 < L) (u : ℝ) :
+    frozen8686Window L n hL (-u) =
+      frozen8686Window L n hL u := by
+  apply profiledBumpWindow_even
+  intro x
+  simp only [QuarticWindowWitnesses.v8686]
+  ring
+
+theorem frozen9506Window_even
+    (L : ℝ) (n : ℕ) (hL : 0 < L) (u : ℝ) :
+    frozen9506Window L n hL (-u) =
+      frozen9506Window L n hL u := by
+  apply profiledBumpWindow_even
+  intro x
+  simp only [QuarticWindowWitnesses.v9506]
+  ring
+
+theorem frozen8686Window_tsupport
+    (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    tsupport (frozen8686Window L n hL) ⊆
+      Icc (-L / 2) (L / 2) :=
+  shrinkingProfileWindow_tsupport
+    QuarticWindowWitnesses.v8686 L n hL
+
+theorem frozen9506Window_tsupport
+    (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    tsupport (frozen9506Window L n hL) ⊆
+      Icc (-L / 2) (L / 2) :=
+  shrinkingProfileWindow_tsupport
+    QuarticWindowWitnesses.v9506 L n hL
+
+/-- The R-8686 smooth window energies converge almost everywhere to the exact
+frozen supported profile. -/
+theorem ae_tendsto_frozen8686Window_sq
+    (L : ℝ) (hL : 0 < L) :
+    ∀ᵐ u : ℝ ∂volume,
+      Tendsto
+        (fun n : ℕ => frozen8686Window L n hL u ^ 2)
+        Filter.atTop
+        (nhds
+          (@QuarticGramFamily.supportedFullProfile
+            QuarticWindowWitnesses.v8686 (u / L))) :=
+  ae_tendsto_shrinkingProfileWindow_sq
+    QuarticWindowWitnesses.v8686 L hL
+    (fun x hx => QuarticWindowWitnesses.v8686_pos hx)
+
+/-- The R-9506 smooth window energies converge almost everywhere to the exact
+frozen supported profile. -/
+theorem ae_tendsto_frozen9506Window_sq
+    (L : ℝ) (hL : 0 < L) :
+    ∀ᵐ u : ℝ ∂volume,
+      Tendsto
+        (fun n : ℕ => frozen9506Window L n hL u ^ 2)
+        Filter.atTop
+        (nhds
+          (@QuarticGramFamily.supportedFullProfile
+            QuarticWindowWitnesses.v9506 (u / L))) :=
+  ae_tendsto_shrinkingProfileWindow_sq
+    QuarticWindowWitnesses.v9506 L hL
+    (fun x hx => QuarticWindowWitnesses.v9506_pos hx)
 
 end SmoothRadialShell
 end Zeta85
