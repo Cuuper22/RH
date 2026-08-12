@@ -2150,6 +2150,154 @@ theorem remoteLatticePairScaleEight_cube_negligible
       norm_distinguishedLatticeScale_eq_ratio F T hσ hμ hlpos hperiodT]
     ring)
 
+/-! ## Completed-kernel growth -/
+
+theorem norm_paperFT_localProfile_le_exp
+    {r : ℝ → ℝ} (hint : Integrable r)
+    (hnonneg : ∀ x, 0 ≤ r x)
+    (hsupp : tsupport r ⊆ Icc (-(1 : ℝ) / 2) (1 / 2))
+    (hmean : ∫ x, r x = 1) (z : ℂ) :
+    ‖paperFT (fun x => (r x : ℂ)) z‖ ≤ Real.exp (|z.im| / 2) := by
+  have hintC : Integrable (fun x => (r x : ℂ)) := hint.ofReal
+  have hsuppC : ∀ u, (r u : ℂ) ≠ 0 → |u| ≤ (1 : ℝ) / 2 := by
+    intro u hu
+    have hur : r u ≠ 0 := by simpa only [Complex.ofReal_ne_zero] using hu
+    have hucl : u ∈ tsupport r := subset_closure (Function.mem_support.mpr hur)
+    have huIcc := hsupp hucl
+    rw [abs_le]
+    constructor <;> linarith [huIcc.1, huIcc.2]
+  have h := Zeta23.norm_paperFT_le hintC hsuppC z
+  have hintnorm : (∫ x, ‖(r x : ℂ)‖) = 1 := by
+    calc
+      (∫ x, ‖(r x : ℂ)‖) = ∫ x, r x := by
+        apply integral_congr_ae
+        filter_upwards [] with x
+        simp only [Complex.norm_real, Real.norm_eq_abs,
+          abs_of_nonneg (hnonneg x)]
+      _ = 1 := hmean
+  rw [hintnorm, mul_one] at h
+  simpa only [div_eq_mul_inv, one_mul] using h
+
+/-- Uniform completed-pair growth over the enlarged zero window. -/
+theorem fullLatticePairKernel_norm_le
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
+    (hadm : AdmWindow (F.window T (F.distinguished T))
+      (F.period T (F.distinguished T)) w c)
+    (hfull : 0 < QuarticGramFamily.fullLength (σ := σ) T)
+    (hE : 0 < F.channelEnergy T (F.distinguished T))
+    (hprofileInt : Integrable (F.localProfile T))
+    (hprofileNonneg : ∀ x, 0 ≤ F.localProfile T x)
+    (hprofileSupport : tsupport (F.localProfile T) ⊆
+      Icc (-(1 : ℝ) / 2) (1 / 2))
+    (hprofileMean : ∫ x, F.localProfile T x = 1)
+    (ρ ρ' : ↥(Zeta23.ZeroSide.ZI Z T)) :
+    ‖fullLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ)‖ ≤
+      QuarticGramFamily.fullLength (σ := σ) T *
+        F.channelEnergy T (F.distinguished T) *
+          Real.exp (F.period T (F.distinguished T) / 2) := by
+  have hstrip : 0 ≤ (ρ : ℂ).re ∧ (ρ : ℂ).re ≤ 1 :=
+    Z.strip (ρ : ℂ)
+      (Zeta23.ZeroSide.mem_carrier_of_mem_ZI Z T ρ.property)
+  have hstrip' : 0 ≤ (ρ' : ℂ).re ∧ (ρ' : ℂ).re ≤ 1 :=
+    Z.strip (ρ' : ℂ)
+      (Zeta23.ZeroSide.mem_carrier_of_mem_ZI Z T ρ'.property)
+  let z : ℂ := (F.period T (F.distinguished T) : ℂ) *
+    (gammaOf (ρ : ℂ) - gammaOf (ρ' : ℂ))
+  have himdiff :
+      (gammaOf (ρ : ℂ) - gammaOf (ρ' : ℂ)).im =
+        (ρ' : ℂ).re - (ρ : ℂ).re := by
+    simp [gammaOf, Complex.div_I]
+  have him : |z.im| ≤ F.period T (F.distinguished T) := by
+    have hdiff : |(ρ' : ℂ).re - (ρ : ℂ).re| ≤ 1 := by
+      rw [abs_le]
+      constructor <;> linarith
+    dsimp only [z]
+    rw [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+      zero_mul, add_zero, himdiff, abs_mul, abs_of_pos hadm.L_pos]
+    nlinarith [mul_le_mul_of_nonneg_left hdiff hadm.L_pos.le]
+  have hft := norm_paperFT_localProfile_le_exp
+    hprofileInt hprofileNonneg hprofileSupport hprofileMean z
+  have hexp : Real.exp (|z.im| / 2) ≤
+      Real.exp (F.period T (F.distinguished T) / 2) := by
+    exact Real.exp_le_exp.mpr (div_le_div_of_nonneg_right him (by norm_num))
+  rw [fullLatticePairKernel_eq_localProfile F T w c hadm hfull hE.ne']
+  change ‖((QuarticGramFamily.fullLength (σ := σ) T *
+      F.channelEnergy T (F.distinguished T) : ℝ) : ℂ) *
+    paperFT (fun x => (F.localProfile T x : ℂ)) z‖ ≤ _
+  rw [norm_mul, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_pos (mul_pos hfull hE)]
+  calc
+    (QuarticGramFamily.fullLength (σ := σ) T *
+        F.channelEnergy T (F.distinguished T)) *
+        ‖paperFT (fun x => (F.localProfile T x : ℂ)) z‖ ≤
+      (QuarticGramFamily.fullLength (σ := σ) T *
+        F.channelEnergy T (F.distinguished T)) *
+        Real.exp (|z.im| / 2) :=
+      mul_le_mul_of_nonneg_left hft (mul_pos hfull hE).le
+    _ ≤ (QuarticGramFamily.fullLength (σ := σ) T *
+        F.channelEnergy T (F.distinguished T)) *
+        Real.exp (F.period T (F.distinguished T) / 2) :=
+      mul_le_mul_of_nonneg_left hexp (mul_pos hfull hE).le
+    _ = _ := by ring
+
+/-- Square-root balancing cancels the physical length and total-energy
+normalization from the completed kernel. -/
+theorem norm_balancedFullLatticeZeroMatrix_le
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
+    (hadm : AdmWindow (F.window T (F.distinguished T))
+      (F.period T (F.distinguished T)) w c)
+    (hfull : 0 < QuarticGramFamily.fullLength (σ := σ) T)
+    (hE : 0 < F.channelEnergy T (F.distinguished T))
+    (htotal : 0 < ∫ u : ℝ, F.windowEnergy T u)
+    (hprofileInt : Integrable (F.localProfile T))
+    (hprofileNonneg : ∀ x, 0 ≤ F.localProfile T x)
+    (hprofileSupport : tsupport (F.localProfile T) ⊆
+      Icc (-(1 : ℝ) / 2) (1 / 2))
+    (hprofileMean : ∫ x, F.localProfile T x = 1) :
+    ‖balancedFullLatticeZeroMatrix F T‖ ≤
+      distinguishedEnergyFraction F T *
+        Real.exp (F.period T (F.distinguished T) / 2) *
+          (Z.NIprime T : ℝ) := by
+  let C : ℝ := QuarticGramFamily.fullLength (σ := σ) T *
+    F.channelEnergy T (F.distinguished T) *
+      Real.exp (F.period T (F.distinguished T) / 2)
+  have hC : 0 ≤ C := by
+    dsimp only [C]
+    positivity
+  have hpair : ∀ ρ ρ' : ↥(ZeroSide.ZI Z T),
+      ‖fullLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ)‖ ≤ C := by
+    intro ρ ρ'
+    exact fullLatticePairKernel_norm_le F T w c hadm hfull hE
+      hprofileInt hprofileNonneg hprofileSupport hprofileMean ρ ρ'
+  have hhat : 0 < F.hatDenominator T := by
+    unfold QuarticGramFamily.hatDenominator
+    positivity
+  have h := norm_balancedKernelMatrix_le
+    (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+      fullLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ))
+    (fun ρ : ↥(ZeroSide.ZI Z T) =>
+      (zeroVertexWeight F T (ρ : ℂ) : ℂ)) hC hpair
+  change ‖balancedKernelMatrix
+    (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+      fullLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ))
+    (fun ρ : ↥(ZeroSide.ZI Z T) =>
+      (zeroVertexWeight F T (ρ : ℂ) : ℂ))‖ ≤ _
+  rw [sum_zeroVertexWeight_norm_sq F T hhat] at h
+  calc
+    ‖balancedKernelMatrix
+      (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+        fullLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ))
+      (fun ρ : ↥(ZeroSide.ZI Z T) =>
+        (zeroVertexWeight F T (ρ : ℂ) : ℂ))‖ ≤
+        C * ((Z.NIprime T : ℝ) / F.hatDenominator T) := h
+    _ = distinguishedEnergyFraction F T *
+        Real.exp (F.period T (F.distinguished T) / 2) *
+          (Z.NIprime T : ℝ) := by
+      unfold C distinguishedEnergyFraction QuarticGramFamily.hatDenominator
+      field_simp [hfull.ne', htotal.ne']
+
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
