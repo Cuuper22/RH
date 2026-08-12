@@ -1445,4 +1445,33 @@ theorem RS1996ZetaInputs.unitIntervalQuartic_evaluated
   refine ⟨hSummable, ?_⟩
   simpa only [unitIntervalProfile_rsMainTerm] using hBound
 
+
+/-- The four-point theorem for an arbitrary smooth unit-interval profile,
+with the main term completely reduced to the quartic contraction scalar. -/
+theorem RS1996ZetaInputs.frozenQuartic_evaluated
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℝ -> ℝ) (hrc : HasCompactSupport r)
+    (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 -> (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (g : Fin 4 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          (((4999 / 10000 : ℝ) *
+            quarticRSScalar (4999 / 10000 : ℝ) r : ℝ) : ℂ)‖ ≤ C * T := by
+  obtain ⟨C, T0, hC, hT0, hRS⟩ :=
+    hrs.frozenQuartic r hrc hrSmooth hrSupport g hg
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  refine ⟨hSummable, ?_⟩
+  rw [rsMainTerm_k4_eq_mu_mul_quarticRSScalar
+    (4999 / 10000 : ℝ) r (by norm_num)
+    hrSmooth.continuous hrc] at hBound
+  exact hBound
+
 end RH.Zeta85.RSPairIntegrals
