@@ -116,11 +116,16 @@ theorem radialShell_shift_overlap_eq_zero
         hL ha hb hua hub hva hvb hsame
     rw [hdistance] at hlt
     nlinarith [mul_le_mul_of_nonneg_right hmabs hL.le]
-  · have hu_sign : 0 < u ∨ u < 0 := lt_or_gt_of_ne hu_ne
+  · have hu_sign : 0 < u ∨ u < 0 := by
+      rcases lt_or_gt_of_ne hu_ne with hneg | hpos
+      · exact Or.inr hneg
+      · exact Or.inl hpos
     have hv_sign :
         0 < u - (m : ℝ) * L ∨
-          u - (m : ℝ) * L < 0 :=
-      lt_or_gt_of_ne hv_ne
+          u - (m : ℝ) * L < 0 := by
+      rcases lt_or_gt_of_ne hv_ne with hneg | hpos
+      · exact Or.inr hneg
+      · exact Or.inl hpos
     have hopp :
         (0 < u ∧ u - (m : ℝ) * L < 0) ∨
           (u < 0 ∧ 0 < u - (m : ℝ) * L) := by
