@@ -166,6 +166,103 @@ theorem mixedAtom_eq_selected
     L.frame (L.selected T)
       (fun r k => A.virtualAtom T r k ρ) a
 
+/-- Pair contraction written solely in the recovered virtual atoms. -/
+def selectedVirtualPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (A : AtomFactorization L)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) *
+    ∑ a : Fin (F.blockDim T),
+      A.virtualAtom T (L.selected T a) a ρ *
+        A.virtualAtom T (L.selected T a) a ρ'
+
+/-- Exact mix-first reduction from the physical family to its routed virtual
+pair kernel. -/
+theorem mixedPairKernel_eq_selectedVirtualPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (A : AtomFactorization L)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' =
+      selectedVirtualPairKernel A T ρ ρ' := by
+  unfold IsometricKernel.mixedPairKernel selectedVirtualPairKernel
+  congr 1
+  apply Finset.sum_congr rfl
+  intro a _
+  rw [mixedAtom_eq_selected A, mixedAtom_eq_selected A]
+
+/-- The terminal quartic numerator after every physical channel and
+compression coefficient has been eliminated. -/
+def selectedVirtualQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (q : TrimmedMoment.Quartic)
+    (A : AtomFactorization L) (T : ℝ) : ℝ :=
+  QuarticTransfer.pairKernelQuarticNumerator q F T
+    (selectedVirtualPairKernel A T)
+
+theorem mixedPairKernelQuarticNumerator_eq_selectedVirtual
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (q : TrimmedMoment.Quartic)
+    (A : AtomFactorization L) (T : ℝ) :
+    IsometricKernel.mixedPairKernelQuarticNumerator
+        q (toRealData L) T =
+      selectedVirtualQuarticNumerator q A T := by
+  unfold IsometricKernel.mixedPairKernelQuarticNumerator
+    selectedVirtualQuarticNumerator
+  rw [mixedPairKernel_eq_selectedVirtualPairKernel A]
+
+/-- The sole remaining analytic statement in routed virtual coordinates. -/
+structure SelectedVirtualQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (q : TrimmedMoment.Quartic)
+    (A : AtomFactorization L) : Prop where
+  block_dimension_pos :
+    ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
+  eventually_gt :
+    ∀ x : ℝ,
+      x < μ * QuarticTransfer.limitQuarticScore q μ p →
+      ∀ᶠ T in Filter.atTop,
+        x < selectedVirtualQuarticNumerator q A T /
+          (Z.N T (2 * T) : ℝ)
+
+/-- A virtual-coordinate lower bound is exactly the mixed pair-kernel lower
+bound required by the finite quartic algebra. -/
+theorem SelectedVirtualQuarticLowerBound.toMixed
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {q : TrimmedMoment.Quartic}
+    {A : AtomFactorization L}
+    (h : SelectedVirtualQuarticLowerBound q A) :
+    IsometricKernel.MixedPairKernelQuarticLowerBound
+      q (toRealData L) := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  simpa only [mixedPairKernelQuarticNumerator_eq_selectedVirtual] using
+    h.eventually_gt x hx
+
+/-- Direct handoff from routed virtual atoms to the isometric terminal
+statistic consumed by every frozen rung. -/
+theorem SelectedVirtualQuarticLowerBound.toIsometric
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {q : TrimmedMoment.Quartic}
+    {A : AtomFactorization L}
+    (h : SelectedVirtualQuarticLowerBound q A) :
+    IsometricBlock.WeightedQuarticLowerBound
+      q (toIsometricData L) :=
+  h.toMixed.toIsometric
+
 end AlignedIsometricLayout
 end Zeta85
 end RH
