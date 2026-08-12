@@ -119,6 +119,15 @@ theorem centered_moment_limits
   rw [topHat_centeredContraction_eq_formula21 hp0 hp1 k hk1 hk4] at hlim
   exact hlim
 
+/-- The uncentered actual-block limits directly supply the exact interface
+consumed by the quartic transfer; no complex-alias premise is used here. -/
+theorem blockMomentConvergence_of_uncenteredRS
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hp0 : 0 < p) (hp1 : p ≤ 1)
+    (hraw : UncenteredRSBlockLimits F) : BlockMomentConvergence F where
+  moments := centered_moment_limits hp0 hp1 hraw
+
 /-- Constructor for the existing R1b interface from the exact uncentered
 actual-block limit plus the two independent complex-Poisson clauses. -/
 theorem blockMomentLimits_of_uncenteredRS
