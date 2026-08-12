@@ -96,10 +96,10 @@ theorem summable_paperFT_affine_int
     Summable (fun k : ℤ =>
       paperFT f (z - (T + (k : ℝ) * h : ℝ))) := by
   have hO := paperFT_affine_horizontal_isBigO (T := T) (h := h) hf hsupp z hh
+  apply summable_of_isBigO
+    (Real.summable_abs_int_rpow one_lt_two)
   simpa only [Function.comp_apply] using
-    (summable_of_isBigO
-      (Real.summable_abs_int_rpow one_lt_two)
-      (hO.comp_tendsto Int.tendsto_coe_cofinite))
+    (hO.comp_tendsto Int.tendsto_coe_cofinite)
 
 end Poisson
 end Zeta23
