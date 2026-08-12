@@ -454,6 +454,38 @@ def canonicalAtomFactorization
     rw [synthesizeComplex_analyzeComplex]
     simp
 
+
+/-- With the canonical virtual analysis, the selected virtual pair kernel is
+definitionally the actual mixed pair kernel. -/
+theorem selectedVirtualPairKernel_canonical_eq_mixedPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : Layout F ι) (T : ℝ) (ρ ρ' : ℂ) :
+    selectedVirtualPairKernel
+        (canonicalAtomFactorization L) T ρ ρ' =
+      IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' := by
+  symm
+  exact mixedPairKernel_eq_selectedVirtualPairKernel
+    (canonicalAtomFactorization L) T ρ ρ'
+
+/-- Consequently the canonical selected virtual quartic numerator is exactly
+the physical mixed-block quartic numerator, with no atom-factorization
+hypothesis remaining. -/
+theorem selectedVirtualQuarticNumerator_canonical_eq_mixed
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (q : TrimmedMoment.Quartic)
+    (L : Layout F ι) (T : ℝ) :
+    selectedVirtualQuarticNumerator q
+        (canonicalAtomFactorization L) T =
+      IsometricKernel.mixedPairKernelQuarticNumerator
+        q (toRealData L) T := by
+  symm
+  exact mixedPairKernelQuarticNumerator_eq_selectedVirtual
+    q (canonicalAtomFactorization L) T
+
 end AlignedIsometricLayout
 end Zeta85
 end RH
