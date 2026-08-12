@@ -257,6 +257,167 @@ theorem shellWindow_supportRadius
   shellWindow_eq_zero_of_outer_le_abs
     target a c d b ha hac hcd hdb hx.le
 
+
+/-- Explicit central cutoffs and annular cutoffs package directly into the
+complete core-plus-radial-shell family.  All smoothness, support, and parity
+clauses are derived from the cutoff formulas. -/
+theorem coreAndShellWindows_toCoreData
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (commonPeriod : ℝ → ℝ)
+    (core : ∀ T : ℝ, Finset (Fin (F.channelCount T)))
+    (target : ∀ T : ℝ, Fin (F.channelCount T) → ℝ → ℝ)
+    (shell : ∀ T : ℝ, Fin (F.channelCount T) → ℕ)
+    (coreInner coreOuter a c d b :
+      ∀ T : ℝ, Fin (F.channelCount T) → ℝ)
+    (hperiod :
+      ∀ T j, F.period T j = commonPeriod T)
+    (hperiodPos :
+      ∀ T, 0 < commonPeriod T)
+    (hcoreInnerPos :
+      ∀ T j, 0 < coreInner T j)
+    (hcoreRadii :
+      ∀ T j, coreInner T j < coreOuter T j)
+    (hcoreHalf :
+      ∀ T j, coreOuter T j ≤ commonPeriod T / 2)
+    (ha :
+      ∀ T j, 0 < a T j)
+    (hac :
+      ∀ T j, a T j < c T j)
+    (hcd :
+      ∀ T j, c T j < d T j)
+    (hdb :
+      ∀ T j, d T j < b T j)
+    (htargetSmooth :
+      ∀ T j, ContDiff ℝ 2 (target T j))
+    (htargetEven :
+      ∀ T j u, target T j (-u) = target T j u)
+    (hwindowCore :
+      ∀ T j, j ∈ core T → ∀ u,
+        F.window T j u =
+          coreWindow (target T j)
+            (coreInner T j) (coreOuter T j)
+            (hcoreInnerPos T j) (hcoreRadii T j) u)
+    (hwindowShell :
+      ∀ T j, j ∉ core T → ∀ u,
+        F.window T j u =
+          shellWindow (target T j)
+            (a T j) (c T j) (d T j) (b T j)
+            (ha T j) (hac T j) (hcd T j) (hdb T j) u)
+    (hshellInner :
+      ∀ T j, j ∉ core T →
+        (shell T j : ℝ) * commonPeriod T / 2 < a T j)
+    (hshellOuter :
+      ∀ T j, j ∉ core T →
+        b T j <
+          (((shell T j) + 1 : ℕ) : ℝ) *
+            commonPeriod T / 2) :
+    RadialShellFamily.CoreData F := by
+  refine
+    { commonPeriod := commonPeriod
+      supportRadius := fun T j =>
+        if j ∈ core T then coreOuter T j else b T j
+      core := core
+      shell := shell
+      innerRadius := a
+      outerRadius := b
+      period_eq := hperiod
+      period_pos := hperiodPos
+      supportRadius_nonneg := ?_
+      smooth := ?_
+      support := ?_
+      even := ?_
+      core_support := ?_
+      shell_support := ?_
+      shell_inner := hshellInner
+      shell_outer := hshellOuter }
+  · intro T j
+    by_cases hj : j ∈ core T
+    · simp only [hj, if_true]
+      exact (lt_trans (hcoreInnerPos T j) (hcoreRadii T j)).le
+    · simp only [hj, if_false]
+      exact le_of_lt
+        (lt_trans (ha T j)
+          (lt_trans (hac T j)
+            (lt_trans (hcd T j) (hdb T j))))
+  · intro T j
+    by_cases hj : j ∈ core T
+    · have hw :
+          F.window T j =
+            coreWindow (target T j)
+              (coreInner T j) (coreOuter T j)
+              (hcoreInnerPos T j) (hcoreRadii T j) :=
+        funext (hwindowCore T j hj)
+      rw [hw]
+      exact coreWindow_contDiff_complex
+        (target T j)
+        (coreInner T j) (coreOuter T j)
+        (hcoreInnerPos T j) (hcoreRadii T j)
+        (htargetSmooth T j)
+    · have hw :
+          F.window T j =
+            shellWindow (target T j)
+              (a T j) (c T j) (d T j) (b T j)
+              (ha T j) (hac T j) (hcd T j) (hdb T j) :=
+        funext (hwindowShell T j hj)
+      rw [hw]
+      exact shellWindow_contDiff_complex
+        (target T j)
+        (a T j) (c T j) (d T j) (b T j)
+        (ha T j) (hac T j) (hcd T j) (hdb T j)
+        (htargetSmooth T j)
+  · intro T j u hu
+    by_cases hj : j ∈ core T
+    · simp only [hj, if_true] at hu
+      rw [hwindowCore T j hj u]
+      exact coreWindow_supportRadius
+        (target T j)
+        (coreInner T j) (coreOuter T j)
+        (hcoreInnerPos T j) (hcoreRadii T j) hu
+    · simp only [hj, if_false] at hu
+      rw [hwindowShell T j hj u]
+      exact shellWindow_supportRadius
+        (target T j)
+        (a T j) (c T j) (d T j) (b T j)
+        (ha T j) (hac T j) (hcd T j) (hdb T j) hu
+  · intro T j u
+    by_cases hj : j ∈ core T
+    · rw [hwindowCore T j hj (-u), hwindowCore T j hj u]
+      exact coreWindow_even
+        (target T j)
+        (coreInner T j) (coreOuter T j)
+        (hcoreInnerPos T j) (hcoreRadii T j)
+        (htargetEven T j) u
+    · rw [hwindowShell T j hj (-u), hwindowShell T j hj u]
+      exact shellWindow_even
+        (target T j)
+        (a T j) (c T j) (d T j) (b T j)
+        (ha T j) (hac T j) (hcd T j) (hdb T j)
+        (htargetEven T j) u
+  · intro T j hj
+    have hw :
+        F.window T j =
+          coreWindow (target T j)
+            (coreInner T j) (coreOuter T j)
+            (hcoreInnerPos T j) (hcoreRadii T j) :=
+      funext (hwindowCore T j hj)
+    rw [hw]
+    exact coreWindow_halfPeriodSupport
+      (target T j)
+      (coreInner T j) (coreOuter T j) (commonPeriod T)
+      (hcoreInnerPos T j) (hcoreRadii T j)
+      (hcoreHalf T j)
+  · intro T j hj u hu
+    have hshell :
+        shellWindow (target T j)
+          (a T j) (c T j) (d T j) (b T j)
+          (ha T j) (hac T j) (hcd T j) (hdb T j) u ≠ 0 := by
+      simpa only [hwindowShell T j hj u] using hu
+    exact shellWindow_support
+      (target T j)
+      (a T j) (c T j) (d T j) (b T j)
+      (ha T j) (hac T j) (hcd T j) (hdb T j) hshell
+
 end SmoothRadialShell
 end Zeta85
 end RH
