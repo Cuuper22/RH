@@ -39,6 +39,25 @@ def uncenteredBlockMoment {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (k : ℕ) (T : ℝ) : ℝ :=
   rtrace ((F.block T) ^ k) / (F.blockDim T : ℝ)
 
+/-- The same normalized moment after all finite block indices have been
+commuted inside each ordered zero tuple. -/
+def zeroKernelBlockMoment {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (k : ℕ) (T : ℝ) : ℝ :=
+  if k = 0 then uncenteredBlockMoment F 0 T
+  else QuarticTransfer.zeroKernelRawTrace F k T / (F.blockDim T : ℝ)
+
+/-- The literal block moment and the zero-tuple-first moment are exactly
+equal in every active degree, at every height. -/
+theorem uncenteredBlockMoment_eq_zeroKernelBlockMoment
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {k : ℕ}
+    (hk1 : 1 ≤ k) (hk4 : k ≤ 4) :
+    uncenteredBlockMoment F k = zeroKernelBlockMoment F k := by
+  funext T
+  unfold uncenteredBlockMoment zeroKernelBlockMoment
+  rw [if_neg (Nat.ne_of_gt hk1)]
+  rw [QuarticTransfer.rtrace_block_pow_eq_zeroKernelRawTrace hk1 hk4]
+
 /-- The exact analytic remainder after the cyclic contractions have been
 evaluated: the actual uncentered block moments converge to formula (27).
 
@@ -49,6 +68,45 @@ structure UncenteredRSBlockLimits {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → 
   moments : ∀ k : ℕ, k ≤ 4 →
     Tendsto (uncenteredBlockMoment F k) atTop
       (nhds (uncenteredContractionMoment (topHatR3Terms p) μ k))
+
+/-- Analytically equivalent sum-first form of the actual-block limit.  Its
+active degrees are now expressed directly as ordered zero-tuple kernels. -/
+structure ZeroKernelRSBlockLimits
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) : Prop where
+  moments : ∀ k : ℕ, k ≤ 4 →
+    Tendsto (zeroKernelBlockMoment F k) atTop
+      (nhds (uncenteredContractionMoment (topHatR3Terms p) μ k))
+
+theorem UncenteredRSBlockLimits.toZeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : UncenteredRSBlockLimits F) : ZeroKernelRSBlockLimits F where
+  moments k hk4 := by
+    by_cases hk0 : k = 0
+    · subst k
+      change Tendsto (uncenteredBlockMoment F 0) atTop
+        (nhds (uncenteredContractionMoment (topHatR3Terms p) μ 0))
+      exact h.moments 0 hk4
+    · have hk1 : 1 ≤ k := Nat.one_le_iff_ne_zero.mpr hk0
+      rw [← uncenteredBlockMoment_eq_zeroKernelBlockMoment hk1 hk4]
+      exact h.moments k hk4
+
+/-- Degree zero is definitional, so the zero-tuple-first limits reconstruct
+the complete uncentered interface used by the centering bridge. -/
+theorem UncenteredRSBlockLimits.ofZeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : ZeroKernelRSBlockLimits F) : UncenteredRSBlockLimits F where
+  moments k hk4 := by
+    by_cases hk0 : k = 0
+    · subst k
+      change Tendsto (zeroKernelBlockMoment F 0) atTop
+        (nhds (uncenteredContractionMoment (topHatR3Terms p) μ 0))
+      exact h.moments 0 hk4
+    · have hk1 : 1 ≤ k := Nat.one_le_iff_ne_zero.mpr hk0
+      rw [uncenteredBlockMoment_eq_zeroKernelBlockMoment hk1 hk4]
+      exact h.moments k hk4
 
 private theorem topHat_pow_integrable {p : ℝ} {k : ℕ}
     (hk : k ≠ 0) :
