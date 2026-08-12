@@ -131,6 +131,8 @@ theorem complexGaux_zero (heven : ∀ u, φ (-u) = φ u) :
   congr 1
   congr 1 with u
   simp only [mul_zero, zero_sub, heven]
+  congr 1
+  push_cast
   ring_nf
 
 /-- Exponential bookkeeping with two genuinely complex frequencies. -/
