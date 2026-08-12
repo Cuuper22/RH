@@ -1869,6 +1869,108 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
     hsmoothC hsuppT hevenT henergy hlocal
     (gammaOf ρ) (gammaOf ρ')]
 
+
+/-! ## Virtual-window half-period cancellation -/
+
+/-- A real window supported in one closed half-period has zero overlap,
+almost everywhere, with every nonzero integral period translate.  The only
+possible overlap for shifts `m = ±1` is a single endpoint, which is null. -/
+theorem halfPeriod_shift_product_ae_zero
+    (f : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hsupport : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (m : ℤ) (hm : m ≠ 0) :
+    ∀ᵐ u : ℝ, f u * f (u - (m : ℝ) * L) = 0 := by
+  have hmem (x : ℝ) (hx : f x ≠ 0) :
+      x / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2) := by
+    have hx' := hsupport (subset_tsupport _ hx)
+    rw [Set.mem_Icc] at hx' ⊢
+    constructor
+    · apply (le_div_iff₀ hL).2
+      nlinarith
+    · apply (div_le_iff₀ hL).2
+      nlinarith
+  filter_upwards [ae_neq ((m : ℝ) * L / 2)] with u hu
+  by_cases hfu : f u = 0
+  · simp [hfu]
+  by_cases hfshift : f (u - (m : ℝ) * L) = 0
+  · simp [hfshift]
+  have hx := hmem u hfu
+  have hy := hmem (u - (m : ℝ) * L) hfshift
+  have hxy :
+      u / L - (u - (m : ℝ) * L) / L = (m : ℝ) := by
+    field_simp [hL.ne']
+    ring
+  have hmloR : (-1 : ℝ) ≤ (m : ℝ) := by
+    rw [← hxy]
+    linarith [hx.1, hy.2]
+  have hmhiR : (m : ℝ) ≤ 1 := by
+    rw [← hxy]
+    linarith [hx.2, hy.1]
+  have hmlo : (-1 : ℤ) ≤ m := by
+    exact_mod_cast hmloR
+  have hmhi : m ≤ (1 : ℤ) := by
+    exact_mod_cast hmhiR
+  have hmcase : m = -1 ∨ m = 1 := by
+    omega
+  apply False.elim
+  apply hu
+  rcases hmcase with rfl | rfl
+  · have hxval : u / L = -(1 : ℝ) / 2 := by
+      norm_num at hxy
+      linarith [hx.1, hy.2]
+    have huval : u = (-(1 : ℝ) / 2) * L :=
+      (div_eq_iff hL.ne').mp hxval
+    calc
+      u = (-(1 : ℝ) / 2) * L := huval
+      _ = ((-1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+  · have hxval : u / L = (1 : ℝ) / 2 := by
+      norm_num at hxy
+      linarith [hx.2, hy.1]
+    have huval : u = ((1 : ℝ) / 2) * L :=
+      (div_eq_iff hL.ne').mp hxval
+    calc
+      u = ((1 : ℝ) / 2) * L := huval
+      _ = ((1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+
+/-- Multiplying the translated overlap by an arbitrary complex exponential
+still gives a zero integral. -/
+theorem halfPeriod_complexShiftIntegral_eq_zero
+    (f : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hsupport : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (m : ℤ) (hm : m ≠ 0) (phase : ℂ) :
+    (∫ u : ℝ,
+      (f u : ℂ) * f (u - (m : ℝ) * L) *
+        Complex.exp (phase * (u : ℂ))) = 0 := by
+  rw [← integral_zero]
+  apply integral_congr_ae
+  filter_upwards [
+    halfPeriod_shift_product_ae_zero f L hL hsupport m hm
+  ] with u hu
+  rcases mul_eq_zero.mp hu with hzero | hzero
+  · simp [hzero]
+  · simp [hzero]
+
+/-- The complex Poisson alias of a standalone virtual window. -/
+def virtualComplexAliasTerm
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (m : ℤ) : ℂ :=
+  Complex.exp
+      (Complex.I * (z' - T) * (m : ℝ) * L) *
+    ∫ u : ℝ,
+      (f u : ℂ) * f (u - (m : ℝ) * L) *
+        Complex.exp (Complex.I * (z - z') * (u : ℂ))
+
+/-- Every nonzero complex alias of a closed-half-period virtual window
+vanishes exactly.  This statement is independent of
+`PrincipalCyclicBlock` and is therefore usable by the routed isometry. -/
+theorem virtualComplexAliasTerm_eq_zero
+    (T L : ℝ) (f : ℝ → ℝ) (hL : 0 < L)
+    (hsupport : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) (m : ℤ) (hm : m ≠ 0) :
+    virtualComplexAliasTerm T L f z z' m = 0 := by
+  unfold virtualComplexAliasTerm
+  rw [halfPeriod_complexShiftIntegral_eq_zero
+    f L hL hsupport m hm (Complex.I * (z - z')), mul_zero]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
