@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import Mathlib.MeasureTheory.Integral.CompactlySupported
 import RH.Zeta85.Inputs95
+import RH.Zeta85.Discharge.QuarticTransfer
 import Zeta23.Poisson.ComplexAlias
 
 /-!
@@ -544,6 +545,62 @@ theorem BlockMomentLimits.eventually_normalizedFrequencyPairSum_eq_energyIntegra
       F T (Λ T) hΛT hLT hsmoothT hsuppT hevenT
       (gammaOf ρ) (gammaOf ρ')
       (hfamily ρ hρ ρ' hρ') (hoff ρ hρ ρ' hρ')
+
+
+/-- The literal finite frequency-pair sum carried by the distinguished
+principal block.  The column label is read from the actual embedding; no
+contiguous-grid enumeration is assumed. -/
+def distinguishedBlockFrequencyPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ∑ i : Fin (F.blockDim T),
+    let address := F.columnAddress T (F.blockEmbedding T i)
+    let L := F.period T (F.distinguished T)
+    let τ : ℝ := T + 2 * Real.pi * (address.2 : ℕ) / L
+    paperFT (fun u => (F.window T (F.distinguished T) u : ℂ))
+        (gammaOf ρ - τ) *
+      paperFT (fun u => (F.window T (F.distinguished T) u : ℂ))
+        (gammaOf ρ' - τ)
+
+/-- Once the block columns are known to belong to the distinguished channel,
+the scalar zero-pair kernel is exactly its finite physical-frequency sum,
+with the two Fourier normalizations factored outside the summation. -/
+theorem zeroPairKernel_eq_distinguishedBlockFrequencyPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T) :
+    QuarticTransfer.zeroPairKernel F T ρ ρ' =
+      (Real.sqrt
+          (F.fullLength T / F.period T (F.distinguished T)) : ℂ) ^ 2 *
+        distinguishedBlockFrequencyPairSum F T ρ ρ' := by
+  classical
+  simp only [QuarticTransfer.zeroPairKernel,
+    distinguishedBlockFrequencyPairSum, Finset.mul_sum, pow_two]
+  apply Finset.sum_congr rfl
+  intro i hi
+  simp only [QuarticGramFamily.atom]
+  rw [hdist i]
+  ring
+
+/-- The preceding identity holds eventually for every zero pair in any
+literal principal construction. -/
+theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedBlockFrequencyPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) :
+    ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
+      QuarticTransfer.zeroPairKernel F T ρ ρ' =
+        (Real.sqrt
+            (F.fullLength T / F.period T (F.distinguished T)) : ℂ) ^ 2 *
+          distinguishedBlockFrequencyPairSum F T ρ ρ' := by
+  filter_upwards [h.distinguished_columns] with T hdist
+  intro ρ ρ'
+  exact zeroPairKernel_eq_distinguishedBlockFrequencyPairSum
+    F T ρ ρ' hdist
 
 end ComplexAliasBridge
 end Zeta85
