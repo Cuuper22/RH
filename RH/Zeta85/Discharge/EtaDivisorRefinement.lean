@@ -326,6 +326,220 @@ theorem sigma_zero_mul_le (m s : ℕ) :
       ArithmeticFunction.sigma 0 m * ArithmeticFunction.sigma 0 s := by
   simpa only [ArithmeticFunction.sigma_zero_apply] using card_divisors_mul_le m s
 
+theorem sigma_zero_le_of_dvd {d n : ℕ} (hn : n ≠ 0) (hd : d ∣ n) :
+    ArithmeticFunction.sigma 0 d ≤ ArithmeticFunction.sigma 0 n := by
+  simpa only [ArithmeticFunction.sigma_zero_apply] using
+    Finset.card_le_card (Nat.divisors_subset_of_dvd hn hd)
+
+theorem divisorBounded_mul {f g : HBDepthFour.AF} {K L : ℝ} {k l : ℕ}
+    (hK : 0 ≤ K) (hL : 0 ≤ L)
+    (hf : DivisorBounded f K k) (hg : DivisorBounded g L l) :
+    DivisorBounded (f * g : HBDepthFour.AF) (K * L) (k + l + 1) := by
+  intro n
+  by_cases hn : n = 0
+  · subst n
+    simp
+  · rw [ArithmeticFunction.mul_apply]
+    let tau : ℝ := ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ)
+    have htau0 : 0 ≤ tau := by positivity
+    calc
+      |∑ xy ∈ n.divisorsAntidiagonal, f xy.1 * g xy.2| ≤
+          ∑ xy ∈ n.divisorsAntidiagonal, |f xy.1 * g xy.2| :=
+        Finset.abs_sum_le_sum_abs _ _
+      _ ≤ ∑ _xy ∈ n.divisorsAntidiagonal,
+          (K * tau ^ k) * (L * tau ^ l) := by
+        gcongr with xy hxy
+        obtain ⟨hprod, _⟩ := Nat.mem_divisorsAntidiagonal.mp hxy
+        have hx_dvd : xy.1 ∣ n := ⟨xy.2, hprod.symm⟩
+        have hy_dvd : xy.2 ∣ n :=
+          ⟨xy.1, by simpa [mul_comm] using hprod.symm⟩
+        have htxNat := sigma_zero_le_of_dvd hn hx_dvd
+        have htyNat := sigma_zero_le_of_dvd hn hy_dvd
+        have htx :
+            ((ArithmeticFunction.sigma 0 xy.1 : ℕ) : ℝ) ≤ tau := by
+          dsimp only [tau]
+          exact_mod_cast htxNat
+        have hty :
+            ((ArithmeticFunction.sigma 0 xy.2 : ℕ) : ℝ) ≤ tau := by
+          dsimp only [tau]
+          exact_mod_cast htyNat
+        have hfx : |f xy.1| ≤ K * tau ^ k :=
+          (hf xy.1).trans
+            (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) htx k) hK)
+        have hgy : |g xy.2| ≤ L * tau ^ l :=
+          (hg xy.2).trans
+            (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) hty l) hL)
+        rw [abs_mul]
+        exact mul_le_mul hfx hgy (abs_nonneg _) (mul_nonneg hK (pow_nonneg htau0 k))
+      _ = (K * L) * tau ^ (k + l + 1) := by
+        rw [Nat.sum_divisorsAntidiagonal
+          (fun _ _ => (K * tau ^ k) * (L * tau ^ l))]
+        simp only [Finset.sum_const, nsmul_eq_mul]
+        dsimp only [tau]
+        rw [← ArithmeticFunction.sigma_zero_apply]
+        ring
+
+theorem divisorBounded_smul {f : HBDepthFour.AF} {K : ℝ} {k : ℕ}
+    (r : ℝ) (hf : DivisorBounded f K k) :
+    DivisorBounded (r • f : HBDepthFour.AF) (|r| * K) k := by
+  intro n
+  change |r * f n| ≤ (|r| * K) * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k
+  rw [abs_mul]
+  calc
+    |r| * |f n| ≤ |r| *
+        (K * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k) :=
+      mul_le_mul_of_nonneg_left (hf n) (abs_nonneg r)
+    _ = (|r| * K) * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k := by ring
+
+theorem divisorBounded_add {f g : HBDepthFour.AF} {K L : ℝ} {k : ℕ}
+    (hf : DivisorBounded f K k) (hg : DivisorBounded g L k) :
+    DivisorBounded (f + g : HBDepthFour.AF) (K + L) k := by
+  intro n
+  change |f n + g n| ≤
+    (K + L) * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k
+  calc
+    |f n + g n| ≤ |f n| + |g n| := abs_add_le _ _
+    _ ≤ K * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k +
+        L * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k :=
+      add_le_add (hf n) (hg n)
+    _ = (K + L) * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k := by ring
+
+theorem divisorBounded_sub {f g : HBDepthFour.AF} {K L : ℝ} {k : ℕ}
+    (hf : DivisorBounded f K k) (hg : DivisorBounded g L k) :
+    DivisorBounded (f - g : HBDepthFour.AF) (K + L) k := by
+  intro n
+  change |f n - g n| ≤
+    (K + L) * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k
+  calc
+    |f n - g n| ≤ |f n| + |g n| := abs_sub _ _
+    _ ≤ K * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k +
+        L * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k :=
+      add_le_add (hf n) (hg n)
+    _ = (K + L) * ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) ^ k := by ring
+
+theorem divisorBounded_mono_exponent {f : HBDepthFour.AF} {K : ℝ} {k l : ℕ}
+    (hK : 0 ≤ K) (hf : DivisorBounded f K k) (hkl : k ≤ l) :
+    DivisorBounded f K l := by
+  intro n
+  by_cases hn : n = 0
+  · subst n
+    have hnonneg : (0 : ℝ) ≤ K * 0 ^ l :=
+      mul_nonneg hK (pow_nonneg (by norm_num) l)
+    simpa using hnonneg
+  · have htau :
+        (1 : ℝ) ≤ ((ArithmeticFunction.sigma 0 n : ℕ) : ℝ) := by
+      exact_mod_cast ArithmeticFunction.sigma_pos 0 n hn
+    exact (hf n).trans
+      (mul_le_mul_of_nonneg_left (pow_le_pow_right₀ htau hkl) hK)
+
+/-! ## The log-free depth-four coefficient -/
+
+/-- The depth-four Heath--Brown coefficient before its final literal
+logarithm convolution. -/
+def hb4Core (Z : ℕ) : HBDepthFour.AF :=
+  (4 : ℝ) • HBDepthFour.muCut Z
+    - (6 : ℝ) • ((HBDepthFour.muCut Z) ^ 2 *
+        (ArithmeticFunction.zeta : HBDepthFour.AF))
+    + (4 : ℝ) • ((HBDepthFour.muCut Z) ^ 3 *
+        (ArithmeticFunction.zeta : HBDepthFour.AF) ^ 2)
+    - ((HBDepthFour.muCut Z) ^ 4 *
+        (ArithmeticFunction.zeta : HBDepthFour.AF) ^ 3)
+
+/-- Exact source-weight separation: the unbounded logarithm remains a
+literal final convolution factor rather than being hidden in an arbitrary
+coefficient. -/
+theorem hb4_eq_core_mul_log (Z : ℕ) :
+    HBDepthFour.hb4 Z = hb4Core Z * ArithmeticFunction.log := by
+  unfold HBDepthFour.hb4 hb4Core
+  simp only [Algebra.smul_def]
+  rw [show algebraMap ℝ HBDepthFour.AF (4 : ℝ) = (4 : HBDepthFour.AF) by
+      exact map_natCast (algebraMap ℝ HBDepthFour.AF) 4]
+  rw [show algebraMap ℝ HBDepthFour.AF (6 : ℝ) = (6 : HBDepthFour.AF) by
+      exact map_natCast (algebraMap ℝ HBDepthFour.AF) 6]
+  ring
+
+theorem muCut_divisorBounded (Z : ℕ) :
+    DivisorBounded (HBDepthFour.muCut Z) 1 0 := by
+  intro n
+  simpa using HBDepthFour.abs_muCut_le_one Z n
+
+theorem zeta_divisorBounded :
+    DivisorBounded (ArithmeticFunction.zeta : HBDepthFour.AF) 1 0 := by
+  intro n
+  by_cases hn : n = 0
+  · subst n
+    simp
+  · simp [ArithmeticFunction.zeta_apply_ne hn]
+
+/-- The log-free depth-four coefficient has a completely explicit fixed
+divisor majorant. -/
+theorem hb4Core_divisorBounded (Z : ℕ) :
+    DivisorBounded (hb4Core Z) 15 6 := by
+  let mu : HBDepthFour.AF := HBDepthFour.muCut Z
+  let zeta : HBDepthFour.AF := ArithmeticFunction.zeta
+  have hmu : DivisorBounded mu 1 0 := muCut_divisorBounded Z
+  have hzeta : DivisorBounded zeta 1 0 := zeta_divisorBounded
+  have hmu2 : DivisorBounded (mu ^ 2 : HBDepthFour.AF) 1 1 := by
+    convert divisorBounded_mul (f := mu) (g := mu)
+      (K := 1) (L := 1) (k := 0) (l := 0)
+      (by norm_num) (by norm_num) hmu hmu using 1 <;> norm_num [pow_two]
+  have hmu3 : DivisorBounded (mu ^ 3 : HBDepthFour.AF) 1 2 := by
+    convert divisorBounded_mul (f := (mu ^ 2 : HBDepthFour.AF)) (g := mu)
+      (K := 1) (L := 1) (k := 1) (l := 0)
+      (by norm_num) (by norm_num) hmu2 hmu using 1 <;> norm_num [pow_succ]
+  have hmu4 : DivisorBounded (mu ^ 4 : HBDepthFour.AF) 1 3 := by
+    convert divisorBounded_mul (f := (mu ^ 3 : HBDepthFour.AF)) (g := mu)
+      (K := 1) (L := 1) (k := 2) (l := 0)
+      (by norm_num) (by norm_num) hmu3 hmu using 1 <;> norm_num [pow_succ]
+  have hzeta2 : DivisorBounded (zeta ^ 2 : HBDepthFour.AF) 1 1 := by
+    convert divisorBounded_mul (f := zeta) (g := zeta)
+      (K := 1) (L := 1) (k := 0) (l := 0)
+      (by norm_num) (by norm_num) hzeta hzeta using 1 <;> norm_num [pow_two]
+  have hzeta3 : DivisorBounded (zeta ^ 3 : HBDepthFour.AF) 1 2 := by
+    convert divisorBounded_mul (f := (zeta ^ 2 : HBDepthFour.AF)) (g := zeta)
+      (K := 1) (L := 1) (k := 1) (l := 0)
+      (by norm_num) (by norm_num) hzeta2 hzeta using 1 <;> norm_num [pow_succ]
+  have hbase1 : DivisorBounded mu 1 6 :=
+    divisorBounded_mono_exponent (by norm_num) hmu (by norm_num)
+  have hbase2raw : DivisorBounded (mu ^ 2 * zeta : HBDepthFour.AF) 1 2 := by
+    simpa using divisorBounded_mul (K := 1) (L := 1) (k := 1) (l := 0)
+      (by norm_num) (by norm_num) hmu2 hzeta
+  have hbase2 : DivisorBounded (mu ^ 2 * zeta : HBDepthFour.AF) 1 6 :=
+    divisorBounded_mono_exponent (by norm_num) hbase2raw (by norm_num)
+  have hbase3raw : DivisorBounded (mu ^ 3 * zeta ^ 2 : HBDepthFour.AF) 1 4 := by
+    simpa using divisorBounded_mul (K := 1) (L := 1) (k := 2) (l := 1)
+      (by norm_num) (by norm_num) hmu3 hzeta2
+  have hbase3 : DivisorBounded (mu ^ 3 * zeta ^ 2 : HBDepthFour.AF) 1 6 :=
+    divisorBounded_mono_exponent (by norm_num) hbase3raw (by norm_num)
+  have hbase4 : DivisorBounded (mu ^ 4 * zeta ^ 3 : HBDepthFour.AF) 1 6 := by
+    simpa using divisorBounded_mul (K := 1) (L := 1) (k := 3) (l := 2)
+      (by norm_num) (by norm_num) hmu4 hzeta3
+  have hterm1 : DivisorBounded ((4 : ℝ) • mu : HBDepthFour.AF) 4 6 := by
+    simpa using divisorBounded_smul (4 : ℝ) hbase1
+  have hterm2 :
+      DivisorBounded ((6 : ℝ) • (mu ^ 2 * zeta) : HBDepthFour.AF) 6 6 := by
+    simpa using divisorBounded_smul (6 : ℝ) hbase2
+  have hterm3 :
+      DivisorBounded ((4 : ℝ) • (mu ^ 3 * zeta ^ 2) : HBDepthFour.AF) 4 6 := by
+    simpa using divisorBounded_smul (4 : ℝ) hbase3
+  have h12 : DivisorBounded
+      ((4 : ℝ) • mu - (6 : ℝ) • (mu ^ 2 * zeta) : HBDepthFour.AF) 10 6 := by
+    have h := divisorBounded_sub hterm1 hterm2
+    norm_num at h
+    exact h
+  have h123 : DivisorBounded
+      ((4 : ℝ) • mu - (6 : ℝ) • (mu ^ 2 * zeta) +
+        (4 : ℝ) • (mu ^ 3 * zeta ^ 2) : HBDepthFour.AF) 14 6 := by
+    have h := divisorBounded_add h12 hterm3
+    norm_num at h
+    exact h
+  change DivisorBounded
+    ((4 : ℝ) • mu - (6 : ℝ) • (mu ^ 2 * zeta) +
+      (4 : ℝ) • (mu ^ 3 * zeta ^ 2) - mu ^ 4 * zeta ^ 3 : HBDepthFour.AF) 15 6
+  have h := divisorBounded_sub h123 hbase4
+  norm_num at h
+  exact h
+
 /-- A singleton left sequence for the divisor-indexed convolution. -/
 def leftSelector (a d : ℕ) : ℝ := if d = a then 1 else 0
 
@@ -486,6 +700,24 @@ theorem shiu_normalizedRightSelector {eta : ℝ}
   exact hshiu (normalizedRightSelector c R a k) K k
     (normalizedRightSelector_divisorBounded ha hK hc)
 
+theorem hb4Core_normalizedRightSelector_divisorBounded
+    (Z : ℕ) {R a : ℕ} (ha : a ≠ 0) :
+    DivisorBounded (normalizedRightSelector (hb4Core Z) R a 6) 15 6 := by
+  exact normalizedRightSelector_divisorBounded ha (by norm_num)
+    (hb4Core_divisorBounded Z)
+
+/-- Shiu applies to the actual normalized depth-four core with no generic
+coefficient-admissibility premise left. -/
+theorem shiu_hb4Core_normalizedRightSelector {eta : ℝ}
+    (hshiu : ShiuMajorant eta) (Z : ℕ) {R a : ℕ} (ha : a ≠ 0) :
+    ∃ C K' T₁ : ℝ, ∀ T ≥ T₁, ∀ P : ℝ, 1 ≤ P →
+      ∀ q r : ℕ, 0 < q → Nat.Coprime r q →
+        (q : ℝ) ≤ P * T ^ (-eta) →
+          progressionSum (normalizedRightSelector (hb4Core Z) R a 6) P q r ≤
+            K' * (P / (Nat.totient q : ℝ)) * (Real.log T) ^ C := by
+  exact hshiu (normalizedRightSelector (hb4Core Z) R a 6) 15 6
+    (hb4Core_normalizedRightSelector_divisorBounded Z ha)
+
 /-- One literal Dirichlet-convolution piece. -/
 def convolutionPiece (c : ℕ → ℝ) (R a n : ℕ) : ℝ :=
   ∑ ds ∈ n.divisorsAntidiagonal,
@@ -502,6 +734,24 @@ theorem normalizedConvolutionPiece_eq (c : ℕ → ℝ) (R k n : ℕ)
   apply Finset.sum_congr rfl
   intro ds hds
   exact weightedLeft_mul_normalizedRight c R k ds.1 ds.2 ha
+
+/-- Package a normalized fiber as an arithmetic function so the remaining
+literal smooth factors can be convolved after the refinement. -/
+def normalizedConvolutionAF (c : HBDepthFour.AF) (R a k : ℕ) : HBDepthFour.AF :=
+  ⟨fun n => normalizedConvolutionPiece c R a k n, by
+    simp [normalizedConvolutionPiece]⟩
+
+@[simp]
+theorem normalizedConvolutionAF_apply (c : HBDepthFour.AF) (R a k n : ℕ) :
+    normalizedConvolutionAF c R a k n = normalizedConvolutionPiece c R a k n := rfl
+
+theorem arithmeticFunction_sum_apply {ι : Type*} (s : Finset ι)
+    (f : ι → HBDepthFour.AF) (n : ℕ) :
+    (∑ i ∈ s, f i) n = ∑ i ∈ s, f i n := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | @insert i s hi ih => simp [hi, ih]
 
 /-- The coefficient assigned directly to one canonical-divisor fiber. -/
 def canonicalPiece (c : ℕ → ℝ) (R a n : ℕ) : ℝ :=
@@ -599,6 +849,16 @@ theorem sum_normalizedConvolutionPiece (c : ℕ → ℝ) (k : ℕ) {R n : ℕ}
       rw [normalizedConvolutionPiece_eq c R k n]
       exact Nat.ne_of_gt (Finset.mem_Icc.mp ha).1
     _ = c n := sum_convolutionPiece c hn hR
+
+theorem sum_normalizedConvolutionAF (c : HBDepthFour.AF) (k : ℕ) {R : ℕ}
+    (hR : 0 < R) :
+    ∑ a ∈ Finset.Icc 1 R, normalizedConvolutionAF c R a k = c := by
+  ext n
+  rw [arithmeticFunction_sum_apply]
+  by_cases hn : n = 0
+  · subst n
+    simp
+  · simpa using sum_normalizedConvolutionPiece c k hn hR
 
 /-- The canonical fibers do not multiply any pointwise cost which vanishes at
 zero.  In particular, the number of divisor fibers creates no pointwise
@@ -729,6 +989,33 @@ theorem hb4_sum_convolutionPiece (Z : ℕ) {R n : ℕ}
       convolutionPiece (fun m => HBDepthFour.hb4 Z m) R a n =
         HBDepthFour.hb4 Z n := by
   exact sum_convolutionPiece (fun m => HBDepthFour.hb4 Z m) hn hR
+
+/-- Exact `(EF_eta)`-side identity with the logarithm preserved on its
+literal convolution slot.  Refinement happens on the divisor-bounded core;
+only afterwards is each fiber convolved with `log`. -/
+theorem hb4_eq_sum_normalizedCore_mul_log (Z : ℕ) {R : ℕ} (hR : 0 < R) :
+    HBDepthFour.hb4 Z =
+      ∑ a ∈ Finset.Icc 1 R,
+        normalizedConvolutionAF (hb4Core Z) R a 6 * ArithmeticFunction.log := by
+  calc
+    HBDepthFour.hb4 Z = hb4Core Z * ArithmeticFunction.log :=
+      hb4_eq_core_mul_log Z
+    _ = (∑ a ∈ Finset.Icc 1 R,
+          normalizedConvolutionAF (hb4Core Z) R a 6) *
+          ArithmeticFunction.log := by
+      rw [sum_normalizedConvolutionAF (hb4Core Z) 6 hR]
+    _ = ∑ a ∈ Finset.Icc 1 R,
+          normalizedConvolutionAF (hb4Core Z) R a 6 *
+            ArithmeticFunction.log := by
+      rw [Finset.sum_mul]
+
+theorem hb4_apply_eq_sum_normalizedCore_mul_log
+    (Z : ℕ) {R n : ℕ} (hR : 0 < R) :
+    HBDepthFour.hb4 Z n =
+      ∑ a ∈ Finset.Icc 1 R,
+        (normalizedConvolutionAF (hb4Core Z) R a 6 * ArithmeticFunction.log) n := by
+  rw [← arithmeticFunction_sum_apply]
+  exact DFunLike.congr_fun (hb4_eq_sum_normalizedCore_mul_log Z hR) n
 
 /-- On the certified range of the depth-four identity, the divisor-dependent
 convolution family reconstructs the von Mangoldt coefficient itself. -/
