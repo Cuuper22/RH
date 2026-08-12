@@ -1218,15 +1218,17 @@ theorem RoutedEnergyQuarticLowerBound.toSelectedVirtual
     dsimp [y]
     linarith
   have hgap : 0 < y - x := sub_pos.mpr hxy
+  have hclose' :=
+    (tendsto_diagonalSymmetricQuarticNumerator_sub_energy q H h).eventually
+      (Metric.ball_mem_nhds (0 : ℝ) hgap)
   have hclose :
       ∀ᶠ T in Filter.atTop,
         dist
             (symmetricRoutedQuarticNumerator q H T
                 (diagonalSymmetricCutoff q H h T) -
               routedEnergyQuarticNumerator q H T)
-            0 < y - x :=
-    (tendsto_diagonalSymmetricQuarticNumerator_sub_energy q H h).eventually
-      (Metric.ball_mem_nhds (0 : ℝ) hgap)
+            0 < y - x := by
+    simpa only [Metric.mem_ball] using hclose'
   filter_upwards
       [hE.eventually_gt y hyTarget, hE.zero_count_pos, hclose] with
       T hEnergy hN hClose
