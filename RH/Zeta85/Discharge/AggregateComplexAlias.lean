@@ -219,6 +219,117 @@ theorem aggregateVirtualNormalizedFrequencyPairSum_eq_energyIntegral
     T L Λ f hL hΛ hsmooth hsupp heven hcancel z z']
   rw [mul_assoc, div_mul_cancel₀ _ hL0]
 
+/-! ## Constructors for collective cancellation -/
+
+/-- Termwise collective cancellation implies the summed-tsum cancellation
+interface.  Absolute summability is supplied by the same compact-smooth
+Poisson theorem used for the individual channels. -/
+theorem aggregateAliasCancellation_of_termwise
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (Λ : ι → ℝ) (f : ι → ℝ → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ r, 0 ≤ Λ r)
+    (hsmooth : ∀ r, ContDiff ℝ 2 (fun u => (f r u : ℂ)))
+    (hsupp : ∀ r u, Λ r < |u| → f r u = 0)
+    (heven : ∀ r u, f r (-u) = f r u)
+    (hterm : ∀ (z z' : ℂ) (m : {m : ℤ // m ≠ 0}),
+      (∑ r : ι,
+        ComplexAliasBridge.virtualComplexAliasTerm
+          T L (f r) z z' m) = 0) :
+    AggregateAliasCancellation T L f := by
+  refine ⟨?_⟩
+  intro z z'
+  have hL0 : (L : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  have hsummable (r : ι) :
+      Summable (fun m : {m : ℤ // m ≠ 0} =>
+        ComplexAliasBridge.virtualComplexAliasTerm
+          T L (f r) z z' m) := by
+    have hscaled :=
+      (ComplexAliasBridge.hasSum_virtualComplexAlias
+        T L (Λ r) (f r) hL (hΛ r) (hsmooth r)
+        (hsupp r) (heven r) z z').1
+    have hfull :
+        Summable (fun m : ℤ =>
+          ComplexAliasBridge.virtualComplexAliasTerm
+            T L (f r) z z' m) :=
+      (summable_mul_left_iff hL0).1 hscaled
+    exact hfull.comp_injective Subtype.val_injective
+  have hHas :
+      HasSum
+        (fun m : {m : ℤ // m ≠ 0} =>
+          ∑ r : ι,
+            ComplexAliasBridge.virtualComplexAliasTerm
+              T L (f r) z z' m)
+        (∑ r : ι,
+          ∑' m : {m : ℤ // m ≠ 0},
+            ComplexAliasBridge.virtualComplexAliasTerm
+              T L (f r) z z' m) := by
+    simpa using
+      (hasSum_sum (s := (Finset.univ : Finset ι))
+        (fun r _ => (hsummable r).hasSum))
+  calc
+    (∑ r : ι,
+      ∑' m : {m : ℤ // m ≠ 0},
+        ComplexAliasBridge.virtualComplexAliasTerm
+          T L (f r) z z' m) =
+        ∑' m : {m : ℤ // m ≠ 0},
+          ∑ r : ι,
+            ComplexAliasBridge.virtualComplexAliasTerm
+              T L (f r) z z' m :=
+      hHas.tsum_eq.symm
+    _ = 0 := by
+      have hzero :
+          (fun m : {m : ℤ // m ≠ 0} =>
+            ∑ r : ι,
+              ComplexAliasBridge.virtualComplexAliasTerm
+                T L (f r) z z' m) = 0 := by
+        funext m
+        exact hterm z z' m
+      rw [hzero]
+      simp
+
+/-- It is enough to cancel the summed shifted overlap integrals.  The
+translation-dependent exponential is common to every channel and factors
+out after the channel sum is taken. -/
+theorem aggregateAliasCancellation_of_shiftIntegrals
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (Λ : ι → ℝ) (f : ι → ℝ → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ r, 0 ≤ Λ r)
+    (hsmooth : ∀ r, ContDiff ℝ 2 (fun u => (f r u : ℂ)))
+    (hsupp : ∀ r u, Λ r < |u| → f r u = 0)
+    (heven : ∀ r u, f r (-u) = f r u)
+    (hshift : ∀ (z z' : ℂ) (m : ℤ), m ≠ 0 →
+      (∑ r : ι,
+        ∫ u : ℝ,
+          (f r u : ℂ) * f r (u - (m : ℝ) * L) *
+            Complex.exp
+              (Complex.I * (z - z') * (u : ℂ))) = 0) :
+    AggregateAliasCancellation T L f := by
+  apply aggregateAliasCancellation_of_termwise
+    T L Λ f hL hΛ hsmooth hsupp heven
+  intro z z' m
+  unfold ComplexAliasBridge.virtualComplexAliasTerm
+  calc
+    (∑ r : ι,
+      Complex.exp
+          (Complex.I * (z' - T) * (m : ℝ) * L) *
+        ∫ u : ℝ,
+          (f r u : ℂ) * f r (u - (m : ℝ) * L) *
+            Complex.exp
+              (Complex.I * (z - z') * (u : ℂ))) =
+        Complex.exp
+            (Complex.I * (z' - T) * (m : ℝ) * L) *
+          ∑ r : ι,
+            ∫ u : ℝ,
+              (f r u : ℂ) * f r (u - (m : ℝ) * L) *
+                Complex.exp
+                  (Complex.I * (z - z') * (u : ℂ)) := by
+      rw [Finset.mul_sum]
+    _ = 0 := by
+      rw [hshift z z' m m.property, mul_zero]
+
 end AggregateComplexAlias
 end Zeta85
 end RH
