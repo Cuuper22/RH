@@ -205,7 +205,6 @@ theorem rationalMixer3_coherent_gain :
       (∑ j : Fin 3, rationalMixer3 j 0) ^ 2 := by
   rw [rationalMixer3_firstColumn_sum]
   norm_num
-  positivity
 
 /-- The four-channel Walsh-Hadamard mixer, normalized by one half. -/
 def hadamardMixer4 : Matrix (Fin 4) (Fin 4) ℝ :=
