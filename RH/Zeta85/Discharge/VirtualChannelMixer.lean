@@ -138,6 +138,44 @@ theorem aggregate_shift_overlap_eq_zero
   intro r _
   exact hzero r
 
+/-- A function supported in an interval shorter than a translation has
+zero self-overlap with that translation. -/
+theorem self_shift_overlap_eq_zero
+    (f : ℝ → ℝ) (a b u h : ℝ)
+    (hsupp : ∀ x : ℝ, f x ≠ 0 → a ≤ x ∧ x ≤ b)
+    (hwidth : b - a < |h|) :
+    f u * f (u - h) = 0 := by
+  by_cases hu : f u = 0
+  · simp [hu]
+  by_cases huv : f (u - h) = 0
+  · simp [huv]
+  exfalso
+  obtain ⟨hua, hub⟩ := hsupp u hu
+  obtain ⟨huva, huvb⟩ := hsupp (u - h) huv
+  by_cases hh : 0 ≤ h
+  · rw [abs_of_nonneg hh] at hwidth
+    linarith
+  · have hh' : h < 0 := lt_of_not_ge hh
+    rw [abs_of_neg hh'] at hwidth
+    linarith
+
+/-- Interval support shorter than the shift annihilates the complete
+physical-channel alias after orthogonal synthesis. -/
+theorem aggregate_shift_overlap_eq_zero_of_supportDiameter_lt
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → ℝ → ℝ)
+    (a b : ι → ℝ) (u h : ℝ)
+    (hsupp : ∀ r : ι, ∀ x : ℝ,
+      virtual r x ≠ 0 → a r ≤ x ∧ x ≤ b r)
+    (hwidth : ∀ r : ι, b r - a r < |h|) :
+    (∑ j : ι,
+        synthesize C virtual j u *
+          synthesize C virtual j (u - h)) = 0 := by
+  apply aggregate_shift_overlap_eq_zero C virtual u h
+  intro r
+  exact self_shift_overlap_eq_zero
+    (virtual r) (a r) (b r) u h (hsupp r) (hwidth r)
+
 /-- Pointwise Parseval identity: synthesis preserves the entire square
 energy after the channel sum has been taken. -/
 theorem pointwise_parseval
