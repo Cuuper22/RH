@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.Calculus.ContDiff.Convolution
 import RH.Zeta85.Inputs95
 
 /-!
@@ -34,7 +35,7 @@ Poisson/EndsCore API do not provide those steps.
 -/
 
 open MeasureTheory
-open scoped BigOperators Matrix
+open scoped BigOperators Matrix Convolution
 
 noncomputable section
 
@@ -350,6 +351,68 @@ theorem exists_smooth_normalCutoff (eps : ℝ) (heps : 0 < eps) :
       simp [Function.comp_apply, hz]
     have hball := hsupport (subset_tsupport f hfs)
     simpa [Real.dist_eq] using hball.le
+
+/-- Smooth compactly supported profiles produce a smooth quartic cyclic
+symbol.  The fixed factor at cyclic position zero supplies one compact
+integration domain for every frequency parameter. -/
+theorem weightedCyclicSymbol_k4_contDiff
+    (mu : ℝ) (r : ℝ -> ℝ)
+    (hrc : HasCompactSupport r) (hr : ContDiff ℝ 1 r) :
+    ContDiff ℝ 1 (weightedCyclicSymbol (k := 4) mu r) := by
+  let g : (Fin 4 -> ℝ) -> ℝ -> ℝ := fun xi y =>
+    ∏ j : Fin 4, r (-y + cyclicPartialSum xi j / mu)
+  let K : Set ℝ := -tsupport r
+  have hK : IsCompact K := by
+    dsimp only [K]
+    exact hrc.isCompact.neg
+  have hgs :
+      ∀ xi : Fin 4 -> ℝ, ∀ y : ℝ,
+        xi ∈ (Set.univ : Set (Fin 4 -> ℝ)) -> y ∉ K -> g xi y = 0 := by
+    intro xi y _hy hyK
+    have hneg : -y ∉ tsupport r := by
+      intro h
+      apply hyK
+      dsimp only [K]
+      simpa using (Set.neg_mem_neg.mpr h)
+    dsimp only [g]
+    apply prod_eq_zero (Finset.mem_univ (0 : Fin 4))
+    simpa [cyclicPartialSum] using
+      image_eq_zero_of_notMem_tsupport hneg
+  have hg : ContDiff ℝ 1 ↿g := by
+    change ContDiff ℝ 1 (fun q : (Fin 4 -> ℝ) × ℝ =>
+      ∏ j : Fin 4, r (-q.2 + cyclicPartialSum q.1 j / mu))
+    simp only [cyclicPartialSum]
+    fun_prop
+  have hconv :=
+    MeasureTheory.contDiffOn_convolution_right_with_param
+      (f := fun _x : ℝ => (1 : ℝ)) (g := g)
+      (s := Set.univ) (k := K) (μ := volume)
+      (ContinuousLinearMap.mul ℝ ℝ)
+      isOpen_univ hK hgs (locallyIntegrable_const (1 : ℝ)) hg.contDiffOn
+  have hconv' :
+      ContDiff ℝ 1 (fun q : (Fin 4 -> ℝ) × ℝ =>
+        ((fun _x : ℝ => (1 : ℝ)) ⋆[
+          ContinuousLinearMap.mul ℝ ℝ, volume] g q.1) q.2) := by
+    rw [← contDiffOn_univ]
+    simpa using hconv
+  have heval :
+      ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ =>
+        ((fun _x : ℝ => (1 : ℝ)) ⋆[
+          ContinuousLinearMap.mul ℝ ℝ, volume] g xi) 0) := by
+    apply hconv'.comp
+    fun_prop
+  have hintegral :
+      ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ =>
+        ∫ x : ℝ, ∏ j : Fin 4,
+          r (x + cyclicPartialSum xi j / mu)) := by
+    simpa [MeasureTheory.convolution_def, g] using heval
+  have hreal :
+      ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ =>
+        mu * ∫ x : ℝ, ∏ j : Fin 4,
+          r (x + cyclicPartialSum xi j / mu)) :=
+    contDiff_const.mul hintegral
+  have hcomplex := Complex.ofRealCLM.contDiff.comp hreal
+  simpa [weightedCyclicSymbol, Function.comp_def] using hcomplex
 
 /-- At the frozen bandwidth, the quartic cyclic test has a smooth compact
 extension meeting the strict RS support threshold.  The extension agrees
