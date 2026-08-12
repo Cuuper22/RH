@@ -1556,6 +1556,88 @@ theorem distinguishedFrequencyPairTail_eq_outsideGrid
   rw [← hsplit]
   ring
 
+
+/-- The retained integer range is exactly the half-open interval from zero
+through the cutoff. -/
+theorem mem_nonnegativeFrequencyRange_iff
+    (n : ℕ) (k : ℤ) :
+    k ∈ nonnegativeFrequencyRange n ↔
+      0 ≤ k ∧ k < n := by
+  classical
+  simp only [nonnegativeFrequencyRange, Finset.mem_map,
+    Finset.mem_range]
+  constructor
+  · rintro ⟨a, ha, hcast⟩
+    subst k
+    constructor <;> omega
+  · intro hk
+    refine ⟨k.toNat, ?_, ?_⟩
+    · omega
+    · simp only [natFrequencyEmbedding]
+      omega
+
+/-- Every omitted integer frequency lies either below zero or at/above the
+finite cutoff. -/
+theorem not_mem_nonnegativeFrequencyRange_iff
+    (n : ℕ) (k : ℤ) :
+    k ∉ nonnegativeFrequencyRange n ↔
+      k < 0 ∨ (n : ℤ) ≤ k := by
+  rw [mem_nonnegativeFrequencyRange_iff]
+  omega
+
+/-- Smooth compact support gives summability of the distinguished integer
+frequency-pair lattice directly from complex Poisson summation. -/
+theorem summable_distinguishedIntegerFrequencyPairTerm
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (Λ : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| →
+      F.window T (F.distinguished T) u = 0)
+    (heven : ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u)
+    (ρ ρ' : ℂ) :
+    Summable
+      (distinguishedIntegerFrequencyPairTerm F T ρ ρ') := by
+  have hhas :=
+    (hasSum_channel_complexAlias F T (F.distinguished T) Λ
+      hL hΛ hsmooth hsupp heven (gammaOf ρ) (gammaOf ρ')).2
+  exact hhas.summable
+
+/-- The tail equals the outside-cutoff lattice with summability discharged
+by the same smooth compact one-channel hypotheses used for Poisson. -/
+theorem distinguishedFrequencyPairTail_eq_outsideGrid_of_compact
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i)
+    (Λ : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| →
+      F.window T (F.distinguished T) u = 0)
+    (heven : ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u) :
+    distinguishedFrequencyPairTail F T ρ ρ' =
+      distinguishedOutsideGridPairSum F T ρ ρ' :=
+  distinguishedFrequencyPairTail_eq_outsideGrid
+    F T ρ ρ' hdist haddr hexhaustive
+      (summable_distinguishedIntegerFrequencyPairTerm
+        F T Λ hL hΛ hsmooth hsupp heven ρ ρ')
+
 end ComplexAliasBridge
 end Zeta85
 end RH
