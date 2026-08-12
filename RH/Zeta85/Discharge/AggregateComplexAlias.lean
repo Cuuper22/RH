@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 
 import RH.Zeta85.Discharge.ComplexAliasBridge
+import RH.Zeta85.Discharge.VirtualChannelMixer
 
 /-!
 # Aggregate cancellation of complex Poisson aliases
@@ -329,6 +330,97 @@ theorem aggregateAliasCancellation_of_shiftIntegrals
       rw [Finset.mul_sum]
     _ = 0 := by
       rw [hshift z z' m m.property, mul_zero]
+
+/-! ## Orthogonal synthesis produces collective cancellation -/
+
+/-- If the complete channel overlap vanishes pointwise after channels are
+summed, then every nonzero aggregate complex alias vanishes. -/
+theorem aggregateAliasCancellation_of_pointwiseOverlap
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (T L : ℝ) (Λ : ι → ℝ) (f : ι → ℝ → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ r, 0 ≤ Λ r)
+    (hsmooth : ∀ r, ContDiff ℝ 2 (fun u => (f r u : ℂ)))
+    (hsupp : ∀ r u, Λ r < |u| → f r u = 0)
+    (heven : ∀ r u, f r (-u) = f r u)
+    (hInt : ∀ (r : ι) (z z' : ℂ) (m : ℤ), m ≠ 0 →
+      Integrable
+        (fun u : ℝ =>
+          (f r u : ℂ) * f r (u - (m : ℝ) * L) *
+            Complex.exp
+              (Complex.I * (z - z') * (u : ℂ))))
+    (hpoint : ∀ (m : ℤ), m ≠ 0 → ∀ u : ℝ,
+      (∑ r : ι, f r u * f r (u - (m : ℝ) * L)) = 0) :
+    AggregateAliasCancellation T L f := by
+  apply aggregateAliasCancellation_of_shiftIntegrals
+    T L Λ f hL hΛ hsmooth hsupp heven
+  intro z z' m hm
+  calc
+    (∑ r : ι,
+      ∫ u : ℝ,
+        (f r u : ℂ) * f r (u - (m : ℝ) * L) *
+          Complex.exp
+            (Complex.I * (z - z') * (u : ℂ))) =
+        ∫ u : ℝ,
+          ∑ r : ι,
+            (f r u : ℂ) * f r (u - (m : ℝ) * L) *
+              Complex.exp
+                (Complex.I * (z - z') * (u : ℂ)) := by
+      rw [integral_finsetSum]
+      intro r _
+      exact hInt r z z' m hm
+    _ = 0 := by
+      have hfun :
+          (fun u : ℝ =>
+            ∑ r : ι,
+              (f r u : ℂ) * f r (u - (m : ℝ) * L) *
+                Complex.exp
+                  (Complex.I * (z - z') * (u : ℂ))) = 0 := by
+        funext u
+        rw [← Finset.sum_mul]
+        have hp := congrArg (fun x : ℝ => (x : ℂ))
+          (hpoint m hm u)
+        push_cast at hp
+        rw [hp, zero_mul]
+      rw [hfun]
+      simp
+
+/-- Orthogonal synthesis is the concrete mechanism for collective
+cancellation.  No physical channel is required to have zero aliases:
+Parseval is applied to the whole physical-channel sum first. -/
+theorem aggregateAliasCancellation_orthogonalSynthesis
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : VirtualChannelMixer.Data ι)
+    (T L : ℝ) (Λ : ι → ℝ) (virtual : ι → ℝ → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ j, 0 ≤ Λ j)
+    (hsmooth : ∀ j,
+      ContDiff ℝ 2
+        (fun u =>
+          (VirtualChannelMixer.synthesize C virtual j u : ℂ)))
+    (hsupp : ∀ j u, Λ j < |u| →
+      VirtualChannelMixer.synthesize C virtual j u = 0)
+    (heven : ∀ j u,
+      VirtualChannelMixer.synthesize C virtual j (-u) =
+        VirtualChannelMixer.synthesize C virtual j u)
+    (hInt : ∀ (j : ι) (z z' : ℂ) (m : ℤ), m ≠ 0 →
+      Integrable
+        (fun u : ℝ =>
+          (VirtualChannelMixer.synthesize C virtual j u : ℂ) *
+            VirtualChannelMixer.synthesize C virtual j
+              (u - (m : ℝ) * L) *
+            Complex.exp
+              (Complex.I * (z - z') * (u : ℂ))))
+    (hvirtual : ∀ (r : ι) (m : ℤ), m ≠ 0 → ∀ u : ℝ,
+      virtual r u * virtual r (u - (m : ℝ) * L) = 0) :
+    AggregateAliasCancellation T L
+      (VirtualChannelMixer.synthesize C virtual) := by
+  apply aggregateAliasCancellation_of_pointwiseOverlap
+    T L Λ (VirtualChannelMixer.synthesize C virtual)
+    hL hΛ hsmooth hsupp heven hInt
+  intro m hm u
+  exact VirtualChannelMixer.aggregate_shift_overlap_eq_zero
+    C virtual u ((m : ℝ) * L) (fun r => hvirtual r m hm u)
 
 end AggregateComplexAlias
 end Zeta85
