@@ -980,6 +980,87 @@ theorem exists_symmetricRoutedQuarticNumerator_gt
       (Ioi_mem_nhds hx)
   exact he.exists
 
+
+/-- At every fixed height, the finite symmetric grid can approximate the
+complete energy quartic numerator to any prescribed positive accuracy. -/
+theorem exists_symmetricRoutedQuarticNumerator_dist_lt
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : TrimmedMoment.Quartic}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T ε : ℝ) (hε : 0 < ε) :
+    ∃ n : ℕ,
+      dist (symmetricRoutedQuarticNumerator q H T n)
+        (routedEnergyQuarticNumerator q H T) < ε := by
+  have he :=
+    (tendsto_symmetricRoutedQuarticNumerator_energy H h T).eventually
+      (Metric.ball_mem_nhds _ hε)
+  simpa only [Metric.mem_ball] using he.exists
+
+/-- Choose the common symmetric cutoff only after the complete quartic
+contraction at each height.  The requested error is exponentially small in
+the height, so no uniform-in-height Fourier estimate is needed. -/
+noncomputable def diagonalSymmetricCutoff
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (q : TrimmedMoment.Quartic)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) : ℕ :=
+  Classical.choose
+    (exists_symmetricRoutedQuarticNumerator_dist_lt
+      (q := q) H h T (Real.exp (-T)) (Real.exp_pos _))
+
+/-- The chosen diagonal cutoff has the promised exponential error at every
+height. -/
+theorem diagonalSymmetricCutoff_spec
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (q : TrimmedMoment.Quartic)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) :
+    dist
+        (symmetricRoutedQuarticNumerator q H T
+          (diagonalSymmetricCutoff q H h T))
+        (routedEnergyQuarticNumerator q H T) <
+      Real.exp (-T) :=
+  Classical.choose_spec
+    (exists_symmetricRoutedQuarticNumerator_dist_lt
+      (q := q) H h T (Real.exp (-T)) (Real.exp_pos _))
+
+/-- Diagonal selection converts the fixed-height symmetric-grid convergence
+into an actual height-asymptotic statement. -/
+theorem tendsto_diagonalSymmetricQuarticNumerator_sub_energy
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (q : TrimmedMoment.Quartic)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H) :
+    Tendsto
+      (fun T : ℝ =>
+        symmetricRoutedQuarticNumerator q H T
+            (diagonalSymmetricCutoff q H h T) -
+          routedEnergyQuarticNumerator q H T)
+      Filter.atTop (nhds 0) := by
+  rw [tendsto_zero_iff_norm_tendsto_zero]
+  apply squeeze_zero
+  · intro T
+    exact norm_nonneg _
+  · intro T
+    have hs := diagonalSymmetricCutoff_spec q H h T
+    simpa only [Real.norm_eq_abs, Real.dist_eq] using hs.le
+  · exact Real.tendsto_exp_atBot.comp tendsto_neg_atTop_atBot
+
 /-- Exact certificate that the routed finite labels are one of the symmetric
 frequency grids.  It is stated at the already-summed level consumed by the
 pair kernel, so no ordering convention for the finite labels survives. -/
