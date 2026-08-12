@@ -305,16 +305,16 @@ theorem normalCutoffSymbol_tsupport_subset {k : ℕ}
   change closure (Function.support (normalCutoffSymbol chi Phi)) ⊆ _
   apply closure_minimal
   · intro xi hxi
-  have hprod : chi (∑ i : Fin k, xi i) * Phi xi ≠ 0 := by
-    simpa only [Function.mem_support, normalCutoffSymbol] using hxi
-  have hc : chi (∑ i : Fin k, xi i) ≠ 0 := by
-    intro hz
-    apply hprod
-    rw [hz, zero_mul]
-  have hp : Phi xi ≠ 0 := by
-    intro hz
-    apply hprod
-    rw [hz, mul_zero]
+    have hprod : chi (∑ i : Fin k, xi i) * Phi xi ≠ 0 := by
+      simpa only [Function.mem_support, normalCutoffSymbol] using hxi
+    have hc : chi (∑ i : Fin k, xi i) ≠ 0 := by
+      intro hz
+      apply hprod
+      rw [hz, zero_mul]
+    have hp : Phi xi ≠ 0 := by
+      intro hz
+      apply hprod
+      rw [hz, mul_zero]
     have ht := hPhi xi hp
     have hn := hchi (∑ i : Fin k, xi i) hc
     exact ht.trans (add_le_add_left hn A)
