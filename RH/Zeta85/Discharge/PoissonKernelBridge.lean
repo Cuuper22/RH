@@ -300,6 +300,81 @@ theorem exists_distinguishedLatticeTerm_horizontal_decay_uniform_on_ZI
     hC (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) him him'
       (T + (k : ℝ) * distinguishedGridStep F T)
 
+/-- The `L¹` Sobolev mass that appears in the explicit two-factor Fourier
+decay constant of the distinguished window. -/
+def distinguishedWindowSobolevMass
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  (∫ u, ‖(F.window T (F.distinguished T) u : ℂ)‖) +
+    ∫ u, ‖deriv (deriv
+      (fun x => (F.window T (F.distinguished T) x : ℂ))) u‖
+
+/-- Explicit uniform fourth-order constant when the distinguished window is
+supported in its natural half-period. -/
+def distinguishedWindowFourierMajorant
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  (Real.exp ((1 / 2 : ℝ) *
+      (F.period T (F.distinguished T) / 2)) *
+    distinguishedWindowSobolevMass F T) ^ 2
+
+/-- The common norm scale of either canonical remote half-lattice. -/
+def distinguishedRemoteTailScale
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  distinguishedWindowFourierMajorant F T *
+    (((Zeta23.D0 T) ^ 4)⁻¹ +
+      ((Zeta23.D0 T) ^ 3)⁻¹ / (3 * distinguishedGridStep F T))
+
+theorem distinguishedWindowFourierMajorant_nonneg
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    0 ≤ distinguishedWindowFourierMajorant F T := by
+  exact sq_nonneg _
+
+/-- With natural half-period support, the explicit majorant controls every
+lattice label and every pair in the enlarged zero set. -/
+theorem distinguishedLatticeTerm_le_fourierMajorant_on_ZI
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupport : ∀ u,
+      (F.window T (F.distinguished T) u : ℂ) ≠ 0 →
+        |u| ≤ F.period T (F.distinguished T) / 2)
+    (ρ ρ' : ↥(Zeta23.ZeroSide.ZI Z T)) (k : ℤ) :
+    ‖distinguishedLatticeTerm F T
+      (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) k‖ *
+        ((1 + ((gammaOf (ρ : ℂ)).re -
+          (T + (k : ℝ) * distinguishedGridStep F T)) ^ 2) *
+         (1 + ((gammaOf (ρ' : ℂ)).re -
+          (T + (k : ℝ) * distinguishedGridStep F T)) ^ 2)) ≤
+      distinguishedWindowFourierMajorant F T := by
+  have hstrip : 0 ≤ (ρ : ℂ).re ∧ (ρ : ℂ).re ≤ 1 :=
+    Z.strip (ρ : ℂ)
+      (Zeta23.ZeroSide.mem_carrier_of_mem_ZI Z T ρ.property)
+  have hstrip' : 0 ≤ (ρ' : ℂ).re ∧ (ρ' : ℂ).re ≤ 1 :=
+    Z.strip (ρ' : ℂ)
+      (Zeta23.ZeroSide.mem_carrier_of_mem_ZI Z T ρ'.property)
+  have him : |(gammaOf (ρ : ℂ)).im| ≤ 1 / 2 := by
+    have hgamma : (gammaOf (ρ : ℂ)).im = 1 / 2 - (ρ : ℂ).re := by
+      simp [gammaOf, Complex.div_I]
+    rw [hgamma, abs_le]
+    constructor <;> linarith
+  have him' : |(gammaOf (ρ' : ℂ)).im| ≤ 1 / 2 := by
+    have hgamma : (gammaOf (ρ' : ℂ)).im = 1 / 2 - (ρ' : ℂ).re := by
+      simp [gammaOf, Complex.div_I]
+    rw [hgamma, abs_le]
+    constructor <;> linarith
+  have hbound := Zeta23.Poisson.paperFT_mul_horizontal_decay_uniform
+    hwindow hsupport (by linarith) (by norm_num)
+      (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) him him'
+      (T + (k : ℝ) * distinguishedGridStep F T)
+  simpa only [distinguishedLatticeTerm, distinguishedGridStep,
+    distinguishedWindowFourierMajorant,
+    distinguishedWindowSobolevMass] using hbound
+
 private theorem norm_le_mul_inv_pow_four_of_weighted_decay
     {r a b x C : ℝ} (hr : 0 ≤ r) (hx : 0 < x)
     (hdecay : r * ((1 + a ^ 2) * (1 + b ^ 2)) ≤ C)
@@ -1363,6 +1438,322 @@ theorem exists_ZI_uniform_canonicalRemainder_bound_of_hasCompactSupport
   rw [canonicalLatticeBoundaryKernelMatrix_apply]
   simpa only [canonicalLatticeBoundaryStrip] using hbound
 
+/-- Explicit uniform canonical remainder bound for a naturally supported
+distinguished window.  No existential decay constant remains. -/
+theorem ZI_canonicalRemainder_bound_of_supportHalf
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n : ℕ)
+    (hT : 0 < T)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hn : n = ⌊T / distinguishedGridStep F T⌋₊)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupport : ∀ u,
+      (F.window T (F.distinguished T) u : ℂ) ≠ 0 →
+        |u| ≤ F.period T (F.distinguished T) / 2)
+    (ρ ρ' : ↥(Zeta23.ZeroSide.ZI Z T)) :
+    ‖∑' k : ℤ, distinguishedLatticeRemainder F T
+      (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) n k‖ ≤
+      ‖canonicalLatticeBoundaryKernelMatrix F T n ρ ρ'‖ +
+        distinguishedRemoteTailScale F T +
+        distinguishedRemoteTailScale F T := by
+  have hD0 : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT
+  have hρ : (ρ : ℂ) ∈ Z.ZIprime T :=
+    (Zeta23.ZeroSide.mem_ZI Z T).1 ρ.property
+  have hρ' : (ρ' : ℂ) ∈ Z.ZIprime T :=
+    (Zeta23.ZeroSide.mem_ZI Z T).1 ρ'.property
+  have hdist := mem_ZIprime_guarded_distances F T n hL hn hρ
+  have hdist' := mem_ZIprime_guarded_distances F T n hL hn hρ'
+  have hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
+    hasCompactSupport_of_support_subset_abs hsupport
+  have hfull : Summable (distinguishedLatticeTerm F T
+      (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))) :=
+    (hasSum_distinguishedLatticeTerm_alias_of_hasCompactSupport
+      F T hL hwindow hcompact
+        (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))).2.summable
+  have hbound := twoGuardedLatticeRemainder_bound_of_weightedDecay
+    F T (Zeta23.D0 T) (Zeta23.D0 T)
+      (distinguishedWindowFourierMajorant F T) n
+      (distinguishedEndpointGuardWidth F T)
+      (distinguishedEndpointGuardWidth F T)
+      hL hD0 hD0 (distinguishedWindowFourierMajorant_nonneg F T)
+      (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))
+      (distinguishedLatticeTerm_le_fourierMajorant_on_ZI
+        F T hL hwindow hsupport ρ ρ')
+      hdist.1 hdist'.1 hdist.2 hdist'.2 hfull
+  rw [canonicalLatticeBoundaryKernelMatrix_apply]
+  simpa only [canonicalLatticeBoundaryStrip,
+    distinguishedRemoteTailScale] using hbound
+
+/-- Any power of the logarithm is dominated by the power saving left by a
+bandwidth strictly below one. -/
+theorem tendsto_rpow_sub_half_mul_log_pow_four
+    {μ : ℝ} (hμ : μ < 1) :
+    Tendsto (fun T : ℝ =>
+      T ^ (μ / 2 - 1 / 2 : ℝ) * Real.log T ^ 4) atTop (nhds 0) := by
+  let δ : ℝ := (1 - μ) / 2
+  have hδ : 0 < δ := by
+    dsimp only [δ]
+    linarith
+  have ho := isLittleO_log_rpow_rpow_atTop (4 : ℝ) hδ
+  have hzero : ∀ᶠ T : ℝ in atTop,
+      T ^ δ = 0 → Real.log T ^ (4 : ℝ) = 0 := by
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with T hT
+    intro hpow
+    exact (((Real.rpow_ne_zero hT.le hδ.ne').2 hT.ne') hpow).elim
+  have hratio : Tendsto
+      (fun T : ℝ => Real.log T ^ (4 : ℝ) / T ^ δ)
+      atTop (nhds 0) :=
+    (Asymptotics.isLittleO_iff_tendsto' hzero).1 ho
+  apply hratio.congr'
+  filter_upwards [eventually_gt_atTop (1 : ℝ)] with T hT
+  have hT0 : 0 < T := lt_trans zero_lt_one hT
+  have hlogpow : Real.log T ^ (4 : ℝ) = Real.log T ^ (4 : ℕ) :=
+    Real.rpow_natCast (Real.log T) 4
+  rw [hlogpow]
+  have hexp : μ / 2 - 1 / 2 = -δ := by
+    dsimp only [δ]
+    ring
+  rw [hexp, Real.rpow_neg hT0.le]
+  simp only [div_eq_mul_inv]
+  ring
+
+/-- Pointwise growth bound for the explicit Fourier majorant. -/
+theorem distinguishedWindowFourierMajorant_le
+    {Z : ZeroConfig} {σ μ p c T : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 ≤ μ) (hT : 1 < T)
+    (hperiod : F.period T (F.distinguished T) = μ * Zeta23.l T)
+    (hmass : distinguishedWindowSobolevMass F T ≤ c * Zeta23.l T) :
+    distinguishedWindowFourierMajorant F T ≤
+      c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2 := by
+  have hT0 : 0 < T := lt_trans zero_lt_one hT
+  have hlogconst : 0 ≤ Real.log (2 * Real.pi) := by
+    apply Real.log_nonneg
+    nlinarith [Real.pi_gt_three]
+  have hlLog : Zeta23.l T ≤ Real.log T := by
+    rw [Zeta23.Assembly.log_eq_l_add hT0]
+    linarith
+  have hexp :
+      (Real.exp ((1 / 2 : ℝ) *
+        (F.period T (F.distinguished T) / 2))) ^ 2 ≤
+        T ^ (μ / 2 : ℝ) := by
+    rw [pow_two, ← Real.exp_add]
+    rw [hperiod, Real.rpow_def_of_pos hT0]
+    apply Real.exp_le_exp.mpr
+    have hmul := mul_le_mul_of_nonneg_right hlLog
+      (show 0 ≤ μ / 2 by positivity)
+    nlinarith
+  have hmass0 : 0 ≤ distinguishedWindowSobolevMass F T := by
+    unfold distinguishedWindowSobolevMass
+    positivity
+  have hcl0 : 0 ≤ c * Zeta23.l T := hmass0.trans hmass
+  unfold distinguishedWindowFourierMajorant
+  calc
+    (Real.exp ((1 / 2 : ℝ) *
+          (F.period T (F.distinguished T) / 2)) *
+        distinguishedWindowSobolevMass F T) ^ 2 =
+        (Real.exp ((1 / 2 : ℝ) *
+          (F.period T (F.distinguished T) / 2))) ^ 2 *
+          distinguishedWindowSobolevMass F T ^ 2 := by ring
+    _ ≤ T ^ (μ / 2 : ℝ) * (c * Zeta23.l T) ^ 2 :=
+      mul_le_mul hexp ((sq_le_sq₀ hmass0 hcl0).2 hmass)
+        (sq_nonneg _) (by positivity)
+    _ = c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2 := by ring
+
+/-- The geometric factor of either remote half-lattice saves three powers
+of `sqrt T`, up to one logarithm. -/
+theorem distinguishedRemoteTailGridFactor_le
+    {Z : ZeroConfig} {σ μ p T : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 < μ) (hT : 1 ≤ T) (hl : 1 ≤ Zeta23.l T)
+    (hperiod : F.period T (F.distinguished T) = μ * Zeta23.l T) :
+    ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+        (3 * distinguishedGridStep F T)) ≤
+      (1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 3)⁻¹ := by
+  have hT0 : 0 < T := lt_of_lt_of_le zero_lt_one hT
+  have hD : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT0
+  have hD1 : 1 ≤ Zeta23.D0 T := by
+    simpa only [Zeta23.D0, Real.sqrt_one] using Real.sqrt_le_sqrt hT
+  have hpow : Zeta23.D0 T ^ 3 ≤ Zeta23.D0 T ^ 4 := by
+    nlinarith [pow_pos hD 3]
+  have hinv : (Zeta23.D0 T ^ 4)⁻¹ ≤ (Zeta23.D0 T ^ 3)⁻¹ :=
+    (inv_le_inv₀ (pow_pos hD 4) (pow_pos hD 3)).2 hpow
+  have hmul : 0 < μ * Zeta23.l T :=
+    mul_pos hμ (lt_of_lt_of_le zero_lt_one hl)
+  have hgridInv : (3 * distinguishedGridStep F T)⁻¹ ≤ μ * Zeta23.l T := by
+    have heq : (3 * distinguishedGridStep F T)⁻¹ =
+        μ * Zeta23.l T / (6 * Real.pi) := by
+      unfold distinguishedGridStep
+      rw [hperiod]
+      field_simp
+      ring
+    rw [heq, div_le_iff₀ (by positivity : (0 : ℝ) < 6 * Real.pi)]
+    have hpi : 1 ≤ 6 * Real.pi := by nlinarith [Real.pi_gt_three]
+    nlinarith [mul_nonneg hmul.le (by linarith : 0 ≤ 6 * Real.pi - 1)]
+  have hinv3 : 0 ≤ (Zeta23.D0 T ^ 3)⁻¹ :=
+    inv_nonneg.mpr (pow_pos hD 3).le
+  calc
+    (Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+          (3 * distinguishedGridStep F T) ≤
+        (Zeta23.D0 T ^ 3)⁻¹ +
+          (Zeta23.D0 T ^ 3)⁻¹ * (μ * Zeta23.l T) := by
+      rw [div_eq_mul_inv]
+      exact add_le_add hinv (mul_le_mul_of_nonneg_left hgridInv hinv3)
+    _ = (1 + μ * Zeta23.l T) * (Zeta23.D0 T ^ 3)⁻¹ := by ring
+    _ ≤ (1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 3)⁻¹ := by
+      apply mul_le_mul_of_nonneg_right _ hinv3
+      nlinarith
+
+/-- Combining zero count, Fourier growth, and grid decay leaves precisely
+the power saving `T^((μ-1)/2)` times four logarithms. -/
+theorem N_mul_distinguishedRemoteTailScale_le
+    {Z : ZeroConfig} {σ μ p c T : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 < μ) (hT : 1 < T) (hl : 1 ≤ Zeta23.l T)
+    (hperiod : F.period T (F.distinguished T) = μ * Zeta23.l T)
+    (hN : (Z.N T (2 * T) : ℝ) ≤ T * Zeta23.l T)
+    (hMaj : distinguishedWindowFourierMajorant F T ≤
+      c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2)
+    (hTail : ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+        (3 * distinguishedGridStep F T)) ≤
+      (1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 3)⁻¹) :
+    (Z.N T (2 * T) : ℝ) * distinguishedRemoteTailScale F T ≤
+      c ^ 2 * (1 + μ) * T ^ (μ / 2 - 1 / 2 : ℝ) *
+        Real.log T ^ 4 := by
+  have hT0 : 0 < T := lt_trans zero_lt_one hT
+  have hD : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT0
+  have hl0 : 0 ≤ Zeta23.l T := le_trans zero_le_one hl
+  have hlog0 : 0 ≤ Real.log T := Real.log_nonneg (le_of_lt hT)
+  have hlogconst : 0 ≤ Real.log (2 * Real.pi) := by
+    apply Real.log_nonneg
+    nlinarith [Real.pi_gt_three]
+  have hlLog : Zeta23.l T ≤ Real.log T := by
+    rw [Zeta23.Assembly.log_eq_l_add hT0]
+    linarith
+  have htail0 : 0 ≤ (Zeta23.D0 T ^ 4)⁻¹ +
+      (Zeta23.D0 T ^ 3)⁻¹ / (3 * distinguishedGridStep F T) := by
+    have hgrid : 0 < distinguishedGridStep F T := by
+      unfold distinguishedGridStep
+      rw [hperiod]
+      positivity
+    positivity
+  have hmaj0 : 0 ≤ distinguishedWindowFourierMajorant F T :=
+    distinguishedWindowFourierMajorant_nonneg F T
+  have hrightMaj0 :
+      0 ≤ c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2 := by
+    positivity
+  have hraw :
+      (Z.N T (2 * T) : ℝ) * distinguishedRemoteTailScale F T ≤
+        (T * Zeta23.l T) *
+          ((c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2) *
+            ((1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 3)⁻¹)) := by
+    unfold distinguishedRemoteTailScale
+    calc
+      (Z.N T (2 * T) : ℝ) *
+          (distinguishedWindowFourierMajorant F T *
+            ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+              (3 * distinguishedGridStep F T))) ≤
+          (T * Zeta23.l T) *
+            (distinguishedWindowFourierMajorant F T *
+              ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+                (3 * distinguishedGridStep F T))) :=
+        mul_le_mul_of_nonneg_right hN (mul_nonneg hmaj0 htail0)
+      _ ≤ (T * Zeta23.l T) *
+          ((c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2) *
+            ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+              (3 * distinguishedGridStep F T))) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_right hMaj htail0) (by positivity)
+      _ ≤ (T * Zeta23.l T) *
+          ((c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2) *
+            ((1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 3)⁻¹)) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left hTail hrightMaj0) (by positivity)
+  have hDsquare : Zeta23.D0 T ^ 2 = T := Real.sq_sqrt hT0.le
+  have hD3 : Zeta23.D0 T ^ 3 = Zeta23.D0 T * T := by
+    calc
+      Zeta23.D0 T ^ 3 = Zeta23.D0 T * Zeta23.D0 T ^ 2 := by ring
+      _ = Zeta23.D0 T * T := by rw [hDsquare]
+  have hpower :
+      T * T ^ (μ / 2 : ℝ) * (Zeta23.D0 T ^ 3)⁻¹ =
+        T ^ (μ / 2 - 1 / 2 : ℝ) := by
+    rw [hD3]
+    have hcancel :
+        T * T ^ (μ / 2 : ℝ) * (Zeta23.D0 T * T)⁻¹ =
+          T ^ (μ / 2 : ℝ) / Zeta23.D0 T := by
+      field_simp
+    rw [hcancel, Zeta23.D0, Real.sqrt_eq_rpow,
+      ← Real.rpow_sub hT0]
+  calc
+    (Z.N T (2 * T) : ℝ) * distinguishedRemoteTailScale F T ≤ _ := hraw
+    _ = c ^ 2 * (1 + μ) *
+          (T * T ^ (μ / 2 : ℝ) * (Zeta23.D0 T ^ 3)⁻¹) *
+            Zeta23.l T ^ 4 := by ring
+    _ = c ^ 2 * (1 + μ) * T ^ (μ / 2 - 1 / 2 : ℝ) *
+          Zeta23.l T ^ 4 := by rw [hpower]
+    _ ≤ c ^ 2 * (1 + μ) * T ^ (μ / 2 - 1 / 2 : ℝ) *
+          Real.log T ^ 4 := by
+      apply mul_le_mul_of_nonneg_left
+      · exact pow_le_pow_left₀ hl0 hlLog 4
+      · positivity
+
+/-- Under a natural `O(log T)` Sobolev-mass bound, both remote Poisson tails
+remain negligible even after multiplication by the full dyadic zero count. -/
+theorem tendsto_N_mul_distinguishedRemoteTailScale
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 < μ) (hμ1 : μ < 1) (hRvM : RiemannVonMangoldt Z)
+    (hperiod : ∀ᶠ T in atTop,
+      F.period T (F.distinguished T) = μ * Zeta23.l T)
+    (hmass : (fun T => distinguishedWindowSobolevMass F T) =O[atTop]
+      Zeta23.l) :
+    Tendsto (fun T => (Z.N T (2 * T) : ℝ) *
+      distinguishedRemoteTailScale F T) atTop (nhds 0) := by
+  obtain ⟨c, hc⟩ := hmass.bound
+  have hlim : Tendsto (fun T =>
+      c ^ 2 * (1 + μ) *
+        (T ^ (μ / 2 - 1 / 2 : ℝ) * Real.log T ^ 4))
+      atTop (nhds 0) := by
+    have hconst : Tendsto (fun _ : ℝ => c ^ 2 * (1 + μ)) atTop
+        (nhds (c ^ 2 * (1 + μ))) := tendsto_const_nhds
+    simpa only [mul_zero] using
+      hconst.mul (tendsto_rpow_sub_half_mul_log_pow_four hμ1)
+  refine squeeze_zero' ?_ ?_ hlim
+  · filter_upwards [hperiod, Zeta23.Assembly.eventually_one_le_l,
+      eventually_gt_atTop (1 : ℝ)] with T hperiodT hl hT
+    have hgrid : 0 < distinguishedGridStep F T := by
+      unfold distinguishedGridStep
+      rw [hperiodT]
+      positivity
+    unfold distinguishedRemoteTailScale
+    apply mul_nonneg (Nat.cast_nonneg _)
+    apply mul_nonneg (distinguishedWindowFourierMajorant_nonneg F T)
+    exact add_nonneg
+      (inv_nonneg.mpr (pow_nonneg (Real.sqrt_nonneg T) 4))
+      (div_nonneg
+        (inv_nonneg.mpr (pow_nonneg (Real.sqrt_nonneg T) 3))
+        (by positivity))
+  · filter_upwards [hc, hperiod, Zeta23.Assembly.eventually_one_le_l,
+      Zeta23.Assembly.eventually_N_le Z hRvM,
+      eventually_gt_atTop (1 : ℝ)] with T hmassT hperiodT hl hN hT
+    have hmass0 : 0 ≤ distinguishedWindowSobolevMass F T := by
+      unfold distinguishedWindowSobolevMass
+      positivity
+    have hl0 : 0 ≤ Zeta23.l T := le_trans zero_le_one hl
+    have hmassPoint :
+        distinguishedWindowSobolevMass F T ≤ c * Zeta23.l T := by
+      simpa only [Real.norm_eq_abs, abs_of_nonneg hmass0,
+        abs_of_nonneg hl0] using hmassT
+    have hMaj := distinguishedWindowFourierMajorant_le
+      F hμ.le hT hperiodT hmassPoint
+    have hTail := distinguishedRemoteTailGridFactor_le
+      F hμ hT.le hl hperiodT
+    simpa only [mul_assoc] using
+      N_mul_distinguishedRemoteTailScale_le
+        F hμ hT hl hperiodT hN hMaj hTail
+
 /-- Under the distinguished-period law, the canonical endpoint-strip width
 is `O(sqrt T * log(T/2π))`. -/
 theorem distinguishedEndpointGuardWidth_isBigO
@@ -1687,6 +2078,19 @@ structure DistinguishedGuardedPoissonKernelData
     F.channelDim T (F.distinguished T) =
       ⌊F.period T (F.distinguished T) * T / (2 * Real.pi)⌋₊
 
+/-- The remaining quantitative window estimates needed to make the two
+remote tails vanish.  These are local to the distinguished window and do
+not reintroduce any global channel-allocation clause. -/
+structure DistinguishedPoissonTailControl
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) : Prop where
+  bandwidth_lt_one : μ < 1
+  distinguished_support_half : ∀ᶠ T in atTop, ∀ u,
+    F.window T (F.distinguished T) u ≠ 0 →
+      |u| ≤ F.period T (F.distinguished T) / 2
+  sobolev_mass_isBigO :
+    (fun T => distinguishedWindowSobolevMass F T) =O[atTop] Zeta23.l
+
 /-- The older physical-window bundle contains the minimal Poisson-kernel
 data as a literal sub-interface. -/
 theorem PrincipalCyclicBlock.toDistinguishedPoissonKernelData
@@ -1747,6 +2151,53 @@ theorem DistinguishedGuardedPoissonKernelData.canonicalBoundaryRank_isLittleO
   canonicalLatticeBoundaryKernelMatrix_rank_isLittleO F
     (fun T => F.channelDim T (F.distinguished T))
     h.bandwidth_pos hRvM h.distinguished_period
+
+/-- The quantitative tail-control interface makes the common remote error
+vanish even after summing one copy for every dyadic zero. -/
+theorem DistinguishedPoissonTailControl.remoteTailScale_negligible
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (htail : DistinguishedPoissonTailControl F)
+    (hguard : DistinguishedGuardedPoissonKernelData F)
+    (hRvM : RiemannVonMangoldt Z) :
+    Tendsto (fun T => (Z.N T (2 * T) : ℝ) *
+      distinguishedRemoteTailScale F T) atTop (nhds 0) :=
+  tendsto_N_mul_distinguishedRemoteTailScale F
+    hguard.bandwidth_pos htail.bandwidth_lt_one hRvM
+      hguard.distinguished_period htail.sobolev_mass_isBigO
+
+/-- At every sufficiently large height the actual distinguished channel is
+the low-rank boundary matrix plus two explicit remote errors whose common
+scale is already known to vanish. -/
+theorem DistinguishedPoissonTailControl.eventually_explicit_canonicalRemainder_bound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (htail : DistinguishedPoissonTailControl F)
+    (hguard : DistinguishedGuardedPoissonKernelData F) :
+    ∀ᶠ T in atTop, ∀ ρ ρ' : ↥(Zeta23.ZeroSide.ZI Z T),
+      ‖∑' k : ℤ, distinguishedLatticeRemainder F T
+        (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))
+        (F.channelDim T (F.distinguished T)) k‖ ≤
+        ‖canonicalLatticeBoundaryKernelMatrix F T
+          (F.channelDim T (F.distinguished T)) ρ ρ'‖ +
+        distinguishedRemoteTailScale F T +
+        distinguishedRemoteTailScale F T := by
+  filter_upwards [eventually_gt_atTop (0 : ℝ), hguard.periods_pos,
+    hguard.windows_smooth, hguard.distinguished_grid_count,
+    htail.distinguished_support_half]
+      with T hT hperiod hsmooth hcount hsupport
+  intro ρ ρ'
+  have hL : 0 < F.period T (F.distinguished T) :=
+    hperiod (F.distinguished T)
+  have hn := distinguishedChannelDim_eq_floor_gridStep F T hL hcount
+  apply ZI_canonicalRemainder_bound_of_supportHalf
+    F T (F.channelDim T (F.distinguished T)) hT hL hn
+      (complexWindow_contDiff_two F T (hsmooth (F.distinguished T)))
+  intro u hu
+  apply hsupport u
+  intro hzero
+  apply hu
+  simp only [hzero, Complex.ofReal_zero]
 
 /-- For all sufficiently large heights, the literal distinguished channel
 uses the guarded grid length and every entry of its exact Poisson remainder
