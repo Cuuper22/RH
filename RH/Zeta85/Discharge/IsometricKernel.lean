@@ -86,22 +86,26 @@ theorem projection_sq
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (C : RealData F) (T : ℝ) :
-    projection C T ^ 2 = projection C T := by
+    projection C T * projection C T = projection C T := by
   unfold projection
   calc
-    (C.toData.compression T *
-          (C.toData.compression T)ᴴ) ^ 2 =
-        C.toData.compression T *
-          ((C.toData.compression T)ᴴ *
-            C.toData.compression T) *
-          (C.toData.compression T)ᴴ := by
-      noncomm_ring
-    _ = C.toData.compression T * 1 *
-          (C.toData.compression T)ᴴ := by
+    (C.toData.compression T * (C.toData.compression T)ᴴ) *
+        (C.toData.compression T * (C.toData.compression T)ᴴ) =
+      C.toData.compression T *
+        ((C.toData.compression T)ᴴ *
+          (C.toData.compression T * (C.toData.compression T)ᴴ)) := by
+      rw [Matrix.mul_assoc]
+    _ = C.toData.compression T *
+        (((C.toData.compression T)ᴴ * C.toData.compression T) *
+          (C.toData.compression T)ᴴ) := by
+      congr 1
+      rw [Matrix.mul_assoc]
+    _ = C.toData.compression T *
+        (1 * (C.toData.compression T)ᴴ) := by
       rw [C.toData.isometry T]
     _ = C.toData.compression T *
-          (C.toData.compression T)ᴴ := by
-      simp
+        (C.toData.compression T)ᴴ := by
+      rw [Matrix.one_mul]
 
 /-- The normalized pair contraction after mixing columns first. -/
 def mixedPairKernel
@@ -213,9 +217,9 @@ theorem A_apply_eq_zeroSum
           (Z.mult ρ : ℂ) * F.atom T i ρ *
             F.atom T j ρ := by
   unfold QuarticGramFamily.A QuarticGramFamily.rawTruncatedGram
+  simp only [Pi.smul_apply, smul_eq_mul]
   rw [finsum_mem_eq_finite_toFinset_sum _
     (ZeroSide.ZIprime_finite Z T)]
-  rfl
 
 /-- The compressed entry with the matrix products and finite zero sum fully
 opened, but before the sums are reordered. -/
@@ -453,7 +457,7 @@ theorem expandedMixedZeroEntry_eq_sum
               ∑ ρ ∈ ZeroSide.ZI Z T,
                 (Z.mult ρ : ℂ) * F.atom T i ρ *
                   F.atom T j ρ)) *
-          C.toData.compression T j b =
+          C.toData.compression T j b) =
       ∑ j : Fin (F.dim T), ∑ i : Fin (F.dim T),
         ∑ ρ ∈ ZeroSide.ZI Z T,
           ((F.hatDenominator T)⁻¹ : ℂ) *
@@ -642,8 +646,11 @@ theorem mixedZeroTupleCyclicTrace2_eq_kernel
     mixedZeroTupleCyclicTrace2 C T =
       mixedZeroKernelCyclicTrace2 C T := by
   unfold mixedZeroTupleCyclicTrace2 mixedZeroKernelCyclicTrace2
-  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T),
-    sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
+  apply congrArg Complex.re
+  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
 
 theorem mixedIndexKernel1_eq_pairCycle
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -654,7 +661,7 @@ theorem mixedIndexKernel1_eq_pairCycle
       QuarticTransfer.pairKernelCycle1 (Z := Z)
         (mixedPairKernel C T) ρ := by
   simp only [QuarticTransfer.pairKernelCycle1,
-    mixedPairKernel, Finset.sum_mul]
+    mixedPairKernel, Finset.sum_mul, Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro i _
   simp only [mixedBlockZeroSummand]
@@ -808,9 +815,11 @@ theorem mixedZeroCyclicTrace3_eq_tuple
   apply Finset.sum_congr rfl
   intro k _
   rw [Finset.sum_mul]
+  rw [Finset.sum_mul]
   apply Finset.sum_congr rfl
   intro ρ₁ _
   rw [Finset.mul_sum]
+  rw [Finset.sum_mul]
   apply Finset.sum_congr rfl
   intro ρ₂ _
   rw [Finset.mul_sum]
@@ -833,7 +842,20 @@ theorem mixedZeroCyclicTrace4_eq_tuple
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro l _
-  simp only [Finset.sum_mul, Finset.mul_sum]
+  rw [Finset.sum_mul]
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [Finset.mul_sum]
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro ρ₂ _
+  rw [Finset.mul_sum]
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro ρ₃ _
+  rw [Finset.mul_sum]
+  rw [Finset.mul_sum]
 
 def mixedZeroKernelCyclicTrace3
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -868,9 +890,14 @@ theorem mixedZeroTupleCyclicTrace3_eq_kernel
     mixedZeroTupleCyclicTrace3 C T =
       mixedZeroKernelCyclicTrace3 C T := by
   unfold mixedZeroTupleCyclicTrace3 mixedZeroKernelCyclicTrace3
-  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T),
-    sum_fintypes3_finset_comm (ZeroSide.ZI Z T),
-    sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
+  apply congrArg Complex.re
+  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
+  apply Finset.sum_congr rfl
+  intro ρ₂ _
+  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
 
 theorem mixedZeroTupleCyclicTrace4_eq_kernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -879,10 +906,17 @@ theorem mixedZeroTupleCyclicTrace4_eq_kernel
     mixedZeroTupleCyclicTrace4 C T =
       mixedZeroKernelCyclicTrace4 C T := by
   unfold mixedZeroTupleCyclicTrace4 mixedZeroKernelCyclicTrace4
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
-    sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
-    sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
-    sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
+  apply congrArg Complex.re
+  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
+  apply Finset.sum_congr rfl
+  intro ρ₂ _
+  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
+  apply Finset.sum_congr rfl
+  intro ρ₃ _
+  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
 
 theorem mixedIndexKernel3_eq_pairCycle
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
