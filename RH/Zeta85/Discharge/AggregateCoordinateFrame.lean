@@ -268,6 +268,100 @@ theorem mixedPairKernel_coordinate_eq_energy_sub_tail
     coordinateFinitePairSum_eq_selectedFrequencyGrid,
     coordinateSelectedFrequencyGrid_eq_energy_sub_tail S h]
 
+/-! ## The literal frozen block inside the aggregate frame -/
+
+/-- Use the frozen family's own principal-block embedding as the selected
+coordinate grid. -/
+def literalBlockSelection
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) :
+    CoordinateSelection F where
+  embedding := F.blockEmbedding
+
+/-- Coordinate compression by the literal block embedding is exactly the
+principal block already present in the frozen family, entry for entry. -/
+theorem coordinateData_block_eq_literalBlock
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    IsometricBlock.block
+        (coordinateData (literalBlockSelection F)) T =
+      F.block T := by
+  classical
+  ext a b
+  simp [IsometricBlock.block, coordinateData,
+    coordinateCompression, literalBlockSelection,
+    QuarticGramFamily.block, Matrix.mul_apply]
+
+/-- The literal centered block moments are therefore the centered moments of
+the coordinate isometry, without a new analytic premise. -/
+theorem coordinateData_centeredMoment_eq_literal
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (k : ℕ) (T : ℝ) :
+    IsometricBlock.centeredMoment
+        (coordinateData (literalBlockSelection F)) k T =
+      F.centeredBlockMoment k T := by
+  unfold IsometricBlock.centeredMoment
+    QuarticGramFamily.centeredBlockMoment
+  rw [coordinateData_block_eq_literalBlock]
+
+/-- The literal centered quartic numerator equals the generic pair-kernel
+quartic numerator of the literal coordinate compression. -/
+theorem quarticTraceNumerator_eq_literalCoordinatePairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : TrimmedMoment.Quartic}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    QuarticTransfer.quarticTraceNumerator q F T =
+      IsometricKernel.mixedPairKernelQuarticNumerator q
+        (coordinateRealData (literalBlockSelection F)) T := by
+  rw [QuarticTransfer.quarticTraceNumerator_eq_uncentered,
+    QuarticTransfer.uncenteredQuarticTraceNumerator_eq_cyclic]
+  rw [← coordinateData_block_eq_literalBlock F T]
+  exact IsometricKernel.cyclicQuarticNumerator_block_eq_mixedPairKernel
+    q (coordinateRealData (literalBlockSelection F)) T
+
+/-- The evaluated aggregate-energy-minus-tail pair kernel attached to the
+literal frozen block. -/
+def literalCoordinateEnergyTailPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) *
+    (coordinateEnergySum F T ρ ρ' -
+      coordinateFrequencyTail
+        (literalBlockSelection F) T ρ ρ')
+
+/-- For regular physical windows, the actual mixed kernel of the literal
+block is exactly its aggregate energy transform minus one frequency tail. -/
+theorem mixedPairKernel_literal_eq_energyTail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PhysicalWindowRegularity F)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    IsometricKernel.mixedPairKernel
+        (coordinateRealData (literalBlockSelection F)) T ρ ρ' =
+      literalCoordinateEnergyTailPairKernel F T ρ ρ' := by
+  unfold literalCoordinateEnergyTailPairKernel
+  exact mixedPairKernel_coordinate_eq_energy_sub_tail
+    (literalBlockSelection F) h T ρ ρ'
+
+/-- The exact literal-block quartic numerator is the finite zero contraction
+of the aggregate energy-minus-tail kernel. -/
+theorem quarticTraceNumerator_eq_literalEnergyTail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : TrimmedMoment.Quartic}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PhysicalWindowRegularity F)
+    (T : ℝ) :
+    QuarticTransfer.quarticTraceNumerator q F T =
+      QuarticTransfer.pairKernelQuarticNumerator q F T
+        (literalCoordinateEnergyTailPairKernel F T) := by
+  rw [quarticTraceNumerator_eq_literalCoordinatePairKernel F T]
+  unfold IsometricKernel.mixedPairKernelQuarticNumerator
+  apply QuarticTransfer.pairKernelQuarticNumerator_congr
+  intro ρ hρ ρ' hρ'
+  exact mixedPairKernel_literal_eq_energyTail h T ρ ρ'
+
 end AggregateCoordinateFrame
 end Zeta85
 end RH
