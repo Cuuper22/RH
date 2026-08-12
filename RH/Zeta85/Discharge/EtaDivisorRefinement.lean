@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 import RH.Zeta85.Discharge.HBDepthFour
+import RH.Zeta85.Discharge.BBLRGCDAllocation
 import Lean.Elab.Tactic.Omega
 import Mathlib.Data.Nat.Prime.Basic
 
@@ -230,6 +231,58 @@ theorem prime_or_product_of_two_primes_of_rough_of_lt_cube {s B : ℕ}
     exact ⟨a, b, prime_of_rough_of_lt_sq ha_one_lt hrough_a ha_sq,
       prime_of_rough_of_lt_sq hb_one_lt hrough_b hb_sq, hab.symm⟩
 
+/-! ## Divisor-bound transport through a retained fiber -/
+
+/-- Allocate a divisor of `m * s` between the fixed retained factor `m` and
+the running factor `s`. -/
+def divisorSplit (m d : ℕ) : ℕ × ℕ :=
+  (m.gcd d, d / m.gcd d)
+
+theorem divisorSplit_mem_product {m s d : ℕ} (hm : m ≠ 0) (hs : s ≠ 0)
+    (hd : d ∈ (m * s).divisors) :
+    divisorSplit m d ∈ m.divisors ×ˢ s.divisors := by
+  have hdpos : 0 < d := Nat.pos_of_mem_divisors hd
+  have hdmul : d ∣ m * s := Nat.dvd_of_mem_divisors hd
+  apply Finset.mem_product.mpr
+  constructor
+  · exact Nat.mem_divisors.mpr ⟨Nat.gcd_dvd_left m d, hm⟩
+  · apply Nat.mem_divisors.mpr
+    refine ⟨?_, hs⟩
+    exact RH.Zeta85.BBLRGCDAllocation.quotient_gcd_dvd_inner hdpos
+      ⟨m, s, hdmul⟩
+
+theorem divisorSplit_injOn (m n : ℕ) :
+    Set.InjOn (divisorSplit m) (n.divisors : Set ℕ) := by
+  intro d hd e he hde
+  have hdprod : (divisorSplit m d).1 * (divisorSplit m d).2 = d := by
+    exact Nat.mul_div_cancel' (Nat.gcd_dvd_right m d)
+  have heprod : (divisorSplit m e).1 * (divisorSplit m e).2 = e := by
+    exact Nat.mul_div_cancel' (Nat.gcd_dvd_right m e)
+  calc
+    d = (divisorSplit m d).1 * (divisorSplit m d).2 := hdprod.symm
+    _ = (divisorSplit m e).1 * (divisorSplit m e).2 := congrArg (fun x => x.1 * x.2) hde
+    _ = e := heprod
+
+/-- The divisor-counting function is submultiplicative.  The proof uses the
+same canonical gcd allocation that underlies the BBLR change of variables. -/
+theorem card_divisors_mul_le (m s : ℕ) :
+    (m * s).divisors.card ≤ m.divisors.card * s.divisors.card := by
+  by_cases hm : m = 0
+  · simp [hm]
+  by_cases hs : s = 0
+  · simp [hs]
+  calc
+    (m * s).divisors.card ≤ (m.divisors ×ˢ s.divisors).card := by
+      exact Finset.card_le_card_of_injOn (divisorSplit m)
+        (fun d hd => divisorSplit_mem_product hm hs hd)
+        (divisorSplit_injOn m (m * s))
+    _ = m.divisors.card * s.divisors.card := Finset.card_product _ _
+
+theorem sigma_zero_mul_le (m s : ℕ) :
+    ArithmeticFunction.sigma 0 (m * s) ≤
+      ArithmeticFunction.sigma 0 m * ArithmeticFunction.sigma 0 s := by
+  simpa only [ArithmeticFunction.sigma_zero_apply] using card_divisors_mul_le m s
+
 /-- A singleton left sequence for the divisor-indexed convolution. -/
 def leftSelector (a d : ℕ) : ℝ := if d = a then 1 else 0
 
@@ -237,6 +290,34 @@ def leftSelector (a d : ℕ) : ℝ := if d = a then 1 else 0
 when `a` is the canonical divisor of the reconstructed integer. -/
 def rightSelector (c : ℕ → ℝ) (R a s : ℕ) : ℝ :=
   if canonicalDivisor (a * s) R = a then c (a * s) else 0
+
+theorem abs_rightSelector_le (c : ℕ → ℝ) (R a s : ℕ) :
+    |rightSelector c R a s| ≤ |c (a * s)| := by
+  simp only [rightSelector]
+  split <;> simp
+
+/-- Retaining a fixed divisor does not increase the divisor-bound order.
+Only the named constant acquires the fixed factor `tau(a)^k`. -/
+theorem rightSelector_divisorBounded {c : ℕ → ℝ} {K : ℝ} {k R a : ℕ}
+    (hK : 0 ≤ K) (hc : DivisorBounded c K k) :
+    DivisorBounded (rightSelector c R a)
+      (K * ((ArithmeticFunction.sigma 0 a : ℕ) : ℝ) ^ k) k := by
+  intro s
+  have htauNat := sigma_zero_mul_le a s
+  have htau :
+      ((ArithmeticFunction.sigma 0 (a * s) : ℕ) : ℝ) ≤
+        ((ArithmeticFunction.sigma 0 a : ℕ) : ℝ) *
+          ((ArithmeticFunction.sigma 0 s : ℕ) : ℝ) := by
+    exact_mod_cast htauNat
+  calc
+    |rightSelector c R a s| ≤ |c (a * s)| := abs_rightSelector_le c R a s
+    _ ≤ K * ((ArithmeticFunction.sigma 0 (a * s) : ℕ) : ℝ) ^ k := hc (a * s)
+    _ ≤ K *
+        (((ArithmeticFunction.sigma 0 a : ℕ) : ℝ) *
+          ((ArithmeticFunction.sigma 0 s : ℕ) : ℝ)) ^ k := by
+      exact mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) htau k) hK
+    _ = (K * ((ArithmeticFunction.sigma 0 a : ℕ) : ℝ) ^ k) *
+        ((ArithmeticFunction.sigma 0 s : ℕ) : ℝ) ^ k := by ring
 
 /-- One literal Dirichlet-convolution piece. -/
 def convolutionPiece (c : ℕ → ℝ) (R a n : ℕ) : ℝ :=
