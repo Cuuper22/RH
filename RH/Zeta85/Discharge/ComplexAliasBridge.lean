@@ -2207,6 +2207,60 @@ theorem tendsto_virtualSymmetricFrequencyPartialSum
     virtualFrequencyPairSum, virtualFrequencyPairTerm] using
       hpair.tendsto_sum_nat
 
+
+/-- With closed half-period support, the canonical finite grids converge
+directly to the evaluated energy transform. -/
+theorem tendsto_virtualSymmetricFrequencyPartialSum_energy
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) :
+    Tendsto
+      (virtualSymmetricFrequencyPartialSum T L f z z')
+      Filter.atTop
+      (nhds
+        ((L : ℂ) *
+          ∫ u : ℝ,
+            (f u : ℂ) * f u *
+              Complex.exp (Complex.I * (z - z') * (u : ℂ)))) := by
+  rw [← virtualFrequencyPairSum_eq_energyIntegral
+    T L Λ f hL hΛ hsmooth hsupp heven hhalf z z']
+  exact tendsto_virtualSymmetricFrequencyPartialSum
+    T L Λ f hL hΛ hsmooth hsupp heven z z'
+
+/-- After reciprocal-period Gram normalization, the canonical finite grids
+converge to the full-length energy transform. -/
+theorem tendsto_virtualNormalizedSymmetricFrequencyPartialSum_energy
+    (fullLength T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) :
+    Tendsto
+      (fun n =>
+        (fullLength : ℂ) / (L : ℂ) *
+          virtualSymmetricFrequencyPartialSum T L f z z' n)
+      Filter.atTop
+      (nhds
+        ((fullLength : ℂ) *
+          ∫ u : ℝ,
+            (f u : ℂ) * f u *
+              Complex.exp (Complex.I * (z - z') * (u : ℂ)))) := by
+  have hL0 : (L : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  have ht :=
+    tendsto_const_nhds.mul
+      (tendsto_virtualSymmetricFrequencyPartialSum_energy
+        T L Λ f hL hΛ hsmooth hsupp heven hhalf z z')
+      ((fullLength : ℂ) / (L : ℂ))
+  convert ht using 1
+  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
