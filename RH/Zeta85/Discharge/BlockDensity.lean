@@ -272,7 +272,8 @@ theorem stableZeroSide_reblock
     rw [reblock_P, reblock_pTraceError]
     exact hT
   · filter_upwards [hzero.bad_index_bound] with T hT
-    convert hT using 1 <;> simp only [reblock_dim, reblock_Q]
+    convert hT using 1
+    simp only [reblock_dim, reblock_Q]
   · have heq : (reblock F).pTraceError = F.pTraceError := by
       funext T
       exact reblock_pTraceError F T
