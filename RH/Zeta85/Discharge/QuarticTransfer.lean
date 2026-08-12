@@ -6,7 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 import RH.Zeta85.Inputs95
 import RH.Zeta85.Discharge.TrimmedMoment
-import Zeta23.Final
+import Zeta23.GammaFacts.Complete
+import Zeta23.RvM.Statement
+import Zeta23.Statement.SeamClosed
 import Zeta23.Tail
 
 /-!
@@ -184,7 +186,7 @@ theorem finite_affine_bridge_at
 private theorem blockDim_pos_eventually
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hr1a : PrincipalCyclicBlock F) :
+    (hr1a : BlockDensityLimit F) :
     ∀ᶠ T in atTop, 0 < F.blockDim T := by
   have hratio : ∀ᶠ T in atTop,
       0 < (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) :=
@@ -200,7 +202,7 @@ theorem finite_affine_bridge
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F)
+    (hr1a : BlockDensityLimit F)
     (q : Quartic) (cap Dbar : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 ≤ 1) (hcost : profileSaturatedCost σ v ≤ Dbar) :
     ∀ᶠ T in atTop,
@@ -282,7 +284,7 @@ theorem normalizedTransfer_tendsto
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
-    (hzero : StableZeroSide F) (hr1a : PrincipalCyclicBlock F)
+    (hzero : StableZeroSide F) (hr1a : BlockDensityLimit F)
     (hmom : BlockMomentLimits F) (q : Quartic) (cap Dbar : ℝ) :
     Tendsto (normalizedTransfer q cap Dbar F) atTop
       (nhds ((μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2) /
@@ -317,7 +319,7 @@ theorem asymptotic_eps_transfer
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
-    (hzero : StableZeroSide F) (hr1a : PrincipalCyclicBlock F)
+    (hzero : StableZeroSide F) (hr1a : BlockDensityLimit F)
     (hmom : BlockMomentLimits F)
     (q : Quartic) (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 < 1) (hcost : profileSaturatedCost σ v ≤ Dbar)
@@ -471,7 +473,7 @@ frozen R-8686 epsilon form. -/
 theorem eps_transfer_8686
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
@@ -490,7 +492,7 @@ frozen R-9506 epsilon form. -/
 theorem eps_transfer_9506
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -520,7 +522,7 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_8657
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -538,7 +540,7 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_9383
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -567,49 +569,53 @@ structures remain explicit. -/
 theorem zeta_eps_transfer_8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero hr1a hmom)
+    (eps_transfer_8686 (RvM.riemannVonMangoldt gammaFacts)
+      hfull hzero hr1a hmom)
 
 /-- Concrete-zeta R-9506 epsilon form, conditional only on the four explicit
 per-support structures. -/
 theorem zeta_eps_transfer_9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hr1a hmom)
+    (eps_transfer_9506 (RvM.riemannVonMangoldt gammaFacts)
+      hfull hzero hr1a hmom)
 
 /-- Concrete-zeta R-8657, obtained monotonically from R-8686. -/
 theorem zeta_eps_transfer_8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero hr1a hmom)
+    (eps_transfer_8657 (RvM.riemannVonMangoldt gammaFacts)
+      hfull hzero hr1a hmom)
 
 /-- Concrete-zeta R-9383, obtained monotonically from R-9506. -/
 theorem zeta_eps_transfer_9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero hr1a hmom)
+    (eps_transfer_9383 (RvM.riemannVonMangoldt gammaFacts)
+      hfull hzero hr1a hmom)
 
 end QuarticTransfer
 end Zeta85
