@@ -627,6 +627,55 @@ theorem rationalMixer5_coherent_gain :
   rw [rationalMixer5_firstColumn_sum]
   norm_num
 
+
+/-- A square real orthogonal mixer also recovers every physical complex
+vector after analysis.  This is the reverse direction of
+analyzeComplex_synthesizeComplex. -/
+theorem synthesizeComplex_analyzeComplex
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (physical : ι → ℂ) (j : ι) :
+    synthesizeComplex C (fun r => analyzeComplex C physical r) j =
+      physical j := by
+  have hreverse : C.matrix * C.matrix.transpose = 1 :=
+    (mul_eq_one_comm).mp C.orthogonal
+  unfold synthesizeComplex analyzeComplex
+  calc
+    (∑ r : ι, (C.matrix j r : ℂ) *
+        ∑ k : ι, (C.matrix k r : ℂ) * physical k) =
+      ∑ r : ι, ∑ k : ι,
+        ((C.matrix j r : ℂ) * (C.matrix k r : ℂ)) *
+          physical k := by
+      apply Finset.sum_congr rfl
+      intro r _
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro k _
+      ring
+    _ = ∑ k : ι, ∑ r : ι,
+        ((C.matrix j r : ℂ) * (C.matrix k r : ℂ)) *
+          physical k := by
+      rw [Finset.sum_comm]
+    _ = ∑ k : ι,
+        (∑ r : ι,
+          (C.matrix j r : ℂ) * (C.matrix k r : ℂ)) *
+            physical k := by
+      apply Finset.sum_congr rfl
+      intro k _
+      rw [Finset.sum_mul]
+    _ = ∑ k : ι, ((1 : Matrix ι ι ℝ) j k : ℂ) * physical k := by
+      apply Finset.sum_congr rfl
+      intro k _
+      have hentry := congrFun (congrFun hreverse j) k
+      have hsumReal :
+          (∑ r : ι, C.matrix j r * C.matrix k r) =
+            (1 : Matrix ι ι ℝ) j k := by
+        simpa [Matrix.mul_apply] using hentry
+      have hsumComplex := congrArg (fun y : ℝ => (y : ℂ)) hsumReal
+      push_cast at hsumComplex
+      rw [hsumComplex]
+    _ = physical j := by
+      simp
+
 end VirtualChannelMixer
 end Zeta85
 end RH
