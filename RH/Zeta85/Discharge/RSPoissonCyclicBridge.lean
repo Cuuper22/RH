@@ -479,6 +479,240 @@ theorem guardedCyclicTrace4_add_remoteCorrection_eq_full
   exact guardedZeroCycle4_add_remoteCorrection_eq_full
     F T ρ₁ ρ₂ ρ₃ ρ₄
 
+/-! ## Sum-first zero-space matrices -/
+
+def fullLatticeZeroMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    Matrix (↥(ZeroSide.ZI Z T)) (↥(ZeroSide.ZI Z T)) ℂ :=
+  fun ρ ρ' => fullLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ) *
+    QuarticTransfer.zeroEdgeWeight F T (ρ' : ℂ)
+
+def guardedLatticeZeroMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    Matrix (↥(ZeroSide.ZI Z T)) (↥(ZeroSide.ZI Z T)) ℂ :=
+  fun ρ ρ' =>
+    PoissonKernelBridge.canonicalGuardedPairKernel F T (ρ : ℂ) (ρ' : ℂ) *
+      QuarticTransfer.zeroEdgeWeight F T (ρ' : ℂ)
+
+def remoteLatticeZeroMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    Matrix (↥(ZeroSide.ZI Z T)) (↥(ZeroSide.ZI Z T)) ℂ :=
+  fun ρ ρ' => remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ) *
+    QuarticTransfer.zeroEdgeWeight F T (ρ' : ℂ)
+
+theorem guardedZeroMatrix_add_remote_eq_full
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    guardedLatticeZeroMatrix F T + remoteLatticeZeroMatrix F T =
+      fullLatticeZeroMatrix F T := by
+  ext ρ ρ'
+  simp only [guardedLatticeZeroMatrix, remoteLatticeZeroMatrix,
+    fullLatticeZeroMatrix, Matrix.add_apply,
+    ← guardedPair_add_remote_eq_full F T]
+  ring
+
+private theorem rtrace_pow_four_eq_cyclic_generic
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (B : Matrix ι ι ℂ) :
+    RHLinalg.rtrace (B ^ 4) =
+      Complex.re (∑ i : ι, ∑ j : ι,
+        (∑ k : ι, B i k * B k j) *
+          (∑ l : ι, B j l * B l i)) := by
+  rw [show B ^ 4 = (B * B) * (B * B) by noncomm_ring]
+  simp [RHLinalg.rtrace, Matrix.trace, Matrix.mul_apply]
+
+theorem rtrace_fullLatticeZeroMatrix_pow_four_eq_subtype_sum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    RHLinalg.rtrace ((fullLatticeZeroMatrix F T) ^ 4) =
+      Complex.re (∑ ρ₁ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₂ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₃ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₄ : ↥(ZeroSide.ZI Z T),
+          fullLatticeZeroCycle4 F T
+            (ρ₁ : ℂ) (ρ₃ : ℂ) (ρ₂ : ℂ) (ρ₄ : ℂ)) := by
+  rw [rtrace_pow_four_eq_cyclic_generic]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  simp_rw [Finset.sum_mul, Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  apply Finset.sum_congr rfl
+  intro ρ₄ hρ₄
+  unfold fullLatticeZeroMatrix fullLatticeZeroCycle4
+  rw [fullLatticePairKernel_comm F T (ρ₄ : ℂ) (ρ₁ : ℂ)]
+  ring
+
+private theorem sum_finsetSubtype_eq_finset
+    {α M : Type*} [DecidableEq α] [AddCommMonoid M]
+    (s : Finset α) (f : α → M) :
+    (∑ x : ↥s, f (x : α)) = ∑ x ∈ s, f x := by
+  exact (Finset.sum_subtype s (fun _ => Iff.rfl) f).symm
+
+private theorem sum_finsetSubtype2_eq_finset2
+    {α M : Type*} [DecidableEq α] [AddCommMonoid M]
+    (s : Finset α) (f : α → α → M) :
+    (∑ x : ↥s, ∑ y : ↥s, f (x : α) (y : α)) =
+      ∑ x ∈ s, ∑ y ∈ s, f x y := by
+  calc
+    (∑ x : ↥s, ∑ y : ↥s, f (x : α) (y : α)) =
+        ∑ x : ↥s, ∑ y ∈ s, f (x : α) y := by
+      apply Finset.sum_congr rfl
+      intro x hx
+      exact sum_finsetSubtype_eq_finset s (f (x : α))
+    _ = ∑ x ∈ s, ∑ y ∈ s, f x y :=
+      sum_finsetSubtype_eq_finset s (fun x => ∑ y ∈ s, f x y)
+
+private theorem sum_finsetSubtype3_eq_finset3
+    {α M : Type*} [DecidableEq α] [AddCommMonoid M]
+    (s : Finset α) (f : α → α → α → M) :
+    (∑ x : ↥s, ∑ y : ↥s, ∑ z : ↥s,
+      f (x : α) (y : α) (z : α)) =
+      ∑ x ∈ s, ∑ y ∈ s, ∑ z ∈ s, f x y z := by
+  calc
+    (∑ x : ↥s, ∑ y : ↥s, ∑ z : ↥s,
+        f (x : α) (y : α) (z : α)) =
+        ∑ x : ↥s, ∑ y ∈ s, ∑ z ∈ s, f (x : α) y z := by
+      apply Finset.sum_congr rfl
+      intro x hx
+      exact sum_finsetSubtype2_eq_finset2 s (f (x : α))
+    _ = ∑ x ∈ s, ∑ y ∈ s, ∑ z ∈ s, f x y z :=
+      sum_finsetSubtype_eq_finset s
+        (fun x => ∑ y ∈ s, ∑ z ∈ s, f x y z)
+
+private theorem sum_finsetSubtype4_eq_finset4
+    {α M : Type*} [DecidableEq α] [AddCommMonoid M]
+    (s : Finset α) (f : α → α → α → α → M) :
+    (∑ x : ↥s, ∑ y : ↥s, ∑ z : ↥s, ∑ t : ↥s,
+      f (x : α) (y : α) (z : α) (t : α)) =
+      ∑ x ∈ s, ∑ y ∈ s, ∑ z ∈ s, ∑ t ∈ s, f x y z t := by
+  calc
+    (∑ x : ↥s, ∑ y : ↥s, ∑ z : ↥s, ∑ t : ↥s,
+        f (x : α) (y : α) (z : α) (t : α)) =
+        ∑ x : ↥s, ∑ y ∈ s, ∑ z ∈ s, ∑ t ∈ s,
+          f (x : α) y z t := by
+      apply Finset.sum_congr rfl
+      intro x hx
+      exact sum_finsetSubtype3_eq_finset3 s (f (x : α))
+    _ = ∑ x ∈ s, ∑ y ∈ s, ∑ z ∈ s, ∑ t ∈ s, f x y z t :=
+      sum_finsetSubtype_eq_finset s
+        (fun x => ∑ y ∈ s, ∑ z ∈ s, ∑ t ∈ s, f x y z t)
+
+theorem rtrace_fullLatticeZeroMatrix_pow_four_eq_fullTrace
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    RHLinalg.rtrace ((fullLatticeZeroMatrix F T) ^ 4) =
+      fullLatticeZeroKernelCyclicTrace4 F T := by
+  rw [rtrace_fullLatticeZeroMatrix_pow_four_eq_subtype_sum]
+  unfold fullLatticeZeroKernelCyclicTrace4
+  apply congrArg Complex.re
+  calc
+    (∑ ρ₁ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₂ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₃ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₄ : ↥(ZeroSide.ZI Z T),
+          fullLatticeZeroCycle4 F T
+            (ρ₁ : ℂ) (ρ₃ : ℂ) (ρ₂ : ℂ) (ρ₄ : ℂ)) =
+        ∑ ρ₁ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₂ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₃ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₄ : ↥(ZeroSide.ZI Z T),
+          fullLatticeZeroCycle4 F T
+            (ρ₁ : ℂ) (ρ₂ : ℂ) (ρ₃ : ℂ) (ρ₄ : ℂ) := by
+      apply Finset.sum_congr rfl
+      intro ρ₁ hρ₁
+      rw [Finset.sum_comm]
+    _ = ∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+        ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+          fullLatticeZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
+      exact sum_finsetSubtype4_eq_finset4 (ZeroSide.ZI Z T)
+        (fullLatticeZeroCycle4 F T)
+
+theorem guardedLatticePairKernel_comm
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ ρ' : ℂ) :
+    PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ' ρ := by
+  unfold PoissonKernelBridge.canonicalGuardedPairKernel
+    PoissonKernelBridge.canonicalGuardedLatticeSegment
+  congr 1
+  apply Finset.sum_congr rfl
+  intro i hi
+  unfold PoissonKernelBridge.distinguishedLatticeTerm
+  ring
+
+theorem rtrace_guardedLatticeZeroMatrix_pow_four_eq_subtype_sum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    RHLinalg.rtrace ((guardedLatticeZeroMatrix F T) ^ 4) =
+      Complex.re (∑ ρ₁ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₂ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₃ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₄ : ↥(ZeroSide.ZI Z T),
+          QuarticTransfer.guardedZeroCycle4 F T
+            (ρ₁ : ℂ) (ρ₃ : ℂ) (ρ₂ : ℂ) (ρ₄ : ℂ)) := by
+  rw [rtrace_pow_four_eq_cyclic_generic]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  simp_rw [Finset.sum_mul, Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  apply Finset.sum_congr rfl
+  intro ρ₄ hρ₄
+  unfold guardedLatticeZeroMatrix QuarticTransfer.guardedZeroCycle4
+  rw [guardedLatticePairKernel_comm F T (ρ₄ : ℂ) (ρ₁ : ℂ)]
+  ring
+
+theorem rtrace_guardedLatticeZeroMatrix_pow_four_eq_guardedTrace
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    RHLinalg.rtrace ((guardedLatticeZeroMatrix F T) ^ 4) =
+      QuarticTransfer.guardedZeroKernelCyclicTrace4 F T := by
+  rw [rtrace_guardedLatticeZeroMatrix_pow_four_eq_subtype_sum]
+  unfold QuarticTransfer.guardedZeroKernelCyclicTrace4
+  apply congrArg Complex.re
+  calc
+    (∑ ρ₁ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₂ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₃ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₄ : ↥(ZeroSide.ZI Z T),
+          QuarticTransfer.guardedZeroCycle4 F T
+            (ρ₁ : ℂ) (ρ₃ : ℂ) (ρ₂ : ℂ) (ρ₄ : ℂ)) =
+        ∑ ρ₁ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₂ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₃ : ↥(ZeroSide.ZI Z T),
+        ∑ ρ₄ : ↥(ZeroSide.ZI Z T),
+          QuarticTransfer.guardedZeroCycle4 F T
+            (ρ₁ : ℂ) (ρ₂ : ℂ) (ρ₃ : ℂ) (ρ₄ : ℂ) := by
+      apply Finset.sum_congr rfl
+      intro ρ₁ hρ₁
+      rw [Finset.sum_comm]
+    _ = ∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+        ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+          QuarticTransfer.guardedZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
+      exact sum_finsetSubtype4_eq_finset4 (ZeroSide.ZI Z T)
+        (QuarticTransfer.guardedZeroCycle4 F T)
+
+theorem remoteCorrectionCyclicTrace4_eq_rtrace_sub
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    remoteCorrectionCyclicTrace4 F T =
+      RHLinalg.rtrace ((fullLatticeZeroMatrix F T) ^ 4) -
+        RHLinalg.rtrace ((guardedLatticeZeroMatrix F T) ^ 4) := by
+  rw [rtrace_fullLatticeZeroMatrix_pow_four_eq_fullTrace,
+    rtrace_guardedLatticeZeroMatrix_pow_four_eq_guardedTrace]
+  have htrace := guardedCyclicTrace4_add_remoteCorrection_eq_full F T
+  linarith
+
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
