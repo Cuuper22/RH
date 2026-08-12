@@ -1,5 +1,6 @@
 import RH.Zeta85.Inputs95
 import Zeta23.Poisson.ComplexAlias
+import Zeta23.Tail.Grid
 
 open Filter Matrix MeasureTheory
 open scoped BigOperators Topology ContDiff
@@ -9,6 +10,73 @@ noncomputable section
 namespace RH.Zeta85.PoissonKernelBridge
 
 open Zeta23 RHLinalg
+
+/-- Spacing of the distinguished modulation lattice. -/
+def distinguishedGridStep
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  2 * Real.pi / F.period T (F.distinguished T)
+
+/-- Canonical strip width covering both the `sqrt T` overhang of `ZIprime`
+and a further `sqrt T` decay buffer, with two extra grid points for the
+floor/ceiling endpoints. -/
+def distinguishedEndpointGuardWidth
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℕ :=
+  Zeta23.Tail.endpointGuardWidth (2 * Zeta23.D0 T)
+    (distinguishedGridStep F T)
+
+/-- Every zero in the actual enlarged window lies between the two guarded
+remote tails, each at least `sqrt T` away.  All closer labels are precisely
+the two finite boundary strips. -/
+theorem mem_ZIprime_guarded_distances
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n : ℕ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hn : n = ⌊T / distinguishedGridStep F T⌋₊)
+    {ρ : ℂ} (hρ : ρ ∈ Z.ZIprime T) :
+    T - (distinguishedEndpointGuardWidth F T + 1) *
+        distinguishedGridStep F T + Zeta23.D0 T ≤
+          (gammaOf ρ).re ∧
+      (gammaOf ρ).re + Zeta23.D0 T ≤
+        T + (n + distinguishedEndpointGuardWidth F T) *
+          distinguishedGridStep F T := by
+  have hh : 0 < distinguishedGridStep F T := by
+    unfold distinguishedGridStep
+    positivity
+  have hmem := (Zeta23.ZeroSide.mem_ZIprime_iff Z T).1 hρ
+  have hgamma : (gammaOf ρ).re = ρ.im := by
+    simp [gammaOf, Complex.div_I]
+  have hlower := Zeta23.Tail.lower_endpointGuard_distance
+    (T := T) (D := 2 * Zeta23.D0 T)
+    (h := distinguishedGridStep F T) hh
+  have hupper := Zeta23.Tail.upper_endpointGuard_distance
+    (T := T) (D := 2 * Zeta23.D0 T)
+    (h := distinguishedGridStep F T) hh
+  change
+    T - (Zeta23.Tail.endpointGuardWidth (2 * Zeta23.D0 T)
+        (distinguishedGridStep F T) + 1) * distinguishedGridStep F T +
+          Zeta23.D0 T ≤ (gammaOf ρ).re ∧
+      (gammaOf ρ).re + Zeta23.D0 T ≤
+        T + (n + Zeta23.Tail.endpointGuardWidth (2 * Zeta23.D0 T)
+          (distinguishedGridStep F T)) * distinguishedGridStep F T
+  constructor
+  · rw [hgamma]
+    have hD0 : 0 ≤ Zeta23.D0 T := Real.sqrt_nonneg T
+    nlinarith [hmem.2.1]
+  · rw [hgamma, hn]
+    push_cast
+    calc
+      ρ.im + Zeta23.D0 T ≤
+          2 * T + 2 * Zeta23.D0 T := by linarith [hmem.2.2]
+      _ ≤ 2 * T + 2 * Zeta23.D0 T + distinguishedGridStep F T := by
+        linarith
+      _ ≤ T +
+          ((⌊T / distinguishedGridStep F T⌋₊ : ℝ) +
+            (Zeta23.Tail.endpointGuardWidth (2 * Zeta23.D0 T)
+              (distinguishedGridStep F T) : ℝ)) *
+            distinguishedGridStep F T := by
+        simpa only [add_assoc] using hupper
 
 def distinguishedBlockLabel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -147,6 +215,243 @@ def distinguishedLatticeTerm
       (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
     paperFT (fun u => (F.window T j u : ℂ))
       (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ))
+
+/-- The full distinguished lattice carries a uniform fourth-order
+horizontal majorant: both Fourier factors retain their quadratic decay. -/
+theorem distinguishedLatticeTerm_horizontal_decay_of_hasCompactSupport
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (z z' : ℂ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ k : ℤ,
+      ‖distinguishedLatticeTerm F T z z' k‖ *
+          ((1 + (z.re -
+            (T + (k : ℝ) *
+              (2 * Real.pi / F.period T (F.distinguished T)))) ^ 2) *
+           (1 + (z'.re -
+            (T + (k : ℝ) *
+              (2 * Real.pi / F.period T (F.distinguished T)))) ^ 2)) ≤ C := by
+  obtain ⟨C, hC0, hC⟩ :=
+    Zeta23.Poisson.paperFT_mul_horizontal_decay_of_hasCompactSupport
+      hwindow hcompact z z'
+  refine ⟨C, hC0, ?_⟩
+  intro k
+  simpa only [distinguishedLatticeTerm] using
+    hC (T + (k : ℝ) *
+      (2 * Real.pi / F.period T (F.distinguished T)))
+
+private theorem norm_le_mul_inv_pow_four_of_weighted_decay
+    {r a b x C : ℝ} (hr : 0 ≤ r) (hx : 0 < x)
+    (hdecay : r * ((1 + a ^ 2) * (1 + b ^ 2)) ≤ C)
+    (ha : x ≤ |a|) (hb : x ≤ |b|) :
+    r ≤ C * (x ^ 4)⁻¹ := by
+  have hxa : x ^ 2 ≤ a ^ 2 := (sq_le_sq).2 (by
+    simpa [abs_of_pos hx] using ha)
+  have hxb : x ^ 2 ≤ b ^ 2 := (sq_le_sq).2 (by
+    simpa [abs_of_pos hx] using hb)
+  have hweight : x ^ 4 ≤ (1 + a ^ 2) * (1 + b ^ 2) := by
+    calc
+      x ^ 4 = x ^ 2 * x ^ 2 := by ring
+      _ ≤ (1 + a ^ 2) * (1 + b ^ 2) :=
+        mul_le_mul (hxa.trans (le_add_of_nonneg_left (by norm_num)))
+          (hxb.trans (le_add_of_nonneg_left (by norm_num)))
+          (sq_nonneg _) (by positivity)
+  have hrx : r * x ^ 4 ≤ C :=
+    (mul_le_mul_of_nonneg_left hweight hr).trans hdecay
+  rw [← div_eq_mul_inv]
+  exact (le_div_iff₀ (pow_pos hx 4)).2 hrx
+
+/-- If a pair of complex frequencies lies a positive distance to the right
+of the last negative lattice frequency, the entire negative half-lattice
+has an explicit fourth-power norm bound. -/
+theorem exists_negativeLatticeTail_bound_of_hasCompactSupport
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T D : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hD : 0 < D)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (z z' : ℂ)
+    (hz : T - 2 * Real.pi / F.period T (F.distinguished T) + D ≤ z.re)
+    (hz' : T - 2 * Real.pi / F.period T (F.distinguished T) + D ≤ z'.re) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      Summable (fun m : ℕ =>
+        distinguishedLatticeTerm F T z z' (-((m : ℤ) + 1))) ∧
+      ‖∑' m : ℕ,
+        distinguishedLatticeTerm F T z z' (-((m : ℤ) + 1))‖ ≤
+        C * ((D ^ 4)⁻¹ + (D ^ 3)⁻¹ /
+          (3 * (2 * Real.pi / F.period T (F.distinguished T)))) := by
+  obtain ⟨C, hC0, hdecay⟩ :=
+    distinguishedLatticeTerm_horizontal_decay_of_hasCompactSupport
+      F T hwindow hcompact z z'
+  let h : ℝ := 2 * Real.pi / F.period T (F.distinguished T)
+  have hh : 0 < h := by
+    dsimp only [h]
+    positivity
+  have hz_h : T - h + D ≤ z.re := by simpa only [h] using hz
+  have hz'_h : T - h + D ≤ z'.re := by simpa only [h] using hz'
+  have hmajor : ∀ m : ℕ,
+      ‖distinguishedLatticeTerm F T z z' (-((m : ℤ) + 1))‖ ≤
+        C * ((D + m * h) ^ 4)⁻¹ := by
+    intro m
+    have hx : 0 < D + m * h := by positivity
+    have hfreq :
+        T + ((-((m : ℤ) + 1) : ℤ) : ℝ) * h = T - h - m * h := by
+      push_cast
+      ring
+    have ha : D + m * h ≤
+        |z.re - (T + ((-((m : ℤ) + 1) : ℤ) : ℝ) * h)| := by
+      rw [hfreq, abs_of_nonneg]
+      · linarith
+      · nlinarith [show 0 ≤ (m : ℝ) * h by positivity]
+    have hb : D + m * h ≤
+        |z'.re - (T + ((-((m : ℤ) + 1) : ℤ) : ℝ) * h)| := by
+      rw [hfreq, abs_of_nonneg]
+      · linarith
+      · nlinarith [show 0 ≤ (m : ℝ) * h by positivity]
+    apply norm_le_mul_inv_pow_four_of_weighted_decay
+      (norm_nonneg _) hx _ ha hb
+    simpa only [h] using hdecay (-((m : ℤ) + 1))
+  obtain ⟨hsum, hnorm⟩ :=
+    Zeta23.Tail.summable_and_norm_tsum_le_inv_pow_four_grid
+      hC0 hD hh hmajor
+  refine ⟨C, hC0, hsum, ?_⟩
+  simpa only [h] using hnorm
+
+/-- Lower-tail estimate after peeling `r` endpoint labels.  This is the
+form needed for the enlarged zero window, whose lower edge extends below
+the first retained frequency. -/
+theorem exists_lowerLatticeTailFrom_bound_of_hasCompactSupport
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T D : ℝ) (r : ℕ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hD : 0 < D)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (z z' : ℂ)
+    (hz : T - (r + 1) *
+      (2 * Real.pi / F.period T (F.distinguished T)) + D ≤ z.re)
+    (hz' : T - (r + 1) *
+      (2 * Real.pi / F.period T (F.distinguished T)) + D ≤ z'.re) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      Summable (fun m : ℕ =>
+        distinguishedLatticeTerm F T z z'
+          (-(((r + m : ℕ) : ℤ) + 1))) ∧
+      ‖∑' m : ℕ,
+        distinguishedLatticeTerm F T z z'
+          (-(((r + m : ℕ) : ℤ) + 1))‖ ≤
+        C * ((D ^ 4)⁻¹ + (D ^ 3)⁻¹ /
+          (3 * (2 * Real.pi / F.period T (F.distinguished T)))) := by
+  obtain ⟨C, hC0, hdecay⟩ :=
+    distinguishedLatticeTerm_horizontal_decay_of_hasCompactSupport
+      F T hwindow hcompact z z'
+  let h : ℝ := 2 * Real.pi / F.period T (F.distinguished T)
+  have hh : 0 < h := by
+    dsimp only [h]
+    positivity
+  have hz_h : T - (r + 1) * h + D ≤ z.re := by
+    simpa only [h] using hz
+  have hz'_h : T - (r + 1) * h + D ≤ z'.re := by
+    simpa only [h] using hz'
+  have hmajor : ∀ m : ℕ,
+      ‖distinguishedLatticeTerm F T z z'
+          (-(((r + m : ℕ) : ℤ) + 1))‖ ≤
+        C * ((D + m * h) ^ 4)⁻¹ := by
+    intro m
+    have hx : 0 < D + m * h := by positivity
+    have hfreq :
+        T + ((-(((r + m : ℕ) : ℤ) + 1) : ℤ) : ℝ) * h =
+          T - (r + 1) * h - m * h := by
+      push_cast
+      ring
+    have ha : D + m * h ≤
+        |z.re - (T +
+          ((-(((r + m : ℕ) : ℤ) + 1) : ℤ) : ℝ) * h)| := by
+      rw [hfreq, abs_of_nonneg]
+      · linarith
+      · nlinarith [show 0 ≤ (m : ℝ) * h by positivity]
+    have hb : D + m * h ≤
+        |z'.re - (T +
+          ((-(((r + m : ℕ) : ℤ) + 1) : ℤ) : ℝ) * h)| := by
+      rw [hfreq, abs_of_nonneg]
+      · linarith
+      · nlinarith [show 0 ≤ (m : ℝ) * h by positivity]
+    apply norm_le_mul_inv_pow_four_of_weighted_decay
+      (norm_nonneg _) hx _ ha hb
+    simpa only [h] using hdecay (-(((r + m : ℕ) : ℤ) + 1))
+  obtain ⟨hsum, hnorm⟩ :=
+    Zeta23.Tail.summable_and_norm_tsum_le_inv_pow_four_grid
+      hC0 hD hh hmajor
+  refine ⟨C, hC0, hsum, ?_⟩
+  simpa only [h] using hnorm
+
+/-- The matching estimate on any upper half-lattice.  The starting label is
+explicit, allowing finitely many endpoint labels to be peeled off before
+the fourth-order estimate is applied. -/
+theorem exists_upperLatticeTail_bound_of_hasCompactSupport
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T D : ℝ) (n : ℕ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hD : 0 < D)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (z z' : ℂ)
+    (hz : z.re + D ≤ T + n *
+      (2 * Real.pi / F.period T (F.distinguished T)))
+    (hz' : z'.re + D ≤ T + n *
+      (2 * Real.pi / F.period T (F.distinguished T))) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      Summable (fun m : ℕ =>
+        distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)) ∧
+      ‖∑' m : ℕ,
+        distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)‖ ≤
+        C * ((D ^ 4)⁻¹ + (D ^ 3)⁻¹ /
+          (3 * (2 * Real.pi / F.period T (F.distinguished T)))) := by
+  obtain ⟨C, hC0, hdecay⟩ :=
+    distinguishedLatticeTerm_horizontal_decay_of_hasCompactSupport
+      F T hwindow hcompact z z'
+  let h : ℝ := 2 * Real.pi / F.period T (F.distinguished T)
+  have hh : 0 < h := by
+    dsimp only [h]
+    positivity
+  have hz_h : z.re + D ≤ T + n * h := by simpa only [h] using hz
+  have hz'_h : z'.re + D ≤ T + n * h := by simpa only [h] using hz'
+  have hmajor : ∀ m : ℕ,
+      ‖distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)‖ ≤
+        C * ((D + m * h) ^ 4)⁻¹ := by
+    intro m
+    have hx : 0 < D + m * h := by positivity
+    have hfreq :
+        T + (((n + m : ℕ) : ℤ) : ℝ) * h = T + n * h + m * h := by
+      push_cast
+      ring
+    have ha : D + m * h ≤
+        |z.re - (T + (((n + m : ℕ) : ℤ) : ℝ) * h)| := by
+      rw [hfreq, abs_of_nonpos]
+      · linarith
+      · nlinarith [show 0 ≤ (m : ℝ) * h by positivity]
+    have hb : D + m * h ≤
+        |z'.re - (T + (((n + m : ℕ) : ℤ) : ℝ) * h)| := by
+      rw [hfreq, abs_of_nonpos]
+      · linarith
+      · nlinarith [show 0 ≤ (m : ℝ) * h by positivity]
+    apply norm_le_mul_inv_pow_four_of_weighted_decay
+      (norm_nonneg _) hx _ ha hb
+    simpa only [h] using hdecay ((n + m : ℕ) : ℤ)
+  obtain ⟨hsum, hnorm⟩ :=
+    Zeta23.Tail.summable_and_norm_tsum_le_inv_pow_four_grid
+      hC0 hD hh hmajor
+  refine ⟨C, hC0, hsum, ?_⟩
+  simpa only [h] using hnorm
 
 /-- A product of two actual block atoms is the corresponding distinguished
 lattice term times the construction's squared normalization. -/
@@ -334,6 +639,32 @@ theorem distinguishedLatticeRemainder_outside
 def omittedLatticeSet (n : ℕ) : Set ℤ :=
   {k | k < 0 ∨ (n : ℤ) ≤ k}
 
+/-- The first `r` omitted labels below the retained grid. -/
+def lowerLatticeBoundaryStrip
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (r : ℕ) : ℂ :=
+  ∑ m ∈ Finset.range r,
+    distinguishedLatticeTerm F T z z' (-((m : ℤ) + 1))
+
+/-- The first `r` omitted labels at and above the upper endpoint `n`. -/
+def upperLatticeBoundaryStrip
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (n r : ℕ) : ℂ :=
+  ∑ m ∈ Finset.range r,
+    distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)
+
+/-- The two endpoint strips selected canonically for the enlarged zero
+window.  They are combined before any absolute-value estimate. -/
+def canonicalLatticeBoundaryStrip
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (n : ℕ) : ℂ :=
+  let r := distinguishedEndpointGuardWidth F T
+  lowerLatticeBoundaryStrip F T z z' r +
+    upperLatticeBoundaryStrip F T z z' n r
+
 /-- Pointwise, the remainder is the lattice family restricted to the two
 omitted sides. -/
 theorem distinguishedLatticeRemainder_eq_indicator
@@ -377,6 +708,327 @@ theorem hasSum_distinguishedLatticeSegmentExtension
   unfold distinguishedLatticeSegmentExtension
   exact (hasSum_extend_zero (finiteLabelEmbedding n).injective).2
     (hasSum_fintype _)
+
+/-- The omitted remainder is exactly two one-sided natural-number tails:
+the negative lattice and the lattice beginning at the first excluded
+nonnegative label.  This is the form consumed by one-sided grid bounds. -/
+theorem tsum_distinguishedLatticeRemainder_eq_two_tails
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (n : ℕ)
+    (hsum : Summable (distinguishedLatticeTerm F T z z')) :
+    (∑' k : ℤ, distinguishedLatticeRemainder F T z z' n k) =
+      (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        (-((m : ℤ) + 1))) +
+      ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        ((n + m : ℕ) : ℤ) := by
+  have hsegment :=
+    (hasSum_distinguishedLatticeSegmentExtension F T z z' n).summable
+  have hrem : Summable (distinguishedLatticeRemainder F T z z' n) := by
+    exact hsum.sub hsegment
+  have hnat : Summable (fun m : ℕ =>
+      distinguishedLatticeRemainder F T z z' n (m : ℤ)) :=
+    hrem.comp_injective Int.ofNat_injective
+  have hneg : Summable (fun m : ℕ =>
+      distinguishedLatticeRemainder F T z z' n (-((m : ℤ) + 1))) :=
+    hrem.comp_injective (by
+      intro a b hab
+      have : Int.negSucc a = Int.negSucc b := by simpa using hab
+      exact Int.negSucc.inj this)
+  have hprefix :
+      (∑ m ∈ Finset.range n,
+        distinguishedLatticeRemainder F T z z' n (m : ℤ)) = 0 := by
+    apply Finset.sum_eq_zero
+    intro m hm
+    have hm_lt : m < n := Finset.mem_range.mp hm
+    let i : Fin n := ⟨m, hm_lt⟩
+    change distinguishedLatticeRemainder F T z z' n
+      (finiteLabelEmbedding n i) = 0
+    exact distinguishedLatticeRemainder_inside F T z z' n i
+  have hshift := hnat.sum_add_tsum_nat_add n
+  rw [hprefix, zero_add] at hshift
+  have hneg_eq : (fun m : ℕ =>
+      distinguishedLatticeRemainder F T z z' n (-((m : ℤ) + 1))) =
+      fun m : ℕ => distinguishedLatticeTerm F T z z' (-((m : ℤ) + 1)) := by
+    funext m
+    exact distinguishedLatticeRemainder_outside F T z z' n _ (Or.inl (by omega))
+  have hupper :
+      (∑' m : ℕ, distinguishedLatticeRemainder F T z z' n (m : ℤ)) =
+        ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          ((n + m : ℕ) : ℤ) := by
+    calc
+      (∑' m : ℕ, distinguishedLatticeRemainder F T z z' n (m : ℤ)) =
+          ∑' m : ℕ, distinguishedLatticeRemainder F T z z' n
+            ((m + n : ℕ) : ℤ) := hshift.symm
+      _ = ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+            ((n + m : ℕ) : ℤ) := by
+        apply tsum_congr
+        intro m
+        rw [distinguishedLatticeRemainder_outside F T z z' n]
+        · congr 2
+          omega
+        · right
+          push_cast
+          omega
+  calc
+    (∑' k : ℤ, distinguishedLatticeRemainder F T z z' n k) =
+        (∑' m : ℕ, distinguishedLatticeRemainder F T z z' n (m : ℤ)) +
+          ∑' m : ℕ, distinguishedLatticeRemainder F T z z' n
+            (-((m : ℤ) + 1)) := tsum_of_nat_of_neg_add_one hnat hneg
+    _ = (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          ((n + m : ℕ) : ℤ)) +
+        ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          (-((m : ℤ) + 1)) := by rw [hupper, hneg_eq]
+    _ = _ := add_comm _ _
+
+/-- Peel an arbitrary finite endpoint strip from the upper omitted tail.
+Everything beyond that strip is again a clean one-sided lattice, while the
+strip stays as a literal finite sum ready to be combined across zero
+variables before estimation. -/
+theorem tsum_distinguishedLatticeRemainder_eq_guarded_tails
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (n r : ℕ)
+    (hsum : Summable (distinguishedLatticeTerm F T z z')) :
+    (∑' k : ℤ, distinguishedLatticeRemainder F T z z' n k) =
+      (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        (-((m : ℤ) + 1))) +
+      (∑ m ∈ Finset.range r,
+        distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)) +
+      ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        ((n + r + m : ℕ) : ℤ) := by
+  rw [tsum_distinguishedLatticeRemainder_eq_two_tails F T z z' n hsum]
+  have hupper : Summable (fun m : ℕ =>
+      distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)) :=
+    hsum.comp_injective (by
+      intro a b hab
+      exact Nat.add_left_cancel (Int.ofNat_inj.mp hab))
+  have hsplit := hupper.sum_add_tsum_nat_add r
+  calc
+    (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          (-((m : ℤ) + 1))) +
+        ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          ((n + m : ℕ) : ℤ) =
+      (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          (-((m : ℤ) + 1))) +
+        ((∑ m ∈ Finset.range r,
+          distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)) +
+        ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          ((n + r + m : ℕ) : ℤ)) := by
+        congr 1
+        rw [← hsplit]
+        congr 1
+        apply tsum_congr
+        intro m
+        congr 2
+        omega
+    _ = _ := by ring
+
+/-- Peel finite strips from both endpoints of the omitted lattice.  The two
+finite strips are grouped together before either remote infinite tail,
+which is the sum-first arrangement used by the enlarged-window argument. -/
+theorem tsum_distinguishedLatticeRemainder_eq_two_guarded_tails
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (n rneg rpos : ℕ)
+    (hsum : Summable (distinguishedLatticeTerm F T z z')) :
+    (∑' k : ℤ, distinguishedLatticeRemainder F T z z' n k) =
+      ((∑ m ∈ Finset.range rneg,
+          distinguishedLatticeTerm F T z z' (-((m : ℤ) + 1))) +
+        ∑ m ∈ Finset.range rpos,
+          distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)) +
+      (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        (-(((rneg + m : ℕ) : ℤ) + 1))) +
+      ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        ((n + rpos + m : ℕ) : ℤ) := by
+  rw [tsum_distinguishedLatticeRemainder_eq_guarded_tails
+    F T z z' n rpos hsum]
+  have hneg : Summable (fun m : ℕ =>
+      distinguishedLatticeTerm F T z z' (-((m : ℤ) + 1))) :=
+    hsum.comp_injective (by
+      intro a b hab
+      have : Int.negSucc a = Int.negSucc b := by simpa using hab
+      exact Int.negSucc.inj this)
+  have hsplit := hneg.sum_add_tsum_nat_add rneg
+  have hremote :
+      (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        (-(((m + rneg : ℕ) : ℤ) + 1))) =
+      ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        (-(((rneg + m : ℕ) : ℤ) + 1)) := by
+    apply tsum_congr
+    intro m
+    congr 3
+    omega
+  rw [hremote] at hsplit
+  rw [← hsplit]
+  ring
+
+/-- Quantitative guarded-remainder theorem.  After a finite upper endpoint
+strip is left untouched, both infinite pieces are absolutely summable and
+bounded by explicit fourth-power grid tails.  The remaining finite strip is
+the sole object that must be summed with the zero variables before applying
+the analytic input. -/
+theorem exists_guardedLatticeRemainder_bound_of_hasCompactSupport
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T Dneg Dpos : ℝ) (n r : ℕ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hDneg : 0 < Dneg) (hDpos : 0 < Dpos)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (z z' : ℂ)
+    (hzneg : T - 2 * Real.pi / F.period T (F.distinguished T) + Dneg ≤ z.re)
+    (hz'neg : T - 2 * Real.pi / F.period T (F.distinguished T) + Dneg ≤ z'.re)
+    (hzpos : z.re + Dpos ≤ T + (n + r) *
+      (2 * Real.pi / F.period T (F.distinguished T)))
+    (hz'pos : z'.re + Dpos ≤ T + (n + r) *
+      (2 * Real.pi / F.period T (F.distinguished T))) :
+    ∃ Cneg Cpos : ℝ, 0 ≤ Cneg ∧ 0 ≤ Cpos ∧
+      ‖∑' k : ℤ, distinguishedLatticeRemainder F T z z' n k‖ ≤
+        ‖∑ m ∈ Finset.range r,
+          distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ)‖ +
+        Cneg * ((Dneg ^ 4)⁻¹ + (Dneg ^ 3)⁻¹ /
+          (3 * (2 * Real.pi / F.period T (F.distinguished T)))) +
+        Cpos * ((Dpos ^ 4)⁻¹ + (Dpos ^ 3)⁻¹ /
+          (3 * (2 * Real.pi / F.period T (F.distinguished T)))) := by
+  obtain ⟨Cneg, hCneg, hnegsum, hnegbound⟩ :=
+    exists_negativeLatticeTail_bound_of_hasCompactSupport
+      F T Dneg hL hDneg hwindow hcompact z z' hzneg hz'neg
+  have hzpos_cast : z.re + Dpos ≤ T + ((n + r : ℕ) : ℝ) *
+      (2 * Real.pi / F.period T (F.distinguished T)) := by
+    simpa only [Nat.cast_add] using hzpos
+  have hz'pos_cast : z'.re + Dpos ≤ T + ((n + r : ℕ) : ℝ) *
+      (2 * Real.pi / F.period T (F.distinguished T)) := by
+    simpa only [Nat.cast_add] using hz'pos
+  obtain ⟨Cpos, hCpos, hpossum, hposbound⟩ :=
+    exists_upperLatticeTail_bound_of_hasCompactSupport
+      F T Dpos (n + r) hL hDpos hwindow hcompact z z'
+        hzpos_cast hz'pos_cast
+  have hfull : Summable (distinguishedLatticeTerm F T z z') :=
+    (hasSum_distinguishedLatticeTerm_alias_of_hasCompactSupport
+      F T hL hwindow hcompact z z').2.summable
+  refine ⟨Cneg, Cpos, hCneg, hCpos, ?_⟩
+  rw [tsum_distinguishedLatticeRemainder_eq_guarded_tails
+    F T z z' n r hfull]
+  have htri := norm_add_le
+    ((∑' m : ℕ, distinguishedLatticeTerm F T z z'
+        (-((m : ℤ) + 1))) +
+      ∑ m ∈ Finset.range r,
+        distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ))
+    (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+      ((n + r + m : ℕ) : ℤ))
+  have htri' := norm_add_le
+    (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+      (-((m : ℤ) + 1)))
+    (∑ m ∈ Finset.range r,
+      distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ))
+  nlinarith
+
+/-- Fully guarded quantitative remainder bound.  For an enlarged zero
+window, choose the two strip widths to cover its lower and upper overhangs;
+then only their combined finite sum remains, while both remote tails carry
+explicit fourth-power bounds. -/
+theorem exists_twoGuardedLatticeRemainder_bound_of_hasCompactSupport
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T Dneg Dpos : ℝ)
+    (n rneg rpos : ℕ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hDneg : 0 < Dneg) (hDpos : 0 < Dpos)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (z z' : ℂ)
+    (hzneg : T - (rneg + 1) *
+      (2 * Real.pi / F.period T (F.distinguished T)) + Dneg ≤ z.re)
+    (hz'neg : T - (rneg + 1) *
+      (2 * Real.pi / F.period T (F.distinguished T)) + Dneg ≤ z'.re)
+    (hzpos : z.re + Dpos ≤ T + (n + rpos) *
+      (2 * Real.pi / F.period T (F.distinguished T)))
+    (hz'pos : z'.re + Dpos ≤ T + (n + rpos) *
+      (2 * Real.pi / F.period T (F.distinguished T))) :
+    ∃ Cneg Cpos : ℝ, 0 ≤ Cneg ∧ 0 ≤ Cpos ∧
+      ‖∑' k : ℤ, distinguishedLatticeRemainder F T z z' n k‖ ≤
+        ‖lowerLatticeBoundaryStrip F T z z' rneg +
+          upperLatticeBoundaryStrip F T z z' n rpos‖ +
+        Cneg * ((Dneg ^ 4)⁻¹ + (Dneg ^ 3)⁻¹ /
+          (3 * (2 * Real.pi / F.period T (F.distinguished T)))) +
+        Cpos * ((Dpos ^ 4)⁻¹ + (Dpos ^ 3)⁻¹ /
+          (3 * (2 * Real.pi / F.period T (F.distinguished T)))) := by
+  obtain ⟨Cneg, hCneg, hnegsum, hnegbound⟩ :=
+    exists_lowerLatticeTailFrom_bound_of_hasCompactSupport
+      F T Dneg rneg hL hDneg hwindow hcompact z z' hzneg hz'neg
+  have hzpos_cast : z.re + Dpos ≤ T + ((n + rpos : ℕ) : ℝ) *
+      (2 * Real.pi / F.period T (F.distinguished T)) := by
+    simpa only [Nat.cast_add] using hzpos
+  have hz'pos_cast : z'.re + Dpos ≤ T + ((n + rpos : ℕ) : ℝ) *
+      (2 * Real.pi / F.period T (F.distinguished T)) := by
+    simpa only [Nat.cast_add] using hz'pos
+  obtain ⟨Cpos, hCpos, hpossum, hposbound⟩ :=
+    exists_upperLatticeTail_bound_of_hasCompactSupport
+      F T Dpos (n + rpos) hL hDpos hwindow hcompact z z'
+        hzpos_cast hz'pos_cast
+  have hfull : Summable (distinguishedLatticeTerm F T z z') :=
+    (hasSum_distinguishedLatticeTerm_alias_of_hasCompactSupport
+      F T hL hwindow hcompact z z').2.summable
+  refine ⟨Cneg, Cpos, hCneg, hCpos, ?_⟩
+  rw [tsum_distinguishedLatticeRemainder_eq_two_guarded_tails
+    F T z z' n rneg rpos hfull]
+  let edge : ℂ :=
+    lowerLatticeBoundaryStrip F T z z' rneg +
+      upperLatticeBoundaryStrip F T z z' n rpos
+  let low : ℂ := ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+    (-(((rneg + m : ℕ) : ℤ) + 1))
+  let high : ℂ := ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+    ((n + rpos + m : ℕ) : ℤ)
+  change ‖edge + low + high‖ ≤
+    ‖edge‖ +
+      Cneg * ((Dneg ^ 4)⁻¹ + (Dneg ^ 3)⁻¹ /
+        (3 * (2 * Real.pi / F.period T (F.distinguished T)))) +
+      Cpos * ((Dpos ^ 4)⁻¹ + (Dpos ^ 3)⁻¹ /
+        (3 * (2 * Real.pi / F.period T (F.distinguished T))))
+  have htri := norm_add_le (edge + low) high
+  have htri' := norm_add_le edge low
+  nlinarith
+
+/-- Canonical enlarged-window specialization.  For every pair of actual
+`ZIprime` zeros, both remote Poisson tails start at distance `sqrt T`; the
+only non-decaying contribution is the combined finite boundary strip. -/
+theorem exists_ZIprime_canonicalRemainder_bound_of_hasCompactSupport
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n : ℕ)
+    (hT : 0 < T)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hn : n = ⌊T / distinguishedGridStep F T⌋₊)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (ρ ρ' : ℂ) (hρ : ρ ∈ Z.ZIprime T) (hρ' : ρ' ∈ Z.ZIprime T) :
+    ∃ Cneg Cpos : ℝ, 0 ≤ Cneg ∧ 0 ≤ Cpos ∧
+      ‖∑' k : ℤ, distinguishedLatticeRemainder F T
+        (gammaOf ρ) (gammaOf ρ') n k‖ ≤
+        ‖canonicalLatticeBoundaryStrip F T
+          (gammaOf ρ) (gammaOf ρ') n‖ +
+        Cneg * (((Zeta23.D0 T) ^ 4)⁻¹ +
+          ((Zeta23.D0 T) ^ 3)⁻¹ / (3 * distinguishedGridStep F T)) +
+        Cpos * (((Zeta23.D0 T) ^ 4)⁻¹ +
+          ((Zeta23.D0 T) ^ 3)⁻¹ / (3 * distinguishedGridStep F T)) := by
+  have hD0 : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT
+  have hdist := mem_ZIprime_guarded_distances F T n hL hn hρ
+  have hdist' := mem_ZIprime_guarded_distances F T n hL hn hρ'
+  have hbound :=
+    exists_twoGuardedLatticeRemainder_bound_of_hasCompactSupport
+      F T (Zeta23.D0 T) (Zeta23.D0 T) n
+        (distinguishedEndpointGuardWidth F T)
+        (distinguishedEndpointGuardWidth F T)
+        hL hD0 hD0 hwindow hcompact (gammaOf ρ) (gammaOf ρ')
+        (by simpa only [distinguishedGridStep] using hdist.1)
+        (by simpa only [distinguishedGridStep] using hdist'.1)
+        (by simpa only [distinguishedGridStep] using hdist.2)
+        (by simpa only [distinguishedGridStep] using hdist'.2)
+  simpa only [canonicalLatticeBoundaryStrip, distinguishedGridStep] using hbound
 
 /-- Exact Poisson remainder identity: after the actual finite segment is
 removed, the remaining lattice has sum equal to the full spatial-alias sum
