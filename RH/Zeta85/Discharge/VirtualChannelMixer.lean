@@ -179,6 +179,55 @@ theorem singleChannel_parseval
   rw [pointwise_parseval]
   simp [singleChannel]
 
+
+/-- With a common modulation period, orthogonal window synthesis passes
+linearly through the paper Fourier transform.  Thus the same finite mixer
+acts on the zero-side atoms before any pair contraction. -/
+theorem paperFT_synthesize
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → ℝ → ℝ) (j : ι) (z : ℂ)
+    (hInt : ∀ r : ι, MeasureTheory.Integrable
+      (fun u : ℝ => (virtual r u : ℂ) *
+        Complex.exp (Complex.I * z * u))) :
+    Zeta23.paperFT
+        (fun u : ℝ => (synthesize C virtual j u : ℂ)) z =
+      ∑ r : ι, (C.matrix j r : ℂ) *
+        Zeta23.paperFT (fun u : ℝ => (virtual r u : ℂ)) z := by
+  rw [Zeta23.paperFT_def]
+  have hpoint : ∀ u : ℝ,
+      (synthesize C virtual j u : ℂ) *
+          Complex.exp (Complex.I * z * u) =
+        ∑ r : ι, (C.matrix j r : ℂ) *
+          ((virtual r u : ℂ) *
+            Complex.exp (Complex.I * z * u)) := by
+    intro u
+    unfold synthesize
+    push_cast
+    rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro r _
+    ring
+  calc
+    (∫ u : ℝ, (synthesize C virtual j u : ℂ) *
+        Complex.exp (Complex.I * z * u)) =
+      ∫ u : ℝ, ∑ r : ι, (C.matrix j r : ℂ) *
+        ((virtual r u : ℂ) *
+          Complex.exp (Complex.I * z * u)) := by
+      apply MeasureTheory.integral_congr_ae
+      filter_upwards [] with u
+      exact hpoint u
+    _ = ∑ r : ι, ∫ u : ℝ, (C.matrix j r : ℂ) *
+        ((virtual r u : ℂ) *
+          Complex.exp (Complex.I * z * u)) := by
+      apply MeasureTheory.integral_finset_sum
+      intro r _
+      exact (hInt r).const_mul _
+    _ = ∑ r : ι, (C.matrix j r : ℂ) *
+        Zeta23.paperFT (fun u : ℝ => (virtual r u : ℂ)) z := by
+      apply Finset.sum_congr rfl
+      intro r _
+      rw [Zeta23.paperFT_def, Zeta23.integral_const_mul_C]
+
 /-- The unweighted coherent sum of physical channels carries the column-sum
 amplitude of a single virtual channel. -/
 theorem sum_synthesize_singleChannel
