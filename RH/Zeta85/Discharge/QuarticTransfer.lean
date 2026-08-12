@@ -122,6 +122,18 @@ structure WeightedQuarticLimit
       quarticScore q F T)
     atTop (nhds (μ * limitQuarticScore q μ p))
 
+/-- The one-sided weighted statement used by the density argument.  It asks
+only that the certificate statistic eventually exceed every strict lower
+threshold; no upper bound or exact limit is consumed downstream. -/
+structure WeightedQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
+  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
+    ∀ᶠ T in atTop,
+      x < (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
+        quarticScore q F T
+
 /-- All finite errors in the affine bridge.  The coefficient `3` on the
 enlarged-window edge count is exact: `2` comes from robust stability and
 `1` from the two count comparisons. -/
@@ -228,6 +240,15 @@ theorem weightedQuarticLimit_of_separate
     (hscore : QuarticScoreConvergence q F) :
     WeightedQuarticLimit q F :=
   ⟨blockDim_pos_eventually hr1a, hr1a.block_dimension.mul hscore⟩
+
+/-- Exact weighted convergence supplies the weaker one-sided datum. -/
+theorem WeightedQuarticLimit.toLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : WeightedQuarticLimit q F) :
+    WeightedQuarticLowerBound q F :=
+  ⟨h.block_dimension_pos, fun x hx =>
+    h.weighted_score.eventually (Ioi_mem_nhds hx)⟩
 
 /-- Eventual form of the finite affine bridge, obtained directly from the
 proved robust stability inequality. -/
@@ -364,7 +385,7 @@ theorem asymptotic_eps_transfer
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F)
-    (q : Quartic) (hweighted : WeightedQuarticLimit q F)
+    (q : Quartic) (hweighted : WeightedQuarticLowerBound q F)
     (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 < 1) (hcost : profileSaturatedCost σ v ≤ Dbar)
     (hstrict : target <
@@ -374,9 +395,32 @@ theorem asymptotic_eps_transfer
       (target - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   have hden : 0 < 1 - cap / 2 := sub_pos.mpr hcap
-  have hlower : ∀ᶠ T in atTop, target < normalizedTransfer q cap Dbar F T :=
-    (normalizedTransfer_tendsto hRvM hfull hzero q hweighted cap Dbar).eventually
-      (Ioi_mem_nhds hstrict)
+  have hstrict' :
+      target * (1 - cap / 2) <
+        μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2 :=
+    (lt_div_iff₀ hden).mp hstrict
+  let δ : ℝ :=
+    (μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2 -
+      target * (1 - cap / 2)) / 3
+  have hδ : 0 < δ := by
+    dsimp only [δ]
+    linarith
+  have hscore : ∀ᶠ T in atTop,
+      μ * limitQuarticScore q μ p - δ <
+        (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
+          quarticScore q F T :=
+    hweighted.eventually_gt _ (by linarith)
+  have herror0 :=
+    (transferError_small hRvM hfull hzero).tendsto_div_nhds_zero
+  have herror : ∀ᶠ T in atTop,
+      transferError F T / (Z.N T (2 * T) : ℝ) < δ :=
+    herror0.eventually (Iio_mem_nhds hδ)
+  have hlower : ∀ᶠ T in atTop, target < normalizedTransfer q cap Dbar F T := by
+    filter_upwards [hscore, herror] with T hscoreT herrorT
+    rw [normalizedTransfer]
+    apply (lt_div_iff₀ hden).2
+    dsimp only [δ] at hscoreT herrorT
+    linarith
   have hfinite := finite_affine_bridge hfull hzero
     hweighted.block_dimension_pos q cap Dbar hdual
     hcap.le hcost
@@ -518,7 +562,7 @@ frozen R-8686 epsilon form. -/
 theorem eps_transfer_8686
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLimit Terminal8686.dual F) :
+    (hweighted : WeightedQuarticLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
@@ -537,7 +581,7 @@ frozen R-9506 epsilon form. -/
 theorem eps_transfer_9506
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLimit Terminal9506.dual F) :
+    (hweighted : WeightedQuarticLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -567,7 +611,7 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_8657
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLimit Terminal8686.dual F) :
+    (hweighted : WeightedQuarticLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -585,7 +629,7 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_9383
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLimit Terminal9506.dual F) :
+    (hweighted : WeightedQuarticLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -614,7 +658,7 @@ structures remain explicit. -/
 theorem zeta_eps_transfer_8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLimit Terminal8686.dual F) :
+    (hweighted : WeightedQuarticLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
@@ -626,7 +670,7 @@ per-support structures. -/
 theorem zeta_eps_transfer_9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLimit Terminal9506.dual F) :
+    (hweighted : WeightedQuarticLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
@@ -638,7 +682,7 @@ theorem zeta_eps_transfer_9506
 theorem zeta_eps_transfer_8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLimit Terminal8686.dual F) :
+    (hweighted : WeightedQuarticLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
@@ -650,7 +694,7 @@ theorem zeta_eps_transfer_8657
 theorem zeta_eps_transfer_9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLimit Terminal9506.dual F) :
+    (hweighted : WeightedQuarticLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
