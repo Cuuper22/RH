@@ -153,7 +153,7 @@ theorem quarticTraceNumerator_eq_uncentered
         (F.block T + F.block T + F.block T + F.block T) + 1 by
           noncomm_ring]
   simp only [rtrace_add, rtrace_sub, hone]
-  ring
+  ring_nf
 
 /-- Explicit cyclic index sums for the first four raw matrix traces. -/
 def cyclicTrace1 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
