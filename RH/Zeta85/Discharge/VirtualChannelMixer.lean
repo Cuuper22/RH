@@ -513,6 +513,38 @@ theorem hadamardMixer4_coherent_gain :
   rw [hadamardMixer4_firstColumn_sum]
   norm_num
 
+/-- A rational five-channel Householder mixer.  Its first column is the
+near-flat unit vector (39, 40, 40, 40, 40) / 89. -/
+def rationalMixer5 : Matrix (Fin 5) (Fin 5) ℝ :=
+  ![![39 / 89, 40 / 89, 40 / 89, 40 / 89, 40 / 89],
+    ![40 / 89, 57 / 89, -32 / 89, -32 / 89, -32 / 89],
+    ![40 / 89, -32 / 89, 57 / 89, -32 / 89, -32 / 89],
+    ![40 / 89, -32 / 89, -32 / 89, 57 / 89, -32 / 89],
+    ![40 / 89, -32 / 89, -32 / 89, -32 / 89, 57 / 89]]
+
+theorem rationalMixer5_orthogonal :
+    rationalMixer5.transpose * rationalMixer5 = 1 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [rationalMixer5, Matrix.mul_apply, Fin.sum_univ_succ]
+
+/-- Certified five-channel rational synthesis data. -/
+def rationalData5 : Data (Fin 5) where
+  matrix := rationalMixer5
+  orthogonal := rationalMixer5_orthogonal
+
+theorem rationalMixer5_firstColumn_sum :
+    (∑ j : Fin 5, rationalMixer5 j 0) = (199 : ℝ) / 89 := by
+  norm_num [rationalMixer5, Fin.sum_univ_succ]
+
+/-- The rational five-channel mixer retains more than 4.999 of the optimal
+coherent squared-amplitude gain five. -/
+theorem rationalMixer5_coherent_gain :
+    (4999 : ℝ) / 1000 <
+      (∑ j : Fin 5, rationalMixer5 j 0) ^ 2 := by
+  rw [rationalMixer5_firstColumn_sum]
+  norm_num
+
 end VirtualChannelMixer
 end Zeta85
 end RH
