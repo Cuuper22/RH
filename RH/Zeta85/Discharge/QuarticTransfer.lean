@@ -1029,6 +1029,81 @@ theorem zeroCyclicTrace4_eq_tuple
     (blockZeroSummand F T i k) (blockZeroSummand F T k j)
       (blockZeroSummand F T j l) (blockZeroSummand F T l i)
 
+/-- The zero-tuple-first coordinate for one raw trace power through degree
+four.  Values outside the active range are deliberately zero. -/
+def zeroKernelRawTrace
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (k : ℕ) (T : ℝ) : ℝ :=
+  match k with
+  | 1 => zeroKernelCyclicTrace1 F T
+  | 2 => zeroKernelCyclicTrace2 F T
+  | 3 => zeroKernelCyclicTrace3 F T
+  | 4 => zeroKernelCyclicTrace4 F T
+  | _ => 0
+
+theorem rtrace_block_pow_one_eq_zeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    rtrace ((F.block T) ^ 1) = zeroKernelCyclicTrace1 F T := by
+  calc
+    rtrace ((F.block T) ^ 1) = cyclicTrace1 (F.block T) :=
+      rtrace_pow_one_eq_cyclic (F.block T)
+    _ = zeroCyclicTrace1 F T := by
+      simp only [cyclicTrace1, zeroCyclicTrace1, block_apply_eq_zeroEntry]
+    _ = zeroTupleCyclicTrace1 F T := zeroCyclicTrace1_eq_tuple
+    _ = zeroKernelCyclicTrace1 F T := zeroTupleCyclicTrace1_eq_kernel
+
+theorem rtrace_block_pow_two_eq_zeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    rtrace ((F.block T) ^ 2) = zeroKernelCyclicTrace2 F T := by
+  calc
+    rtrace ((F.block T) ^ 2) = cyclicTrace2 (F.block T) :=
+      rtrace_pow_two_eq_cyclic (F.block T)
+    _ = zeroCyclicTrace2 F T := by
+      simp only [cyclicTrace2, zeroCyclicTrace2, block_apply_eq_zeroEntry]
+    _ = zeroTupleCyclicTrace2 F T := zeroCyclicTrace2_eq_tuple
+    _ = zeroKernelCyclicTrace2 F T := zeroTupleCyclicTrace2_eq_kernel
+
+theorem rtrace_block_pow_three_eq_zeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    rtrace ((F.block T) ^ 3) = zeroKernelCyclicTrace3 F T := by
+  calc
+    rtrace ((F.block T) ^ 3) = cyclicTrace3 (F.block T) :=
+      rtrace_pow_three_eq_cyclic (F.block T)
+    _ = zeroCyclicTrace3 F T := by
+      simp only [cyclicTrace3, zeroCyclicTrace3, block_apply_eq_zeroEntry]
+    _ = zeroTupleCyclicTrace3 F T := zeroCyclicTrace3_eq_tuple
+    _ = zeroKernelCyclicTrace3 F T := zeroTupleCyclicTrace3_eq_kernel
+
+theorem rtrace_block_pow_four_eq_zeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    rtrace ((F.block T) ^ 4) = zeroKernelCyclicTrace4 F T := by
+  calc
+    rtrace ((F.block T) ^ 4) = cyclicTrace4 (F.block T) :=
+      rtrace_pow_four_eq_cyclic (F.block T)
+    _ = zeroCyclicTrace4 F T := by
+      simp only [cyclicTrace4, zeroCyclicTrace4, block_apply_eq_zeroEntry]
+    _ = zeroTupleCyclicTrace4 F T := zeroCyclicTrace4_eq_tuple
+    _ = zeroKernelCyclicTrace4 F T := zeroTupleCyclicTrace4_eq_kernel
+
+/-- Uniform exact expansion of every active raw block trace: first expand
+the entries into zeros, then commute all block indices inside each ordered
+zero tuple. -/
+theorem rtrace_block_pow_eq_zeroKernelRawTrace
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    {k : ℕ} (hk1 : 1 ≤ k) (hk4 : k ≤ 4) :
+    rtrace ((F.block T) ^ k) = zeroKernelRawTrace F k T := by
+  interval_cases k <;>
+    simp only [zeroKernelRawTrace,
+      rtrace_block_pow_one_eq_zeroKernel,
+      rtrace_block_pow_two_eq_zeroKernel,
+      rtrace_block_pow_three_eq_zeroKernel,
+      rtrace_block_pow_four_eq_zeroKernel]
+
 def zeroCyclicQuarticNumerator
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
