@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 
 import RH.Zeta85.Discharge.RepeatedChannelCompression
+import RH.Zeta85.Discharge.ComplexAliasBridge
 
 /-!
 # Aligned finite-frame layouts inside the quartic block
@@ -16,7 +17,7 @@ corresponding synthesized virtual atoms, mixing first recovers the selected
 virtual atom exactly.
 -/
 
-open Matrix Finset
+open Matrix Finset Set
 open scoped BigOperators ComplexConjugate
 
 noncomputable section
@@ -485,6 +486,308 @@ theorem selectedVirtualQuarticNumerator_canonical_eq_mixed
   symm
   exact mixedPairKernelQuarticNumerator_eq_selectedVirtual
     q (canonicalAtomFactorization L) T
+
+/-! ## Balanced routing across every virtual channel -/
+
+/-- A routed block grid: every retained block label is exactly one virtual
+channel together with one modulation label.  This replaces the impossible
+single-principal-channel allocation by a bijective distribution across all
+virtual tiles. -/
+structure RoutedGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : Layout F ι) where
+  labelCount : ℝ → ℕ
+  labelEquiv : ∀ T : ℝ,
+    Fin (F.blockDim T) ≃ ι × Fin (labelCount T)
+  selected_eq : ∀ (T : ℝ) (a : Fin (F.blockDim T)),
+    L.selected T a = (labelEquiv T a).1
+
+/-- The virtual atom addressed by a virtual-channel/modulation pair. -/
+def routedVirtualAtom
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (A : AtomFactorization L) (T : ℝ)
+    (r : ι) (k : Fin (G.labelCount T)) (ρ : ℂ) : ℂ :=
+  A.virtualAtom T r ((G.labelEquiv T).symm (r, k)) ρ
+
+/-- Pair sum after the routed block has been reindexed as the full virtual
+channel-by-label product. -/
+def routedVirtualPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (A : AtomFactorization L) (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ∑ r : ι, ∑ k : Fin (G.labelCount T),
+    routedVirtualAtom G A T r k ρ *
+      routedVirtualAtom G A T r k ρ'
+
+/-- Every channel-label pair is selected by its own inverse grid address. -/
+theorem RoutedGrid.selected_symm
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (T : ℝ) (r : ι) (k : Fin (G.labelCount T)) :
+    L.selected T ((G.labelEquiv T).symm (r, k)) = r := by
+  rw [G.selected_eq]
+  simp
+
+/-- Exact allocation redesign: the selected virtual pair kernel is the
+complete sum over every virtual tile and every modulation label.  No
+distinguished physical channel occurs in the statement. -/
+theorem selectedVirtualPairKernel_eq_routedGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (A : AtomFactorization L) (T : ℝ) (ρ ρ' : ℂ) :
+    selectedVirtualPairKernel A T ρ ρ' =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        routedVirtualPairSum G A T ρ ρ' := by
+  unfold selectedVirtualPairKernel routedVirtualPairSum
+  apply congrArg (fun w : ℂ =>
+    ((F.hatDenominator T)⁻¹ : ℂ) * w)
+  calc
+    (∑ a : Fin (F.blockDim T),
+      A.virtualAtom T (L.selected T a) a ρ *
+        A.virtualAtom T (L.selected T a) a ρ') =
+      ∑ a : Fin (F.blockDim T),
+        A.virtualAtom T ((G.labelEquiv T a).1) a ρ *
+          A.virtualAtom T ((G.labelEquiv T a).1) a ρ' := by
+      apply Finset.sum_congr rfl
+      intro a _
+      rw [G.selected_eq]
+    _ = ∑ rk : ι × Fin (G.labelCount T),
+        A.virtualAtom T rk.1 ((G.labelEquiv T).symm rk) ρ *
+          A.virtualAtom T rk.1 ((G.labelEquiv T).symm rk) ρ' := by
+      simpa using
+        (Equiv.sum_comp (G.labelEquiv T)
+          (fun rk : ι × Fin (G.labelCount T) =>
+            A.virtualAtom T rk.1 ((G.labelEquiv T).symm rk) ρ *
+              A.virtualAtom T rk.1
+                ((G.labelEquiv T).symm rk) ρ'))
+    _ = ∑ r : ι, ∑ k : Fin (G.labelCount T),
+        routedVirtualAtom G A T r k ρ *
+          routedVirtualAtom G A T r k ρ' := by
+      simp only [Fintype.sum_prod_type, routedVirtualAtom]
+
+
+/-! ## Exact finite-grid tail in routed virtual coordinates -/
+
+/-- Fourier realization of every routed virtual label.  The defining field is
+the product identity actually consumed by the pair kernel, so the square-root
+normalization is discharged once at construction time. -/
+structure RoutedFourierGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (A : AtomFactorization L) where
+  period : ℝ → ι → ℝ
+  supportRadius : ℝ → ι → ℝ
+  window : ℝ → ι → ℝ → ℝ
+  frequency : ∀ T : ℝ, ι → Fin (G.labelCount T) → ℤ
+  product_eq :
+    ∀ (T : ℝ) (r : ι) (k : Fin (G.labelCount T))
+      (ρ ρ' : ℂ),
+      routedVirtualAtom G A T r k ρ *
+          routedVirtualAtom G A T r k ρ' =
+        ((F.fullLength T : ℂ) / (period T r : ℂ)) *
+          (paperFT (fun u => (window T r u : ℂ))
+              (gammaOf ρ -
+                (T + (frequency T r k : ℝ) *
+                  (2 * Real.pi / period T r) : ℝ)) *
+            paperFT (fun u => (window T r u : ℂ))
+              (gammaOf ρ' -
+                (T + (frequency T r k : ℝ) *
+                  (2 * Real.pi / period T r) : ℝ)))
+
+/-- The regularity and closed-half-period support needed by the standalone
+complex Poisson theorem, imposed channel by channel on the routed windows. -/
+structure RoutedWindowRegularity
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {A : AtomFactorization L}
+    (H : RoutedFourierGrid G A) : Prop where
+  period_pos : ∀ T r, 0 < H.period T r
+  supportRadius_nonneg : ∀ T r, 0 ≤ H.supportRadius T r
+  smooth : ∀ T r,
+    ContDiff ℝ 2 (fun u => (H.window T r u : ℂ))
+  support : ∀ T r u,
+    H.supportRadius T r < |u| → H.window T r u = 0
+  even : ∀ T r u, H.window T r (-u) = H.window T r u
+  half_support : ∀ T r,
+    tsupport (H.window T r) ⊆
+      Icc (-H.period T r / 2) (H.period T r / 2)
+
+/-- The omitted part of the integer frequency lattice.  It is defined as the
+complete Poisson lattice minus the finite routed labels, so subsequent
+estimates target one explicit object. -/
+def routedVirtualFrequencyTail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {A : AtomFactorization L}
+    (H : RoutedFourierGrid G A)
+    (T : ℝ) (r : ι) (ρ ρ' : ℂ) : ℂ :=
+  ComplexAliasBridge.virtualFrequencyPairSum
+      T (H.period T r) (H.window T r)
+      (gammaOf ρ) (gammaOf ρ') -
+    ∑ k : Fin (G.labelCount T),
+      paperFT (fun u => (H.window T r u : ℂ))
+          (gammaOf ρ -
+            (T + (H.frequency T r k : ℝ) *
+              (2 * Real.pi / H.period T r) : ℝ)) *
+        paperFT (fun u => (H.window T r u : ℂ))
+          (gammaOf ρ' -
+            (T + (H.frequency T r k : ℝ) *
+              (2 * Real.pi / H.period T r) : ℝ))
+
+/-- The routed pair sum is exactly the normalized finite Fourier grid. -/
+theorem routedVirtualPairSum_eq_frequencyGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {A : AtomFactorization L}
+    (H : RoutedFourierGrid G A)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    routedVirtualPairSum G A T ρ ρ' =
+      ∑ r : ι,
+        ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+          ∑ k : Fin (G.labelCount T),
+            paperFT (fun u => (H.window T r u : ℂ))
+                (gammaOf ρ -
+                  (T + (H.frequency T r k : ℝ) *
+                    (2 * Real.pi / H.period T r) : ℝ)) *
+              paperFT (fun u => (H.window T r u : ℂ))
+                (gammaOf ρ' -
+                  (T + (H.frequency T r k : ℝ) *
+                    (2 * Real.pi / H.period T r) : ℝ)) := by
+  unfold routedVirtualPairSum
+  apply Finset.sum_congr rfl
+  intro r _
+  simp_rw [H.product_eq T r]
+  rw [← Finset.mul_sum]
+
+/-- Exact full-lattice decomposition: the only difference between the routed
+finite grid and the Poisson lattice is the named frequency tail. -/
+theorem routedVirtualPairSum_eq_fullLattice_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {A : AtomFactorization L}
+    (H : RoutedFourierGrid G A)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    routedVirtualPairSum G A T ρ ρ' =
+      ∑ r : ι,
+        ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+          (ComplexAliasBridge.virtualFrequencyPairSum
+              T (H.period T r) (H.window T r)
+              (gammaOf ρ) (gammaOf ρ') -
+            routedVirtualFrequencyTail H T r ρ ρ') := by
+  rw [routedVirtualPairSum_eq_frequencyGrid H]
+  apply Finset.sum_congr rfl
+  intro r _
+  unfold routedVirtualFrequencyTail
+  ring
+
+/-- Closed half-period support evaluates the complete lattice before the
+finite-grid tail is subtracted. -/
+theorem routedVirtualPairSum_eq_energy_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {A : AtomFactorization L}
+    (H : RoutedFourierGrid G A)
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    routedVirtualPairSum G A T ρ ρ' =
+      ∑ r : ι,
+        (F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (H.window T r u : ℂ) * H.window T r u *
+                Complex.exp
+                  (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+            routedVirtualFrequencyTail H T r ρ ρ' := by
+  rw [routedVirtualPairSum_eq_fullLattice_sub_tail H]
+  apply Finset.sum_congr rfl
+  intro r _
+  rw [mul_sub]
+  rw [ComplexAliasBridge.virtualNormalizedFrequencyPairSum_eq_energyIntegral
+    (F.fullLength T) T (H.period T r) (H.supportRadius T r)
+    (H.window T r) (h.period_pos T r)
+    (h.supportRadius_nonneg T r) (h.smooth T r)
+    (h.support T r) (h.even T r) (h.half_support T r)
+    (gammaOf ρ) (gammaOf ρ')]
+
+/-- The selected block kernel is now an evaluated energy transform minus the
+single explicit finite-grid tail, with no principal physical channel. -/
+theorem selectedVirtualPairKernel_eq_energy_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {A : AtomFactorization L}
+    (H : RoutedFourierGrid G A)
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    selectedVirtualPairKernel A T ρ ρ' =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        ∑ r : ι,
+          (F.fullLength T : ℂ) *
+              ∫ u : ℝ,
+                (H.window T r u : ℂ) * H.window T r u *
+                  Complex.exp
+                    (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+            ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+              routedVirtualFrequencyTail H T r ρ ρ' := by
+  rw [selectedVirtualPairKernel_eq_routedGrid G]
+  rw [routedVirtualPairSum_eq_energy_sub_tail H h]
+
+/-! ## Canonical physical kernel as an evaluated energy minus one tail -/
+
+/-- Analyze the physical atoms first, route every retained label, and only
+then apply Poisson summation.  The actual mixed physical kernel is exactly
+the evaluated channel energy transforms minus the explicit finite-grid
+frequency tails.  No external atom-factorization premise remains. -/
+theorem mixedPairKernel_canonical_eq_energy_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : Layout F ι) (G : RoutedGrid L)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        ∑ r : ι,
+          (F.fullLength T : ℂ) *
+              ∫ u : ℝ,
+                (H.window T r u : ℂ) * H.window T r u *
+                  Complex.exp
+                    (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+            ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+              routedVirtualFrequencyTail H T r ρ ρ' := by
+  calc
+    IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' =
+        selectedVirtualPairKernel
+          (canonicalAtomFactorization L) T ρ ρ' :=
+      (selectedVirtualPairKernel_canonical_eq_mixedPairKernel
+        L T ρ ρ').symm
+    _ = _ :=
+      selectedVirtualPairKernel_eq_energy_sub_tail H h T ρ ρ'
 
 end AlignedIsometricLayout
 end Zeta85
