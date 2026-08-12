@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+import Mathlib.Analysis.SpecialFunctions.Sqrt
 import RH.Zeta85.Discharge.RadialShellFamily
 
 /-!
@@ -162,6 +163,181 @@ theorem shellWindow_supportRadius
     shellWindow target a c d b ha hac hcd hdb x = 0 :=
   shellWindow_eq_zero_of_outer_le_abs
     target a c d b ha hac hcd hdb hx.le
+
+
+/-! ## Profiled half-period windows -/
+
+/-- A smooth cutoff multiplied by the square root of a prescribed energy
+profile.  The square root is only required to be smooth where the cutoff can
+be nonzero. -/
+def profiledBumpWindow
+    (v : ℝ → ℝ) (L : ℝ) (b : ContDiffBump (0 : ℝ)) (u : ℝ) : ℝ :=
+  Real.sqrt (v (u / L)) * b u
+
+/-- Local positivity on the closed outer ball is enough for global
+smoothness: outside that ball the bump is identically zero on a
+neighborhood. -/
+theorem profiledBumpWindow_contDiff
+    (v : ℝ → ℝ) (L : ℝ) (b : ContDiffBump (0 : ℝ))
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ u, |u| ≤ b.rOut → 0 < v (u / L)) :
+    ContDiff ℝ ∞ (profiledBumpWindow v L b) := by
+  rw [contDiff_iff_contDiffAt]
+  intro x
+  by_cases hx : x ∈ Metric.closedBall (0 : ℝ) b.rOut
+  · have hxabs : |x| ≤ b.rOut := by
+      simpa [Real.dist_eq] using hx
+    have hscaled :
+        ContDiff ℝ ∞ (fun y : ℝ => v (y / L)) :=
+      hv.comp (contDiff_id.div_const L)
+    exact
+      (hscaled.contDiffAt.sqrt (ne_of_gt (hpos x hxabs))).mul
+        b.contDiffAt
+  · have hopen :
+        IsOpen ((Metric.closedBall (0 : ℝ) b.rOut)ᶜ) :=
+      isClosed_closedBall.isOpen_compl
+    have heq :
+        profiledBumpWindow v L b =ᶠ[𝓝 x] (fun _ : ℝ => (0 : ℝ)) := by
+      filter_upwards [hopen.mem_nhds hx] with y hy
+      have hyout : b.rOut < dist y (0 : ℝ) := by
+        simpa only [Set.mem_compl_iff, Metric.mem_closedBall, not_le] using hy
+      have hby : b y = 0 :=
+        b.zero_of_le_dist hyout.le
+      simp [profiledBumpWindow, hby]
+    exact contDiff_zero.contDiffAt.congr_of_eventuallyEq heq
+
+/-- An even profile gives an even profiled bump. -/
+theorem profiledBumpWindow_even
+    (v : ℝ → ℝ) (L : ℝ) (b : ContDiffBump (0 : ℝ))
+    (heven : ∀ x, v (-x) = v x) (u : ℝ) :
+    profiledBumpWindow v L b (-u) =
+      profiledBumpWindow v L b u := by
+  unfold profiledBumpWindow
+  rw [show (-u) / L = -(u / L) by ring, heven, b.neg]
+
+/-- The energy of a profiled bump is the profile times the squared cutoff. -/
+theorem profiledBumpWindow_sq
+    (v : ℝ → ℝ) (L : ℝ) (b : ContDiffBump (0 : ℝ))
+    (u : ℝ) (hnonneg : 0 ≤ v (u / L)) :
+    profiledBumpWindow v L b u ^ 2 =
+      v (u / L) * b u ^ 2 := by
+  unfold profiledBumpWindow
+  rw [mul_pow, Real.sq_sqrt hnonneg]
+
+/-- The profiled window has no support beyond the bump's closed outer ball. -/
+theorem profiledBumpWindow_tsupport
+    (v : ℝ → ℝ) (L : ℝ) (b : ContDiffBump (0 : ℝ)) :
+    tsupport (profiledBumpWindow v L b) ⊆
+      Metric.closedBall (0 : ℝ) b.rOut := by
+  rw [tsupport]
+  refine closure_minimal ?_ isClosed_closedBall
+  intro u hu
+  have hbu : b u ≠ 0 := by
+    intro hzero
+    apply hu
+    simp [profiledBumpWindow, hzero]
+  have hball : u ∈ Metric.ball (0 : ℝ) b.rOut := by
+    rw [← b.support_eq]
+    exact hbu
+  exact Metric.ball_subset_closedBall hball
+
+/-- On the bump's inner ball, its energy is exactly the requested profile. -/
+theorem profiledBumpWindow_sq_eq_profile
+    (v : ℝ → ℝ) (L : ℝ) (b : ContDiffBump (0 : ℝ))
+    (u : ℝ) (hnonneg : 0 ≤ v (u / L))
+    (hu : u ∈ Metric.closedBall (0 : ℝ) b.rIn) :
+    profiledBumpWindow v L b u ^ 2 = v (u / L) := by
+  rw [profiledBumpWindow_sq v L b u hnonneg,
+    b.one_of_mem_closedBall hu]
+  ring
+
+/-- A cutoff whose transition layer shrinks to the two half-period
+endpoints. -/
+def shrinkingHalfPeriodBump
+    (L : ℝ) (n : ℕ) (hL : 0 < L) : ContDiffBump (0 : ℝ) where
+  rIn := L / 2 - L / ((n : ℝ) + 3)
+  rOut := L / 2 - L / (2 * ((n : ℝ) + 3))
+  rIn_pos := by
+    apply sub_pos.mpr
+    rw [div_lt_div_iff₀
+      (by positivity : 0 < (n : ℝ) + 3)
+      (by norm_num : (0 : ℝ) < 2)]
+    nlinarith
+  rIn_lt_rOut := by
+    have hn : 0 < (n : ℝ) + 3 := by positivity
+    have hdiv :
+        L / (2 * ((n : ℝ) + 3)) <
+          L / ((n : ℝ) + 3) := by
+      rw [div_lt_div_iff₀ (mul_pos (by norm_num) hn) hn]
+      nlinarith
+    linarith
+
+theorem shrinkingHalfPeriodBump_rOut_lt
+    (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    (shrinkingHalfPeriodBump L n hL).rOut < L / 2 := by
+  dsimp [shrinkingHalfPeriodBump]
+  positivity
+
+/-- The explicit shrinking-window energy approximation to a normalized
+profile. -/
+def shrinkingProfileWindow
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L) (u : ℝ) : ℝ :=
+  profiledBumpWindow v L (shrinkingHalfPeriodBump L n hL) u
+
+/-- A smooth positive profile on the normalized half interval gives a smooth
+strict-half-period window at every finite stage. -/
+theorem shrinkingProfileWindow_contDiff
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    ContDiff ℝ ∞ (shrinkingProfileWindow v L n hL) := by
+  apply profiledBumpWindow_contDiff v L
+    (shrinkingHalfPeriodBump L n hL) hv
+  intro u hu
+  apply hpos
+  rw [abs_div, abs_of_pos hL]
+  apply (div_le_iff₀ hL).2
+  have hout :=
+    (shrinkingHalfPeriodBump_rOut_lt L n hL).le
+  nlinarith
+
+/-- Every shrinking profiled window lies in the closed half-period, so every
+nonzero period translate has zero overlap. -/
+theorem shrinkingProfileWindow_tsupport
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    tsupport (shrinkingProfileWindow v L n hL) ⊆
+      Icc (-L / 2) (L / 2) := by
+  intro u hu
+  have hclosed :=
+    profiledBumpWindow_tsupport v L
+      (shrinkingHalfPeriodBump L n hL) hu
+  have habs :
+      |u| ≤ (shrinkingHalfPeriodBump L n hL).rOut := by
+    simpa [Real.dist_eq] using hclosed
+  exact abs_le.mp
+    (le_trans habs (shrinkingHalfPeriodBump_rOut_lt L n hL).le)
+
+/-- The shrinking window is literally the target energy away from its two
+transition layers. -/
+theorem shrinkingProfileWindow_sq_eq_profile
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (u : ℝ)
+    (hu :
+      |u| ≤ (shrinkingHalfPeriodBump L n hL).rIn) :
+    shrinkingProfileWindow v L n hL u ^ 2 = v (u / L) := by
+  apply profiledBumpWindow_sq_eq_profile
+  · apply (hpos (u / L) ?_).le
+    rw [abs_div, abs_of_pos hL]
+    apply (div_le_iff₀ hL).2
+    have hradii :
+        (shrinkingHalfPeriodBump L n hL).rIn <
+          (shrinkingHalfPeriodBump L n hL).rOut :=
+      (shrinkingHalfPeriodBump L n hL).rIn_lt_rOut
+    have hout :=
+      (shrinkingHalfPeriodBump_rOut_lt L n hL).le
+    nlinarith
+  · simpa [Real.dist_eq] using hu
 
 end SmoothRadialShell
 end Zeta85
