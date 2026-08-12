@@ -1372,4 +1372,77 @@ theorem normalizedRSMainTerm_k4_of_continuous_compactSupport
     (nestedDistanceKernel_integrable_of_continuous_compact r hr hrc)
     (crossingRawKernel_integrable_of_continuous_compact mu r hmu.ne' hr hrc)
 
+
+/-! ## Concrete quartic scalar carried by the frozen smooth test -/
+
+/-- The real scalar appearing in the normalized quartic RS main term. -/
+def quarticRSScalar (mu : ℝ) (r : ℝ -> ℝ) : ℝ :=
+  (∫ x : ℝ, r x ^ 4) +
+    mu ^ 2 * (4 * distanceIntegral (fun x => r x ^ 3) r +
+      2 * distanceIntegral (fun x => r x ^ 2) (fun x => r x ^ 2)) +
+    mu ^ 4 * (2 * pairSquaredPotentialIntegral r + crossingFunctional r)
+
+/-- The normalized quartic main term is exactly the displayed real
+contraction scalar. -/
+theorem normalizedRSMainTerm_k4_eq_quarticRSScalar
+    (mu : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    normalizedRSMainTerm mu (weightedCyclicSymbol (k := 4) mu r) =
+      (quarticRSScalar mu r : ℝ) := by
+  simpa only [quarticRSScalar] using
+    normalizedRSMainTerm_k4_of_continuous_compactSupport mu r hmu hr hrc
+
+/-- Undoing the normalization exposes the literal scalar multiplying the
+height factor in the four-point theorem. -/
+theorem rsMainTerm_k4_eq_mu_mul_quarticRSScalar
+    (mu : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    rsMainTerm (weightedCyclicSymbol (k := 4) mu r) =
+      (mu * quarticRSScalar mu r : ℝ) := by
+  have h :=
+    normalizedRSMainTerm_k4_eq_quarticRSScalar mu r hmu hr hrc
+  change rsMainTerm (weightedCyclicSymbol (k := 4) mu r) / (mu : ℂ) =
+    (quarticRSScalar mu r : ℂ) at h
+  have hmuC : (mu : ℂ) ≠ 0 := by
+    exact_mod_cast hmu.ne'
+  have hm := (div_eq_iff hmuC).mp h
+  simpa [mul_comm] using hm
+
+/-- The literal profile used by the frozen strict-support construction has a
+fully evaluated quartic RS main term. -/
+theorem unitIntervalProfile_rsMainTerm :
+    rsMainTerm
+        (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+          unitIntervalProfile) =
+      ((4999 / 10000 : ℝ) *
+        quarticRSScalar (4999 / 10000 : ℝ) unitIntervalProfile : ℝ) := by
+  apply rsMainTerm_k4_eq_mu_mul_quarticRSScalar
+  · norm_num
+  · exact unitIntervalProfile_contDiff.continuous
+  · exact unitIntervalProfile_hasCompactSupport
+
+/-- The four-point RS theorem for the frozen smooth test, with its main term
+rewritten as the concrete quartic contraction scalar. -/
+theorem RS1996ZetaInputs.unitIntervalQuartic_evaluated
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (g : Fin 4 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+          unitIntervalProfile) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+            unitIntervalProfile) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          (((4999 / 10000 : ℝ) *
+            quarticRSScalar (4999 / 10000 : ℝ)
+              unitIntervalProfile : ℝ) : ℂ)‖ ≤ C * T := by
+  obtain ⟨C, T0, hC, hT0, hRS⟩ := hrs.unitIntervalQuartic g hg
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  refine ⟨hSummable, ?_⟩
+  simpa only [unitIntervalProfile_rsMainTerm] using hBound
+
 end RH.Zeta85.RSPairIntegrals
