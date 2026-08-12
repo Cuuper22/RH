@@ -1475,4 +1475,149 @@ theorem RS1996ZetaInputs.frozenQuartic_evaluated
     hrSmooth.continuous hrc] at hBound
   exact hBound
 
+
+/-! ## Evaluated contractions in every degree through four -/
+
+
+/-- Raw cyclic contractions through degree four, before binomial centering. -/
+def cyclicRSScalarMoment (mu : ℝ) (r : ℝ -> ℝ) : ℕ -> ℝ
+  | 0 => 1
+  | 1 => ∫ x : ℝ, r x
+  | 2 => (∫ x : ℝ, r x ^ 2) + mu ^ 2 * distanceIntegral r r
+  | 3 => (∫ x : ℝ, r x ^ 3) +
+      3 * mu ^ 2 * distanceIntegral (fun x => r x ^ 2) r
+  | 4 => quarticRSScalar mu r
+  | _ => 0
+
+private theorem rsMainTerm_eq_mu_mul_of_normalized
+    {n : ℕ} (mu s : ℝ) (Phi : (Fin (n + 1) -> ℝ) -> ℂ)
+    (hmu : 0 < mu)
+    (h : normalizedRSMainTerm mu Phi = (s : ℂ)) :
+    rsMainTerm Phi = (mu * s : ℝ) := by
+  change rsMainTerm Phi / (mu : ℂ) = (s : ℂ) at h
+  have hmuC : (mu : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr hmu.ne'
+  have hm := (div_eq_iff hmuC).mp h
+  simpa [mul_comm] using hm
+
+theorem rsMainTerm_k1_eq_cyclicRSScalarMoment
+    (mu : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu) :
+    rsMainTerm (weightedCyclicSymbol (k := 1) mu r) =
+      (mu * cyclicRSScalarMoment mu r 1 : ℝ) := by
+  apply rsMainTerm_eq_mu_mul_of_normalized mu
+  simpa only [cyclicRSScalarMoment] using
+    normalizedRSMainTerm_k1 mu r hmu
+
+theorem rsMainTerm_k2_eq_cyclicRSScalarMoment
+    (mu : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    rsMainTerm (weightedCyclicSymbol (k := 2) mu r) =
+      (mu * cyclicRSScalarMoment mu r 2 : ℝ) := by
+  apply rsMainTerm_eq_mu_mul_of_normalized mu
+  simpa only [cyclicRSScalarMoment] using
+    normalizedRSMainTerm_k2_of_continuous_compactSupport
+      mu r hmu hr hrc
+
+theorem rsMainTerm_k3_eq_cyclicRSScalarMoment
+    (mu : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    rsMainTerm (weightedCyclicSymbol (k := 3) mu r) =
+      (mu * cyclicRSScalarMoment mu r 3 : ℝ) := by
+  apply rsMainTerm_eq_mu_mul_of_normalized mu
+  simpa only [cyclicRSScalarMoment] using
+    normalizedRSMainTerm_k3_of_continuous_compactSupport
+      mu r hmu hr hrc
+
+theorem rsMainTerm_k4_eq_cyclicRSScalarMoment
+    (mu : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    rsMainTerm (weightedCyclicSymbol (k := 4) mu r) =
+      (mu * cyclicRSScalarMoment mu r 4 : ℝ) := by
+  simpa only [cyclicRSScalarMoment] using
+    rsMainTerm_k4_eq_mu_mul_quarticRSScalar mu r hmu hr hrc
+
+
+
+/-- The one-point theorem with its raw contraction exposed. -/
+theorem RS1996ZetaInputs.frozenLinear_evaluated
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℝ -> ℝ) (hrc : HasCompactSupport r)
+    (hrSmooth : ContDiff ℝ 1 r)
+    (g : Fin 1 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 1) (4999 / 10000 : ℝ) r) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 1) (4999 / 10000 : ℝ) r) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          (((4999 / 10000 : ℝ) *
+            cyclicRSScalarMoment (4999 / 10000 : ℝ) r 1 : ℝ) : ℂ)‖ ≤
+        C * T := by
+  obtain ⟨C, T0, hC, hT0, hRS⟩ :=
+    hrs.frozenLinear r hrc hrSmooth g hg
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  refine ⟨hSummable, ?_⟩
+  rw [rsMainTerm_k1_eq_cyclicRSScalarMoment
+    (4999 / 10000 : ℝ) r (by norm_num)] at hBound
+  exact hBound
+
+/-- The two-point theorem with its raw contraction exposed. -/
+theorem RS1996ZetaInputs.frozenQuadratic_evaluated
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℝ -> ℝ) (hrc : HasCompactSupport r)
+    (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 -> (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (g : Fin 2 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 2) (4999 / 10000 : ℝ) r) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 2) (4999 / 10000 : ℝ) r) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          (((4999 / 10000 : ℝ) *
+            cyclicRSScalarMoment (4999 / 10000 : ℝ) r 2 : ℝ) : ℂ)‖ ≤
+        C * T := by
+  obtain ⟨C, T0, hC, hT0, hRS⟩ :=
+    hrs.frozenQuadratic r hrc hrSmooth hrSupport g hg
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  refine ⟨hSummable, ?_⟩
+  rw [rsMainTerm_k2_eq_cyclicRSScalarMoment
+    (4999 / 10000 : ℝ) r (by norm_num)
+    hrSmooth.continuous hrc] at hBound
+  exact hBound
+
+/-- The three-point theorem with its raw contraction exposed. -/
+theorem RS1996ZetaInputs.frozenCubic_evaluated
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℝ -> ℝ) (hrc : HasCompactSupport r)
+    (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 -> (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (g : Fin 3 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 3) (4999 / 10000 : ℝ) r) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 3) (4999 / 10000 : ℝ) r) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          (((4999 / 10000 : ℝ) *
+            cyclicRSScalarMoment (4999 / 10000 : ℝ) r 3 : ℝ) : ℂ)‖ ≤
+        C * T := by
+  obtain ⟨C, T0, hC, hT0, hRS⟩ :=
+    hrs.frozenCubic r hrc hrSmooth hrSupport g hg
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  refine ⟨hSummable, ?_⟩
+  rw [rsMainTerm_k3_eq_cyclicRSScalarMoment
+    (4999 / 10000 : ℝ) r (by norm_num)
+    hrSmooth.continuous hrc] at hBound
+  exact hBound
+
 end RH.Zeta85.RSPairIntegrals
