@@ -384,6 +384,55 @@ private theorem sum_fintype_finset_comm
       ∑ a ∈ s, ∑ i : ι, f i a := by
   rw [Finset.sum_comm]
 
+
+private theorem sum_fintypes2_finset_comm
+    {ι κ α : Type*} [Fintype ι] [Fintype κ]
+    (s : Finset α) (f : ι → κ → α → ℂ) :
+    (∑ i : ι, ∑ j : κ, ∑ a ∈ s, f i j a) =
+      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, f i j a := by
+  calc
+    (∑ i : ι, ∑ j : κ, ∑ a ∈ s, f i j a) =
+        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, f i j a := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [sum_fintype_finset_comm]
+    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, f i j a := by
+      rw [sum_fintype_finset_comm]
+
+private theorem sum_fintypes3_finset_comm
+    {ι κ ν α : Type*} [Fintype ι] [Fintype κ] [Fintype ν]
+    (s : Finset α) (f : ι → κ → ν → α → ℂ) :
+    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ a ∈ s, f i j k a) =
+      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, f i j k a := by
+  calc
+    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ a ∈ s, f i j k a) =
+        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, ∑ k : ν, f i j k a := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [sum_fintypes2_finset_comm]
+    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, f i j k a := by
+      rw [sum_fintype_finset_comm]
+
+private theorem sum_fintypes4_finset_comm
+    {ι κ ν ξ α : Type*}
+    [Fintype ι] [Fintype κ] [Fintype ν] [Fintype ξ]
+    (s : Finset α) (f : ι → κ → ν → ξ → α → ℂ) :
+    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+      ∑ a ∈ s, f i j k l a) =
+      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+        f i j k l a := by
+  calc
+    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+        ∑ a ∈ s, f i j k l a) =
+        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+          f i j k l a := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [sum_fintypes3_finset_comm]
+    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+        f i j k l a := by
+      rw [sum_fintype_finset_comm]
+
 /-- Reordering only finite sums shows that a compressed entry is again a
 literal Gram sum of the mixed atoms. -/
 theorem expandedMixedZeroEntry_eq_sum
@@ -585,10 +634,8 @@ theorem mixedZeroTupleCyclicTrace2_eq_kernel
     mixedZeroTupleCyclicTrace2 C T =
       mixedZeroKernelCyclicTrace2 C T := by
   unfold mixedZeroTupleCyclicTrace2 mixedZeroKernelCyclicTrace2
-  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T)]
+  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
 
 theorem mixedIndexKernel1_eq_pairCycle
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -603,7 +650,7 @@ theorem mixedIndexKernel1_eq_pairCycle
   apply Finset.sum_congr rfl
   intro i _
   simp only [mixedBlockZeroSummand]
-  ring_nf
+  ring
 
 theorem mixedIndexKernel2_eq_pairCycle
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -622,7 +669,7 @@ theorem mixedIndexKernel2_eq_pairCycle
   apply Finset.sum_congr rfl
   intro j _
   simp only [mixedBlockZeroSummand]
-  ring_nf
+  ring
 
 theorem mixedZeroKernelCyclicTrace1_eq_pairKernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -788,15 +835,9 @@ theorem mixedZeroTupleCyclicTrace3_eq_kernel
     mixedZeroTupleCyclicTrace3 C T =
       mixedZeroKernelCyclicTrace3 C T := by
   unfold mixedZeroTupleCyclicTrace3 mixedZeroKernelCyclicTrace3
-  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T)]
+  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes3_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
 
 theorem mixedZeroTupleCyclicTrace4_eq_kernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -805,22 +846,10 @@ theorem mixedZeroTupleCyclicTrace4_eq_kernel
     mixedZeroTupleCyclicTrace4 C T =
       mixedZeroKernelCyclicTrace4 C T := by
   unfold mixedZeroTupleCyclicTrace4 mixedZeroKernelCyclicTrace4
-  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T)]
+  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
 
 theorem mixedIndexKernel3_eq_pairCycle
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -842,7 +871,7 @@ theorem mixedIndexKernel3_eq_pairCycle
   apply Finset.sum_congr rfl
   intro k _
   simp only [mixedBlockZeroSummand]
-  ring_nf
+  ring
 
 theorem mixedIndexKernel4_eq_pairCycle
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -868,7 +897,7 @@ theorem mixedIndexKernel4_eq_pairCycle
   apply Finset.sum_congr rfl
   intro l _
   simp only [mixedBlockZeroSummand]
-  ring_nf
+  ring
 
 theorem mixedZeroKernelCyclicTrace3_eq_pairKernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
