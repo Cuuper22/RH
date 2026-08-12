@@ -445,6 +445,29 @@ theorem paperFT_mul_horizontal_decay_of_hasCompactSupport
     by_contra hnot
     exact hu (hsupp u (not_le.mp hnot))) z z'
 
+/-- Compact support also supplies one fourth-order constant for every pair
+of frequencies in a fixed vertical strip. -/
+theorem exists_paperFT_mul_horizontal_decay_uniform_of_hasCompactSupport
+    {φ : ℝ → ℂ}
+    (hφ : ContDiff ℝ 2 φ)
+    (hcompact : HasCompactSupport φ)
+    (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ z z' : ℂ,
+      |z.im| ≤ B → |z'.im| ≤ B → ∀ s : ℝ,
+        ‖paperFT φ (z - s) * paperFT φ (z' - s)‖ *
+            ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) ≤ C := by
+  obtain ⟨Λ, hΛ, hsuppZero⟩ := exists_nonneg_support_abs_bound hcompact
+  have hsupp : ∀ u, φ u ≠ 0 → |u| ≤ Λ := by
+    intro u hu
+    by_contra hnot
+    exact hu (hsuppZero u (not_le.mp hnot))
+  let C : ℝ := (Real.exp (B * Λ) *
+    ((∫ u, ‖φ u‖) + (∫ u, ‖deriv (deriv φ) u‖))) ^ 2
+  refine ⟨C, by dsimp only [C]; positivity, ?_⟩
+  intro z z' hz hz' s
+  exact paperFT_mul_horizontal_decay_uniform
+    hφ hsupp hΛ hB z z' hz hz' s
+
 /-- Full complex Poisson summation stated directly for a compactly supported
 window, with the support radius chosen internally. -/
 theorem hasSum_paperFT_mul_paperFT_alias_of_hasCompactSupport
