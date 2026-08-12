@@ -479,7 +479,7 @@ theorem zeroIndexKernel1_eq_factored
   apply Finset.sum_congr rfl
   intro i _
   simp only [blockZeroSummand, zeroEdgeWeight]
-  ring_nf
+  ring
 
 theorem zeroIndexKernel2_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -495,7 +495,7 @@ theorem zeroIndexKernel2_eq_factored
   apply Finset.sum_congr rfl
   intro j _
   simp only [blockZeroSummand, zeroEdgeWeight]
-  ring_nf
+  ring
 
 theorem zeroIndexKernel3_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -515,7 +515,7 @@ theorem zeroIndexKernel3_eq_factored
   apply Finset.sum_congr rfl
   intro k _
   simp only [blockZeroSummand, zeroEdgeWeight]
-  ring_nf
+  ring
 
 theorem zeroIndexKernel4_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -539,7 +539,7 @@ theorem zeroIndexKernel4_eq_factored
   apply Finset.sum_congr rfl
   intro l _
   simp only [blockZeroSummand, zeroEdgeWeight]
-  ring_nf
+  ring
 
 def factoredZeroKernelCyclicTrace1
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -662,24 +662,58 @@ theorem zeroCyclicTrace2_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroCyclicTrace2 F T = zeroTupleCyclicTrace2 F T := by
-  simp [zeroCyclicTrace2, zeroTupleCyclicTrace2,
-    blockZeroEntry_eq_finsetSum, Finset.sum_mul, Finset.mul_sum]
+  unfold zeroCyclicTrace2 zeroTupleCyclicTrace2
+  simp only [blockZeroEntry_eq_finsetSum]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [Finset.mul_sum]
 
 theorem zeroCyclicTrace3_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroCyclicTrace3 F T = zeroTupleCyclicTrace3 F T := by
-  simp [zeroCyclicTrace3, zeroTupleCyclicTrace3,
-    blockZeroEntry_eq_finsetSum, Finset.sum_mul, Finset.mul_sum,
-    mul_assoc]
+  unfold zeroCyclicTrace3 zeroTupleCyclicTrace3
+  simp only [blockZeroEntry_eq_finsetSum]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro ρ₂ _
+  rw [Finset.mul_sum]
 
 theorem zeroCyclicTrace4_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroCyclicTrace4 F T = zeroTupleCyclicTrace4 F T := by
-  simp [zeroCyclicTrace4, zeroTupleCyclicTrace4,
-    blockZeroEntry_eq_finsetSum, Finset.sum_mul, Finset.mul_sum,
-    mul_assoc]
+  unfold zeroCyclicTrace4 zeroTupleCyclicTrace4
+  simp only [blockZeroEntry_eq_finsetSum]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro l _
+  simp only [Finset.sum_mul, Finset.mul_sum]
 
 def zeroCyclicQuarticNumerator
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -1704,7 +1738,7 @@ theorem factoredZeroCycle1_eq_normalized
       normalizedFactoredZeroCycle1 F T ρ := by
   simp only [factoredZeroCycle1, normalizedFactoredZeroCycle1,
     normalizedZeroPairKernel, zeroEdgeWeight]
-  ring_nf
+  ring
 
 theorem factoredZeroCycle2_eq_normalized
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -1713,7 +1747,7 @@ theorem factoredZeroCycle2_eq_normalized
       normalizedFactoredZeroCycle2 F T ρ₁ ρ₂ := by
   simp only [factoredZeroCycle2, normalizedFactoredZeroCycle2,
     normalizedZeroPairKernel, zeroEdgeWeight]
-  ring_nf
+  ring
 
 theorem factoredZeroCycle3_eq_normalized
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -1723,7 +1757,7 @@ theorem factoredZeroCycle3_eq_normalized
       normalizedFactoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ := by
   simp only [factoredZeroCycle3, normalizedFactoredZeroCycle3,
     normalizedZeroPairKernel, zeroEdgeWeight]
-  ring_nf
+  ring
 
 theorem factoredZeroCycle4_eq_normalized
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -1733,7 +1767,7 @@ theorem factoredZeroCycle4_eq_normalized
       normalizedFactoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
   simp only [factoredZeroCycle4, normalizedFactoredZeroCycle4,
     normalizedZeroPairKernel, zeroEdgeWeight]
-  ring_nf
+  ring
 
 def normalizedFactoredZeroKernelCyclicTrace1
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
