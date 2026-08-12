@@ -1867,6 +1867,289 @@ theorem eventually_balancedRemote_norm_le_eight
   rw [sum_zeroVertexWeight_norm_sq F T hhatT] at h
   exact h
 
+/-- Any fixed logarithmic power is absorbed by the power saving left by
+`μ < 1`; this is the six-log version needed by the quartic perturbation. -/
+theorem tendsto_rpow_sub_half_mul_log_pow_six
+    {μ : ℝ} (hμ : μ < 1) :
+    Tendsto (fun T : ℝ =>
+      T ^ (μ / 2 - 1 / 2 : ℝ) * Real.log T ^ 6) atTop (nhds 0) := by
+  let δ : ℝ := (1 - μ) / 2
+  have hδ : 0 < δ := by
+    dsimp only [δ]
+    linarith
+  have ho := isLittleO_log_rpow_rpow_atTop (6 : ℝ) hδ
+  have hzero : ∀ᶠ T : ℝ in atTop,
+      T ^ δ = 0 → Real.log T ^ (6 : ℝ) = 0 := by
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with T hT
+    intro hpow
+    exact (((Real.rpow_ne_zero hT.le hδ.ne').2 hT.ne') hpow).elim
+  have hratio : Tendsto
+      (fun T : ℝ => Real.log T ^ (6 : ℝ) / T ^ δ)
+      atTop (nhds 0) :=
+    (Asymptotics.isLittleO_iff_tendsto' hzero).1 ho
+  apply hratio.congr'
+  filter_upwards [eventually_gt_atTop (1 : ℝ)] with T hT
+  have hT0 : 0 < T := lt_trans zero_lt_one hT
+  have hlogpow : Real.log T ^ (6 : ℝ) = Real.log T ^ (6 : ℕ) :=
+    Real.rpow_natCast (Real.log T) 6
+  rw [hlogpow]
+  have hexp : μ / 2 - 1 / 2 = -δ := by
+    dsimp only [δ]
+    ring
+  rw [hexp, Real.rpow_neg hT0.le]
+  simp only [div_eq_mul_inv]
+  ring
+
+theorem distinguishedWindowFourierMajorantEight_le
+    {Z : ZeroConfig} {σ μ p c T : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 ≤ μ) (hT : 1 < T)
+    (hperiod : F.period T (F.distinguished T) = μ * Zeta23.l T)
+    (hmass : distinguishedWindowSobolevMassFour F T ≤ c * Zeta23.l T) :
+    distinguishedWindowFourierMajorantEight F T ≤
+      c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2 := by
+  have hT0 : 0 < T := lt_trans zero_lt_one hT
+  have hlogconst : 0 ≤ Real.log (2 * Real.pi) := by
+    apply Real.log_nonneg
+    nlinarith [Real.pi_gt_three]
+  have hlLog : Zeta23.l T ≤ Real.log T := by
+    rw [Zeta23.Assembly.log_eq_l_add hT0]
+    linarith
+  have hexp :
+      (Real.exp ((1 / 2 : ℝ) *
+        (F.period T (F.distinguished T) / 2))) ^ 2 ≤
+        T ^ (μ / 2 : ℝ) := by
+    rw [pow_two, ← Real.exp_add]
+    rw [hperiod, Real.rpow_def_of_pos hT0]
+    apply Real.exp_le_exp.mpr
+    have hmul := mul_le_mul_of_nonneg_right hlLog
+      (show 0 ≤ μ / 2 by positivity)
+    nlinarith
+  have hmass0 : 0 ≤ distinguishedWindowSobolevMassFour F T := by
+    unfold distinguishedWindowSobolevMassFour
+    positivity
+  have hcl0 : 0 ≤ c * Zeta23.l T := hmass0.trans hmass
+  unfold distinguishedWindowFourierMajorantEight
+  calc
+    (Real.exp ((1 / 2 : ℝ) *
+          (F.period T (F.distinguished T) / 2)) *
+        distinguishedWindowSobolevMassFour F T) ^ 2 =
+        (Real.exp ((1 / 2 : ℝ) *
+          (F.period T (F.distinguished T) / 2))) ^ 2 *
+          distinguishedWindowSobolevMassFour F T ^ 2 := by ring
+    _ ≤ T ^ (μ / 2 : ℝ) * (c * Zeta23.l T) ^ 2 :=
+      mul_le_mul hexp ((sq_le_sq₀ hmass0 hcl0).2 hmass)
+        (sq_nonneg _) (by positivity)
+    _ = c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2 := by ring
+
+theorem distinguishedRemoteTailGridFactorEight_le
+    {Z : ZeroConfig} {σ μ p T : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 < μ) (hT : 1 ≤ T) (hl : 1 ≤ Zeta23.l T)
+    (hperiod : F.period T (F.distinguished T) = μ * Zeta23.l T) :
+    (Zeta23.D0 T ^ 4)⁻¹ *
+        ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+          (3 * PoissonKernelBridge.distinguishedGridStep F T)) ≤
+      (1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 7)⁻¹ := by
+  have hT0 : 0 < T := lt_of_lt_of_le zero_lt_one hT
+  have hD : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT0
+  have hold := PoissonKernelBridge.distinguishedRemoteTailGridFactor_le
+    F hμ hT hl hperiod
+  calc
+    (Zeta23.D0 T ^ 4)⁻¹ *
+        ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+          (3 * PoissonKernelBridge.distinguishedGridStep F T)) ≤
+      (Zeta23.D0 T ^ 4)⁻¹ *
+        ((1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 3)⁻¹) := by
+          gcongr
+    _ = (1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 7)⁻¹ := by
+      field_simp [hD.ne']
+
+/-- Three zero-count factors still leave the full power saving supplied by
+the eighth-order pair tail. -/
+theorem N_cube_mul_distinguishedRemoteTailScaleEight_le
+    {Z : ZeroConfig} {σ μ p c T : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 < μ) (hT : 1 < T) (hl : 1 ≤ Zeta23.l T)
+    (hperiod : F.period T (F.distinguished T) = μ * Zeta23.l T)
+    (hN : (Z.N T (2 * T) : ℝ) ≤ T * Zeta23.l T)
+    (hMaj : distinguishedWindowFourierMajorantEight F T ≤
+      c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2)
+    (hTail : (Zeta23.D0 T ^ 4)⁻¹ *
+        ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+          (3 * PoissonKernelBridge.distinguishedGridStep F T)) ≤
+      (1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 7)⁻¹) :
+    (Z.N T (2 * T) : ℝ) ^ 3 * distinguishedRemoteTailScaleEight F T ≤
+      c ^ 2 * (1 + μ) * T ^ (μ / 2 - 1 / 2 : ℝ) *
+        Real.log T ^ 6 := by
+  have hT0 : 0 < T := lt_trans zero_lt_one hT
+  have hD : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT0
+  have hl0 : 0 ≤ Zeta23.l T := le_trans zero_le_one hl
+  have hlog0 : 0 ≤ Real.log T := Real.log_nonneg (le_of_lt hT)
+  have hlogconst : 0 ≤ Real.log (2 * Real.pi) := by
+    apply Real.log_nonneg
+    nlinarith [Real.pi_gt_three]
+  have hlLog : Zeta23.l T ≤ Real.log T := by
+    rw [Zeta23.Assembly.log_eq_l_add hT0]
+    linarith
+  have hgrid : 0 < PoissonKernelBridge.distinguishedGridStep F T := by
+    unfold PoissonKernelBridge.distinguishedGridStep
+    rw [hperiod]
+    positivity
+  have htail0 : 0 ≤ (Zeta23.D0 T ^ 4)⁻¹ *
+      ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+        (3 * PoissonKernelBridge.distinguishedGridStep F T)) := by
+    positivity
+  have hmaj0 : 0 ≤ distinguishedWindowFourierMajorantEight F T := by
+    unfold distinguishedWindowFourierMajorantEight
+    positivity
+  have hrightMaj0 :
+      0 ≤ c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2 := by
+    positivity
+  have hNpow : (Z.N T (2 * T) : ℝ) ^ 3 ≤
+      (T * Zeta23.l T) ^ 3 := by
+    exact pow_le_pow_left₀ (Nat.cast_nonneg _) hN 3
+  have hraw :
+      (Z.N T (2 * T) : ℝ) ^ 3 * distinguishedRemoteTailScaleEight F T ≤
+        (T * Zeta23.l T) ^ 3 *
+          ((c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2) *
+            ((1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 7)⁻¹)) := by
+    unfold distinguishedRemoteTailScaleEight
+    calc
+      (Z.N T (2 * T) : ℝ) ^ 3 *
+          (distinguishedWindowFourierMajorantEight F T *
+            ((Zeta23.D0 T ^ 4)⁻¹ *
+              ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+                (3 * PoissonKernelBridge.distinguishedGridStep F T)))) ≤
+          (T * Zeta23.l T) ^ 3 *
+            (distinguishedWindowFourierMajorantEight F T *
+              ((Zeta23.D0 T ^ 4)⁻¹ *
+                ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+                  (3 * PoissonKernelBridge.distinguishedGridStep F T)))) :=
+        mul_le_mul_of_nonneg_right hNpow (mul_nonneg hmaj0 htail0)
+      _ ≤ (T * Zeta23.l T) ^ 3 *
+          ((c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2) *
+            ((Zeta23.D0 T ^ 4)⁻¹ *
+              ((Zeta23.D0 T ^ 4)⁻¹ + (Zeta23.D0 T ^ 3)⁻¹ /
+                (3 * PoissonKernelBridge.distinguishedGridStep F T)))) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_right hMaj htail0) (by positivity)
+      _ ≤ (T * Zeta23.l T) ^ 3 *
+          ((c ^ 2 * T ^ (μ / 2 : ℝ) * Zeta23.l T ^ 2) *
+            ((1 + μ) * Zeta23.l T * (Zeta23.D0 T ^ 7)⁻¹)) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left hTail hrightMaj0) (by positivity)
+  have hDsquare : Zeta23.D0 T ^ 2 = T := Real.sq_sqrt hT0.le
+  have hD7 : Zeta23.D0 T ^ 7 = Zeta23.D0 T * T ^ 3 := by
+    calc
+      Zeta23.D0 T ^ 7 = Zeta23.D0 T * (Zeta23.D0 T ^ 2) ^ 3 := by ring
+      _ = Zeta23.D0 T * T ^ 3 := by rw [hDsquare]
+  have hpower :
+      T ^ 3 * T ^ (μ / 2 : ℝ) * (Zeta23.D0 T ^ 7)⁻¹ =
+        T ^ (μ / 2 - 1 / 2 : ℝ) := by
+    rw [hD7]
+    have hcancel :
+        T ^ 3 * T ^ (μ / 2 : ℝ) * (Zeta23.D0 T * T ^ 3)⁻¹ =
+          T ^ (μ / 2 : ℝ) / Zeta23.D0 T := by
+      field_simp
+    rw [hcancel, Zeta23.D0, Real.sqrt_eq_rpow,
+      ← Real.rpow_sub hT0]
+  calc
+    (Z.N T (2 * T) : ℝ) ^ 3 * distinguishedRemoteTailScaleEight F T ≤ _ := hraw
+    _ = c ^ 2 * (1 + μ) *
+          (T ^ 3 * T ^ (μ / 2 : ℝ) * (Zeta23.D0 T ^ 7)⁻¹) *
+            Zeta23.l T ^ 6 := by ring
+    _ = c ^ 2 * (1 + μ) * T ^ (μ / 2 - 1 / 2 : ℝ) *
+          Zeta23.l T ^ 6 := by rw [hpower]
+    _ ≤ c ^ 2 * (1 + μ) * T ^ (μ / 2 - 1 / 2 : ℝ) *
+          Real.log T ^ 6 := by
+      apply mul_le_mul_of_nonneg_left
+      · exact pow_le_pow_left₀ hl0 hlLog 6
+      · positivity
+
+theorem tendsto_N_cube_mul_distinguishedRemoteTailScaleEight
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 < μ) (hμ1 : μ < 1) (hRvM : RiemannVonMangoldt Z)
+    (hperiod : ∀ᶠ T in atTop,
+      F.period T (F.distinguished T) = μ * Zeta23.l T)
+    (hmass : (fun T => distinguishedWindowSobolevMassFour F T) =O[atTop]
+      Zeta23.l) :
+    Tendsto (fun T => (Z.N T (2 * T) : ℝ) ^ 3 *
+      distinguishedRemoteTailScaleEight F T) atTop (nhds 0) := by
+  obtain ⟨c, hc⟩ := hmass.bound
+  have hlim : Tendsto (fun T =>
+      c ^ 2 * (1 + μ) *
+        (T ^ (μ / 2 - 1 / 2 : ℝ) * Real.log T ^ 6))
+      atTop (nhds 0) := by
+    have hconst : Tendsto (fun _ : ℝ => c ^ 2 * (1 + μ)) atTop
+        (nhds (c ^ 2 * (1 + μ))) := tendsto_const_nhds
+    simpa only [mul_zero] using
+      hconst.mul (tendsto_rpow_sub_half_mul_log_pow_six hμ1)
+  refine squeeze_zero' ?_ ?_ hlim
+  · filter_upwards [hperiod, Zeta23.Assembly.eventually_one_le_l,
+      eventually_gt_atTop (1 : ℝ)] with T hperiodT hl hT
+    have hgrid : 0 < PoissonKernelBridge.distinguishedGridStep F T := by
+      unfold PoissonKernelBridge.distinguishedGridStep
+      rw [hperiodT]
+      positivity
+    unfold distinguishedRemoteTailScaleEight
+    apply mul_nonneg (pow_nonneg (Nat.cast_nonneg _) 3)
+    apply mul_nonneg
+    · unfold distinguishedWindowFourierMajorantEight
+      positivity
+    · apply mul_nonneg
+      · exact inv_nonneg.mpr (pow_nonneg (Real.sqrt_nonneg T) 4)
+      · apply add_nonneg
+        · exact inv_nonneg.mpr (pow_nonneg (Real.sqrt_nonneg T) 4)
+        · exact div_nonneg
+            (inv_nonneg.mpr (pow_nonneg (Real.sqrt_nonneg T) 3))
+            (mul_nonneg (by norm_num) hgrid.le)
+  · filter_upwards [hc, hperiod, Zeta23.Assembly.eventually_one_le_l,
+      Zeta23.Assembly.eventually_N_le Z hRvM,
+      eventually_gt_atTop (1 : ℝ)] with T hmassT hperiodT hl hN hT
+    have hmass0 : 0 ≤ distinguishedWindowSobolevMassFour F T := by
+      unfold distinguishedWindowSobolevMassFour
+      positivity
+    have hl0 : 0 ≤ Zeta23.l T := le_trans zero_le_one hl
+    have hmassPoint :
+        distinguishedWindowSobolevMassFour F T ≤ c * Zeta23.l T := by
+      simpa only [Real.norm_eq_abs, abs_of_nonneg hmass0,
+        abs_of_nonneg hl0] using hmassT
+    have hMaj := distinguishedWindowFourierMajorantEight_le
+      F hμ.le hT hperiodT hmassPoint
+    have hTail := distinguishedRemoteTailGridFactorEight_le
+      F hμ hT.le hl hperiodT
+    simpa only [mul_assoc] using
+      N_cube_mul_distinguishedRemoteTailScaleEight_le
+        F hμ hT hl hperiodT hN hMaj hTail
+
+/-- The complete eighth-order pair scale remains negligible after three
+dyadic zero-count factors. -/
+theorem remoteLatticePairScaleEight_cube_negligible
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hσ : 0 ≤ σ)
+    (hμ : 0 < μ) (hμ1 : μ < 1) (hRvM : RiemannVonMangoldt Z)
+    (hperiod : ∀ᶠ T in atTop,
+      F.period T (F.distinguished T) = μ * Zeta23.l T)
+    (hmass : (fun T => distinguishedWindowSobolevMassFour F T) =O[atTop]
+      Zeta23.l) :
+    Tendsto (fun T => (Z.N T (2 * T) : ℝ) ^ 3 *
+      remoteLatticePairScaleEight F T) atTop (nhds 0) := by
+  have htail := tendsto_N_cube_mul_distinguishedRemoteTailScaleEight
+    F hμ hμ1 hRvM hperiod hmass
+  have hconst : Tendsto (fun _ : ℝ => 2 * (σ / μ)) atTop
+      (nhds (2 * (σ / μ))) := tendsto_const_nhds
+  have hlim := hconst.mul htail
+  simpa only [mul_zero] using hlim.congr' (by
+    filter_upwards [hperiod, Zeta23.Assembly.eventually_one_le_l]
+      with T hperiodT hl
+    have hlpos : 0 < Zeta23.l T := lt_of_lt_of_le zero_lt_one hl
+    rw [remoteLatticePairScaleEight,
+      norm_distinguishedLatticeScale_eq_ratio F T hσ hμ hlpos hperiodT]
+    ring)
+
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
