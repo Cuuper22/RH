@@ -596,8 +596,16 @@ theorem mixedZeroCyclicTrace2_eq_tuple
     (C : RealData F) (T : ℝ) :
     mixedZeroCyclicTrace2 C T =
       mixedZeroTupleCyclicTrace2 C T := by
-  simp [mixedZeroCyclicTrace2, mixedZeroTupleCyclicTrace2,
-    Finset.sum_mul, Finset.mul_sum]
+  unfold mixedZeroCyclicTrace2 mixedZeroTupleCyclicTrace2
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [Finset.mul_sum]
 
 def mixedZeroKernelCyclicTrace1
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -790,8 +798,22 @@ theorem mixedZeroCyclicTrace3_eq_tuple
     (C : RealData F) (T : ℝ) :
     mixedZeroCyclicTrace3 C T =
       mixedZeroTupleCyclicTrace3 C T := by
-  simp [mixedZeroCyclicTrace3, mixedZeroTupleCyclicTrace3,
-    Finset.sum_mul, Finset.mul_sum, mul_assoc]
+  unfold mixedZeroCyclicTrace3 mixedZeroTupleCyclicTrace3
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro ρ₂ _
+  rw [Finset.mul_sum]
 
 theorem mixedZeroCyclicTrace4_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -799,8 +821,19 @@ theorem mixedZeroCyclicTrace4_eq_tuple
     (C : RealData F) (T : ℝ) :
     mixedZeroCyclicTrace4 C T =
       mixedZeroTupleCyclicTrace4 C T := by
-  simp [mixedZeroCyclicTrace4, mixedZeroTupleCyclicTrace4,
-    Finset.sum_mul, Finset.mul_sum, mul_assoc]
+  unfold mixedZeroCyclicTrace4 mixedZeroTupleCyclicTrace4
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro l _
+  simp only [Finset.sum_mul, Finset.mul_sum]
 
 def mixedZeroKernelCyclicTrace3
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
