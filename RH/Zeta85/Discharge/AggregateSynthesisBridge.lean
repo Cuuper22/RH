@@ -100,7 +100,11 @@ theorem coordinateFullFrequencyLattice_eq_energySum_collective
                   (Complex.I *
                     (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
       unfold AggregateComplexAlias.aggregateVirtualEnergyIntegral
-      rw [mul_assoc, Finset.mul_sum]
+      unfold AggregateComplexAlias.aggregateVirtualEnergyIntegral
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro j hj
+      ring
 
 /-- The selected finite physical grid is the collectively evaluated energy
 minus the same one aggregate frequency tail. -/
