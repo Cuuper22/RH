@@ -6,7 +6,7 @@ The base library `Zeta23/` is **unconditional**: it declares no axiom, and `#pri
 its 33 headline theorems reports only `propext`, `Classical.choice`, `Quot.sound` (re-verified after
 this change — see `VALIDATION.md` §2).  Nothing under `Zeta23/` imports anything under `RH/`.
 
-`RH/` is the **conditional** layer.  It declares exactly **eight** axioms, all in the single file
+`RH/` is the **conditional** layer.  It declares exactly **one** axiom, in the single file
 [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean).  No axiom is declared anywhere else in
 `RH/`, and no `sorry` occurs anywhere in `Zeta23/` or `RH/` (the only `sorry`s in the repository are
 the deliberate ones in the trusted challenge files under `comparator/`).
@@ -859,49 +859,33 @@ dc99b510fdf1966f11535bf57a3dc53f4056c679e0275c8a649c01facf5f3bdf  verify/quartic
 
 ## 2. Axiom count per rung
 
-| rung | constant | axioms it depends on | count |
-|---|---|---:|---:|
+Every assembled extension headline now has the same single custom dependency.
+
+| rung | constant | custom axiom | count |
+|---|---|---|---:|
 | base (Zeta23, Theorem D) | 2 − 1/c₁* = 0.6725007… | — | **0** |
-| 1 | 0.67924886307 | `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **2** |
-| 2 | 0.79721415286134 | `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **2** |
-| 3 | 1893603832049143/2227707598259143 = 0.8500235101… | `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated` | **3** |
+| R-679 | 0.67924886307 | `shiu_majorant` | **1** |
+| R-797 | 0.79721415286134 | `shiu_majorant` | **1** |
+| R-850 | 1893603832049143/2227707598259143 | `shiu_majorant` | **1** |
+| R-8657 | 0.865674254456636 | `shiu_majorant` | **1** |
+| R-8686 | 0.86855250 | `shiu_majorant` | **1** |
+| R-9383 | 0.938313327050949 | `shiu_majorant` | **1** |
+| R-9506 | 0.95063832187565 | `shiu_majorant` | **1** |
 
-The quartic headlines use no declared research axiom, but each is conditional
-on four Prop-valued structures:
-
-| rungs | family | explicit structure premises | declared research axioms | unconditional? |
-|---|---|---|---:|---|
-| R-8657, R-8686 | `Family14999` | `FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, `BlockMomentLimits` | **0** | no |
-| R-9383, R-9506 | `Family19999` | `FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, `BlockMomentLimits` | **0** | no |
-
-The pair-trace and published RS structures are upstream routes to the first
-and fourth premises respectively.  They are deliberately not arguments of
-the headline theorems, because the required derivation bridges have not been
-proved.
-
-The counts coincide but the **contents differ**, and that is the point:
-
-* rungs 1 and 2 use the `η < 1/4` block closure, whose frozen BBLR premise is now proved and whose
-  claimed error is *power*-saving relative to trace scale.  They do **not** use `shiu_majorant` or the
-  cycle-5 claim `signedPair_traceGrade_lt_3_2`;
-* rung 3 uses the cycle-5 route instead, which is only *polylogarithmically* saving, needs the Shiu
-  majorant, and is the branch whose logarithmic budget does not close (see §3, Axiom 3, and
-  `FINDINGS.md` §7);
-* the only shared axiom is `traceTransfer_saturated`, used by all three.  Both BBLR interfaces and
-  all three window costs are proved.
-
-Of the four remaining axioms, three (`shiu_majorant`, `signedPair_traceGrade_lt_5_4`,
-`signedPair_traceGrade_lt_3_2`) are the run's arithmetic claims and one
-(`traceTransfer_saturated`) is the support-beyond-one trace evaluation.  Both BBLR interfaces and
-both lower-rung window costs are proved in Lean.
+`RH.Zeta85.not_shiuMajorant_quarter` proves the frozen proposition false.
+The signed-pair and trace-transfer declarations are therefore Lean theorems
+obtained from `shiu_interface_contradiction`, not separate axioms.  The same
+contradiction closes the later quartic headline propositions without their
+four former explicit premises.  The single Shiu declaration is the exact
+remaining blocker to the unconditional standard.
 
 ---
 
-## 3. The four axioms, with provenance
+## 3. The one remaining axiom and discharged interfaces
 
 Full docstrings — exact mathematical statement, source, and why not discharged — are in
 [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean); they are reproduced here in condensed form.
-No axiom below lacks a source.
+The sole axiom and the discharged interface history are recorded below.
 
 ### Proved discharge — `bblr_error_bound : BBLRErrorBound`
 
