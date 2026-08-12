@@ -103,6 +103,92 @@ theorem paperFT_mul_horizontal_decay
           (‖paperFT f (z' - s)‖ * (1 + (z'.re - s) ^ 2)) := by ring
     _ ≤ C * C' := mul_le_mul (hC s) (hC' s) (by positivity) hC0
 
+/-- A single quadratic Fourier majorant works simultaneously on a bounded
+vertical strip.  This is the uniform form needed when the horizontal
+frequency varies over all zeros in a finite height window. -/
+theorem paperFT_horizontal_decay_uniform
+    {f : ℝ → ℂ} {Λ B : ℝ}
+    (hf : ContDiff ℝ 2 f)
+    (hsupp : ∀ u, f u ≠ 0 → |u| ≤ Λ)
+    (hΛ : 0 ≤ Λ) (hB : 0 ≤ B)
+    (z : ℂ) (hz : |z.im| ≤ B) (s : ℝ) :
+    ‖paperFT f (z - s)‖ * (1 + (z.re - s) ^ 2) ≤
+      Real.exp (B * Λ) *
+        ((∫ u, ‖f u‖) + (∫ u, ‖deriv (deriv f) u‖)) := by
+  have hcompact : HasCompactSupport f :=
+    hasCompactSupport_of_support_subset_abs hsupp
+  have hfi : Integrable f :=
+    hf.continuous.integrable_of_hasCompactSupport hcompact
+  let w : ℂ := z - s
+  have h0 := norm_paperFT_le hfi hsupp w
+  have h2 := norm_paperFT_mul_sq_le hf hsupp w
+  have him : w.im = z.im := by simp [w]
+  rw [him] at h0 h2
+  have hre : (z.re - s) ^ 2 ≤ ‖w‖ ^ 2 := by
+    have hsq := Complex.sq_norm_sub_sq_re w
+    have hwre : w.re = z.re - s := by simp [w]
+    rw [hwre] at hsq
+    nlinarith [sq_nonneg w.im]
+  have h2re :
+      ‖paperFT f w‖ * (z.re - s) ^ 2 ≤
+        Real.exp (|z.im| * Λ) * ∫ u, ‖deriv (deriv f) u‖ :=
+    (mul_le_mul_of_nonneg_left hre (norm_nonneg _)).trans h2
+  have hexp : Real.exp (|z.im| * Λ) ≤ Real.exp (B * Λ) := by
+    exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right hz hΛ)
+  have hfInt : 0 ≤ ∫ u, ‖f u‖ := integral_nonneg fun _ => norm_nonneg _
+  have hdInt : 0 ≤ ∫ u, ‖deriv (deriv f) u‖ :=
+    integral_nonneg fun _ => norm_nonneg _
+  change ‖paperFT f w‖ * (1 + (z.re - s) ^ 2) ≤ _
+  calc
+    ‖paperFT f w‖ * (1 + (z.re - s) ^ 2) =
+        ‖paperFT f w‖ +
+          ‖paperFT f w‖ * (z.re - s) ^ 2 := by ring
+    _ ≤ Real.exp (|z.im| * Λ) * (∫ u, ‖f u‖) +
+          Real.exp (|z.im| * Λ) *
+            (∫ u, ‖deriv (deriv f) u‖) := add_le_add h0 h2re
+    _ ≤ Real.exp (B * Λ) * (∫ u, ‖f u‖) +
+          Real.exp (B * Λ) *
+            (∫ u, ‖deriv (deriv f) u‖) :=
+      add_le_add
+        (mul_le_mul_of_nonneg_right hexp hfInt)
+        (mul_le_mul_of_nonneg_right hexp hdInt)
+    _ = Real.exp (B * Λ) *
+          ((∫ u, ‖f u‖) + (∫ u, ‖deriv (deriv f) u‖)) := by ring
+
+/-- Consequently the same fourth-order product constant works for every
+pair of complex frequencies in a bounded vertical strip. -/
+theorem paperFT_mul_horizontal_decay_uniform
+    {f : ℝ → ℂ} {Λ B : ℝ}
+    (hf : ContDiff ℝ 2 f)
+    (hsupp : ∀ u, f u ≠ 0 → |u| ≤ Λ)
+    (hΛ : 0 ≤ Λ) (hB : 0 ≤ B)
+    (z z' : ℂ) (hz : |z.im| ≤ B) (hz' : |z'.im| ≤ B)
+    (s : ℝ) :
+    ‖paperFT f (z - s) * paperFT f (z' - s)‖ *
+        ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) ≤
+      (Real.exp (B * Λ) *
+        ((∫ u, ‖f u‖) + (∫ u, ‖deriv (deriv f) u‖))) ^ 2 := by
+  let C : ℝ := Real.exp (B * Λ) *
+    ((∫ u, ‖f u‖) + (∫ u, ‖deriv (deriv f) u‖))
+  have hC0 : 0 ≤ C := by
+    dsimp only [C]
+    positivity
+  have hzBound := paperFT_horizontal_decay_uniform
+    hf hsupp hΛ hB z hz s
+  have hz'Bound := paperFT_horizontal_decay_uniform
+    hf hsupp hΛ hB z' hz' s
+  rw [norm_mul]
+  change
+    (‖paperFT f (z - s)‖ * ‖paperFT f (z' - s)‖) *
+        ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) ≤ C ^ 2
+  calc
+    (‖paperFT f (z - s)‖ * ‖paperFT f (z' - s)‖) *
+          ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) =
+        (‖paperFT f (z - s)‖ * (1 + (z.re - s) ^ 2)) *
+          (‖paperFT f (z' - s)‖ * (1 + (z'.re - s) ^ 2)) := by ring
+    _ ≤ C * C := mul_le_mul hzBound hz'Bound (by positivity) hC0
+    _ = C ^ 2 := by ring
+
 /-- Along any nondegenerate affine real lattice, the complex-frequency
 Fourier samples are quadratically small at infinity. -/
 theorem paperFT_affine_horizontal_isBigO
