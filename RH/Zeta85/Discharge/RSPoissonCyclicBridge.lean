@@ -895,6 +895,344 @@ theorem remoteCorrectionCyclicTrace4_abs_le_frobenius
   rw [guardedZeroMatrix_add_remote_eq_full] at h
   exact h
 
+/-! ## Balanced zero weights -/
+
+/-- The positive square root of one normalized zero multiplicity.  Splitting
+this weight between the two ends of every edge preserves cyclic traces and
+makes Frobenius estimates depend on the total multiplicity only. -/
+def zeroVertexWeight
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℝ :=
+  Real.sqrt ((Z.mult ρ : ℝ) / F.hatDenominator T)
+
+theorem zeroVertexWeight_sq
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hhat : 0 < F.hatDenominator T) (ρ : ℂ) :
+    ((zeroVertexWeight F T ρ : ℂ) ^ 2) =
+      QuarticTransfer.zeroEdgeWeight F T ρ := by
+  have hnonneg : 0 ≤ (Z.mult ρ : ℝ) / F.hatDenominator T := by
+    positivity
+  unfold zeroVertexWeight
+  rw [← Complex.ofReal_pow, Real.sq_sqrt hnonneg]
+  unfold QuarticTransfer.zeroEdgeWeight
+  push_cast
+  field_simp [hhat.ne']
+
+def balancedKernelMatrix
+    {ι : Type*} (K : Matrix ι ι ℂ) (s : ι → ℂ) : Matrix ι ι ℂ :=
+  fun i j => s i * K i j * s j
+
+def rightWeightedKernelMatrix
+    {ι : Type*} (K : Matrix ι ι ℂ) (w : ι → ℂ) : Matrix ι ι ℂ :=
+  fun i j => K i j * w j
+
+/-- Moving a square edge weight half-way to each adjacent vertex leaves the
+fourth cyclic trace unchanged. -/
+theorem rtrace_balancedKernelMatrix_pow_four_eq_rightWeighted
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (K : Matrix ι ι ℂ) (s w : ι → ℂ)
+    (hs : ∀ i, s i ^ 2 = w i) :
+    RHLinalg.rtrace ((balancedKernelMatrix K s) ^ 4) =
+      RHLinalg.rtrace ((rightWeightedKernelMatrix K w) ^ 4) := by
+  rw [rtrace_pow_four_eq_cyclic_generic,
+    rtrace_pow_four_eq_cyclic_generic]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro i hi
+  apply Finset.sum_congr rfl
+  intro j hj
+  simp_rw [Finset.sum_mul, Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro k hk
+  apply Finset.sum_congr rfl
+  intro l hl
+  unfold balancedKernelMatrix rightWeightedKernelMatrix
+  rw [← hs i, ← hs j, ← hs k, ← hs l]
+  ring
+
+def balancedFullLatticeZeroMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    Matrix (↥(ZeroSide.ZI Z T)) (↥(ZeroSide.ZI Z T)) ℂ :=
+  fun ρ ρ' =>
+    (zeroVertexWeight F T (ρ : ℂ) : ℂ) *
+      fullLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ) *
+      (zeroVertexWeight F T (ρ' : ℂ) : ℂ)
+
+def balancedGuardedLatticeZeroMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    Matrix (↥(ZeroSide.ZI Z T)) (↥(ZeroSide.ZI Z T)) ℂ :=
+  fun ρ ρ' =>
+    (zeroVertexWeight F T (ρ : ℂ) : ℂ) *
+      PoissonKernelBridge.canonicalGuardedPairKernel F T
+        (ρ : ℂ) (ρ' : ℂ) *
+      (zeroVertexWeight F T (ρ' : ℂ) : ℂ)
+
+def balancedRemoteLatticeZeroMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    Matrix (↥(ZeroSide.ZI Z T)) (↥(ZeroSide.ZI Z T)) ℂ :=
+  fun ρ ρ' =>
+    (zeroVertexWeight F T (ρ : ℂ) : ℂ) *
+      remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ) *
+      (zeroVertexWeight F T (ρ' : ℂ) : ℂ)
+
+theorem balancedGuarded_add_remote_eq_full
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    balancedGuardedLatticeZeroMatrix F T +
+        balancedRemoteLatticeZeroMatrix F T =
+      balancedFullLatticeZeroMatrix F T := by
+  ext ρ ρ'
+  simp only [balancedGuardedLatticeZeroMatrix,
+    balancedRemoteLatticeZeroMatrix, balancedFullLatticeZeroMatrix,
+    Matrix.add_apply, ← guardedPair_add_remote_eq_full F T]
+  ring
+
+theorem rtrace_balancedFull_pow_four_eq_full
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hhat : 0 < F.hatDenominator T) :
+    RHLinalg.rtrace ((balancedFullLatticeZeroMatrix F T) ^ 4) =
+      RHLinalg.rtrace ((fullLatticeZeroMatrix F T) ^ 4) := by
+  exact rtrace_balancedKernelMatrix_pow_four_eq_rightWeighted
+    (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+      fullLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ))
+    (fun ρ => (zeroVertexWeight F T (ρ : ℂ) : ℂ))
+    (fun ρ => QuarticTransfer.zeroEdgeWeight F T (ρ : ℂ))
+    (fun ρ => zeroVertexWeight_sq F T hhat (ρ : ℂ))
+
+theorem rtrace_balancedGuarded_pow_four_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hhat : 0 < F.hatDenominator T) :
+    RHLinalg.rtrace ((balancedGuardedLatticeZeroMatrix F T) ^ 4) =
+      RHLinalg.rtrace ((guardedLatticeZeroMatrix F T) ^ 4) := by
+  exact rtrace_balancedKernelMatrix_pow_four_eq_rightWeighted
+    (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+      PoissonKernelBridge.canonicalGuardedPairKernel F T
+        (ρ : ℂ) (ρ' : ℂ))
+    (fun ρ => (zeroVertexWeight F T (ρ : ℂ) : ℂ))
+    (fun ρ => QuarticTransfer.zeroEdgeWeight F T (ρ : ℂ))
+    (fun ρ => zeroVertexWeight_sq F T hhat (ρ : ℂ))
+
+theorem remoteCorrection_eq_balanced_rtrace_sub
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hhat : 0 < F.hatDenominator T) :
+    remoteCorrectionCyclicTrace4 F T =
+      RHLinalg.rtrace ((balancedFullLatticeZeroMatrix F T) ^ 4) -
+        RHLinalg.rtrace ((balancedGuardedLatticeZeroMatrix F T) ^ 4) := by
+  rw [remoteCorrectionCyclicTrace4_eq_rtrace_sub,
+    rtrace_balancedFull_pow_four_eq_full F T hhat,
+    rtrace_balancedGuarded_pow_four_eq_guarded F T hhat]
+
+/-- The fourth-trace perturbation bound after exact square-root balancing. -/
+theorem remoteCorrection_abs_le_balanced_frobenius
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hhat : 0 < F.hatDenominator T) :
+    |remoteCorrectionCyclicTrace4 F T| ≤
+      ‖balancedRemoteLatticeZeroMatrix F T‖ *
+          ‖balancedFullLatticeZeroMatrix F T‖ ^ 3 +
+        (‖balancedGuardedLatticeZeroMatrix F T‖ *
+          ‖balancedRemoteLatticeZeroMatrix F T‖) *
+          ‖balancedFullLatticeZeroMatrix F T‖ ^ 2 +
+        (‖balancedGuardedLatticeZeroMatrix F T‖ ^ 2 *
+          ‖balancedRemoteLatticeZeroMatrix F T‖) *
+          ‖balancedFullLatticeZeroMatrix F T‖ +
+        ‖balancedGuardedLatticeZeroMatrix F T‖ ^ 3 *
+          ‖balancedRemoteLatticeZeroMatrix F T‖ := by
+  rw [remoteCorrection_eq_balanced_rtrace_sub F T hhat]
+  have h := rtrace_pow_four_add_sub_bound
+    (balancedGuardedLatticeZeroMatrix F T)
+    (balancedRemoteLatticeZeroMatrix F T)
+  rw [balancedGuarded_add_remote_eq_full] at h
+  exact h
+
+theorem sum_zeroMultiplicities_eq_NIprime
+    {Z : ZeroConfig} (T : ℝ) :
+    (∑ ρ : ↥(ZeroSide.ZI Z T), Z.mult (ρ : ℂ)) = Z.NIprime T := by
+  rw [ZeroConfig.NIprime, ZeroConfig.N]
+  change _ = ∑ᶠ ρ ∈ Z.ZIprime T, Z.mult ρ
+  calc
+    (∑ ρ : ↥(ZeroSide.ZI Z T), Z.mult (ρ : ℂ)) =
+        ∑ ρ ∈ ZeroSide.ZI Z T, Z.mult ρ :=
+      (Finset.sum_subtype (ZeroSide.ZI Z T)
+        (fun _ => Iff.rfl) (fun ρ => Z.mult ρ)).symm
+    _ = ∑ᶠ ρ ∈ Z.ZIprime T, Z.mult ρ := by
+      rw [finsum_mem_eq_finite_toFinset_sum _
+        (ZeroSide.ZIprime_finite Z T)]
+      rfl
+
+theorem sum_zeroVertexWeight_norm_sq
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hhat : 0 < F.hatDenominator T) :
+    (∑ ρ : ↥(ZeroSide.ZI Z T),
+      ‖(zeroVertexWeight F T (ρ : ℂ) : ℂ)‖ ^ 2) =
+      (Z.NIprime T : ℝ) / F.hatDenominator T := by
+  calc
+    (∑ ρ : ↥(ZeroSide.ZI Z T),
+        ‖(zeroVertexWeight F T (ρ : ℂ) : ℂ)‖ ^ 2) =
+        ∑ ρ : ↥(ZeroSide.ZI Z T),
+          (Z.mult (ρ : ℂ) : ℝ) / F.hatDenominator T := by
+      apply Finset.sum_congr rfl
+      intro ρ hρ
+      unfold zeroVertexWeight
+      rw [Complex.norm_real, Real.norm_eq_abs,
+        abs_of_nonneg (Real.sqrt_nonneg _),
+        Real.sq_sqrt (by positivity)]
+    _ = (∑ ρ : ↥(ZeroSide.ZI Z T),
+          (Z.mult (ρ : ℂ) : ℝ)) / F.hatDenominator T := by
+      rw [Finset.sum_div]
+    _ = (Z.NIprime T : ℝ) / F.hatDenominator T := by
+      rw [← Nat.cast_sum, sum_zeroMultiplicities_eq_NIprime]
+
+/-- A uniform entry bound for a kernel becomes a total-weight Frobenius
+bound after square-root balancing. -/
+theorem norm_balancedKernelMatrix_le
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (K : Matrix ι ι ℂ) (s : ι → ℂ) {C : ℝ}
+    (hC : 0 ≤ C) (hK : ∀ i j, ‖K i j‖ ≤ C) :
+    ‖balancedKernelMatrix K s‖ ≤ C * ∑ i : ι, ‖s i‖ ^ 2 := by
+  rw [Zeta23.Assembly.norm_eq_sqrt_frobSq, Real.sqrt_le_iff]
+  constructor
+  · positivity
+  rw [Zeta23.Assembly.frobSq_eq_sum_norm_sq]
+  calc
+    (∑ i : ι, ∑ j : ι, ‖balancedKernelMatrix K s i j‖ ^ 2) ≤
+        ∑ i : ι, ∑ j : ι, (‖s i‖ * C * ‖s j‖) ^ 2 := by
+      apply Finset.sum_le_sum
+      intro i hi
+      apply Finset.sum_le_sum
+      intro j hj
+      apply pow_le_pow_left₀ (norm_nonneg _) _ 2
+      unfold balancedKernelMatrix
+      rw [norm_mul, norm_mul]
+      gcongr
+      exact hK i j
+    _ = (C * ∑ i : ι, ‖s i‖ ^ 2) ^ 2 := by
+      calc
+        (∑ i : ι, ∑ j : ι, (‖s i‖ * C * ‖s j‖) ^ 2) =
+            ∑ i : ι, (‖s i‖ ^ 2 * C ^ 2) *
+              (∑ j : ι, ‖s j‖ ^ 2) := by
+          apply Finset.sum_congr rfl
+          intro i hi
+          rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro j hj
+          ring
+        _ = (∑ i : ι, ‖s i‖ ^ 2) *
+            (C ^ 2 * ∑ j : ι, ‖s j‖ ^ 2) := by
+          rw [← Finset.sum_mul, ← Finset.sum_mul]
+          ring
+        _ = (C * ∑ i : ι, ‖s i‖ ^ 2) ^ 2 := by ring
+
+theorem norm_balancedRemoteMatrix_le
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hhat : 0 < F.hatDenominator T)
+    (hscale : 0 ≤ remoteLatticePairScale F T)
+    (hpair : ∀ ρ ρ' : ↥(ZeroSide.ZI Z T),
+      ‖remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ)‖ ≤
+        remoteLatticePairScale F T) :
+    ‖balancedRemoteLatticeZeroMatrix F T‖ ≤
+      remoteLatticePairScale F T *
+        ((Z.NIprime T : ℝ) / F.hatDenominator T) := by
+  have h := norm_balancedKernelMatrix_le
+    (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+      remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ))
+    (fun ρ : ↥(ZeroSide.ZI Z T) =>
+      (zeroVertexWeight F T (ρ : ℂ) : ℂ))
+    hscale hpair
+  change ‖balancedKernelMatrix
+    (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+      remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ))
+    (fun ρ : ↥(ZeroSide.ZI Z T) =>
+      (zeroVertexWeight F T (ρ : ℂ) : ℂ))‖ ≤ _
+  rw [sum_zeroVertexWeight_norm_sq F T hhat] at h
+  exact h
+
+theorem remoteLatticePairScale_nonneg
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hT : 0 < T)
+    (hL : 0 < F.period T (F.distinguished T)) :
+    0 ≤ remoteLatticePairScale F T := by
+  unfold remoteLatticePairScale
+    PoissonKernelBridge.distinguishedRemoteTailScale
+    PoissonKernelBridge.distinguishedGridStep
+  have hD : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT
+  have hpi : 0 < (2 * Real.pi : ℝ) := by positivity
+  have hgrid : 0 < 2 * Real.pi / F.period T (F.distinguished T) :=
+    div_pos hpi hL
+  have htail : 0 ≤
+      PoissonKernelBridge.distinguishedWindowFourierMajorant F T *
+        (((Zeta23.D0 T) ^ 4)⁻¹ +
+          ((Zeta23.D0 T) ^ 3)⁻¹ /
+            (3 * (2 * Real.pi / F.period T (F.distinguished T)))) := by
+    apply mul_nonneg
+    · exact PoissonKernelBridge.distinguishedWindowFourierMajorant_nonneg F T
+    · apply add_nonneg
+      · exact inv_nonneg.mpr (pow_nonneg hD.le 4)
+      · exact div_nonneg (inv_nonneg.mpr (pow_nonneg hD.le 3))
+          (mul_nonneg (by norm_num) hgrid.le)
+  positivity
+
+theorem eventually_remotePair_le_scale
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F) :
+    ∀ᶠ T in atTop, ∀ ρ ρ' : ↥(ZeroSide.ZI Z T),
+      ‖remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ)‖ ≤
+        remoteLatticePairScale F T := by
+  filter_upwards [eventually_gt_atTop (0 : ℝ), hguard.periods_pos,
+    hguard.windows_smooth, hguard.distinguished_grid_count,
+    htail.distinguished_support_half]
+      with T hT hperiod hsmooth hcount hsupport
+  intro ρ ρ'
+  have hL : 0 < F.period T (F.distinguished T) :=
+    hperiod (F.distinguished T)
+  have hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)) := by
+    change ContDiff ℝ 2
+      (Complex.ofRealCLM ∘ F.window T (F.distinguished T))
+    exact (Complex.ofRealCLM.contDiff.comp
+      (hsmooth (F.distinguished T))).of_le (by
+        exact (WithTop.coe_le_coe).2
+          (show (2 : ℕ∞) ≤ ⊤ from le_top))
+  have hsupp : ∀ u,
+      (F.window T (F.distinguished T) u : ℂ) ≠ 0 →
+        |u| ≤ F.period T (F.distinguished T) / 2 := by
+    intro u hu
+    apply hsupport u
+    simpa only [Complex.ofReal_ne_zero] using hu
+  simpa only [remoteLatticePairScale] using
+    remoteLatticePairKernel_norm_le F T hT hL hcount hwindow hsupp ρ ρ'
+
+/-- Eventual Frobenius control of the balanced remote matrix from the
+already-proved pairwise Poisson tail estimate. -/
+theorem eventually_balancedRemote_norm_le
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
+    (hhat : ∀ᶠ T in atTop, 0 < F.hatDenominator T) :
+    ∀ᶠ T in atTop,
+      ‖balancedRemoteLatticeZeroMatrix F T‖ ≤
+        remoteLatticePairScale F T *
+          ((Z.NIprime T : ℝ) / F.hatDenominator T) := by
+  filter_upwards [eventually_gt_atTop (0 : ℝ), hguard.periods_pos,
+    eventually_remotePair_le_scale htail hguard, hhat]
+      with T hT hperiod hpair hhatT
+  exact norm_balancedRemoteMatrix_le F T hhatT
+    (remoteLatticePairScale_nonneg F T hT
+      (hperiod (F.distinguished T))) hpair
+
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
