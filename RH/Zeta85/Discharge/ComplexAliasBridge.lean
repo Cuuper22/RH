@@ -2153,6 +2153,56 @@ theorem virtualNormalizedFrequencyPairSum_eq_energyIntegral
     T L Λ f hL hΛ hsmooth hsupp heven hhalf z z']
   rw [mul_assoc, div_mul_cancel₀ _ hL0]
 
+
+/-! ## Canonical finite exhaustion of the virtual frequency lattice -/
+
+/-- One integer-frequency product in the standalone virtual lattice. -/
+def virtualFrequencyPairTerm
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (k : ℤ) : ℂ :=
+  paperFT (fun u => (f u : ℂ))
+      (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+    paperFT (fun u => (f u : ℂ))
+      (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ))
+
+/-- The first n nonnegative frequencies paired with the first n negative
+frequencies.  This enumerates every integer exactly once as n tends to
+infinity. -/
+def virtualSymmetricFrequencyPartialSum
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (n : ℕ) : ℂ :=
+  ∑ k in Finset.range n,
+    virtualFrequencyPairTerm T L f z z' (k : ℤ) +
+      virtualFrequencyPairTerm T L f z z' (-(k : ℤ) - 1)
+
+/-- The canonical finite symmetric grids converge to the complete virtual
+Poisson lattice. -/
+theorem tendsto_virtualSymmetricFrequencyPartialSum
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (z z' : ℂ) :
+    Tendsto
+      (virtualSymmetricFrequencyPartialSum T L f z z')
+      Filter.atTop
+      (nhds (virtualFrequencyPairSum T L f z z')) := by
+  have hsum :
+      Summable (virtualFrequencyPairTerm T L f z z') := by
+    simpa only [virtualFrequencyPairTerm] using
+      (hasSum_virtualComplexAlias T L Λ f
+        hL hΛ hsmooth hsupp heven z z').2.summable
+  have hpair :
+      HasSum
+        (fun n : ℕ =>
+          virtualFrequencyPairTerm T L f z z' (n : ℤ) +
+            virtualFrequencyPairTerm T L f z z' (-(n : ℤ) - 1))
+        (∑' k : ℤ, virtualFrequencyPairTerm T L f z z' k) := by
+    simpa only [Int.reduceNegSucc] using
+      hsum.hasSum.nat_add_neg_add_one
+  simpa only [virtualSymmetricFrequencyPartialSum,
+    virtualFrequencyPairSum, virtualFrequencyPairTerm] using
+      hpair.tendsto_sum_nat
+
 end ComplexAliasBridge
 end Zeta85
 end RH
