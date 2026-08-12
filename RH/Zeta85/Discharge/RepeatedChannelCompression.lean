@@ -107,6 +107,86 @@ theorem recover_virtual_atom
     (synthesizeComplex C (fun s => virtual s k)) r = virtual r k
   exact analyzeComplex_synthesizeComplex C _ r
 
+/-- Select a possibly different virtual mixer column at every aligned
+modulation label. -/
+def routedMatrix
+    {ι κ : Type*} [Fintype ι] [DecidableEq ι]
+    [Fintype κ] [DecidableEq κ]
+    (C : Data ι) (selected : κ → ι) : Matrix (ι × κ) κ ℂ :=
+  fun jk k =>
+    if jk.2 = k then (C.matrix jk.1 (selected k) : ℂ) else 0
+
+/-- Label-dependent column selection remains an exact isometry because
+different labels have disjoint physical coordinates. -/
+theorem routed_isometry
+    {ι κ : Type*} [Fintype ι] [DecidableEq ι]
+    [Fintype κ] [DecidableEq κ]
+    (C : Data ι) (selected : κ → ι) :
+    (routedMatrix C selected)ᴴ * routedMatrix C selected = 1 := by
+  classical
+  ext a b
+  by_cases hab : a = b
+  · subst b
+    have hentry :=
+      congrFun (congrFun C.orthogonal (selected a)) (selected a)
+    have hsumReal :
+        (∑ j : ι,
+          C.matrix j (selected a) * C.matrix j (selected a)) =
+            (1 : ℝ) := by
+      simpa [Matrix.mul_apply] using hentry
+    have hsumComplex :=
+      congrArg (fun y : ℝ => (y : ℂ)) hsumReal
+    push_cast at hsumComplex
+    simpa [Matrix.mul_apply, Matrix.conjTranspose_apply, routedMatrix,
+      Fintype.sum_prod_type] using hsumComplex
+  · simp only [Matrix.mul_apply, Matrix.conjTranspose_apply,
+      Fintype.sum_prod_type]
+    rw [show (1 : Matrix κ κ ℂ) a b = 0 by simp [hab]]
+    apply Finset.sum_eq_zero
+    intro j _
+    apply Finset.sum_eq_zero
+    intro k _
+    by_cases hka : k = a
+    · subst k
+      simp [routedMatrix, hab]
+    · simp [routedMatrix, hka]
+
+/-- Every routed compression coefficient is real. -/
+theorem routed_real_entries
+    {ι κ : Type*} [Fintype ι] [DecidableEq ι]
+    [Fintype κ] [DecidableEq κ]
+    (C : Data ι) (selected : κ → ι) (jk : ι × κ) (k : κ) :
+    star (routedMatrix C selected jk k) =
+      routedMatrix C selected jk k := by
+  unfold routedMatrix
+  split_ifs <;> simp
+
+/-- Routed compression recovers the selected virtual atom independently at
+each modulation label. -/
+theorem recover_routed_virtual_atom
+    {ι κ : Type*} [Fintype ι] [DecidableEq ι]
+    [Fintype κ] [DecidableEq κ]
+    (C : Data ι) (selected : κ → ι)
+    (virtual : ι → κ → ℂ) (k : κ) :
+    (∑ jk : ι × κ,
+      routedMatrix C selected jk k * physicalAtom C virtual jk) =
+        virtual (selected k) k := by
+  rw [Fintype.sum_prod_type]
+  simp only [routedMatrix, physicalAtom]
+  have hcollapse : ∀ j : ι,
+      (∑ k' : κ,
+        (if k' = k then (C.matrix j (selected k) : ℂ) else 0) *
+          synthesizeComplex C (fun s => virtual s k') j) =
+        (C.matrix j (selected k) : ℂ) *
+          synthesizeComplex C (fun s => virtual s k) j := by
+    intro j
+    simp
+  simp_rw [hcollapse]
+  change analyzeComplex C
+    (synthesizeComplex C (fun s => virtual s k)) (selected k) =
+      virtual (selected k) k
+  exact analyzeComplex_synthesizeComplex C _ (selected k)
+
 end RepeatedChannelCompression
 end Zeta85
 end RH
