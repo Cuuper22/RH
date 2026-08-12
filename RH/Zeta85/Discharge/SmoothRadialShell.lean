@@ -994,6 +994,103 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq
       ae_tendsto_shrinkingProfileShellWindow_sq
         v L hL hposProfile
 
+/-! ## Direct family realization -/
+
+/-- A quartic family is realized by the one-channel annular construction when
+all of its physical windows are the shrinking profiled shells in one common
+period. -/
+structure AnnularFamilyRealization
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) : Prop where
+  commonPeriod : ℝ → ℝ
+  stage : ∀ T : ℝ, Fin (F.channelCount T) → ℕ
+  period_eq : ∀ T j, F.period T j = commonPeriod T
+  period_pos : ∀ T, 0 < commonPeriod T
+  window_eq : ∀ T j u,
+    F.window T j u =
+      shrinkingProfileShellWindow v (commonPeriod T) (stage T j)
+        (period_pos T) u
+  profile_smooth : ContDiff ℝ ∞ v
+  profile_pos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x
+  profile_even : ∀ x, v (-x) = v x
+
+/-- The annular realization discharges every field of the radial-shell
+interface consumed by aggregate alias cancellation. -/
+theorem AnnularFamilyRealization.toRadialShellData
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : AnnularFamilyRealization F) :
+    RadialShellFamily.Data F := by
+  refine
+    { commonPeriod := h.commonPeriod
+      supportRadius := fun T _ => h.commonPeriod T / 2
+      shell := fun _ _ => 0
+      innerRadius := fun T j =>
+        (shrinkingCoreBump
+          (h.commonPeriod T) (h.stage T j) (h.period_pos T)).rIn
+      outerRadius := fun T j =>
+        (shrinkingHalfPeriodBump
+          (h.commonPeriod T) (h.stage T j) (h.period_pos T)).rOut
+      period_eq := h.period_eq
+      period_pos := h.period_pos
+      supportRadius_nonneg := ?_
+      smooth := ?_
+      support := ?_
+      even := ?_
+      shell_support := ?_
+      shell_inner := ?_
+      shell_outer := ?_ }
+  · intro T j
+    exact div_nonneg (h.period_pos T).le (by norm_num)
+  · intro T j
+    have hwindow :
+        (fun u => (F.window T j u : ℂ)) =
+          (fun u =>
+            (shrinkingProfileShellWindow v
+              (h.commonPeriod T) (h.stage T j) (h.period_pos T) u : ℂ)) := by
+      funext u
+      rw [h.window_eq T j u]
+    rw [hwindow]
+    exact
+      ((shrinkingProfileShellWindow_contDiff
+        v (h.commonPeriod T) (h.stage T j) (h.period_pos T)
+        h.profile_smooth h.profile_pos).of_le
+          (by exact le_top)).continuousLinearMap_comp
+            Complex.ofRealCLM
+  · intro T j u hu
+    rw [h.window_eq T j u]
+    exact
+      shrinkingProfileShellWindow_supportRadius
+        v (h.commonPeriod T) (h.stage T j) (h.period_pos T) hu
+  · intro T j u
+    rw [h.window_eq T j (-u), h.window_eq T j u]
+    exact
+      shrinkingProfileShellWindow_even
+        v (h.commonPeriod T) (h.stage T j) (h.period_pos T)
+        h.profile_even u
+  · intro T j u hu
+    rw [h.window_eq T j u] at hu
+    exact
+      shrinkingProfileShellWindow_support
+        v (h.commonPeriod T) (h.stage T j) (h.period_pos T) hu
+  · intro T j
+    simpa using
+      shrinkingProfileShellWindow_innerRadius_pos
+        (h.commonPeriod T) (h.stage T j) (h.period_pos T)
+  · intro T j
+    simpa using
+      shrinkingProfileShellWindow_outerRadius_lt
+        (h.commonPeriod T) (h.stage T j) (h.period_pos T)
+
+/-- Hence the annular realization gives collective complex-alias cancellation
+without a separate cancellation premise. -/
+theorem AnnularFamilyRealization.toCollectiveWindowRegularity
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : AnnularFamilyRealization F) :
+    AggregateSynthesisBridge.CollectiveWindowRegularity F :=
+  h.toRadialShellData.toCollectiveWindowRegularity
+
 theorem tendsto_integral_frozen8686Window_sq
     (L : ℝ) (hL : 0 < L) :
     Tendsto
