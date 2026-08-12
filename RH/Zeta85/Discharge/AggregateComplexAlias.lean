@@ -469,6 +469,116 @@ theorem aggregateAliasCancellation_orthogonalSynthesis_of_intervalSupport
     _ = |(m : ℝ) * L| := by
       rw [abs_mul, abs_of_pos hL]
 
+/-! ## Virtual regularity generates every physical analytic clause -/
+
+/-- A smooth compactly supported real window has an integrable complex
+shift-overlap against every exponential phase. -/
+theorem integrable_complexShiftOverlap
+    (f : ℝ → ℝ) (Λ h : ℝ)
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (phase : ℂ) :
+    Integrable
+      (fun u : ℝ =>
+        (f u : ℂ) * f (u - h) *
+          Complex.exp (phase * (u : ℂ))) := by
+  have hcontinuous :
+      Continuous
+        (fun u : ℝ =>
+          (f u : ℂ) * f (u - h) *
+            Complex.exp (phase * (u : ℂ))) :=
+    (hsmooth.continuous.mul
+      (hsmooth.continuous.comp
+        (continuous_id.sub continuous_const))).mul
+      (Complex.continuous_exp.comp
+        (continuous_const.mul Complex.continuous_ofReal))
+  have hcompactWindow :
+      HasCompactSupport (fun u : ℝ => (f u : ℂ)) := by
+    refine HasCompactSupport.intro
+      (K := Icc (-Λ) Λ) isCompact_Icc ?_
+    intro u hu
+    have habs : Λ < |u| := by
+      simp only [mem_Icc, not_and_or, not_le] at hu
+      rcases hu with hu | hu
+      · rw [abs_of_neg
+          (lt_of_lt_of_le hu (neg_nonpos.mpr hΛ))]
+        linarith
+      · rw [abs_of_pos (lt_of_le_of_lt hΛ hu)]
+        exact hu
+    simp [hsupp u habs]
+  have hcompact :
+      HasCompactSupport
+        (fun u : ℝ =>
+          (f u : ℂ) * f (u - h) *
+            Complex.exp (phase * (u : ℂ))) := by
+    apply hcompactWindow.mono
+    intro u hu
+    change
+      (f u : ℂ) * f (u - h) *
+          Complex.exp (phase * (u : ℂ)) ≠ 0 at hu
+    change (f u : ℂ) ≠ 0
+    intro hzero
+    apply hu
+    simp [hzero]
+  exact hcontinuous.integrable_of_hasCompactSupport hcompact
+
+/-- Smooth, even, compact virtual channels with strict sub-period interval
+support synthesize physical channels whose complex aliases cancel
+collectively.  All physical smoothness, support, evenness, and integrability
+premises are derived inside the theorem. -/
+theorem aggregateAliasCancellation_of_virtualWindowSystem
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : VirtualChannelMixer.Data ι)
+    (T L Λ : ℝ) (virtual : ι → ℝ → ℝ)
+    (a b : ι → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmoothVirtual : ∀ r,
+      ContDiff ℝ 2 (fun u => (virtual r u : ℂ)))
+    (hsuppVirtualCommon : ∀ r u,
+      Λ < |u| → virtual r u = 0)
+    (hevenVirtual : ∀ r u,
+      virtual r (-u) = virtual r u)
+    (hsuppVirtualInterval : ∀ r : ι, ∀ x : ℝ,
+      virtual r x ≠ 0 → a r ≤ x ∧ x ≤ b r)
+    (hwidth : ∀ r : ι, b r - a r < L) :
+    AggregateAliasCancellation T L
+      (VirtualChannelMixer.synthesize C virtual) := by
+  apply aggregateAliasCancellation_orthogonalSynthesis_of_intervalSupport
+    C T L (fun _ => Λ) virtual a b hL
+  · intro j
+    exact hΛ
+  · intro j
+    simp only [VirtualChannelMixer.synthesize]
+    push_cast
+    apply ContDiff.sum
+    intro r _
+    exact contDiff_const.mul (hsmoothVirtual r)
+  · intro j u hu
+    exact VirtualChannelMixer.synthesize_eq_zero
+      C virtual j u (fun r => hsuppVirtualCommon r u hu)
+  · intro j u
+    unfold VirtualChannelMixer.synthesize
+    apply Finset.sum_congr rfl
+    intro r _
+    rw [hevenVirtual r u]
+  · intro j z z' m hm
+    exact integrable_complexShiftOverlap
+      (VirtualChannelMixer.synthesize C virtual j)
+      Λ ((m : ℝ) * L) hΛ
+      (by
+        simp only [VirtualChannelMixer.synthesize]
+        push_cast
+        apply ContDiff.sum
+        intro r _
+        exact contDiff_const.mul (hsmoothVirtual r))
+      (fun u hu =>
+        VirtualChannelMixer.synthesize_eq_zero
+          C virtual j u (fun r => hsuppVirtualCommon r u hu))
+      (Complex.I * (z - z'))
+  · exact hsuppVirtualInterval
+  · exact hwidth
+
 end AggregateComplexAlias
 end Zeta85
 end RH
