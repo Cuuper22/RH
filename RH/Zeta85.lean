@@ -15,7 +15,7 @@ Import graph:
   Arith        — the arithmetic vocabulary of the hypotheses layer (definitions only)
   Discharge/*  — what could be proved of Phase C: the signed-shift lemma (C1), the exponent
                  bookkeeping, the logarithmic-power audit (C7)
-  Hypotheses   — the six axioms, with provenance (THE ONLY FILE IN `RH/` DECLARING AN AXIOM)
+  Hypotheses   — the five axioms, with provenance (THE ONLY FILE IN `RH/` DECLARING AN AXIOM)
   Main         — Phase D: the three rungs, assembled
 
 See `AXIOMS.md`, `FINDINGS.md`, `VALIDATION.md` and `docs/REUSE_MAP.md`.

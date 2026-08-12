@@ -8,8 +8,8 @@ RH/Zeta85/Main.lean — **Phase D**: the three rungs, assembled.
 
 Given `RH/Zeta85/Hypotheses.lean`, everything here is proved.  The chain, for each rung, is
 
-  window cost `D` at support `σ`   (Phase A for `σ = 143/100`; Axioms 6/7 for the other two)
-    ── Axiom 6 (trace transfer) ──►  `TwoTraceCert zetaZeroConfig D`
+  window cost `D` at support `σ`   (proved for all three supports)
+    ── Axiom 5 (trace transfer) ──►  `TwoTraceCert zetaZeroConfig D`
     ── `RH.Zeta85.epsForm_of_twoTraceCert` ──►  `(2 − D − ε)·N(T,2T) ≤ N₀ˢ(T,2T)` eventually
     ── `Zeta23.cumulative_of_dyadic` ──►  the same for the windows `(0,T]`.
 
@@ -124,8 +124,8 @@ theorem rung125_cumulative : Rung125_cumulative_statement := cumulative rung125
 /-! ## 3. Rung 3 — support 143/100, at least 1893603832049143/2227707598259143 -/
 
 /-- The two-trace certificate at support `143/100`, cost `D_pc`.
-Axioms: `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`,
-`traceTransfer_saturated`.  Note that the window cost is **not** an axiom here: it is
+Axioms: `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, and `traceTransfer_saturated`.
+The BBLR block interface and window cost are proved: the latter is
 `RH.Zeta85.windowCost_143`, proved in `RH/Zeta85/Certificate.lean` from the three exact window
 moments of `RH/Zeta85/Window.lean`. -/
 theorem cert143 : TwoTraceCert zetaZeroConfig DPC :=

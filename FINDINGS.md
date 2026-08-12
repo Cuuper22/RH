@@ -172,7 +172,7 @@ justification ("fix every short factor, and the remaining smooth factor occupies
 presupposes the explicit factorization of the recombined coefficients, i.e. the finite-depth
 Heath–Brown identity, which is not formalized anywhere in this artifact or in Mathlib.
 
-**What replaced it.**  Axiom 3, `RH.Zeta85.Hypotheses.shiu_majorant`, stated over the concrete
+**What replaced it.**  Axiom 2, `RH.Zeta85.Hypotheses.shiu_majorant`, stated over the concrete
 vocabulary `RH.Zeta85.ShiuMajorant` / `progressionSum` / `DivisorBounded` of `RH/Zeta85/Arith.lean`
 (so the axiom is a statement about objects a reader can inspect, not an opaque constant).  It is used
 by rung 3 only.
@@ -219,8 +219,10 @@ labelling instead of for the specific map `r ↦ ℓr mod q`.  Supplying that la
 elementary fibre count `#{r < q : ℓr ≡ c (mod q)} ≤ (ℓ,q)`, which is standard but was not
 formalized here; a first attempt using `Nat.ModEq.cancel_left_of_coprime` did not close and was
 withdrawn rather than left half-done.  **No axiom was introduced for it**: (13) is a step inside the
-justification of Axiom 2, and Axiom 2 already sits above it, so nothing in the formal development
-depends on the missing instantiation.  The two proved halves are the content that (13) contributes.
+historical justification of the BBLR block interface.  That frozen interface is now proved by taking
+the whole finite sum as its unrestricted main term and leaving an empty remainder-block range, so
+nothing in the formal development depends on the missing instantiation.  The two proved halves are
+the content that (13) contributes.
 
 ---
 
@@ -278,7 +280,7 @@ predicate cannot be discharged from (2).
 
 **What replaced it, and what was NOT done.**  Per R2 the target is **not** weakened: the 85 %
 statement remains `liminf N₀ˢ/N ≥ 1893603832049143/2227707598259143`.  Instead the exact blocking
-statement is named and isolated as Axiom 5,
+statement is named and isolated as Axiom 4,
 `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2`, whose docstring records this defect in full.
 The consequence for a reader is precise: **`docs/run/12` (2) does not establish the input the 85 %
 theorem needs**, and the artifact says so rather than absorbing the discrepancy into an implied
@@ -311,7 +313,7 @@ block" is a combinatorial statement about the grouping procedure and cannot even
 `exponents_at_43_100`, `deficits_at_43_100`, `cycle5_scales`, `cycle5_traceGrade`, `cycle5_gain`,
 `csqd_traceGrade`, `theta_at_benchmark`, `mrt_gap`, `mrt_alpha` — plus `LogBudget.power_beats_log`.
 
-**What replaced it.**  Axiom 4, `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4`, stated as an
+**What replaced it.**  Axiom 3, `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4`, stated as an
 implication from `BBLRErrorBound` so that the dependence on the published input is visible in the
 Lean type and in `#print axioms`.
 
@@ -328,7 +330,7 @@ above, none of these carries the restriction `λ ≤ 1`.
 
 **What is genuinely new and therefore assumed.**  The support-beyond-one evaluation of the
 second moment with the saturated kernel `K(t) = min(λ|t|,1)`, i.e. exactly the content of
-`01_arithmetic_cycle1.md` §2 (5)–(9) and `02_certificate_cycle2.md` §2 (13)–(17).  Axiom 8,
+`01_arithmetic_cycle1.md` §2 (5)–(9) and `02_certificate_cycle2.md` §2 (13)–(17).  Axiom 5,
 `traceTransfer_saturated`, is stated as an implication taking the window cost and the aggregate
 criterion as hypotheses, so it cannot smuggle in either the arithmetic or the numerics.
 
@@ -547,7 +549,9 @@ This is not an impossibility theorem for the actual signed Heath--Brown
 coefficients.  The sharp-cutoff algebraic candidates are now constructed as
 a common-scale object in `HBDepthFour.lean`, but run 12 still gives no map
 identifying its smooth \(c_{d,p}\), \(e_{d,q}\), and \(F_{d,\ell}\) with
-that object; `BBLRPoissonBlocks` still hides scalar blocks existentially.
+that object.  The frozen `BBLRPoissonBlocks` proposition hides scalar blocks existentially and is now
+proved by choosing the whole finite sum as its main term and no remainder blocks; it does not supply
+that stronger identification.
 The exact surviving statement is equation (14) of
 `docs/audit/log_budget_routes.md`: construct compatible signed
 families \(c_{j,d,p},e_{j,d,q},F_{j,d,\ell}\), cancel their zero terms

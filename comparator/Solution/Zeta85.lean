@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 comparator/Solution/Zeta85.lean — SOLUTION for the topic `Zeta85`: the same eight statements as
 `comparator/Challenge/Zeta85.lean`, byte-for-byte, delegated to `RH.Zeta85`.
 
-Conditional: these proofs use the six axioms of `RH/Zeta85/Hypotheses.lean` in addition to
+Conditional: these proofs use the five axioms of `RH/Zeta85/Hypotheses.lean` in addition to
 `propext`, `Classical.choice`, `Quot.sound`.  `comparator/config-zeta85.json` lists them; the exact
 per-theorem dependency is in `AXIOMS.md`.
 -/
