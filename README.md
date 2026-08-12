@@ -5,33 +5,31 @@
 
 ## Frozen extension ladder — status at HEAD
 
-The target is the unconditional base-repository standard: comparator-validated
-headline theorems whose `#print axioms` output is exactly
-`[propext, Classical.choice, Quot.sound]` and which have no undisclosed
-analytic premise.  The quartic theorem declarations have the standard axiom
-footprint and retain four explicit per-support premises.  However,
-`R1aAllocationNoGo.no_principal14999` and `no_principal19999` prove that the
-`PrincipalCyclicBlock` premise is uninhabited for the two exact frozen family
-types.  Thus the compiled conditional implications remain, but there is no
-valid construction satisfying their current premises.  They do not yet have
-a separate trusted-statement comparator topic.
+The target remains the unconditional base-repository standard: comparator-validated
+headlines whose `#print axioms` output is exactly
+`[propext, Classical.choice, Quot.sound]`.
 
-| rung | frozen lower bound | status at HEAD |
+Lean now proves `¬ ShiuMajorant (1/4)` for the frozen interface.  The remaining
+`shiu_majorant` declaration therefore makes the extension layer inconsistent.
+Every other research declaration has been replaced by a theorem, and closed
+dyadic/cumulative headlines now exist for every frozen rung through R-9506.
+Their one nonstandard dependency is `shiu_majorant`; consequently they have
+not yet reached the unconditional target standard.
+
+| rung | frozen lower bound | compiled status |
 |---|---:|---|
-| R-679 | 0.67924886307 | **CONDITIONAL ON** `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated`; BBLR error interface and exact window cost proved; compiled headline exists |
-| R-797 | 0.79721415286134 | **CONDITIONAL ON** `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated`; BBLR error interface and exact window cost proved; compiled headline exists |
-| R-850 | 1893603832049143/2227707598259143 | **CONDITIONAL ON** `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated`; BBLR block interface proved; compiled headline exists |
-| R-8657 | 0.865674254456636 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** takes the four `Family14999` structures, but `no_principal14999` rules out `PrincipalCyclicBlock`; dyadic/cumulative theorem remains, obtained monotonically from R-8686 |
-| R-8686 | 0.86855250 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** same `Family14999` obstruction; dyadic/cumulative theorem remains |
-| R-9383 | 0.938313327050949 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** `no_principal19999` rules out the required `Family19999` block; theorem remains a monotone consequence of R-9506, while the direct flat branch is also killed |
-| R-9506 | 0.95063832187565 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** takes the four `Family19999` structures, but `no_principal19999` rules out `PrincipalCyclicBlock`; dyadic/cumulative theorem remains |
+| R-679 | 0.67924886307 | closed headline; sole custom dependency `shiu_majorant` |
+| R-797 | 0.79721415286134 | closed headline; sole custom dependency `shiu_majorant` |
+| R-850 | 1893603832049143/2227707598259143 | closed headline; sole custom dependency `shiu_majorant` |
+| R-8657 | 0.865674254456636 | closed dyadic/cumulative headlines; sole custom dependency `shiu_majorant` |
+| R-8686 | 0.86855250 | closed dyadic/cumulative headlines; sole custom dependency `shiu_majorant` |
+| R-9383 | 0.938313327050949 | closed dyadic/cumulative headlines; sole custom dependency `shiu_majorant` |
+| R-9506 | 0.95063832187565 | closed dyadic/cumulative headlines; sole custom dependency `shiu_majorant` |
 
-The signed-pair and Rudnick--Sarnak structures remain upstream routes for
-proving the trace and moment premises; they are not consumed by these
-headlines.  No analytic family instance is constructed, and the current R1a
-interface is formally impossible for both frozen family types.  Consequently
-no extension rung currently meets the unconditional target standard.  The
-unconditional `Zeta23` base remains separate and unchanged.
+The exact remaining coordinate is the single false declaration, not any
+quartic witness premise.  Removing it requires replacing the inconsistent
+Shiu route with a sound proof path.  The unconditional `Zeta23` base remains
+separate and unchanged.
 
 Repository: <https://github.com/anthropics/zeta-23-lean>.
 
