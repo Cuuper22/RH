@@ -416,6 +416,115 @@ theorem LiteralEnergyTailQuarticLowerBound.toIsometric
       (coordinateData (literalBlockSelection F)) :=
   (h.toMixed hreg).toIsometric
 
+/-! ## Collapse channel energy to the total physical profile -/
+
+/-- Once the full support length is nonnegative, each square-root modulation
+normalization cancels its positive channel period.  The complete channel
+energy sum is therefore the Fourier transform of the total physical
+window-energy profile. -/
+theorem coordinateEnergySum_eq_fullLength_windowEnergy
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PhysicalWindowRegularity F)
+    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (ρ ρ' : ℂ) :
+    coordinateEnergySum F T ρ ρ' =
+      (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.windowEnergy T u : ℂ) *
+            Complex.exp
+              (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+  unfold coordinateEnergySum
+  calc
+    (∑ j : Fin (F.channelCount T),
+      ((Real.sqrt (F.fullLength T / F.period T j) : ℂ) ^ 2) *
+        (F.period T j : ℂ) *
+        ∫ u : ℝ,
+          (F.window T j u : ℂ) * F.window T j u *
+            Complex.exp
+              (Complex.I *
+                (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
+        ∑ j : Fin (F.channelCount T),
+          (F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.window T j u : ℂ) * F.window T j u *
+                Complex.exp
+                  (Complex.I *
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+      apply Finset.sum_congr rfl
+      intro j _
+      have hquot : 0 ≤ F.fullLength T / F.period T j :=
+        div_nonneg hfull (h.period_pos T j).le
+      have hreal :
+          Real.sqrt (F.fullLength T / F.period T j) ^ 2 *
+              F.period T j =
+            F.fullLength T := by
+        rw [Real.sq_sqrt hquot]
+        exact div_mul_cancel₀ _ (h.period_pos T j).ne'
+      have hcomplex :=
+        congrArg (fun x : ℝ => (x : ℂ)) hreal
+      push_cast at hcomplex
+      rw [hcomplex]
+    _ = (F.fullLength T : ℂ) *
+        ∑ j : Fin (F.channelCount T),
+          ∫ u : ℝ,
+            (F.window T j u : ℂ) * F.window T j u *
+              Complex.exp
+                (Complex.I *
+                  (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+      rw [Finset.mul_sum]
+    _ = (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.windowEnergy T u : ℂ) *
+            Complex.exp
+              (Complex.I *
+                (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+      congr 1
+      calc
+        (∑ j : Fin (F.channelCount T),
+          ∫ u : ℝ,
+            (F.window T j u : ℂ) * F.window T j u *
+              Complex.exp
+                (Complex.I *
+                  (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
+            ∑ j : Fin (F.channelCount T),
+              F.complexAliasTerm T
+                (gammaOf ρ) (gammaOf ρ') j 0 := by
+          apply Finset.sum_congr rfl
+          intro j _
+          exact (ComplexAliasBridge.complexAliasTerm_zero
+            F T j (gammaOf ρ) (gammaOf ρ')).symm
+        _ = _ :=
+          ComplexAliasBridge.sum_complexAliasTerm_zero_eq_integral_windowEnergy
+            F T (gammaOf ρ) (gammaOf ρ')
+            (fun j =>
+              ComplexAliasBridge.integrable_zeroAliasIntegrand
+                F T j (h.supportRadius T j)
+                (h.supportRadius_nonneg T j)
+                (h.smooth T j) (h.support T j)
+                (gammaOf ρ) (gammaOf ρ'))
+
+/-- Under the same positivity, the literal block kernel is the normalized
+Fourier transform of total physical energy minus the single aggregate tail. -/
+theorem literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PhysicalWindowRegularity F)
+    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (ρ ρ' : ℂ) :
+    literalCoordinateEnergyTailPairKernel F T ρ ρ' =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        ((F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.windowEnergy T u : ℂ) *
+                Complex.exp
+                  (Complex.I *
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          coordinateFrequencyTail
+            (literalBlockSelection F) T ρ ρ') := by
+  unfold literalCoordinateEnergyTailPairKernel
+  rw [coordinateEnergySum_eq_fullLength_windowEnergy h T hfull]
+
 end AggregateCoordinateFrame
 end Zeta85
 end RH
