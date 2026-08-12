@@ -1,0 +1,7 @@
+import RH.Zeta85.Discharge.EtaDivisorRefinement
+
+#print axioms RH.Zeta85.EtaDivisorRefinement.hb4Core_divisorBounded
+#print axioms RH.Zeta85.EtaDivisorRefinement.hb4_eq_sum_normalizedCore_mul_log
+#print axioms RH.Zeta85.EtaDivisorRefinement.vonMangoldt_eq_regularCore_mul_log_add_roughCore_mul_log_apply
+#print axioms RH.Zeta85.EtaDivisorRefinement.roughCoreAF_family_zero_log_majorant
+#print axioms RH.Zeta85.EtaDivisorRefinement.abs_signedFunctional_hb4_le_recombined_regular_add_rough
