@@ -286,6 +286,29 @@ theorem paperFT_synthesize
       rw [Zeta23.paperFT_def, Zeta23.integral_const_mul_C]
 
 
+
+/-- A common atom normalization can be applied before or after virtual
+channel synthesis. -/
+theorem scaled_paperFT_synthesize
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → ℝ → ℝ)
+    (j : ι) (z c : ℂ)
+    (hInt : ∀ r : ι, MeasureTheory.Integrable
+      (fun u : ℝ => (virtual r u : ℂ) *
+        Complex.exp (Complex.I * z * u))) :
+    c * Zeta23.paperFT
+        (fun u : ℝ => (synthesize C virtual j u : ℂ)) z =
+      synthesizeComplex C
+        (fun r : ι =>
+          c * Zeta23.paperFT
+            (fun u : ℝ => (virtual r u : ℂ)) z) j := by
+  rw [paperFT_synthesize C virtual j z hInt]
+  unfold synthesizeComplex
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro r _
+  ring
+
 /-- Coherent analysis of all physical Fourier atoms recovers the chosen
 virtual Fourier atom exactly. -/
 theorem analyzeComplex_paperFT_synthesize
