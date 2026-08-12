@@ -2044,6 +2044,120 @@ theorem pairKernelQuarticNumerator_congr
     pairKernelCyclicTrace3_congr hK,
     pairKernelCyclicTrace4_congr hK]
 
+/-! ## Finite quartic contractions preserve pair-kernel convergence -/
+
+/-- The one-cycle trace is continuous under pointwise convergence of the pair
+kernel on the actual finite zero sample. -/
+theorem tendsto_pairKernelCyclicTrace1
+    {α : Type*} {l : Filter α}
+    {Z : ZeroConfig} {T : ℝ}
+    {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
+    Tendsto
+      (fun n => pairKernelCyclicTrace1 Z T (K n)) l
+      (nhds (pairKernelCyclicTrace1 Z T K₀)) := by
+  unfold pairKernelCyclicTrace1 pairKernelCycle1
+  apply (Complex.continuous_re.tendsto _).comp
+  apply tendsto_finsetSum
+  intro ρ hρ
+  exact (hK ρ hρ ρ hρ).mul tendsto_const_nhds
+
+/-- The two-cycle trace is continuous under pointwise convergence on the
+finite zero sample. -/
+theorem tendsto_pairKernelCyclicTrace2
+    {α : Type*} {l : Filter α}
+    {Z : ZeroConfig} {T : ℝ}
+    {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
+    Tendsto
+      (fun n => pairKernelCyclicTrace2 Z T (K n)) l
+      (nhds (pairKernelCyclicTrace2 Z T K₀)) := by
+  unfold pairKernelCyclicTrace2 pairKernelCycle2
+  apply (Complex.continuous_re.tendsto _).comp
+  apply tendsto_finsetSum
+  intro ρ₁ hρ₁
+  apply tendsto_finsetSum
+  intro ρ₂ hρ₂
+  exact
+    (hK ρ₁ hρ₁ ρ₂ hρ₂).mul
+      ((hK ρ₁ hρ₁ ρ₂ hρ₂).mul tendsto_const_nhds)
+
+/-- The three-cycle trace is continuous under pointwise convergence on the
+finite zero sample. -/
+theorem tendsto_pairKernelCyclicTrace3
+    {α : Type*} {l : Filter α}
+    {Z : ZeroConfig} {T : ℝ}
+    {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
+    Tendsto
+      (fun n => pairKernelCyclicTrace3 Z T (K n)) l
+      (nhds (pairKernelCyclicTrace3 Z T K₀)) := by
+  unfold pairKernelCyclicTrace3 pairKernelCycle3
+  apply (Complex.continuous_re.tendsto _).comp
+  apply tendsto_finsetSum
+  intro ρ₁ hρ₁
+  apply tendsto_finsetSum
+  intro ρ₂ hρ₂
+  apply tendsto_finsetSum
+  intro ρ₃ hρ₃
+  exact
+    (hK ρ₁ hρ₁ ρ₂ hρ₂).mul
+      ((hK ρ₂ hρ₂ ρ₃ hρ₃).mul
+        ((hK ρ₁ hρ₁ ρ₃ hρ₃).mul tendsto_const_nhds))
+
+/-- The four-cycle trace is continuous under pointwise convergence on the
+finite zero sample. -/
+theorem tendsto_pairKernelCyclicTrace4
+    {α : Type*} {l : Filter α}
+    {Z : ZeroConfig} {T : ℝ}
+    {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
+    Tendsto
+      (fun n => pairKernelCyclicTrace4 Z T (K n)) l
+      (nhds (pairKernelCyclicTrace4 Z T K₀)) := by
+  unfold pairKernelCyclicTrace4 pairKernelCycle4
+  apply (Complex.continuous_re.tendsto _).comp
+  apply tendsto_finsetSum
+  intro ρ₁ hρ₁
+  apply tendsto_finsetSum
+  intro ρ₂ hρ₂
+  apply tendsto_finsetSum
+  intro ρ₃ hρ₃
+  apply tendsto_finsetSum
+  intro ρ₄ hρ₄
+  exact
+    (hK ρ₃ hρ₃ ρ₄ hρ₄).mul
+      ((hK ρ₁ hρ₁ ρ₂ hρ₂).mul
+        ((hK ρ₂ hρ₂ ρ₃ hρ₃).mul
+          ((hK ρ₁ hρ₁ ρ₄ hρ₄).mul tendsto_const_nhds)))
+
+/-- The complete target-specific quartic numerator is continuous under
+pointwise pair-kernel convergence on the finite enlarged-window zero set. -/
+theorem tendsto_pairKernelQuarticNumerator
+    {α : Type*} {l : Filter α}
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    {T : ℝ} {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
+    Tendsto
+      (fun n => pairKernelQuarticNumerator q F T (K n)) l
+      (nhds (pairKernelQuarticNumerator q F T K₀)) := by
+  have h1 := tendsto_pairKernelCyclicTrace1 hK
+  have h2 := tendsto_pairKernelCyclicTrace2 hK
+  have h3 := tendsto_pairKernelCyclicTrace3 hK
+  have h4 := tendsto_pairKernelCyclicTrace4 hK
+  unfold pairKernelQuarticNumerator
+  exact
+    ((((tendsto_const_nhds.add (tendsto_const_nhds.mul h1)).add
+      (tendsto_const_nhds.mul h2)).add
+      (tendsto_const_nhds.mul h3)).add
+      (tendsto_const_nhds.mul h4))
+
 end QuarticTransfer
 end Zeta85
 end RH
