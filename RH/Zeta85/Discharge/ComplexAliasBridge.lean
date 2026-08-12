@@ -1444,6 +1444,118 @@ theorem distinguishedFrequencyPairTail_eq_full_sub_floorGrid
   unfold distinguishedFiniteGridPairSum
   rw [hgrid]
 
+
+/-- One distinguished-channel Fourier-pair summand on the full integer
+frequency lattice. -/
+def distinguishedIntegerFrequencyPairTerm
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) (k : ℤ) : ℂ :=
+  let L := F.period T (F.distinguished T)
+  paperFT (fun u => (F.window T (F.distinguished T) u : ℂ))
+      (gammaOf ρ -
+        (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+    paperFT (fun u => (F.window T (F.distinguished T) u : ℂ))
+      (gammaOf ρ' -
+        (T + (k : ℝ) * (2 * Real.pi / L) : ℝ))
+
+/-- Casting a nonnegative label into the integer lattice gives exactly the
+same frequency-pair summand. -/
+theorem distinguishedIntegerFrequencyPairTerm_natCast
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) (k : ℕ) :
+    distinguishedIntegerFrequencyPairTerm F T ρ ρ' (k : ℤ) =
+      distinguishedNatFrequencyPairTerm F T ρ ρ' k := by
+  have hshift :
+      T + (((k : ℤ) : ℝ) *
+          (2 * Real.pi /
+            F.period T (F.distinguished T))) =
+        T + 2 * Real.pi * (k : ℝ) /
+          F.period T (F.distinguished T) := by
+    push_cast
+    ring
+  simp only [distinguishedIntegerFrequencyPairTerm,
+    distinguishedNatFrequencyPairTerm]
+  rw [hshift]
+
+/-- The embedding of natural cutoff labels into the integer frequency
+lattice. -/
+def natFrequencyEmbedding : ℕ ↪ ℤ where
+  toFun k := k
+  inj' := by
+    intro k k' h
+    exact_mod_cast h
+
+/-- Integer frequencies retained by the finite nonnegative cutoff. -/
+def nonnegativeFrequencyRange (n : ℕ) : Finset ℤ :=
+  (Finset.range n).map natFrequencyEmbedding
+
+/-- The complete integer lattice is definitionally the channel frequency
+sum. -/
+theorem channelFrequencyPairSum_eq_integerLattice
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    channelFrequencyPairSum F T (F.distinguished T)
+        (gammaOf ρ) (gammaOf ρ') =
+      ∑' k : ℤ,
+        distinguishedIntegerFrequencyPairTerm F T ρ ρ' k := by
+  rfl
+
+/-- The complete distinguished finite grid is the finite sum over its image
+inside the integer lattice. -/
+theorem distinguishedFiniteGridPairSum_eq_integerRange
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    distinguishedFiniteGridPairSum F T ρ ρ' =
+      ∑ k ∈ nonnegativeFrequencyRange
+          (F.channelDim T (F.distinguished T)),
+        distinguishedIntegerFrequencyPairTerm F T ρ ρ' k := by
+  unfold distinguishedFiniteGridPairSum nonnegativeFrequencyRange
+  rw [Fin.sum_univ_eq_sum_range]
+  simp only [Finset.sum_map, distinguishedIntegerFrequencyPairTerm_natCast]
+
+/-- The exact tail is the summable lattice restricted to the complement of
+the retained nonnegative cutoff. -/
+def distinguishedOutsideGridPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ∑' k : {k : ℤ // k ∉
+      nonnegativeFrequencyRange
+        (F.channelDim T (F.distinguished T))},
+    distinguishedIntegerFrequencyPairTerm F T ρ ρ' k
+
+/-- After the actual block has been reindexed, its finite/infinite
+discrepancy is exactly the outside-cutoff integer sum. -/
+theorem distinguishedFrequencyPairTail_eq_outsideGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i)
+    (hsum : Summable
+      (distinguishedIntegerFrequencyPairTerm F T ρ ρ')) :
+    distinguishedFrequencyPairTail F T ρ ρ' =
+      distinguishedOutsideGridPairSum F T ρ ρ' := by
+  rw [distinguishedFrequencyPairTail_eq_full_sub_finiteGrid
+    F T ρ ρ' hdist haddr hexhaustive]
+  rw [channelFrequencyPairSum_eq_integerLattice,
+    distinguishedFiniteGridPairSum_eq_integerRange]
+  unfold distinguishedOutsideGridPairSum
+  have hsplit := hsum.sum_add_tsum_subtype_compl
+    (nonnegativeFrequencyRange
+      (F.channelDim T (F.distinguished T)))
+  rw [← hsplit]
+  ring
+
 end ComplexAliasBridge
 end Zeta85
 end RH
