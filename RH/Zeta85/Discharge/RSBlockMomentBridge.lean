@@ -11,6 +11,7 @@ import Zeta23.Poisson.Complex
 import Zeta23.Poisson.ComplexAlias
 import RH.Zeta85.Discharge.ComplexAliasBridge
 import Mathlib.Analysis.SpecificLimits.Basic
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Data.Nat.Find
 import Mathlib.Order.Filter.AtTopBot.Floor
 
@@ -35,7 +36,7 @@ noncomputable section
 
 namespace RH.Zeta85.RSBlockMomentBridge
 
-open Zeta23 RHLinalg RSReduction
+open Zeta23 RHLinalg RSReduction RSPairIntegrals
 
 /-- A slowly improving diagonal can respect an arbitrary convergence
 threshold in every fixed row.  This is the quantifier-order bridge needed
@@ -124,6 +125,135 @@ theorem exists_tendsto_slow_diagonal
       dist_triangle _ _ _
     _ < ε / 2 + ε / 2 := add_lt_add h₁ h₂
     _ = ε := by ring
+
+/-- The height scale in the smoothed four-point theorem. -/
+def rsQuarticScale (T : ℝ) : ℝ :=
+  T * Real.log T / (2 * Real.pi)
+
+/-- An error bounded by a constant times height disappears after division
+by the four-point scale, whose extra logarithm tends to infinity. -/
+theorem tendsto_normalized_of_linear_error
+    (S : ℝ → ℂ) (M : ℂ)
+    (herror : ∃ C T₀ : ℝ, ∀ T ≥ T₀,
+      ‖S T - (rsQuarticScale T : ℂ) * M‖ ≤ C * T) :
+    Tendsto (fun T => S T / (rsQuarticScale T : ℂ))
+      atTop (nhds M) := by
+  obtain ⟨C, T₀, herror⟩ := herror
+  have hratioZero :
+      Tendsto (fun T : ℝ => C * (2 * Real.pi) / Real.log T)
+        atTop (nhds 0) := by
+    simpa only using
+      Real.tendsto_log_atTop.const_div_atTop (C * (2 * Real.pi))
+  refine Metric.tendsto_nhds.2 ?_
+  intro ε hε
+  filter_upwards [
+    eventually_ge_atTop T₀,
+    eventually_gt_atTop (1 : ℝ),
+    (Metric.tendsto_nhds.1 hratioZero ε hε)
+  ] with T hT hT1 hratio
+  have hTpos : 0 < T := lt_trans zero_lt_one hT1
+  have hlog : 0 < Real.log T := Real.log_pos hT1
+  have hscale : 0 < rsQuarticScale T := by
+    unfold rsQuarticScale
+    positivity
+  have hscaleC : (rsQuarticScale T : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr hscale.ne'
+  have hrewrite :
+      S T / (rsQuarticScale T : ℂ) - M =
+        (S T - (rsQuarticScale T : ℂ) * M) /
+          (rsQuarticScale T : ℂ) := by
+    field_simp [hscaleC]
+  have hnormScale :
+      ‖(rsQuarticScale T : ℂ)‖ = rsQuarticScale T := by
+    rw [Complex.norm_real, abs_of_pos hscale]
+  have hratioEq :
+      C * T / rsQuarticScale T =
+        C * (2 * Real.pi) / Real.log T := by
+    unfold rsQuarticScale
+    field_simp [hTpos.ne', hlog.ne', Real.pi_ne_zero]
+    <;> ring
+  calc
+    dist (S T / (rsQuarticScale T : ℂ)) M =
+        ‖S T / (rsQuarticScale T : ℂ) - M‖ := dist_eq_norm _ _
+    _ = ‖S T - (rsQuarticScale T : ℂ) * M‖ /
+          rsQuarticScale T := by
+      rw [hrewrite, norm_div, hnormScale]
+    _ ≤ C * T / rsQuarticScale T :=
+      (div_le_div_iff_of_pos_right hscale).2 (herror T hT)
+    _ = C * (2 * Real.pi) / Real.log T := hratioEq
+    _ < ε := by
+      simpa only [Real.dist_eq, sub_zero,
+        abs_of_nonneg (by positivity :
+          0 ≤ C * (2 * Real.pi) / Real.log T)] using hratio
+
+/-- The normalized all-zero four-point statistic for one fixed smooth
+profile. -/
+def normalizedFrozenQuarticRSStatistic
+    {Z : ZeroConfig} (r : ℝ → ℝ)
+    (g : Fin 4 → ℝ → ℂ) (T : ℝ) : ℂ :=
+  (∑' ρ, rsZeroTupleTerm Z g
+      (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) T ρ) /
+    (rsQuarticScale T : ℂ)
+
+/-- The fixed-profile limit furnished by the evaluated RS main term. -/
+def frozenQuarticRSMain
+    (r : ℝ → ℝ) (g : Fin 4 → ℝ → ℂ) : ℂ :=
+  rsHeightFactor g *
+    (((4999 / 10000 : ℝ) *
+      quarticRSScalar (4999 / 10000 : ℝ) r : ℝ) : ℂ)
+
+/-- For every fixed smooth unit-interval profile, the published linear
+error becomes a genuine normalized limit. -/
+theorem RS1996ZetaInputs.tendsto_normalizedFrozenQuarticRSStatistic
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℝ → ℝ) (hrc : HasCompactSupport r)
+    (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 → (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (g : Fin 4 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    Tendsto (normalizedFrozenQuarticRSStatistic r g)
+      atTop (nhds (frozenQuarticRSMain r g)) := by
+  unfold normalizedFrozenQuarticRSStatistic
+  apply tendsto_normalized_of_linear_error
+  obtain ⟨C, T₀, _hC, _hT₀, hRS⟩ :=
+    RSPairIntegrals.RS1996ZetaInputs.frozenQuartic_evaluated
+      hrs r hrc hrSmooth hrSupport g hg
+  refine ⟨C, T₀, ?_⟩
+  intro T hT
+  have hbound := (hRS T hT).2
+  convert hbound using 1 <;>
+    simp only [frozenQuarticRSMain, rsQuarticScale] <;> ring
+
+/-- A sequence of increasingly sharp smooth profiles may be selected slowly
+enough that its fixed-test RS estimates and its limiting main term hold on
+one common height diagonal. -/
+theorem RS1996ZetaInputs.exists_tendsto_profile_diagonal
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℕ → ℝ → ℝ)
+    (hrc : ∀ n, HasCompactSupport (r n))
+    (hrSmooth : ∀ n, ContDiff ℝ 1 (r n))
+    (hrSupport : ∀ n x, r n x ≠ 0 →
+      (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (g : Fin 4 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j))
+    (A : ℂ)
+    (hmain : Tendsto (fun n => frozenQuarticRSMain (r n) g)
+      atTop (nhds A)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          normalizedFrozenQuarticRSStatistic (r (stage T)) g T)
+        atTop (nhds A) := by
+  apply exists_tendsto_slow_diagonal
+    (fun n T => normalizedFrozenQuarticRSStatistic (r n) g T)
+    (fun n => frozenQuarticRSMain (r n) g) A
+  · intro n
+    exact
+      RS1996ZetaInputs.tendsto_normalizedFrozenQuarticRSStatistic
+        hrs (r n) (hrc n) (hrSmooth n)
+          (hrSupport n) g hg
+  · exact hmain
 
 /-- Normalized uncentered trace moment of the literal distinguished block. -/
 def uncenteredBlockMoment {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
