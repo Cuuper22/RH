@@ -1,0 +1,428 @@
+/-
+Copyright (c) 2026 Anthropic, PBC. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+SPDX-License-Identifier: Apache-2.0
+-/
+import RH.Zeta85.Discharge.HBDepthFour
+import Lean.Elab.Tactic.Omega
+import Mathlib.Data.Nat.Prime.Basic
+
+/-!
+# Divisor-dependent refinement of a terminal coefficient
+
+The fixed asymmetric support box killed by `EtaSuperpositionObstruction`
+cannot represent integers which have no divisor in that box.  This module
+changes the order of operations: for each integer it first selects the
+largest divisor below the requested cutoff, and only then forms the
+convolution piece.
+
+The resulting identity is pointwise and exact for an arbitrary coefficient.
+It loses no prime, prime-square, logarithmic, or Möbius contribution.  The
+selected divisor satisfies a sharp alternative: it is within the requested
+multiplicative scale, or every prime in the complementary factor is larger
+than the scale tolerance.  Thus the former balanced block is split into a
+literal asymmetric convolution family plus an explicit rough-cofactor
+family, rather than being discarded or replaced by a majorant.
+-/
+
+open scoped BigOperators
+open Finset
+
+noncomputable section
+
+namespace RH
+namespace Zeta85
+namespace EtaDivisorRefinement
+
+/-- The largest divisor of `n` not exceeding `R`.  The value is total; the
+theorems below use the natural nondegenerate hypotheses `n != 0`, `0 < R`. -/
+def canonicalDivisor (n R : ℕ) : ℕ :=
+  Nat.findGreatest (fun d => d ∣ n) R
+
+theorem canonicalDivisor_le (n R : ℕ) : canonicalDivisor n R ≤ R := by
+  exact Nat.findGreatest_le R
+
+theorem canonicalDivisor_pos {n R : ℕ} (hR : 0 < R) :
+    0 < canonicalDivisor n R := by
+  rw [canonicalDivisor, Nat.findGreatest_pos]
+  exact ⟨1, by norm_num, hR, one_dvd n⟩
+
+theorem canonicalDivisor_dvd {n R : ℕ} (hR : 0 < R) :
+    canonicalDivisor n R ∣ n := by
+  unfold canonicalDivisor
+  exact Nat.findGreatest_spec (P := fun d => d ∣ n) (m := 1) hR (one_dvd n)
+
+theorem divisor_le_canonical {n R d : ℕ} (hdR : d ≤ R) (hdn : d ∣ n) :
+    d ≤ canonicalDivisor n R := by
+  exact Nat.le_findGreatest hdR hdn
+
+/-- The complementary factor associated to the canonical divisor. -/
+def canonicalCofactor (n R : ℕ) : ℕ := n / canonicalDivisor n R
+
+theorem canonical_factorization {n R : ℕ} (hR : 0 < R) :
+    canonicalDivisor n R * canonicalCofactor n R = n := by
+  exact Nat.mul_div_cancel' (canonicalDivisor_dvd hR)
+
+theorem canonicalCofactor_pos {n R : ℕ} (hn : n ≠ 0) (hR : 0 < R) :
+    0 < canonicalCofactor n R := by
+  have hdpos := canonicalDivisor_pos (n := n) hR
+  have hdle : canonicalDivisor n R ≤ n :=
+    Nat.le_of_dvd (Nat.zero_lt_of_ne_zero hn) (canonicalDivisor_dvd hR)
+  exact Nat.div_pos hdle hdpos
+
+theorem canonicalCofactor_one_lt {n R : ℕ} (hnR : R < n) (hR : 0 < R) :
+    1 < canonicalCofactor n R := by
+  have hn : n ≠ 0 := Nat.ne_zero_of_lt (hR.trans hnR)
+  have hqpos := canonicalCofactor_pos hn hR
+  by_contra hq
+  have hqone : canonicalCofactor n R = 1 := by omega
+  have hfactor := canonical_factorization (n := n) hR
+  rw [hqone, mul_one] at hfactor
+  have hdle := canonicalDivisor_le n R
+  omega
+
+/-- Multiplying the selected divisor by any prime from its cofactor crosses
+the cutoff.  This is the maximal-divisor mechanism behind the refinement. -/
+theorem cutoff_lt_mul_prime_of_dvd_cofactor {n R q : ℕ} (hR : 0 < R)
+    (hqprime : q.Prime) (hq : q ∣ canonicalCofactor n R) :
+    R < canonicalDivisor n R * q := by
+  let d := canonicalDivisor n R
+  have hdpos : 0 < d := canonicalDivisor_pos (n := n) hR
+  have hfactor : d * canonicalCofactor n R = n :=
+    canonical_factorization (n := n) hR
+  have hdq_dvd : d * q ∣ n := by
+    obtain ⟨k, hk⟩ := hq
+    refine ⟨k, ?_⟩
+    rw [← hfactor, hk]
+    ac_rfl
+  by_contra hcut
+  have hdq_le : d * q ≤ R := Nat.le_of_not_gt hcut
+  have hmax : d * q ≤ d := divisor_le_canonical hdq_le hdq_dvd
+  have hqone : 1 < q := hqprime.one_lt
+  nlinarith
+
+/-- Exact regular/rough dichotomy.  Either the chosen divisor is within a
+factor `B` of the cutoff, or the complementary factor is `B`-rough. -/
+theorem canonical_regular_or_rough {n R B : ℕ} (hR : 0 < R) :
+    R < canonicalDivisor n R * B ∨
+      ∀ q : ℕ, q.Prime → q ∣ canonicalCofactor n R → B < q := by
+  by_cases hregular : R < canonicalDivisor n R * B
+  · exact Or.inl hregular
+  · right
+    intro q hqprime hq
+    have hcross := cutoff_lt_mul_prime_of_dvd_cofactor hR hqprime hq
+    have hupper : canonicalDivisor n R * B ≤ R := Nat.le_of_not_gt hregular
+    have hdpos := canonicalDivisor_pos (n := n) hR
+    nlinarith
+
+/-- A rough number below the square of the roughness threshold is prime. -/
+theorem prime_of_rough_of_lt_sq {s B : ℕ} (hs : 1 < s)
+    (hrough : ∀ q : ℕ, q.Prime → q ∣ s → B < q)
+    (hsize : s < (B + 1) ^ 2) : s.Prime := by
+  by_contra hprime
+  obtain ⟨a, b, ha_lt, hb_lt, hab⟩ :=
+    (Nat.not_prime_iff_exists_mul_eq (by omega)).mp hprime
+  have ha_one : a ≠ 1 := by
+    intro ha
+    subst a
+    simp at hab
+    omega
+  have hb_one : b ≠ 1 := by
+    intro hb
+    subst b
+    simp at hab
+    omega
+  have ha_pos : 0 < a := by
+    by_contra ha0
+    simp_all
+  have hb_pos : 0 < b := by
+    by_contra hb0
+    simp_all
+  obtain ⟨p, hpprime, hpa⟩ := Nat.exists_prime_and_dvd ha_one
+  obtain ⟨q, hqprime, hqb⟩ := Nat.exists_prime_and_dvd hb_one
+  have hpas : p ∣ s := hpa.trans ⟨b, hab.symm⟩
+  have hqbs : q ∣ s := hqb.trans ⟨a, by simpa [mul_comm] using hab.symm⟩
+  have hBp' : B < p := hrough p hpprime hpas
+  have hBq' : B < q := hrough q hqprime hqbs
+  have hBp : B + 1 ≤ p := by omega
+  have hBq : B + 1 ≤ q := by omega
+  have hp_le : p ≤ a := Nat.le_of_dvd ha_pos hpa
+  have hq_le : q ≤ b := Nat.le_of_dvd hb_pos hqb
+  have hsquare_le : (B + 1) ^ 2 ≤ s := by
+    calc
+      (B + 1) ^ 2 = (B + 1) * (B + 1) := by ring
+      _ ≤ p * q := Nat.mul_le_mul hBp hBq
+      _ ≤ a * b := Nat.mul_le_mul hp_le hq_le
+      _ = s := hab
+  omega
+
+/-- Roughness passes to every positive divisor. -/
+theorem rough_of_dvd {r s B : ℕ}
+    (hrough : ∀ q : ℕ, q.Prime → q ∣ s → B < q) (hrs : r ∣ s) :
+    ∀ q : ℕ, q.Prime → q ∣ r → B < q := by
+  intro q hqprime hqr
+  exact hrough q hqprime (hqr.trans hrs)
+
+/-- A nontrivial rough number itself crosses the roughness threshold. -/
+theorem threshold_lt_of_rough {s B : ℕ} (hs : 1 < s)
+    (hrough : ∀ q : ℕ, q.Prime → q ∣ s → B < q) : B < s := by
+  obtain ⟨p, hpprime, hps⟩ := Nat.exists_prime_and_dvd (by omega : s ≠ 1)
+  exact (hrough p hpprime hps).trans_le (Nat.le_of_dvd (by omega) hps)
+
+/-- A rough number below the cube of the threshold has at most two prime
+factors: it is prime or the product of two primes. -/
+theorem prime_or_product_of_two_primes_of_rough_of_lt_cube {s B : ℕ}
+    (hs : 1 < s)
+    (hrough : ∀ q : ℕ, q.Prime → q ∣ s → B < q)
+    (hsize : s < (B + 1) ^ 3) :
+    s.Prime ∨ ∃ p q : ℕ, p.Prime ∧ q.Prime ∧ s = p * q := by
+  by_cases hsprime : s.Prime
+  · exact Or.inl hsprime
+  · right
+    obtain ⟨a, b, ha_lt, hb_lt, hab⟩ :=
+      (Nat.not_prime_iff_exists_mul_eq (by omega)).mp hsprime
+    have ha_one : a ≠ 1 := by
+      intro ha
+      subst a
+      simp at hab
+      omega
+    have hb_one : b ≠ 1 := by
+      intro hb
+      subst b
+      simp at hab
+      omega
+    have ha_pos : 0 < a := by
+      by_contra ha0
+      simp_all
+    have hb_pos : 0 < b := by
+      by_contra hb0
+      simp_all
+    have ha_one_lt : 1 < a := by omega
+    have hb_one_lt : 1 < b := by omega
+    have ha_dvd : a ∣ s := ⟨b, hab.symm⟩
+    have hb_dvd : b ∣ s := ⟨a, by simpa [mul_comm] using hab.symm⟩
+    have hrough_a := rough_of_dvd hrough ha_dvd
+    have hrough_b := rough_of_dvd hrough hb_dvd
+    have hBa : B + 1 ≤ a := by
+      have := threshold_lt_of_rough ha_one_lt hrough_a
+      omega
+    have hBb : B + 1 ≤ b := by
+      have := threshold_lt_of_rough hb_one_lt hrough_b
+      omega
+    have ha_sq : a < (B + 1) ^ 2 := by
+      by_contra hnot
+      have hsq : (B + 1) ^ 2 ≤ a := Nat.le_of_not_gt hnot
+      have hcube : (B + 1) ^ 3 ≤ s := by
+        calc
+          (B + 1) ^ 3 = (B + 1) ^ 2 * (B + 1) := by ring
+          _ ≤ a * b := Nat.mul_le_mul hsq hBb
+          _ = s := hab
+      omega
+    have hb_sq : b < (B + 1) ^ 2 := by
+      by_contra hnot
+      have hsq : (B + 1) ^ 2 ≤ b := Nat.le_of_not_gt hnot
+      have hcube : (B + 1) ^ 3 ≤ s := by
+        calc
+          (B + 1) ^ 3 = (B + 1) * (B + 1) ^ 2 := by ring
+          _ ≤ a * b := Nat.mul_le_mul hBa hsq
+          _ = s := hab
+      omega
+    exact ⟨a, b, prime_of_rough_of_lt_sq ha_one_lt hrough_a ha_sq,
+      prime_of_rough_of_lt_sq hb_one_lt hrough_b hb_sq, hab.symm⟩
+
+/-- A singleton left sequence for the divisor-indexed convolution. -/
+def leftSelector (a d : ℕ) : ℝ := if d = a then 1 else 0
+
+/-- The matching right sequence.  It retains the original coefficient only
+when `a` is the canonical divisor of the reconstructed integer. -/
+def rightSelector (c : ℕ → ℝ) (R a s : ℕ) : ℝ :=
+  if canonicalDivisor (a * s) R = a then c (a * s) else 0
+
+/-- One literal Dirichlet-convolution piece. -/
+def convolutionPiece (c : ℕ → ℝ) (R a n : ℕ) : ℝ :=
+  ∑ ds ∈ n.divisorsAntidiagonal,
+    leftSelector a ds.1 * rightSelector c R a ds.2
+
+/-- The coefficient assigned directly to one canonical-divisor fiber. -/
+def canonicalPiece (c : ℕ → ℝ) (R a n : ℕ) : ℝ :=
+  if canonicalDivisor n R = a then c n else 0
+
+/-- Each canonical fiber is exactly a Dirichlet convolution; this is not a
+support-only or summed identity. -/
+theorem convolutionPiece_eq_canonicalPiece (c : ℕ → ℝ) {R a n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    convolutionPiece c R a n = canonicalPiece c R a n := by
+  rw [convolutionPiece,
+    Nat.sum_divisorsAntidiagonal
+      (fun d s => leftSelector a d * rightSelector c R a s)]
+  by_cases hcanon : canonicalDivisor n R = a
+  · have ha_dvd : a ∣ n := by
+      rw [← hcanon]
+      exact canonicalDivisor_dvd hR
+    have ha_mem : a ∈ n.divisors := Nat.mem_divisors.mpr ⟨ha_dvd, hn⟩
+    rw [canonicalPiece, if_pos hcanon]
+    calc
+      ∑ d ∈ n.divisors, leftSelector a d * rightSelector c R a (n / d) =
+          leftSelector a a * rightSelector c R a (n / a) := by
+        exact Finset.sum_eq_single_of_mem a ha_mem
+          (by
+            intro b hb hba
+            simp [leftSelector, hba])
+      _ = c n := by
+        simp [leftSelector, rightSelector, Nat.mul_div_cancel' ha_dvd, hcanon]
+  · rw [canonicalPiece, if_neg hcanon]
+    apply Finset.sum_eq_zero
+    intro d hd
+    by_cases hda : d = a
+    · subst d
+      have ha_dvd : a ∣ n := Nat.dvd_of_mem_divisors hd
+      simp [leftSelector, rightSelector, Nat.mul_div_cancel' ha_dvd, hcanon]
+    · simp [leftSelector, hda]
+
+/-- The canonical divisor lies in the finite index set used by the
+superposition. -/
+theorem canonicalDivisor_mem_Icc {n R : ℕ} (hR : 0 < R) :
+    canonicalDivisor n R ∈ Finset.Icc 1 R := by
+  exact Finset.mem_Icc.mpr
+    ⟨canonicalDivisor_pos (n := n) hR, canonicalDivisor_le n R⟩
+
+/-- Pointwise exact coefficient refinement.  The finite family of literal
+convolutions reconstructs any coefficient without a majorant or an omitted
+exceptional integer. -/
+theorem sum_convolutionPiece (c : ℕ → ℝ) {R n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    ∑ a ∈ Finset.Icc 1 R, convolutionPiece c R a n = c n := by
+  simp_rw [convolutionPiece_eq_canonicalPiece c hn hR]
+  calc
+    ∑ a ∈ Finset.Icc 1 R, canonicalPiece c R a n =
+        canonicalPiece c R (canonicalDivisor n R) n := by
+      exact Finset.sum_eq_single_of_mem _ (canonicalDivisor_mem_Icc hR)
+        (by
+          intro a ha hne
+          simp [canonicalPiece, Ne.symm hne])
+    _ = c n := by simp [canonicalPiece]
+
+/-- The canonical fibers do not multiply any pointwise cost which vanishes at
+zero.  In particular, the number of divisor fibers creates no pointwise
+`L1` or `L2` loss. -/
+theorem sum_map_convolutionPiece (c : ℕ → ℝ) (Phi : ℝ → ℝ)
+    (hPhi : Phi 0 = 0) {R n : ℕ} (hn : n ≠ 0) (hR : 0 < R) :
+    ∑ a ∈ Finset.Icc 1 R, Phi (convolutionPiece c R a n) = Phi (c n) := by
+  simp_rw [convolutionPiece_eq_canonicalPiece c hn hR]
+  calc
+    ∑ a ∈ Finset.Icc 1 R, Phi (canonicalPiece c R a n) =
+        Phi (canonicalPiece c R (canonicalDivisor n R) n) := by
+      exact Finset.sum_eq_single_of_mem _ (canonicalDivisor_mem_Icc hR)
+        (by
+          intro a ha hne
+          simp [canonicalPiece, Ne.symm hne, hPhi])
+    _ = Phi (c n) := by simp [canonicalPiece]
+
+theorem sum_abs_convolutionPiece (c : ℕ → ℝ) {R n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    ∑ a ∈ Finset.Icc 1 R, |convolutionPiece c R a n| = |c n| := by
+  exact sum_map_convolutionPiece c abs (abs_zero) hn hR
+
+theorem sum_sq_convolutionPiece (c : ℕ → ℝ) {R n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    ∑ a ∈ Finset.Icc 1 R, (convolutionPiece c R a n) ^ 2 = (c n) ^ 2 := by
+  exact sum_map_convolutionPiece c (fun x => x ^ 2) (zero_pow (by norm_num)) hn hR
+
+/-- The refinement applied to the actual depth-four Heath--Brown coefficient,
+removing the source-identification gap left by the support obstruction. -/
+theorem hb4_sum_convolutionPiece (Z : ℕ) {R n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    ∑ a ∈ Finset.Icc 1 R,
+      convolutionPiece (fun m => HBDepthFour.hb4 Z m) R a n =
+        HBDepthFour.hb4 Z n := by
+  exact sum_convolutionPiece (fun m => HBDepthFour.hb4 Z m) hn hR
+
+/-- On the certified range of the depth-four identity, the divisor-dependent
+convolution family reconstructs the von Mangoldt coefficient itself. -/
+theorem sum_convolutionPiece_eq_vonMangoldt (Z : ℕ) {R n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) (hnZ : n ≤ Z ^ 4) :
+    ∑ a ∈ Finset.Icc 1 R,
+      convolutionPiece (fun m => HBDepthFour.hb4 Z m) R a n =
+        ArithmeticFunction.vonMangoldt n := by
+  rw [hb4_sum_convolutionPiece Z hn hR, HBDepthFour.hb4_eq_vonMangoldt Z n hnZ]
+
+/-- The regular fibers, whose first factor is within multiplicative tolerance
+`B` of the target cutoff. -/
+def regularRefinement (c : ℕ → ℝ) (R B n : ℕ) : ℝ :=
+  ∑ a ∈ (Finset.Icc 1 R).filter (fun a => R < a * B),
+    convolutionPiece c R a n
+
+/-- The complementary fibers.  Every contributing cofactor is `B`-rough. -/
+def roughRefinement (c : ℕ → ℝ) (R B n : ℕ) : ℝ :=
+  ∑ a ∈ (Finset.Icc 1 R).filter (fun a => ¬R < a * B),
+    convolutionPiece c R a n
+
+/-- Exact pointwise split into the terminal-scale family and the rough
+exceptional family. -/
+theorem regular_add_rough (c : ℕ → ℝ) {R B n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    regularRefinement c R B n + roughRefinement c R B n = c n := by
+  rw [regularRefinement, roughRefinement]
+  rw [Finset.sum_filter_add_sum_filter_not]
+  exact sum_convolutionPiece c hn hR
+
+theorem hb4_regular_add_rough (Z : ℕ) {R B n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    regularRefinement (fun m => HBDepthFour.hb4 Z m) R B n +
+      roughRefinement (fun m => HBDepthFour.hb4 Z m) R B n =
+        HBDepthFour.hb4 Z n := by
+  exact regular_add_rough (fun m => HBDepthFour.hb4 Z m) hn hR
+
+/-- A nonzero rough fiber has exactly the promised rough complementary
+factor.  This is the explicit exceptional support which the fixed-box
+superposition lacked. -/
+theorem rough_fiber_cofactor {c : ℕ → ℝ} {R B a n : ℕ}
+    (hR : 0 < R) (hpiece : convolutionPiece c R a n ≠ 0)
+    (hrough : ¬R < a * B) :
+    ∀ q : ℕ, q.Prime → q ∣ canonicalCofactor n R → B < q := by
+  have hn : n ≠ 0 := by
+    intro hn0
+    subst n
+    simp [convolutionPiece] at hpiece
+  have hcanonPiece := convolutionPiece_eq_canonicalPiece c (a := a) hn hR
+  have hcanon : canonicalDivisor n R = a := by
+    by_contra hne
+    rw [hcanonPiece, canonicalPiece, if_neg hne] at hpiece
+    exact hpiece rfl
+  obtain hregular | hcofactor := canonical_regular_or_rough (n := n) (B := B) hR
+  · rw [hcanon] at hregular
+    exact (hrough hregular).elim
+  · exact hcofactor
+
+/-- In the first exceptional size range the rough complementary factor is a
+single prime, so it can be retained as a prime variable rather than treated
+as an uncontrolled balanced coefficient. -/
+theorem rough_fiber_cofactor_prime {c : ℕ → ℝ} {R B a n : ℕ}
+    (hnR : R < n) (hR : 0 < R)
+    (hpiece : convolutionPiece c R a n ≠ 0)
+    (hrough : ¬R < a * B)
+    (hsize : canonicalCofactor n R < (B + 1) ^ 2) :
+    (canonicalCofactor n R).Prime := by
+  apply prime_of_rough_of_lt_sq (canonicalCofactor_one_lt hnR hR)
+  · exact rough_fiber_cofactor hR hpiece hrough
+  · exact hsize
+
+/-- In the next exceptional size range the retained cofactor is still fully
+structured: it is prime or a product of two primes. -/
+theorem rough_fiber_cofactor_prime_or_product_of_two_primes
+    {c : ℕ → ℝ} {R B a n : ℕ}
+    (hnR : R < n) (hR : 0 < R)
+    (hpiece : convolutionPiece c R a n ≠ 0)
+    (hrough : ¬R < a * B)
+    (hsize : canonicalCofactor n R < (B + 1) ^ 3) :
+    (canonicalCofactor n R).Prime ∨
+      ∃ p q : ℕ, p.Prime ∧ q.Prime ∧ canonicalCofactor n R = p * q := by
+  exact prime_or_product_of_two_primes_of_rough_of_lt_cube
+    (canonicalCofactor_one_lt hnR hR)
+    (rough_fiber_cofactor hR hpiece hrough) hsize
+
+end EtaDivisorRefinement
+end Zeta85
+end RH
+
+end
