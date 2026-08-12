@@ -40,7 +40,7 @@ theorem shiftAlias_eq_period_mul_complexAlias
       (F.period T j : ℂ) * F.complexAliasTerm T z z' j m := by
   simp only [Poisson.complexPoissonShiftAliasTerm,
     QuarticGramFamily.complexAliasTerm]
-  ring
+  ring_nf
 
 /-- The full complex-frequency lattice sum for one even compact physical
 channel, stated directly using the family complex alias term. -/
@@ -158,7 +158,7 @@ theorem channelAliasSum_eq_zero_add_nonzero
           F.complexAliasTerm T z z' j m := by
   classical
   unfold channelAliasSum
-  simpa using
+  simpa only [Finset.mem_singleton] using
     (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
 
 /-- Once the frozen off-RH alias family cancels, summing the full alias
@@ -227,7 +227,7 @@ def channelNormalizedFrequencyPairSum
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ) (j : Fin (F.channelCount T)) (z z' : ℂ) : ℂ :=
-  (F.fullLength T : ℂ) / (F.period T j : ℂ) *
+  (@QuarticGramFamily.fullLength σ T : ℂ) / (F.period T j : ℂ) *
     channelFrequencyPairSum F T j z z'
 
 /-- Complex Poisson cancels the channel period against the atom's
@@ -242,13 +242,13 @@ theorem channelNormalizedFrequencyPairSum_eq_fullLength_mul_aliasSum
     (heven : ∀ u, F.window T j (-u) = F.window T j u)
     (z z' : ℂ) :
     channelNormalizedFrequencyPairSum F T j z z' =
-      (F.fullLength T : ℂ) * channelAliasSum F T j z z' := by
+      (@QuarticGramFamily.fullLength σ T : ℂ) * channelAliasSum F T j z z' := by
   have hL0 : (F.period T j : ℂ) ≠ 0 := by
     exact_mod_cast (ne_of_gt hL)
   unfold channelNormalizedFrequencyPairSum
   rw [channelFrequencyPairSum_eq_period_mul_aliasSum
     F T j Λ hL hΛ hsmooth hsupp heven z z']
-  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+  field_simp [hL0]
 
 /-- Smooth compact channels have summable unscaled spatial alias lattices. -/
 theorem summable_channelAlias
@@ -287,7 +287,7 @@ theorem sum_channelNormalizedFrequencyPairSum_eq_fullLength_mul_sum_zero
       F.complexAliasFamily T z z' a) = 0) :
     (∑ j : Fin (F.channelCount T),
         channelNormalizedFrequencyPairSum F T j z z') =
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∑ j : Fin (F.channelCount T),
           F.complexAliasTerm T z z' j 0 := by
   have hsum : ∀ j : Fin (F.channelCount T),
@@ -298,16 +298,16 @@ theorem sum_channelNormalizedFrequencyPairSum_eq_fullLength_mul_sum_zero
     (∑ j : Fin (F.channelCount T),
         channelNormalizedFrequencyPairSum F T j z z') =
       ∑ j : Fin (F.channelCount T),
-        (F.fullLength T : ℂ) * channelAliasSum F T j z z' := by
+        (@QuarticGramFamily.fullLength σ T : ℂ) * channelAliasSum F T j z z' := by
       apply Finset.sum_congr rfl
       intro j hj
       exact channelNormalizedFrequencyPairSum_eq_fullLength_mul_aliasSum
         F T j Λ (hL j) hΛ (hsmooth j) (hsupp j) (heven j) z z'
-    _ = (F.fullLength T : ℂ) *
+    _ = (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∑ j : Fin (F.channelCount T),
           channelAliasSum F T j z z' := by
       rw [Finset.mul_sum]
-    _ = (F.fullLength T : ℂ) *
+    _ = (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∑ j : Fin (F.channelCount T),
           F.complexAliasTerm T z z' j 0 := by
       rw [sum_channelAliasSum_eq_sum_zero
@@ -338,7 +338,7 @@ theorem BlockMomentLimits.eventually_normalizedFrequencyPairSum_eq_zeroAliases
         (∑ j : Fin (F.channelCount T),
             channelNormalizedFrequencyPairSum F T j
               (gammaOf ρ) (gammaOf ρ')) =
-          (F.fullLength T : ℂ) *
+          (@QuarticGramFamily.fullLength σ T : ℂ) *
             ∑ j : Fin (F.channelCount T),
               F.complexAliasTerm T (gammaOf ρ) (gammaOf ρ') j 0 := by
   filter_upwards [
@@ -416,7 +416,7 @@ theorem sum_channelNormalizedFrequencyPairSum_eq_energyIntegral
           cexp (I * (z - z') * (u : ℂ)))) :
     (∑ j : Fin (F.channelCount T),
         channelNormalizedFrequencyPairSum F T j z z') =
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (F.windowEnergy T u : ℂ) *
             cexp (I * (z - z') * (u : ℂ)) := by
@@ -494,7 +494,7 @@ theorem sum_channelNormalizedFrequencyPairSum_eq_energyIntegral_of_compact
       F.complexAliasFamily T z z' a) = 0) :
     (∑ j : Fin (F.channelCount T),
         channelNormalizedFrequencyPairSum F T j z z') =
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (F.windowEnergy T u : ℂ) *
             cexp (I * (z - z') * (u : ℂ)) := by
@@ -529,7 +529,7 @@ theorem BlockMomentLimits.eventually_normalizedFrequencyPairSum_eq_energyIntegra
         (∑ j : Fin (F.channelCount T),
             channelNormalizedFrequencyPairSum F T j
               (gammaOf ρ) (gammaOf ρ')) =
-          (F.fullLength T : ℂ) *
+          (@QuarticGramFamily.fullLength σ T : ℂ) *
             ∫ u : ℝ,
               (F.windowEnergy T u : ℂ) *
                 cexp (I * (gammaOf ρ - gammaOf ρ') *
@@ -575,7 +575,7 @@ theorem zeroPairKernel_eq_distinguishedBlockFrequencyPairSum
         F.distinguished T) :
     QuarticTransfer.zeroPairKernel F T ρ ρ' =
       (Real.sqrt
-          (F.fullLength T / F.period T (F.distinguished T)) : ℂ) ^ 2 *
+          (@QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T)) : ℂ) ^ 2 *
         distinguishedBlockFrequencyPairSum F T ρ ρ' := by
   classical
   simp only [QuarticTransfer.zeroPairKernel,
@@ -595,7 +595,7 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedBlockFreq
     ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
       QuarticTransfer.zeroPairKernel F T ρ ρ' =
         (Real.sqrt
-            (F.fullLength T / F.period T (F.distinguished T)) : ℂ) ^ 2 *
+            (@QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T)) : ℂ) ^ 2 *
           distinguishedBlockFrequencyPairSum F T ρ ρ' := by
   filter_upwards [h.distinguished_columns] with T hdist
   intro ρ ρ'
@@ -614,16 +614,16 @@ theorem zeroPairKernel_eq_normalizedDistinguishedBlockFrequencyPairSum
       (F.columnAddress T (F.blockEmbedding T i)).1 =
         F.distinguished T)
     (hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T)) :
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T)) :
     QuarticTransfer.zeroPairKernel F T ρ ρ' =
-      ((F.fullLength T / F.period T (F.distinguished T) : ℝ) : ℂ) *
+      ((@QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T) : ℝ) : ℂ) *
         distinguishedBlockFrequencyPairSum F T ρ ρ' := by
   rw [zeroPairKernel_eq_distinguishedBlockFrequencyPairSum
     F T ρ ρ' hdist]
   have hsqrt :
       (Real.sqrt
-          (F.fullLength T / F.period T (F.distinguished T)) : ℂ) ^ 2 =
-        ((F.fullLength T /
+          (@QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T)) : ℂ) ^ 2 =
+        ((@QuarticGramFamily.fullLength σ T /
           F.period T (F.distinguished T) : ℝ) : ℂ) := by
     norm_cast
     exact Real.sq_sqrt hratio
@@ -637,7 +637,7 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedDistinguishe
     (h : PrincipalCyclicBlock F) :
     ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
       QuarticTransfer.zeroPairKernel F T ρ ρ' =
-        ((F.fullLength T /
+        ((@QuarticGramFamily.fullLength σ T /
           F.period T (F.distinguished T) : ℝ) : ℂ) *
           distinguishedBlockFrequencyPairSum F T ρ ρ' := by
   filter_upwards [
@@ -645,11 +645,11 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedDistinguishe
     h.periods_pos,
     Zeta23.Assembly.eventually_l_pos
   ] with T hdist hperiod hl
-  have hfull : 0 ≤ F.fullLength T := by
+  have hfull : 0 ≤ @QuarticGramFamily.fullLength σ T := by
     simp only [QuarticGramFamily.fullLength]
     exact mul_nonneg h.support_pos.le hl.le
   have hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T) :=
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T) :=
     div_nonneg hfull (hperiod (F.distinguished T)).le
   intro ρ ρ'
   exact
@@ -677,19 +677,19 @@ theorem zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
       (F.columnAddress T (F.blockEmbedding T i)).1 =
         F.distinguished T)
     (hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T)) :
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T)) :
     QuarticTransfer.zeroPairKernel F T ρ ρ' =
       channelNormalizedFrequencyPairSum F T (F.distinguished T)
           (gammaOf ρ) (gammaOf ρ') -
-        ((F.fullLength T /
+        ((@QuarticGramFamily.fullLength σ T /
           F.period T (F.distinguished T) : ℝ) : ℂ) *
           distinguishedFrequencyPairTail F T ρ ρ' := by
   rw [zeroPairKernel_eq_normalizedDistinguishedBlockFrequencyPairSum
     F T ρ ρ' hdist hratio]
   have hcast :
-      ((F.fullLength T /
+      ((@QuarticGramFamily.fullLength σ T /
         F.period T (F.distinguished T) : ℝ) : ℂ) =
-        (F.fullLength T : ℂ) /
+        (@QuarticGramFamily.fullLength σ T : ℂ) /
           (F.period T (F.distinguished T) : ℂ) := by
     norm_cast
   rw [hcast]
@@ -707,7 +707,7 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedFrequencyPai
       QuarticTransfer.zeroPairKernel F T ρ ρ' =
         channelNormalizedFrequencyPairSum F T (F.distinguished T)
             (gammaOf ρ) (gammaOf ρ') -
-          ((F.fullLength T /
+          ((@QuarticGramFamily.fullLength σ T /
             F.period T (F.distinguished T) : ℝ) : ℂ) *
             distinguishedFrequencyPairTail F T ρ ρ' := by
   filter_upwards [
@@ -715,11 +715,11 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedFrequencyPai
     h.periods_pos,
     Zeta23.Assembly.eventually_l_pos
   ] with T hdist hperiod hl
-  have hfull : 0 ≤ F.fullLength T := by
+  have hfull : 0 ≤ @QuarticGramFamily.fullLength σ T := by
     simp only [QuarticGramFamily.fullLength]
     exact mul_nonneg h.support_pos.le hl.le
   have hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T) :=
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T) :=
     div_nonneg hfull (hperiod (F.distinguished T)).le
   intro ρ ρ'
   exact zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
@@ -740,7 +740,7 @@ theorem channelNormalizedFrequencyPairSum_eq_channelEnergyIntegral_of_support_ga
     (hgap : 2 * Λ < F.period T j)
     (z z' : ℂ) :
     channelNormalizedFrequencyPairSum F T j z z' =
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (F.window T j u : ℂ) * F.window T j u *
             cexp (I * (z - z') * (u : ℂ)) := by
@@ -767,7 +767,8 @@ theorem channelNormalizedFrequencyPairSum_eq_channelEnergyIntegral_of_support_ga
   have hL0 : (F.period T j : ℂ) ≠ 0 := by
     exact_mod_cast hL.ne'
   unfold channelNormalizedFrequencyPairSum
-  rw [hfreq, mul_assoc, div_mul_cancel₀ _ hL0]
+  rw [hfreq]
+  field_simp [hL0]
   rw [complexAliasTerm_zero]
 
 /-- The actual distinguished zero-pair kernel is therefore its one-channel
@@ -780,7 +781,7 @@ theorem zeroPairKernel_eq_distinguishedEnergyIntegral_sub_tail
       (F.columnAddress T (F.blockEmbedding T i)).1 =
         F.distinguished T)
     (hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T))
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T))
     (Λ : ℝ)
     (hL : 0 < F.period T (F.distinguished T))
     (hΛ : 0 ≤ Λ)
@@ -793,12 +794,12 @@ theorem zeroPairKernel_eq_distinguishedEnergyIntegral_sub_tail
         F.window T (F.distinguished T) u)
     (hgap : 2 * Λ < F.period T (F.distinguished T)) :
     QuarticTransfer.zeroPairKernel F T ρ ρ' =
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
           ∫ u : ℝ,
             (F.window T (F.distinguished T) u : ℂ) *
               F.window T (F.distinguished T) u *
               cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
-        ((F.fullLength T /
+        ((@QuarticGramFamily.fullLength σ T /
           F.period T (F.distinguished T) : ℝ) : ℂ) *
           distinguishedFrequencyPairTail F T ρ ρ' := by
   rw [zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
@@ -827,12 +828,12 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
       2 * Λ T < F.period T (F.distinguished T)) :
     ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
       QuarticTransfer.zeroPairKernel F T ρ ρ' =
-        (F.fullLength T : ℂ) *
+        (@QuarticGramFamily.fullLength σ T : ℂ) *
             ∫ u : ℝ,
               (F.window T (F.distinguished T) u : ℂ) *
                 F.window T (F.distinguished T) u *
                 cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
-          ((F.fullLength T /
+          ((@QuarticGramFamily.fullLength σ T /
             F.period T (F.distinguished T) : ℝ) : ℂ) *
             distinguishedFrequencyPairTail F T ρ ρ' := by
   filter_upwards [
@@ -859,7 +860,7 @@ theorem normalizedZeroPairKernel_eq_energyRatioIntegral_sub_tail
       (F.columnAddress T (F.blockEmbedding T i)).1 =
         F.distinguished T)
     (hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T))
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T))
     (Λ : ℝ)
     (hL : 0 < F.period T (F.distinguished T))
     (hΛ : 0 ≤ Λ)
@@ -871,7 +872,7 @@ theorem normalizedZeroPairKernel_eq_energyRatioIntegral_sub_tail
       F.window T (F.distinguished T) (-u) =
         F.window T (F.distinguished T) u)
     (hgap : 2 * Λ < F.period T (F.distinguished T))
-    (hfull0 : F.fullLength T ≠ 0)
+    (hfull0 : @QuarticGramFamily.fullLength σ T ≠ 0)
     (henergy0 : (∫ u : ℝ, F.windowEnergy T u) ≠ 0) :
     QuarticTransfer.normalizedZeroPairKernel F T ρ ρ' =
       (∫ u : ℝ,
@@ -989,7 +990,7 @@ theorem normalizedZeroPairKernel_eq_localProfile_sub_tail
       (F.columnAddress T (F.blockEmbedding T i)).1 =
         F.distinguished T)
     (hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T))
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T))
     (Λ : ℝ)
     (hL : 0 < F.period T (F.distinguished T))
     (hΛ : 0 ≤ Λ)
@@ -1001,7 +1002,7 @@ theorem normalizedZeroPairKernel_eq_localProfile_sub_tail
       F.window T (F.distinguished T) (-u) =
         F.window T (F.distinguished T) u)
     (hgap : 2 * Λ < F.period T (F.distinguished T))
-    (hfull0 : F.fullLength T ≠ 0)
+    (hfull0 : @QuarticGramFamily.fullLength σ T ≠ 0)
     (htotal0 : (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
     (hchannel0 : F.channelEnergy T (F.distinguished T) ≠ 0) :
     QuarticTransfer.normalizedZeroPairKernel F T ρ ρ' =
@@ -1040,7 +1041,7 @@ theorem normalizedZeroPairKernel_eq_localProfileTailPairKernel
       (F.columnAddress T (F.blockEmbedding T i)).1 =
         F.distinguished T)
     (hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T))
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T))
     (Λ : ℝ)
     (hL : 0 < F.period T (F.distinguished T))
     (hΛ : 0 ≤ Λ)
@@ -1052,7 +1053,7 @@ theorem normalizedZeroPairKernel_eq_localProfileTailPairKernel
       F.window T (F.distinguished T) (-u) =
         F.window T (F.distinguished T) u)
     (hgap : 2 * Λ < F.period T (F.distinguished T))
-    (hfull0 : F.fullLength T ≠ 0)
+    (hfull0 : @QuarticGramFamily.fullLength σ T ≠ 0)
     (htotal0 : (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
     (hchannel0 : F.channelEnergy T (F.distinguished T) ≠ 0) :
     QuarticTransfer.normalizedZeroPairKernel F T ρ ρ' =
@@ -1067,14 +1068,14 @@ kernel.  The substitution is made before every higher product and finite
 zero sum. -/
 theorem factoredZeroKernelQuarticNumerator_eq_localProfileTailPairKernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic)
+    (q : TrimmedMoment.Quartic)
     (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ)
     (hdist : ∀ i : Fin (F.blockDim T),
       (F.columnAddress T (F.blockEmbedding T i)).1 =
         F.distinguished T)
     (hratio : 0 ≤
-      F.fullLength T / F.period T (F.distinguished T))
+      @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T))
     (Λ : ℝ)
     (hL : 0 < F.period T (F.distinguished T))
     (hΛ : 0 ≤ Λ)
@@ -1086,7 +1087,7 @@ theorem factoredZeroKernelQuarticNumerator_eq_localProfileTailPairKernel
       F.window T (F.distinguished T) (-u) =
         F.window T (F.distinguished T) u)
     (hgap : 2 * Λ < F.period T (F.distinguished T))
-    (hfull0 : F.fullLength T ≠ 0)
+    (hfull0 : @QuarticGramFamily.fullLength σ T ≠ 0)
     (htotal0 : (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
     (hchannel0 : F.channelEnergy T (F.distinguished T) ≠ 0) :
     QuarticTransfer.factoredZeroKernelQuarticNumerator q F T =
@@ -1107,7 +1108,7 @@ distinguished local profile minus its finite-grid tail, and only then form
 the cyclic products and zero sums. -/
 structure LocalProfileTailQuarticLowerBound
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (q : TrimmedMoment.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
   block_dimension_pos :
     ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
   eventually_gt : ∀ x : ℝ,
@@ -1123,7 +1124,7 @@ zero-kernel lower bound using only the concrete, pointwise hypotheses of the
 one-channel Poisson reduction.  No principal-block structure is assumed. -/
 theorem LocalProfileTailQuarticLowerBound.toFactored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : RHLinalg.Quartic} {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic} {F : QuarticGramFamily Z σ μ p v}
     (h : LocalProfileTailQuarticLowerBound q F)
     (Λ : ℝ → ℝ)
     (hdist : ∀ᶠ T in Filter.atTop,
@@ -1131,7 +1132,7 @@ theorem LocalProfileTailQuarticLowerBound.toFactored
         (F.columnAddress T (F.blockEmbedding T i)).1 =
           F.distinguished T)
     (hratio : ∀ᶠ T in Filter.atTop,
-      0 ≤ F.fullLength T / F.period T (F.distinguished T))
+      0 ≤ @QuarticGramFamily.fullLength σ T / F.period T (F.distinguished T))
     (hL : ∀ᶠ T in Filter.atTop,
       0 < F.period T (F.distinguished T))
     (hΛ : ∀ᶠ T in Filter.atTop, 0 ≤ Λ T)
@@ -1146,7 +1147,7 @@ theorem LocalProfileTailQuarticLowerBound.toFactored
         F.window T (F.distinguished T) u)
     (hgap : ∀ᶠ T in Filter.atTop,
       2 * Λ T < F.period T (F.distinguished T))
-    (hfull0 : ∀ᶠ T in Filter.atTop, F.fullLength T ≠ 0)
+    (hfull0 : ∀ᶠ T in Filter.atTop, @QuarticGramFamily.fullLength σ T ≠ 0)
     (htotal0 : ∀ᶠ T in Filter.atTop,
       (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
     (hchannel0 : ∀ᶠ T in Filter.atTop,
@@ -1181,7 +1182,7 @@ numerator.  The subtraction is deliberately taken after all cyclic products
 and finite zero sums have been formed. -/
 def localProfileTailQuarticErrorDensity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v)
+    (q : TrimmedMoment.Quartic) (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ) : ℝ :=
   QuarticTransfer.pairKernelQuarticNumerator q F T
         (localProfileTailPairKernel F T) /
@@ -1193,7 +1194,7 @@ def localProfileTailQuarticErrorDensity
 /-- One-sided asymptotics for the local-profile main numerator. -/
 structure LocalProfileMainQuarticLowerBound
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (q : TrimmedMoment.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
   block_dimension_pos :
     ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
   eventually_gt : ∀ x : ℝ,
@@ -1208,7 +1209,7 @@ structure LocalProfileMainQuarticLowerBound
 no pointwise tail bound on individual zero pairs. -/
 structure LocalProfileTailQuarticErrorVanishing
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (q : TrimmedMoment.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
   vanishes : Tendsto
     (localProfileTailQuarticErrorDensity q F)
     Filter.atTop (nhds 0)
@@ -1218,7 +1219,7 @@ Applied here, it transfers the local-profile main estimate to the exact
 local-profile-minus-finite-tail numerator. -/
 theorem localProfileTailQuarticLowerBound_of_main_of_error
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : RHLinalg.Quartic} {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic} {F : QuarticGramFamily Z σ μ p v}
     (hmain : LocalProfileMainQuarticLowerBound q F)
     (herror : LocalProfileTailQuarticErrorVanishing q F) :
     LocalProfileTailQuarticLowerBound q F := by
@@ -1278,9 +1279,10 @@ theorem distinguishedBlockLabel_bijective
   · intro i i' hii
     apply (F.blockEmbedding T).injective
     apply haddr.1
-    apply Sigma.subtype_ext
+    apply Sigma.ext
     · exact (hdist i).trans (hdist i').symm
-    · have hval := congrArg Fin.val hii
+    · apply Fin.ext
+      have hval := congrArg Fin.val hii
       simpa only [distinguishedBlockLabel] using hval
   · intro k
     obtain ⟨c, hc⟩ :=
@@ -1291,7 +1293,12 @@ theorem distinguishedBlockLabel_bijective
     obtain ⟨i, hi⟩ := hexhaustive c hcfirst
     refine ⟨i, ?_⟩
     apply Fin.ext
-    simp [distinguishedBlockLabel, hi, hc]
+    have hcval :=
+      congrArg (fun a => a.2.val) hc
+    change
+      (F.columnAddress T (F.blockEmbedding T i)).2.val = k.val
+    rw [hi]
+    exact hcval
 
 /-- The canonical equivalence between actual block columns and the complete
 distinguished finite grid. -/
@@ -1485,7 +1492,8 @@ def natFrequencyEmbedding : ℕ ↪ ℤ where
   toFun k := k
   inj' := by
     intro k k' h
-    exact_mod_cast h
+    change (k : ℤ) = (k' : ℤ) at h
+    exact Int.ofNat_inj.mp h
 
 /-- Integer frequencies retained by the finite nonnegative cutoff. -/
 def nonnegativeFrequencyRange (n : ℕ) : Finset ℤ :=
@@ -1515,7 +1523,8 @@ theorem distinguishedFiniteGridPairSum_eq_integerRange
         distinguishedIntegerFrequencyPairTerm F T ρ ρ' k := by
   unfold distinguishedFiniteGridPairSum nonnegativeFrequencyRange
   rw [Fin.sum_univ_eq_sum_range]
-  simp only [Finset.sum_map, distinguishedIntegerFrequencyPairTerm_natCast]
+  simp only [Finset.sum_map, natFrequencyEmbedding,
+    distinguishedIntegerFrequencyPairTerm_natCast]
 
 /-- The exact tail is the summable lattice restricted to the complement of
 the retained nonnegative cutoff. -/
@@ -1568,6 +1577,7 @@ theorem mem_nonnegativeFrequencyRange_iff
     Finset.mem_range]
   constructor
   · rintro ⟨a, ha, hcast⟩
+    simp only [natFrequencyEmbedding] at hcast
     subst k
     constructor <;> omega
   · intro hk
@@ -1681,7 +1691,7 @@ theorem distinguished_complexAliasTerm_eq_zero
           cexp (I * (z - z') * (u : ℂ))) = 0 := by
     rw [← integral_zero]
     apply integral_congr_ae
-    filter_upwards [ae_neq ((m : ℝ) * L / 2)] with u hu
+    filter_upwards [volume.ae_ne ((m : ℝ) * L / 2)] with u hu
     by_cases hwu : F.window T (F.distinguished T) u = 0
     · simp [hwu]
     by_cases hwshift :
@@ -1715,7 +1725,7 @@ theorem distinguished_complexAliasTerm_eq_zero
         (div_eq_iff hL'.ne').mp hxval
       calc
         u = (-(1 : ℝ) / 2) * L := huval
-        _ = ((-1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+        _ = ((-1 : ℤ) : ℝ) * L / 2 := by norm_num
     · have hxval : u / L = (1 : ℝ) / 2 := by
         norm_num at hxy
         linarith [hx.2, hy.1]
@@ -1723,7 +1733,7 @@ theorem distinguished_complexAliasTerm_eq_zero
         (div_eq_iff hL'.ne').mp hxval
       calc
         u = ((1 : ℝ) / 2) * L := huval
-        _ = ((1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+        _ = ((1 : ℤ) : ℝ) * L / 2 := by norm_num
   rw [hint, mul_zero]
 
 
@@ -1747,7 +1757,7 @@ theorem distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
       tsupport (F.localProfile T) ⊆ Icc (-(1 : ℝ) / 2) (1 / 2))
     (z z' : ℂ) :
     channelNormalizedFrequencyPairSum F T (F.distinguished T) z z' =
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (F.window T (F.distinguished T) u : ℂ) *
             F.window T (F.distinguished T) u *
@@ -1766,7 +1776,7 @@ theorem distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
       exact distinguished_complexAliasTerm_eq_zero F T
         hL henergy hlocalSupport z z' m m.property
     rw [hfun]
-    simp
+    exact tsum_zero
   have halias :
       channelAliasSum F T j z z' =
         F.complexAliasTerm T z z' j 0 := by
@@ -1777,8 +1787,9 @@ theorem distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
   unfold channelNormalizedFrequencyPairSum
   rw [channelFrequencyPairSum_eq_period_mul_aliasSum
     F T j Λ hL hΛ hsmooth hsupp heven z z']
-  rw [halias, mul_assoc, div_mul_cancel₀ _ hL0]
-  exact congrArg (fun w : ℂ => (F.fullLength T : ℂ) * w)
+  rw [halias]
+  field_simp [hL0]
+  exact congrArg (fun w : ℂ => (@QuarticGramFamily.fullLength σ T : ℂ) * w)
     (complexAliasTerm_zero F T j z z')
 
 /-- The physical principal-block construction therefore supplies literal
@@ -1841,12 +1852,12 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
         F.window T (F.distinguished T) u) :
     ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
       QuarticTransfer.zeroPairKernel F T ρ ρ' =
-        (F.fullLength T : ℂ) *
+        (@QuarticGramFamily.fullLength σ T : ℂ) *
             ∫ u : ℝ,
               (F.window T (F.distinguished T) u : ℂ) *
                 F.window T (F.distinguished T) u *
                 cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
-          ((F.fullLength T /
+          ((@QuarticGramFamily.fullLength σ T /
             F.period T (F.distinguished T) : ℝ) : ℂ) *
             distinguishedFrequencyPairTail F T ρ ρ' := by
   filter_upwards [
@@ -1861,13 +1872,14 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
       ContDiff ℝ 2
         (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
     (Complex.ofRealCLM.contDiff.comp
-      (hsmooth (F.distinguished T))).of_le (by norm_num)
+      (hsmooth (F.distinguished T))).of_le (by exact le_top)
   intro ρ ρ'
   rw [hkernel ρ ρ']
   rw [distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
     F T (Λ T) (hperiod (F.distinguished T)) hΛT
     hsmoothC hsuppT hevenT henergy hlocal
     (gammaOf ρ) (gammaOf ρ')]
+  ring
 
 
 /-! ## Virtual-window half-period cancellation -/
@@ -1889,7 +1901,7 @@ theorem halfPeriod_shift_product_ae_zero
       nlinarith
     · apply (div_le_iff₀ hL).2
       nlinarith
-  filter_upwards [ae_neq ((m : ℝ) * L / 2)] with u hu
+  filter_upwards [volume.ae_ne ((m : ℝ) * L / 2)] with u hu
   by_cases hfu : f u = 0
   · simp [hfu]
   by_cases hfshift : f (u - (m : ℝ) * L) = 0
@@ -1922,7 +1934,7 @@ theorem halfPeriod_shift_product_ae_zero
       (div_eq_iff hL.ne').mp hxval
     calc
       u = (-(1 : ℝ) / 2) * L := huval
-      _ = ((-1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+      _ = ((-1 : ℤ) : ℝ) * L / 2 := by norm_num
   · have hxval : u / L = (1 : ℝ) / 2 := by
       norm_num at hxy
       linarith [hx.2, hy.1]
@@ -1930,7 +1942,7 @@ theorem halfPeriod_shift_product_ae_zero
       (div_eq_iff hL.ne').mp hxval
     calc
       u = ((1 : ℝ) / 2) * L := huval
-      _ = ((1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+      _ = ((1 : ℤ) : ℝ) * L / 2 := by norm_num
 
 /-- Multiplying the translated overlap by an arbitrary complex exponential
 still gives a zero integral. -/
@@ -1996,7 +2008,7 @@ theorem virtualShiftAlias_eq_period_mul
       (L : ℂ) * virtualComplexAliasTerm T L f z z' m := by
   simp only [Poisson.complexPoissonShiftAliasTerm,
     virtualComplexAliasTerm]
-  ring
+  ring_nf
 
 /-- Complex Poisson summation stated entirely in virtual-window
 coordinates. -/
@@ -2098,14 +2110,14 @@ theorem virtualAliasSum_eq_zeroTranslation
       exact virtualComplexAliasTerm_eq_zero
         T L f hL hhalf z z' m m.property
     rw [hfun]
-    simp
+    exact tsum_zero
   unfold virtualAliasSum
   calc
     (∑' m : ℤ, virtualComplexAliasTerm T L f z z' m) =
         virtualComplexAliasTerm T L f z z' 0 +
           ∑' m : {m : ℤ // m ≠ 0},
             virtualComplexAliasTerm T L f z z' m := by
-      simpa using
+      simpa only [Finset.mem_singleton] using
         (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
     _ = virtualComplexAliasTerm T L f z z' 0 := by
       rw [hnonzero, add_zero]
@@ -2151,7 +2163,7 @@ theorem virtualNormalizedFrequencyPairSum_eq_energyIntegral
     exact_mod_cast hL.ne'
   rw [virtualFrequencyPairSum_eq_energyIntegral
     T L Λ f hL hΛ hsmooth hsupp heven hhalf z z']
-  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+  field_simp [hL0]
 
 
 /-! ## Canonical finite exhaustion of the virtual frequency lattice -/
@@ -2169,7 +2181,7 @@ frequencies.  This enumerates every integer exactly once as n tends to
 infinity. -/
 def virtualSymmetricFrequencyPartialSum
     (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (n : ℕ) : ℂ :=
-  ∑ k in Finset.range n,
+  Finset.sum (Finset.range n) fun k =>
     virtualFrequencyPairTerm T L f z z' (k : ℤ) +
       virtualFrequencyPairTerm T L f z z' (-(k : ℤ) - 1)
 
@@ -2202,7 +2214,7 @@ theorem tendsto_virtualSymmetricFrequencyPartialSum
     funext n
     congr 1
     push_cast
-    ring
+    ring_nf
   simpa only [virtualSymmetricFrequencyPartialSum,
     virtualFrequencyPairSum, virtualFrequencyPairTerm] using
       hpair.tendsto_sum_nat
@@ -2269,8 +2281,7 @@ theorem tendsto_virtualNormalizedSymmetricFrequencyPartialSum_energy
     tendsto_const_nhds.mul
       (tendsto_virtualSymmetricFrequencyPartialSum_energy
         T L Λ f hL hΛ hsmooth hsupp heven hhalf z z')
-  convert ht using 1
-  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+  convert ht using 1 <;> field_simp [hL0]
 
 
 /-- Tail left after the canonical finite symmetric frequency grid. -/
