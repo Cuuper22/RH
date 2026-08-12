@@ -1625,7 +1625,7 @@ def cyclicUncenteredMoment (mu : ℝ) (r : ℝ → ℝ) : ℕ → ℝ
       mu ^ 4 * (2 * pairSquaredPotentialIntegral r + crossingFunctional r)
   | _ => 0
 
-+theorem cyclicUncenteredMoment_topHat_eq_uncenteredContractionMoment
+theorem cyclicUncenteredMoment_topHat_eq_uncenteredContractionMoment
     {p mu : ℝ} (hp : 0 < p) (hp1 : p ≤ 1)
     (k : ℕ) (hk1 : 1 ≤ k) (hk4 : k ≤ 4) :
     cyclicUncenteredMoment mu (topHat p) k =
