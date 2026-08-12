@@ -41,7 +41,7 @@ theorem rung8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
     (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticTransfer.QuarticScoreConvergence Terminal8686.dual F) :
+    (hscore : QuarticTransfer.QuarticScoreConvergence QuarticTransfer.Terminal8686.dual F) :
     Rung8657_statement := by
   simpa only [Rung8657_statement, cRung8657] using
     QuarticTransfer.zeta_eps_transfer_8657 hfull hzero hr1a hscore
@@ -51,7 +51,7 @@ theorem rung8657_cumulative
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
     (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticTransfer.QuarticScoreConvergence Terminal8686.dual F) :
+    (hscore : QuarticTransfer.QuarticScoreConvergence QuarticTransfer.Terminal8686.dual F) :
     Rung8657_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung8657 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
@@ -64,7 +64,7 @@ theorem rung8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
     (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticTransfer.QuarticScoreConvergence Terminal8686.dual F) :
+    (hscore : QuarticTransfer.QuarticScoreConvergence QuarticTransfer.Terminal8686.dual F) :
     Rung8686_statement := by
   simpa only [Rung8686_statement, cRung8686] using
     QuarticTransfer.zeta_eps_transfer_8686 hfull hzero hr1a hscore
@@ -74,7 +74,7 @@ theorem rung8686_cumulative
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
     (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticTransfer.QuarticScoreConvergence Terminal8686.dual F) :
+    (hscore : QuarticTransfer.QuarticScoreConvergence QuarticTransfer.Terminal8686.dual F) :
     Rung8686_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung8686 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
@@ -89,7 +89,7 @@ theorem rung9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
     (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticTransfer.QuarticScoreConvergence Terminal9506.dual F) :
+    (hscore : QuarticTransfer.QuarticScoreConvergence QuarticTransfer.Terminal9506.dual F) :
     Rung9383_statement := by
   simpa only [Rung9383_statement, cRung9383] using
     QuarticTransfer.zeta_eps_transfer_9383 hfull hzero hr1a hscore
@@ -99,7 +99,7 @@ theorem rung9383_cumulative
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
     (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticTransfer.QuarticScoreConvergence Terminal9506.dual F) :
+    (hscore : QuarticTransfer.QuarticScoreConvergence QuarticTransfer.Terminal9506.dual F) :
     Rung9383_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung9383 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
@@ -112,7 +112,7 @@ theorem rung9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
     (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticTransfer.QuarticScoreConvergence Terminal9506.dual F) :
+    (hscore : QuarticTransfer.QuarticScoreConvergence QuarticTransfer.Terminal9506.dual F) :
     Rung9506_statement := by
   simpa only [Rung9506_statement, cRung9506] using
     QuarticTransfer.zeta_eps_transfer_9506 hfull hzero hr1a hscore
@@ -122,7 +122,7 @@ theorem rung9506_cumulative
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
     (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticTransfer.QuarticScoreConvergence Terminal9506.dual F) :
+    (hscore : QuarticTransfer.QuarticScoreConvergence QuarticTransfer.Terminal9506.dual F) :
     Rung9506_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
