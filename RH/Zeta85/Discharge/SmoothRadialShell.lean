@@ -1568,6 +1568,27 @@ theorem tendsto_integral_frozen9506ShellWindow_sq_exact
       (fun x hx => QuarticWindowWitnesses.v9506_pos hx)
   simpa only [integral_supportedFullProfile_v9506_div L hL] using h
 
+
+/-- The exact R-8686 supported-profile mass is nonzero at every positive
+physical scale. -/
+theorem integral_supportedFullProfile_v8686_div_ne_zero
+    (L : ℝ) (hL : 0 < L) :
+    (∫ u : ℝ,
+      @QuarticGramFamily.supportedFullProfile
+        QuarticWindowWitnesses.v8686 (u / L)) ≠ 0 := by
+  rw [integral_supportedFullProfile_v8686_div L hL]
+  exact mul_ne_zero hL.ne' (by norm_num)
+
+/-- The exact R-9506 supported-profile mass is nonzero at every positive
+physical scale. -/
+theorem integral_supportedFullProfile_v9506_div_ne_zero
+    (L : ℝ) (hL : 0 < L) :
+    (∫ u : ℝ,
+      @QuarticGramFamily.supportedFullProfile
+        QuarticWindowWitnesses.v9506 (u / L)) ≠ 0 := by
+  rw [integral_supportedFullProfile_v9506_div L hL]
+  exact mul_ne_zero hL.ne' (by norm_num)
+
 end SmoothRadialShell
 end Zeta85
 end RH
