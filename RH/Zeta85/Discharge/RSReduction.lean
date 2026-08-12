@@ -35,7 +35,7 @@ Poisson/EndsCore API do not provide those steps.
 -/
 
 open MeasureTheory
-open scoped BigOperators Matrix Convolution
+open scoped BigOperators Matrix Convolution ContDiff
 
 noncomputable section
 
@@ -120,24 +120,25 @@ theorem weightedCyclicSymbol_k4_l1_bound
         apply integral_congr_ae
         filter_upwards [] with x
         exact hx x
-      _ = 0 := integral_zero
+      _ = 0 := by simp
   rcases hex with ⟨x, hx⟩
+  have hfactor (j : Fin 4) :
+      r (x + cyclicPartialSum xi j / mu) ≠ 0 := by
+    intro h
+    apply hx
+    dsimp only [I]
+    exact Finset.prod_eq_zero (Finset.mem_univ j) h
   have hr0 : r x ≠ 0 := by
-    intro h
-    apply hx
-    simp [I, Fin.prod_univ_succ, cyclicPartialSum, h]
+    simpa [cyclicPartialSum] using hfactor (0 : Fin 4)
   have hr1 : r (x + xi 0 / mu) ≠ 0 := by
-    intro h
-    apply hx
-    norm_num [I, Fin.prod_univ_succ, cyclicPartialSum, h]
+    convert hfactor (1 : Fin 4) using 1 <;>
+      norm_num [cyclicPartialSum, Fin.sum_univ_succ]
   have hr2 : r (x + (xi 0 + xi 1) / mu) ≠ 0 := by
-    intro h
-    apply hx
-    norm_num [I, Fin.prod_univ_succ, cyclicPartialSum, h]
+    convert hfactor (2 : Fin 4) using 1 <;>
+      norm_num [cyclicPartialSum, Fin.sum_univ_succ] <;> ring
   have hr3 : r (x + (xi 0 + xi 1 + xi 2) / mu) ≠ 0 := by
-    intro h
-    apply hx
-    norm_num [I, Fin.prod_univ_succ, cyclicPartialSum, h]
+    convert hfactor (3 : Fin 4) using 1 <;>
+      norm_num [cyclicPartialSum, Fin.sum_univ_succ] <;> ring
   rcases hr x hr0 with ⟨hx0a, hx0b⟩
   rcases hr (x + xi 0 / mu) hr1 with ⟨hx1a, hx1b⟩
   rcases hr (x + (xi 0 + xi 1) / mu) hr2 with ⟨hx2a, hx2b⟩
@@ -148,6 +149,7 @@ theorem weightedCyclicSymbol_k4_l1_bound
     have heq :
         xi 0 = mu * ((x + xi 0 / mu) - x) := by
       field_simp [ne_of_gt hmu]
+      ring
     rw [heq, abs_mul, abs_of_pos hmu]
     exact mul_le_mul_of_nonneg_left hd hmu.le
   have h1 : |xi 1| ≤ mu * (b - a) := by
@@ -175,11 +177,13 @@ theorem weightedCyclicSymbol_k4_l1_bound
         xi 0 + xi 1 + xi 2 =
           mu * ((x + (xi 0 + xi 1 + xi 2) / mu) - x) := by
       field_simp [ne_of_gt hmu]
+      ring
     rw [heq, abs_mul, abs_of_pos hmu]
     exact mul_le_mul_of_nonneg_left hd hmu.le
   have hsum :
       (∑ i : Fin 4, xi i) = xi 0 + xi 1 + xi 2 + xi 3 := by
     norm_num [Fin.sum_univ_succ]
+    ring
   have hlastEq :
       xi 3 = (∑ i : Fin 4, xi i) - (xi 0 + xi 1 + xi 2) := by
     linarith
@@ -190,13 +194,14 @@ theorem weightedCyclicSymbol_k4_l1_bound
       |(∑ i : Fin 4, xi i) - (xi 0 + xi 1 + xi 2)| ≤
           |∑ i : Fin 4, xi i| + |xi 0 + xi 1 + xi 2| := by
             simpa only [sub_eq_add_neg, abs_neg] using
-              abs_add (∑ i : Fin 4, xi i) (-(xi 0 + xi 1 + xi 2))
+              abs_add_le (∑ i : Fin 4, xi i) (-(xi 0 + xi 1 + xi 2))
       _ ≤ |∑ i : Fin 4, xi i| + mu * (b - a) :=
-        add_le_add_left hcycle _
+        add_le_add (le_refl _) hcycle
   have habssum :
       (∑ i : Fin 4, |xi i|) =
         |xi 0| + |xi 1| + |xi 2| + |xi 3| := by
     norm_num [Fin.sum_univ_succ]
+    ring
   rw [habssum]
   nlinarith
 
@@ -298,7 +303,6 @@ theorem normalCutoffSymbol_tsupport_subset {k : ℕ}
     rw [hz, mul_zero]
   have ht := hPhi xi hp
   have hn := hchi (∑ i : Fin k, xi i) hc
-  dsimp only [Set.mem_setOf_eq]
   linarith
 
 /-- A strict numerical margin converts the closed support bound into the
@@ -375,7 +379,7 @@ theorem weightedCyclicSymbol_k4_contDiff
       dsimp only [K]
       simpa using (Set.neg_mem_neg.mpr h)
     dsimp only [g]
-    apply prod_eq_zero (Finset.mem_univ (0 : Fin 4))
+    apply Finset.prod_eq_zero (Finset.mem_univ (0 : Fin 4))
     simpa [cyclicPartialSum] using
       image_eq_zero_of_notMem_tsupport hneg
   have hg : ContDiff ℝ 1 ↿g := by
@@ -399,8 +403,10 @@ theorem weightedCyclicSymbol_k4_contDiff
       ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ =>
         ((fun _x : ℝ => (1 : ℝ)) ⋆[
           ContinuousLinearMap.mul ℝ ℝ, volume] g xi) 0) := by
-    apply hconv'.comp
-    fun_prop
+    simpa only [Function.comp_apply] using
+      hconv'.comp
+        (by fun_prop :
+          ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ => (xi, (0 : ℝ))))
   have hintegral :
       ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ =>
         ∫ x : ℝ, ∏ j : Fin 4,
@@ -411,8 +417,10 @@ theorem weightedCyclicSymbol_k4_contDiff
         mu * ∫ x : ℝ, ∏ j : Fin 4,
           r (x + cyclicPartialSum xi j / mu)) :=
     contDiff_const.mul hintegral
-  have hcomplex := Complex.ofRealCLM.contDiff.comp hreal
-  simpa [weightedCyclicSymbol, Function.comp_def] using hcomplex
+  change ContDiff ℝ 1 (fun xi : Fin 4 -> ℝ =>
+    ((mu * ∫ x : ℝ, ∏ j : Fin 4,
+      r (x + cyclicPartialSum xi j / mu) : ℝ) : ℂ))
+  exact Complex.ofRealCLM.contDiff.comp hreal
 
 /-- At the frozen bandwidth, the quartic cyclic test has a smooth compact
 extension meeting the strict RS support threshold.  The extension agrees
@@ -481,18 +489,24 @@ def unitIntervalProfile : ℝ -> ℝ := fun x => unitIntervalBump x
 
 theorem unitIntervalProfile_contDiff :
     ContDiff ℝ ∞ unitIntervalProfile := by
-  simpa only [unitIntervalProfile] using unitIntervalBump.contDiff
+  change ContDiff ℝ ∞ (unitIntervalBump : ℝ -> ℝ)
+  exact unitIntervalBump.contDiff
 
 theorem unitIntervalProfile_hasCompactSupport :
     HasCompactSupport unitIntervalProfile := by
-  simpa only [unitIntervalProfile] using unitIntervalBump.hasCompactSupport
+  change HasCompactSupport (unitIntervalBump : ℝ -> ℝ)
+  exact unitIntervalBump.hasCompactSupport
 
 theorem unitIntervalProfile_support
     (x : ℝ) (hx : unitIntervalProfile x ≠ 0) :
     (0 : ℝ) ≤ x ∧ x ≤ 1 := by
-  have hxball : x ∈ Metric.ball (1 / 2 : ℝ) (1 / 2 : ℝ) := by
+  change unitIntervalBump x ≠ 0 at hx
+  have hxball0 :
+      x ∈ Metric.ball (1 / 2 : ℝ) unitIntervalBump.rOut := by
     rw [← unitIntervalBump.support_eq]
     exact hx
+  have hxball : x ∈ Metric.ball (1 / 2 : ℝ) (1 / 2 : ℝ) := by
+    simpa [unitIntervalBump] using hxball0
   have habs : |x - 1 / 2| < (1 / 2 : ℝ) := by
     simpa [Real.dist_eq] using hxball
   rw [abs_lt] at habs
@@ -515,7 +529,7 @@ theorem exists_unitInterval_frozenQuarticRSTest :
             unitIntervalProfile) := by
   apply exists_frozenQuarticRSTest_of_smoothCompact
   · exact unitIntervalProfile_hasCompactSupport
-  · exact unitIntervalProfile_contDiff.of_le (by norm_num)
+  · exact (unitIntervalProfile_contDiff).of_le (by norm_num)
   · exact unitIntervalProfile_support
 
 /-- RS Theorem 3.1 now applies directly to the explicit frozen quartic
