@@ -370,8 +370,16 @@ theorem analyzeComplex_synthesizeComplex
       push_cast at hsumComplex
       rw [hsumComplex]
     _ = virtual r := by
-      simp only [Matrix.one_apply]
-      push_cast
+      calc
+        (∑ s : ι,
+            ((1 : Matrix ι ι ℝ) r s : ℂ) * virtual s) =
+            ∑ s : ι, if r = s then virtual s else 0 := by
+          apply Finset.sum_congr rfl
+          intro s _
+          by_cases hrs : r = s
+          · simp [Matrix.one_apply, hrs]
+          · simp [Matrix.one_apply, hrs]
+        _ = virtual r := by simp
 
 /-- With a common modulation period, orthogonal window synthesis passes
 linearly through the paper Fourier transform.  Thus the same finite mixer
@@ -685,8 +693,16 @@ theorem synthesizeComplex_analyzeComplex
       push_cast at hsumComplex
       rw [hsumComplex]
     _ = physical j := by
-      simp only [Matrix.one_apply]
-      push_cast
+      calc
+        (∑ k : ι,
+            ((1 : Matrix ι ι ℝ) j k : ℂ) * physical k) =
+            ∑ k : ι, if j = k then physical k else 0 := by
+          apply Finset.sum_congr rfl
+          intro k _
+          by_cases hjk : j = k
+          · simp [Matrix.one_apply, hjk]
+          · simp [Matrix.one_apply, hjk]
+        _ = physical j := by simp
 
 end VirtualChannelMixer
 end Zeta85
