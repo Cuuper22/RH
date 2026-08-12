@@ -1233,6 +1233,85 @@ theorem eventually_balancedRemote_norm_le
     (remoteLatticePairScale_nonneg F T hT
       (hperiod (F.distinguished T))) hpair
 
+theorem edgeCount_isLittleO_core
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) :
+    (fun T => (Zeta23.Assembly.NII Z T : ℝ)) =o[atTop]
+      (fun T => (Z.N T (2 * T) : ℝ)) := by
+  obtain ⟨A₀, hA₀, hloc⟩ := hRvM.local_count
+  obtain ⟨C, hC⟩ := Zeta23.Tail.eventually_NII_le Z hA₀ hloc
+  have hO : (fun T => (Zeta23.Assembly.NII Z T : ℝ)) =O[atTop]
+      (fun T => Real.sqrt T * Zeta23.l T) := by
+    refine Asymptotics.IsBigO.of_bound C ?_
+    filter_upwards [hC, Zeta23.Assembly.eventually_l_pos] with T hCT hlT
+    rw [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg (Nat.cast_nonneg _), abs_of_nonneg (by positivity)]
+    simpa [mul_assoc] using hCT
+  exact hO.trans_isLittleO
+    (Zeta23.Assembly.isLittleO_N_of_isLittleO_Tl Z hRvM
+      Zeta23.Assembly.isLittleO_sqrt_mul_l_Tl)
+
+theorem eventually_NIprime_le_two_core
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) :
+    ∀ᶠ T in atTop,
+      (Z.NIprime T : ℝ) ≤ 2 * (Z.N T (2 * T) : ℝ) := by
+  have hsmall := (Asymptotics.isLittleO_iff.mp
+    (edgeCount_isLittleO_core hRvM)) (show (0 : ℝ) < 1 by norm_num)
+  filter_upwards [hsmall, eventually_ge_atTop (0 : ℝ)] with T hsmallT hT
+  rw [Real.norm_eq_abs, Real.norm_eq_abs,
+    abs_of_nonneg (Nat.cast_nonneg _),
+    abs_of_nonneg (Nat.cast_nonneg _), one_mul] at hsmallT
+  rw [Zeta23.Assembly.NIprime_eq Z hT]
+  push_cast
+  linarith
+
+/-- Under the natural lower normalization, the balanced remote matrix
+itself converges to zero in Frobenius norm. -/
+theorem balancedRemote_norm_tendsto_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hσ : 0 ≤ σ)
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
+    (hRvM : RiemannVonMangoldt Z)
+    (hhat : ∀ᶠ T in atTop, 1 ≤ F.hatDenominator T) :
+    Tendsto (fun T => ‖balancedRemoteLatticeZeroMatrix F T‖)
+      atTop (nhds 0) := by
+  have hhatPos : ∀ᶠ T in atTop, 0 < F.hatDenominator T :=
+    hhat.mono fun T h => lt_of_lt_of_le zero_lt_one h
+  have hbound := eventually_balancedRemote_norm_le htail hguard hhatPos
+  have hupper : ∀ᶠ T in atTop,
+      ‖balancedRemoteLatticeZeroMatrix F T‖ ≤
+        2 * ((Z.N T (2 * T) : ℝ) * remoteLatticePairScale F T) := by
+    filter_upwards [hbound, hhat,
+      eventually_NIprime_le_two_core hRvM,
+      eventually_gt_atTop (0 : ℝ), hguard.periods_pos]
+        with T hboundT hhatT hNI hT hperiod
+    have hscale : 0 ≤ remoteLatticePairScale F T :=
+      remoteLatticePairScale_nonneg F T hT
+        (hperiod (F.distinguished T))
+    have hquot : (Z.NIprime T : ℝ) / F.hatDenominator T ≤
+        (Z.NIprime T : ℝ) := by
+      exact div_le_self (Nat.cast_nonneg _) hhatT
+    calc
+      ‖balancedRemoteLatticeZeroMatrix F T‖ ≤
+          remoteLatticePairScale F T *
+            ((Z.NIprime T : ℝ) / F.hatDenominator T) := hboundT
+      _ ≤ remoteLatticePairScale F T * (Z.NIprime T : ℝ) := by
+        gcongr
+      _ ≤ remoteLatticePairScale F T *
+          (2 * (Z.N T (2 * T) : ℝ)) := by
+        gcongr
+      _ = 2 * ((Z.N T (2 * T) : ℝ) *
+          remoteLatticePairScale F T) := by ring
+  have hlim : Tendsto (fun T =>
+      2 * ((Z.N T (2 * T) : ℝ) * remoteLatticePairScale F T))
+      atTop (nhds 0) := by
+    simpa only [mul_zero] using
+      (remoteLatticePairScale_negligible
+        (F := F) hσ htail hguard hRvM).const_mul 2
+  exact squeeze_zero'
+    (Eventually.of_forall fun T => norm_nonneg _) hupper hlim
+
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
