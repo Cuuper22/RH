@@ -2091,6 +2091,23 @@ structure DistinguishedPoissonTailControl
   sobolev_mass_isBigO :
     (fun T => distinguishedWindowSobolevMass F T) =O[atTop] Zeta23.l
 
+/-- Elementary pointwise/integral window bounds implying the asymptotic
+tail-control interface.  These are the bounds supplied by a standard
+half-period smooth taper. -/
+structure DistinguishedWindowNormBounds
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) : Prop where
+  bandwidth_lt_one : μ < 1
+  distinguished_support_half : ∀ᶠ T in atTop, ∀ u,
+    F.window T (F.distinguished T) u ≠ 0 →
+      |u| ≤ F.period T (F.distinguished T) / 2
+  window_l1_le_period : ∀ᶠ T in atTop,
+    (∫ u, ‖(F.window T (F.distinguished T) u : ℂ)‖) ≤
+      F.period T (F.distinguished T)
+  deriv2_l1_bounded : ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ T in atTop,
+    (∫ u, ‖deriv (deriv
+      (fun x => (F.window T (F.distinguished T) x : ℂ))) u‖) ≤ C
+
 /-- The older physical-window bundle contains the minimal Poisson-kernel
 data as a literal sub-interface. -/
 theorem PrincipalCyclicBlock.toDistinguishedPoissonKernelData
@@ -2116,6 +2133,44 @@ theorem PrincipalCyclicBlock.toDistinguishedGuardedPoissonKernelData
   distinguished_period := h.distinguished_period
   distinguished_grid_count := h.channel_grid_count.mono fun T hcount =>
     hcount (F.distinguished T)
+
+/-- The elementary taper bounds imply the `O(log T)` Sobolev mass required
+by the remote-tail theorem. -/
+theorem DistinguishedWindowNormBounds.toDistinguishedPoissonTailControl
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hwindow : DistinguishedWindowNormBounds F)
+    (hguard : DistinguishedGuardedPoissonKernelData F) :
+    DistinguishedPoissonTailControl F where
+  bandwidth_lt_one := hwindow.bandwidth_lt_one
+  distinguished_support_half := hwindow.distinguished_support_half
+  sobolev_mass_isBigO := by
+    obtain ⟨C, hC0, hderiv⟩ := hwindow.deriv2_l1_bounded
+    refine IsBigO.of_bound (μ + C) ?_
+    filter_upwards [hwindow.window_l1_le_period, hderiv,
+      hguard.distinguished_period, Zeta23.Assembly.eventually_one_le_l]
+        with T hbase hderivT hperiod hl
+    have hbase0 :
+        0 ≤ ∫ u, ‖(F.window T (F.distinguished T) u : ℂ)‖ :=
+      integral_nonneg fun _ => norm_nonneg _
+    have hderiv0 : 0 ≤ ∫ u, ‖deriv (deriv
+        (fun x => (F.window T (F.distinguished T) x : ℂ))) u‖ :=
+      integral_nonneg fun _ => norm_nonneg _
+    have hmass0 : 0 ≤ distinguishedWindowSobolevMass F T := by
+      unfold distinguishedWindowSobolevMass
+      positivity
+    have hl0 : 0 ≤ Zeta23.l T := le_trans zero_le_one hl
+    rw [Real.norm_eq_abs, Real.norm_eq_abs,
+      abs_of_nonneg hmass0, abs_of_nonneg hl0]
+    unfold distinguishedWindowSobolevMass
+    calc
+      (∫ u, ‖(F.window T (F.distinguished T) u : ℂ)‖) +
+          ∫ u, ‖deriv (deriv
+            (fun x => (F.window T (F.distinguished T) x : ℂ))) u‖ ≤
+        F.period T (F.distinguished T) + C := add_le_add hbase hderivT
+      _ = μ * Zeta23.l T + C := by rw [hperiod]
+      _ ≤ (μ + C) * Zeta23.l T := by
+        nlinarith
 
 private theorem complexWindow_contDiff_two
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
