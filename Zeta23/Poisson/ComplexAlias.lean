@@ -440,6 +440,67 @@ theorem hasSum_paperFT_mul_paperFT_shift_alias
   rw [← htsum]
   exact hhas
 
+
+/-- If a window fits strictly inside half a modulation period, every nonzero
+shifted spatial alias vanishes.  This is pointwise in both complex
+frequencies and does not require cancellation between channels. -/
+theorem complexPoissonShiftAliasTerm_eq_zero_of_support_gap
+    {φ : ℝ → ℂ} {L T Λ : ℝ}
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsupp : ∀ u, Λ < |u| → φ u = 0)
+    (heven : ∀ u, φ (-u) = φ u)
+    (hgap : 2 * Λ < L)
+    (z z' : ℂ) {m : ℤ} (hm : m ≠ 0) :
+    complexPoissonShiftAliasTerm φ L T z z' m = 0 := by
+  rw [← complexPoissonAliasTerm_eq_shift φ L T z z' heven m]
+  rw [← complexGaux_int_eq_alias]
+  apply complexGaux_eq_zero_of_abs_gt hL hΛ hsupp
+  have hunit : 2 * Λ / L < 1 := by
+    rw [div_lt_one hL]
+    exact hgap
+  have hmCases : m ≤ -1 ∨ 1 ≤ m := by omega
+  have hmabs : (1 : ℝ) ≤ |(m : ℝ)| := by
+    rcases hmCases with hmneg | hmpos
+    · have hmnonpos : (m : ℝ) ≤ 0 := by
+        exact_mod_cast (show m ≤ 0 by omega)
+      rw [abs_of_nonpos hmnonpos]
+      exact_mod_cast (show (1 : ℤ) ≤ -m by omega)
+    · have hmnonneg : (0 : ℝ) ≤ m := by
+        exact_mod_cast (show (0 : ℤ) ≤ m by omega)
+      rw [abs_of_nonneg hmnonneg]
+      exact_mod_cast hmpos
+  exact lt_of_lt_of_le hunit hmabs
+
+/-- Under the same strict support gap, complex Poisson summation collapses to
+the zero spatial translate for one channel by itself. -/
+theorem hasSum_paperFT_mul_paperFT_shift_alias_zero_only
+    {φ : ℝ → ℂ} {L T Λ : ℝ}
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hφ : ContDiff ℝ 2 φ)
+    (hsupp : ∀ u, Λ < |u| → φ u = 0)
+    (heven : ∀ u, φ (-u) = φ u)
+    (hgap : 2 * Λ < L)
+    (z z' : ℂ) :
+    HasSum
+      (fun k : ℤ =>
+        paperFT φ
+            (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+          paperFT φ
+            (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)))
+      (complexPoissonShiftAliasTerm φ L T z z' 0) := by
+  obtain ⟨_, hhas⟩ :=
+    hasSum_paperFT_mul_paperFT_shift_alias
+      hL hΛ hφ hsupp heven z z'
+  have hcollapse :
+      (∑' m : ℤ, complexPoissonShiftAliasTerm φ L T z z' m) =
+        complexPoissonShiftAliasTerm φ L T z z' 0 := by
+    rw [tsum_eq_single 0]
+    intro m hm
+    exact complexPoissonShiftAliasTerm_eq_zero_of_support_gap
+      hL hΛ hsupp heven hgap z z' hm
+  rw [hcollapse] at hhas
+  exact hhas
+
 end Poisson
 end Zeta23
 
