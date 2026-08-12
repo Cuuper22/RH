@@ -388,6 +388,179 @@ theorem asymptotic_eps_transfer
     positivity
   nlinarith
 
+
+/-! ## Exact terminal specializations -/
+
+/-- Support 14999/10000: the isometric weighted statistic implies the
+frozen R-8686 epsilon statement. -/
+theorem eps_transfer_8686
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
+    {F : Family14999 Z}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (hweighted :
+      WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((86855250 / 100000000 : ℝ) - ε) *
+          (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) := by
+  have hcost :
+      profileSaturatedCost (14999 / 10000)
+          QuarticWindowWitnesses.v8686 ≤
+        TrimmedMoment.Terminal8686.costUpper := by
+    rw [profileSaturatedCost_v8686]
+    exact QuarticWindowWitnesses.D8686_lt.le
+  exact asymptotic_eps_transfer hRvM hfull hzero C
+    TrimmedMoment.Terminal8686.dual hweighted
+    TrimmedMoment.Terminal8686.cap
+    TrimmedMoment.Terminal8686.costUpper
+    (86855250 / 100000000)
+    TrimmedMoment.Terminal8686.dual_feasible
+    TrimmedMoment.Terminal8686.cap_slope hcost
+    QuarticTransfer.strict_transfer_8686
+
+/-- Support 19999/10000: the isometric weighted statistic implies the
+frozen R-9506 epsilon statement. -/
+theorem eps_transfer_9506
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
+    {F : Family19999 Z}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (hweighted :
+      WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((95063832187565 / 100000000000000 : ℝ) - ε) *
+          (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) := by
+  have hcost :
+      profileSaturatedCost (19999 / 10000)
+          QuarticWindowWitnesses.v9506 ≤
+        TrimmedMoment.Terminal9506.costUpper := by
+    rw [profileSaturatedCost_v9506]
+    exact QuarticWindowWitnesses.D9506_lt.le
+  exact asymptotic_eps_transfer hRvM hfull hzero C
+    TrimmedMoment.Terminal9506.dual hweighted
+    TrimmedMoment.Terminal9506.cap
+    TrimmedMoment.Terminal9506.costUpper
+    (95063832187565 / 100000000000000)
+    TrimmedMoment.Terminal9506.dual_feasible
+    TrimmedMoment.Terminal9506.cap_slope hcost
+    QuarticTransfer.strict_transfer_9506
+
+/-- R-8657 follows monotonically from the stronger mixed-channel
+support-14999 transfer. -/
+theorem eps_transfer_8657
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
+    {F : Family14999 Z}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (hweighted :
+      WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((865674254456636 / 1000000000000000 : ℝ) - ε) *
+          (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) := by
+  intro ε hε
+  obtain ⟨T₀, hT₀⟩ :=
+    eps_transfer_8686 hRvM hfull hzero C hweighted ε hε
+  refine ⟨T₀, ?_⟩
+  intro T hT
+  have hstrong := hT₀ T hT
+  have hN : 0 ≤ (Z.N T (2 * T) : ℝ) := by
+    positivity
+  nlinarith [QuarticTransfer.frozen_8657_lt_8686]
+
+/-- R-9383 follows monotonically from the stronger mixed-channel
+support-19999 transfer. -/
+theorem eps_transfer_9383
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
+    {F : Family19999 Z}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (hweighted :
+      WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((938313327050949 / 1000000000000000 : ℝ) - ε) *
+          (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) := by
+  intro ε hε
+  obtain ⟨T₀, hT₀⟩ :=
+    eps_transfer_9506 hRvM hfull hzero C hweighted ε hε
+  refine ⟨T₀, ?_⟩
+  intro T hT
+  have hstrong := hT₀ T hT
+  have hN : 0 ≤ (Z.N T (2 * T) : ℝ) := by
+    positivity
+  nlinarith [QuarticTransfer.frozen_9383_lt_9506]
+
+private theorem zeta_N (T₁ T₂ : ℝ) :
+    zetaZeroConfig.N T₁ T₂ = Ncount T₁ T₂ :=
+  zetaZeros_N zetaSeam T₁ T₂
+
+private theorem zeta_N0s (T₁ T₂ : ℝ) :
+    zetaZeroConfig.N0s T₁ T₂ = N0simple T₁ T₂ :=
+  zetaZeros_N0s zetaSeam T₁ T₂
+
+theorem zeta_eps_transfer_8686
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (hweighted :
+      WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((86855250 / 100000000 : ℝ) - ε) *
+          (Ncount T (2 * T) : ℝ) ≤
+        (N0simple T (2 * T) : ℝ) := by
+  simpa only [zeta_N, zeta_N0s] using
+    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero C hweighted)
+
+theorem zeta_eps_transfer_9506
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (hweighted :
+      WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((95063832187565 / 100000000000000 : ℝ) - ε) *
+          (Ncount T (2 * T) : ℝ) ≤
+        (N0simple T (2 * T) : ℝ) := by
+  simpa only [zeta_N, zeta_N0s] using
+    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero C hweighted)
+
+theorem zeta_eps_transfer_8657
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (hweighted :
+      WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((865674254456636 / 1000000000000000 : ℝ) - ε) *
+          (Ncount T (2 * T) : ℝ) ≤
+        (N0simple T (2 * T) : ℝ) := by
+  simpa only [zeta_N, zeta_N0s] using
+    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero C hweighted)
+
+theorem zeta_eps_transfer_9383
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (hweighted :
+      WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((938313327050949 / 1000000000000000 : ℝ) - ε) *
+          (Ncount T (2 * T) : ℝ) ≤
+        (N0simple T (2 * T) : ℝ) := by
+  simpa only [zeta_N, zeta_N0s] using
+    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero C hweighted)
+
 end IsometricBlock
 end Zeta85
 end RH
