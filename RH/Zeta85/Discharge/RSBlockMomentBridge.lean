@@ -31,7 +31,7 @@ noncomputable section
 
 namespace RH.Zeta85.RSBlockMomentBridge
 
-open Zeta23 RHLinalg RSReduction
+open Zeta23 RHLinalg RSReduction TrimmedMoment
 
 /-- Normalized uncentered trace moment of the literal distinguished block. -/
 def uncenteredBlockMoment {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
