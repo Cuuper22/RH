@@ -246,6 +246,126 @@ theorem block_apply_eq_expandedMixedZeroEntry
   simp only [Matrix.mul_apply, Matrix.conjTranspose_apply]
   simp_rw [A_apply_eq_zeroSum]
 
+
+/-! ## Cyclic traces after opening the mixed block entries -/
+
+def expandedCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    expandedMixedZeroEntry C T i i)
+
+def expandedCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    ∑ j : Fin (F.blockDim T),
+      expandedMixedZeroEntry C T i j *
+        expandedMixedZeroEntry C T j i)
+
+def expandedCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    ∑ j : Fin (F.blockDim T),
+      (∑ k : Fin (F.blockDim T),
+        expandedMixedZeroEntry C T i k *
+          expandedMixedZeroEntry C T k j) *
+        expandedMixedZeroEntry C T j i)
+
+def expandedCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    ∑ j : Fin (F.blockDim T),
+      (∑ k : Fin (F.blockDim T),
+        expandedMixedZeroEntry C T i k *
+          expandedMixedZeroEntry C T k j) *
+      (∑ l : Fin (F.blockDim T),
+        expandedMixedZeroEntry C T j l *
+          expandedMixedZeroEntry C T l i))
+
+theorem cyclicTrace1_block_eq_expanded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    QuarticTransfer.cyclicTrace1
+        (IsometricBlock.block C.toData T) =
+      expandedCyclicTrace1 C T := by
+  simp only [QuarticTransfer.cyclicTrace1, expandedCyclicTrace1,
+    block_apply_eq_expandedMixedZeroEntry]
+
+theorem cyclicTrace2_block_eq_expanded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    QuarticTransfer.cyclicTrace2
+        (IsometricBlock.block C.toData T) =
+      expandedCyclicTrace2 C T := by
+  simp only [QuarticTransfer.cyclicTrace2, expandedCyclicTrace2,
+    block_apply_eq_expandedMixedZeroEntry]
+
+theorem cyclicTrace3_block_eq_expanded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    QuarticTransfer.cyclicTrace3
+        (IsometricBlock.block C.toData T) =
+      expandedCyclicTrace3 C T := by
+  simp only [QuarticTransfer.cyclicTrace3, expandedCyclicTrace3,
+    block_apply_eq_expandedMixedZeroEntry]
+
+theorem cyclicTrace4_block_eq_expanded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    QuarticTransfer.cyclicTrace4
+        (IsometricBlock.block C.toData T) =
+      expandedCyclicTrace4 C T := by
+  simp only [QuarticTransfer.cyclicTrace4, expandedCyclicTrace4,
+    block_apply_eq_expandedMixedZeroEntry]
+
+def expandedCyclicQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic)
+    (C : RealData F) (T : ℝ) : ℝ :=
+  let u := QuarticTransfer.uncenteredQuartic q
+  u.p0 * (F.blockDim T : ℝ) +
+    u.p1 * expandedCyclicTrace1 C T +
+    u.p2 * expandedCyclicTrace2 C T +
+    u.p3 * expandedCyclicTrace3 C T +
+    u.p4 * expandedCyclicTrace4 C T
+
+theorem cyclicQuarticNumerator_block_eq_expanded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic)
+    (C : RealData F) (T : ℝ) :
+    QuarticTransfer.cyclicQuarticTraceNumerator q
+        (IsometricBlock.block C.toData T) =
+      expandedCyclicQuarticNumerator q C T := by
+  simp only [QuarticTransfer.cyclicQuarticTraceNumerator,
+    expandedCyclicQuarticNumerator,
+    cyclicTrace1_block_eq_expanded,
+    cyclicTrace2_block_eq_expanded,
+    cyclicTrace3_block_eq_expanded,
+    cyclicTrace4_block_eq_expanded]
+
+/-- The analytic target after mixing and pair contraction, before any
+zero-tuple summation is estimated. -/
+def mixedPairKernelQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic)
+    (C : RealData F) (T : ℝ) : ℝ :=
+  QuarticTransfer.pairKernelQuarticNumerator q F T
+    (mixedPairKernel C T)
+
 end IsometricKernel
 end Zeta85
 end RH
