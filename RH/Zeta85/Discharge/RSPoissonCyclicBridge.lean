@@ -199,6 +199,139 @@ theorem remoteLatticePairKernel_eq_scaled_remoteTails
   rw [hguard]
   ring
 
+theorem remoteLatticePairKernel_norm_le
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hT : 0 < T)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hcount : F.channelDim T (F.distinguished T) =
+      ⌊F.period T (F.distinguished T) * T / (2 * Real.pi)⌋₊)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupport : ∀ u,
+      (F.window T (F.distinguished T) u : ℂ) ≠ 0 →
+        |u| ≤ F.period T (F.distinguished T) / 2)
+    (ρ ρ' : ↥(Zeta23.ZeroSide.ZI Z T)) :
+    ‖remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ)‖ ≤
+      ‖PoissonKernelBridge.distinguishedLatticeScale F T‖ *
+        (PoissonKernelBridge.distinguishedRemoteTailScale F T +
+          PoissonKernelBridge.distinguishedRemoteTailScale F T) := by
+  let n := F.channelDim T (F.distinguished T)
+  let r := PoissonKernelBridge.distinguishedEndpointGuardWidth F T
+  let C := PoissonKernelBridge.distinguishedWindowFourierMajorant F T
+  have hn : n = ⌊T / PoissonKernelBridge.distinguishedGridStep F T⌋₊ := by
+    exact PoissonKernelBridge.distinguishedChannelDim_eq_floor_gridStep
+      F T hL hcount
+  have hD : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT
+  have hρ : (ρ : ℂ) ∈ Z.ZIprime T :=
+    (Zeta23.ZeroSide.mem_ZI Z T).1 ρ.property
+  have hρ' : (ρ' : ℂ) ∈ Z.ZIprime T :=
+    (Zeta23.ZeroSide.mem_ZI Z T).1 ρ'.property
+  have hdist := PoissonKernelBridge.mem_ZIprime_guarded_distances
+    F T n hL hn hρ
+  have hdist' := PoissonKernelBridge.mem_ZIprime_guarded_distances
+    F T n hL hn hρ'
+  have hdecay :=
+    PoissonKernelBridge.distinguishedLatticeTerm_le_fourierMajorant_on_ZI
+      F T hL hwindow hsupport ρ ρ'
+  have hlower :=
+    PoissonKernelBridge.lowerLatticeTailFrom_bound_of_weightedDecay
+      F T (Zeta23.D0 T) C r hL hD
+        (PoissonKernelBridge.distinguishedWindowFourierMajorant_nonneg F T)
+        (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) hdecay
+        (by simpa only [PoissonKernelBridge.distinguishedGridStep] using hdist.1)
+        (by simpa only [PoissonKernelBridge.distinguishedGridStep] using hdist'.1)
+  have hupper :=
+    PoissonKernelBridge.upperLatticeTail_bound_of_weightedDecay
+      F T (Zeta23.D0 T) C (n + r) hL hD
+        (PoissonKernelBridge.distinguishedWindowFourierMajorant_nonneg F T)
+        (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) hdecay
+        (by simpa only [n, r, Nat.cast_add,
+          PoissonKernelBridge.distinguishedGridStep] using hdist.2)
+        (by simpa only [n, r, Nat.cast_add,
+          PoissonKernelBridge.distinguishedGridStep] using hdist'.2)
+  have hcompact : HasCompactSupport
+      (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
+    hasCompactSupport_of_support_subset_abs hsupport
+  have hsum : Summable (PoissonKernelBridge.distinguishedLatticeTerm F T
+      (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))) :=
+    (PoissonKernelBridge.hasSum_distinguishedLatticeTerm_alias_of_hasCompactSupport
+      F T hL hwindow hcompact
+        (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))).2.summable
+  rw [remoteLatticePairKernel_eq_scaled_remoteTails F T ρ ρ' hsum,
+    norm_mul]
+  apply mul_le_mul_of_nonneg_left
+  · calc
+      ‖(∑' m : ℕ, PoissonKernelBridge.distinguishedLatticeTerm F T
+            (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))
+            (-(((r + m : ℕ) : ℤ) + 1))) +
+          ∑' m : ℕ, PoissonKernelBridge.distinguishedLatticeTerm F T
+            (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))
+            ((n + r + m : ℕ) : ℤ)‖ ≤
+          ‖∑' m : ℕ, PoissonKernelBridge.distinguishedLatticeTerm F T
+            (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))
+            (-(((r + m : ℕ) : ℤ) + 1))‖ +
+          ‖∑' m : ℕ, PoissonKernelBridge.distinguishedLatticeTerm F T
+            (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ))
+            ((n + r + m : ℕ) : ℤ)‖ := norm_add_le _ _
+      _ ≤ PoissonKernelBridge.distinguishedRemoteTailScale F T +
+          PoissonKernelBridge.distinguishedRemoteTailScale F T := by
+        gcongr
+        · simpa only [C, r, PoissonKernelBridge.distinguishedRemoteTailScale,
+            PoissonKernelBridge.distinguishedGridStep] using hlower.2
+        · simpa only [C, n, r,
+            PoissonKernelBridge.distinguishedRemoteTailScale,
+            PoissonKernelBridge.distinguishedGridStep, Nat.add_assoc] using hupper.2
+  · exact norm_nonneg _
+
+def remoteLatticePairScale
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  ‖PoissonKernelBridge.distinguishedLatticeScale F T‖ *
+    (PoissonKernelBridge.distinguishedRemoteTailScale F T +
+      PoissonKernelBridge.distinguishedRemoteTailScale F T)
+
+theorem norm_distinguishedLatticeScale_eq_ratio
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hσ : 0 ≤ σ) (hμ : 0 < μ) (hl : 0 < Zeta23.l T)
+    (hperiod : F.period T (F.distinguished T) = μ * Zeta23.l T) :
+    ‖PoissonKernelBridge.distinguishedLatticeScale F T‖ = σ / μ := by
+  have hratio : QuarticGramFamily.fullLength (σ := σ) T /
+      F.period T (F.distinguished T) = σ / μ := by
+    unfold QuarticGramFamily.fullLength
+    rw [hperiod]
+    field_simp [hμ.ne', hl.ne']
+  have hnonneg : 0 ≤ σ / μ := div_nonneg hσ hμ.le
+  unfold PoissonKernelBridge.distinguishedLatticeScale
+  rw [hratio, norm_pow, Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (Real.sqrt_nonneg _), Real.sq_sqrt hnonneg]
+
+theorem remoteLatticePairScale_negligible
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hσ : 0 ≤ σ)
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
+    (hRvM : RiemannVonMangoldt Z) :
+    Tendsto (fun T => (Z.N T (2 * T) : ℝ) *
+      remoteLatticePairScale F T) atTop (nhds 0) := by
+  have htail0 := htail.remoteTailScale_negligible hguard hRvM
+  have hconst : Tendsto (fun _ : ℝ => 2 * (σ / μ)) atTop
+      (nhds (2 * (σ / μ))) := tendsto_const_nhds
+  have hscaled : Tendsto (fun T =>
+      (2 * (σ / μ)) * ((Z.N T (2 * T) : ℝ) *
+        PoissonKernelBridge.distinguishedRemoteTailScale F T))
+      atTop (nhds 0) := by
+    simpa only [mul_zero] using hconst.mul htail0
+  apply hscaled.congr'
+  filter_upwards [hguard.distinguished_period,
+    Zeta23.Assembly.eventually_l_pos] with T hperiod hl
+  rw [remoteLatticePairScale,
+    norm_distinguishedLatticeScale_eq_ratio F T hσ
+      hguard.bandwidth_pos hl hperiod]
+  ring
+
 theorem localProfile_even
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
