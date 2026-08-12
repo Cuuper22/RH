@@ -449,6 +449,75 @@ theorem exists_frozenQuarticRSTest
   · exact rsMainTerm_normalCutoffSymbol chi
       (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) hchi0
 
+/-- Smooth compact support now discharges the last premise of the frozen
+quartic test construction. -/
+theorem exists_frozenQuarticRSTest_of_smoothCompact
+    (r : ℝ -> ℝ)
+    (hrc : HasCompactSupport r) (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 -> (0 : ℝ) ≤ x ∧ x ≤ 1) :
+    ∃ Phi : (Fin 4 -> ℝ) -> ℂ,
+      ContDiff ℝ 1 Phi ∧
+      tsupport Phi ⊆ {xi | ∑ i : Fin 4, |xi i| < 2} ∧
+      (∀ x : Fin 4 -> ℂ,
+        rsGaugeTest Phi x =
+          rsGaugeTest
+            (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) x) ∧
+      rsMainTerm Phi =
+        rsMainTerm
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) :=
+  exists_frozenQuarticRSTest r hrSupport
+    (weightedCyclicSymbol_k4_contDiff
+      (4999 / 10000 : ℝ) r hrc hrSmooth)
+
+/-- A literal smooth profile supported in the unit interval. -/
+def unitIntervalBump : ContDiffBump (1 / 2 : ℝ) where
+  rIn := 1 / 4
+  rOut := 1 / 2
+  rIn_pos := by norm_num
+  rIn_lt_rOut := by norm_num
+
+/-- The real function underlying the literal unit-interval bump. -/
+def unitIntervalProfile : ℝ -> ℝ := fun x => unitIntervalBump x
+
+theorem unitIntervalProfile_contDiff :
+    ContDiff ℝ ∞ unitIntervalProfile := by
+  simpa only [unitIntervalProfile] using unitIntervalBump.contDiff
+
+theorem unitIntervalProfile_hasCompactSupport :
+    HasCompactSupport unitIntervalProfile := by
+  simpa only [unitIntervalProfile] using unitIntervalBump.hasCompactSupport
+
+theorem unitIntervalProfile_support
+    (x : ℝ) (hx : unitIntervalProfile x ≠ 0) :
+    (0 : ℝ) ≤ x ∧ x ≤ 1 := by
+  have hxball : x ∈ Metric.ball (1 / 2 : ℝ) (1 / 2 : ℝ) := by
+    rw [← unitIntervalBump.support_eq]
+    exact hx
+  have habs : |x - 1 / 2| < (1 / 2 : ℝ) := by
+    simpa [Real.dist_eq] using hxball
+  rw [abs_lt] at habs
+  constructor <;> linarith
+
+/-- A completely explicit smooth quartic test at the frozen bandwidth,
+with no remaining support or regularity premise. -/
+theorem exists_unitInterval_frozenQuarticRSTest :
+    ∃ Phi : (Fin 4 -> ℝ) -> ℂ,
+      ContDiff ℝ 1 Phi ∧
+      tsupport Phi ⊆ {xi | ∑ i : Fin 4, |xi i| < 2} ∧
+      (∀ x : Fin 4 -> ℂ,
+        rsGaugeTest Phi x =
+          rsGaugeTest
+            (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+              unitIntervalProfile) x) ∧
+      rsMainTerm Phi =
+        rsMainTerm
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+            unitIntervalProfile) := by
+  apply exists_frozenQuarticRSTest_of_smoothCompact
+  · exact unitIntervalProfile_hasCompactSupport
+  · exact unitIntervalProfile_contDiff.of_le (by norm_num)
+  · exact unitIntervalProfile_support
+
 /-- The complete multiplicity-weighted zero-tuple summand is unchanged. -/
 theorem rsZeroTupleTerm_normalCutoffSymbol (Z : ZeroConfig) {n : ℕ}
     (g : Fin (n + 1) -> ℝ -> ℂ)
