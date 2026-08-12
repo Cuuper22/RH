@@ -1017,6 +1017,96 @@ theorem hb4_apply_eq_sum_normalizedCore_mul_log
   rw [← arithmeticFunction_sum_apply]
   exact DFunLike.congr_fun (hb4_eq_sum_normalizedCore_mul_log Z hR) n
 
+/-- The terminal fibers whose retained divisor reaches the requested scale
+within the multiplicative tolerance `B`, summed before restoring `log`. -/
+def regularCoreAF (Z R B : ℕ) : HBDepthFour.AF :=
+  ∑ a ∈ (Finset.Icc 1 R).filter (fun a => R < a * B),
+    normalizedConvolutionAF (hb4Core Z) R a 6
+
+/-- The complementary log-free source.  Every individual running fiber in
+this sum is supported on `B`-rough integers. -/
+def roughCoreAF (Z R B : ℕ) : HBDepthFour.AF :=
+  ∑ a ∈ (Finset.Icc 1 R).filter (fun a => ¬R < a * B),
+    normalizedConvolutionAF (hb4Core Z) R a 6
+
+/-- Every summand of the regular source has the retained singleton in the
+terminal band and the same explicit divisor majorant on its running side. -/
+theorem regularCoreAF_fiber_data (Z : ℕ) {R B a : ℕ}
+    (ha : a ∈ (Finset.Icc 1 R).filter (fun d => R < d * B)) :
+    1 ≤ a ∧ a ≤ R ∧ R < a * B ∧
+      (∀ d : ℕ, weightedLeftSelector a 6 d ≠ 0 → d = a) ∧
+      DivisorBounded (normalizedRightSelector (hb4Core Z) R a 6) 15 6 := by
+  have haData := Finset.mem_filter.mp ha
+  have haIcc := Finset.mem_Icc.mp haData.1
+  have ha0 : a ≠ 0 := Nat.ne_of_gt haIcc.1
+  exact ⟨haIcc.1, haIcc.2, haData.2,
+    fun d hd => weightedLeftSelector_support hd,
+    hb4Core_normalizedRightSelector_divisorBounded Z ha0⟩
+
+/-- Every summand of the exceptional source has the same explicit divisor
+majorant, while every nonzero running coefficient is supported on a
+`B`-rough integer. -/
+theorem roughCoreAF_fiber_data (Z : ℕ) {R B a : ℕ} (hR : 0 < R)
+    (ha : a ∈ (Finset.Icc 1 R).filter (fun d => ¬R < d * B)) :
+    1 ≤ a ∧ a ≤ R ∧ ¬R < a * B ∧
+      DivisorBounded (normalizedRightSelector (hb4Core Z) R a 6) 15 6 ∧
+      ∀ s : ℕ, normalizedRightSelector (hb4Core Z) R a 6 s ≠ 0 →
+        ∀ q : ℕ, q.Prime → q ∣ s → B < q := by
+  have haData := Finset.mem_filter.mp ha
+  have haIcc := Finset.mem_Icc.mp haData.1
+  have ha0 : a ≠ 0 := Nat.ne_of_gt haIcc.1
+  exact ⟨haIcc.1, haIcc.2, haData.2,
+    hb4Core_normalizedRightSelector_divisorBounded Z ha0,
+    fun s hs => normalizedRightSelector_rough_support hR haData.2 hs⟩
+
+/-- Below the `r`th roughness power, every nonzero running coefficient in an
+exceptional depth-four fiber has fewer than `r` prime factors, with
+multiplicity. -/
+theorem roughCoreAF_fiber_bounded_prime_depth (Z : ℕ) {R B a s r : ℕ}
+    (hR : 0 < R)
+    (ha : a ∈ (Finset.Icc 1 R).filter (fun d => ¬R < d * B))
+    (hs : s ≠ 0) (hsize : s < (B + 1) ^ r)
+    (hcoeff : normalizedRightSelector (hb4Core Z) R a 6 s ≠ 0) :
+    s.primeFactorsList.length < r := by
+  exact normalizedRightSelector_bounded_prime_depth hR
+    (Finset.mem_filter.mp ha).2 hs hsize hcoeff
+
+/-- Exact regular/rough partition at the arithmetic-function level, before
+absolute values and before the final logarithm convolution. -/
+theorem regularCoreAF_add_roughCoreAF (Z B : ℕ) {R : ℕ} (hR : 0 < R) :
+    regularCoreAF Z R B + roughCoreAF Z R B = hb4Core Z := by
+  unfold regularCoreAF roughCoreAF
+  rw [Finset.sum_filter_add_sum_filter_not]
+  exact sum_normalizedConvolutionAF (hb4Core Z) 6 hR
+
+/-- Exact source split for the literal Heath--Brown coefficient.  Both
+families are formed first; only then is `log` convolved onto them. -/
+theorem hb4_eq_regularCore_mul_log_add_roughCore_mul_log
+    (Z B : ℕ) {R : ℕ} (hR : 0 < R) :
+    HBDepthFour.hb4 Z =
+      regularCoreAF Z R B * ArithmeticFunction.log +
+        roughCoreAF Z R B * ArithmeticFunction.log := by
+  calc
+    HBDepthFour.hb4 Z = hb4Core Z * ArithmeticFunction.log :=
+      hb4_eq_core_mul_log Z
+    _ = (regularCoreAF Z R B + roughCoreAF Z R B) *
+          ArithmeticFunction.log := by
+      rw [regularCoreAF_add_roughCoreAF Z B hR]
+    _ = regularCoreAF Z R B * ArithmeticFunction.log +
+          roughCoreAF Z R B * ArithmeticFunction.log := by
+      rw [add_mul]
+
+/-- On the depth-four range, the same pre-logarithm split reconstructs the
+actual von Mangoldt coefficient pointwise. -/
+theorem vonMangoldt_eq_regularCore_mul_log_add_roughCore_mul_log_apply
+    (Z B : ℕ) {R n : ℕ} (hR : 0 < R) (hnZ : n ≤ Z ^ 4) :
+    ArithmeticFunction.vonMangoldt n =
+      (regularCoreAF Z R B * ArithmeticFunction.log) n +
+        (roughCoreAF Z R B * ArithmeticFunction.log) n := by
+  rw [← HBDepthFour.hb4_eq_vonMangoldt Z n hnZ]
+  exact DFunLike.congr_fun
+    (hb4_eq_regularCore_mul_log_add_roughCore_mul_log Z B hR) n
+
 /-- On the certified range of the depth-four identity, the divisor-dependent
 convolution family reconstructs the von Mangoldt coefficient itself. -/
 theorem sum_convolutionPiece_eq_vonMangoldt (Z : ℕ) {R n : ℕ}
