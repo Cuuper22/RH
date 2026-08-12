@@ -218,6 +218,99 @@ theorem sum_channelAliasSum_eq_sum_zero
         F.complexAliasTerm T z z' j 0 := by
       rw [hnonzero, add_zero]
 
+
+/-- The channel frequency-pair lattice with the reciprocal-period factor
+coming from the square of the Gram atom. -/
+def channelNormalizedFrequencyPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (z z' : ℂ) : ℂ :=
+  (F.fullLength T : ℂ) / (F.period T j : ℂ) *
+    channelFrequencyPairSum F T j z z'
+
+/-- Complex Poisson cancels the channel period against the atom's
+reciprocal-period normalization. -/
+theorem channelNormalizedFrequencyPairSum_eq_fullLength_mul_aliasSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (Λ : ℝ)
+    (hL : 0 < F.period T j) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → F.window T j u = 0)
+    (heven : ∀ u, F.window T j (-u) = F.window T j u)
+    (z z' : ℂ) :
+    channelNormalizedFrequencyPairSum F T j z z' =
+      (F.fullLength T : ℂ) * channelAliasSum F T j z z' := by
+  have hL0 : (F.period T j : ℂ) ≠ 0 := by
+    exact_mod_cast (ne_of_gt hL)
+  unfold channelNormalizedFrequencyPairSum
+  rw [channelFrequencyPairSum_eq_period_mul_aliasSum
+    F T j Λ hL hΛ hsmooth hsupp heven z z']
+  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+
+/-- Smooth compact channels have summable unscaled spatial alias lattices. -/
+theorem summable_channelAlias
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (Λ : ℝ)
+    (hL : 0 < F.period T j) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → F.window T j u = 0)
+    (heven : ∀ u, F.window T j (-u) = F.window T j u)
+    (z z' : ℂ) :
+    Summable (fun m : ℤ => F.complexAliasTerm T z z' j m) := by
+  have hL0 : (F.period T j : ℂ) ≠ 0 := by
+    exact_mod_cast (ne_of_gt hL)
+  have hscaled :=
+    (hasSum_channel_complexAlias F T j Λ hL hΛ
+      hsmooth hsupp heven z z').1
+  exact (summable_mul_left_iff hL0).1 hscaled
+
+/-- After summing normalized physical channels, the frozen off-RH
+cancellation removes every nonzero spatial translation. -/
+theorem sum_channelNormalizedFrequencyPairSum_eq_fullLength_mul_sum_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T Λ : ℝ) (hΛ : 0 ≤ Λ)
+    (hL : ∀ j : Fin (F.channelCount T), 0 < F.period T j)
+    (hsmooth : ∀ j : Fin (F.channelCount T),
+      ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ j : Fin (F.channelCount T), ∀ u,
+      Λ < |u| → F.window T j u = 0)
+    (heven : ∀ j : Fin (F.channelCount T), ∀ u,
+      F.window T j (-u) = F.window T j u)
+    (z z' : ℂ)
+    (hfamily : Summable (F.complexAliasFamily T z z'))
+    (hoff : (∑' a : F.AliasIndex T,
+      F.complexAliasFamily T z z' a) = 0) :
+    (∑ j : Fin (F.channelCount T),
+        channelNormalizedFrequencyPairSum F T j z z') =
+      (F.fullLength T : ℂ) *
+        ∑ j : Fin (F.channelCount T),
+          F.complexAliasTerm T z z' j 0 := by
+  have hsum : ∀ j : Fin (F.channelCount T),
+      Summable (fun m : ℤ => F.complexAliasTerm T z z' j m) :=
+    fun j => summable_channelAlias F T j Λ
+      (hL j) hΛ (hsmooth j) (hsupp j) (heven j) z z'
+  calc
+    (∑ j : Fin (F.channelCount T),
+        channelNormalizedFrequencyPairSum F T j z z') =
+      ∑ j : Fin (F.channelCount T),
+        (F.fullLength T : ℂ) * channelAliasSum F T j z z' := by
+      apply Finset.sum_congr rfl
+      intro j hj
+      exact channelNormalizedFrequencyPairSum_eq_fullLength_mul_aliasSum
+        F T j Λ (hL j) hΛ (hsmooth j) (hsupp j) (heven j) z z'
+    _ = (F.fullLength T : ℂ) *
+        ∑ j : Fin (F.channelCount T),
+          channelAliasSum F T j z z' := by
+      rw [Finset.mul_sum]
+    _ = (F.fullLength T : ℂ) *
+        ∑ j : Fin (F.channelCount T),
+          F.complexAliasTerm T z z' j 0 := by
+      rw [sum_channelAliasSum_eq_sum_zero
+        F T z z' hsum hfamily hoff]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
