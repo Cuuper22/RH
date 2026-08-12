@@ -486,7 +486,6 @@ theorem selectedVirtualQuarticNumerator_canonical_eq_mixed
   symm
   exact mixedPairKernelQuarticNumerator_eq_selectedVirtual
     q (canonicalAtomFactorization L) T
-
 /-! ## Balanced routing across every virtual channel -/
 
 /-- A routed block grid: every retained block label is exactly one virtual
@@ -857,6 +856,225 @@ theorem mixedPairKernelQuarticNumerator_canonical_eq_energyTail
   intro ρ _ ρ' _
   exact mixedPairKernel_canonical_eq_energyTailKernel
     L G H h T ρ ρ'
+
+
+/-! ## Symmetric exhaustion before the quartic contraction -/
+
+/-- The common symmetric cutoff applied to every routed virtual channel.
+The finite channel sum is formed before the finite zero contraction. -/
+def symmetricRoutedPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (T : ℝ) (n : ℕ) (ρ ρ' : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) *
+    ∑ r : ι,
+      ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+        ComplexAliasBridge.virtualSymmetricFrequencyPartialSum
+          T (H.period T r) (H.window T r)
+          (gammaOf ρ) (gammaOf ρ') n
+
+/-- The evaluated routed energy kernel reached when the common symmetric
+cutoff tends to infinity. -/
+def routedEnergyPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) *
+    ∑ r : ι,
+      (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (H.window T r u : ℂ) * H.window T r u *
+            Complex.exp
+              (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))
+
+/-- Summing the channels first preserves convergence of the common symmetric
+frequency cutoff to the complete evaluated energy kernel. -/
+theorem tendsto_symmetricRoutedPairKernel_energy
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    Tendsto
+      (fun n => symmetricRoutedPairKernel H T n ρ ρ')
+      Filter.atTop
+      (nhds (routedEnergyPairKernel H T ρ ρ')) := by
+  unfold symmetricRoutedPairKernel routedEnergyPairKernel
+  apply tendsto_const_nhds.mul
+  apply tendsto_finsetSum
+  intro r hr
+  exact
+    ComplexAliasBridge.tendsto_virtualNormalizedSymmetricFrequencyPartialSum_energy
+      (F.fullLength T) T (H.period T r) (H.supportRadius T r)
+      (H.window T r) (h.period_pos T r)
+      (h.supportRadius_nonneg T r) (h.smooth T r)
+      (h.support T r) (h.even T r) (h.half_support T r)
+      (gammaOf ρ) (gammaOf ρ')
+
+/-- Quartic numerator of the common finite symmetric routed grid. -/
+def symmetricRoutedQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (q : TrimmedMoment.Quartic)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (T : ℝ) (n : ℕ) : ℝ :=
+  QuarticTransfer.pairKernelQuarticNumerator q F T
+    (symmetricRoutedPairKernel H T n)
+
+/-- Quartic numerator of the complete evaluated routed energy kernel. -/
+def routedEnergyQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (q : TrimmedMoment.Quartic)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (T : ℝ) : ℝ :=
+  QuarticTransfer.pairKernelQuarticNumerator q F T
+    (routedEnergyPairKernel H T)
+
+/-- The whole finite quartic zero contraction converges after the channel sum
+has already been formed. -/
+theorem tendsto_symmetricRoutedQuarticNumerator_energy
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : TrimmedMoment.Quartic}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) :
+    Tendsto
+      (symmetricRoutedQuarticNumerator q H T)
+      Filter.atTop
+      (nhds (routedEnergyQuarticNumerator q H T)) := by
+  apply QuarticTransfer.tendsto_pairKernelQuarticNumerator
+  intro ρ hρ ρ' hρ'
+  exact tendsto_symmetricRoutedPairKernel_energy H h T ρ ρ'
+
+/-- At every fixed height, any strict lower bound for the evaluated energy
+quartic numerator is already attained by one finite symmetric grid. -/
+theorem exists_symmetricRoutedQuarticNumerator_gt
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : TrimmedMoment.Quartic}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T x : ℝ)
+    (hx : x < routedEnergyQuarticNumerator q H T) :
+    ∃ n : ℕ, x < symmetricRoutedQuarticNumerator q H T n := by
+  have he :=
+    (tendsto_symmetricRoutedQuarticNumerator_energy H h T).eventually
+      (Ioi_mem_nhds hx)
+  exact he.exists
+
+/-- Exact certificate that the routed finite labels are one of the symmetric
+frequency grids.  It is stated at the already-summed level consumed by the
+pair kernel, so no ordering convention for the finite labels survives. -/
+structure SymmetricFrequencyExhaustion
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L)) where
+  cutoff : ℝ → ℕ
+  finite_sum_eq :
+    ∀ (T : ℝ) (r : ι) (ρ ρ' : ℂ),
+      (∑ k : Fin (G.labelCount T),
+        paperFT (fun u => (H.window T r u : ℂ))
+            (gammaOf ρ -
+              (T + (H.frequency T r k : ℝ) *
+                (2 * Real.pi / H.period T r) : ℝ)) *
+          paperFT (fun u => (H.window T r u : ℂ))
+            (gammaOf ρ' -
+              (T + (H.frequency T r k : ℝ) *
+                (2 * Real.pi / H.period T r) : ℝ))) =
+        ComplexAliasBridge.virtualSymmetricFrequencyPartialSum
+          T (H.period T r) (H.window T r)
+          (gammaOf ρ) (gammaOf ρ') (cutoff T)
+
+/-- Under a symmetric exhaustion certificate, the named routed tail is
+literally the canonical symmetric lattice tail. -/
+theorem routedVirtualFrequencyTail_eq_symmetricFrequencyTail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {H : RoutedFourierGrid G (canonicalAtomFactorization L)}
+    (S : SymmetricFrequencyExhaustion H)
+    (T : ℝ) (r : ι) (ρ ρ' : ℂ) :
+    routedVirtualFrequencyTail H T r ρ ρ' =
+      ComplexAliasBridge.virtualSymmetricFrequencyTail
+        T (H.period T r) (H.window T r)
+        (gammaOf ρ) (gammaOf ρ') (S.cutoff T) := by
+  unfold routedVirtualFrequencyTail
+    ComplexAliasBridge.virtualSymmetricFrequencyTail
+  rw [S.finite_sum_eq]
+
+/-- A routed physical kernel whose finite labels exhaust a symmetric grid is
+exactly that finite symmetric routed kernel. -/
+theorem mixedPairKernel_canonical_eq_symmetricRoutedPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : Layout F ι) (G : RoutedGrid L)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (S : SymmetricFrequencyExhaustion H)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' =
+      symmetricRoutedPairKernel H T (S.cutoff T) ρ ρ' := by
+  calc
+    IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' =
+        selectedVirtualPairKernel
+          (canonicalAtomFactorization L) T ρ ρ' :=
+      (selectedVirtualPairKernel_canonical_eq_mixedPairKernel
+        L T ρ ρ').symm
+    _ = ((F.hatDenominator T)⁻¹ : ℂ) *
+        routedVirtualPairSum G (canonicalAtomFactorization L)
+          T ρ ρ' :=
+      selectedVirtualPairKernel_eq_routedGrid
+        G (canonicalAtomFactorization L) T ρ ρ'
+    _ = symmetricRoutedPairKernel H T (S.cutoff T) ρ ρ' := by
+      unfold symmetricRoutedPairKernel
+      rw [routedVirtualPairSum_eq_frequencyGrid H]
+      apply congrArg
+        (fun w : ℂ => ((F.hatDenominator T)⁻¹ : ℂ) * w)
+      apply Finset.sum_congr rfl
+      intro r hr
+      rw [S.finite_sum_eq]
+
+/-- Consequently the actual mixed physical quartic numerator is the chosen
+finite symmetric routed numerator. -/
+theorem mixedPairKernelQuarticNumerator_canonical_eq_symmetricRouted
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : TrimmedMoment.Quartic}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : Layout F ι) (G : RoutedGrid L)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (S : SymmetricFrequencyExhaustion H)
+    (T : ℝ) :
+    IsometricKernel.mixedPairKernelQuarticNumerator
+        q (toRealData L) T =
+      symmetricRoutedQuarticNumerator q H T (S.cutoff T) := by
+  unfold IsometricKernel.mixedPairKernelQuarticNumerator
+    symmetricRoutedQuarticNumerator
+  apply QuarticTransfer.pairKernelQuarticNumerator_congr
+  intro ρ hρ ρ' hρ'
+  exact mixedPairKernel_canonical_eq_symmetricRoutedPairKernel
+    L G H S T ρ ρ'
 
 end AlignedIsometricLayout
 end Zeta85
