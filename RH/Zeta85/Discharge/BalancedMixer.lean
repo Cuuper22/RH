@@ -49,8 +49,19 @@ theorem projection_diag
       (((F.blockDim T : ℝ) / (F.dim T : ℝ) : ℝ) : ℂ) := by
   unfold IsometricKernel.projection
   simp only [Matrix.mul_apply, Matrix.conjTranspose_apply]
-  simp_rw [C.flat_weight T i]
-  simp [div_eq_mul_inv]
+  calc
+    (∑ a : Fin (F.blockDim T),
+        C.toRealData.toData.compression T i a *
+          star (C.toRealData.toData.compression T i a)) =
+        ∑ _a : Fin (F.blockDim T),
+          (((F.dim T : ℝ)⁻¹ : ℝ) : ℂ) := by
+      apply Finset.sum_congr rfl
+      intro a _
+      rw [mul_comm]
+      exact C.flat_weight T i a
+    _ = (((F.blockDim T : ℝ) /
+        (F.dim T : ℝ) : ℝ) : ℂ) := by
+      simp [div_eq_mul_inv]
 
 /-- Isometry alone fixes the trace of the mixing projection. -/
 theorem projection_rtrace
@@ -60,7 +71,7 @@ theorem projection_rtrace
     rtrace (IsometricKernel.projection C T) =
       (F.blockDim T : ℝ) := by
   unfold IsometricKernel.projection rtrace
-  rw [trace_mul_cycle, C.toData.isometry T]
+  rw [Matrix.trace_mul_comm, C.toData.isometry T]
   simp [Matrix.trace]
 
 /-- The diagonal main term after flat mixing: the full aggregate physical
