@@ -519,6 +519,85 @@ theorem rung9506_cumulative_radialShell_energyTail
   simpa only [Rung9506_cumulative_statement] using
     quarticCumulative hdyadic
 
+
+/-! ## Double-diagonal frozen-profile route -/
+
+/-- Frozen R-9506 after both analytic approximation layers have been removed:
+the annular stage and the routed frequency cutoff are selected only after the
+complete quartic contraction.  The remaining one-sided premise is stated
+directly for the literal frozen R-9506 supported profile. -/
+theorem rung9506_diagonal_annular_routed
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (Lyt : AlignedIsometricLayout.Layout F ι)
+    (G : AlignedIsometricLayout.RoutedGrid Lyt)
+    (H : AlignedIsometricLayout.RoutedFourierGrid G
+      (AlignedIsometricLayout.canonicalAtomFactorization Lyt))
+    (hH : AlignedIsometricLayout.RoutedWindowRegularity H)
+    (hEnergy : AlignedIsometricLayout.RoutedEnergyNormalization H)
+    (period : ℝ → ℝ) (hperiod : ∀ T, 0 < period T)
+    (hv : ContDiff ℝ ∞ QuarticWindowWitnesses.v9506)
+    (hposProfile :
+      ∀ x, |x| ≤ (1 : ℝ) / 2 →
+        0 < QuarticWindowWitnesses.v9506 x)
+    (hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile
+            QuarticWindowWitnesses.v9506 (u / period T)) ≠ 0)
+    (hProfile :
+      AlignedIsometricLayout.SupportedProfileQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual F period)
+    (R :
+      AlignedIsometricLayout.DiagonalAnnularWindowEnergyRealization
+        F TrimmedMoment.Terminal9506.dual
+          period hperiod hv hposProfile hmass)
+    (S :
+      AlignedIsometricLayout.DiagonalSymmetricFrequencyExhaustion
+        TrimmedMoment.Terminal9506.dual H hH) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData Lyt)
+    (hProfile.toIsometric R S)
+
+/-- The cumulative R-9506 statement follows through the identical
+double-diagonal route. -/
+theorem rung9506_cumulative_diagonal_annular_routed
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (Lyt : AlignedIsometricLayout.Layout F ι)
+    (G : AlignedIsometricLayout.RoutedGrid Lyt)
+    (H : AlignedIsometricLayout.RoutedFourierGrid G
+      (AlignedIsometricLayout.canonicalAtomFactorization Lyt))
+    (hH : AlignedIsometricLayout.RoutedWindowRegularity H)
+    (hEnergy : AlignedIsometricLayout.RoutedEnergyNormalization H)
+    (period : ℝ → ℝ) (hperiod : ∀ T, 0 < period T)
+    (hv : ContDiff ℝ ∞ QuarticWindowWitnesses.v9506)
+    (hposProfile :
+      ∀ x, |x| ≤ (1 : ℝ) / 2 →
+        0 < QuarticWindowWitnesses.v9506 x)
+    (hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile
+            QuarticWindowWitnesses.v9506 (u / period T)) ≠ 0)
+    (hProfile :
+      AlignedIsometricLayout.SupportedProfileQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual F period)
+    (R :
+      AlignedIsometricLayout.DiagonalAnnularWindowEnergyRealization
+        F TrimmedMoment.Terminal9506.dual
+          period hperiod hv hposProfile hmass)
+    (S :
+      AlignedIsometricLayout.DiagonalSymmetricFrequencyExhaustion
+        TrimmedMoment.Terminal9506.dual H hH) :
+    Rung9506_cumulative_statement :=
+  rung9506_cumulative_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData Lyt)
+    (hProfile.toIsometric R S)
+
 end Zeta85
 end RH
 
