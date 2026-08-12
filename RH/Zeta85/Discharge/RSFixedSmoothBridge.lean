@@ -4,8 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 
-import RH.Zeta85.Discharge.RSPairIntegrals
-import RH.Zeta85.Discharge.RSSharpSmoothing
+import RH.Zeta85.Discharge.RSSharpEvaluation
 
 /-!
 # Rudnick--Sarnak at fixed smoothing width
@@ -63,5 +62,39 @@ theorem RS1996ZetaInputs.theorem31_fixedSmoothTopHatFamily
         (topHatSupport_subset_baseWindow hp1))
       hdelta hmu hbudget
   · exact rsMainTerm_smoothTopHat_tendsto_topHat hp hp1 hmu
+
+/-- The same fixed-test family with its sharp limiting main term evaluated
+as the frozen contraction formula through degree four. -/
+theorem RS1996ZetaInputs.theorem31_fixedSmoothTopHatFamily_evaluated
+    {Z : Zeta23.ZeroConfig} (hRS : RS1996ZetaInputs Z)
+    (n : ℕ) (hn : n ≤ 3) (g : Fin (n + 1) → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j))
+    {p delta mu : ℝ} (hp : 0 < p) (hp1 : p ≤ 1)
+    (hdelta : 0 < delta) (hmu : 0 < mu)
+    (hbudget : (n + 1 : ℝ) * mu + delta < 2) :
+    (∀ m : ℕ, ∃ C T₀ : ℝ, 0 ≤ C ∧ 1 ≤ T₀ ∧ ∀ T ≥ T₀,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := n + 1) mu
+          (smoothTopHat p (topHatSmoothingWidth p m))) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := n + 1) mu
+            (smoothTopHat p (topHatSmoothingWidth p m))) T rho) -
+          rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+            rsMainTerm (weightedCyclicSymbol (k := n + 1) mu
+              (smoothTopHat p (topHatSmoothingWidth p m)))‖ ≤ C * T) ∧
+    Tendsto
+      (fun m : ℕ => rsMainTerm
+        (weightedCyclicSymbol (k := n + 1) mu
+          (smoothTopHat p (topHatSmoothingWidth p m))))
+      atTop
+      (𝓝 ((mu : ℂ) *
+        (uncenteredContractionMoment
+          (topHatR3Terms p) mu (n + 1) : ℝ))) := by
+  obtain ⟨hfixed, hlim⟩ :=
+    RS1996ZetaInputs.theorem31_fixedSmoothTopHatFamily
+      hRS n g hg hp hp1 hdelta hmu hbudget
+  refine ⟨hfixed, ?_⟩
+  simpa only [RSPairIntegrals.rsMainTerm_topHat_eq_uncenteredContractionMoment
+    hn hp hp1 hmu] using hlim
 
 end RH.Zeta85.RSReduction
