@@ -1154,6 +1154,242 @@ theorem tsum_distinguishedLatticeRemainder_eq_two_guarded_tails
   rw [← hsplit]
   ring
 
+/-- The actual modulation grid enlarged by `r` labels at each endpoint,
+written as one contiguous finite lattice indexed from `-r` through
+`n + r - 1`.  This is the finite object to be summed before invoking the
+zero-tuple input. -/
+def canonicalGuardedLatticeSegment
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (n r : ℕ) : ℂ :=
+  ∑ i : Fin (r + n + r),
+    distinguishedLatticeTerm F T z z' ((i.val : ℤ) - (r : ℤ))
+
+/-- The contiguous guarded grid is literally the lower endpoint strip, the
+actual retained segment, and the upper endpoint strip. -/
+theorem canonicalGuardedLatticeSegment_eq_boundary_add_segment
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (n r : ℕ) :
+    canonicalGuardedLatticeSegment F T z z' n r =
+      lowerLatticeBoundaryStrip F T z z' r +
+        (∑ k : Fin n,
+          distinguishedLatticeTerm F T z z' (k : ℕ)) +
+        upperLatticeBoundaryStrip F T z z' n r := by
+  unfold canonicalGuardedLatticeSegment
+  have hall :
+      (∑ i : Fin (r + n + r),
+        distinguishedLatticeTerm F T z z' ((i.val : ℤ) - (r : ℤ))) =
+      ∑ i ∈ Finset.range (r + n + r),
+        distinguishedLatticeTerm F T z z' ((i : ℤ) - (r : ℤ)) := by
+    simpa using Fin.sum_univ_eq_sum_range
+      (fun i : ℕ => distinguishedLatticeTerm F T z z'
+        ((i : ℤ) - (r : ℤ))) (r + n + r)
+  rw [hall]
+  rw [show r + n + r = r + (n + r) by omega]
+  rw [Finset.sum_range_add]
+  rw [Finset.sum_range_add]
+  unfold lowerLatticeBoundaryStrip upperLatticeBoundaryStrip
+  have hmid :
+      (∑ k : Fin n, distinguishedLatticeTerm F T z z' (k : ℕ)) =
+      ∑ k ∈ Finset.range n,
+        distinguishedLatticeTerm F T z z' (k : ℕ) := by
+    simpa using Fin.sum_univ_eq_sum_range
+      (fun k : ℕ => distinguishedLatticeTerm F T z z' k) n
+  rw [hmid]
+  have hlower :
+      (∑ i ∈ Finset.range r,
+        distinguishedLatticeTerm F T z z' ((i : ℤ) - (r : ℤ))) =
+      ∑ m ∈ Finset.range r,
+        distinguishedLatticeTerm F T z z' (-((m : ℤ) + 1)) := by
+    rw [← Finset.sum_range_reflect
+      (fun i => distinguishedLatticeTerm F T z z'
+        ((i : ℤ) - (r : ℤ))) r]
+    apply Finset.sum_congr rfl
+    intro m hm
+    have hm_lt : m < r := Finset.mem_range.mp hm
+    congr 2
+    omega
+  have hmiddle :
+      (∑ k ∈ Finset.range n,
+        distinguishedLatticeTerm F T z z'
+          (((r + k : ℕ) : ℤ) - (r : ℤ))) =
+      ∑ k ∈ Finset.range n,
+        distinguishedLatticeTerm F T z z' (k : ℕ) := by
+    apply Finset.sum_congr rfl
+    intro k hk
+    congr 2
+    omega
+  have hupper :
+      (∑ m ∈ Finset.range r,
+        distinguishedLatticeTerm F T z z'
+          (((r + (n + m) : ℕ) : ℤ) - (r : ℤ))) =
+      ∑ m ∈ Finset.range r,
+        distinguishedLatticeTerm F T z z' ((n + m : ℕ) : ℤ) := by
+    apply Finset.sum_congr rfl
+    intro m hm
+    congr 2
+    omega
+  rw [hlower, hmiddle, hupper]
+  ring
+
+/-- After changing the object summed first to the enlarged contiguous grid,
+the full Poisson lattice differs from it by exactly two remote half-lattices.
+No finite boundary term remains outside the guarded segment. -/
+theorem tsum_distinguishedLatticeTerm_eq_guardedSegment_add_remoteTails
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (z z' : ℂ) (n r : ℕ)
+    (hsum : Summable (distinguishedLatticeTerm F T z z')) :
+    (∑' k : ℤ, distinguishedLatticeTerm F T z z' k) =
+      canonicalGuardedLatticeSegment F T z z' n r +
+        (∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          (-(((r + m : ℕ) : ℤ) + 1))) +
+        ∑' m : ℕ, distinguishedLatticeTerm F T z z'
+          ((n + r + m : ℕ) : ℤ) := by
+  have hrem := hsum.hasSum.sub
+    (hasSum_distinguishedLatticeSegmentExtension F T z z' n)
+  have hrem' :
+      (∑' k : ℤ, distinguishedLatticeRemainder F T z z' n k) =
+        (∑' k : ℤ, distinguishedLatticeTerm F T z z' k) -
+          ∑ k : Fin n,
+            distinguishedLatticeTerm F T z z' (k : ℕ) := by
+    simpa only [distinguishedLatticeRemainder] using hrem.tsum_eq
+  have hsplit := tsum_distinguishedLatticeRemainder_eq_two_guarded_tails
+    F T z z' n r r hsum
+  rw [hrem'] at hsplit
+  rw [canonicalGuardedLatticeSegment_eq_boundary_add_segment]
+  unfold canonicalLatticeBoundaryStrip lowerLatticeBoundaryStrip
+    upperLatticeBoundaryStrip at *
+  ring_nf at hsplit ⊢
+  linear_combination hsplit
+
+/-- Matrix of the literal retained segment on the finite enlarged zero set. -/
+def finiteLatticeSegmentKernelMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n : ℕ) :
+    Matrix (↥(Zeta23.ZeroSide.ZI Z T))
+      (↥(Zeta23.ZeroSide.ZI Z T)) ℂ :=
+  ∑ k : Fin n,
+    vecMulVec
+      (distinguishedLatticeFeature F T (k : ℕ))
+      (distinguishedLatticeFeature F T (k : ℕ))
+
+/-- Matrix of the single contiguous guarded grid. -/
+def canonicalGuardedLatticeKernelMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n r : ℕ) :
+    Matrix (↥(Zeta23.ZeroSide.ZI Z T))
+      (↥(Zeta23.ZeroSide.ZI Z T)) ℂ :=
+  ∑ i : Fin (r + n + r),
+    vecMulVec
+      (distinguishedLatticeFeature F T ((i.val : ℤ) - (r : ℤ)))
+      (distinguishedLatticeFeature F T ((i.val : ℤ) - (r : ℤ)))
+
+theorem finiteLatticeSegmentKernelMatrix_apply
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n : ℕ)
+    (ρ ρ' : ↥(Zeta23.ZeroSide.ZI Z T)) :
+    finiteLatticeSegmentKernelMatrix F T n ρ ρ' =
+      ∑ k : Fin n, distinguishedLatticeTerm F T
+        (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) (k : ℕ) := by
+  simp only [finiteLatticeSegmentKernelMatrix, Matrix.sum_apply,
+    Matrix.vecMulVec_apply, distinguishedLatticeFeature,
+    distinguishedLatticeTerm, distinguishedGridStep]
+
+theorem canonicalGuardedLatticeKernelMatrix_apply
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n r : ℕ)
+    (ρ ρ' : ↥(Zeta23.ZeroSide.ZI Z T)) :
+    canonicalGuardedLatticeKernelMatrix F T n r ρ ρ' =
+      canonicalGuardedLatticeSegment F T
+        (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) n r := by
+  simp only [canonicalGuardedLatticeKernelMatrix,
+    canonicalGuardedLatticeSegment, Matrix.sum_apply,
+    Matrix.vecMulVec_apply, distinguishedLatticeFeature,
+    distinguishedLatticeTerm, distinguishedGridStep]
+
+/-- On zero space the guarded grid is exactly the retained kernel plus the
+two endpoint matrices. -/
+theorem canonicalGuardedLatticeKernelMatrix_eq
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n r : ℕ) :
+    canonicalGuardedLatticeKernelMatrix F T n r =
+      lowerLatticeBoundaryKernelMatrix F T r +
+        finiteLatticeSegmentKernelMatrix F T n +
+        upperLatticeBoundaryKernelMatrix F T n r := by
+  ext ρ ρ'
+  rw [canonicalGuardedLatticeKernelMatrix_apply,
+    canonicalGuardedLatticeSegment_eq_boundary_add_segment,
+    Matrix.add_apply, Matrix.add_apply,
+    finiteLatticeSegmentKernelMatrix_apply]
+  simp only [lowerLatticeBoundaryKernelMatrix,
+    upperLatticeBoundaryKernelMatrix, lowerLatticeBoundaryStrip,
+    upperLatticeBoundaryStrip, Matrix.sum_apply, Matrix.vecMulVec_apply,
+    distinguishedLatticeFeature, distinguishedLatticeTerm,
+    distinguishedGridStep]
+
+/-- The fixed construction normalization multiplying every distinguished
+lattice contraction. -/
+def distinguishedLatticeScale
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℂ :=
+  (Real.sqrt
+    (QuarticGramFamily.fullLength (σ := σ) T /
+      F.period T (F.distinguished T)) : ℂ) ^ 2
+
+/-- The live scalar block contractions assembled on finite zero space. -/
+def blockPairKernelMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    Matrix (↥(Zeta23.ZeroSide.ZI Z T))
+      (↥(Zeta23.ZeroSide.ZI Z T)) ℂ :=
+  fun ρ ρ' => blockPairKernel F T (ρ : ℂ) (ρ' : ℂ)
+
+theorem blockPairKernelMatrix_eq_smul_finiteLatticeSegment
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (haddress : Function.Bijective (F.columnAddress T))
+    (hcolumns : ∀ i,
+      (F.columnAddress T (F.blockEmbedding T i)).1 = F.distinguished T)
+    (hexhaustive : ∀ i,
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i) :
+    blockPairKernelMatrix F T =
+      distinguishedLatticeScale F T •
+        finiteLatticeSegmentKernelMatrix F T
+          (F.channelDim T (F.distinguished T)) := by
+  ext ρ ρ'
+  rw [blockPairKernelMatrix, blockPairKernel_eq_latticeSegment
+    F T haddress hcolumns hexhaustive,
+    Matrix.smul_apply, finiteLatticeSegmentKernelMatrix_apply]
+  rfl
+
+/-- The live block plus its entire non-decaying endpoint contribution is
+one normalized contiguous guarded-grid matrix. -/
+theorem blockPairKernelMatrix_add_canonicalBoundary_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (haddress : Function.Bijective (F.columnAddress T))
+    (hcolumns : ∀ i,
+      (F.columnAddress T (F.blockEmbedding T i)).1 = F.distinguished T)
+    (hexhaustive : ∀ i,
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i) :
+    blockPairKernelMatrix F T +
+        distinguishedLatticeScale F T •
+          canonicalLatticeBoundaryKernelMatrix F T
+            (F.channelDim T (F.distinguished T)) =
+      distinguishedLatticeScale F T •
+        canonicalGuardedLatticeKernelMatrix F T
+          (F.channelDim T (F.distinguished T))
+          (distinguishedEndpointGuardWidth F T) := by
+  rw [blockPairKernelMatrix_eq_smul_finiteLatticeSegment
+    F T haddress hcolumns hexhaustive,
+    canonicalGuardedLatticeKernelMatrix_eq]
+  unfold canonicalLatticeBoundaryKernelMatrix
+  module
+
 /-- Quantitative guarded-remainder theorem.  After a finite upper endpoint
 strip is left untouched, both infinite pieces are absolutely summable and
 bounded by explicit fourth-power grid tails.  The remaining finite strip is
