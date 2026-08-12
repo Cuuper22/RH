@@ -430,7 +430,7 @@ theorem zeroIndexKernel1_eq_factored
   apply Finset.sum_congr rfl
   intro i _
   simp only [blockZeroSummand, zeroEdgeWeight]
-  ring
+  ring_nf
 
 theorem zeroIndexKernel2_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -446,7 +446,7 @@ theorem zeroIndexKernel2_eq_factored
   apply Finset.sum_congr rfl
   intro j _
   simp only [blockZeroSummand, zeroEdgeWeight]
-  ring
+  ring_nf
 
 theorem zeroIndexKernel3_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -466,7 +466,7 @@ theorem zeroIndexKernel3_eq_factored
   apply Finset.sum_congr rfl
   intro k _
   simp only [blockZeroSummand, zeroEdgeWeight]
-  ring
+  ring_nf
 
 theorem zeroIndexKernel4_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -490,7 +490,7 @@ theorem zeroIndexKernel4_eq_factored
   apply Finset.sum_congr rfl
   intro l _
   simp only [blockZeroSummand, zeroEdgeWeight]
-  ring
+  ring_nf
 
 def factoredZeroKernelCyclicTrace1
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
