@@ -198,6 +198,7 @@ theorem weightedCyclicSymbol_k4_l1_bound
       (∑ i : Fin 4, xi i) = xi 0 + xi 1 + xi 2 + xi 3 := by
     norm_num [Fin.sum_univ_succ]
     rw [show Fin.succ (2 : Fin 3) = (3 : Fin 4) by decide]
+    ring
   have hlastEq :
       xi 3 = (∑ i : Fin 4, xi i) - (xi 0 + xi 1 + xi 2) := by
     linarith
@@ -216,6 +217,7 @@ theorem weightedCyclicSymbol_k4_l1_bound
         |xi 0| + |xi 1| + |xi 2| + |xi 3| := by
     norm_num [Fin.sum_univ_succ]
     rw [show Fin.succ (2 : Fin 3) = (3 : Fin 4) by decide]
+    ring
   rw [habssum]
   nlinarith
 
@@ -317,7 +319,7 @@ theorem normalCutoffSymbol_tsupport_subset {k : ℕ}
       rw [hz, mul_zero]
     have ht := hPhi xi hp
     have hn := hchi (∑ i : Fin k, xi i) hc
-    exact ht.trans (add_le_add_left hn A)
+    nlinarith [ht, hn]
   · exact isClosed_le (by fun_prop) (by fun_prop)
 
 /-- A strict numerical margin converts the closed support bound into the
