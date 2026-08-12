@@ -31,7 +31,7 @@ coefficients.
 -/
 
 open MeasureTheory
-open scoped BigOperators Matrix Convolution
+open scoped BigOperators Matrix Convolution ContDiff
 
 noncomputable section
 
