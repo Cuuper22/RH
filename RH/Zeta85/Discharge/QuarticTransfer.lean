@@ -153,7 +153,8 @@ theorem quarticTraceNumerator_eq_uncentered
         (F.block T + F.block T + F.block T + F.block T) + 1 by
           noncomm_ring]
   simp only [rtrace_add, rtrace_sub, hone]
-  ring_nf
+  simp only [mul_comm, mul_left_comm, mul_assoc]
+  abel
 
 /-- Explicit cyclic index sums for the first four raw matrix traces. -/
 def cyclicTrace1 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
@@ -703,7 +704,17 @@ theorem zeroCyclicTrace3_eq_tuple
   rw [Finset.sum_mul]
   apply Finset.sum_congr rfl
   intro k _
-  simpa only [Finset.sum_mul, Finset.mul_sum, mul_assoc]
+  rw [mul_assoc]
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [Finset.sum_mul]
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro ρ₂ _
+  rw [Finset.mul_sum]
+  rw [Finset.mul_sum]
+  simp only [mul_assoc]
 
 theorem zeroCyclicTrace4_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -722,7 +733,23 @@ theorem zeroCyclicTrace4_eq_tuple
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro l _
-  simpa only [Finset.sum_mul, Finset.mul_sum, mul_assoc]
+  rw [mul_assoc]
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  rw [Finset.sum_mul]
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro ρ₂ _
+  rw [Finset.sum_mul]
+  rw [Finset.mul_sum]
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro ρ₃ _
+  rw [Finset.mul_sum]
+  rw [Finset.mul_sum]
+  rw [Finset.mul_sum]
+  simp only [mul_assoc]
 
 def zeroCyclicQuarticNumerator
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
