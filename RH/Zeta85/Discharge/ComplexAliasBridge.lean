@@ -656,6 +656,75 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedDistinguishe
     zeroPairKernel_eq_normalizedDistinguishedBlockFrequencyPairSum
       F T ρ ρ' hdist hratio
 
+
+/-- The exact finite/infinite frequency discrepancy for the distinguished
+channel, before its reciprocal-period normalization. -/
+def distinguishedFrequencyPairTail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  channelFrequencyPairSum F T (F.distinguished T)
+      (gammaOf ρ) (gammaOf ρ') -
+    distinguishedBlockFrequencyPairSum F T ρ ρ'
+
+/-- The actual zero-pair kernel is exactly the normalized infinite Poisson
+lattice minus one explicit finite-grid tail. -/
+theorem zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (hratio : 0 ≤
+      F.fullLength T / F.period T (F.distinguished T)) :
+    QuarticTransfer.zeroPairKernel F T ρ ρ' =
+      channelNormalizedFrequencyPairSum F T (F.distinguished T)
+          (gammaOf ρ) (gammaOf ρ') -
+        ((F.fullLength T /
+          F.period T (F.distinguished T) : ℝ) : ℂ) *
+          distinguishedFrequencyPairTail F T ρ ρ' := by
+  rw [zeroPairKernel_eq_normalizedDistinguishedBlockFrequencyPairSum
+    F T ρ ρ' hdist hratio]
+  have hcast :
+      ((F.fullLength T /
+        F.period T (F.distinguished T) : ℝ) : ℂ) =
+        (F.fullLength T : ℂ) /
+          (F.period T (F.distinguished T) : ℂ) := by
+    norm_cast
+  rw [hcast]
+  simp only [channelNormalizedFrequencyPairSum,
+    distinguishedFrequencyPairTail]
+  ring
+
+/-- In a literal principal construction, the main-minus-tail decomposition
+holds eventually and simultaneously for all zero pairs. -/
+theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) :
+    ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
+      QuarticTransfer.zeroPairKernel F T ρ ρ' =
+        channelNormalizedFrequencyPairSum F T (F.distinguished T)
+            (gammaOf ρ) (gammaOf ρ') -
+          ((F.fullLength T /
+            F.period T (F.distinguished T) : ℝ) : ℂ) *
+            distinguishedFrequencyPairTail F T ρ ρ' := by
+  filter_upwards [
+    h.distinguished_columns,
+    h.periods_pos,
+    Zeta23.Assembly.eventually_l_pos
+  ] with T hdist hperiod hl
+  have hfull : 0 ≤ F.fullLength T := by
+    simp only [QuarticGramFamily.fullLength]
+    exact mul_nonneg h.support_pos.le hl.le
+  have hratio : 0 ≤
+      F.fullLength T / F.period T (F.distinguished T) :=
+    div_nonneg hfull (hperiod (F.distinguished T)).le
+  intro ρ ρ'
+  exact zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
+    F T ρ ρ' hdist hratio
+
 end ComplexAliasBridge
 end Zeta85
 end RH
