@@ -177,10 +177,14 @@ theorem complexGaux_continuous_general
     unfold complexGaux
     rw [setIntegral_eq_integral_of_forall_compl_eq_zero]
     intro u hu
+    have hout : u < -Λ ∨ Λ < u := by
+      by_cases hleft : -Λ ≤ u
+      · right
+        exact lt_of_not_ge (fun hright => hu ⟨hleft, hright⟩)
+      · left
+        exact lt_of_not_ge hleft
     have habs : Λ < |u| := by
-      rw [mem_Icc] at hu
-      push_neg at hu
-      rcases hu with hu | hu
+      rcases hout with hu | hu
       · have hu_neg : u < 0 := lt_of_lt_of_le hu (neg_nonpos.mpr hΛ)
         rw [abs_of_neg hu_neg]
         linarith
