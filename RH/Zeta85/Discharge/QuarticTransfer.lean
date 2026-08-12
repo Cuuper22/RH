@@ -1086,6 +1086,342 @@ def poissonZeroKernelQuarticNumerator
     u.p3 * poissonZeroKernelCyclicTrace3 F T +
     u.p4 * poissonZeroKernelCyclicTrace4 F T
 
+/-! ## Guarded finite-grid quartic coordinate -/
+
+/-- Cyclic zero contributions formed from the one contiguous guarded
+modulation grid. -/
+def guardedZeroCycle1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ *
+    zeroEdgeWeight F T ρ
+
+def guardedZeroCycle2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ₁ ρ₂ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂ *
+    (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂ *
+      (zeroEdgeWeight F T ρ₁ * zeroEdgeWeight F T ρ₂))
+
+def guardedZeroCycle3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂ *
+    (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₂ ρ₃ *
+      (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₃ *
+        (zeroEdgeWeight F T ρ₁ *
+          (zeroEdgeWeight F T ρ₂ * zeroEdgeWeight F T ρ₃))))
+
+def guardedZeroCycle4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₃ ρ₄ *
+    (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂ *
+      (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₂ ρ₃ *
+        (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₄ *
+          (zeroEdgeWeight F T ρ₁ *
+            (zeroEdgeWeight F T ρ₂ *
+              (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄))))))
+
+/-- Telescoping corrections from the retained grid to the guarded grid.
+Each summand contains a literal endpoint-boundary factor. -/
+def boundaryCorrectionZeroCycle1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ *
+    zeroEdgeWeight F T ρ
+
+def boundaryCorrectionZeroCycle2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ₁ ρ₂ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ₁ ρ₂ *
+    (zeroPairKernel F T ρ₁ ρ₂ +
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂) *
+    (zeroEdgeWeight F T ρ₁ * zeroEdgeWeight F T ρ₂)
+
+def boundaryCorrectionZeroCycle3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
+  let K := zeroPairKernel F T
+  let B := PoissonKernelBridge.canonicalBoundaryPairKernel F T
+  let G := PoissonKernelBridge.canonicalGuardedPairKernel F T
+  (B ρ₁ ρ₂ * G ρ₂ ρ₃ * G ρ₁ ρ₃ +
+    K ρ₁ ρ₂ * B ρ₂ ρ₃ * G ρ₁ ρ₃ +
+    K ρ₁ ρ₂ * K ρ₂ ρ₃ * B ρ₁ ρ₃) *
+      (zeroEdgeWeight F T ρ₁ *
+        (zeroEdgeWeight F T ρ₂ * zeroEdgeWeight F T ρ₃))
+
+def boundaryCorrectionZeroCycle4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
+  let K := zeroPairKernel F T
+  let B := PoissonKernelBridge.canonicalBoundaryPairKernel F T
+  let G := PoissonKernelBridge.canonicalGuardedPairKernel F T
+  (B ρ₃ ρ₄ * G ρ₁ ρ₂ * G ρ₂ ρ₃ * G ρ₁ ρ₄ +
+    K ρ₃ ρ₄ * B ρ₁ ρ₂ * G ρ₂ ρ₃ * G ρ₁ ρ₄ +
+    K ρ₃ ρ₄ * K ρ₁ ρ₂ * B ρ₂ ρ₃ * G ρ₁ ρ₄ +
+    K ρ₃ ρ₄ * K ρ₁ ρ₂ * K ρ₂ ρ₃ * B ρ₁ ρ₄) *
+      (zeroEdgeWeight F T ρ₁ *
+        (zeroEdgeWeight F T ρ₂ *
+          (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄)))
+
+theorem factoredZeroCycle1_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ')
+    (ρ : ℂ) :
+    factoredZeroCycle1 F T ρ + boundaryCorrectionZeroCycle1 F T ρ =
+      guardedZeroCycle1 F T ρ := by
+  simp only [factoredZeroCycle1, boundaryCorrectionZeroCycle1,
+    guardedZeroCycle1, ← hpair]
+  ring
+
+theorem factoredZeroCycle2_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ')
+    (ρ₁ ρ₂ : ℂ) :
+    factoredZeroCycle2 F T ρ₁ ρ₂ +
+        boundaryCorrectionZeroCycle2 F T ρ₁ ρ₂ =
+      guardedZeroCycle2 F T ρ₁ ρ₂ := by
+  simp only [factoredZeroCycle2, boundaryCorrectionZeroCycle2,
+    guardedZeroCycle2, ← hpair]
+  ring
+
+theorem factoredZeroCycle3_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ')
+    (ρ₁ ρ₂ ρ₃ : ℂ) :
+    factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ +
+        boundaryCorrectionZeroCycle3 F T ρ₁ ρ₂ ρ₃ =
+      guardedZeroCycle3 F T ρ₁ ρ₂ ρ₃ := by
+  simp only [factoredZeroCycle3, boundaryCorrectionZeroCycle3,
+    guardedZeroCycle3, ← hpair]
+  ring
+
+theorem factoredZeroCycle4_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ')
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) :
+    factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ +
+        boundaryCorrectionZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
+      guardedZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
+  simp only [factoredZeroCycle4, boundaryCorrectionZeroCycle4,
+    guardedZeroCycle4, ← hpair]
+  ring
+
+def guardedZeroKernelCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, guardedZeroCycle1 F T ρ)
+
+def guardedZeroKernelCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    guardedZeroCycle2 F T ρ₁ ρ₂)
+
+def guardedZeroKernelCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, guardedZeroCycle3 F T ρ₁ ρ₂ ρ₃)
+
+def guardedZeroKernelCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      guardedZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+def boundaryCorrectionCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T,
+    boundaryCorrectionZeroCycle1 F T ρ)
+
+def boundaryCorrectionCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    boundaryCorrectionZeroCycle2 F T ρ₁ ρ₂)
+
+def boundaryCorrectionCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T,
+      boundaryCorrectionZeroCycle3 F T ρ₁ ρ₂ ρ₃)
+
+def boundaryCorrectionCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      boundaryCorrectionZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+theorem factoredCyclicTrace1_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelCyclicTrace1 F T + boundaryCorrectionCyclicTrace1 F T =
+      guardedZeroKernelCyclicTrace1 F T := by
+  unfold factoredZeroKernelCyclicTrace1 boundaryCorrectionCyclicTrace1
+    guardedZeroKernelCyclicTrace1
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ hρ
+  exact factoredZeroCycle1_add_boundaryCorrection_eq_guarded hpair ρ
+
+theorem factoredCyclicTrace2_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelCyclicTrace2 F T + boundaryCorrectionCyclicTrace2 F T =
+      guardedZeroKernelCyclicTrace2 F T := by
+  unfold factoredZeroKernelCyclicTrace2 boundaryCorrectionCyclicTrace2
+    guardedZeroKernelCyclicTrace2
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  exact factoredZeroCycle2_add_boundaryCorrection_eq_guarded hpair ρ₁ ρ₂
+
+theorem factoredCyclicTrace3_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelCyclicTrace3 F T + boundaryCorrectionCyclicTrace3 F T =
+      guardedZeroKernelCyclicTrace3 F T := by
+  unfold factoredZeroKernelCyclicTrace3 boundaryCorrectionCyclicTrace3
+    guardedZeroKernelCyclicTrace3
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  exact factoredZeroCycle3_add_boundaryCorrection_eq_guarded hpair ρ₁ ρ₂ ρ₃
+
+theorem factoredCyclicTrace4_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelCyclicTrace4 F T + boundaryCorrectionCyclicTrace4 F T =
+      guardedZeroKernelCyclicTrace4 F T := by
+  unfold factoredZeroKernelCyclicTrace4 boundaryCorrectionCyclicTrace4
+    guardedZeroKernelCyclicTrace4
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₄ hρ₄
+  exact factoredZeroCycle4_add_boundaryCorrection_eq_guarded
+    hpair ρ₁ ρ₂ ρ₃ ρ₄
+
+/-- The quartic numerator evaluated on the enlarged guarded grid. -/
+def guardedZeroKernelQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  let u := uncenteredQuartic q
+  u.p0 * (F.blockDim T : ℝ) +
+    u.p1 * guardedZeroKernelCyclicTrace1 F T +
+    u.p2 * guardedZeroKernelCyclicTrace2 F T +
+    u.p3 * guardedZeroKernelCyclicTrace3 F T +
+    u.p4 * guardedZeroKernelCyclicTrace4 F T
+
+/-- Exact quartic correction from the retained grid to the guarded grid. -/
+def boundaryCorrectionQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  let u := uncenteredQuartic q
+  u.p1 * boundaryCorrectionCyclicTrace1 F T +
+    u.p2 * boundaryCorrectionCyclicTrace2 F T +
+    u.p3 * boundaryCorrectionCyclicTrace3 F T +
+    u.p4 * boundaryCorrectionCyclicTrace4 F T
+
+/-- Changing the object summed first from the retained grid to the guarded
+grid produces exactly the displayed boundary-factor correction. -/
+theorem factoredQuarticNumerator_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelQuarticNumerator q F T +
+        boundaryCorrectionQuarticNumerator q F T =
+      guardedZeroKernelQuarticNumerator q F T := by
+  unfold factoredZeroKernelQuarticNumerator
+    boundaryCorrectionQuarticNumerator guardedZeroKernelQuarticNumerator
+  rw [← factoredCyclicTrace1_add_boundaryCorrection_eq_guarded hpair,
+    ← factoredCyclicTrace2_add_boundaryCorrection_eq_guarded hpair,
+    ← factoredCyclicTrace3_add_boundaryCorrection_eq_guarded hpair,
+    ← factoredCyclicTrace4_add_boundaryCorrection_eq_guarded hpair]
+  ring
+
+/-- The exact quartic guarded-grid replacement is available at every
+sufficiently large height from the construction data itself. -/
+theorem PoissonKernelBridge.DistinguishedGuardedPoissonKernelData.eventually_factoredQuarticNumerator_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
+    (q : Quartic) :
+    ∀ᶠ T in atTop,
+      factoredZeroKernelQuarticNumerator q F T +
+          boundaryCorrectionQuarticNumerator q F T =
+        guardedZeroKernelQuarticNumerator q F T := by
+  filter_upwards [h.eventually_blockPairKernel_add_boundary_eq_guarded]
+    with T hT
+  apply factoredQuarticNumerator_add_boundaryCorrection_eq_guarded
+  simpa only [zeroPairKernel, PoissonKernelBridge.blockPairKernel] using hT
+
 theorem factoredZeroKernelQuarticNumerator_eq_poisson
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
