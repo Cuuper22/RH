@@ -411,34 +411,22 @@ or theorem statement changes.
  Classical.choice,
  Quot.sound,
  RH.Zeta85.Hypotheses.shiu_majorant]
-'zeta85_rung_8657' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- RH.Zeta85.Hypotheses.shiu_majorant]
+'zeta85_rung_8657' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_rung_8657_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  RH.Zeta85.Hypotheses.shiu_majorant]
-'zeta85_rung_8686' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- RH.Zeta85.Hypotheses.shiu_majorant]
+'zeta85_rung_8686' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_rung_8686_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  RH.Zeta85.Hypotheses.shiu_majorant]
-'zeta85_rung_9383' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- RH.Zeta85.Hypotheses.shiu_majorant]
+'zeta85_rung_9383' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_rung_9383_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  RH.Zeta85.Hypotheses.shiu_majorant]
-'zeta85_rung_9506' depends on axioms: [propext,
- Classical.choice,
- Quot.sound,
- RH.Zeta85.Hypotheses.shiu_majorant]
+'zeta85_rung_9506' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_rung_9506_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
