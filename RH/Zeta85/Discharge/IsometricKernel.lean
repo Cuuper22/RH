@@ -81,32 +81,6 @@ def projection
   C.toData.compression T *
     (C.toData.compression T)ᴴ
 
-/-- The mixing matrix determines an exact idempotent projection. -/
-theorem projection_sq
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v}
-    (C : RealData F) (T : ℝ) :
-    projection C T * projection C T = projection C T := by
-  unfold projection
-  calc
-    (C.toData.compression T * (C.toData.compression T)ᴴ) *
-        (C.toData.compression T * (C.toData.compression T)ᴴ) =
-      C.toData.compression T *
-        ((C.toData.compression T)ᴴ *
-          (C.toData.compression T * (C.toData.compression T)ᴴ)) := by
-      rw [Matrix.mul_assoc]
-    _ = C.toData.compression T *
-        (((C.toData.compression T)ᴴ * C.toData.compression T) *
-          (C.toData.compression T)ᴴ) := by
-      congr 1
-      rw [Matrix.mul_assoc]
-    _ = C.toData.compression T *
-        (1 * (C.toData.compression T)ᴴ) := by
-      rw [C.toData.isometry T]
-    _ = C.toData.compression T *
-        (C.toData.compression T)ᴴ := by
-      rw [Matrix.one_mul]
-
 /-- The normalized pair contraction after mixing columns first. -/
 def mixedPairKernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -216,8 +190,15 @@ theorem A_apply_eq_zeroSum
         ∑ ρ ∈ ZeroSide.ZI Z T,
           (Z.mult ρ : ℂ) * F.atom T i ρ *
             F.atom T j ρ := by
-  unfold QuarticGramFamily.A QuarticGramFamily.rawTruncatedGram
-  simp only [Pi.smul_apply, smul_eq_mul]
+  change
+    ((F.hatDenominator T)⁻¹ : ℂ) *
+        (∑ᶠ ρ ∈ Z.ZIprime T,
+          (Z.mult ρ : ℂ) * F.atom T i ρ *
+            F.atom T j ρ) =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        ∑ ρ ∈ ZeroSide.ZI Z T,
+          (Z.mult ρ : ℂ) * F.atom T i ρ *
+            F.atom T j ρ
   rw [finsum_mem_eq_finite_toFinset_sum _
     (ZeroSide.ZIprime_finite Z T)]
 
@@ -501,15 +482,25 @@ theorem expandedMixedZeroEntry_eq_sum
             F.atom T i ρ * F.atom T j ρ := by
       rw [sum_fintype_finset_comm]
     _ = ∑ ρ ∈ ZeroSide.ZI Z T,
+        ∑ j : Fin (F.dim T), ∑ i : Fin (F.dim T),
+          ((F.hatDenominator T)⁻¹ : ℂ) *
+            (Z.mult ρ : ℂ) *
+            C.toData.compression T i a *
+            C.toData.compression T j b *
+            F.atom T i ρ * F.atom T j ρ := by
+      apply Finset.sum_congr rfl
+      intro ρ _
+      rw [Finset.sum_comm]
+    _ = ∑ ρ ∈ ZeroSide.ZI Z T,
         mixedBlockZeroSummand C T a b ρ := by
       apply Finset.sum_congr rfl
       intro ρ _
       unfold mixedBlockZeroSummand mixedAtom
       simp only [Finset.mul_sum, Finset.sum_mul]
       apply Finset.sum_congr rfl
-      intro i _
-      apply Finset.sum_congr rfl
       intro j _
+      apply Finset.sum_congr rfl
+      intro i _
       ring
 
 /-- The actual isometric block entry is the finite zero Gram sum of the
@@ -814,15 +805,7 @@ theorem mixedZeroCyclicTrace3_eq_tuple
   rw [Finset.sum_mul]
   apply Finset.sum_congr rfl
   intro k _
-  rw [Finset.sum_mul]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [Finset.mul_sum]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [Finset.mul_sum]
+  simp only [Finset.sum_mul, Finset.mul_sum]
 
 theorem mixedZeroCyclicTrace4_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -842,20 +825,7 @@ theorem mixedZeroCyclicTrace4_eq_tuple
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro l _
-  rw [Finset.sum_mul]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [Finset.mul_sum]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro ρ₃ _
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
+  simp only [Finset.sum_mul, Finset.mul_sum]
 
 def mixedZeroKernelCyclicTrace3
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
