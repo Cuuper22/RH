@@ -231,6 +231,49 @@ theorem prime_or_product_of_two_primes_of_rough_of_lt_cube {s B : ℕ}
     exact ⟨a, b, prime_of_rough_of_lt_sq ha_one_lt hrough_a ha_sq,
       prime_of_rough_of_lt_sq hb_one_lt hrough_b hb_sq, hab.symm⟩
 
+/-- Every prime factor in a rough number crosses the threshold. -/
+theorem threshold_succ_le_of_mem_primeFactorsList {s B p : ℕ}
+    (hrough : ∀ q : ℕ, q.Prime → q ∣ s → B < q)
+    (hp : p ∈ s.primeFactorsList) : B + 1 ≤ p := by
+  have hpprime := Nat.prime_of_mem_primeFactorsList hp
+  have hpdvd := Nat.dvd_of_mem_primeFactorsList hp
+  have hBp := hrough p hpprime hpdvd
+  omega
+
+theorem pow_length_le_list_prod {L : List ℕ} {B : ℕ}
+    (hL : ∀ p ∈ L, B + 1 ≤ p) : (B + 1) ^ L.length ≤ L.prod := by
+  induction L with
+  | nil => simp
+  | cons p ps ih =>
+      calc
+        (B + 1) ^ (p :: ps).length =
+            (B + 1) * (B + 1) ^ ps.length := by simp [pow_succ']
+        _ ≤ p * ps.prod := Nat.mul_le_mul (hL p (by simp))
+          (ih (fun q hq => hL q (by simp [hq])))
+        _ = (p :: ps).prod := by simp
+
+/-- The product of the prime-factor list of a `B`-rough integer is bounded
+below by `(B+1)` to the number of factors, with multiplicity. -/
+theorem rough_pow_cardFactors_le {s B : ℕ} (hs : s ≠ 0)
+    (hrough : ∀ q : ℕ, q.Prime → q ∣ s → B < q) :
+    (B + 1) ^ s.primeFactorsList.length ≤ s := by
+  calc
+    (B + 1) ^ s.primeFactorsList.length ≤ s.primeFactorsList.prod :=
+      pow_length_le_list_prod
+        (fun p hp => threshold_succ_le_of_mem_primeFactorsList hrough hp)
+    _ = s := Nat.prod_primeFactorsList hs
+
+/-- Uniform retained-prime depth: below the `r`th threshold power a rough
+integer has strictly fewer than `r` prime factors, counted with multiplicity. -/
+theorem cardFactors_lt_of_rough_of_lt_pow {s B r : ℕ} (hs : s ≠ 0)
+    (hrough : ∀ q : ℕ, q.Prime → q ∣ s → B < q)
+    (hsize : s < (B + 1) ^ r) : s.primeFactorsList.length < r := by
+  by_contra hnot
+  have hrle : r ≤ s.primeFactorsList.length := Nat.le_of_not_gt hnot
+  have hpow : (B + 1) ^ r ≤ (B + 1) ^ s.primeFactorsList.length :=
+    Nat.pow_le_pow_right (by omega) hrle
+  exact (not_le_of_gt hsize) (hpow.trans (rough_pow_cardFactors_le hs hrough))
+
 /-! ## Divisor-bound transport through a retained fiber -/
 
 /-- Allocate a divisor of `m * s` between the fixed retained factor `m` and
@@ -419,6 +462,15 @@ theorem normalizedRightSelector_prime_or_semiprime_support
     (hcoeff : normalizedRightSelector c R a k s ≠ 0) :
     s.Prime ∨ ∃ p q : ℕ, p.Prime ∧ q.Prime ∧ s = p * q := by
   exact prime_or_product_of_two_primes_of_rough_of_lt_cube hs
+    (normalizedRightSelector_rough_support hR hrough hcoeff) hsize
+
+theorem normalizedRightSelector_bounded_prime_depth
+    {c : ℕ → ℝ} {R B a k s r : ℕ} (hR : 0 < R)
+    (hrough : ¬R < a * B)
+    (hs : s ≠ 0) (hsize : s < (B + 1) ^ r)
+    (hcoeff : normalizedRightSelector c R a k s ≠ 0) :
+    s.primeFactorsList.length < r := by
+  exact cardFactors_lt_of_rough_of_lt_pow hs
     (normalizedRightSelector_rough_support hR hrough hcoeff) hsize
 
 /-- The existing Shiu progression theorem applies to every normalized
