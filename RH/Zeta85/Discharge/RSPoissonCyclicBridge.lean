@@ -10,7 +10,7 @@ complex-frequency Rudnick--Sarnak test.
 -/
 
 open MeasureTheory Set Filter
-open scoped BigOperators
+open scoped BigOperators Matrix.Norms.Frobenius
 
 noncomputable section
 
@@ -712,6 +712,188 @@ theorem remoteCorrectionCyclicTrace4_eq_rtrace_sub
     rtrace_guardedLatticeZeroMatrix_pow_four_eq_guardedTrace]
   have htrace := guardedCyclicTrace4_add_remoteCorrection_eq_full F T
   linarith
+
+/-! ## Frobenius perturbation of the quartic zero trace -/
+
+/-- Hilbert--Schmidt Cauchy--Schwarz in the exact orientation needed for
+the cyclic trace telescope. -/
+theorem abs_rtrace_mul_le_frobenius
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (A B : Matrix ι ι ℂ) :
+    |RHLinalg.rtrace (A * B)| ≤ ‖A‖ * ‖B‖ := by
+  calc
+    |RHLinalg.rtrace (A * B)| = |Complex.re ((A * B).trace)| := rfl
+    _ ≤ ‖(A * B).trace‖ := Complex.abs_re_le_norm _
+    _ = ‖∑ i : ι, ∑ j : ι, A i j * B j i‖ := by
+      simp only [Matrix.trace, Matrix.diag_apply, Matrix.mul_apply]
+    _ ≤ ∑ i : ι, ∑ j : ι, ‖A i j‖ * ‖B j i‖ := by
+      calc
+        ‖∑ i : ι, ∑ j : ι, A i j * B j i‖
+            ≤ ∑ i : ι, ‖∑ j : ι, A i j * B j i‖ := norm_sum_le _ _
+        _ ≤ ∑ i : ι, ∑ j : ι, ‖A i j * B j i‖ := by
+          apply Finset.sum_le_sum
+          intro i hi
+          exact norm_sum_le _ _
+        _ = ∑ i : ι, ∑ j : ι, ‖A i j‖ * ‖B j i‖ := by
+          simp only [norm_mul]
+    _ ≤ Real.sqrt (∑ i : ι, ∑ j : ι, ‖A i j‖ ^ 2) *
+          Real.sqrt (∑ i : ι, ∑ j : ι, ‖B j i‖ ^ 2) := by
+      calc
+        (∑ i : ι, ∑ j : ι, ‖A i j‖ * ‖B j i‖) =
+            ∑ ij ∈ Finset.univ.product (Finset.univ : Finset ι),
+              ‖A ij.1 ij.2‖ * ‖B ij.2 ij.1‖ := by
+          exact (Finset.sum_product'
+            (Finset.univ : Finset ι) (Finset.univ : Finset ι)
+            (fun i j => ‖A i j‖ * ‖B j i‖)).symm
+        _ ≤ Real.sqrt
+              (∑ ij ∈ Finset.univ.product (Finset.univ : Finset ι),
+                ‖A ij.1 ij.2‖ ^ 2) *
+              Real.sqrt
+              (∑ ij ∈ Finset.univ.product (Finset.univ : Finset ι),
+                ‖B ij.2 ij.1‖ ^ 2) :=
+          Real.sum_mul_le_sqrt_mul_sqrt
+            (Finset.univ.product (Finset.univ : Finset ι))
+            (fun ij : ι × ι => ‖A ij.1 ij.2‖)
+            (fun ij : ι × ι => ‖B ij.2 ij.1‖)
+        _ = Real.sqrt (∑ i : ι, ∑ j : ι, ‖A i j‖ ^ 2) *
+              Real.sqrt (∑ i : ι, ∑ j : ι, ‖B j i‖ ^ 2) := by
+          congr 1
+          · congr 1
+            exact Finset.sum_product'
+              (Finset.univ : Finset ι) (Finset.univ : Finset ι)
+              (fun i j => ‖A i j‖ ^ 2)
+          · congr 1
+            exact Finset.sum_product'
+              (Finset.univ : Finset ι) (Finset.univ : Finset ι)
+              (fun i j => ‖B j i‖ ^ 2)
+    _ = ‖A‖ * ‖B‖ := by
+      have hBsum :
+          (∑ i : ι, ∑ j : ι, ‖B j i‖ ^ 2) =
+            ∑ i : ι, ∑ j : ι, ‖B i j‖ ^ 2 := by
+        rw [Finset.sum_comm]
+      rw [Zeta23.Assembly.norm_eq_sqrt_frobSq,
+        Zeta23.Assembly.norm_eq_sqrt_frobSq,
+        Zeta23.Assembly.frobSq_eq_sum_norm_sq,
+        Zeta23.Assembly.frobSq_eq_sum_norm_sq, hBsum]
+
+/-- A noncommutative fourth-power telescope with no dimension loss.  Only
+one copy of the perturbation occurs in each term. -/
+theorem rtrace_pow_four_add_sub_bound
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (G R : Matrix ι ι ℂ) :
+    |RHLinalg.rtrace ((G + R) ^ 4) - RHLinalg.rtrace (G ^ 4)| ≤
+      ‖R‖ * ‖G + R‖ ^ 3 +
+        (‖G‖ * ‖R‖) * ‖G + R‖ ^ 2 +
+        (‖G‖ ^ 2 * ‖R‖) * ‖G + R‖ +
+        ‖G‖ ^ 3 * ‖R‖ := by
+  have hpow2 (X : Matrix ι ι ℂ) : ‖X ^ 2‖ ≤ ‖X‖ ^ 2 := by
+    rw [pow_two, pow_two]
+    exact Matrix.frobenius_norm_mul X X
+  have hpow3 (X : Matrix ι ι ℂ) : ‖X ^ 3‖ ≤ ‖X‖ ^ 3 := by
+    rw [show X ^ 3 = X ^ 2 * X by noncomm_ring,
+      show ‖X‖ ^ 3 = ‖X‖ ^ 2 * ‖X‖ by ring]
+    calc
+      ‖X ^ 2 * X‖ ≤ ‖X ^ 2‖ * ‖X‖ :=
+        Matrix.frobenius_norm_mul (X ^ 2) X
+      _ ≤ ‖X‖ ^ 2 * ‖X‖ := by
+        gcongr
+        exact hpow2 X
+  have hid :
+      (G + R) ^ 4 - G ^ 4 =
+        R * (G + R) ^ 3 +
+          (G * R) * (G + R) ^ 2 +
+          (G ^ 2 * R) * (G + R) +
+          G ^ 3 * R := by
+    noncomm_ring
+  have h1 : |RHLinalg.rtrace (R * (G + R) ^ 3)| ≤
+      ‖R‖ * ‖G + R‖ ^ 3 := by
+    calc
+      |RHLinalg.rtrace (R * (G + R) ^ 3)| ≤
+          ‖R‖ * ‖(G + R) ^ 3‖ :=
+        abs_rtrace_mul_le_frobenius R ((G + R) ^ 3)
+      _ ≤ ‖R‖ * ‖G + R‖ ^ 3 := by
+        gcongr
+        exact hpow3 (G + R)
+  have h2 : |RHLinalg.rtrace ((G * R) * (G + R) ^ 2)| ≤
+      (‖G‖ * ‖R‖) * ‖G + R‖ ^ 2 := by
+    calc
+      |RHLinalg.rtrace ((G * R) * (G + R) ^ 2)| ≤
+          ‖G * R‖ * ‖(G + R) ^ 2‖ :=
+        abs_rtrace_mul_le_frobenius (G * R) ((G + R) ^ 2)
+      _ ≤ (‖G‖ * ‖R‖) * ‖G + R‖ ^ 2 := by
+        gcongr
+        · exact Matrix.frobenius_norm_mul G R
+        · exact hpow2 (G + R)
+  have h3 : |RHLinalg.rtrace ((G ^ 2 * R) * (G + R))| ≤
+      (‖G‖ ^ 2 * ‖R‖) * ‖G + R‖ := by
+    calc
+      |RHLinalg.rtrace ((G ^ 2 * R) * (G + R))| ≤
+          ‖G ^ 2 * R‖ * ‖G + R‖ :=
+        abs_rtrace_mul_le_frobenius (G ^ 2 * R) (G + R)
+      _ ≤ (‖G‖ ^ 2 * ‖R‖) * ‖G + R‖ := by
+        gcongr
+        calc
+          ‖G ^ 2 * R‖ ≤ ‖G ^ 2‖ * ‖R‖ :=
+            Matrix.frobenius_norm_mul (G ^ 2) R
+          _ ≤ ‖G‖ ^ 2 * ‖R‖ := by
+            gcongr
+            exact hpow2 G
+  have h4 : |RHLinalg.rtrace (G ^ 3 * R)| ≤
+      ‖G‖ ^ 3 * ‖R‖ := by
+    calc
+      |RHLinalg.rtrace (G ^ 3 * R)| ≤ ‖G ^ 3‖ * ‖R‖ :=
+        abs_rtrace_mul_le_frobenius (G ^ 3) R
+      _ ≤ ‖G‖ ^ 3 * ‖R‖ := by
+        gcongr
+        exact hpow3 G
+  rw [← RHLinalg.rtrace_sub, hid, RHLinalg.rtrace_add,
+    RHLinalg.rtrace_add, RHLinalg.rtrace_add]
+  calc
+    |RHLinalg.rtrace (R * (G + R) ^ 3) +
+        RHLinalg.rtrace ((G * R) * (G + R) ^ 2) +
+        RHLinalg.rtrace ((G ^ 2 * R) * (G + R)) +
+        RHLinalg.rtrace (G ^ 3 * R)| ≤
+      |RHLinalg.rtrace (R * (G + R) ^ 3)| +
+        |RHLinalg.rtrace ((G * R) * (G + R) ^ 2)| +
+        |RHLinalg.rtrace ((G ^ 2 * R) * (G + R))| +
+        |RHLinalg.rtrace (G ^ 3 * R)| := by
+      let a := RHLinalg.rtrace (R * (G + R) ^ 3)
+      let b := RHLinalg.rtrace ((G * R) * (G + R) ^ 2)
+      let c := RHLinalg.rtrace ((G ^ 2 * R) * (G + R))
+      let d := RHLinalg.rtrace (G ^ 3 * R)
+      change |a + b + c + d| ≤ |a| + |b| + |c| + |d|
+      calc
+        |a + b + c + d| ≤ |a + b + c| + |d| := abs_add_le _ _
+        _ ≤ (|a + b| + |c|) + |d| := by
+          gcongr
+          exact abs_add_le _ _
+        _ ≤ (|a| + |b| + |c|) + |d| := by
+          gcongr
+          exact abs_add_le _ _
+    _ ≤ ‖R‖ * ‖G + R‖ ^ 3 +
+        (‖G‖ * ‖R‖) * ‖G + R‖ ^ 2 +
+        (‖G‖ ^ 2 * ‖R‖) * ‖G + R‖ +
+        ‖G‖ ^ 3 * ‖R‖ := by
+      linarith
+
+/-- The guarded/full quartic correction is controlled by one Frobenius
+copy of the remote matrix rather than four independent zero sums. -/
+theorem remoteCorrectionCyclicTrace4_abs_le_frobenius
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    |remoteCorrectionCyclicTrace4 F T| ≤
+      ‖remoteLatticeZeroMatrix F T‖ * ‖fullLatticeZeroMatrix F T‖ ^ 3 +
+        (‖guardedLatticeZeroMatrix F T‖ * ‖remoteLatticeZeroMatrix F T‖) *
+          ‖fullLatticeZeroMatrix F T‖ ^ 2 +
+        (‖guardedLatticeZeroMatrix F T‖ ^ 2 *
+          ‖remoteLatticeZeroMatrix F T‖) * ‖fullLatticeZeroMatrix F T‖ +
+        ‖guardedLatticeZeroMatrix F T‖ ^ 3 *
+          ‖remoteLatticeZeroMatrix F T‖ := by
+  rw [remoteCorrectionCyclicTrace4_eq_rtrace_sub]
+  have h := rtrace_pow_four_add_sub_bound
+    (guardedLatticeZeroMatrix F T) (remoteLatticeZeroMatrix F T)
+  rw [guardedZeroMatrix_add_remote_eq_full] at h
+  exact h
 
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
