@@ -63,6 +63,22 @@ theorem support19999_over_mu_lt_five :
     (19999 / 10000 : ℝ) / frozenMu < 5 := by
   norm_num [frozenMu]
 
+/-- The exact four-channel Hadamard frame clears the lower frozen ratio. -/
+theorem support14999_over_mu_lt_hadamard4_gain :
+    (14999 / 10000 : ℝ) / frozenMu <
+      (∑ j : Fin 4,
+        VirtualChannelMixer.hadamardMixer4 j 0) ^ 2 := by
+  rw [VirtualChannelMixer.hadamardMixer4_coherent_gain]
+  exact support14999_over_mu_lt_four
+
+/-- The exact rational five-channel frame clears the upper frozen ratio. -/
+theorem support19999_over_mu_lt_rational5_gain :
+    (19999 / 10000 : ℝ) / frozenMu <
+      (∑ j : Fin 5,
+        VirtualChannelMixer.rationalMixer5 j 0) ^ 2 := by
+  rw [VirtualChannelMixer.rationalMixer5_firstColumn_sum]
+  norm_num [frozenMu]
+
 /-- The previous three-channel attempt cannot carry the lower support ratio. -/
 theorem three_lt_support14999_over_mu :
     (3 : ℝ) < (14999 / 10000 : ℝ) / frozenMu := by
