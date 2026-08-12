@@ -2197,8 +2197,12 @@ theorem tendsto_virtualSymmetricFrequencyPartialSum
           virtualFrequencyPairTerm T L f z z' (n : ℤ) +
             virtualFrequencyPairTerm T L f z z' (-(n : ℤ) - 1))
         (∑' k : ℤ, virtualFrequencyPairTerm T L f z z' k) := by
-    simpa only [Int.reduceNegSucc] using
-      hsum.hasSum.nat_add_neg_add_one
+    have hbase := hsum.hasSum.nat_add_neg_add_one
+    convert hbase using 1
+    funext n
+    congr 1
+    push_cast
+    ring
   simpa only [virtualSymmetricFrequencyPartialSum,
     virtualFrequencyPairSum, virtualFrequencyPairTerm] using
       hpair.tendsto_sum_nat
