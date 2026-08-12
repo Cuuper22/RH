@@ -263,6 +263,96 @@ theorem SelectedVirtualQuarticLowerBound.toIsometric
       q (toIsometricData L) :=
   h.toMixed.toIsometric
 
+
+/-! ## Balanced routing across every virtual channel -/
+
+/-- A routed block grid: every retained block label is exactly one virtual
+channel together with one modulation label.  This replaces the impossible
+single-principal-channel allocation by a bijective distribution across all
+virtual tiles. -/
+structure RoutedGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : Layout F ι) where
+  labelCount : ℝ → ℕ
+  labelEquiv : ∀ T : ℝ,
+    Fin (F.blockDim T) ≃ ι × Fin (labelCount T)
+  selected_eq : ∀ (T : ℝ) (a : Fin (F.blockDim T)),
+    L.selected T a = (labelEquiv T a).1
+
+/-- The virtual atom addressed by a virtual-channel/modulation pair. -/
+def routedVirtualAtom
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (A : AtomFactorization L) (T : ℝ)
+    (r : ι) (k : Fin (G.labelCount T)) (ρ : ℂ) : ℂ :=
+  A.virtualAtom T r ((G.labelEquiv T).symm (r, k)) ρ
+
+/-- Pair sum after the routed block has been reindexed as the full virtual
+channel-by-label product. -/
+def routedVirtualPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (A : AtomFactorization L) (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ∑ r : ι, ∑ k : Fin (G.labelCount T),
+    routedVirtualAtom G A T r k ρ *
+      routedVirtualAtom G A T r k ρ'
+
+/-- Every channel-label pair is selected by its own inverse grid address. -/
+theorem RoutedGrid.selected_symm
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (T : ℝ) (r : ι) (k : Fin (G.labelCount T)) :
+    L.selected T ((G.labelEquiv T).symm (r, k)) = r := by
+  rw [G.selected_eq]
+  simp
+
+/-- Exact allocation redesign: the selected virtual pair kernel is the
+complete sum over every virtual tile and every modulation label.  No
+distinguished physical channel occurs in the statement. -/
+theorem selectedVirtualPairKernel_eq_routedGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} (G : RoutedGrid L)
+    (A : AtomFactorization L) (T : ℝ) (ρ ρ' : ℂ) :
+    selectedVirtualPairKernel A T ρ ρ' =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        routedVirtualPairSum G A T ρ ρ' := by
+  unfold selectedVirtualPairKernel routedVirtualPairSum
+  apply congrArg (fun w : ℂ =>
+    ((F.hatDenominator T)⁻¹ : ℂ) * w)
+  calc
+    (∑ a : Fin (F.blockDim T),
+      A.virtualAtom T (L.selected T a) a ρ *
+        A.virtualAtom T (L.selected T a) a ρ') =
+      ∑ a : Fin (F.blockDim T),
+        A.virtualAtom T ((G.labelEquiv T a).1) a ρ *
+          A.virtualAtom T ((G.labelEquiv T a).1) a ρ' := by
+      apply Finset.sum_congr rfl
+      intro a _
+      rw [G.selected_eq]
+    _ = ∑ rk : ι × Fin (G.labelCount T),
+        A.virtualAtom T rk.1 ((G.labelEquiv T).symm rk) ρ *
+          A.virtualAtom T rk.1 ((G.labelEquiv T).symm rk) ρ' := by
+      simpa using
+        (Equiv.sum_comp (G.labelEquiv T)
+          (fun rk : ι × Fin (G.labelCount T) =>
+            A.virtualAtom T rk.1 ((G.labelEquiv T).symm rk) ρ *
+              A.virtualAtom T rk.1
+                ((G.labelEquiv T).symm rk) ρ'))
+    _ = ∑ r : ι, ∑ k : Fin (G.labelCount T),
+        routedVirtualAtom G A T r k ρ *
+          routedVirtualAtom G A T r k ρ' := by
+      simp only [Fintype.sum_prod_type, routedVirtualAtom]
+
 end AlignedIsometricLayout
 end Zeta85
 end RH
