@@ -359,6 +359,57 @@ theorem rung9506_cumulative_aligned_canonical
   rung9506_cumulative_aligned_virtual hfull hzero L
     (AlignedIsometricLayout.canonicalAtomFactorization L) hvirtual
 
+/-! ## Literal aggregate energy-tail route -/
+
+/-- Frozen R-8686 from the exact literal block after summing complete channel
+lattices first and isolating one aggregate finite-grid tail. -/
+theorem rung8686_literal_energyTail
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hreg :
+      AggregateCoordinateFrame.PhysicalWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (htail.toIsometric hreg)
+
+/-- Frozen R-9506 from the same literal aggregate energy-tail coordinate. -/
+theorem rung9506_literal_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hreg :
+      AggregateCoordinateFrame.PhysicalWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (htail.toIsometric hreg)
+
+/-- Cumulative frozen R-9506 through the aggregate energy-tail route. -/
+theorem rung9506_cumulative_literal_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hreg :
+      AggregateCoordinateFrame.PhysicalWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_literal_energyTail hfull hzero hreg htail
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
 end Zeta85
 end RH
 
