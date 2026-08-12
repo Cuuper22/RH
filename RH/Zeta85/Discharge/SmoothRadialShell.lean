@@ -365,6 +365,27 @@ theorem shrinkingCoreBump_rOut_lt_halfPeriod
     (by norm_num : (0 : ℝ) < 2)]
   nlinarith
 
+/-- Away from the origin, the shrinking core cutoff is eventually
+identically zero. -/
+theorem shrinkingCoreBump_eventually_zero
+    (L : ℝ) (hL : 0 < L) (u : ℝ) (hu : u ≠ 0) :
+    ∀ᶠ n : ℕ in Filter.atTop, shrinkingCoreBump L n hL u = 0 := by
+  have huabs : 0 < |u| := abs_pos.mpr hu
+  obtain ⟨N, hN⟩ := exists_nat_gt (L / |u|)
+  have hNmul : L < (N : ℝ) * |u| :=
+    (div_lt_iff₀ huabs).1 hN
+  filter_upwards [eventually_ge_atTop N] with n hn
+  have hnR : (N : ℝ) ≤ (n : ℝ) := by
+    exact_mod_cast hn
+  have hfrac : L / ((n : ℝ) + 3) < |u| := by
+    apply (div_lt_iff₀ (by positivity : 0 < (n : ℝ) + 3)).2
+    have hmul :
+        (N : ℝ) * |u| ≤ ((n : ℝ) + 3) * |u| := by
+      nlinarith [mul_le_mul_of_nonneg_right hnR huabs.le]
+    exact lt_of_lt_of_le hNmul hmul
+  apply (shrinkingCoreBump L n hL).zero_of_le_dist
+  simpa [shrinkingCoreBump, Real.dist_eq] using hfrac.le
+
 /-- The explicit shrinking-window energy approximation to a normalized
 profile. -/
 def shrinkingProfileWindow
@@ -454,6 +475,16 @@ theorem shrinkingProfileShellWindow_outerRadius_lt
     (L : ℝ) (n : ℕ) (hL : 0 < L) :
     (shrinkingHalfPeriodBump L n hL).rOut < L / 2 :=
   shrinkingHalfPeriodBump_rOut_lt L n hL
+
+/-- Away from the origin, annular and centered energies are eventually
+literally equal. -/
+theorem shrinkingProfileShellWindow_sq_eventually_eq
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L) (u : ℝ) (hu : u ≠ 0) :
+    (fun n : ℕ => shrinkingProfileShellWindow v L n hL u ^ 2) =ᶠ[Filter.atTop]
+      (fun n : ℕ => shrinkingProfileWindow v L n hL u ^ 2) := by
+  filter_upwards [shrinkingCoreBump_eventually_zero L hL u hu] with n hzero
+  simp [shrinkingProfileShellWindow, shrinkingProfileWindow,
+    profiledShellWindow, hzero]
 
 /-- Every shrinking profiled window lies in the closed half-period, so every
 nonzero period translate has zero overlap. -/
@@ -613,6 +644,50 @@ theorem ae_tendsto_shrinkingProfileWindow_sq
     rw [abs_of_nonpos (le_of_not_ge hu)] at hb
     linarith
 
+
+/-- Except at the null origin and the two null endpoints, the annular
+energies converge to the same frozen supported profile. -/
+theorem tendsto_shrinkingProfileShellWindow_sq
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (u : ℝ) (hu : u ≠ 0) (hboundary : |u| ≠ L / 2) :
+    Tendsto
+      (fun n : ℕ => shrinkingProfileShellWindow v L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (@QuarticGramFamily.supportedFullProfile v (u / L))) := by
+  apply
+    (tendsto_shrinkingProfileWindow_sq
+      v L hL hposProfile u hboundary).congr'
+  exact
+    (shrinkingProfileShellWindow_sq_eventually_eq
+      v L hL u hu).symm
+
+/-- The annular energies converge almost everywhere to the frozen supported
+profile. -/
+theorem ae_tendsto_shrinkingProfileShellWindow_sq
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    ∀ᵐ u : ℝ ∂volume,
+      Tendsto
+        (fun n : ℕ => shrinkingProfileShellWindow v L n hL u ^ 2)
+        Filter.atTop
+        (nhds
+          (@QuarticGramFamily.supportedFullProfile v (u / L))) := by
+  filter_upwards [
+    volume.ae_ne (0 : ℝ),
+    volume.ae_ne (-L / 2),
+    volume.ae_ne (L / 2)
+  ] with u hzero hleft hright
+  apply tendsto_shrinkingProfileShellWindow_sq
+    v L hL hposProfile u hzero
+  intro hb
+  by_cases hu : 0 ≤ u
+  · apply hright
+    simpa [abs_of_nonneg hu] using hb
+  · apply hleft
+    rw [abs_of_nonpos (le_of_not_ge hu)] at hb
+    linarith
 
 /-! ## Frozen profile specializations -/
 
@@ -812,6 +887,51 @@ theorem shrinkingProfileWindow_sq_le_supportedFullProfile
         Set.indicator_of_not_mem hmem, hzero]
       norm_num
 
+/-- Every finite annular energy is bounded by the same frozen supported
+profile as its centered parent. -/
+theorem shrinkingProfileShellWindow_sq_le_supportedFullProfile
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (u : ℝ) :
+    0 ≤ shrinkingProfileShellWindow v L n hL u ^ 2 ∧
+      shrinkingProfileShellWindow v L n hL u ^ 2 ≤
+        @QuarticGramFamily.supportedFullProfile v (u / L) := by
+  have hbase :=
+    shrinkingProfileWindow_sq_le_supportedFullProfile
+      v L n hL hposProfile u
+  have hinner0 :
+      0 ≤ (shrinkingCoreBump L n hL) u :=
+    (shrinkingCoreBump L n hL).nonneg
+  have hinner1 :
+      (shrinkingCoreBump L n hL) u ≤ 1 :=
+    (shrinkingCoreBump L n hL).le_one
+  have hfactor :
+      (1 - (shrinkingCoreBump L n hL) u) ^ 2 ≤ 1 := by
+    have htwo :
+        0 ≤ 2 - (shrinkingCoreBump L n hL) u := by
+      linarith
+    have hprod :
+        0 ≤ (shrinkingCoreBump L n hL) u *
+          (2 - (shrinkingCoreBump L n hL) u) :=
+      mul_nonneg hinner0 htwo
+    nlinarith
+  have hmul :
+      shrinkingProfileWindow v L n hL u ^ 2 *
+          (1 - (shrinkingCoreBump L n hL) u) ^ 2 ≤
+        shrinkingProfileWindow v L n hL u ^ 2 := by
+    simpa only [mul_one] using
+      mul_le_mul_of_nonneg_left hfactor hbase.1
+  have hsquare :
+      shrinkingProfileShellWindow v L n hL u ^ 2 =
+        shrinkingProfileWindow v L n hL u ^ 2 *
+          (1 - (shrinkingCoreBump L n hL) u) ^ 2 := by
+    simp only [shrinkingProfileShellWindow, shrinkingProfileWindow,
+      profiledShellWindow, mul_pow]
+  rw [hsquare]
+  constructor
+  · exact mul_nonneg hbase.1 (sq_nonneg _)
+  · exact le_trans hmul hbase.2
+
 /-- Dominated convergence upgrades the pointwise construction to convergence
 of total physical energy. -/
 theorem tendsto_integral_shrinkingProfileWindow_sq
@@ -841,6 +961,37 @@ theorem tendsto_integral_shrinkingProfileWindow_sq
     simpa [Real.norm_eq_abs, abs_of_nonneg hbound.1] using hbound.2
   · exact
       ae_tendsto_shrinkingProfileWindow_sq
+        v L hL hposProfile
+
+/-- Dominated convergence gives total-energy convergence for the literal
+annular shells. -/
+theorem tendsto_integral_shrinkingProfileShellWindow_sq
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n : ℕ =>
+        ∫ u : ℝ, shrinkingProfileShellWindow v L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / L))) := by
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun u : ℝ =>
+      @QuarticGramFamily.supportedFullProfile v (u / L))
+  · intro n
+    exact
+      ((shrinkingProfileShellWindow_contDiff
+        v L n hL hv hposProfile).continuous.pow 2).aestronglyMeasurable
+  · exact integrable_supportedFullProfile_div v L hL hv
+  · intro n
+    filter_upwards [] with u
+    have hbound :=
+      shrinkingProfileShellWindow_sq_le_supportedFullProfile
+        v L n hL hposProfile u
+    simpa [Real.norm_eq_abs, abs_of_nonneg hbound.1] using hbound.2
+  · exact
+      ae_tendsto_shrinkingProfileShellWindow_sq
         v L hL hposProfile
 
 theorem tendsto_integral_frozen8686Window_sq
