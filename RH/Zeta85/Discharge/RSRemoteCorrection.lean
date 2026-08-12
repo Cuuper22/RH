@@ -683,4 +683,50 @@ theorem remoteCorrection_div_core_tendsto_zero
       field_simp [hNpos.ne']
       ring
 
+/-- The completed and guarded fourth traces therefore have the same
+dyadic-count-normalized limit. -/
+theorem full_sub_guarded_trace4_div_core_tendsto_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hprincipal : PrincipalCyclicBlock F)
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hRvM : RiemannVonMangoldt Z) (w c : ℝ)
+    (hadm : ∀ᶠ T in atTop,
+      AdmWindow (F.window T (F.distinguished T))
+        (F.period T (F.distinguished T)) w c)
+    (hhat : ∀ᶠ T in atTop, 1 ≤ F.hatDenominator T)
+    (hmass : (fun T => distinguishedWindowSobolevMassSix F T) =O[atTop]
+      Zeta23.l) :
+    Tendsto (fun T =>
+      (fullLatticeZeroKernelCyclicTrace4 F T -
+        QuarticTransfer.guardedZeroKernelCyclicTrace4 F T) /
+          (Z.N T (2 * T) : ℝ)) atTop (nhds 0) := by
+  have hcorr := remoteCorrection_div_core_tendsto_zero
+    hprincipal htail hRvM w c hadm hhat hmass
+  apply hcorr.congr'
+  filter_upwards [] with T
+  have htrace := guardedCyclicTrace4_add_remoteCorrection_eq_full F T
+  rw [← htrace]
+  ring
+
+theorem full_div_core_sub_guarded_div_core_tendsto_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hprincipal : PrincipalCyclicBlock F)
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hRvM : RiemannVonMangoldt Z) (w c : ℝ)
+    (hadm : ∀ᶠ T in atTop,
+      AdmWindow (F.window T (F.distinguished T))
+        (F.period T (F.distinguished T)) w c)
+    (hhat : ∀ᶠ T in atTop, 1 ≤ F.hatDenominator T)
+    (hmass : (fun T => distinguishedWindowSobolevMassSix F T) =O[atTop]
+      Zeta23.l) :
+    Tendsto (fun T =>
+      fullLatticeZeroKernelCyclicTrace4 F T / (Z.N T (2 * T) : ℝ) -
+        QuarticTransfer.guardedZeroKernelCyclicTrace4 F T /
+          (Z.N T (2 * T) : ℝ)) atTop (nhds 0) := by
+  simpa only [sub_div] using
+    full_sub_guarded_trace4_div_core_tendsto_zero
+      hprincipal htail hRvM w c hadm hhat hmass
+
 end RH.Zeta85.RSPoissonCyclicBridge
