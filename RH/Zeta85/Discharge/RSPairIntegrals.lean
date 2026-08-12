@@ -1403,8 +1403,8 @@ theorem rsMainTerm_k4_eq_mu_mul_quarticRSScalar
     normalizedRSMainTerm_k4_eq_quarticRSScalar mu r hmu hr hrc
   change rsMainTerm (weightedCyclicSymbol (k := 4) mu r) / (mu : ℂ) =
     (quarticRSScalar mu r : ℂ) at h
-  have hmuC : (mu : ℂ) ≠ 0 := by
-    exact_mod_cast hmu.ne'
+  have hmuC : (mu : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr hmu.ne'
   have hm := (div_eq_iff hmuC).mp h
   simpa [mul_comm] using hm
 
@@ -1443,7 +1443,8 @@ theorem RS1996ZetaInputs.unitIntervalQuartic_evaluated
   intro T hT
   obtain ⟨hSummable, hBound⟩ := hRS T hT
   refine ⟨hSummable, ?_⟩
-  simpa only [unitIntervalProfile_rsMainTerm] using hBound
+  rw [unitIntervalProfile_rsMainTerm] at hBound
+  exact hBound
 
 
 /-- The four-point theorem for an arbitrary smooth unit-interval profile,
