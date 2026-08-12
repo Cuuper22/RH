@@ -414,6 +414,41 @@ theorem hasSum_paperFT_mul_paperFT_alias
   rw [hG]
   rw [fourier_complexGaux_general hL hΛ hφ.continuous hsupp]
 
+/-- Every compactly supported complex window admits a nonnegative symmetric
+support radius.  This removes an arbitrary radius witness from downstream
+Poisson applications. -/
+theorem exists_nonneg_support_abs_bound
+    {φ : ℝ → ℂ} (hcompact : HasCompactSupport φ) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧ ∀ u, Λ < |u| → φ u = 0 := by
+  obtain ⟨r, hr⟩ := hcompact.isCompact.isBounded.subset_closedBall 0
+  refine ⟨max r 0, le_max_right _ _, ?_⟩
+  intro u hu
+  apply image_eq_zero_of_notMem_tsupport
+  intro hut
+  have hur := hr hut
+  rw [Metric.mem_closedBall, Real.dist_0_eq_abs] at hur
+  have hle : |u| ≤ max r 0 := hur.trans (le_max_left _ _)
+  exact (not_lt_of_ge hle) hu
+
+/-- Full complex Poisson summation stated directly for a compactly supported
+window, with the support radius chosen internally. -/
+theorem hasSum_paperFT_mul_paperFT_alias_of_hasCompactSupport
+    {φ : ℝ → ℂ} {L T : ℝ}
+    (hL : 0 < L)
+    (hφ : ContDiff ℝ 2 φ)
+    (hcompact : HasCompactSupport φ)
+    (z z' : ℂ) :
+    Summable (complexPoissonAliasTerm φ L T z z') ∧
+      HasSum
+        (fun k : ℤ =>
+          paperFT φ
+              (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+            paperFT φ
+              (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)))
+        (∑' m : ℤ, complexPoissonAliasTerm φ L T z z' m) := by
+  obtain ⟨Λ, hΛ, hsupp⟩ := exists_nonneg_support_abs_bound hcompact
+  exact hasSum_paperFT_mul_paperFT_alias hL hΛ hφ hsupp z z'
+
 end Poisson
 end Zeta23
 
