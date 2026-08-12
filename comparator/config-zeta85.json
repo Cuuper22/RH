@@ -9,13 +9,24 @@
     "zeta85_simple_on_critical_line",
     "zeta85_simple_on_critical_line_cumulative",
     "zeta85_eighty_five_percent",
-    "zeta85_eighty_five_percent_cumulative"
+    "zeta85_eighty_five_percent_cumulative",
+    "zeta85_rung_8657",
+    "zeta85_rung_8657_cumulative",
+    "zeta85_rung_8686",
+    "zeta85_rung_8686_cumulative",
+    "zeta85_rung_9383",
+    "zeta85_rung_9383_cumulative",
+    "zeta85_rung_9506",
+    "zeta85_rung_9506_cumulative"
   ],
   "permitted_axioms": [
     "propext",
     "Quot.sound",
     "Classical.choice",
-    "RH.Zeta85.Hypotheses.shiu_majorant"
+    "RH.Zeta85.Hypotheses.shiu_majorant",
+    "RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4",
+    "RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2",
+    "RH.Zeta85.Hypotheses.traceTransfer_saturated"
   ],
   "enable_nanoda": true
 }

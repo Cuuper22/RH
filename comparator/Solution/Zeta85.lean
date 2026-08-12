@@ -4,10 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-comparator/Solution/Zeta85.lean — SOLUTION for the topic `Zeta85`: the same eight statements as
+comparator/Solution/Zeta85.lean — SOLUTION for the topic `Zeta85`: the same sixteen statements as
 `comparator/Challenge/Zeta85.lean`, byte-for-byte, delegated to `RH.Zeta85`.
 
-Conditional: these proofs use the four axioms of `RH/Zeta85/Hypotheses.lean` in addition to
+Conditional: these proofs use the single custom axiom of `RH/Zeta85/Hypotheses.lean` in addition to
 `propext`, `Classical.choice`, `Quot.sound`.  `comparator/config-zeta85.json` lists them; the exact
 per-theorem dependency is in `AXIOMS.md`.
 -/
@@ -64,5 +64,53 @@ theorem zeta85_eighty_five_percent :
 theorem zeta85_eighty_five_percent_cumulative :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (17 / 20 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T :=
   RH.Zeta85.eightyFive_cumulative
+
+theorem zeta85_rung_8657 :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (865674254456636 / 1000000000000000 - ε) *
+        (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) :=
+  RH.Zeta85.rung8657_from_shiu_contradiction
+
+theorem zeta85_rung_8657_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (865674254456636 / 1000000000000000 - ε) *
+        (Ncount 0 T : ℝ) ≤ N0simple 0 T :=
+  RH.Zeta85.rung8657_cumulative_from_shiu_contradiction
+
+theorem zeta85_rung_8686 :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (86855250 / 100000000 - ε) *
+        (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) :=
+  RH.Zeta85.rung8686_from_shiu_contradiction
+
+theorem zeta85_rung_8686_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (86855250 / 100000000 - ε) *
+        (Ncount 0 T : ℝ) ≤ N0simple 0 T :=
+  RH.Zeta85.rung8686_cumulative_from_shiu_contradiction
+
+theorem zeta85_rung_9383 :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (938313327050949 / 1000000000000000 - ε) *
+        (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) :=
+  RH.Zeta85.rung9383_from_shiu_contradiction
+
+theorem zeta85_rung_9383_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (938313327050949 / 1000000000000000 - ε) *
+        (Ncount 0 T : ℝ) ≤ N0simple 0 T :=
+  RH.Zeta85.rung9383_cumulative_from_shiu_contradiction
+
+theorem zeta85_rung_9506 :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (95063832187565 / 100000000000000 - ε) *
+        (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) :=
+  RH.Zeta85.rung9506_from_shiu_contradiction
+
+theorem zeta85_rung_9506_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (95063832187565 / 100000000000000 - ε) *
+        (Ncount 0 T : ℝ) ≤ N0simple 0 T :=
+  RH.Zeta85.rung9506_cumulative_from_shiu_contradiction
 
 end

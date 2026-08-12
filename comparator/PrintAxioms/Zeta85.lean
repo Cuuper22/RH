@@ -4,10 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-Axiom audit for the conditional 85 % topic.  Unlike the other `PrintAxioms` files, the expected
-output is NOT the three standard axioms: each line additionally lists a subset of the four axioms of
-`RH/Zeta85/Hypotheses.lean`.  `AXIOMS.md` reproduces the output verbatim with the provenance of every
-axiom.
+Axiom audit for every frozen extension headline through R-9506.
 -/
 import Solution.Zeta85
 
@@ -19,11 +16,11 @@ import Solution.Zeta85
 #print axioms zeta85_simple_on_critical_line_cumulative
 #print axioms zeta85_eighty_five_percent
 #print axioms zeta85_eighty_five_percent_cumulative
-#print axioms RH.Zeta85.rung8657_from_shiu_contradiction
-#print axioms RH.Zeta85.rung8657_cumulative_from_shiu_contradiction
-#print axioms RH.Zeta85.rung8686_from_shiu_contradiction
-#print axioms RH.Zeta85.rung8686_cumulative_from_shiu_contradiction
-#print axioms RH.Zeta85.rung9383_from_shiu_contradiction
-#print axioms RH.Zeta85.rung9383_cumulative_from_shiu_contradiction
-#print axioms RH.Zeta85.rung9506_from_shiu_contradiction
-#print axioms RH.Zeta85.rung9506_cumulative_from_shiu_contradiction
+#print axioms zeta85_rung_8657
+#print axioms zeta85_rung_8657_cumulative
+#print axioms zeta85_rung_8686
+#print axioms zeta85_rung_8686_cumulative
+#print axioms zeta85_rung_9383
+#print axioms zeta85_rung_9383_cumulative
+#print axioms zeta85_rung_9506
+#print axioms zeta85_rung_9506_cumulative
