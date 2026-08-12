@@ -42,6 +42,7 @@ theorem shiftAlias_eq_period_mul_complexAlias
     QuarticGramFamily.complexAliasTerm, sub_eq_add_neg]
   push_cast
   ring_nf
+  simp only [sub_eq_add_neg, add_comm]
 
 /-- The full complex-frequency lattice sum for one even compact physical
 channel, stated directly using the family complex alias term. -/
@@ -856,7 +857,7 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
             F.period T (F.distinguished T) : ℝ) : ℂ) *
             distinguishedFrequencyPairTail F T ρ ρ' := by
   filter_upwards [
-    hblock.eventually_zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail,
+    eventually_zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail hblock,
     hblock.periods_pos,
     hΛ, hsmooth, hsupp, heven, hgap
   ] with T hkernel hperiod hΛT hsmoothT hsuppT hevenT hgapT
@@ -1307,9 +1308,11 @@ theorem distinguishedBlockLabel_bijective
     subst j
     subst j'
     have hval := congrArg Fin.val hii
-    have hkk : k = k' := by
-      apply Fin.ext
-      simpa only [distinguishedBlockLabel, hai, hai'] using hval
+    change
+      (F.columnAddress T (F.blockEmbedding T i)).2.val =
+        (F.columnAddress T (F.blockEmbedding T i')).2.val at hval
+    rw [hai, hai'] at hval
+    have hkk : k = k' := Fin.ext hval
     subst k'
     rfl
   · intro k
@@ -1910,7 +1913,8 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
   have hsmoothR :
       ContDiff ℝ 2
         (F.window T (F.distinguished T)) :=
-    (hsmooth (F.distinguished T)).of_le (by exact le_top)
+    (hsmooth (F.distinguished T)).of_le
+      (show (2 : WithTop ℕ) ≤ ⊤ from le_top)
   have hsmoothC :
       ContDiff ℝ 2
         (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
@@ -2053,6 +2057,7 @@ theorem virtualShiftAlias_eq_period_mul
     virtualComplexAliasTerm, sub_eq_add_neg]
   push_cast
   ring_nf
+  simp only [sub_eq_add_neg, add_comm]
 
 /-- Complex Poisson summation stated entirely in virtual-window
 coordinates. -/
