@@ -2253,11 +2253,22 @@ theorem tendsto_virtualNormalizedSymmetricFrequencyPartialSum_energy
               Complex.exp (Complex.I * (z - z') * (u : ℂ)))) := by
   have hL0 : (L : ℂ) ≠ 0 := by
     exact_mod_cast hL.ne'
-  have ht :=
+  have ht :
+      Tendsto
+        (fun n =>
+          (fullLength : ℂ) / (L : ℂ) *
+            virtualSymmetricFrequencyPartialSum T L f z z' n)
+        Filter.atTop
+        (nhds
+          (((fullLength : ℂ) / (L : ℂ)) *
+            ((L : ℂ) *
+              ∫ u : ℝ,
+                (f u : ℂ) * f u *
+                  Complex.exp
+                    (Complex.I * (z - z') * (u : ℂ))))) :=
     tendsto_const_nhds.mul
       (tendsto_virtualSymmetricFrequencyPartialSum_energy
         T L Λ f hL hΛ hsmooth hsupp heven hhalf z z')
-      ((fullLength : ℂ) / (L : ℂ))
   convert ht using 1
   rw [mul_assoc, div_mul_cancel₀ _ hL0]
 
