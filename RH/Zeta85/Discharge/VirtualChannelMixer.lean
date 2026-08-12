@@ -472,6 +472,18 @@ theorem rationalMixer3_coherent_gain :
   rw [rationalMixer3_firstColumn_sum]
   norm_num
 
+
+/-- The identity mixer exists at every finite channel count. -/
+def identityData (n : ℕ) : Data (Fin n) where
+  matrix := 1
+  orthogonal := by simp
+
+/-- The four-channel identity supplies an exact label-preserving dilation. -/
+def identityData4 : Data (Fin 4) := identityData 4
+
+/-- The five-channel identity supplies an exact label-preserving dilation. -/
+def identityData5 : Data (Fin 5) := identityData 5
+
 /-- The four-channel Walsh-Hadamard mixer, normalized by one half. -/
 def hadamardMixer4 : Matrix (Fin 4) (Fin 4) ℝ :=
   ![![1 / 2, 1 / 2, 1 / 2, 1 / 2],
