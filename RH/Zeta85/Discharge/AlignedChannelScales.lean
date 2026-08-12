@@ -6,6 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 import RH.Zeta85.Discharge.VirtualChannelMixer
 
+open scoped BigOperators
+
 /-!
 # Exact aligned-channel scales
 
