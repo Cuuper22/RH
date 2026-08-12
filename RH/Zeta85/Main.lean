@@ -26,6 +26,8 @@ import RH.Zeta85.Hypotheses
 import RH.Zeta85.Discharge.AliasFallback
 import RH.Zeta85.Discharge.AliasRankObstruction
 import RH.Zeta85.Discharge.ActualScaleBBLR
+import RH.Zeta85.Discharge.AggregateBlock
+import RH.Zeta85.Discharge.ReducedQuartic
 import RH.Zeta85.Discharge.PreMajorantDI
 import RH.Zeta85.Discharge.BBLRGCDAllocation
 import RH.Zeta85.Discharge.EtaClosure
