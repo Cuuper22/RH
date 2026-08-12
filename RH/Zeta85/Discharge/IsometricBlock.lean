@@ -639,7 +639,7 @@ theorem quarticTraceNumerator_eq_uncentered
         1 by
           noncomm_ring]
   simp only [rtrace_add, rtrace_sub, hone]
-  ring_nf
+  ring
 
 /-- The raw mixed-block numerator is the generic explicit cyclic trace
 functional already used by the zero-kernel route. -/
