@@ -42,6 +42,9 @@ jobs:
       - name: Compile radial shell aliases
         run: lake env lean RH/Zeta85/Discharge/RadialShellAlias.lean
 
+      - name: Compile radial shell family bridge
+        run: lake env lean RH/Zeta85/Discharge/RadialShellFamily.lean
+
       - name: Compile collective synthesis bridge
         run: lake env lean RH/Zeta85/Discharge/AggregateSynthesisBridge.lean
 
