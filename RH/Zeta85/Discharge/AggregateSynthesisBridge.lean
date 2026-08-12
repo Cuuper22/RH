@@ -217,6 +217,51 @@ theorem literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail_collectiv
   rw [coordinateEnergySum_eq_fullLength_windowEnergy_collective
     h T hfull]
 
+
+/-- If the constructed channel energy is the frozen physical profile almost
+everywhere, the collective literal kernel is exactly that profile transform
+minus the one finite-grid tail. -/
+theorem literalCoordinateEnergyTailPairKernel_eq_supportedProfile_sub_tail_collective
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : CollectiveWindowRegularity F)
+    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (henergy :
+      ∀ᵐ u : ℝ,
+        F.windowEnergy T u =
+          F.supportedFullProfile (u / F.fullLength T))
+    (ρ ρ' : ℂ) :
+    literalCoordinateEnergyTailPairKernel F T ρ ρ' =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        ((F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.supportedFullProfile
+                  (u / F.fullLength T) : ℂ) *
+                Complex.exp
+                  (Complex.I *
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          coordinateFrequencyTail
+            (literalBlockSelection F) T ρ ρ') := by
+  rw [
+    literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail_collective
+      h T hfull]
+  have hint :
+      (∫ u : ℝ,
+        (F.windowEnergy T u : ℂ) *
+          Complex.exp
+            (Complex.I *
+              (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
+        ∫ u : ℝ,
+          (F.supportedFullProfile
+              (u / F.fullLength T) : ℂ) *
+            Complex.exp
+              (Complex.I *
+                (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+    apply integral_congr_ae
+    filter_upwards [henergy] with u hu
+    rw [hu]
+  rw [hint]
+
 /-- The selected finite physical grid is the collectively evaluated energy
 minus the same one aggregate frequency tail. -/
 theorem coordinateSelectedFrequencyGrid_eq_energy_sub_tail_collective
