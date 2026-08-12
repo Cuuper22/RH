@@ -20,7 +20,6 @@
     "RH.Zeta85.Hypotheses.shiu_majorant",
     "RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4",
     "RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2",
-    "RH.Zeta85.Hypotheses.windowCost_101",
     "RH.Zeta85.Hypotheses.windowCost_125",
     "RH.Zeta85.Hypotheses.traceTransfer_saturated"
   ],

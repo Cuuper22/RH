@@ -9,7 +9,7 @@ RH/Zeta85/Main.lean — **Phase D**: the three rungs, assembled.
 Given `RH/Zeta85/Hypotheses.lean`, everything here is proved.  The chain, for each rung, is
 
   window cost `D` at support `σ`   (Phase A for `σ = 143/100`; Axioms 6/7 for the other two)
-    ── Axiom 8 (trace transfer) ──►  `TwoTraceCert zetaZeroConfig D`
+    ── Axiom 7 (trace transfer) ──►  `TwoTraceCert zetaZeroConfig D`
     ── `RH.Zeta85.epsForm_of_twoTraceCert` ──►  `(2 − D − ε)·N(T,2T) ≤ N₀ˢ(T,2T)` eventually
     ── `Zeta23.cumulative_of_dyadic` ──►  the same for the windows `(0,T]`.
 
@@ -88,8 +88,8 @@ private theorem cumulative {c : ℝ}
 /-! ## 1. Rung 1 — support 101/100, at least 0.67924886307 -/
 
 /-- The two-trace certificate at support `101/100`.
-Axioms: `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`,
-`traceTransfer_saturated`. -/
+Axioms: `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, and
+`traceTransfer_saturated`.  The window cost is proved. -/
 theorem cert101 : TwoTraceCert zetaZeroConfig (2 - cRung101) :=
   traceTransfer_saturated (101 / 100) (2 - cRung101) (by norm_num) (by norm_num)
     windowCost_101
@@ -106,9 +106,8 @@ theorem rung101_cumulative : Rung101_cumulative_statement := cumulative rung101
 /-! ## 2. Rung 2 — support 5/4, at least 0.79721415286134 -/
 
 /-- The two-trace certificate at a support just below `5/4`.
-Axioms: `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`,
-`traceTransfer_saturated` — the same four as rung 1, with `windowCost_101` replaced by
-`windowCost_125`. -/
+Axioms: `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`, and
+`traceTransfer_saturated`. -/
 theorem cert125 : TwoTraceCert zetaZeroConfig (2 - cRung125) := by
   obtain ⟨σ, hσ1, hσ2, hσw⟩ := windowCost_125
   exact traceTransfer_saturated σ (2 - cRung125) hσ1 (by linarith) hσw

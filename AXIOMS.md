@@ -384,15 +384,13 @@ or theorem statement changes.
  Quot.sound,
  RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated,
- RH.Zeta85.Hypotheses.windowCost_101]
+ RH.Zeta85.Hypotheses.traceTransfer_saturated]
 'zeta85_rung_support_101_over_100_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated,
- RH.Zeta85.Hypotheses.windowCost_101]
+ RH.Zeta85.Hypotheses.traceTransfer_saturated]
 ```
 
 ### 1.2 The 0.797 theorem (support 5/4)
@@ -865,7 +863,7 @@ dc99b510fdf1966f11535bf57a3dc53f4056c679e0275c8a649c01facf5f3bdf  verify/quartic
 | rung | constant | axioms it depends on | count |
 |---|---|---:|---:|
 | base (Zeta23, Theorem D) | 2 − 1/c₁* = 0.6725007… | — | **0** |
-| 1 | 0.67924886307 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`, `traceTransfer_saturated` | **4** |
+| 1 | 0.67924886307 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **3** |
 | 2 | 0.79721415286134 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`, `traceTransfer_saturated` | **4** |
 | 3 | 1893603832049143/2227707598259143 = 0.8500235101… | `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated` | **4** |
 
@@ -894,14 +892,15 @@ The counts coincide but the **contents differ**, and that is the point:
   the published BBLR bound.  Rung 3's window cost is **not** an axiom: `RH.Zeta85.windowCost_143` is
   proved from the exact rational moments of `RH/Zeta85/Window.lean`.
 
-Two of the eight axioms (`bblr_error_bound`, `bblr_poisson_blocks`) are published literature; three
+Two of the seven axioms (`bblr_error_bound`, `bblr_poisson_blocks`) are published literature; three
 (`shiu_majorant`, `signedPair_traceGrade_lt_5_4`, `signedPair_traceGrade_lt_3_2`) are the run's
-arithmetic claims; two (`windowCost_101`, `windowCost_125`) are the run's numerical certificates for
-transcendental windows; one (`traceTransfer_saturated`) is the support-beyond-one trace evaluation.
+arithmetic claims; one (`windowCost_125`) is the remaining numerical certificate for a
+transcendental window; one (`traceTransfer_saturated`) is the support-beyond-one trace evaluation.
+The support-`101/100` cost is now proved by `RH.Zeta85.Window101.windowCost_101_proved`.
 
 ---
 
-## 3. The eight axioms, with provenance
+## 3. The seven axioms, with provenance
 
 Full docstrings — exact mathematical statement, source, and why not discharged — are in
 [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean); they are reproduced here in condensed form.
@@ -1013,23 +1012,19 @@ the aggregate criterion `(AS)` holds at every fixed connected support `1 < σ = 
    `1893603832049143/2227707598259143`, and this axiom states exactly the blocking statement at the
    strength the transfer consumes.
 
-### Axiom 6 — `windowCost_101 : SaturatedWindowCost (101/100) (2 − cRung101)`
+### Proved discharge — `windowCost_101 : SaturatedWindowCost (101/100) (2 − cRung101)`
 
-*Status:* **[RUN CLAIM: `docs/run/07_root_gain_support_1p01.md`, "Explicit numerical certificate",
-undischarged]**.
+*Status:* **PROVED IN LEAN** by `RH.Zeta85.Window101.windowCost_101_proved`.
 
-*Statement.*  At `λ = 101/100` with `v(s) = cos(√2 s)` on `[−1/2,1/2]` and `K_λ(s,t) = min(λ|s−t|,1)`:
-`I₁ = 2sin(√2/2)/√2`, `I₂ = 1/2 + sin√2/(2√2)`, `J_λ = 2λ∫₀^{1/λ}d·A(d)dd + 2∫_{1/λ}^1 A(d)dd` with
-`A(d) = ((1−d)/2)cos(√2 d) + sin(√2(1−d))/(2√2)`, and
-`D_{1.01}(v) = (I₂ + λJ_λ)/(λI₁²) = 1.32075113693…`, so `2 − D = 0.67924886307…`.  The axiom asserts
-the cost at the **truncated** decimal, which is the weaker assertion.
+*Construction.*  The exact degree-six rational profile
+`1 - s² + s⁴/6 - s⁶/90 + d` is strictly positive on the normalized window.  Lean computes its
+area, square integral, and saturated autocorrelation exactly.  The exact cost defect has opposite
+signs at `d = 0` and `d = 1/100000`; the intermediate value theorem supplies a nonnegative `d`
+whose cost is exactly the frozen rational target.
 
-*Why not discharged.*  The window is transcendental; a rational bound to twelve significant figures
-requires certified interval arithmetic on `sin`/`cos` at `√2`, which Mathlib's `norm_num` extensions
-do not provide.  Verified numerically outside Lean (`FINDINGS.md` §4): the computed value is
-`2 − D = 0.6792488630700078…`, so the truncation is on the safe side.
+It therefore no longer appears in the compiler's axiom output.
 
-### Axiom 7 — `windowCost_125 : ∃ σ, 1 < σ ∧ σ < 5/4 ∧ SaturatedWindowCost σ (2 − cRung125)`
+### Axiom 6 — `windowCost_125 : ∃ σ, 1 < σ ∧ σ < 5/4 ∧ SaturatedWindowCost σ (2 − cRung125)`
 
 *Status:* **[RUN CLAIM: `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §3, equations
 (11)–(16); same numbers at `docs/run/03_arithmetic_cycle3.md` §5 (32)–(37); undischarged]**.
@@ -1041,12 +1036,12 @@ do not provide.  Verified numerically outside Lean (`FINDINGS.md` §4): the comp
 `D*_{5/4} = 1.20278584713866…`, `2 − D*_{5/4} = 0.79721415286134…`.  Since `σ ↑ 5/4` is a limit, the
 axiom asserts the cost at *some* fixed `σ ∈ (1, 5/4)` and at the truncated decimal.
 
-*Why not discharged.*  As Axiom 6, plus: the profile is characterised as the solution of an integral
+*Why not discharged.*  The transcendental profile is characterised as the solution of an integral
 equation, so discharging it also requires proving that the displayed function *is* that solution.
 Verified numerically outside Lean (`FINDINGS.md` §4): the Euler equation holds to `1·10⁻⁹` uniformly
 on the support, and `2 − D = 0.7972141529233692…`, so the truncation is on the safe side.
 
-### Axiom 8 — `traceTransfer_saturated : ∀ σ D, 1 < σ → σ < 3/2 → SaturatedWindowCost σ D → SignedPairTraceGrade σ → TwoTraceCert zetaZeroConfig D`
+### Axiom 7 — `traceTransfer_saturated : ∀ σ D, 1 < σ → σ < 3/2 → SaturatedWindowCost σ D → SignedPairTraceGrade σ → TwoTraceCert zetaZeroConfig D`
 
 *Status:* **[RUN CLAIM: `docs/run/01_arithmetic_cycle1.md` §2 (5)–(9),
 `docs/run/01_certificate_cycle1.md` (5)–(6), `docs/run/02_arithmetic_cycle2.md` §1,
