@@ -513,7 +513,7 @@ theorem strict_transfer_9506 :
   rw [hid]
   exact Terminal9506.density_gt_frozen
 
-/-- Support `14999/10000`: the four explicit analytic structures imply the
+/-- Support `14999/10000`: the three explicit analytic structures imply the
 frozen R-8686 epsilon form. -/
 theorem eps_transfer_8686
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
@@ -527,12 +527,12 @@ theorem eps_transfer_8686
         Terminal8686.costUpper := by
     rw [profileSaturatedCost_v8686]
     exact QuarticWindowWitnesses.D8686_lt.le
-  exact asymptotic_eps_transfer hRvM hfull hzero hr1a
-    Terminal8686.dual hscore Terminal8686.cap Terminal8686.costUpper
+  exact asymptotic_eps_transfer hRvM hfull hzero
+    Terminal8686.dual hweighted Terminal8686.cap Terminal8686.costUpper
     (86855250 / 100000000) Terminal8686.dual_feasible
     Terminal8686.cap_slope hcost strict_transfer_8686
 
-/-- Support `19999/10000`: the four explicit analytic structures imply the
+/-- Support `19999/10000`: the three explicit analytic structures imply the
 frozen R-9506 epsilon form. -/
 theorem eps_transfer_9506
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
@@ -547,8 +547,8 @@ theorem eps_transfer_9506
         Terminal9506.costUpper := by
     rw [profileSaturatedCost_v9506]
     exact QuarticWindowWitnesses.D9506_lt.le
-  exact asymptotic_eps_transfer hRvM hfull hzero hr1a
-    Terminal9506.dual hscore Terminal9506.cap Terminal9506.costUpper
+  exact asymptotic_eps_transfer hRvM hfull hzero
+    Terminal9506.dual hweighted Terminal9506.cap Terminal9506.costUpper
     (95063832187565 / 100000000000000) Terminal9506.dual_feasible
     Terminal9506.cap_slope hcost strict_transfer_9506
 
@@ -621,7 +621,7 @@ theorem zeta_eps_transfer_8686
   simpa only [zeta_N, zeta_N0s] using
     (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero hweighted)
 
-/-- Concrete-zeta R-9506 epsilon form, conditional only on the four explicit
+/-- Concrete-zeta R-9506 epsilon form, conditional only on the three explicit
 per-support structures. -/
 theorem zeta_eps_transfer_9506
     {F : Family19999 zetaZeroConfig}
