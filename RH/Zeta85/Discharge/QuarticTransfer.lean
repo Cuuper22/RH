@@ -231,6 +231,29 @@ theorem block_apply_eq_zeroEntry
     F.block T i j = blockZeroEntry F T i j := by
   rfl
 
+/-- One summand after replacing the finite-support notation by the canonical
+finite set of enlarged-window zeros. -/
+def blockZeroSummand
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (i j : Fin (F.blockDim T)) (ρ : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) *
+    ((Z.mult ρ : ℂ) *
+      F.atom T (F.blockEmbedding T i) ρ *
+      F.atom T (F.blockEmbedding T j) ρ)
+
+theorem blockZeroEntry_eq_finsetSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (i j : Fin (F.blockDim T)) :
+    blockZeroEntry F T i j =
+      ∑ ρ in ZeroSide.ZI Z T, blockZeroSummand F T i j ρ := by
+  unfold blockZeroEntry blockZeroSummand
+  rw [finsum_mem_eq_finite_toFinset_sum _
+    (ZeroSide.ZIprime_finite Z T)]
+  rw [Finset.mul_sum]
+  rfl
+
 /-- Cyclic sums after every block entry has been replaced by its literal
 finite zero sum. -/
 def zeroCyclicTrace1
@@ -261,6 +284,74 @@ def zeroCyclicTrace4
     (∑ l : Fin (F.blockDim T),
       blockZeroEntry F T j l * blockZeroEntry F T l i))
 
+/-- Fully expanded cyclic zero-tuple sums. -/
+def zeroTupleCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    ∑ ρ in ZeroSide.ZI Z T, blockZeroSummand F T i i ρ)
+
+def zeroTupleCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
+    ∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
+      blockZeroSummand F T i j ρ₁ *
+        blockZeroSummand F T j i ρ₂)
+
+def zeroTupleCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
+    ∑ k : Fin (F.blockDim T),
+      ∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
+        ∑ ρ₃ in ZeroSide.ZI Z T,
+          (blockZeroSummand F T i k ρ₁ *
+            blockZeroSummand F T k j ρ₂) *
+              blockZeroSummand F T j i ρ₃)
+
+def zeroTupleCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
+    ∑ k : Fin (F.blockDim T), ∑ l : Fin (F.blockDim T),
+      ∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
+        ∑ ρ₃ in ZeroSide.ZI Z T, ∑ ρ₄ in ZeroSide.ZI Z T,
+          (blockZeroSummand F T i k ρ₁ *
+            blockZeroSummand F T k j ρ₂) *
+          (blockZeroSummand F T j l ρ₃ *
+            blockZeroSummand F T l i ρ₄))
+
+theorem zeroCyclicTrace1_eq_tuple
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    zeroCyclicTrace1 F T = zeroTupleCyclicTrace1 F T := by
+  simp [zeroCyclicTrace1, zeroTupleCyclicTrace1,
+    blockZeroEntry_eq_finsetSum]
+
+theorem zeroCyclicTrace2_eq_tuple
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    zeroCyclicTrace2 F T = zeroTupleCyclicTrace2 F T := by
+  simp [zeroCyclicTrace2, zeroTupleCyclicTrace2,
+    blockZeroEntry_eq_finsetSum, Finset.sum_mul, Finset.mul_sum]
+
+theorem zeroCyclicTrace3_eq_tuple
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    zeroCyclicTrace3 F T = zeroTupleCyclicTrace3 F T := by
+  simp [zeroCyclicTrace3, zeroTupleCyclicTrace3,
+    blockZeroEntry_eq_finsetSum, Finset.sum_mul, Finset.mul_sum,
+    mul_assoc]
+
+theorem zeroCyclicTrace4_eq_tuple
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    zeroCyclicTrace4 F T = zeroTupleCyclicTrace4 F T := by
+  simp [zeroCyclicTrace4, zeroTupleCyclicTrace4,
+    blockZeroEntry_eq_finsetSum, Finset.sum_mul, Finset.mul_sum,
+    mul_assoc]
+
 def zeroCyclicQuarticNumerator
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
@@ -278,6 +369,23 @@ theorem cyclicQuarticTraceNumerator_eq_zeroCyclic
     cyclicTrace1, cyclicTrace2, cyclicTrace3, cyclicTrace4,
     zeroCyclicTrace1, zeroCyclicTrace2, zeroCyclicTrace3, zeroCyclicTrace4,
     block_apply_eq_zeroEntry]
+
+def zeroTupleQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  let u := uncenteredQuartic q
+  u.p0 * (F.blockDim T : ℝ) + u.p1 * zeroTupleCyclicTrace1 F T +
+    u.p2 * zeroTupleCyclicTrace2 F T + u.p3 * zeroTupleCyclicTrace3 F T +
+    u.p4 * zeroTupleCyclicTrace4 F T
+
+theorem zeroCyclicQuarticNumerator_eq_tuple
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    zeroCyclicQuarticNumerator q F T =
+      zeroTupleQuarticNumerator q F T := by
+  simp only [zeroCyclicQuarticNumerator, zeroTupleQuarticNumerator,
+    zeroCyclicTrace1_eq_tuple, zeroCyclicTrace2_eq_tuple,
+    zeroCyclicTrace3_eq_tuple, zeroCyclicTrace4_eq_tuple]
 
 /-- On a nonempty block, multiplying the normalized quartic score by the
 block size is exactly the raw trace numerator. -/
@@ -394,6 +502,16 @@ structure ZeroCyclicQuarticLowerBound
   eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
     ∀ᶠ T in atTop,
       x < zeroCyclicQuarticNumerator q F T /
+        (Z.N T (2 * T) : ℝ)
+
+/-- The fully expanded zero-tuple correlation statement. -/
+structure ZeroTupleQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
+  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
+    ∀ᶠ T in atTop,
+      x < zeroTupleQuarticNumerator q F T /
         (Z.N T (2 * T) : ℝ)
 
 /-- All finite errors in the affine bridge.  The coefficient `3` on the
@@ -606,6 +724,28 @@ theorem ZeroCyclicQuarticLowerBound.toCyclic
   rw [cyclicQuarticTraceNumerator_eq_zeroCyclic]
   exact hT
 
+theorem ZeroCyclicQuarticLowerBound.toTuple
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : ZeroCyclicQuarticLowerBound q F) :
+    ZeroTupleQuarticLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx] with T hT
+  rw [zeroCyclicQuarticNumerator_eq_tuple] at hT
+  exact hT
+
+theorem ZeroTupleQuarticLowerBound.toZeroCyclic
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : ZeroTupleQuarticLowerBound q F) :
+    ZeroCyclicQuarticLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx] with T hT
+  rw [zeroCyclicQuarticNumerator_eq_tuple]
+  exact hT
+
 /-- Eventual form of the finite affine bridge, obtained directly from the
 proved robust stability inequality. -/
 theorem finite_affine_bridge
@@ -741,7 +881,7 @@ theorem asymptotic_eps_transfer
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F)
-    (q : Quartic) (hzeroCyclic : ZeroCyclicQuarticLowerBound q F)
+    (q : Quartic) (htuple : ZeroTupleQuarticLowerBound q F)
     (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 < 1) (hcost : profileSaturatedCost σ v ≤ Dbar)
     (hstrict : target <
@@ -750,6 +890,7 @@ theorem asymptotic_eps_transfer
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (target - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
+  have hzeroCyclic := htuple.toZeroCyclic
   have hcyclic := hzeroCyclic.toCyclic
   have huncentered := hcyclic.toUncentered
   have htrace := huncentered.toCentered
@@ -922,7 +1063,7 @@ frozen R-8686 epsilon form. -/
 theorem eps_transfer_8686
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hzeroCyclic : ZeroCyclicQuarticLowerBound Terminal8686.dual F) :
+    (htuple : ZeroTupleQuarticLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
@@ -932,7 +1073,7 @@ theorem eps_transfer_8686
     rw [profileSaturatedCost_v8686]
     exact QuarticWindowWitnesses.D8686_lt.le
   exact asymptotic_eps_transfer hRvM hfull hzero
-    Terminal8686.dual hzeroCyclic Terminal8686.cap Terminal8686.costUpper
+    Terminal8686.dual htuple Terminal8686.cap Terminal8686.costUpper
     (86855250 / 100000000) Terminal8686.dual_feasible
     Terminal8686.cap_slope hcost strict_transfer_8686
 
@@ -941,7 +1082,7 @@ frozen R-9506 epsilon form. -/
 theorem eps_transfer_9506
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hzeroCyclic : ZeroCyclicQuarticLowerBound Terminal9506.dual F) :
+    (htuple : ZeroTupleQuarticLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -952,7 +1093,7 @@ theorem eps_transfer_9506
     rw [profileSaturatedCost_v9506]
     exact QuarticWindowWitnesses.D9506_lt.le
   exact asymptotic_eps_transfer hRvM hfull hzero
-    Terminal9506.dual hzeroCyclic Terminal9506.cap Terminal9506.costUpper
+    Terminal9506.dual htuple Terminal9506.cap Terminal9506.costUpper
     (95063832187565 / 100000000000000) Terminal9506.dual_feasible
     Terminal9506.cap_slope hcost strict_transfer_9506
 
@@ -971,13 +1112,13 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_8657
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hzeroCyclic : ZeroCyclicQuarticLowerBound Terminal8686.dual F) :
+    (htuple : ZeroTupleQuarticLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   intro ε hε
-  obtain ⟨T₀, hT₀⟩ := eps_transfer_8686 hRvM hfull hzero hzeroCyclic ε hε
+  obtain ⟨T₀, hT₀⟩ := eps_transfer_8686 hRvM hfull hzero htuple ε hε
   refine ⟨T₀, ?_⟩
   intro T hT
   have hstrong := hT₀ T hT
@@ -989,13 +1130,13 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_9383
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hzeroCyclic : ZeroCyclicQuarticLowerBound Terminal9506.dual F) :
+    (htuple : ZeroTupleQuarticLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   intro ε hε
-  obtain ⟨T₀, hT₀⟩ := eps_transfer_9506 hRvM hfull hzero hzeroCyclic ε hε
+  obtain ⟨T₀, hT₀⟩ := eps_transfer_9506 hRvM hfull hzero htuple ε hε
   refine ⟨T₀, ?_⟩
   intro T hT
   have hstrong := hT₀ T hT
@@ -1018,49 +1159,49 @@ structures remain explicit. -/
 theorem zeta_eps_transfer_8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hzeroCyclic : ZeroCyclicQuarticLowerBound Terminal8686.dual F) :
+    (htuple : ZeroTupleQuarticLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero hzeroCyclic)
+    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero htuple)
 
 /-- Concrete-zeta R-9506 epsilon form, conditional only on the three explicit
 per-support structures. -/
 theorem zeta_eps_transfer_9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hzeroCyclic : ZeroCyclicQuarticLowerBound Terminal9506.dual F) :
+    (htuple : ZeroTupleQuarticLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hzeroCyclic)
+    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero htuple)
 
 /-- Concrete-zeta R-8657, obtained monotonically from R-8686. -/
 theorem zeta_eps_transfer_8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hzeroCyclic : ZeroCyclicQuarticLowerBound Terminal8686.dual F) :
+    (htuple : ZeroTupleQuarticLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero hzeroCyclic)
+    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero htuple)
 
 /-- Concrete-zeta R-9383, obtained monotonically from R-9506. -/
 theorem zeta_eps_transfer_9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hzeroCyclic : ZeroCyclicQuarticLowerBound Terminal9506.dual F) :
+    (htuple : ZeroTupleQuarticLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero hzeroCyclic)
+    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero htuple)
 
 end QuarticTransfer
 end Zeta85
