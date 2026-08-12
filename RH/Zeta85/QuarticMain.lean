@@ -370,7 +370,7 @@ theorem rung8686_literal_energyTail
       AggregateCoordinateFrame.PhysicalWindowRegularity F)
     (htail :
       AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
-        TrimmedMoment.Terminal8686.dual) :
+        (F := F) TrimmedMoment.Terminal8686.dual) :
     Rung8686_statement :=
   rung8686_isometric hfull hzero
     (AggregateCoordinateFrame.coordinateData
@@ -385,7 +385,7 @@ theorem rung9506_literal_energyTail
       AggregateCoordinateFrame.PhysicalWindowRegularity F)
     (htail :
       AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
-        TrimmedMoment.Terminal9506.dual) :
+        (F := F) TrimmedMoment.Terminal9506.dual) :
     Rung9506_statement :=
   rung9506_isometric hfull hzero
     (AggregateCoordinateFrame.coordinateData
@@ -400,7 +400,7 @@ theorem rung9506_cumulative_literal_energyTail
       AggregateCoordinateFrame.PhysicalWindowRegularity F)
     (htail :
       AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
-        TrimmedMoment.Terminal9506.dual) :
+        (F := F) TrimmedMoment.Terminal9506.dual) :
     Rung9506_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
