@@ -95,7 +95,7 @@ or finite-grid estimate is hidden in the proof. -/
 theorem centered_moment_limits
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hr1a : PrincipalCyclicBlock F) (hraw : UncenteredRSBlockLimits F) :
+    (hp0 : 0 < p) (hp1 : p ≤ 1) (hraw : UncenteredRSBlockLimits F) :
     ∀ k : ℕ, 1 ≤ k → k ≤ 4 →
       Tendsto (F.centeredBlockMoment k) atTop
         (nhds (formula21Moment k μ p)) := by
@@ -116,8 +116,7 @@ theorem centered_moment_limits
     intro a ha
     exact (hraw.moments a
       (le_trans (Nat.le_of_lt_succ (Finset.mem_range.mp ha)) hk4)).const_mul _
-  rw [topHat_centeredContraction_eq_formula21
-    hr1a.fill_pos hr1a.fill_le_one k hk1 hk4] at hlim
+  rw [topHat_centeredContraction_eq_formula21 hp0 hp1 k hk1 hk4] at hlim
   exact hlim
 
 /-- Constructor for the existing R1b interface from the exact uncentered
@@ -125,7 +124,7 @@ actual-block limit plus the two independent complex-Poisson clauses. -/
 theorem blockMomentLimits_of_uncenteredRS
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hr1a : PrincipalCyclicBlock F)
+    (hp0 : 0 < p) (hp1 : p ≤ 1)
     (haliasSummable : ∀ᶠ T in atTop,
       ∀ ρ ∈ Z.ZIprime T, ∀ ρ' ∈ Z.ZIprime T,
         Summable (F.complexAliasFamily T (gammaOf ρ) (gammaOf ρ')))
@@ -136,7 +135,7 @@ theorem blockMomentLimits_of_uncenteredRS
     BlockMomentLimits F where
   complex_aliases_summable_at_zeros := haliasSummable
   offRH_complex_poisson_at_zeros := haliasZero
-  moments := centered_moment_limits hr1a hraw
+  moments := centered_moment_limits hp0 hp1 hraw
 
 end RH.Zeta85.RSBlockMomentBridge
 
