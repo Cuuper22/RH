@@ -364,6 +364,30 @@ theorem abs_weightedLeftSelector_le (a k d : ℕ) :
   · simp [weightedLeftSelector, leftSelector, hda, abs_of_nonneg hscale]
   · simp [weightedLeftSelector, leftSelector, hda, hscale]
 
+theorem weightedLeftSelector_support {a k d : ℕ}
+    (hcoeff : weightedLeftSelector a k d ≠ 0) : d = a := by
+  by_contra hda
+  exact hcoeff (by simp [weightedLeftSelector, leftSelector, hda])
+
+theorem normalizedRightSelector_support {c : ℕ → ℝ} {R a k s : ℕ}
+    (hcoeff : normalizedRightSelector c R a k s ≠ 0) :
+    canonicalDivisor (a * s) R = a := by
+  by_contra hcanon
+  exact hcoeff (by simp [normalizedRightSelector, rightSelector, hcanon])
+
+/-- The existing Shiu progression theorem applies to every normalized
+running fiber with the same input constant and divisor exponent. -/
+theorem shiu_normalizedRightSelector {eta : ℝ}
+    (hshiu : ShiuMajorant eta) {c : ℕ → ℝ} {K : ℝ} {k R a : ℕ}
+    (ha : a ≠ 0) (hK : 0 ≤ K) (hc : DivisorBounded c K k) :
+    ∃ C K' T₁ : ℝ, ∀ T ≥ T₁, ∀ P : ℝ, 1 ≤ P →
+      ∀ q r : ℕ, 0 < q → Nat.Coprime r q →
+        (q : ℝ) ≤ P * T ^ (-eta) →
+          progressionSum (normalizedRightSelector c R a k) P q r ≤
+            K' * (P / (Nat.totient q : ℝ)) * (Real.log T) ^ C := by
+  exact hshiu (normalizedRightSelector c R a k) K k
+    (normalizedRightSelector_divisorBounded ha hK hc)
+
 /-- One literal Dirichlet-convolution piece. -/
 def convolutionPiece (c : ℕ → ℝ) (R a n : ℕ) : ℝ :=
   ∑ ds ∈ n.divisorsAntidiagonal,
@@ -422,6 +446,26 @@ theorem normalizedConvolutionPiece_eq_canonicalPiece (c : ℕ → ℝ)
     normalizedConvolutionPiece c R a k n = canonicalPiece c R a n := by
   rw [normalizedConvolutionPiece_eq c R k n ha,
     convolutionPiece_eq_canonicalPiece c hn hR]
+
+/-- A regular normalized fiber is a literal convolution with all algebraic
+data needed at the analytic boundary: terminal-band singleton support,
+uniform divisor bound on the running factor, and exact source coefficient. -/
+theorem regular_normalized_fiber_data
+    {c : ℕ → ℝ} {K : ℝ} {k R B a n : ℕ}
+    (ha : a ∈ (Finset.Icc 1 R).filter (fun d => R < d * B))
+    (hK : 0 ≤ K) (hc : DivisorBounded c K k)
+    (hn : n ≠ 0) (hR : 0 < R) :
+    1 ≤ a ∧ a ≤ R ∧ R < a * B ∧
+      (∀ d : ℕ, weightedLeftSelector a k d ≠ 0 → d = a) ∧
+      DivisorBounded (normalizedRightSelector c R a k) K k ∧
+      normalizedConvolutionPiece c R a k n = canonicalPiece c R a n := by
+  have haData := Finset.mem_filter.mp ha
+  have haIcc := Finset.mem_Icc.mp haData.1
+  have ha0 : a ≠ 0 := Nat.ne_of_gt haIcc.1
+  exact ⟨haIcc.1, haIcc.2, haData.2,
+    fun d hd => weightedLeftSelector_support hd,
+    normalizedRightSelector_divisorBounded ha0 hK hc,
+    normalizedConvolutionPiece_eq_canonicalPiece c ha0 hn hR⟩
 
 /-- The canonical divisor lies in the finite index set used by the
 superposition. -/
