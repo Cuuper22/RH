@@ -1200,6 +1200,61 @@ theorem tendsto_integral_frozen9506Window_sq_exact
   simpa only [integral_supportedFullProfile_v9506_div L hL] using
     tendsto_integral_frozen9506Window_sq L hL
 
+
+/-! ## Exact normalization of the literal annular specializations -/
+
+/-- The explicit annular R-8686 window, with a shrinking central hole. -/
+def frozen8686ShellWindow
+    (L : ℝ) (n : ℕ) (hL : 0 < L) : ℝ → ℝ :=
+  shrinkingProfileShellWindow
+    QuarticWindowWitnesses.v8686 L n hL
+
+/-- The explicit annular R-9506 window, with a shrinking central hole. -/
+def frozen9506ShellWindow
+    (L : ℝ) (n : ℕ) (hL : 0 < L) : ℝ → ℝ :=
+  shrinkingProfileShellWindow
+    QuarticWindowWitnesses.v9506 L n hL
+
+/-- The literal R-8686 annular energies converge to their exact physical
+normalization. -/
+theorem tendsto_integral_frozen8686ShellWindow_sq_exact
+    (L : ℝ) (hL : 0 < L) :
+    Tendsto
+      (fun n : ℕ =>
+        ∫ u : ℝ, frozen8686ShellWindow L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (L * (3815170470337249 / 3814073303040000 : ℝ))) := by
+  unfold frozen8686ShellWindow
+  have h :=
+    tendsto_integral_shrinkingProfileShellWindow_sq
+      QuarticWindowWitnesses.v8686 L hL
+      (by
+        unfold QuarticWindowWitnesses.v8686
+        fun_prop)
+      (fun x hx => QuarticWindowWitnesses.v8686_pos hx)
+  simpa only [integral_supportedFullProfile_v8686_div L hL] using h
+
+/-- The literal R-9506 annular energies converge to their exact physical
+normalization. -/
+theorem tendsto_integral_frozen9506ShellWindow_sq_exact
+    (L : ℝ) (hL : 0 < L) :
+    Tendsto
+      (fun n : ℕ =>
+        ∫ u : ℝ, frozen9506ShellWindow L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (L * (5913507107 / 5913600000 : ℝ))) := by
+  unfold frozen9506ShellWindow
+  have h :=
+    tendsto_integral_shrinkingProfileShellWindow_sq
+      QuarticWindowWitnesses.v9506 L hL
+      (by
+        unfold QuarticWindowWitnesses.v9506
+        fun_prop)
+      (fun x hx => QuarticWindowWitnesses.v9506_pos hx)
+  simpa only [integral_supportedFullProfile_v9506_div L hL] using h
+
 end SmoothRadialShell
 end Zeta85
 end RH
