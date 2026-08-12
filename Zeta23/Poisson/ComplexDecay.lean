@@ -71,6 +71,38 @@ theorem paperFT_horizontal_decay
           Real.exp (|z.im| * Λ) * (∫ u, ‖deriv (deriv f) u‖) :=
       add_le_add h0 h2re
 
+/-- Two Fourier factors on the same horizontal frequency line have a
+fourth-order product majorant.  Keeping both quadratic weights, rather than
+discarding one factor as in the bare summability proof, is what makes the
+two omitted Poisson tails quantitatively controllable. -/
+theorem paperFT_mul_horizontal_decay
+    {f : ℝ → ℂ} {Λ : ℝ}
+    (hf : ContDiff ℝ 2 f)
+    (hsupp : ∀ u, f u ≠ 0 → |u| ≤ Λ)
+    (z z' : ℂ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ s : ℝ,
+      ‖paperFT f (z - s) * paperFT f (z' - s)‖ *
+          ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) ≤ C := by
+  obtain ⟨C, hC⟩ := paperFT_horizontal_decay hf hsupp z
+  obtain ⟨C', hC'⟩ := paperFT_horizontal_decay hf hsupp z'
+  have hC0 : 0 ≤ C := by
+    exact
+      (mul_nonneg (norm_nonneg _)
+        (by positivity : 0 ≤ 1 + (z.re - 0) ^ 2)).trans (hC 0)
+  have hC'0 : 0 ≤ C' := by
+    exact
+      (mul_nonneg (norm_nonneg _)
+        (by positivity : 0 ≤ 1 + (z'.re - 0) ^ 2)).trans (hC' 0)
+  refine ⟨C * C', mul_nonneg hC0 hC'0, ?_⟩
+  intro s
+  rw [norm_mul]
+  calc
+    (‖paperFT f (z - s)‖ * ‖paperFT f (z' - s)‖) *
+          ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) =
+        (‖paperFT f (z - s)‖ * (1 + (z.re - s) ^ 2)) *
+          (‖paperFT f (z' - s)‖ * (1 + (z'.re - s) ^ 2)) := by ring
+    _ ≤ C * C' := mul_le_mul (hC s) (hC' s) (by positivity) hC0
+
 /-- Along any nondegenerate affine real lattice, the complex-frequency
 Fourier samples are quadratically small at infinity. -/
 theorem paperFT_affine_horizontal_isBigO
