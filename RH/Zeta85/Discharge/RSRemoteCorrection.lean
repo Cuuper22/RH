@@ -17,6 +17,40 @@ namespace RH.Zeta85.RSPoissonCyclicBridge
 
 open Zeta23
 
+/-- The compatible completed-kernel data actually consumed by the remote
+quartic correction.  It deliberately omits the full-profile allocation
+clauses of `PrincipalCyclicBlock`: those clauses play no role in completing
+the Poisson trace. -/
+structure CompletedTraceKernelData
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) : Prop where
+  support_pos : 0 < σ
+  distinguished_energy_ratio : Tendsto
+    (fun T => F.channelEnergy T (F.distinguished T) /
+      (∫ u : ℝ, F.windowEnergy T u)) atTop (nhds μ)
+  distinguished_channel_energy_pos : ∀ᶠ T in atTop,
+    0 < F.channelEnergy T (F.distinguished T)
+  local_profile_integrable : ∀ᶠ T in atTop,
+    Integrable (F.localProfile T)
+  local_profile_nonneg : ∀ᶠ T in atTop, ∀ x,
+    0 ≤ F.localProfile T x
+  local_profile_support : ∀ᶠ T in atTop,
+    tsupport (F.localProfile T) ⊆ Icc (-(1 : ℝ) / 2) (1 / 2)
+  local_profile_mean_one : ∀ᶠ T in atTop,
+    ∫ x : ℝ, F.localProfile T x = 1
+
+theorem CompletedTraceKernelData.ofPrincipalCyclicBlock
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) : CompletedTraceKernelData F where
+  support_pos := h.support_pos
+  distinguished_energy_ratio := h.distinguished_energy_ratio
+  distinguished_channel_energy_pos := h.distinguished_channel_energy_pos
+  local_profile_integrable := h.local_profile_integrable
+  local_profile_nonneg := h.local_profile_nonneg
+  local_profile_support := h.local_profile_support
+  local_profile_mean_one := h.local_profile_mean_one
+
 theorem distinguishedWindowFourierMajorantTwelve_le
     {Z : ZeroConfig} {σ μ p c T : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v)
@@ -400,10 +434,11 @@ theorem eventually_balancedRemote_norm_le_twelve
   rw [sum_zeroVertexWeight_norm_sq F T hhatT] at h
   exact h
 
-theorem eventually_balancedFull_norm_le_completedGrowth
+theorem eventually_balancedFull_norm_le_completedGrowth_data
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hprincipal : PrincipalCyclicBlock F)
+    (hdata : CompletedTraceKernelData F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
     (hRvM : RiemannVonMangoldt Z) (w c : ℝ)
     (hadm : ∀ᶠ T in atTop,
       AdmWindow (F.window T (F.distinguished T))
@@ -415,15 +450,15 @@ theorem eventually_balancedFull_norm_le_completedGrowth
           (Z.N T (2 * T) : ℝ) := by
   have hefrac : ∀ᶠ T in atTop,
       distinguishedEnergyFraction F T < μ + 1 :=
-    hprincipal.distinguished_energy_ratio.eventually
+    hdata.distinguished_energy_ratio.eventually
       (Iio_mem_nhds (by linarith))
   filter_upwards [hadm, hhat, hefrac,
-    hprincipal.distinguished_period,
-    hprincipal.distinguished_channel_energy_pos,
-    hprincipal.local_profile_integrable,
-    hprincipal.local_profile_nonneg,
-    hprincipal.local_profile_support,
-    hprincipal.local_profile_mean_one,
+    hguard.distinguished_period,
+    hdata.distinguished_channel_energy_pos,
+    hdata.local_profile_integrable,
+    hdata.local_profile_nonneg,
+    hdata.local_profile_support,
+    hdata.local_profile_mean_one,
     Zeta23.Assembly.eventually_l_pos,
     eventually_NIprime_le_two_core hRvM,
     eventually_gt_atTop (1 : ℝ)]
@@ -431,7 +466,7 @@ theorem eventually_balancedFull_norm_le_completedGrowth
         hprofileNonneg hprofileSupport hprofileMean hl hNI hT
   have hfull : 0 < QuarticGramFamily.fullLength (σ := σ) T := by
     unfold QuarticGramFamily.fullLength
-    exact mul_pos hprincipal.support_pos hl
+    exact mul_pos hdata.support_pos hl
   have htotal : 0 < ∫ u : ℝ, F.windowEnergy T u := by
     by_contra hnot
     have hnonpos : (∫ u : ℝ, F.windowEnergy T u) ≤ 0 := le_of_not_gt hnot
@@ -454,13 +489,13 @@ theorem eventually_balancedFull_norm_le_completedGrowth
       T ^ (μ / 2 : ℝ) := by
     rw [hperiodT, Real.rpow_def_of_pos hT0]
     apply Real.exp_le_exp.mpr
-    have hmul := mul_le_mul_of_nonneg_left hlLog hprincipal.bandwidth_pos.le
+    have hmul := mul_le_mul_of_nonneg_left hlLog hguard.bandwidth_pos.le
     nlinarith
   have hefrac0 : 0 ≤ distinguishedEnergyFraction F T := by
     unfold distinguishedEnergyFraction
     exact div_nonneg hE.le htotal.le
   have hN0 : 0 ≤ (Z.N T (2 * T) : ℝ) := Nat.cast_nonneg _
-  have hmu1 : 0 ≤ 1 + μ := by linarith [hprincipal.bandwidth_pos]
+  have hmu1 : 0 ≤ 1 + μ := by linarith [hguard.bandwidth_pos]
   have hrpow0 : 0 ≤ T ^ (μ / 2 : ℝ) := Real.rpow_nonneg hT0.le _
   calc
     ‖balancedFullLatticeZeroMatrix F T‖ ≤
@@ -473,6 +508,25 @@ theorem eventually_balancedFull_norm_le_completedGrowth
       linarith
     _ = 2 * (1 + μ) * T ^ (μ / 2 : ℝ) *
         (Z.N T (2 * T) : ℝ) := by ring
+
+theorem eventually_balancedFull_norm_le_completedGrowth
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hprincipal : PrincipalCyclicBlock F)
+    (hRvM : RiemannVonMangoldt Z) (w c : ℝ)
+    (hadm : ∀ᶠ T in atTop,
+      AdmWindow (F.window T (F.distinguished T))
+        (F.period T (F.distinguished T)) w c)
+    (hhat : ∀ᶠ T in atTop, 1 ≤ F.hatDenominator T) :
+    ∀ᶠ T in atTop,
+      ‖balancedFullLatticeZeroMatrix F T‖ ≤
+        2 * (1 + μ) * T ^ (μ / 2 : ℝ) *
+          (Z.N T (2 * T) : ℝ) :=
+  eventually_balancedFull_norm_le_completedGrowth_data
+    (CompletedTraceKernelData.ofPrincipalCyclicBlock hprincipal)
+    (PoissonKernelBridge.PrincipalCyclicBlock.toDistinguishedGuardedPoissonKernelData
+      hprincipal)
+    hRvM w c hadm hhat
 
 theorem norm_balancedGuarded_le_full_add_remote
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -541,10 +595,11 @@ theorem remoteCorrection_abs_le_four_mul
       add_le_add (add_le_add (add_le_add h1 h2) h3) h4
     _ = 4 * r * B ^ 3 := by ring
 
-theorem remoteCorrection_div_core_tendsto_zero
+theorem remoteCorrection_div_core_tendsto_zero_data
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hprincipal : PrincipalCyclicBlock F)
+    (hdata : CompletedTraceKernelData F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
     (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
     (hRvM : RiemannVonMangoldt Z) (w c : ℝ)
     (hadm : ∀ᶠ T in atTop,
@@ -557,25 +612,22 @@ theorem remoteCorrection_div_core_tendsto_zero
       (Z.N T (2 * T) : ℝ)) atTop (nhds 0) := by
   let A : ℝ := 2 * (1 + μ)
   let C : ℝ := A + 2
-  have hguard :=
-    PoissonKernelBridge.PrincipalCyclicBlock.toDistinguishedGuardedPoissonKernelData
-      hprincipal
   have hhatPos : ∀ᶠ T in atTop, 0 < F.hatDenominator T :=
     hhat.mono fun T hT => lt_of_lt_of_le zero_lt_one hT
   have hremote := eventually_balancedRemote_norm_le_twelve
     htail hguard hhatPos
-  have hfull := eventually_balancedFull_norm_le_completedGrowth
-    hprincipal hRvM w c hadm hhat
+  have hfull := eventually_balancedFull_norm_le_completedGrowth_data
+    hdata hguard hRvM w c hadm hhat
   have hscaleLim := remoteLatticePairScaleTwelve_tendsto_zero
-    F hprincipal.support_pos.le hprincipal.bandwidth_pos
-      htail.bandwidth_lt_one hRvM hprincipal.distinguished_period hmass
+    F hdata.support_pos.le hguard.bandwidth_pos
+      htail.bandwidth_lt_one hRvM hguard.distinguished_period hmass
   have hscaleOne : ∀ᶠ T in atTop,
       remoteLatticePairScaleTwelve F T < 1 :=
     hscaleLim.eventually (Iio_mem_nhds zero_lt_one)
   have hmain :=
     remoteLatticePairScaleTwelve_completedGrowth_negligible
-      F hprincipal.support_pos.le hprincipal.bandwidth_pos
-        htail.bandwidth_lt_one hRvM hprincipal.distinguished_period hmass
+      F hdata.support_pos.le hguard.bandwidth_pos
+        htail.bandwidth_lt_one hRvM hguard.distinguished_period hmass
   have hconst : Tendsto (fun _ : ℝ => 8 * C ^ 3) atTop
       (nhds (8 * C ^ 3)) := tendsto_const_nhds
   have hupperLim : Tendsto (fun T =>
@@ -586,7 +638,7 @@ theorem remoteCorrection_div_core_tendsto_zero
   apply (tendsto_zero_iff_norm_tendsto_zero).2
   refine squeeze_zero' (Eventually.of_forall fun T => norm_nonneg _) ?_ hupperLim
   filter_upwards [eventually_gt_atTop (1 : ℝ),
-    hprincipal.distinguished_period, hhat, hremote, hfull, hscaleOne,
+    hguard.distinguished_period, hhat, hremote, hfull, hscaleOne,
     Zeta23.Assembly.eventually_l_pos,
     eventually_NIprime_le_two_core hRvM,
     (Zeta23.Assembly.tendsto_N_atTop Z hRvM).eventually_gt_atTop 0]
@@ -594,7 +646,7 @@ theorem remoteCorrection_div_core_tendsto_zero
   have hT0 : 0 < T := lt_trans zero_lt_one hT
   have hL : 0 < F.period T (F.distinguished T) := by
     rw [hperiodT]
-    exact mul_pos hprincipal.bandwidth_pos hl
+    exact mul_pos hguard.bandwidth_pos hl
   have hscale0 : 0 ≤ remoteLatticePairScaleTwelve F T :=
     remoteLatticePairScaleTwelve_nonneg F T hT0 hL
   have hN0 : 0 ≤ (Z.N T (2 * T) : ℝ) := Nat.cast_nonneg _
@@ -620,7 +672,7 @@ theorem remoteCorrection_div_core_tendsto_zero
   have hg1 : 1 ≤ g := by
     dsimp only [g]
     exact Real.one_le_rpow hT.le
-      (div_nonneg hprincipal.bandwidth_pos.le (by norm_num))
+      (div_nonneg hguard.bandwidth_pos.le (by norm_num))
   have hremoteCoarse : ‖balancedRemoteLatticeZeroMatrix F T‖ ≤
       2 * g * (Z.N T (2 * T) : ℝ) := by
     apply hremoteSharp.trans
@@ -628,7 +680,7 @@ theorem remoteCorrection_div_core_tendsto_zero
     exact hscaleOneT.le.trans hg1
   have hA0 : 0 ≤ A := by
     dsimp only [A]
-    linarith [hprincipal.bandwidth_pos]
+    linarith [hguard.bandwidth_pos]
   have hC0 : 0 ≤ C := by
     dsimp only [C]
     linarith
@@ -683,8 +735,53 @@ theorem remoteCorrection_div_core_tendsto_zero
       field_simp [hNpos.ne']
       ring
 
+theorem remoteCorrection_div_core_tendsto_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hprincipal : PrincipalCyclicBlock F)
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hRvM : RiemannVonMangoldt Z) (w c : ℝ)
+    (hadm : ∀ᶠ T in atTop,
+      AdmWindow (F.window T (F.distinguished T))
+        (F.period T (F.distinguished T)) w c)
+    (hhat : ∀ᶠ T in atTop, 1 ≤ F.hatDenominator T)
+    (hmass : (fun T => distinguishedWindowSobolevMassSix F T) =O[atTop]
+      Zeta23.l) :
+    Tendsto (fun T => remoteCorrectionCyclicTrace4 F T /
+      (Z.N T (2 * T) : ℝ)) atTop (nhds 0) :=
+  remoteCorrection_div_core_tendsto_zero_data
+    (CompletedTraceKernelData.ofPrincipalCyclicBlock hprincipal)
+    (PoissonKernelBridge.PrincipalCyclicBlock.toDistinguishedGuardedPoissonKernelData
+      hprincipal)
+    htail hRvM w c hadm hhat hmass
+
 /-- The completed and guarded fourth traces therefore have the same
 dyadic-count-normalized limit. -/
+theorem full_sub_guarded_trace4_div_core_tendsto_zero_data
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hdata : CompletedTraceKernelData F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hRvM : RiemannVonMangoldt Z) (w c : ℝ)
+    (hadm : ∀ᶠ T in atTop,
+      AdmWindow (F.window T (F.distinguished T))
+        (F.period T (F.distinguished T)) w c)
+    (hhat : ∀ᶠ T in atTop, 1 ≤ F.hatDenominator T)
+    (hmass : (fun T => distinguishedWindowSobolevMassSix F T) =O[atTop]
+      Zeta23.l) :
+    Tendsto (fun T =>
+      (fullLatticeZeroKernelCyclicTrace4 F T -
+        QuarticTransfer.guardedZeroKernelCyclicTrace4 F T) /
+          (Z.N T (2 * T) : ℝ)) atTop (nhds 0) := by
+  have hcorr := remoteCorrection_div_core_tendsto_zero_data
+    hdata hguard htail hRvM w c hadm hhat hmass
+  apply hcorr.congr'
+  filter_upwards [] with T
+  have htrace := guardedCyclicTrace4_add_remoteCorrection_eq_full F T
+  rw [← htrace]
+  ring
+
 theorem full_sub_guarded_trace4_div_core_tendsto_zero
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
@@ -700,14 +797,33 @@ theorem full_sub_guarded_trace4_div_core_tendsto_zero
     Tendsto (fun T =>
       (fullLatticeZeroKernelCyclicTrace4 F T -
         QuarticTransfer.guardedZeroKernelCyclicTrace4 F T) /
+          (Z.N T (2 * T) : ℝ)) atTop (nhds 0) :=
+  full_sub_guarded_trace4_div_core_tendsto_zero_data
+    (CompletedTraceKernelData.ofPrincipalCyclicBlock hprincipal)
+    (PoissonKernelBridge.PrincipalCyclicBlock.toDistinguishedGuardedPoissonKernelData
+      hprincipal)
+    htail hRvM w c hadm hhat hmass
+
+theorem full_div_core_sub_guarded_div_core_tendsto_zero_data
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hdata : CompletedTraceKernelData F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hRvM : RiemannVonMangoldt Z) (w c : ℝ)
+    (hadm : ∀ᶠ T in atTop,
+      AdmWindow (F.window T (F.distinguished T))
+        (F.period T (F.distinguished T)) w c)
+    (hhat : ∀ᶠ T in atTop, 1 ≤ F.hatDenominator T)
+    (hmass : (fun T => distinguishedWindowSobolevMassSix F T) =O[atTop]
+      Zeta23.l) :
+    Tendsto (fun T =>
+      fullLatticeZeroKernelCyclicTrace4 F T / (Z.N T (2 * T) : ℝ) -
+        QuarticTransfer.guardedZeroKernelCyclicTrace4 F T /
           (Z.N T (2 * T) : ℝ)) atTop (nhds 0) := by
-  have hcorr := remoteCorrection_div_core_tendsto_zero
-    hprincipal htail hRvM w c hadm hhat hmass
-  apply hcorr.congr'
-  filter_upwards [] with T
-  have htrace := guardedCyclicTrace4_add_remoteCorrection_eq_full F T
-  rw [← htrace]
-  ring
+  simpa only [sub_div] using
+    full_sub_guarded_trace4_div_core_tendsto_zero_data
+      hdata hguard htail hRvM w c hadm hhat hmass
 
 theorem full_div_core_sub_guarded_div_core_tendsto_zero
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
