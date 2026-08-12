@@ -1,0 +1,15 @@
+import RH.Zeta85.Discharge.SQ4SimultaneousRoutes
+
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.source_scales_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.character_large_sieve_output_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.character_large_sieve_integrated_excess_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.norm_only_output_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.norm_only_integrated_excess_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.additive_large_sieve_output_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.additive_large_sieve_integrated_excess_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.reciprocal_profile_scales_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.reciprocal_poisson_scales_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.poisson_zero_mode_integrated_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.poisson_weil_triangle_output_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.poisson_weil_triangle_integrated_excess_exact
+#print axioms RH.Zeta85.SQ4SimultaneousRoutes.route_log_exponents_exact

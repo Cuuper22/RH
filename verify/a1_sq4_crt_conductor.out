@@ -1,0 +1,10 @@
+A1 SQ4 CRT/conductor exact finite calibration
+imprimitive Gauss identities checked = 3336
+nonzero conductor-support checks = 1208
+squarefree shared-gcd strata checked = 3721
+smallest shared slot = u1=u2=2, mu(2)=-1, gcd=2
+ring obstruction = 2 mod 4 is nonzero square-zero
+real-character conductor calibration = PASS
+general complex phase = Lean theorem (outside Python scope)
+48/25 - 43/100 = 149/100
+121/50 - 48/25 = 1/2

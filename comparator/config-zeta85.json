@@ -1,0 +1,28 @@
+{
+  "challenge_module": "Challenge.Zeta85",
+  "solution_module": "Solution.Zeta85",
+  "theorem_names": [
+    "zeta85_rung_support_101_over_100",
+    "zeta85_rung_support_101_over_100_cumulative",
+    "zeta85_rung_support_5_over_4",
+    "zeta85_rung_support_5_over_4_cumulative",
+    "zeta85_simple_on_critical_line",
+    "zeta85_simple_on_critical_line_cumulative",
+    "zeta85_eighty_five_percent",
+    "zeta85_eighty_five_percent_cumulative"
+  ],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice",
+    "RH.Zeta85.Hypotheses.bblr_error_bound",
+    "RH.Zeta85.Hypotheses.bblr_poisson_blocks",
+    "RH.Zeta85.Hypotheses.shiu_majorant",
+    "RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4",
+    "RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2",
+    "RH.Zeta85.Hypotheses.windowCost_101",
+    "RH.Zeta85.Hypotheses.windowCost_125",
+    "RH.Zeta85.Hypotheses.traceTransfer_saturated"
+  ],
+  "enable_nanoda": true
+}

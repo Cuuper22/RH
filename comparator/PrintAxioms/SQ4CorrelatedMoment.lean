@@ -1,0 +1,17 @@
+import RH.Zeta85.Discharge.SQ4CorrelatedMoment
+
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.source_scales_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.character_norms_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.character_cauchy_output_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.character_cauchy_integrated_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.fixed_pv_square_root_output_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.blomer_pascadi_fixed_pv_terms_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.blomer_pascadi_fixed_pv_output_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.kswx_type_i_delta_terms_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.kswx_type_i_output_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.pascadi_parameters_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.pascadi_geometry_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.pascadi_lifted_output_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.pascadi_lifted_integrated_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.literal_cor511_output_exact
+#print axioms RH.Zeta85.SQ4CorrelatedMoment.correlated_route_log_exponents_exact

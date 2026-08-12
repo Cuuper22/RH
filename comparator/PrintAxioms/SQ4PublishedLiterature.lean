@@ -1,0 +1,8 @@
+import RH.Zeta85.Discharge.SQ4PublishedLiterature
+
+#print axioms RH.Zeta85.SQ4PublishedLiterature.precompletion_target_exact
+#print axioms RH.Zeta85.SQ4PublishedLiterature.existing_benchmark_precompletion_exact
+#print axioms RH.Zeta85.SQ4PublishedLiterature.shparlinski19_t21_terms_exact
+#print axioms RH.Zeta85.SQ4PublishedLiterature.shparlinski19_t22_good_part_exact
+#print axioms RH.Zeta85.SQ4PublishedLiterature.other_precompletion_outputs_exact
+#print axioms RH.Zeta85.SQ4PublishedLiterature.audited_log_exponents_exact

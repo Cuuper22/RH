@@ -1,0 +1,19 @@
+A1 SQ4 finite Gauss-square transform target audit
+one short Mobius slot U = 43/200 (0.215000000000)
+factorized modulus P = 83/100 (0.830000000000)
+two-slot product V = 43/100 (0.430000000000)
+Poisson dual length K = 43/100 (0.430000000000)
+numerator R = 33/50 (0.660000000000)
+completion prefactor M/P = -43/100 (-0.430000000000)
+SQ4-HB fixed-x target = 149/100 (1.490000000000)
+literal fixed-x budget = 83/50 (1.660000000000)
+
+exact pre-completion SQ4 moment target = 48/25 (1.920000000000)
+exact pre-completion literal target = 209/100 (2.090000000000)
+coefficient-blind pre-completion output = 121/50 (2.420000000000)
+coefficient-blind excess above SQ4 moment = 1/2 (0.500000000000)
+coefficient-blind excess above literal moment = 33/100 (0.330000000000)
+raw long-slot log exponent = 2 (2.000000000000)
+finite transform identity = EXACT ALGEBRA, ALL POSITIVE MODULI INCLUDING COMPOSITE
+Gauss-square specialization = UNIT STRATUM ONLY
+analytic survivor = signed generalized-Gauss level moment before Cauchy

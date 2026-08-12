@@ -1,0 +1,21 @@
+PAIRING COUNTS
+k=1: q-counts=(); total=0
+k=2: q-counts=(1,); total=1
+k=3: q-counts=(3,); total=3
+k=4: q-counts=(6, 3); total=9
+ONE-PAIR PARTIAL SUMS
+(0, 1): ('0', 'u', '0', '0')
+(0, 2): ('0', 'u', 'u', '0')
+(0, 3): ('0', 'u', 'u', 'u')
+(1, 2): ('0', '0', 'u', '0')
+(1, 3): ('0', '0', 'u', 'u')
+(2, 3): ('0', '0', '0', 'u')
+k=4 classes: adjacent=4; opposite=2
+TWO-PAIR PARTIAL SUMS
+crossing: +(0, 1)/-(2, 3) -> ('0', 'u', 'u+v', 'v')
+nested: +(0, 1)/-(3, 2) -> ('0', 'u', 'u+v', 'u')
+separated: +(0, 2)/-(1, 3) -> ('0', 'u', '0', 'v')
+MU SCALING
+q=1: symbol=mu^1; q*(|w|dw)=mu^2; unnormalized=mu^3; normalized=mu^2
+q=2: symbol=mu^1; q*(|w|dw)=mu^4; unnormalized=mu^5; normalized=mu^4
+PASS: exact pairing, partial-sum, and mu-scaling checks

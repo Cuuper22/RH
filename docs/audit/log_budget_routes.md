@@ -1,0 +1,1190 @@
+# Cycle-5 logarithmic budget: ordered route audit
+
+## Outcome
+
+The cycle-5 hole remains open.  The accounting can be sharpened, but none of
+the four prescribed routes supplies the missing estimate from the stated
+premises.
+
+The corrected accounting has three distinct models:
+
+| model | trace contribution from \(E_Y\ll Y(\log T)^C\) | closes when |
+|---|---:|---:|
+| globally recombined | \(T(\log T)^{C+1}\) | \(C<2\) |
+| literal dyadic \(Y\)-sum | \(T(\log T)^{C+2}\) | \(C<1\) |
+| separately dyadicized \(Y\) and \(h\), both triangle-summed | \(T(\log T)^{C+3}\) | \(C<0\) |
+
+The middle line is the literal reading of
+`docs/run/02_certificate_cycle2.md` (14): its outer sum is over dyadic
+\(Y\), but its inner sum is directly over \(h\).  The last line is a valid
+fully adversarial overdecomposition, not a forced reading of that formula.
+All three dichotomies are proved in
+`RH/Zeta85/Discharge/LogBudget.lean`.
+
+At the 85-percent exponent the depth condition still gives \(K\ge4\), and
+the run's divisor-majorant accounting gives \(C\ge K-1\ge3\).  Hence this
+correction does not close the budget.
+
+On the exact legal actual-scale block
+\((A,B,H;M_1,M_2,N_1,N_2)=(43/100,43/100,43/100;
+2/5,3/5,2/5,3/5)\) in exponent notation, two further positive-majorant
+routes fail before logarithms matter.  Direct BBLR Proposition 3.1 misses
+trace by at least \(9/50\), and the run-12 progression majorant applied
+after equation (14) misses by \(23/100\) at \(d=1\).  These are
+method-class failures only; a coefficient-sensitive estimate retaining
+simultaneous cancellation before that majorant remains open.
+
+## Route 1: adjudicate generous versus dyadic accounting
+
+On \(n\asymp Y\) and \(h\asymp H_Y=Y/T\), equation (10) of certificate
+cycle 2 gives
+
+\[
+ |\mathcal W_{Y,h}(n)|
+ \ll \frac{TL}{Y}+\frac{\log L}{Y}.
+\tag{1}
+\]
+
+An already \(h\)-summed error \(E_Y\) therefore contributes
+
+\[
+ \frac{TL}{Y}E_Y.
+\tag{2}
+\]
+
+For \(E_Y\ll Y(\log T)^C\), (2) is
+\(T(\log T)^{C+1}\).  Summing the \(O(\log X)\) displayed dyadic
+\(Y\)-blocks by triangle inequality gives
+\(T(\log T)^{C+2}\).  There is no displayed dyadic \(h\)-sum in (14), so
+charging another factor there is an additional proof choice.
+
+The exact transfer condition is \(M_{\rm err}=o(TL^3)\).  The condition
+`(AS)`, which asks for \(Y(\log Y)^{-A}\) for every \(A\), is a convenient
+strictly stronger sufficient statement.  Thus the comparison “positive log
+loss versus `(AS)`” explains why the current Lean predicate is not
+discharged, but it is not an independent proof that every positive \(C\)
+misses the trace budget.
+
+**Route-1 verdict:** the correct forced blockwise threshold is \(C<1\),
+between the previously recorded \(C<2\) and \(C<0\) readings.  The
+\(C\ge3\) obstruction survives.
+
+For the distinct B-4 `eta>1/2` balanced-block survivor, the same middle
+threshold applies to the explicitly per-`Y` formulation `(HD_eta)`:
+
+\[
+ |R_{\rm HD}(Y,T,\eta)|
+   \ll_{\eta,\mathcal W}Y(\log T)^C,\qquad C<1.
+\]
+
+Here the signed `h`-sum and actual zero-mode subtraction occur within one
+outer prime scale before absolute values, and the dyadic `Y`-sum is still to
+be taken.  Defining `R_HD` only after that outer recombination would instead
+use the generous `C<2` line.  The finite support theorem in
+`docs/audit/eta_superposition_obstruction.md` does not prove either analytic
+estimate or identify an actual HB coefficient.  This cross-reference does
+not change the separate A1 survivor or any frozen-rung status.
+
+## Route 2: retain signs across scales
+
+### Shift scales
+
+The second triangle loss is avoidable at the level of the \(h\)-weights.
+Join the two orientations \(h>0\) and \(h<0\), insert the \(h=0\) term, and
+subtract that diagonal term separately.  The remaining dyadic partition then
+recombines to one smooth compactly supported weight
+
+\[
+ W_H(h)=W(h/H),\qquad h\in\mathbb Z.
+\tag{3}
+\]
+
+There is no boundary at \(h=0\) in the bilateral sum.  Repeated summation by
+parts therefore applies directly to (3) and gives
+
+\[
+ \left|\sum_{h\in\mathbb Z}W(h/H)e(h\theta)\right|
+ \ll_J H(1+H\lVert\theta\rVert)^{-J}.
+\tag{4}
+\]
+
+This is the same construction as the proved signed-shift lemma, with the
+diagonal isolated instead of forcing every component to live on \((1,2)\).
+It prevents a separate factor \(\log T\) from the \(h\)-scale partition.
+
+### Prime scales
+
+No corresponding cancellation follows across the dyadic prime blocks.
+At the natural shift \(h\asymp Y/T\),
+
+\[
+ T\log(1+h/n)=\frac{Th}{n}+O(T^{-1})\asymp1,
+\tag{5}
+\]
+
+uniformly on every \(n\asymp Y\) block.  The phase therefore does not
+oscillate as a function of the dyadic scale \(Y\).  Error terms on different
+\(Y\)-blocks can have the same sign and phase while satisfying every
+per-block estimate used in cycle 5.  A nonnegative partition of unity cannot
+create cancellation between them.
+
+Removing this last logarithm would require a genuinely global estimate such
+as
+
+\[
+ \left|\sum_{Y\ \mathrm{dyadic}}
+       \frac{T}{Y}E_Y\right|
+ \ll T(\log T)^C
+\tag{6}
+\]
+
+with the sum taken before absolute values.  Neither the Shiu majorant nor the
+per-block Poisson estimate implies (6); both take absolute values inside the
+\(Y\)-sum.
+
+### Exact size and threshold of (6)
+
+Write \(Y=T^{1+\theta}\).  On every cycle-5 block,
+
+\[
+ H=T^\theta,\qquad P=H\sqrt T,\qquad Q=\sqrt T,
+ \qquad PQ=Y,\qquad \frac{PH}{Y}=\frac{H}{Q}.
+\tag{7}
+\]
+
+For \(\theta\le43/100\), the \(PH\) term therefore has the fixed power
+saving \(T^{-7/100}\); only \(PQ\) is critical.  This is not an endpoint-only
+phenomenon.  Even in the depth-four-compatible top band
+
+\[
+ \frac{143}{400}+\varepsilon<\theta<\frac{43}{100},
+\]
+
+the number of dyadic critical blocks is
+
+\[
+ J(T)=\frac{29/400-\varepsilon}{\log 2}\log T+O(1).
+\tag{8}
+\]
+
+Put \(A_j=(T/Y_j)E_{Y_j}\) and \(L=\log T\).  The block estimate gives
+
+\[
+ |A_j|\ll TL^C.
+\tag{9}
+\]
+
+If (6) were proved with the same exponent \(C\), its trace contribution
+would be \(O(TL^{C+1})\), because the trace coefficient still contributes
+one further \(L\).  Thus (6) closes exactly when \(C<2\), not when \(C<1\).
+At the available \(C\ge3\) it gives at least \(TL^4\), still larger than the
+\(o(TL^3)\) budget by one logarithm.  The estimate actually required at the
+forced depth is
+
+\[
+ \left|\sum_j A_j\right|=o(TL^2).
+\tag{10}
+\]
+
+Even ideal square-root cancellation among \(J(T)\asymp L\) blocks gives
+\(TL^{C+1/2}\), and hence would close only for \(C<3/2\).
+
+### Five exact method-class obstructions
+
+1. **After equation (16), sign recovery is impossible.**  That inequality
+   has already put absolute values around the products
+   \(c_{d,p}e_{d,q}S_H\).  For nonnegative weights \(a_j\) and independent
+   bounds \(B_j\), the admissible choice \(E_j=B_j\) gives
+
+   \[
+    \left|\sum_j a_jE_j\right|=\sum_j a_jB_j.
+   \tag{11}
+   \]
+
+   This sharp countermodel is formalized as
+   RH.Zeta85.LogBudget.blockwise_triangle_sharp.  No theorem using only the
+   post-absolute-value outputs can improve the factor \(J(T)\).
+
+2. **The endpoint phase need not vary with scale.**  Choose integers
+   \((n_j,h_j)=(2^jn_0,2^jh_0)\).  Then
+
+   \[
+    T\log(1+h_j/n_j)=T\log(1+h_0/n_0)
+   \tag{12}
+   \]
+
+   exactly on the whole dyadic orbit.  Phase-only van der Corput in
+   \(\log Y\) therefore has no uniform derivative to exploit.
+
+3. **A dyadic partition transmits the Mellin zero mode.**  If
+   \(\sum_j\psi(2^{-j}x)=1\), integration over \(1\le x\le2\) with measure
+   \(dx/x\) gives
+
+   \[
+    \int_0^\infty\psi(u)\,\frac{du}{u}=\log2\ne0.
+   \tag{13}
+   \]
+
+   Mellin orthogonality away from frequency zero cannot control (6) without
+   a separate zero-mode estimate.
+
+4. **Cauchy and square functions do not supply the missing saving.**  From
+   (9), \(\sum_j|A_j|^2\le J(T)(TL^C)^2\), and Cauchy returns the original
+   \(J(T)TL^C\).  Even a new bound \(\sum_j|A_j|^2\ll(TL^C)^2\) returns
+   \(\sqrt{J(T)}TL^C\).  Reaching \(TL^C\) by this route would require
+   \(\sum_j|A_j|^2\ll(TL^C)^2/J(T)\), already a new cross-scale theorem.
+
+5. **Abel summation is a reformulation, not a saving.**  It requires the
+   stronger prefix estimate
+   \(\sup_k|\sum_{j\le k}A_j|\ll TL^C\).  The current block inputs give only
+   \(kTL^C\).  A Littlewood--Paley difference decomposition leaves the same
+   obstruction in its scaling, or zero-frequency, term.
+
+### Missing actual block and surviving statement
+
+The repository now has a sharp common-index candidate in `HBDepthFour.lean`
+and canonical source coefficients for supplied BBLR outer/smooth sequences
+in `BBLRGCDAllocation.lean`.  It still has no theorem identifying those
+supplied sequences with the actual signed Heath--Brown blocks at every
+scale.  `BBLRPoissonBlocks` existentially quantifies scalar blocks and
+exposes no \(Y,j,d,\ell,p,q,c,e,F\) data.  Fixed-cutoff progression theorems
+used in Route 5 provide neither covariance between two cutoffs nor
+compatibility between the changing Heath--Brown groupings.
+
+The surviving route must first construct compatible smooth factor partitions
+at all scales, instantiate the proved canonical collapse to give the actual
+\(c_{j,d,p}\), \(e_{j,d,q}\), and \(F_{j,d,\ell}\), and match the frequency
+\(\ell=0\) terms with the singular-series subtraction before any Shiu or
+triangle step.  With \(P_j=H_jQ\) and \(Q=\sqrt T\), the exact leading-family
+target is
+
+\[
+ \left|\sum_j\frac{Q}{P_j}
+  \sum_{\substack{d,\ell\\q\asymp Q/d\\p\asymp P_j/d}}
+  c_{j,d,p}e_{j,d,q}F_{j,d,\ell}(p,q)
+  S_{H_j/d}(\ell\bar p/q)\right|=o(TL^2),
+\tag{14}
+\]
+
+with every \(d\)- and \(\ell\)-weight explicit.  A mere \(O(TL^3)\) version
+of (6) is insufficient.
+
+**Route-2 verdict:** the optional shift-scale logarithm is removed.  The
+post-absolute-value, endpoint-phase, Mellin-away-from-zero, present
+square-function, and Abel-without-prefix-bound method classes are finished
+and killed by (11)--(13) and the exact log count.  The actual coefficient
+estimate (14) is neither proved nor disproved.  A sharp common-scale
+coefficient candidate now exists in `HBDepthFour.lean`, and
+`BBLRGCDAllocation.lean` proves the canonical source collapse for supplied
+outer sequences and smooth inner weights.  The smooth Heath--Brown grouping,
+analytic kernel bounds, BBLR frequency \(\ell=0\) integrals, and signed
+Ramanujan evaluation needed to make it the actual cycle-5 family remain
+absent.  Equation (14) is the precise blocking estimate once that grouping
+is supplied, not an inference from the current hypotheses.
+
+## Route 3: reduce Heath--Brown depth
+
+At \(\eta=43/100\), the raw depth-\(K\) atom has exponent
+
+\[
+ \frac{1+\eta}{K}.
+\tag{15}
+\]
+
+Depth three is too long by the exact amount
+
+\[
+ \frac{143}{300}-\frac{43}{100}=\frac7{150}>0,
+\tag{16}
+\]
+
+whereas depth four is shorter than the shift scale by
+
+\[
+ \frac{43}{100}-\frac{143}{400}=\frac{29}{400}>0.
+\tag{17}
+\]
+
+These equalities are formalized as `depth_three_excess` and
+`depth_four_margin`.  Thus depth four is the first possible integer depth for
+the grouping rule used in cycles 4--5.  Under the run's own relation
+\(C\ge K-1\), lowering the logarithmic exponent below two by lowering
+\(K\) is impossible.
+
+An alternative identity could only help by decoupling logarithmic complexity
+from atom depth.  No Vaughan/Heath--Brown decomposition with all terminal
+atoms at most \(T^{43/100}\), the same BBLR block geometry, and an explicitly
+constructed progression majorant with \(C<1\) is present in either run.
+
+**Route-3 verdict:** the existing identity cannot be shaved.  A replacement
+identity must be supplied with its complete terminal-block construction; an
+unspecified “lower-depth” identity is not enough.
+
+## Route 4: Weil-grade power injection
+
+Any fixed power saving would absorb all fixed logarithmic losses.  The place
+to inject it is the leading \(P_dQ_d\) term in cycle 5, equation (18), which
+is exactly at the natural scale
+
+\[
+ P_dQ_d\asymp T^{1+\eta}d^{-2}.
+\tag{18}
+\]
+
+Before the coefficient \(p\) is collapsed, its relevant scales are
+
+\[
+ p=am,\qquad a\asymp H=T^\eta,\qquad
+ m\asymp q\asymp Q=T^{1/2}.
+\tag{19}
+\]
+
+There is an important failed shortcut.  Expand the signed transform back
+into its \(h\)-sum and, for each fixed \((a,h,q)\), complete \(m\) modulo
+\(q\).  Even granting a square-root Weil bound \(q^{1/2}\) for every
+resulting complete inverse sum, absolute summation over
+\(a\asymp H\), \(h\asymp H\), and \(q\asymp Q\) gives
+
+\[
+ H^2Q^{3/2}=T^{2\eta+3/4}.
+\tag{20}
+\]
+
+At \(\eta=43/100\), this is worse than the natural scale
+\(HQ^2=T^{1+\eta}\) by
+
+\[
+ \left(2\eta+\frac34\right)-(1+\eta)
+ =\eta-\frac14=\frac9{50}.
+\tag{21}
+\]
+
+The last equality is formalized as `fixed_modulus_weil_excess`.  Thus a
+fixed-modulus Weil estimate followed by triangle inequality is not a power
+injection in this range.
+
+The actual sufficient target has to retain cancellation in more than one of
+the remaining variables.  Write the factorized fixed-modulus block as
+
+\[
+ \mathcal R_{q,\ell}
+ =\sum_{a\asymp H}\alpha_a
+   \sum_{m\asymp Q}\beta_m F_{q,\ell}(a,m)
+   S_H\!\left(\ell\overline{am}/q\right).
+\tag{22}
+\]
+
+After restoring the summable \(d\)- and \(\ell\)-weights from cycle 5, the
+following coefficient-sensitive average would be sufficient for any fixed
+\(\delta>0\):
+
+\[
+ \boxed{
+  \sum_{q\asymp Q}|\mathcal R_{q,\ell}|
+  \ll H Q^2 T^{-\delta}(\log T)^{O(1)}.}
+\tag{WG-HB}
+\]
+
+Indeed, `(WG-HB)` replaces the leading \(T^{1+\eta}\) term by
+\(T^{1+\eta-\delta}(\log T)^{O(1)}\), and the proved theorem
+`power_beats_log` then absorbs every fixed logarithmic loss.  This is a
+sufficient target, not a claimed estimate.  It is deliberately stated for
+the actual depth-four coefficients and smooth factor \(F_{q,\ell}\); an
+arbitrary divisor-bounded operator norm cannot supply it.
+
+### Quantitative sufficiency
+
+If a bound
+
+\[
+ |\mathcal R_j|\ll Y_jT^{-\delta}L^B
+\tag{23}
+\]
+
+holds uniformly on the \(O(L)\) prime scales, then
+
+\[
+ \sum_j\frac{T}{Y_j}|\mathcal R_j|
+ \ll T^{1-\delta}L^{B+1}=o(TL^2).
+\tag{24}
+\]
+
+The remaining height-kernel logarithm is therefore \(o(TL^3)\).  Thus every
+fixed \(\delta>0\), with every fixed explicit \(B\), is sufficient.
+
+The candidate simultaneous quadratic-dispersion estimate (CSQD) in
+`docs/run/12` has the proposed right side
+
+\[
+ T^{1/2+2\eta+\varepsilon}
+ +T^{3/4+3\eta/2+\varepsilon}.
+\tag{25}
+\]
+
+At \(\eta=43/100\), the two exponents are \(34/25\) and \(279/200\).
+The larger is below \(143/100\) by \(7/200\); choosing
+\(\varepsilon=7/400\) leaves the explicit net saving
+\(\delta=7/400\).  This verifies that the displayed CSQD would imply
+`(WG-HB)`; it does not prove CSQD.
+
+### The one-shot arbitrary-coefficient class
+
+Define \(\mathcal W_1\) to consist of arguments that, after exposing the
+\(h,a,m,q\) sum, do one of the following:
+
+1. replace progression or residue cells independently by size bounds;
+2. complete at most one variable, apply Weil, and sum the others by
+   triangle/Cauchy with divisor or \(L^2\) norms;
+3. collapse the variables into one arbitrary-coefficient trilinear
+   Kloosterman-fraction estimate; or
+4. apply one fixed-modulus arbitrary-coefficient bilinear Kloosterman
+   theorem.
+
+The class does not use two retained Heath--Brown/Möbius factors
+simultaneously and imposes no coefficient relation across \(q\).
+
+Independent cell estimates cannot give a fixed power saving.  For prime
+\(q\), \(2H<q\), and a fixed nonzero smooth \(w\), Parseval gives
+
+\[
+ \sum_{r\bmod q}|S_H(r/q)|^2
+ =q\sum_h|w(h/H)|^2\asymp qH.
+\tag{26}
+\]
+
+Because \(|S_H(0)|^2=O(H^2)=o(qH)\) and
+\(\max_r|S_H(r/q)|\ll H\), it follows that
+
+\[
+ \sum_{r\ne0}|S_H(r/q)|\gg q.
+\tag{27}
+\]
+
+The Shiu cell size is \(P/q\asymp H\).  The admissible independent-cell
+choice
+
+\[
+ A_{q,r}=H\,\overline{S_H(r/q)}/|S_H(r/q)|
+\]
+
+on nonzero cells aligns every phase and contributes \(\gg Hq\) per modulus,
+hence \(\gg HQ^2/\log Q\) over primes \(q\asymp Q\).  No fixed
+\(T^{-\delta}\), even with fixed logarithmic factors, follows from
+independent cell sizes.  This is not a counterexample to the actual
+factorized coefficients.
+
+The established arbitrary-coefficient theorems also miss:
+
+- [Bettin--Chandee, Theorem 1](https://arxiv.org/abs/1502.00769) has
+  variables \(A=H\), \(M=P\), \(N=Q\).  Even granting perfect separability
+  and that its extra front factor is \(O(1)\), for bounded coefficients the
+  product of the three \(L^2\) norms has exponent
+  \((HPQ)^{1/2}=P=T^{93/100}\), while \(AMN=P^2\).  Its two terms are
+
+  \[
+  P(P^2)^{7/20}P^{1/4}=T^{3627/2000},
+  \qquad
+  P(P^2)^{3/8}(HP)^{1/8}=T^{719/400}.
+  \tag{28}
+  \]
+
+  The larger exceeds \(T^{143/100}\) by \(T^{767/2000}\).
+
+- The valid all-modulus/Kuznetsov architecture is
+  [Bettin--Bui--Li--Radziwiłł, Proposition 3.1](https://arxiv.org/abs/1609.02539).
+  On the exact actual-scale block
+  \(A=B=H=T^{43/100}\),
+  \(M_1=N_1=T^{2/5}\), and \(M_2=N_2=T^{3/5}\), so
+  \(M=M_1M_2=N=N_1N_2=T\).  Its two errors have exponents
+  \(179/100\) and \(161/100\), exceeding \(143/100\) by \(9/25\) and
+  \(9/50\).  `ActualScaleBBLR.lean` proves these exact substitutions,
+  including every nonnegative exponent slack.
+  The source-audited literal-completion test below makes the
+  Deshouillers--Iwaniec/Pascadi mismatch exact: completion produces
+  \(S(k\bar a,\pm \ell h;q)\), not the required \(S(ka,\pm \ell h;q)\).
+  A modulus- and outer-variable-dependent reindex is a separate open
+  construction, not an automatic fixed-sequence Kuznetsov input.
+
+The separate run-12 progression majorant applied after equation (14) also
+fails on this actual-scale block.  At \(d=1\), the exact reduced lengths are
+
+\[
+ P=A M_1=T^{83/100},\qquad Q=B N_1=T^{83/100}.
+\]
+
+Thus \(PQ\) has exponent \(83/50\), which exceeds trace by \(23/100\),
+whereas \(PH\) has exponent \(63/50\), saving \(17/100\).  The physical
+Fourier-integral scale \(T^{-23/100}\) does not repair the first comparison:
+equation (14)'s nonzero-frequency cutoff has exponent \(23/100\), so the two
+powers cancel when those frequencies are summed.  This kills exactly the
+blockwise absolute/progression class \(P_d(Q_d+H_d)\), not the signed
+Poisson remainder or an estimate which cancels jointly in
+\(p,q,h,\ell\) before that majorant.
+
+### Pre-majorant one-shot DI tests
+
+`docs/audit/premajorant_di_one_shot.md` source-audits two narrower attempts
+to estimate the \(d=1\) sum before the progression majorant.  Their verdicts
+are distinct.
+
+The **direct collapsed Drappeau class** first collapses each pair of
+Möbius slots into one arbitrary outer coefficient and collapses
+\((|\ell|,h)\) into a numerator coefficient.  Applying Drappeau Theorem 2.1
+once at fixed \(x\), then integrating the absolute bound, gives the exact
+power exponent
+
+\[
+ \frac{179}{100}
+ =\frac{143}{100}+\frac9{25}.
+\]
+
+Thus that prescribed upper-bound chain is power-killed before its positive
+\(T^\varepsilon\) and logarithmic losses.  This is not a lower bound for the
+original signed remainder and says nothing about cancellation retained
+before the three coefficient norms are taken.
+
+The **literal completed \(r=a\) Pascadi map** fails for a structural reason,
+not an exponent comparison.  Completing the \(m_1\)-sum modulo \(q=bn_1\)
+gives
+
+\[
+ S(k,\pm|\ell|h\bar a;q)=S(k\bar a,\pm|\ell|h;q),
+\]
+
+whereas Pascadi Theorem 10.3 with \(r=a\) requires
+\(S(ma,\pm|\ell|h;q)\).  Matching them needs the
+\((q,a)\)-dependent congruence \(m\equiv k\bar a^2\pmod q\); no
+support-preserving, smooth, coefficient-independent reindex has been
+constructed.  Moreover the completion term \(k=0\) lies outside the
+theorem's \(m\asymp M\) sum and needs a separate treatment.  The exact
+\(\mathbb Z/5\mathbb Z\) regression in `PreMajorantDI.lean` disproves only
+the literal identification \(\bar a=a\).
+
+Substituting the candidate scales into Pascadi's displayed factors also
+returns \(179/100\), but this is conditional arithmetic only.  It is not a
+bound and is not used in either finish/kill verdict.  A source-faithful
+\((q,a)\)-dependent reindex with the \(k=0\) term, or a coefficient-sensitive
+simultaneous theorem that avoids this collapse, remains open.
+
+Recent preprints do not enlarge this conclusion into a theorem about the
+actual coefficients:
+
+- [Blomer--Pascadi, Theorem 1.1](https://arxiv.org/abs/2607.24311)
+  is nontrivial for equal lengths only in
+  \(q^{13/28+\varepsilon}<N<q^{7/12-\varepsilon}\).
+  Here \(H=q^{43/50}\), exceeding the upper endpoint by \(83/300\).
+- [Milićević--Qin--Wu, Theorem 1.1](https://arxiv.org/abs/2511.07550)
+  requires \(M^{7/5}N<q^{3/2}\) and \(MN\le q^{5/4}\).
+  At \(M=N=H=q^{43/50}\), the left exponents are
+  \(258/125\) and \(43/25\), so both conditions fail.
+- [Wright, Theorem 2.1](https://arxiv.org/abs/2604.25177) improves the
+  Bettin--Chandee bound when the denominator has a useful fixed factor
+  \(R>1\).  The unavoidable \(d=1\) block has \(R=1\), where this mechanism
+  gives no improvement over the Bettin--Chandee class.
+
+### Four retained Möbius slots
+
+`docs/audit/four_mu_kloosterman.md` keeps the four depth-four Möbius slots
+separate on the exact surviving block:
+
+\[
+ u_1,u_2,v_1,v_2:T^{43/200},\qquad m,n:T^{2/5},\qquad
+ r=|\ell|h:T^{33/50}.
+\]
+
+Each product side \(u_1u_2m\) and \(v_1v_2n\) has exponent \(83/100\).
+The source audit finds no direct application among its displayed published
+theorem families which both uses the literal composite modulus
+\(q=v_1v_2n\) and retains all four Möbius variables separately.  This is a
+narrow applicability conclusion for those cited families, not a universal
+nonexistence claim.
+
+The exact **one-sided fixed-modulus square-root/triangle class** is finished
+and killed.  Even granting square-root size for the whole \(u_1,u_2,m\)
+side with zero theorem and logarithmic loss, then triangle-summing the
+modulus side and numerator, gives
+
+\[
+ {83\over200}+{83\over100}+{33\over50}={381\over200}
+ ={83\over50}+{49\over200}.
+\]
+
+After the physical \(x\)-integration it gives \(67/40\), still exceeding
+\(143/100\) by \(49/200\).  These are outputs of that prescribed
+upper-bound chain, not lower bounds for the signed block.
+
+The exact surviving candidate is the genuinely simultaneous estimate
+
+\[
+ |\mathcal Z^{(0)}_{4,\sigma}(x)|
+ \ll_{\varepsilon,\mathbf W}T^{149/100+\varepsilon}.
+ \tag{SQ4-HB}
+\]
+
+It is not proved.  The normalized long-log exponent in this statement is
+exactly \(0\).  Restoring the two original long logarithmic slots gives
+exactly \(T^{149/100+\varepsilon}(\log T)^2\).  Allocating \(17/400\) to
+the analytic epsilon and \(17/400\) to dominate this explicit log square
+produces fixed-\(x\) exponent \(63/40\) and integrated exponent \(269/200\),
+each below its target by \(17/200\).  Thus a proof of `(SQ4-HB)` would meet
+the literal log budget with \(C=0<1\), without a separate cross-\(Y\)
+estimate.
+
+This candidate is not yet a statement about every actual cycle block.  The
+repository still lacks the smooth partition and pointwise recombination
+identity mapping all signed Heath--Brown components to the displayed
+source-shaped block, together with support, derivative, zero-frequency,
+tail, and explicit dyadic-log bounds.  That source-identification gap is
+separate from the analytic proof of `(SQ4-HB)`.
+
+### Simultaneous SQ4 route tests
+
+`docs/audit/sq4_simultaneous_routes.md` tests six exact method classes on
+the granted source-shaped block.  The verdicts are deliberately narrow:
+
+1. multiplicative Fourier, one all-modulus character large sieve, favourable
+   coefficient energies, and numerator triangle inequality is power-killed
+   at fixed-\(x\) exponent \(58/25\), excess \(33/50\);
+2. the prescribed coefficient-uniform two-sided norm-only chain is
+   power-killed at \(381/200\), excess \(49/200\); its single-column witness
+   concerns arbitrary ambient coefficient vectors, not the source vector;
+3. one additive large sieve in the numerator is power-killed at \(199/100\),
+   excess \(33/100\);
+4. literal reciprocal-completed classical Kuznetsov is structurally
+   inapplicable because \(k\bar v\pmod p\) varies with the modulus \(p\);
+5. the direct switch \(va_p-k=jp\) is structurally inapplicable because it
+   does not produce a modulus-\(j\) complete sum; and
+6. reciprocity, one smooth Poisson completion, pointwise Weil, and triangle
+   inequality is power-killed at \(467/200\), excess \(27/40\), before its
+   additional positive power loss.
+
+The Poisson completion has prefactor exponent \(-43/100\) and dual length
+\(K=T^{43/100}\).  For any fixed \(0<\eta<2/5\), rapid decay truncates
+at \(|k|\le KT^\eta\), with \(KT^\eta/p=T^{-2/5+\eta}<1\); the direct
+nonzero Weil chain therefore has an explicit additional
+\(T^{\eta+\varepsilon}\) loss for \(\varepsilon>0\).  Its normalized
+auxiliary logarithmic exponent is \(0\), and the two raw long slots have
+exact logarithmic exponent \(2\).
+
+The \(k=0\) Ramanujan mode is separately power-safe at fixed-\(x\) exponent
+\(149/100+\varepsilon\), or integrated exponent
+\(63/50+\varepsilon\), with pre-loss margin \(17/100\).  Allocating
+\(17/400\) to this divisor power loss and \(17/400\) to dominate the exact
+\((\log T)^2\) restores a margin \(17/200\).  This does not prove
+`(SQ4-HB)`, because it treats only the zero dual frequency.
+
+The exact survivor after the valid geometry change is the nonzero family
+
+\[
+ {M\over p}
+ \sum_{u_1,u_2,m}\sum_{v_1,v_2}\sum_r\sum_{k\ne0}
+ \mu(u_1)\mu(u_2)\mu(v_1)\mu(v_2)
+ \Gamma_{\sigma,x}(r)\,\mathcal W_{T,x}(\cdots)
+ S(k\overline{v_1v_2},\sigma r;u_1u_2m).                \tag{33}
+\]
+
+No correlated four-slot moment, coefficient-sensitive operator estimate,
+or geometry-changing trace formula bounding (33) is supplied.  Thus neither
+the analytic `(SQ4-HB)` estimate nor the separate smooth
+source-identification/recombination statement is discharged.
+
+### Exact finite Gauss transform; signed level moment open
+
+`docs/audit/sq4_gauss_square_transform.md` and
+`RH/Zeta85/Discharge/SQ4GaussSquareTransform.lean` now prove the exact
+multiplicative transform of (33).  For every positive modulus \(p\),
+including composite moduli, and arbitrary residue classes \(k,r\),
+
+\[
+ \sum_{v\bmod p}^{*}\chi(v)^{-1}S(k\bar v,r;p)
+ =G_p(\chi;k)G_p(\chi;r).
+\]
+
+Full Dirichlet-character inversion is also proved.  On the unit stratum
+\((kr,p)=1\) the product is exactly
+\(\chi(kr)^{-1}G_p(\chi;1)^2\), without a primitivity assumption.
+This specialization is not valid on the full nonzero family: \(k\ne0\)
+and \(|k|<p\) do not imply \((k,p)=1\), and \(r\) may share factors
+with \(p\).  Imprimitive characters retain conductor/gcd conditions.
+Moreover \(p=u_1u_2m\) is not a coprime factorization, so any CRT
+continuation must stratify prime powers and shared gcds before localizing.
+The companion continuation below now proves that finite stratification.
+
+With \(\mathfrak M_4=(P/M)\mathcal Z_{33}^{\rm nz}\), the exact
+pre-completion analytic target sufficient for `(SQ4-HB)` is
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0.
+\]
+
+Restoring \(M/P=T^{-43/100}\) gives \(149/100+\varepsilon\).
+The coefficient-blind character chain has pre-completion exponent
+\(121/50\), exceeding this target by exactly \(1/2\).  This is a
+method-class comparison, not a lower bound for the source moment.  The
+remaining estimate is equation (14) of the dedicated audit: it retains all
+four Möbius factors, the Gauss-square phase on unit strata, the generalized
+shifted products on nonunit conductor/gcd strata, and the varying
+factorized composite modulus before Cauchy.  It is not proved or assumed.
+
+### Exact CRT and conductor stratification
+
+`docs/audit/sq4_crt_conductor_strata.md` and
+`RH/Zeta85/Discharge/SQ4CRTConductor.lean` finish the finite CRT/conductor
+algebra without introducing an input.  Coprime CRT factorization is proved
+for arbitrary shifts and retains the two complementary-modulus twists.  It
+therefore applies to nonunit \(k,r\), but it does not split the displayed
+source factors \(u_1,u_2,m\) when they share primes.
+
+For a primitive complex Dirichlet character \(\chi^*\) modulo \(f\), its
+explicit `changeLevel` \(\chi\) to \(q=f\ell\) satisfies the formally proved
+identity
+
+\[
+ G_q(\chi;t)=G_f(\chi^*;1)
+ \sum_{\substack{s\mid\ell,\ s\mid t\\(\ell/s,f)=1}}
+ \mu(\ell/s)\chi^*(\ell/s)s\,
+ \overline{\chi^*(t/s)}.
+\]
+
+Equivalently, zero extension of \(\chi^*\) removes the displayed
+coprimality condition.  Lean first proves the divisor-\(d\) form and then
+proves the complementary-divisor reindex \(s=\ell/d\), the complex
+conjugation phase, and the unit-supported specialization.  Thus the displayed formula is not
+inferred from the finite real-character calibration; it is a general theorem
+covering shared primes between \(f\) and \(\ell\), nonunit shifts, and
+nonreal characters.
+
+If \(u_1,u_2\) are squarefree and \(g=(u_1,u_2)\), the same module proves
+
+\[
+ u_1=ga,\qquad u_2=gb,\qquad u_1u_2=g^2ab,
+ \qquad \mu(u_1)\mu(u_2)=\mu(a)\mu(b),
+\]
+
+with \(g,a,b\) pairwise coprime.  The repeated sign cancels, but the common
+prime remains squared in the modulus.  The stratum \(u_1=u_2=2\) and the
+finite-ring obstruction
+\(\mathbb Z/4\mathbb Z\not\simeq
+\mathbb Z/2\mathbb Z\times\mathbb Z/2\mathbb Z\) are formalized.  Hence
+only distinct prime-power factors may be separated by CRT.
+
+Substitution of the conductor formula into the two generalized Gauss factors produces two
+divisor sums sharing the same quotient \(\ell\) and the phase
+\(G_f(\chi^*;1)^2\).  Their local conductor support remains coupled to
+\(g^2abm\), both shifts, and the joint source weight.  No pointwise
+factorization of that weight is available, so the four Möbius slots do not
+become independent local character polynomials.  The exact analytic target
+is unchanged:
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0.
+\]
+
+This signed level moment, with every conductor/divisor stratum and all four
+Möbius factors retained before Cauchy, remains unproved.  The smooth
+source-identification/recombination bridge remains a separate blocker.  No
+A1 field is discharged and no frozen rung status changes.
+
+### Correlated-moment theorem classes
+
+The audit in docs/audit/sq4_correlated_moment.md tests the exact surviving
+family before Cauchy.  The sufficient pre-completion target, with every
+logarithm displayed, is
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}
+ T^{48/25+\varepsilon}(\log T)^0.
+\]
+
+One coefficient-blind character Cauchy chain gives \(199/100\), exceeding
+the literal budget by \(33/100\) and (SQ4-HB) by \(1/2\).  Even ideal joint
+square-root cancellation in \((k,r)\) at each fixed \((p,v)\), followed by
+triangle inequality in both outer families, gives \(179/100\), with
+respective excesses \(13/100\) and \(3/10\).  Exact character Parseval
+identifies the diagonal \(v_1v_2=w_1w_2\) created by Cauchy: the original
+signs have become coefficient energy, so a subsequent coefficient-blind
+large sieve cannot recover their unsquared correlation.
+
+The applicable-theorem statuses are deliberately distinct.
+
+- Blomer--Pascadi Theorem 5.5, arXiv:2607.24311v1, is a July 2026
+  **preprint**.  After the exact \(t\)-integral separation, sign split, and
+  zero-padding, it applies literally to each fixed-\((p,v)\) block,
+  including nonunit \(k,r\).  Its five \(H\)-powers are
+  \(7/320,1/3200,27/500,71/900,-17/1500\); the fixed-block output is
+  \(2617/1800\).  Absolute summation in \(p,v\) gives \(4111/1800\), missing
+  the literal budget by \(1123/1800\) and (SQ4-HB) by \(1429/1800\).
+- Kerr--Shparlinski--Wu--Xi, JLMS 108 (2023), Theorem 2.1, is
+  **published**, but the map from (33) is conditional on the favourable
+  grants \((\ell,p)=1\) and
+  \(\|\alpha(t)\|_2\ll_\varepsilon T^{43/100+\varepsilon}\).  Under those
+  grants its best \(\Delta_1\)-power is \(-43/200\), its per-\((p,\ell)\)
+  output is \(59/40\), and its completed output is \(421/200\), exceeding
+  the two targets by \(89/200\) and \(123/200\).  Replacing the residual
+  reciprocity phase by \(1\) is power-safe: allocating
+  \(\eta=1/20\) and aggregate \(\varepsilon=1/20\) gives error
+  \(287/200\), still \(11/200\) below (SQ4-HB).
+- Pascadi, Forum Math. Pi 14 (2026), Corollary 5.11 (Corollary 17 in the
+  arXiv version), is **published**.  On the squarefree-\(v\) stratum, the
+  exact Ramanujan lift followed by separate fixed-\((d,a)\) invocations is
+  literal.  Equation (5.32) contains \(S\sqrt R\,C\), and the four geometry
+  powers are \(63/50,19/25,209/200,11/8\).  Literal recombination gives
+  \(513/200\), missing the targets by \(181/200\) and \(43/40\).  The
+  smaller \(47/20\) output is only conditional arithmetic under an
+  explicitly unstated general-first-sequence and no-cost recombination
+  grant; even then the misses are \(69/100\) and \(43/50\).
+
+The Pascadi lift does not cover the full family.  If
+\(v_1=ga,\ v_2=gb\), then \(v=g^2ab\) and \(c_v(k)=0\) exactly when
+\(g\nmid k\); division by the Ramanujan factor is impossible on those
+nonsquarefree source strata.  The coefficient-blind, fixed-\((p,v)\),
+Blomer--Pascadi, and KSWX tests have normalized/raw fixed log exponents
+\(0/2\).  Literal Corollary 5.11 recombination has exponents \(1/3\), and
+the favourable unstated general-first-sequence variant has \(2/4\).
+All theorem, divisor, Mellin, and truncation losses are explicit
+\(T^\varepsilon\) losses.
+
+No primary theorem audited in this continuation has the full left-hand side
+of (33).  This is a verdict for the displayed theorem classes, not a claim
+that no such theorem exists.  The signed generalized-Gauss-product level
+moment before Cauchy, or a new estimate coupling at least one outer
+modulus/level slot, remains the analytic blocker; the smooth
+source-identification/recombination statement remains a separate blocker.
+
+### Published-theorem source audit
+
+The source-first continuation in `docs/audit/sq4_published_literature.md`
+widens the explicit literature check without changing the target.  All
+outputs are compared before completion with \(48/25\).  Shparlinski 2019
+Theorem 2.1 gives \(2071/800\) even under favourable unit/coprime and
+coefficient-norm grants; its excess is \(107/160\).  The good-modulus part of
+Theorem 2.2 at moment two gives \(1017/400+\varepsilon\), with excess
+\(249/400+\varepsilon\), but supplies no bound for exceptional source mass.
+The audited KSWX and published Pascadi classes retain their positive gaps,
+while primitive Gauss-sum and order-dividing-four character results have
+literal family or left-hand-side mismatches.
+
+No published theorem was found in these audited classes whose literal
+left-hand side is the full signed conductor-stratified source moment.  This
+is a finish/kill result only for the sources and theorem classes listed in
+that audit, not a universal nonexistence claim.  The analytic survivor and
+fixed logarithmic target remain
+
+\[
+ |\mathfrak M_4(T,x)|
+ \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0,
+\]
+
+and the smooth source-identification/recombination bridge remains separately
+unproved.
+
+### Canonical BBLR collapse proved; smooth Heath--Brown identification missing
+
+`RH/Zeta85/Discharge/HBDepthFour.lean` now constructs the exact sharp-cutoff
+depth-four expansion, eight retained factor slots, arbitrary scale-indexed
+left/right groupings, the \(d_1d_2=d_3d_4=d\) reduced sums, dyadic support,
+literal triangle majorants, and a common
+\((j,d,\ell,p,q,\text{left term},\text{right term})\) address.  It also
+defines the fixed-\(q\) norm and a finite nonzero-frequency cross-scale signed
+sum before absolute values.  Its planned support uses explicit closed
+natural-number floor blocks; it is not a reconstruction of the source's
+smooth partition, and no infinite-\(\ell\) tail estimate is included.  Its
+generic residue mean averages all classes.  The module now also constructs
+the literal reduced-class mean for its planned left coefficients and their
+signed four-component sum, and proves the corresponding centered sums
+vanish.  Exact countermodels show that the all-class and reduced-class means
+cannot be interchanged and that reduced centering alone cannot imply a
+singular-series main term.  These constructions are exact but are not yet
+the source's coefficients or BBLR frequency \(\ell=0\) main term.  In
+particular, `HBDepthFour.splitCoeff` omits \((a,d_2)=1\) and is a raw
+divisor split.
+
+`RH/Zeta85/Discharge/BBLRGCDAllocation.lean` now proves the exact correction
+for supplied source sequences.  It allocates \(d\) canonically by a gcd,
+proves the allocation is a multiplicity-one equivalence, constructs the
+filtered coefficients
+
+\[
+ c_{d,p}=\sum_{d_1d_2=d}\sum_{\substack{am=p\\(a,d_2)=1}}
+   \alpha_{d_1a}W_1(d_2m/M_1),
+\]
+
+and proves the two-sided finite-kernel reindexing with
+\(\gcd(dp,dq)=d\iff(p,q)=1\).  Thus the gcd allocation, coprimality filters,
+and multiplicities are no longer part of the blocker.  What remains is to
+construct the supplied outer sequences and genuine smooth inner variables
+from every signed Heath--Brown block.
+
+The actual depth-four route still cannot be submitted to any cited estimate
+because run 12 does not provide:
+
+- a cutoff \(Z(T,Y)\) and smooth partition proved equal to the sharp
+  expansion on every relevant integer;
+- the scale-dependent grouping map proving that the irregular factors are
+  the supplied BBLR outer sequences while the residual variables carry the
+  genuine smooth \(W_1,W_3\) weights;
+- the instantiation of the proved finite \((p,q)\)-kernel reindexing with the
+  integrated \(F_{q,\ell}\) and signed \(h\)-sum, including separability,
+  derivative bounds, and the infinite-\(\ell\) tail; or
+- the BBLR frequency \(\ell=0\) gcd/integral formula for that same smooth
+  allocation and its signed Euler/Ramanujan evaluation as the
+  singular-series subtraction plus an explicitly bounded error.
+
+**Route-4 verdict:** the exact class \(\mathcal W_1\) is finished and killed.
+Fixed-modulus completion already fails by \(T^{9/50}\); independent cells,
+Bettin--Chandee, and the valid BBLR/Kuznetsov architecture fail as quantified
+above, while the cited recent preprints are out of range or give no
+\(d=1\) improvement.  The narrower four-slot one-sided
+fixed-modulus/square-root/triangle class is also killed by the exact
+\(49/200\) power miss.  A genuinely coefficient-sensitive simultaneous
+\(a,m,h,q\) estimate remains sufficient, with net
+\(\delta=7/400\) under (25), but is neither proved nor disproved.  It is
+now stateable for supplied BBLR sequences through the canonical collapse,
+but it cannot be applied to the actual signed Heath--Brown blocks because the
+smooth grouping and analytic kernel hypotheses listed above are absent.
+
+## Route 5: evaluate the progression sums instead of bounding them
+
+This route asks whether the \((\log T)^{K-1}\) in the Shiu majorant can be
+removed by evaluating the depth-four progression sums, then cancelling their
+main terms against the singular-series subtraction already present in the
+signed aggregate.
+
+At the cycle-5 endpoint \(\eta=43/100\), suppressing the summable \(d\)- and
+\(\ell\)-weights, the exact scales are
+
+\[
+ P=T^{93/100},\qquad Q=T^{1/2},\qquad H=T^{43/100},
+ \qquad P=HQ,
+\tag{29}
+\]
+
+so \(Q=P^{50/93}\) and \(\log P/\log Q=93/50\).  After a progression main
+term has been subtracted, a literal \(C=0\) estimate must in particular
+control an aggregate of the form
+
+\[
+ \boxed{
+ \sum_{q\asymp Q} e_q
+  \sum_{r\bmod q}^{*}
+  S_H(\ell\bar r/q)E_c(P;q,r)
+  \ll PQ.}
+\tag{EDB}
+\]
+
+Here \(c\) and \(e\) are the actual signed, smoothly truncated
+Möbius/Heath--Brown convolutions and \(E_c\) is their *centred* progression
+sum over reduced residue classes.  The finite reduced-centering identity is
+now formalized, but it does not identify the main term removed from the
+source calculation.  In BBLR Proposition 3.1 equation (14), frequency
+\(\ell=0\) is a gcd-weighted integral; the reduced variables occur only in
+the later split of the nonzero-frequency family.  The canonical filtered
+collapse and its multiplicity are now proved for supplied BBLR sequences;
+this does not construct the actual signed, smoothly grouped Heath--Brown
+sequences needed in `(EDB)`.  In addition to `(EDB)`, the route therefore
+needs that smooth HB allocation into the frequency \(\ell=0\) integrals and
+a signed Euler/Ramanujan evaluation matching their aggregate with the
+prime-pair singular-series subtraction, including an explicit error and
+logarithmic exponent.  Neither requirement may be replaced by the
+corresponding statement for the nonnegative majorant \(d_4\).
+
+### The available published mean values
+
+Nguyen's Theorem 3 states, for \(k\geq4\),
+
+\[
+ \sum_{d\leq D}\sum_{(a,d)=1}
+ |\Delta(\tau_k;X,d,a)|^2
+ \ll
+ \left(D+X^{1-1/(6(k+2))}\right)
+ X(\log X)^{k^2-1}.
+\tag{30}
+\]
+
+See [Nguyen, *Generalized divisor functions in arithmetic progressions: I*,
+Theorem 3](https://arxiv.org/pdf/2308.06839).  At \(k=4\) this contains the
+term \(P^{35/36}P(\log P)^{15}\).
+
+For prime \(q\leq x^{4/7}\), Parry's Theorems 1--2 give, in his additive
+notation,
+
+\[
+ \sum_{a=1}^{q}|\Delta(a/q)|^2
+ \ll x^{3/2+\varepsilon}q^{7/8},
+ \qquad
+ \sum_{a=1}^{q}|E_x(q,a)|
+ \ll x^{3/4+\varepsilon}q^{7/16}.
+\tag{31}
+\]
+
+See [Parry, *The distribution of \(d_4(n)\) in arithmetic progressions*,
+Theorems 1--2](https://arxiv.org/pdf/2404.04749).  The range includes the
+needed exponent because \(4/7-50/93=22/651>0\).
+
+Wei--Xue--Zhang's fixed-residue theorem for appropriately smooth squarefree
+moduli stops at exponent \(293/584\); it misses the required modulus exponent
+by
+
+\[
+ \frac{50}{93}-\frac{293}{584}=\frac{1951}{54312}>0.
+\tag{32}
+\]
+
+See [Wei--Xue--Zhang, *General divisor functions in arithmetic progressions
+to large moduli*, Theorem 1](https://arxiv.org/pdf/1512.01470).  The
+unconditional range in Rodgers--Soundararajan's Theorem 1 is
+\(\log X/\log Q\leq(k+2)/k-\delta\), hence below \(3/2\) for \(k=4\), while
+the required ratio is \(93/50\).  Their extension to this ratio assumes GRH.
+See [Rodgers--Soundararajan, *The variance of divisor sums in arithmetic
+progressions*, Theorem 1](https://arxiv.org/pdf/1610.06900).
+
+### Exact loss after the necessary norm bounds
+
+If \((\ell,q)=1\), \(H<q\), and \(w\) is supported on an interval of length
+\(H\) with \(|w|\leq1\), discrete Parseval gives the explicit construction
+
+\[
+\begin{aligned}
+ \sum_{r\bmod q}^{*}|S_H(\ell\bar r/q)|^2
+ &\leq \sum_{a\bmod q}|S_H(a/q)|^2\\
+ &=q\sum_{h_1\equiv h_2\pmod q}
+     w(h_1/H)\overline{w(h_2/H)}\\
+ &=q\sum_h|w(h/H)|^2
+ \leq q(\lceil H\rceil+1).
+\end{aligned}
+\tag{33}
+\]
+
+The third line uses the support length \(<q\), so congruent supported
+integers are equal.  Combining (30) and (33) by Cauchy, even after replacing
+the actual coefficients by \(d_4\), setting \(e_q=1\), and granting all
+needed smooth uniformity, produces
+
+\[
+ QH^{1/2}P^{71/72}(\log P)^{15/2}
+ =T^{3917/2400}(\log T)^{15/2}.
+\tag{34}
+\]
+
+This exceeds \(PQ=T^{143/100}\) by
+\(T^{97/480}(\log T)^{15/2}\).  Likewise, (31), Parseval, (33), and absolute
+summation over \(q\asymp Q\) give
+
+\[
+ P^{3/4+\varepsilon}H^{1/2}Q^{23/16}
+ =T^{261/160+\varepsilon},
+\tag{35}
+\]
+
+which exceeds \(PQ\) by \(T^{161/800+\varepsilon}\).  Even a hypothetical
+natural-order variance \(\ll QP(\log P)^{15}\) gives exactly
+\(PQ(\log P)^{15/2}\) after (33): it has zero power margin and retains a
+positive logarithmic loss.
+
+There are also two statement mismatches.  The published results concern
+\(d_4\), not the signed truncated coefficients \(c\); pointwise domination
+recovers the Shiu loss instead of evaluating \(E_c\).  Parry's main term
+
+\[
+ M_x(q,a)=\frac1q\sum_{d\mid q}c_d(a)F_x(d)
+\tag{36}
+\]
+
+comes from an additive Estermann series for \(d_4\).  No cited result or
+in-repository derivation identifies the aggregate of these main terms for
+the actual signed blocks with the prime-pair singular-series subtraction.
+
+There is a separate exact finish/kill result for centering.  The method class
+that tries to infer the singular-series identity using only reduced-cell
+centering is killed by `reducedCentering_alone_not_sufficient`: centered
+unit-class cells may all sum to zero while any proposed nonzero singular
+target remains unmatched.  This does not kill the surviving method from the
+actual smooth HB allocation, BBLR frequency \(\ell=0\) integrals, and their
+signed Ramanujan recombination; that construction remains absent.
+
+**Route-5 verdict:** the exact method class “published \(d_4\) progression
+mean value, followed by a norm bound in the residue variable and
+absolute/Cauchy aggregation in \(q\)” is impossible at (29): it misses by a
+fixed power before the coefficient and main-term mismatches are addressed.
+This does **not** disprove `(EDB)`.  It proves that `(EDB)` needs a new
+estimate correlated with \(S_H(\ell\bar r/q)\), the signs of \(e_q\), or the
+simultaneous Heath--Brown factorization.  Those are the cross-\(Y\) and
+`(WG-HB)` routes, not a consequence of the cited divisor-progression
+theorems.  The exact fractions are independently recomputed by
+`verify/a1_1_method_kill.py`, with committed output in
+`verify/a1_1_method_kill.out`.
+
+## Program status
+
+The target remains frozen.  The support-\(143/100\) theorem still depends on
+`signedPair_traceGrade_lt_3_2`.  The ordered attack narrows the analytic gap
+as follows:
+
+1. A constructed per-block estimate with literal exponent \(C=0\) closes
+   the budget **by itself**, because it contributes \(T(\log T)^2\), which
+   is \(o(T(\log T)^3)\).  No cross-\(Y\) estimate is needed in that case.
+   Route 5 kills only the published-\(d_4\)-plus-norm method class for
+   obtaining this estimate; `(EDB)` itself remains the exact resisted
+   statement.
+2. Route 2 is finished for the available method classes.  Equation (6)
+   improves the threshold only to \(C<2\), so it is insufficient at
+   \(C\ge3\).  The stronger common-scale target (14) survives, but the
+   sharp compatible coefficient family is still only an algebraic candidate.
+   Reduced-residue centering and the canonical BBLR gcd collapse for supplied
+   sequences are proved.  The fixed asymmetric literal-slot grouping is now
+   killed by the exact legal block
+   \((43/200,43/200,2/5,3/5)\): its only literal smooth scales miss the
+   requested left pair by \(1/10\).  A source construction would therefore
+   need actual block-dependent scales, a proved superposition identity, or a
+   higher-dimensional divisor theorem.  Those alternatives, the analytic
+   kernel bounds, frequency \(\ell=0\) integrals, and signed
+   Ramanujan evaluation required to make (14) its actual decomposition
+   remain absent.
+3. Route 4 kills the one-shot arbitrary-coefficient class
+   \(\mathcal W_1\).  The coefficient-sensitive `(WG-HB)` estimate
+   would close with the explicit net saving \(7/400\) under (25), but the
+   repository lacks a surviving smooth Heath--Brown identification and
+   analytic kernel estimates needed to apply such a theorem to the actual
+   block.  The formerly claimed fixed asymmetric literal-slot identification
+   is not available: `HBToBBLRSmoothGrouping.no_asymmetric_literal_grouping`
+   proves its exact obstruction below exponent cushion \(1/10\).
+   On the surviving actual-scale block, direct Proposition 3.1 and the
+   run-12 progression majorant applied after equation (14) are also killed
+   by fixed excesses \(9/50\) and \(23/100\), respectively.  The terminal
+   pre-majorant direct collapsed Drappeau class is separately power-killed
+   at \(179/100\), an excess of \(9/25\).  The literal completed \(r=a\)
+   Pascadi map is structurally inapplicable; its conditional \(179/100\)
+   substitution is not a bound, and a \((q,a)\)-dependent reindex with a
+   separate \(k=0\) treatment remains open.  Retaining all four Möbius slots
+   still leaves the one-sided fixed-modulus/square-root/triangle class
+   power-incompatible by \(49/200\).  The simultaneous candidate
+   `(SQ4-HB)` has normalized/raw long-log exponents \(0\) and \(2\) and
+   would close with literal \(C=0\), but it is unproved.  Of the six exact
+   simultaneous-route classes, the character, coefficient-uniform norm,
+   additive, and Poisson-Weil/triangle chains are power-killed, while literal
+   fixed-index Kuznetsov and the direct moving-index divisor switch are
+   structurally inapplicable.  Poisson makes the zero mode power-safe, but
+   leaves the exact nonzero family (33), with the explicit truncation loss
+   \(T^{\eta+\varepsilon}\) for \(0<\eta<2/5\).  The finite coprime CRT,
+   general primitive-`changeLevel` conductor formula, nonunit support, and
+   shared-gcd decomposition are now formally proved.  They expose two
+   divisor sums coupled through the same conductor quotient and joint source
+   weight; they do not provide cancellation.  The terminal A1 blocker on the
+   granted source-shaped block is therefore the signed
+   generalized-Gauss moment of
+   `docs/audit/sq4_published_literature.md`, bounded at explicit pre-completion
+   scale \(T^{48/25+\varepsilon}(\log T)^0\), or another correlated estimate
+   for (33), or a proved geometry-changing completion/reindex.  The audited
+   published-theorem classes audited there do not supply it: the locally
+   applicable Blomer--Pascadi preprint loses the outer signs; the published KSWX map
+   requires favourable coprimality/energy grants and still misses; and
+   published Pascadi Corollary 5.11 is either literal only on its squarefree
+   lifted strata with a larger recombination cost, or conditional on an
+   unstated general-first-sequence variant.  A full A1
+   discharge additionally requires the missing smooth
+   source-identification/recombination identity;
+   `signedPair_traceGrade_lt_3_2` is not discharged, and no frozen rung
+   status changes.

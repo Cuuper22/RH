@@ -1,0 +1,31 @@
+A1 actual-scale BBLR exact exponent audit
+eta = 43/100 = 0.430000000000000
+trace exponent = 143/100 = 1.430000000000000
+outer exponent A=B = 43/100 = 0.430000000000000
+inner short exponent M1=N1 = 2/5 = 0.400000000000000
+inner long exponent M2=N2 = 3/5 = 0.600000000000000
+shift exponent H = 43/100 = 0.430000000000000
+one-side product exponent = 143/100 = 1.430000000000000
+ABMN exponent = 143/50 = 2.860000000000000
+block geometry and BBLR range boundary = PASS
+BBLR outside exponent = 93/100 = 0.930000000000000
+BBLR AB-error exponent = 179/100 = 1.790000000000000
+BBLR Watt-parenthesis exponent = 17/25 = 0.680000000000000
+BBLR Watt-error exponent = 161/100 = 1.610000000000000
+BBLR AB-error excess = 9/25 = 0.360000000000000
+BBLR Watt-error excess = 9/50 = 0.180000000000000
+BBLR Proposition 3.1 black-box class = POWER-INCOMPATIBLE
+source Fourier physical exponent = -23/100 = -0.230000000000000
+source nonzero-frequency cutoff exponent = 23/100 = 0.230000000000000
+source summed-Fourier net exponent = 0 = 0.000000000000000
+Fourier-size/frequency-count cancellation = PASS
+source d=1 P exponent = 83/100 = 0.830000000000000
+source d=1 Q exponent = 83/100 = 0.830000000000000
+source d=1 PQ exponent = 83/50 = 1.660000000000000
+source d=1 PH exponent = 63/50 = 1.260000000000000
+source P(Q+H) exponent = 83/50 = 1.660000000000000
+source PQ excess = 23/100 = 0.230000000000000
+source PH saving = 17/100 = 0.170000000000000
+Taylor H^2 saving = 57/100 = 0.570000000000000
+source d=1 P(Q+H) progression-majorant class = POWER-INCOMPATIBLE
+survivor = cancellation before the residue/progression majorant

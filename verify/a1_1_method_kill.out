@@ -1,0 +1,29 @@
+repo scales
+eta = 43/100 = 0.430000000000000
+P exponent = 93/100 = 0.930000000000000
+Q exponent = 1/2 = 0.500000000000000
+H exponent = 43/100 = 0.430000000000000
+Q as a power of P = 50/93 = 0.537634408602151
+log(P)/log(Q) = 93/50 = 1.860000000000000
+PQ target exponent = 143/100 = 1.430000000000000
+
+Nguyen Theorem 3 plus residue Parseval and Cauchy
+aggregate exponent = 3917/2400 = 1.632083333333333
+excess over PQ = 97/480 = 0.202083333333333
+explicit logarithmic exponent = 15/2
+
+Parry Theorem 1 plus Parseval and absolute q-sum
+aggregate exponent = 261/160 = 1.631250000000000
+excess over PQ = 161/800 = 0.201250000000000
+
+modulus ranges
+Parry 4/7 margin over Q=P^(50/93) = 22/651 = 0.033794162826421
+Wei-Xue-Zhang deficit below Q=P^(50/93) = 1951/54312 = 0.035922079835027
+
+natural variance boundary
+variance-plus-Cauchy exponent = 143/100 = 1.430000000000000
+power margin = 0 = 0.000000000000000
+
+literal log budget
+C=0 contribution exponent = 2
+trace normalization exponent = 3

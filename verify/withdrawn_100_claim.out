@@ -1,0 +1,30 @@
+EXACT ENDPOINT AUDIT
+mu = 333333/500000 = 0.666666
+delta = 3385873/50000000 = 0.06771746
+claimed_m2 = 18717/50000 = 0.37434
+cap_c_7_over_20 = 455737013/1218517300 = 0.37400947282406249
+gap_c_7_over_20 = 201376541/609258650000 = 0.000330527175937510284
+score_gap_c_7_over_20 = 201376541/2025000000000 = 0.0000994452054320987654
+cap_c_3_over_8 = 64517303/172727100 = 0.373521601416338258
+gap_c_3_over_8 = 70679807/86363550000 = 0.000818398583661741556
+score_gap_c_3_over_8 = 6425437/25000000000 = 0.00025701748
+
+WRITTEN POINTWISE-CONE REPRODUCTION
+A = 0.831212660984219696038186
+B = -0.355154209556179482979852
+normalization = 1.59397241720812340137677
+total_cap_mass = 1.22077934447367486113976
+gap = 0.176121680110582015886448
+profile_mass = 1.0
+q_squared = 0.214430821368998600312495
+absolute_distance = 0.359813284954748140261163
+m2 = 0.374347517070571064334645
+50-vs-80-dps M2 difference = 9.7520352e-52
+pointwise check: r(t)=0 on the central gap and r(t)=V_sigma(mu*t) outside
+therefore 0 <= r(t) <= V_sigma(mu*t) identically by construction
+M2 - 0.3144 = 0.0599475170705710643346451
+
+VERDICT
+density-one premise package: INCONSISTENT AT s/N = 1
+claimed pointwise maximum M2 <= 0.3144: NOT REPRODUCED
+an additional admissibility condition is required to obtain that bound

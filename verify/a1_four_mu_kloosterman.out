@@ -1,0 +1,43 @@
+A1 retained four-Moebius-slot exact exponent audit
+each Moebius slot U = 43/200 = 0.215000000000000
+each smooth slot M = 2/5 = 0.400000000000000
+frequency L = 23/100 = 0.230000000000000
+shift H = 43/100 = 0.430000000000000
+collapsed numerator r=|ell|h = 33/50 = 0.660000000000000
+each product side u1*u2*m or v1*v2*n = 83/100 = 0.830000000000000
+seven-variable tuple volume = 58/25 = 2.320000000000000
+physical x exponent = -23/100 = -0.230000000000000
+fixed-x target = 83/50 = 1.660000000000000
+integrated target = 143/100 = 1.430000000000000
+seven literal scales and target normalization = PASS
+one Moebius slot relative to q = 43/166 = 0.259036144578313
+prime-modulus square-root threshold = 1/2 = 0.500000000000000
+one-slot threshold deficit = 20/83 = 0.240963855421687
+single-slot arbitrary-modulus multiplicative range = FAILS
+one-sided ideal square-root fixed-x output = 381/200 = 1.905000000000000
+one-sided ideal square-root integrated output = 67/40 = 1.675000000000000
+one-sided fixed-x excess = 49/200 = 0.245000000000000
+one-sided integrated excess = 49/200 = 0.245000000000000
+prescribed one-sided fixed-modulus/triangle class = POWER-INCOMPATIBLE
+this is an upper-bound-chain output, not a lower bound for the source sum
+simultaneous both-side candidate fixed-x exponent = 149/100 = 1.490000000000000
+simultaneous candidate margin = 17/100 = 0.170000000000000
+simultaneous both-side candidate integrated exponent = 63/50 = 1.260000000000000
+simultaneous integrated margin = 17/100 = 0.170000000000000
+gain over one-sided chain = 83/200 = 0.415000000000000
+gain needed to repair one-sided chain = 49/200 = 0.245000000000000
+surplus after repair = 17/100 = 0.170000000000000
+simultaneous exponent is a CANDIDATE, not a proved analytic estimate
+concrete analytic epsilon allocation = 17/400 = 0.042500000000000
+concrete two-log power allocation = 17/400 = 0.042500000000000
+allocated raw fixed-x exponent = 63/40 = 1.575000000000000
+allocated raw integrated exponent = 269/200 = 1.345000000000000
+allocated fixed-x margin = 17/200 = 0.085000000000000
+allocated integrated margin = 17/200 = 0.085000000000000
+concrete epsilon/log allocation remains STRICTLY BELOW both targets
+normalized long-log exponent = 0 = 0.000000000000000
+raw two-long-slot log exponent = 2 = 2.000000000000000
+single dyadic numerator L1 count adds log exponent 0
+a proved T^(149/100+epsilon)*(log T)^2 bound with epsilon<17/100
+would imply the fixed-x target with C=0; no such bound is asserted
+published direct theorem found retaining all four Moebius slots = NO

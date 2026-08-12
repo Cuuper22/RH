@@ -1,0 +1,102 @@
+A1 SQ4 correlated-moment exact exponent audit
+one short Mobius slot U = 43/200 (0.215000000000)
+product modulus side P = 83/100 (0.830000000000)
+two-slot product V = 43/100 (0.430000000000)
+Poisson dual length K = 43/100 (0.430000000000)
+source numerator R = 33/50 (0.660000000000)
+completion prefactor = -43/100 (-0.430000000000)
+SQ4-HB target = 149/100 (1.490000000000)
+literal fixed-x budget = 83/50 (1.660000000000)
+
+generalized-Gauss-product character moment + one coefficient-blind Cauchy
+modulus-character family exponent = 83/50 (1.660000000000)
+v-pair character norm = 209/200 (1.045000000000)
+k*r character norm = 11/8 (1.375000000000)
+fixed-x output = 199/100 (1.990000000000)
+excess above literal budget = 33/100 (0.330000000000)
+excess above SQ4-HB = 1/2 (0.500000000000)
+integrated output = 44/25 (1.760000000000)
+integrated budget excess = 33/100 (0.330000000000)
+
+fixed-(p,v) ideal k,r square-root class
+fixed-x output = 179/100 (1.790000000000)
+excess above literal budget = 13/100 (0.130000000000)
+excess above SQ4-HB = 3/10 (0.300000000000)
+integrated output = 39/25 (1.560000000000)
+
+Blomer--Pascadi Theorem 5.5 on a fixed-(p,v) k,r block
+H first summand = 7/320 (0.021875000000)
+H second summand = 1/3200 (0.000312500000)
+H third summand = 27/500 (0.054000000000)
+H fourth summand = 71/900 (0.078888888889)
+H fifth summand = -17/1500 (-0.011333333333)
+dominant H exponent = 71/900 (0.078888888889)
+fixed-(p,v) inner bilinear output = 2617/1800 (1.453888888889)
+outer-triangled fixed-x output = 4111/1800 (2.283888888889)
+excess above literal budget = 1123/1800 (0.623888888889)
+excess above SQ4-HB = 1429/1800 (0.793888888889)
+integrated output = 3697/1800 (2.053888888889)
+status = LITERAL FIXED-BLOCK APPLICATION; OUTER CORRELATION DISCARDED
+
+Kerr--Shparlinski--Wu--Xi favourable Type-I class
+source ell exponent = 23/100 (0.230000000000)
+Delta1 first candidate = -43/200 (-0.215000000000)
+Delta1 second candidate = -43/200 (-0.215000000000)
+Delta1 third candidate = -83/400 (-0.207500000000)
+best Delta1 exponent = -43/200 (-0.215000000000)
+per-(p,ell) output = 59/40 (1.475000000000)
+fixed-x output = 421/200 (2.105000000000)
+excess above literal budget = 89/200 (0.445000000000)
+excess above SQ4-HB = 123/200 (0.615000000000)
+integrated output = 15/8 (1.875000000000)
+reciprocity-phase base error = 267/200 (1.335000000000)
+Poisson eta allocation = 1/20 (0.050000000000)
+aggregate epsilon allocation = 1/20 (0.050000000000)
+allocated reciprocity-phase error = 287/200 (1.435000000000)
+allocated reciprocity-error margin below SQ4-HB = 11/200 (0.055000000000)
+status = FAVOURABLE COEFFICIENT-NORM/COPRIME GRANTS; POWER-KILLED
+
+squarefree-v Ramanujan lift + Pascadi geometry
+lifted level q=(u1*u2)*v = 43/50 (0.860000000000)
+lifted first index k = 43/100 (0.430000000000)
+lifted second index v*r = 109/100 (1.090000000000)
+lifted quotient modulus = 2/5 (0.400000000000)
+sqrt(q*k) prefactor = 129/200 (0.645000000000)
+level/second-index coefficient norm = 19/25 (0.760000000000)
+Pascadi A=S*sqrt(R)*C = 63/50 (1.260000000000)
+Pascadi B=sqrt(M*N) = 19/25 (0.760000000000)
+Pascadi C=sqrt(S*M)*C = 209/200 (1.045000000000)
+Pascadi D=sqrt(S*N)*C = 11/8 (1.375000000000)
+Pascadi rational geometry factor = 11/8 (1.375000000000)
+output before Poisson prefactor = 139/50 (2.780000000000)
+fixed-x output = 47/20 (2.350000000000)
+excess above literal budget = 69/100 (0.690000000000)
+excess above SQ4-HB = 43/50 (0.860000000000)
+integrated output = 53/25 (2.120000000000)
+integrated budget excess = 69/100 (0.690000000000)
+status = CONDITIONAL ARITHMETIC UNDER UNSTATED GENERAL-b VARIANT
+
+literal stated Corollary 5.11 via separate (d,a) applications
+additive recombination power = 43/200 (0.215000000000)
+output before Poisson prefactor = 599/200 (2.995000000000)
+fixed-x output = 513/200 (2.565000000000)
+excess above literal budget = 181/200 (0.905000000000)
+excess above SQ4-HB = 43/40 (1.075000000000)
+integrated output = 467/200 (2.335000000000)
+
+optimistic normalized auxiliary log exponent = 0 (0.000000000000)
+raw long-slot log exponent = 2 (2.000000000000)
+literal Cor5.11 k-dyadic scale log exponent = 1 (1.000000000000)
+literal Cor5.11 raw fixed log exponent = 3 (3.000000000000)
+granted general-b divisor log exponent = 1 (1.000000000000)
+granted general-b normalized fixed log exponent = 2 (2.000000000000)
+granted general-b raw fixed log exponent = 4 (4.000000000000)
+all divisor, Mellin, and theorem losses are displayed as T^epsilon
+verdict coefficient-blind generalized-Gauss-product moment = POWER-KILLED
+verdict fixed-(p,v) square-root-only chain = POWER-KILLED
+verdict fixed-(p,v) Blomer--Pascadi chain = APPLICABLE LOCALLY AND POWER-KILLED
+verdict favourable Kerr--Shparlinski--Wu--Xi Type-I chain = POWER-KILLED
+verdict literal squarefree-v Cor5.11 additive chain = POWER-KILLED
+verdict favourable general-b geometry = CONDITIONAL AND POWER-KILLED
+non-squarefree v with gcd(v1,v2) not dividing k = STRUCTURALLY OUTSIDE THE LIFT
+survivor = signed generalized-Gauss-product level moment before Cauchy

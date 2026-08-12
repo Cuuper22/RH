@@ -1,0 +1,7 @@
+d=2 p=2
+raw_count=4
+canonical_count=3
+original_count=3
+raw_merged=[(1, 4), (2, 2), (2, 2), (4, 1)]
+canonical_merged=[(1, 4), (2, 2), (4, 1)]
+status=PASS

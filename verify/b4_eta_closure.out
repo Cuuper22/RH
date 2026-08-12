@@ -1,0 +1,43 @@
+B4 eta-closure exact rational audit
+eta = 3/4 = 0.750000000000000
+delta = (1-eta)/2 = 1/8 = 0.125000000000000
+
+legal K=3, j=2 balanced Heath--Brown block
+X exponent = 7/4 = 1.750000000000000
+K=3 truncated cutoff exponent = 7/12 = 0.583333333333333
+each of two truncated exponents = 3/8 = 0.375000000000000
+each of two unrestricted exponents = 1/2 = 0.500000000000000
+cutoff and product checks = PASS
+
+literal relabel-only split
+target M1 exponent = 1/4 = 0.250000000000000
+available subproduct exponents = 0, 1/2, 1
+whole-variable groups having exponent A=eta = [(2, 0)]
+requested M1 split is unavailable = PASS
+
+conditional asymmetric single-block algebra
+P exponent = 1 = 1.000000000000000
+Q exponent = 3/4 = 0.750000000000000
+H exponent = 3/4 = 0.750000000000000
+P Q exponent = 7/4 = 1.750000000000000
+trace exponent = 7/4 = 1.750000000000000
+
+balanced block obstruction
+balanced P exponent = 5/4 = 1.250000000000000
+balanced Q exponent = 5/4 = 1.250000000000000
+balanced P Q exponent = 5/2 = 2.500000000000000
+P Q excess over trace = 3/4 = 0.750000000000000
+balanced P H exponent = 2 = 2.000000000000000
+P H excess over trace = 1/4 = 0.250000000000000
+
+preliminary zero-shift replacement
+epsilon = 1/14 = 0.071428571428571
+epsilon threshold = 1/7 = 0.142857142857143
+H^2 (AM)^epsilon exponent = 13/8 = 1.625000000000000
+power saving against trace = 1/8 = 0.125000000000000
+
+literal prime-dyadic logarithmic threshold
+contribution exponent in log T = C + 2
+budget exponent in log T = 3
+closure requires C < 1; every C >= 1 fails
+all exact checks = PASS

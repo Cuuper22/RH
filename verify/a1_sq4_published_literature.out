@@ -1,0 +1,54 @@
+A1 SQ4 published-literature exact exponent audit
+pre-completion target = 48/25 (1.920000000000)
+completion prefactor = -43/100 (-0.430000000000)
+completed SQ4-HB target = 149/100 (1.490000000000)
+
+existing benchmark classes, replayed in pre-completion normalization
+coefficient-blind character output = 121/50 (2.420000000000)
+coefficient-blind target excess = 1/2 (0.500000000000)
+fixed-(p,v) ideal joint-square-root output = 111/50 (2.220000000000)
+fixed-(p,v) target excess = 3/10 (0.300000000000)
+direct Weil-triangle base output = 553/200 (2.765000000000)
+direct Weil-triangle base target excess = 169/200 (0.845000000000)
+direct Weil-triangle also carries the explicit positive loss eta+epsilon
+
+Shparlinski 2019 Theorem 2.1 favourable fixed-(p,ell,t) unit class
+granted alpha L1 exponent = 43/50 (0.860000000000)
+granted alpha L2 exponent = 43/100 (0.430000000000)
+sqrt(L1*L2) exponent = 129/200 (0.645000000000)
+kernel term N^(1/8)*q = 707/800 (0.883750000000)
+kernel term N^(1/2)*q^(3/4) = 67/80 (0.837500000000)
+dominant kernel exponent = 707/800 (0.883750000000)
+local fixed-(p,ell,t) output = 1223/800 (1.528750000000)
+outer-triangled pre-completion output = 2071/800 (2.588750000000)
+target excess = 107/160 (0.668750000000)
+status = FAVOURABLE UNIT/COPRIME AND COEFFICIENT-NORM GRANTS; POWER-KILLED
+
+Shparlinski 2019 Theorem 2.2 good-modulus part at s=2
+mixed coefficient norm exponent = 129/200 (0.645000000000)
+kernel term q = 83/100 (0.830000000000)
+kernel term N^(1/2)*q^(3/4) = 67/80 (0.837500000000)
+good-modulus pre-completion base output = 1017/400 (2.542500000000)
+good-modulus target excess = 249/400 (0.622500000000)
+status = GOOD PART POWER-KILLED; THEOREM DOES NOT BOUND EXCEPTIONAL SOURCE MASS
+
+other audited theorem classes in pre-completion normalization
+Blomer--Pascadi preprint fixed-(p,v) outer-triangle output = 977/360 (2.713888888889)
+Blomer--Pascadi target excess = 1429/1800 (0.793888888889)
+KSWX favourable Type-I output = 507/200 (2.535000000000)
+KSWX target excess = 123/200 (0.615000000000)
+Pascadi unstated-general-sequence conditional output = 139/50 (2.780000000000)
+Pascadi conditional target excess = 43/50 (0.860000000000)
+Pascadi literal separate-(d,a) output = 599/200 (2.995000000000)
+Pascadi literal target excess = 43/40 (1.075000000000)
+
+standard normalized fixed log exponent = 0 (0.000000000000)
+standard raw fixed log exponent = 2 (2.000000000000)
+Pascadi literal normalized fixed log exponent = 1 (1.000000000000)
+Pascadi literal raw fixed log exponent = 3 (3.000000000000)
+Pascadi conditional normalized fixed log exponent = 2 (2.000000000000)
+Pascadi conditional raw fixed log exponent = 4 (4.000000000000)
+unspecified q^o, Mellin, truncation, and theorem losses are recorded as T^epsilon
+explicit Pascadi divisor/dyadic losses are the fixed log powers printed above
+headline = NO PUBLISHED THEOREM FOUND IN THE AUDITED CLASSES
+survivor = full signed conductor-stratified generalized-Gauss-product level moment

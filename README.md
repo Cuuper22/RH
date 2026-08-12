@@ -3,14 +3,44 @@
 > Research artifact. Not maintained and not accepting contributions.
 > A Lean 4 formalization released as a static companion artifact to the paper.
 
+## Frozen extension ladder — status at HEAD
+
+The target is the unconditional base-repository standard: comparator-validated
+headline theorems whose `#print axioms` output is exactly
+`[propext, Classical.choice, Quot.sound]` and which have no undisclosed
+analytic premise.  The quartic theorem declarations have the standard axiom
+footprint and retain four explicit per-support premises.  However,
+`R1aAllocationNoGo.no_principal14999` and `no_principal19999` prove that the
+`PrincipalCyclicBlock` premise is uninhabited for the two exact frozen family
+types.  Thus the compiled conditional implications remain, but there is no
+valid construction satisfying their current premises.  They do not yet have
+a separate trusted-statement comparator topic.
+
+| rung | frozen lower bound | status at HEAD |
+|---|---:|---|
+| R-679 | 0.67924886307 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`, `traceTransfer_saturated`; compiled headline exists |
+| R-797 | 0.79721415286134 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`, `traceTransfer_saturated`; compiled headline exists |
+| R-850 | 1893603832049143/2227707598259143 | **CONDITIONAL ON** `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated`; compiled headline exists |
+| R-8657 | 0.865674254456636 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** takes the four `Family14999` structures, but `no_principal14999` rules out `PrincipalCyclicBlock`; dyadic/cumulative theorem remains, obtained monotonically from R-8686 |
+| R-8686 | 0.86855250 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** same `Family14999` obstruction; dyadic/cumulative theorem remains |
+| R-9383 | 0.938313327050949 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** `no_principal19999` rules out the required `Family19999` block; theorem remains a monotone consequence of R-9506, while the direct flat branch is also killed |
+| R-9506 | 0.95063832187565 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** takes the four `Family19999` structures, but `no_principal19999` rules out `PrincipalCyclicBlock`; dyadic/cumulative theorem remains |
+
+The signed-pair and Rudnick--Sarnak structures remain upstream routes for
+proving the trace and moment premises; they are not consumed by these
+headlines.  No analytic family instance is constructed, and the current R1a
+interface is formally impossible for both frozen family types.  Consequently
+no extension rung currently meets the unconditional target standard.  The
+unconditional `Zeta23` base remains separate and unchanged.
+
 Repository: <https://github.com/anthropics/zeta-23-lean>.
 
 This repository accompanies the paper "More than two thirds of the zeros of the Riemann zeta function lie on the critical line" (Claude; Anthropic, San Francisco, 2026).
-It contains a complete, `sorry`-free Lean 4 / Mathlib formalization of Theorems A–E of that paper, including proofs
+The base `Zeta23` layer contains a complete, `sorry`-free Lean 4 / Mathlib formalization of Theorems A–E of that paper, including proofs
 of every analytic input the argument uses (Weil's explicit formula for ζ and for primitive Dirichlet L-functions,
 the Riemann–von Mangoldt zero-counting formulas, Stirling-type estimates for Γ′/Γ on vertical lines,
 Chebyshev–Mertens prime-sum estimates, and the Montgomery–Vaughan generalized Hilbert inequality). Nothing is
-assumed: the top-level theorems have no hypotheses, the repository declares no axioms, and `#print axioms` on each
+assumed by `Zeta23`: its top-level theorems have no hypotheses, `Zeta23` declares no axioms, and `#print axioms` on each
 headline theorem reports only Lean's three standard axioms `propext`, `Classical.choice`, `Quot.sound`.
 
 Toolchain: Lean `v4.33.0-rc2`, Mathlib commit `51e6992efd06126df61a496bebf8f49482a4e129` (Mathlib's tag `v4.33.0-rc2`; pinned in `lake-manifest.json`).
@@ -105,6 +135,76 @@ form `'two_thirds_on_critical_line' depends on axioms: [propext, Classical.choic
 For the strongest independent check — statement equality against the trusted challenge plus kernel replay —
 run comparator as described in [`comparator/README.md`](comparator/README.md).
 
+
+## The legacy axiom-based `Solution.Zeta85` comparator topic through R-850
+
+The base-repository results described in the intervening sections above are
+**unconditional**. The directory [`RH/`](RH/) adds a separate,
+**conditional** legacy layer: a formalization of a research run extending the
+2 − 1/c₁* = 0.6725007… result to 0.8500235…, in which the prime-side inputs the
+run could not establish are isolated as eight named axioms in the single file
+[`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean).  The separate
+Prop-structured quartic headlines are listed in the top ladder; they are not
+part of this trusted-statement comparator topic.  Nothing under
+`Zeta23/` imports anything under `RH/`, so the unconditional results are untouched (re-verified:
+`VALIDATION.md` §4). The source documents of the run are unpacked in [`docs/run/`](docs/run/).
+
+`lake build` builds both libraries (`defaultTargets = ["Zeta23", "RH"]`).
+
+### Legacy statement hierarchy
+
+The legacy comparator-topic rows are `liminf_{T→∞} N₀ˢ(T,2T)/N(T,2T) ≥ c` and the cumulative `liminf N₀ˢ(T)/N(T) ≥ c`,
+in the repository's ε-form, over the counting functions of `comparator/ChallengeDeps.lean`.
+
+| | support σ | c | Lean name (`Solution.Zeta85`) | underlying theorem | axioms |
+|---|---|---|---|---|---:|
+| base | ≤ 1 | 2 − 1/c₁* = 0.6725007… | `montgomery_taylor_simple_on_critical_line_mult` | `Zeta23.ThmD.thmD₀_simple_mult` | **0** |
+| rung 1 | 101/100 | 0.67924886307 | `zeta85_rung_support_101_over_100`(`_cumulative`) | `RH.Zeta85.rung101`(`_cumulative`) | 4 |
+| rung 2 | 5/4 | 0.79721415286134 | `zeta85_rung_support_5_over_4`(`_cumulative`) | `RH.Zeta85.rung125`(`_cumulative`) | 4 |
+| rung 3 | 143/100 | 1893603832049143/2227707598259143 = 0.8500235101… | `zeta85_simple_on_critical_line`(`_cumulative`) | `RH.Zeta85.rung143`(`_cumulative`) | 4 |
+| corollary | 143/100 | 17/20 | `zeta85_eighty_five_percent`(`_cumulative`) | `RH.Zeta85.eightyFive`(`_cumulative`) | 4 |
+
+Rung 3's constant is exact: `2 − 1/c_pc` with `c_pc = λA²/(B + λJ) = 2227707598259143/2561811364469143`
+for the window `v(s) = 1 − (169/100)s²` at `λ = 143/100`, whose three moments
+`A = 1031/1200`, `B = 1809683/2400000`, `J = 970487502160963/3017889594720000` are **proved** by
+Mathlib interval integration in [`RH/Zeta85/Window.lean`](RH/Zeta85/Window.lean). It clears `17/20`
+by `1047470577429/44554151965182860`. Rungs 1 and 2 carry the truncated decimals of their sources,
+whose optimal windows are transcendental (`FINDINGS.md` §4).
+
+Rungs 1 and 2 depend on the **published** BBLR error bound and on the `η < 1/4` block closure, which
+is power-saving; rung 3 depends instead on the run's cycle-5 claim, which is only
+polylogarithmically saving. The two branches are disjoint — see `AXIOMS.md` §2.
+
+### One-line status of each axiom
+
+| axiom (`RH.Zeta85.Hypotheses.…`) | status |
+|---|---|
+| `bblr_error_bound` | **[PUBLISHED LITERATURE: Bettin–Bui–Li–Radziwiłł, JEMS 22 (2020) 3953–3980, Proposition 3.1, error bound — with the first factor `AB`, not `(AB)^{1/2}`]** |
+| `bblr_poisson_blocks` | **[PUBLISHED LITERATURE: BBLR ibid., proof of Proposition 3.1, equation (14)]**, with the per-block bound of `docs/run/12` (6), (11), (17) |
+| `shiu_majorant` | **[RUN CLAIM: `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` §2 eq. (14), undischarged]** |
+| `signedPair_traceGrade_lt_5_4` | **[RUN CLAIM: `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §2 (T1)–(T5), undischarged]** |
+| `signedPair_traceGrade_lt_3_2` | **[RUN CLAIM: `docs/run/12_…_86p5674.md` eq. (2) and §5, undischarged — and its logarithmic budget does not close: `FINDINGS.md` §7]** |
+| `windowCost_101` | **[RUN CLAIM: `docs/run/07_root_gain_support_1p01.md`, numerical certificate, undischarged]** |
+| `windowCost_125` | **[RUN CLAIM: `docs/run/08_…_79p7214.md` §3 eqs. (11)–(16), numerical certificate, undischarged]** |
+| `traceTransfer_saturated` | **[RUN CLAIM: `docs/run/01_arithmetic_cycle1.md` §2, `docs/run/02_certificate_cycle2.md` §2, `docs/run/12` §5, undischarged for the support-beyond-one part only; the σ ≤ 1 case is PROVEN IN REPO as `Zeta23.ThmD.tracesBoundsD_concrete`]** |
+
+Proved outright inside the conditional layer, with no axiom: the whole Phase-A certificate; the count
+lemma of `docs/run/01_hybrid_cycle1.md` (1)–(3); the two-trace ⇒ ε-form derivation; the signed-shift
+reciprocal lemma `|S_{H₀}(θ)| ≪_J H₀(1+H₀‖θ‖)^{−J}` with an explicit constant; the whole exponent
+bookkeeping of arithmetic cycles 3–5; and the logarithmic-power audit — which **shows that the
+cycle-5 route's `(log T)^C` does not fit the trace budget**. See `AXIOMS.md` §4 and `FINDINGS.md` §7.
+
+### Reading order
+
+[`AXIOMS.md`](AXIOMS.md) — what is assumed, `#print axioms` verbatim, provenance of each axiom.
+[`FINDINGS.md`](FINDINGS.md) — every place the run's documents were wrong, imprecise or unprovable.
+[`VALIDATION.md`](VALIDATION.md) — build, `sorry`/axiom audits, statement-equality check.
+[`docs/REUSE_MAP.md`](docs/REUSE_MAP.md) — every `Zeta23` declaration the layer reuses.
+
+Comparator topic `Zeta85` (`comparator/config-zeta85.json`, eight statements): unlike every other
+topic it is **conditional**, so its `permitted_axioms` lists the eight axioms above alongside
+`propext`, `Classical.choice`, `Quot.sound`. That is a deliberate, documented deviation from rule (5)
+of `comparator/README.md`; see `VALIDATION.md` §7.
 
 ## Provenance and attribution
 
