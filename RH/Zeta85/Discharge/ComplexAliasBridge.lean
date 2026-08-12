@@ -1638,6 +1638,237 @@ theorem distinguishedFrequencyPairTail_eq_outsideGrid_of_compact
       (summable_distinguishedIntegerFrequencyPairTerm
         F T Λ hL hΛ hsmooth hsupp heven ρ ρ')
 
+
+/-! ## Distinguished-channel aliases vanish from support alone -/
+
+
+/-- Half-period support of the distinguished local profile kills every
+nonzero spatial alias, for arbitrary complex frequencies.  Two translates
+can overlap only at the single endpoint u = m L / 2, hence the integral
+vanishes without an RH or real-frequency restriction. -/
+theorem distinguished_complexAliasTerm_eq_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (henergy : 0 < F.channelEnergy T (F.distinguished T))
+    (hsupport :
+      tsupport (F.localProfile T) ⊆ Icc (-(1 : ℝ) / 2) (1 / 2))
+    (z z' : ℂ) (m : ℤ) (hm : m ≠ 0) :
+    F.complexAliasTerm T z z' (F.distinguished T) m = 0 := by
+  let L : ℝ := F.period T (F.distinguished T)
+  have hL' : 0 < L := by simpa only [L] using hL
+  have hwindow_mem (u : ℝ)
+      (hu : F.window T (F.distinguished T) u ≠ 0) :
+      u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2) := by
+    have hlocal :
+        F.localProfile T (u / L) ≠ 0 := by
+      have harg : L * (u / L) = u := by
+        field_simp [hL'.ne']
+      unfold QuarticGramFamily.localProfile
+      dsimp only
+      rw [show F.period T (F.distinguished T) = L by rfl, harg]
+      exact div_ne_zero
+        (mul_ne_zero hL'.ne' (pow_ne_zero 2 hu))
+        henergy.ne'
+    exact hsupport (subset_tsupport _ hlocal)
+  unfold QuarticGramFamily.complexAliasTerm
+  dsimp only
+  rw [show F.period T (F.distinguished T) = L by rfl]
+  have hint :
+      (∫ u : ℝ,
+        (F.window T (F.distinguished T) u : ℂ) *
+          F.window T (F.distinguished T) (u - (m : ℝ) * L) *
+          cexp (I * (z - z') * (u : ℂ))) = 0 := by
+    rw [← integral_zero]
+    apply integral_congr_ae
+    filter_upwards [ae_neq ((m : ℝ) * L / 2)] with u hu
+    by_cases hwu : F.window T (F.distinguished T) u = 0
+    · simp [hwu]
+    by_cases hwshift :
+        F.window T (F.distinguished T) (u - (m : ℝ) * L) = 0
+    · simp [hwshift]
+    have hx := hwindow_mem u hwu
+    have hy := hwindow_mem (u - (m : ℝ) * L) hwshift
+    have hxy :
+        u / L - (u - (m : ℝ) * L) / L = (m : ℝ) := by
+      field_simp [hL'.ne']
+      ring
+    have hmloR : (-1 : ℝ) ≤ (m : ℝ) := by
+      rw [← hxy]
+      linarith [hx.1, hy.2]
+    have hmhiR : (m : ℝ) ≤ 1 := by
+      rw [← hxy]
+      linarith [hx.2, hy.1]
+    have hmlo : (-1 : ℤ) ≤ m := by
+      exact_mod_cast hmloR
+    have hmhi : m ≤ (1 : ℤ) := by
+      exact_mod_cast hmhiR
+    have hmcase : m = -1 ∨ m = 1 := by
+      omega
+    apply False.elim
+    apply hu
+    rcases hmcase with rfl | rfl
+    · have hxval : u / L = -(1 : ℝ) / 2 := by
+        norm_num at hxy
+        linarith [hx.1, hy.2]
+      have huval : u = (-(1 : ℝ) / 2) * L :=
+        (div_eq_iff hL'.ne').mp hxval
+      calc
+        u = (-(1 : ℝ) / 2) * L := huval
+        _ = ((-1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+    · have hxval : u / L = (1 : ℝ) / 2 := by
+        norm_num at hxy
+        linarith [hx.2, hy.1]
+      have huval : u = ((1 : ℝ) / 2) * L :=
+        (div_eq_iff hL'.ne').mp hxval
+      calc
+        u = ((1 : ℝ) / 2) * L := huval
+        _ = ((1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+  rw [hint, mul_zero]
+
+
+/-- The distinguished infinite frequency lattice equals its zero-translation
+energy integral under closed half-period support.  Unlike the earlier support
+gap lemma, no strict inequality between support width and period is needed. -/
+theorem distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T Λ : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| ->
+      F.window T (F.distinguished T) u = 0)
+    (heven : ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u)
+    (henergy : 0 < F.channelEnergy T (F.distinguished T))
+    (hlocalSupport :
+      tsupport (F.localProfile T) ⊆ Icc (-(1 : ℝ) / 2) (1 / 2))
+    (z z' : ℂ) :
+    channelNormalizedFrequencyPairSum F T (F.distinguished T) z z' =
+      (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.window T (F.distinguished T) u : ℂ) *
+            F.window T (F.distinguished T) u *
+            cexp (I * (z - z') * (u : ℂ)) := by
+  let j : Fin (F.channelCount T) := F.distinguished T
+  have hsum :
+      Summable (fun m : ℤ => F.complexAliasTerm T z z' j m) :=
+    summable_channelAlias F T j Λ hL hΛ hsmooth hsupp heven z z'
+  have hnonzero :
+      (∑' m : {m : ℤ // m ≠ 0},
+        F.complexAliasTerm T z z' j m) = 0 := by
+    have hfun :
+        (fun m : {m : ℤ // m ≠ 0} =>
+          F.complexAliasTerm T z z' j m) = 0 := by
+      funext m
+      exact distinguished_complexAliasTerm_eq_zero F T
+        hL henergy hlocalSupport z z' m m.property
+    rw [hfun]
+    simp
+  have halias :
+      channelAliasSum F T j z z' =
+        F.complexAliasTerm T z z' j 0 := by
+    rw [channelAliasSum_eq_zero_add_nonzero F T j z z' hsum,
+      hnonzero, add_zero]
+  have hL0 : (F.period T j : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  unfold channelNormalizedFrequencyPairSum
+  rw [channelFrequencyPairSum_eq_period_mul_aliasSum
+    F T j Λ hL hΛ hsmooth hsupp heven z z']
+  rw [halias, mul_assoc, div_mul_cancel₀ _ hL0]
+  exact congrArg (fun w : ℂ => (F.fullLength T : ℂ) * w)
+    (complexAliasTerm_zero F T j z z')
+
+/-- The physical principal-block construction therefore supplies literal
+nonzero-alias cancellation on its distinguished channel eventually. -/
+theorem PrincipalCyclicBlock.eventually_distinguished_complexAlias_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) :
+    ∀ᶠ T in Filter.atTop,
+      ∀ z z' : ℂ, ∀ m : ℤ, m ≠ 0 ->
+        F.complexAliasTerm T z z' (F.distinguished T) m = 0 := by
+  filter_upwards [
+    h.periods_pos,
+    h.distinguished_channel_energy_pos,
+    h.local_profile_support
+  ] with T hperiod henergy hsupport
+  intro z z' m hm
+  exact distinguished_complexAliasTerm_eq_zero F T
+    (hperiod (F.distinguished T)) henergy hsupport z z' m hm
+
+
+/-- In particular, the entire nonzero distinguished-channel alias family is
+summable and has zero sum at every complex frequency pair. -/
+theorem PrincipalCyclicBlock.eventually_distinguished_nonzeroAliases
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) :
+    ∀ᶠ T in Filter.atTop, ∀ z z' : ℂ,
+      Summable (fun m : {m : ℤ // m ≠ 0} =>
+        F.complexAliasTerm T z z' (F.distinguished T) m) ∧
+      (∑' m : {m : ℤ // m ≠ 0},
+        F.complexAliasTerm T z z' (F.distinguished T) m) = 0 := by
+  filter_upwards [
+    eventually_distinguished_complexAlias_zero h
+  ] with T hzero
+  intro z z'
+  have hfun :
+      (fun m : {m : ℤ // m ≠ 0} =>
+        F.complexAliasTerm T z z' (F.distinguished T) m) = 0 := by
+    funext m
+    exact hzero z z' m m.property
+  rw [hfun]
+  simp
+
+
+/-- Closed half-period support upgrades the actual block pair kernel to the
+energy-integral-minus-grid-tail formula with no strict support-gap premise.
+This removes the endpoint obstruction in the previous Poisson wrapper. -/
+theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyIntegral_sub_tail_closed
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hblock : PrincipalCyclicBlock F)
+    (Λ : ℝ -> ℝ)
+    (hΛ : ∀ᶠ T in Filter.atTop, 0 ≤ Λ T)
+    (hsupp : ∀ᶠ T in Filter.atTop, ∀ u,
+      Λ T < |u| ->
+        F.window T (F.distinguished T) u = 0)
+    (heven : ∀ᶠ T in Filter.atTop, ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u) :
+    ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
+      QuarticTransfer.zeroPairKernel F T ρ ρ' =
+        (F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.window T (F.distinguished T) u : ℂ) *
+                F.window T (F.distinguished T) u *
+                cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          ((F.fullLength T /
+            F.period T (F.distinguished T) : ℝ) : ℂ) *
+            distinguishedFrequencyPairTail F T ρ ρ' := by
+  filter_upwards [
+    eventually_zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail hblock,
+    hblock.periods_pos,
+    hblock.windows_smooth,
+    hblock.distinguished_channel_energy_pos,
+    hblock.local_profile_support,
+    hΛ, hsupp, heven
+  ] with T hkernel hperiod hsmooth henergy hlocal hΛT hsuppT hevenT
+  have hsmoothC :
+      ContDiff ℝ 2
+        (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
+    (Complex.ofRealCLM.contDiff.comp
+      (hsmooth (F.distinguished T))).of_le (by norm_num)
+  intro ρ ρ'
+  rw [hkernel ρ ρ']
+  rw [distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
+    F T (Λ T) (hperiod (F.distinguished T)) hΛT
+    hsmoothC hsuppT hevenT henergy hlocal
+    (gammaOf ρ) (gammaOf ρ')]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
