@@ -248,6 +248,68 @@ theorem rung9506_cumulative_isometric
   simpa only [Rung9506_cumulative_statement] using
     quarticCumulative hdyadic
 
+/-! ## Routed virtual-channel route -/
+
+/-- Frozen R-8686 from the routed virtual-atom quartic lower bound. -/
+theorem rung8686_aligned_virtual
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (A : AlignedIsometricLayout.AtomFactorization L)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual A) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData L)
+    hvirtual.toIsometric
+
+/-- Cumulative R-8686 from the same routed virtual construction. -/
+theorem rung8686_cumulative_aligned_virtual
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (A : AlignedIsometricLayout.AtomFactorization L)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual A) :
+    Rung8686_cumulative_statement :=
+  rung8686_cumulative_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData L)
+    hvirtual.toIsometric
+
+/-- Frozen R-9506 from the routed virtual-atom quartic lower bound. -/
+theorem rung9506_aligned_virtual
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (A : AlignedIsometricLayout.AtomFactorization L)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual A) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData L)
+    hvirtual.toIsometric
+
+/-- Cumulative R-9506 from the same routed virtual construction. -/
+theorem rung9506_cumulative_aligned_virtual
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (A : AlignedIsometricLayout.AtomFactorization L)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual A) :
+    Rung9506_cumulative_statement :=
+  rung9506_cumulative_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData L)
+    hvirtual.toIsometric
+
 end Zeta85
 end RH
 
