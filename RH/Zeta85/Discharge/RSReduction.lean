@@ -147,6 +147,59 @@ theorem rsMainTerm_normalCutoffSymbol {n : ℕ}
   intro pairing hpairing
   exact rsPairIntegral_normalCutoffSymbol chi Phi hchi pairing
 
+/-- Smoothness of the tangential test and the one-dimensional cutoff
+combine to give smoothness of the compact extension. -/
+theorem normalCutoffSymbol_contDiff {k : ℕ} {m : WithTop ℕ∞}
+    (chi : ℝ -> ℂ) (Phi : (Fin k -> ℝ) -> ℂ)
+    (hchi : ContDiff ℝ m chi) (hPhi : ContDiff ℝ m Phi) :
+    ContDiff ℝ m (normalCutoffSymbol chi Phi) := by
+  unfold normalCutoffSymbol
+  fun_prop
+
+/-- Abstract closed support bound for the normal-cutoff construction.
+
+The tangential estimate is allowed one copy of the normal displacement.
+This is the exact form produced by closing the cyclic polygon. -/
+theorem normalCutoffSymbol_tsupport_subset {k : ℕ}
+    (chi : ℝ -> ℂ) (Phi : (Fin k -> ℝ) -> ℂ) (A eps : ℝ)
+    (hchi : ∀ s, chi s ≠ 0 -> |s| ≤ eps)
+    (hPhi : ∀ xi, Phi xi ≠ 0 ->
+      ∑ i : Fin k, |xi i| ≤ A + |∑ i : Fin k, xi i|) :
+    tsupport (normalCutoffSymbol chi Phi) ⊆
+      {xi | ∑ i : Fin k, |xi i| ≤ A + eps} := by
+  change closure (Function.support (normalCutoffSymbol chi Phi)) ⊆ _
+  apply (isClosed_le (by fun_prop) (by fun_prop)).closure_subset_iff.mpr
+  intro xi hxi
+  have hprod : chi (∑ i : Fin k, xi i) * Phi xi ≠ 0 := by
+    simpa only [Function.mem_support, normalCutoffSymbol] using hxi
+  have hc : chi (∑ i : Fin k, xi i) ≠ 0 := by
+    intro hz
+    apply hprod
+    rw [hz, zero_mul]
+  have hp : Phi xi ≠ 0 := by
+    intro hz
+    apply hprod
+    rw [hz, mul_zero]
+  have ht := hPhi xi hp
+  have hn := hchi (∑ i : Fin k, xi i) hc
+  dsimp only [Set.mem_setOf_eq]
+  linarith
+
+/-- A strict numerical margin converts the closed support bound into the
+strict total Fourier support required by RS Theorem 3.1. -/
+theorem normalCutoffSymbol_strictSupport {k : ℕ}
+    (chi : ℝ -> ℂ) (Phi : (Fin k -> ℝ) -> ℂ) (A eps : ℝ)
+    (hchi : ∀ s, chi s ≠ 0 -> |s| ≤ eps)
+    (hPhi : ∀ xi, Phi xi ≠ 0 ->
+      ∑ i : Fin k, |xi i| ≤ A + |∑ i : Fin k, xi i|)
+    (hmargin : A + eps < 2) :
+    tsupport (normalCutoffSymbol chi Phi) ⊆
+      {xi | ∑ i : Fin k, |xi i| < 2} := by
+  intro xi hxi
+  exact lt_of_le_of_lt
+    (normalCutoffSymbol_tsupport_subset chi Phi A eps hchi hPhi hxi)
+    hmargin
+
 /-- The complete multiplicity-weighted zero-tuple summand is unchanged. -/
 theorem rsZeroTupleTerm_normalCutoffSymbol (Z : ZeroConfig) {n : ℕ}
     (g : Fin (n + 1) -> ℝ -> ℂ)
