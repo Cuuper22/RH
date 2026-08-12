@@ -311,6 +311,46 @@ theorem sum_channelNormalizedFrequencyPairSum_eq_fullLength_mul_sum_zero
       rw [sum_channelAliasSum_eq_sum_zero
         F T z z' hsum hfamily hoff]
 
+
+/-- The cancellation field of BlockMomentLimits, specialized to the actual
+zero pairs and combined with the channel Poisson identity. -/
+theorem BlockMomentLimits.eventually_normalizedFrequencyPairSum_eq_zeroAliases
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : BlockMomentLimits F)
+    (Λ : ℝ → ℝ)
+    (hΛ : ∀ᶠ T in Filter.atTop, 0 ≤ Λ T)
+    (hL : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T), 0 < F.period T j)
+    (hsmooth : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T),
+        ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T), ∀ u,
+        Λ T < |u| → F.window T j u = 0)
+    (heven : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T), ∀ u,
+        F.window T j (-u) = F.window T j u) :
+    ∀ᶠ T in Filter.atTop,
+      ∀ ρ ∈ Z.ZIprime T, ∀ ρ' ∈ Z.ZIprime T,
+        (∑ j : Fin (F.channelCount T),
+            channelNormalizedFrequencyPairSum F T j
+              (gammaOf ρ) (gammaOf ρ')) =
+          (F.fullLength T : ℂ) *
+            ∑ j : Fin (F.channelCount T),
+              F.complexAliasTerm T (gammaOf ρ) (gammaOf ρ') j 0 := by
+  filter_upwards [
+    h.complex_aliases_summable_at_zeros,
+    h.offRH_complex_poisson_at_zeros,
+    hΛ, hL, hsmooth, hsupp, heven
+  ] with T hfamily hoff hΛT hLT hsmoothT hsuppT hevenT
+  intro ρ hρ ρ' hρ'
+  exact
+    sum_channelNormalizedFrequencyPairSum_eq_fullLength_mul_sum_zero
+      F T (Λ T) hΛT hLT hsmoothT hsuppT hevenT
+      (gammaOf ρ) (gammaOf ρ')
+      (hfamily ρ hρ ρ' hρ') (hoff ρ hρ ρ' hρ')
+
 end ComplexAliasBridge
 end Zeta85
 end RH
