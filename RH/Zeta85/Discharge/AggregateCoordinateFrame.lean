@@ -362,6 +362,60 @@ theorem quarticTraceNumerator_eq_literalEnergyTail
   intro ρ hρ ρ' hρ'
   exact mixedPairKernel_literal_eq_energyTail h T ρ ρ'
 
+/-! ## Terminal lower bound in the exact aggregate coordinate -/
+
+/-- The sole terminal analytic inequality after the literal block has been
+rewritten as an aggregate energy transform minus its finite-grid tail. -/
+structure LiteralEnergyTailQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic) : Prop where
+  block_dimension_pos :
+    ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
+  eventually_gt :
+    ∀ x : ℝ,
+      x < μ * QuarticTransfer.limitQuarticScore q μ p →
+      ∀ᶠ T in Filter.atTop,
+        x <
+          QuarticTransfer.pairKernelQuarticNumerator q F T
+            (literalCoordinateEnergyTailPairKernel F T) /
+              (Z.N T (2 * T) : ℝ)
+
+/-- The literal energy-tail lower bound supplies the mixed pair-kernel
+boundary with no layout or atom-factorization premise. -/
+theorem LiteralEnergyTailQuarticLowerBound.toMixed
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic}
+    (hreg : PhysicalWindowRegularity F)
+    (h : LiteralEnergyTailQuarticLowerBound q) :
+    IsometricKernel.MixedPairKernelQuarticLowerBound q
+      (coordinateRealData (literalBlockSelection F)) := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx] with T hT
+  have heq :
+      IsometricKernel.mixedPairKernelQuarticNumerator q
+          (coordinateRealData (literalBlockSelection F)) T =
+        QuarticTransfer.pairKernelQuarticNumerator q F T
+          (literalCoordinateEnergyTailPairKernel F T) := by
+    rw [← quarticTraceNumerator_eq_literalCoordinatePairKernel F T,
+      quarticTraceNumerator_eq_literalEnergyTail hreg T]
+  rw [heq]
+  exact hT
+
+/-- Direct handoff to the isometric quartic transfer consumed by the frozen
+rungs. -/
+theorem LiteralEnergyTailQuarticLowerBound.toIsometric
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic}
+    (hreg : PhysicalWindowRegularity F)
+    (h : LiteralEnergyTailQuarticLowerBound q) :
+    IsometricBlock.WeightedQuarticLowerBound q
+      (coordinateData (literalBlockSelection F)) :=
+  (h.toMixed hreg).toIsometric
+
 end AggregateCoordinateFrame
 end Zeta85
 end RH
