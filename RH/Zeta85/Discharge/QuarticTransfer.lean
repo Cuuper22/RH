@@ -639,6 +639,81 @@ def factoredZeroCycle4
             (zeroEdgeWeight F T ρ₂ *
               (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄))))))
 
+/-- The same factored tuple contributions after replacing every finite
+column contraction by its exact Poisson-completed value. -/
+def poissonZeroCycle1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
+  PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ *
+    zeroEdgeWeight F T ρ
+
+def poissonZeroCycle2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ₁ ρ₂ : ℂ) : ℂ :=
+  PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₂ *
+    (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₂ *
+      (zeroEdgeWeight F T ρ₁ * zeroEdgeWeight F T ρ₂))
+
+def poissonZeroCycle3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
+  PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₂ *
+    (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₂ ρ₃ *
+      (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₃ *
+        (zeroEdgeWeight F T ρ₁ *
+          (zeroEdgeWeight F T ρ₂ * zeroEdgeWeight F T ρ₃))))
+
+def poissonZeroCycle4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
+  PoissonKernelBridge.poissonAliasCompletedPair F T ρ₃ ρ₄ *
+    (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₂ *
+      (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₂ ρ₃ *
+        (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₄ *
+          (zeroEdgeWeight F T ρ₁ *
+            (zeroEdgeWeight F T ρ₂ *
+              (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄))))))
+
+theorem factoredZeroCycle1_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ')
+    (ρ : ℂ) :
+    factoredZeroCycle1 F T ρ = poissonZeroCycle1 F T ρ := by
+  simp only [factoredZeroCycle1, poissonZeroCycle1, hpair]
+
+theorem factoredZeroCycle2_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ')
+    (ρ₁ ρ₂ : ℂ) :
+    factoredZeroCycle2 F T ρ₁ ρ₂ = poissonZeroCycle2 F T ρ₁ ρ₂ := by
+  simp only [factoredZeroCycle2, poissonZeroCycle2, hpair]
+
+theorem factoredZeroCycle3_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ')
+    (ρ₁ ρ₂ ρ₃ : ℂ) :
+    factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ =
+      poissonZeroCycle3 F T ρ₁ ρ₂ ρ₃ := by
+  simp only [factoredZeroCycle3, poissonZeroCycle3, hpair]
+
+theorem factoredZeroCycle4_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ')
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) :
+    factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
+      poissonZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
+  simp only [factoredZeroCycle4, poissonZeroCycle4, hpair]
+
 theorem zeroIndexKernel1_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} {ρ : ℂ} :
@@ -733,6 +808,70 @@ def factoredZeroKernelCyclicTrace4
   Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
     ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
       factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+def poissonZeroKernelCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, poissonZeroCycle1 F T ρ)
+
+def poissonZeroKernelCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    poissonZeroCycle2 F T ρ₁ ρ₂)
+
+def poissonZeroKernelCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, poissonZeroCycle3 F T ρ₁ ρ₂ ρ₃)
+
+def poissonZeroKernelCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      poissonZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+theorem factoredZeroKernelCyclicTrace1_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelCyclicTrace1 F T =
+      poissonZeroKernelCyclicTrace1 F T := by
+  unfold factoredZeroKernelCyclicTrace1 poissonZeroKernelCyclicTrace1
+  simp_rw [factoredZeroCycle1_eq_poisson hpair]
+
+theorem factoredZeroKernelCyclicTrace2_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelCyclicTrace2 F T =
+      poissonZeroKernelCyclicTrace2 F T := by
+  unfold factoredZeroKernelCyclicTrace2 poissonZeroKernelCyclicTrace2
+  simp_rw [factoredZeroCycle2_eq_poisson hpair]
+
+theorem factoredZeroKernelCyclicTrace3_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelCyclicTrace3 F T =
+      poissonZeroKernelCyclicTrace3 F T := by
+  unfold factoredZeroKernelCyclicTrace3 poissonZeroKernelCyclicTrace3
+  simp_rw [factoredZeroCycle3_eq_poisson hpair]
+
+theorem factoredZeroKernelCyclicTrace4_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelCyclicTrace4 F T =
+      poissonZeroKernelCyclicTrace4 F T := by
+  unfold factoredZeroKernelCyclicTrace4 poissonZeroKernelCyclicTrace4
+  simp_rw [factoredZeroCycle4_eq_poisson hpair]
 
 theorem zeroKernelCyclicTrace1_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -934,6 +1073,33 @@ def factoredZeroKernelQuarticNumerator
     u.p3 * factoredZeroKernelCyclicTrace3 F T +
     u.p4 * factoredZeroKernelCyclicTrace4 F T
 
+/-- The terminal quartic numerator after every scalar block contraction has
+been expanded as a full spatial-alias sum minus its two explicit lattice
+tails. -/
+def poissonZeroKernelQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  let u := uncenteredQuartic q
+  u.p0 * (F.blockDim T : ℝ) +
+    u.p1 * poissonZeroKernelCyclicTrace1 F T +
+    u.p2 * poissonZeroKernelCyclicTrace2 F T +
+    u.p3 * poissonZeroKernelCyclicTrace3 F T +
+    u.p4 * poissonZeroKernelCyclicTrace4 F T
+
+theorem factoredZeroKernelQuarticNumerator_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelQuarticNumerator q F T =
+      poissonZeroKernelQuarticNumerator q F T := by
+  simp only [factoredZeroKernelQuarticNumerator,
+    poissonZeroKernelQuarticNumerator,
+    factoredZeroKernelCyclicTrace1_eq_poisson hpair,
+    factoredZeroKernelCyclicTrace2_eq_poisson hpair,
+    factoredZeroKernelCyclicTrace3_eq_poisson hpair,
+    factoredZeroKernelCyclicTrace4_eq_poisson hpair]
+
 theorem zeroKernelQuarticNumerator_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
@@ -1111,6 +1277,67 @@ structure FactoredZeroKernelQuarticLowerBound
     ∀ᶠ T in atTop,
       x < factoredZeroKernelQuarticNumerator q F T /
         (Z.N T (2 * T) : ℝ)
+
+/-- The same one-sided terminal bound in the explicit complex-Poisson
+coordinate.  Every pair factor here is a spatial-alias sum minus the exact
+negative and upper lattice tails. -/
+structure PoissonZeroKernelQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
+  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
+    ∀ᶠ T in atTop,
+      x < poissonZeroKernelQuarticNumerator q F T /
+        (Z.N T (2 * T) : ℝ)
+
+theorem eventually_zeroPairKernel_eq
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PoissonKernelBridge.DistinguishedPoissonKernelData F) :
+    ∀ᶠ T in atTop, ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' =
+        PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ' := by
+  filter_upwards [h.eventually_blockPairKernel_eq] with T hT
+  intro ρ ρ'
+  simpa only [zeroPairKernel, PoissonKernelBridge.blockPairKernel] using
+    hT ρ ρ'
+
+theorem eventually_quarticNumerator_eq
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (q : Quartic) :
+    ∀ᶠ T in atTop,
+      factoredZeroKernelQuarticNumerator q F T =
+        poissonZeroKernelQuarticNumerator q F T := by
+  filter_upwards [eventually_zeroPairKernel_eq h] with T hT
+  exact factoredZeroKernelQuarticNumerator_eq_poisson hT
+
+theorem PoissonZeroKernelQuarticLowerBound.toFactored
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : PoissonZeroKernelQuarticLowerBound q F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F) :
+    FactoredZeroKernelQuarticLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx,
+    eventually_quarticNumerator_eq hkernel q] with T hT heq
+  rw [heq]
+  exact hT
+
+theorem FactoredZeroKernelQuarticLowerBound.toPoisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : FactoredZeroKernelQuarticLowerBound q F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F) :
+    PoissonZeroKernelQuarticLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx,
+    eventually_quarticNumerator_eq hkernel q] with T hT heq
+  rw [← heq]
+  exact hT
 
 /-- All finite errors in the affine bridge.  The coefficient `3` on the
 enlarged-window edge count is exact: `2` comes from robust stability and
@@ -1753,6 +1980,33 @@ theorem eps_transfer_9506
     (95063832187565 / 100000000000000) Terminal9506.dual_feasible
     Terminal9506.cap_slope hcost strict_transfer_9506
 
+/-- R-8686 with the analytic premise stated directly in the explicit
+complex-Poisson coordinate. -/
+theorem eps_transfer_8686_of_poisson
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (hpoisson :
+      PoissonZeroKernelQuarticLowerBound Terminal8686.dual F) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) :=
+  eps_transfer_8686 hRvM hfull hzero (hpoisson.toFactored hkernel)
+
+/-- R-9506 with the sole quartic premise reduced to full spatial aliases
+minus the explicit negative and upper lattice tails. -/
+theorem eps_transfer_9506_of_poisson
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (hpoisson :
+      PoissonZeroKernelQuarticLowerBound Terminal9506.dual F) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((95063832187565 / 100000000000000 : ℝ) - ε) *
+          (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) :=
+  eps_transfer_9506 hRvM hfull hzero (hpoisson.toFactored hkernel)
+
 theorem frozen_8657_lt_8686 :
     (865674254456636 / 1000000000000000 : ℝ) <
       86855250 / 100000000 := by
@@ -1834,6 +2088,33 @@ theorem zeta_eps_transfer_9506
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
     (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hfactored)
+
+theorem zeta_eps_transfer_8686_of_poisson
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (hpoisson :
+      PoissonZeroKernelQuarticLowerBound Terminal8686.dual F) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
+        (N0simple T (2 * T) : ℝ) := by
+  simpa only [zeta_N, zeta_N0s] using
+    (eps_transfer_8686_of_poisson paperInputs_zeta.RvM hfull hzero
+      hkernel hpoisson)
+
+theorem zeta_eps_transfer_9506_of_poisson
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (hpoisson :
+      PoissonZeroKernelQuarticLowerBound Terminal9506.dual F) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((95063832187565 / 100000000000000 : ℝ) - ε) *
+          (Ncount T (2 * T) : ℝ) ≤
+        (N0simple T (2 * T) : ℝ) := by
+  simpa only [zeta_N, zeta_N0s] using
+    (eps_transfer_9506_of_poisson paperInputs_zeta.RvM hfull hzero
+      hkernel hpoisson)
 
 /-- Concrete-zeta R-8657, obtained monotonically from R-8686. -/
 theorem zeta_eps_transfer_8657
