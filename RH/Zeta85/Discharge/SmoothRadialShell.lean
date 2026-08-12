@@ -1049,6 +1049,106 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq
       ae_tendsto_shrinkingProfileShellWindow_sq
         v L hL hposProfile
 
+
+/-- The full complex Fourier-weighted energy of the shrinking annular shell
+converges to the Fourier transform of the frozen supported profile. -/
+theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (z : ℂ) :
+    Tendsto
+      (fun n : ℕ =>
+        ∫ u : ℝ,
+          (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ) *
+            Complex.exp (Complex.I * z * (u : ℂ)))
+      Filter.atTop
+      (nhds
+        (∫ u : ℝ,
+          (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ) *
+            Complex.exp (Complex.I * z * (u : ℂ)))) := by
+  let C : ℝ := Real.exp (‖z‖ * (L / 2))
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun u : ℝ =>
+      C * @QuarticGramFamily.supportedFullProfile v (u / L))
+  · intro n
+    have hshell :
+        Continuous
+          (fun u : ℝ =>
+            (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ)) :=
+      Complex.continuous_ofReal.comp
+        ((shrinkingProfileShellWindow_contDiff
+          v L n hL hv hposProfile).continuous.pow 2)
+    exact
+      (hshell.mul
+        (Complex.continuous_exp.comp
+          (continuous_const.mul Complex.continuous_ofReal))).aestronglyMeasurable
+  · exact
+      (integrable_supportedFullProfile_div v L hL hv).const_mul C
+  · intro n
+    filter_upwards [] with u
+    have hbound :=
+      shrinkingProfileShellWindow_sq_le_supportedFullProfile
+        v L n hL hposProfile u
+    by_cases hmem : u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2)
+    · have hscaled : |u / L| ≤ (1 : ℝ) / 2 := abs_le.mpr hmem
+      rw [abs_div, abs_of_pos hL] at hscaled
+      have huabs : |u| ≤ L / 2 := by
+        have hmul := (div_le_iff₀ hL).mp hscaled
+        linarith
+      have hre :
+          (Complex.I * z * (u : ℂ)).re ≤ ‖z‖ * (L / 2) := by
+        calc
+          (Complex.I * z * (u : ℂ)).re ≤
+              ‖Complex.I * z * (u : ℂ)‖ :=
+            Complex.re_le_norm _
+          _ = ‖z‖ * |u| := by
+            simp [norm_mul]
+          _ ≤ ‖z‖ * (L / 2) :=
+            mul_le_mul_of_nonneg_left huabs (norm_nonneg z)
+      have hexp :
+          ‖Complex.exp (Complex.I * z * (u : ℂ))‖ ≤ C := by
+        dsimp [C]
+        rw [Complex.norm_exp]
+        exact Real.exp_le_exp.mpr hre
+      have hprofile_nonneg :
+          0 ≤ @QuarticGramFamily.supportedFullProfile v (u / L) :=
+        le_trans hbound.1 hbound.2
+      calc
+        ‖(shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ) *
+            Complex.exp (Complex.I * z * (u : ℂ))‖ =
+            shrinkingProfileShellWindow v L n hL u ^ 2 *
+              ‖Complex.exp (Complex.I * z * (u : ℂ))‖ := by
+                rw [norm_mul]
+                simp [Real.norm_eq_abs, abs_of_nonneg hbound.1]
+        _ ≤
+            @QuarticGramFamily.supportedFullProfile v (u / L) * C :=
+          mul_le_mul hbound.2 hexp (norm_nonneg _) hprofile_nonneg
+        _ = C * @QuarticGramFamily.supportedFullProfile v (u / L) := by
+          ring
+    · have hprofile :
+          @QuarticGramFamily.supportedFullProfile v (u / L) = 0 := by
+        simp [QuarticGramFamily.supportedFullProfile, hmem]
+      have hshell :
+          shrinkingProfileShellWindow v L n hL u ^ 2 = 0 := by
+        rw [hprofile] at hbound
+        exact le_antisymm hbound.2 hbound.1
+      simp [hshell, hprofile]
+  · filter_upwards [
+      ae_tendsto_shrinkingProfileShellWindow_sq
+        v L hL hposProfile
+    ] with u hu
+    have hcast :
+        Tendsto
+          (fun n : ℕ =>
+            (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ))
+          Filter.atTop
+          (nhds
+            (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
+      Complex.continuous_ofReal.continuousAt.comp hu
+    exact hcast.mul_const
+      (Complex.exp (Complex.I * z * (u : ℂ)))
+
 /-! ## Direct family realization -/
 
 /-- A quartic family is realized by the one-channel annular construction when
