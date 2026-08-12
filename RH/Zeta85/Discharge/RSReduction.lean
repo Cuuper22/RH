@@ -319,7 +319,7 @@ theorem normalCutoffSymbol_tsupport_subset {k : ℕ}
       rw [hz, mul_zero]
     have ht := hPhi xi hp
     have hn := hchi (∑ i : Fin k, xi i) hc
-    nlinarith [ht, hn]
+    exact ht.trans (add_le_add_left hn A)
   · exact isClosed_le (by fun_prop) (by fun_prop)
 
 /-- A strict numerical margin converts the closed support bound into the
