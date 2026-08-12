@@ -153,7 +153,7 @@ theorem quarticTraceNumerator_eq_uncentered
         (F.block T + F.block T + F.block T + F.block T) + 1 by
           noncomm_ring]
   simp only [rtrace_add, rtrace_sub, hone]
-  ring
+  ring_nf
 
 /-- Explicit cyclic index sums for the first four raw matrix traces. -/
 def cyclicTrace1 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
@@ -247,7 +247,7 @@ theorem blockZeroEntry_eq_finsetSum
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
     (i j : Fin (F.blockDim T)) :
     blockZeroEntry F T i j =
-      ∑ ρ in ZeroSide.ZI Z T, blockZeroSummand F T i j ρ := by
+      ∑ ρ ∈ ZeroSide.ZI Z T, blockZeroSummand F T i j ρ := by
   unfold blockZeroEntry blockZeroSummand
   rw [finsum_mem_eq_finite_toFinset_sum _
     (ZeroSide.ZIprime_finite Z T)]
@@ -289,13 +289,13 @@ def zeroTupleCyclicTrace1
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
   Complex.re (∑ i : Fin (F.blockDim T),
-    ∑ ρ in ZeroSide.ZI Z T, blockZeroSummand F T i i ρ)
+    ∑ ρ ∈ ZeroSide.ZI Z T, blockZeroSummand F T i i ρ)
 
 def zeroTupleCyclicTrace2
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
   Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-    ∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
+    ∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
       blockZeroSummand F T i j ρ₁ *
         blockZeroSummand F T j i ρ₂)
 
@@ -304,8 +304,8 @@ def zeroTupleCyclicTrace3
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
   Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
     ∑ k : Fin (F.blockDim T),
-      ∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
-        ∑ ρ₃ in ZeroSide.ZI Z T,
+      ∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+        ∑ ρ₃ ∈ ZeroSide.ZI Z T,
           (blockZeroSummand F T i k ρ₁ *
             blockZeroSummand F T k j ρ₂) *
               blockZeroSummand F T j i ρ₃)
@@ -315,8 +315,8 @@ def zeroTupleCyclicTrace4
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
   Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
     ∑ k : Fin (F.blockDim T), ∑ l : Fin (F.blockDim T),
-      ∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
-        ∑ ρ₃ in ZeroSide.ZI Z T, ∑ ρ₄ in ZeroSide.ZI Z T,
+      ∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+        ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
           (blockZeroSummand F T i k ρ₁ *
             blockZeroSummand F T k j ρ₂) *
           (blockZeroSummand F T j l ρ₃ *
@@ -326,8 +326,8 @@ def zeroTupleCyclicTrace4
 private theorem sum_fintype_finset_comm
     {ι α : Type*} [Fintype ι]
     (s : Finset α) (f : ι → α → ℂ) :
-    (∑ i : ι, ∑ a in s, f i a) =
-      ∑ a in s, ∑ i : ι, f i a := by
+    (∑ i : ι, ∑ a ∈ s, f i a) =
+      ∑ a ∈ s, ∑ i : ι, f i a := by
   rw [Finset.sum_comm]
 
 /-- Zero-tuple-first cyclic kernels.  Every block-index contraction now sits
@@ -335,13 +335,13 @@ inside the contribution of one explicit ordered tuple of zeros. -/
 def zeroKernelCyclicTrace1
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ in ZeroSide.ZI Z T,
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T,
     ∑ i : Fin (F.blockDim T), blockZeroSummand F T i i ρ)
 
 def zeroKernelCyclicTrace2
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
     ∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
       blockZeroSummand F T i j ρ₁ *
         blockZeroSummand F T j i ρ₂)
@@ -349,8 +349,8 @@ def zeroKernelCyclicTrace2
 def zeroKernelCyclicTrace3
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
-    ∑ ρ₃ in ZeroSide.ZI Z T,
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T,
       ∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
         ∑ k : Fin (F.blockDim T),
           (blockZeroSummand F T i k ρ₁ *
@@ -360,8 +360,8 @@ def zeroKernelCyclicTrace3
 def zeroKernelCyclicTrace4
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
-    ∑ ρ₃ in ZeroSide.ZI Z T, ∑ ρ₄ in ZeroSide.ZI Z T,
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
       ∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
         ∑ k : Fin (F.blockDim T), ∑ l : Fin (F.blockDim T),
           (blockZeroSummand F T i k ρ₁ *
@@ -495,25 +495,25 @@ theorem zeroIndexKernel4_eq_factored
 def factoredZeroKernelCyclicTrace1
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ in ZeroSide.ZI Z T, factoredZeroCycle1 F T ρ)
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, factoredZeroCycle1 F T ρ)
 
 def factoredZeroKernelCyclicTrace2
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
     factoredZeroCycle2 F T ρ₁ ρ₂)
 
 def factoredZeroKernelCyclicTrace3
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
-    ∑ ρ₃ in ZeroSide.ZI Z T, factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃)
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃)
 
 def factoredZeroKernelCyclicTrace4
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ in ZeroSide.ZI Z T, ∑ ρ₂ in ZeroSide.ZI Z T,
-    ∑ ρ₃ in ZeroSide.ZI Z T, ∑ ρ₄ in ZeroSide.ZI Z T,
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
       factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
 
 theorem zeroKernelCyclicTrace1_eq_factored
