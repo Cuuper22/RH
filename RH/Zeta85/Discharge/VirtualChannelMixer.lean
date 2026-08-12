@@ -82,6 +82,62 @@ theorem analyze_synthesize
     _ = virtual r x := by
       simp
 
+
+/-- Bilinear Parseval identity at two points.  This is the form that kills
+all nonzero spatial aliases only after the complete channel sum. -/
+theorem pointwise_bilinear_parseval
+    {ι α : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → α → ℝ) (x y : α) :
+    (∑ j : ι,
+        synthesize C virtual j x * synthesize C virtual j y) =
+      ∑ r : ι, virtual r x * virtual r y := by
+  calc
+    (∑ j : ι,
+        synthesize C virtual j x * synthesize C virtual j y) =
+      ∑ j : ι, (∑ r : ι, C.matrix j r * virtual r x) *
+        synthesize C virtual j y := by
+      apply Finset.sum_congr rfl
+      intro j _
+      rfl
+    _ = ∑ j : ι, ∑ r : ι,
+        (C.matrix j r * virtual r x) *
+          synthesize C virtual j y := by
+      apply Finset.sum_congr rfl
+      intro j _
+      rw [Finset.sum_mul]
+    _ = ∑ r : ι, ∑ j : ι,
+        (C.matrix j r * virtual r x) *
+          synthesize C virtual j y := by
+      rw [Finset.sum_comm]
+    _ = ∑ r : ι, virtual r x *
+        (∑ j : ι, C.matrix j r * synthesize C virtual j y) := by
+      apply Finset.sum_congr rfl
+      intro r _
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro j _
+      ring
+    _ = ∑ r : ι, virtual r x * virtual r y := by
+      apply Finset.sum_congr rfl
+      intro r _
+      change virtual r x *
+        analyze C (synthesize C virtual) r y = _
+      rw [analyze_synthesize]
+
+/-- If every virtual channel has zero overlap with one translate, the
+aggregate overlap of the mixed physical channels vanishes exactly. -/
+theorem aggregate_shift_overlap_eq_zero
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → ℝ → ℝ) (u h : ℝ)
+    (hzero : ∀ r : ι, virtual r u * virtual r (u - h) = 0) :
+    (∑ j : ι,
+        synthesize C virtual j u *
+          synthesize C virtual j (u - h)) = 0 := by
+  rw [pointwise_bilinear_parseval]
+  apply Finset.sum_eq_zero
+  intro r _
+  exact hzero r
+
 /-- Pointwise Parseval identity: synthesis preserves the entire square
 energy after the channel sum has been taken. -/
 theorem pointwise_parseval
