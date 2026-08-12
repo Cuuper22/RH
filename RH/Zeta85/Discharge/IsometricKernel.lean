@@ -651,7 +651,7 @@ theorem mixedIndexKernel1_eq_pairCycle
     {C : RealData F} {T : ℝ} {ρ : ℂ} :
     (∑ i : Fin (F.blockDim T),
       mixedBlockZeroSummand C T i i ρ) =
-      QuarticTransfer.pairKernelCycle1
+      QuarticTransfer.pairKernelCycle1 (Z := Z)
         (mixedPairKernel C T) ρ := by
   simp only [QuarticTransfer.pairKernelCycle1,
     mixedPairKernel, Finset.sum_mul]
@@ -668,7 +668,7 @@ theorem mixedIndexKernel2_eq_pairCycle
       ∑ j : Fin (F.blockDim T),
         mixedBlockZeroSummand C T i j ρ₁ *
           mixedBlockZeroSummand C T j i ρ₂) =
-      QuarticTransfer.pairKernelCycle2
+      QuarticTransfer.pairKernelCycle2 (Z := Z)
         (mixedPairKernel C T) ρ₁ ρ₂ := by
   simp only [QuarticTransfer.pairKernelCycle2,
     mixedPairKernel, Finset.sum_mul, Finset.mul_sum]
@@ -893,7 +893,7 @@ theorem mixedIndexKernel3_eq_pairCycle
         (mixedBlockZeroSummand C T i k ρ₁ *
           mixedBlockZeroSummand C T k j ρ₂) *
         mixedBlockZeroSummand C T j i ρ₃) =
-      QuarticTransfer.pairKernelCycle3
+      QuarticTransfer.pairKernelCycle3 (Z := Z)
         (mixedPairKernel C T) ρ₁ ρ₂ ρ₃ := by
   simp only [QuarticTransfer.pairKernelCycle3,
     mixedPairKernel, Finset.sum_mul, Finset.mul_sum]
@@ -917,7 +917,7 @@ theorem mixedIndexKernel4_eq_pairCycle
           mixedBlockZeroSummand C T k j ρ₂) *
         (mixedBlockZeroSummand C T j l ρ₃ *
           mixedBlockZeroSummand C T l i ρ₄)) =
-      QuarticTransfer.pairKernelCycle4
+      QuarticTransfer.pairKernelCycle4 (Z := Z)
         (mixedPairKernel C T) ρ₁ ρ₂ ρ₃ ρ₄ := by
   simp only [QuarticTransfer.pairKernelCycle4,
     mixedPairKernel, Finset.sum_mul, Finset.mul_sum]
