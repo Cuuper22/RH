@@ -351,6 +351,78 @@ theorem BlockMomentLimits.eventually_normalizedFrequencyPairSum_eq_zeroAliases
       (gammaOf ρ) (gammaOf ρ')
       (hfamily ρ hρ ρ' hρ') (hoff ρ hρ ρ' hρ')
 
+
+/-- The sum of all zero translations is the Fourier integral of the total
+physical window energy. -/
+theorem sum_complexAliasTerm_zero_eq_integral_windowEnergy
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (z z' : ℂ)
+    (hintegrable : ∀ j : Fin (F.channelCount T),
+      Integrable (fun u : ℝ =>
+        (F.window T j u : ℂ) * F.window T j u *
+          cexp (I * (z - z') * (u : ℂ)))) :
+    (∑ j : Fin (F.channelCount T),
+        F.complexAliasTerm T z z' j 0) =
+      ∫ u : ℝ,
+        (F.windowEnergy T u : ℂ) *
+          cexp (I * (z - z') * (u : ℂ)) := by
+  calc
+    (∑ j : Fin (F.channelCount T),
+        F.complexAliasTerm T z z' j 0) =
+      ∑ j : Fin (F.channelCount T),
+        ∫ u : ℝ,
+          (F.window T j u : ℂ) * F.window T j u *
+            cexp (I * (z - z') * (u : ℂ)) := by
+      apply Finset.sum_congr rfl
+      intro j hj
+      exact complexAliasTerm_zero F T j z z'
+    _ = ∫ u : ℝ,
+        ∑ j : Fin (F.channelCount T),
+          (F.window T j u : ℂ) * F.window T j u *
+            cexp (I * (z - z') * (u : ℂ)) := by
+      simpa using
+        (integral_finsetSum Finset.univ
+          (fun j hj => hintegrable j)).symm
+    _ = ∫ u : ℝ,
+        (F.windowEnergy T u : ℂ) *
+          cexp (I * (z - z') * (u : ℂ)) := by
+      apply integral_congr_ae
+      filter_upwards [] with u
+      simp [QuarticGramFamily.windowEnergy, Finset.sum_mul, pow_two]
+
+/-- The normalized cross-channel Poisson identity expressed directly in the
+physical total-energy profile. -/
+theorem sum_channelNormalizedFrequencyPairSum_eq_energyIntegral
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T Λ : ℝ) (hΛ : 0 ≤ Λ)
+    (hL : ∀ j : Fin (F.channelCount T), 0 < F.period T j)
+    (hsmooth : ∀ j : Fin (F.channelCount T),
+      ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ j : Fin (F.channelCount T), ∀ u,
+      Λ < |u| → F.window T j u = 0)
+    (heven : ∀ j : Fin (F.channelCount T), ∀ u,
+      F.window T j (-u) = F.window T j u)
+    (z z' : ℂ)
+    (hfamily : Summable (F.complexAliasFamily T z z'))
+    (hoff : (∑' a : F.AliasIndex T,
+      F.complexAliasFamily T z z' a) = 0)
+    (hintegrable : ∀ j : Fin (F.channelCount T),
+      Integrable (fun u : ℝ =>
+        (F.window T j u : ℂ) * F.window T j u *
+          cexp (I * (z - z') * (u : ℂ)))) :
+    (∑ j : Fin (F.channelCount T),
+        channelNormalizedFrequencyPairSum F T j z z') =
+      (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.windowEnergy T u : ℂ) *
+            cexp (I * (z - z') * (u : ℂ)) := by
+  rw [sum_channelNormalizedFrequencyPairSum_eq_fullLength_mul_sum_zero
+    F T Λ hΛ hL hsmooth hsupp heven z z' hfamily hoff]
+  rw [sum_complexAliasTerm_zero_eq_integral_windowEnergy
+    F T z z' hintegrable]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
