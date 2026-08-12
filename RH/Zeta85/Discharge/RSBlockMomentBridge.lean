@@ -9,6 +9,7 @@ import RH.Zeta85.Discharge.QuarticTransfer
 import Zeta23.Poisson.ComplexDecay
 import Zeta23.Poisson.Complex
 import Zeta23.Poisson.ComplexAlias
+import RH.Zeta85.Discharge.ComplexAliasBridge
 
 /-!
 # Actual-block centering bridge for the Rudnick--Sarnak route
