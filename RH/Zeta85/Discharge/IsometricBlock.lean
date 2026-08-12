@@ -321,8 +321,7 @@ theorem asymptotic_eps_transfer
           quarticScore q C T :=
     hweighted.eventually_gt _ (by linarith)
   have herror0 :=
-    (QuarticTransfer.transferError_small hRvM hfull hzero).
-      tendsto_div_nhds_zero
+    (QuarticTransfer.transferError_small hRvM hfull hzero).tendsto_div_nhds_zero
   have herror : ∀ᶠ T in Filter.atTop,
       QuarticTransfer.transferError F T /
           (Z.N T (2 * T) : ℝ) < δ :=
@@ -639,6 +638,7 @@ theorem quarticTraceNumerator_eq_uncentered
         1 by
           noncomm_ring]
   simp only [rtrace_add, rtrace_sub, hone]
+  ring_nf
   ring
 
 /-- The raw mixed-block numerator is the generic explicit cyclic trace
