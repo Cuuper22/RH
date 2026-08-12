@@ -1713,9 +1713,9 @@ def normalizedFactoredZeroCycle3
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
     (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
-  normalizedZeroPairKernel F T ρ₁ ρ₃ *
+  normalizedZeroPairKernel F T ρ₁ ρ₂ *
     (normalizedZeroPairKernel F T ρ₂ ρ₃ *
-      (normalizedZeroPairKernel F T ρ₁ ρ₂ *
+      (normalizedZeroPairKernel F T ρ₁ ρ₃ *
         ((Z.mult ρ₁ : ℂ) *
           ((Z.mult ρ₂ : ℂ) * (Z.mult ρ₃ : ℂ)))))
 
@@ -1723,10 +1723,10 @@ def normalizedFactoredZeroCycle4
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
     (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
-  normalizedZeroPairKernel F T ρ₁ ρ₄ *
-    (normalizedZeroPairKernel F T ρ₂ ρ₃ *
-      (normalizedZeroPairKernel F T ρ₁ ρ₂ *
-        (normalizedZeroPairKernel F T ρ₃ ρ₄ *
+  normalizedZeroPairKernel F T ρ₃ ρ₄ *
+    (normalizedZeroPairKernel F T ρ₁ ρ₂ *
+      (normalizedZeroPairKernel F T ρ₂ ρ₃ *
+        (normalizedZeroPairKernel F T ρ₁ ρ₄ *
           ((Z.mult ρ₁ : ℂ) *
             ((Z.mult ρ₂ : ℂ) *
               ((Z.mult ρ₃ : ℂ) * (Z.mult ρ₄ : ℂ)))))))
@@ -1871,14 +1871,14 @@ def pairKernelCycle2
 def pairKernelCycle3
     {Z : ZeroConfig} (K : ℂ → ℂ → ℂ)
     (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
-  K ρ₁ ρ₃ * (K ρ₂ ρ₃ * (K ρ₁ ρ₂ *
+  K ρ₁ ρ₂ * (K ρ₂ ρ₃ * (K ρ₁ ρ₃ *
     ((Z.mult ρ₁ : ℂ) *
       ((Z.mult ρ₂ : ℂ) * (Z.mult ρ₃ : ℂ)))))
 
 def pairKernelCycle4
     {Z : ZeroConfig} (K : ℂ → ℂ → ℂ)
     (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
-  K ρ₁ ρ₄ * (K ρ₂ ρ₃ * (K ρ₁ ρ₂ * (K ρ₃ ρ₄ *
+  K ρ₃ ρ₄ * (K ρ₁ ρ₂ * (K ρ₂ ρ₃ * (K ρ₁ ρ₄ *
     ((Z.mult ρ₁ : ℂ) * ((Z.mult ρ₂ : ℂ) *
       ((Z.mult ρ₃ : ℂ) * (Z.mult ρ₄ : ℂ)))))))
 
