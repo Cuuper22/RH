@@ -41,6 +41,7 @@ import RH.Zeta85.Discharge.HBDepthFour
 import RH.Zeta85.Discharge.EtaDivisorRefinement
 import RH.Zeta85.Discharge.HBToBBLRSmoothGrouping
 import RH.Zeta85.Discharge.QuarticWindowWitnesses
+import RH.Zeta85.Discharge.RationalWindowCosts
 import RH.Zeta85.Discharge.R9383ExactEndpoint
 import RH.Zeta85.Discharge.R1aAllocationNoGo
 import RH.Zeta85.Discharge.RobustStability
@@ -90,11 +91,11 @@ private theorem cumulative {c : ℝ}
 /-! ## 1. Rung 1 — support 101/100, at least 0.67924886307 -/
 
 /-- The two-trace certificate at support `101/100`.
-Axioms: `signedPair_traceGrade_lt_5_4`, `windowCost_101`,
+Axioms: `signedPair_traceGrade_lt_5_4`,
 `traceTransfer_saturated`. -/
 theorem cert101 : TwoTraceCert zetaZeroConfig (2 - cRung101) :=
   traceTransfer_saturated (101 / 100) (2 - cRung101) (by norm_num) (by norm_num)
-    windowCost_101
+    RationalWindowCosts.windowCost_101
     (signedPair_traceGrade_lt_5_4 BBLRStatements.bblrErrorBound
       (101 / 100) (by norm_num) (by norm_num))
 
