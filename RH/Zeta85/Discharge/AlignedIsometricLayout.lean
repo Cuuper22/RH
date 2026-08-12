@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import RH.Zeta85.Discharge.RepeatedChannelCompression
 import RH.Zeta85.Discharge.ComplexAliasBridge
+import RH.Zeta85.Discharge.SmoothRadialShell
 
 /-!
 # Aligned finite-frame layouts inside the quartic block
@@ -1460,6 +1461,239 @@ theorem physicalWindowEnergyPairKernel_eq_normalized
     exact_mod_cast hmass
   push_cast
   field_simp [hfullC, hmassC]
+
+
+/-! ## Frozen-profile handoff through both post-contraction diagonals -/
+
+/-- Exact realization of total physical window energy by the annular stage
+selected only after the complete quartic zero contraction has been formed. -/
+structure DiagonalAnnularWindowEnergyRealization
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (q : TrimmedMoment.Quartic)
+    (L : ℝ → ℝ) (hL : ∀ T, 0 < L T)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / L T)) ≠ 0) :
+    Prop where
+  stage : ℝ → ℕ
+  window_energy_eq :
+    ∀ (T u : ℝ),
+      F.windowEnergy T u =
+        SmoothRadialShell.shrinkingProfileShellWindow
+          v (L T) (stage T) (hL T) u ^ 2
+  stage_eq :
+    ∀ T : ℝ,
+      stage T =
+        SmoothRadialShell.diagonalAnnularProfileStage
+          q F v L hL hv hposProfile hmass T
+  full_length_ne :
+    ∀ᶠ T in Filter.atTop, F.fullLength T ≠ 0
+  window_energy_mass_ne :
+    ∀ᶠ T in Filter.atTop,
+      (∫ u : ℝ, F.windowEnergy T u) ≠ 0
+
+/-- The only lower bound left after both diagonal selections: the complete
+zero contraction of the literal frozen supported profile. -/
+structure SupportedProfileQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : TrimmedMoment.Quartic)
+    (F : QuarticGramFamily Z σ μ p v)
+    (L : ℝ → ℝ) : Prop where
+  block_dimension_pos :
+    ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
+  zero_count_pos :
+    ∀ᶠ T in Filter.atTop, 0 < Z.N T (2 * T)
+  eventually_gt :
+    ∀ x : ℝ,
+      x < μ * QuarticTransfer.limitQuarticScore q μ p →
+      ∀ᶠ T in Filter.atTop,
+        x <
+          SmoothRadialShell.supportedProfileNormalizedQuarticNumerator
+            q F v L T / (Z.N T (2 * T) : ℝ)
+
+/-- Under exact annular energy realization, the routed energy numerator is
+literally the normalized annular numerator at the realized stage. -/
+theorem routedEnergyQuarticNumerator_eq_shrinkingAnnular
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {Lyt : Layout F ι} {G : RoutedGrid Lyt}
+    {q : TrimmedMoment.Quartic}
+    {H : RoutedFourierGrid G (canonicalAtomFactorization Lyt)}
+    (hH : RoutedWindowRegularity H)
+    (hEnergy : RoutedEnergyNormalization H)
+    {period : ℝ → ℝ} {hperiod : ∀ T, 0 < period T}
+    {hv : ContDiff ℝ ∞ v}
+    {hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x}
+    {hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / period T)) ≠ 0}
+    (R : DiagonalAnnularWindowEnergyRealization
+      F q period hperiod hv hposProfile hmass)
+    (T : ℝ)
+    (hfull : F.fullLength T ≠ 0)
+    (hphysicalMass : (∫ u : ℝ, F.windowEnergy T u) ≠ 0) :
+    routedEnergyQuarticNumerator q H T =
+      SmoothRadialShell.shrinkingAnnularNormalizedQuarticNumerator
+        q F v period hperiod T (R.stage T) := by
+  unfold routedEnergyQuarticNumerator
+    SmoothRadialShell.shrinkingAnnularNormalizedQuarticNumerator
+  apply QuarticTransfer.pairKernelQuarticNumerator_congr
+  intro ρ hρ ρ' hρ'
+  calc
+    routedEnergyPairKernel H T ρ ρ' =
+        physicalWindowEnergyPairKernel F T ρ ρ' :=
+      routedEnergyPairKernel_eq_physicalWindowEnergyPairKernel
+        H hH hEnergy T ρ ρ'
+    _ = normalizedPhysicalWindowEnergyPairKernel F T ρ ρ' :=
+      physicalWindowEnergyPairKernel_eq_normalized
+        F T hfull hphysicalMass ρ ρ'
+    _ = SmoothRadialShell.shrinkingProfileShellNormalizedPairKernel
+        v (period T) (R.stage T) (hperiod T) ρ ρ' := by
+      unfold normalizedPhysicalWindowEnergyPairKernel
+        SmoothRadialShell.shrinkingProfileShellNormalizedPairKernel
+      simp_rw [R.window_energy_eq T]
+
+/-- The annular post-contraction diagonal transfers a frozen-profile lower
+bound to the complete routed energy kernel. -/
+theorem SupportedProfileQuarticLowerBound.toRoutedEnergy
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {Lyt : Layout F ι} {G : RoutedGrid Lyt}
+    {q : TrimmedMoment.Quartic}
+    {H : RoutedFourierGrid G (canonicalAtomFactorization Lyt)}
+    {hH : RoutedWindowRegularity H}
+    {hEnergy : RoutedEnergyNormalization H}
+    {period : ℝ → ℝ} {hperiod : ∀ T, 0 < period T}
+    {hv : ContDiff ℝ ∞ v}
+    {hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x}
+    {hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / period T)) ≠ 0}
+    (hProfile : SupportedProfileQuarticLowerBound q F period)
+    (R : DiagonalAnnularWindowEnergyRealization
+      F q period hperiod hv hposProfile hmass) :
+    RoutedEnergyQuarticLowerBound q H := by
+  refine
+    { block_dimension_pos := hProfile.block_dimension_pos
+      zero_count_pos := hProfile.zero_count_pos
+      eventually_gt := ?_ }
+  intro x hx
+  let y : ℝ :=
+    (x + μ * QuarticTransfer.limitQuarticScore q μ p) / 2
+  have hxy : x < y := by
+    dsimp [y]
+    linarith
+  have hyTarget :
+      y < μ * QuarticTransfer.limitQuarticScore q μ p := by
+    dsimp [y]
+    linarith
+  have hgap : 0 < y - x := sub_pos.mpr hxy
+  have hclose' :=
+    (SmoothRadialShell
+      .tendsto_diagonalAnnularNormalizedQuarticNumerator_sub_profile
+        q F v period hperiod hv hposProfile hmass).eventually
+      (Metric.ball_mem_nhds (0 : ℝ) hgap)
+  have hclose :
+      ∀ᶠ T in Filter.atTop,
+        dist
+            (SmoothRadialShell
+                .shrinkingAnnularNormalizedQuarticNumerator
+                  q F v period hperiod T
+                    (SmoothRadialShell.diagonalAnnularProfileStage
+                      q F v period hperiod hv hposProfile hmass T) -
+              SmoothRadialShell
+                .supportedProfileNormalizedQuarticNumerator
+                  q F v period T)
+            0 < y - x := by
+    simpa only [Metric.mem_ball] using hclose'
+  filter_upwards
+      [hProfile.eventually_gt y hyTarget,
+        hProfile.zero_count_pos,
+        R.full_length_ne,
+        R.window_energy_mass_ne,
+        hclose] with
+      T hFrozen hN hfull hphysicalMass hClose
+  have hExact :
+      routedEnergyQuarticNumerator q H T =
+        SmoothRadialShell.shrinkingAnnularNormalizedQuarticNumerator
+          q F v period hperiod T
+            (SmoothRadialShell.diagonalAnnularProfileStage
+              q F v period hperiod hv hposProfile hmass T) := by
+    rw [routedEnergyQuarticNumerator_eq_shrinkingAnnular
+      hH hEnergy R T hfull hphysicalMass, R.stage_eq T]
+  rw [hExact]
+  have hNreal : (0 : ℝ) < (Z.N T (2 * T) : ℝ) := by
+    exact_mod_cast hN
+  have hNone : (1 : ℝ) ≤ (Z.N T (2 * T) : ℝ) := by
+    exact_mod_cast (Nat.succ_le_iff.mpr hN)
+  have hFrozen' :
+      y * (Z.N T (2 * T) : ℝ) <
+        SmoothRadialShell.supportedProfileNormalizedQuarticNumerator
+          q F v period T :=
+    (lt_div_iff₀ hNreal).mp hFrozen
+  have hClose' :
+      |SmoothRadialShell.shrinkingAnnularNormalizedQuarticNumerator
+            q F v period hperiod T
+              (SmoothRadialShell.diagonalAnnularProfileStage
+                q F v period hperiod hv hposProfile hmass T) -
+          SmoothRadialShell.supportedProfileNormalizedQuarticNumerator
+            q F v period T| < y - x := by
+    simpa only [Real.dist_eq, sub_zero] using hClose
+  have hLower :
+      SmoothRadialShell.supportedProfileNormalizedQuarticNumerator
+            q F v period T - (y - x) <
+        SmoothRadialShell.shrinkingAnnularNormalizedQuarticNumerator
+          q F v period hperiod T
+            (SmoothRadialShell.diagonalAnnularProfileStage
+              q F v period hperiod hv hposProfile hmass T) := by
+    have hNeg :=
+      neg_abs_le
+        (SmoothRadialShell.shrinkingAnnularNormalizedQuarticNumerator
+            q F v period hperiod T
+              (SmoothRadialShell.diagonalAnnularProfileStage
+                q F v period hperiod hv hposProfile hmass T) -
+          SmoothRadialShell.supportedProfileNormalizedQuarticNumerator
+            q F v period T)
+    linarith
+  have hProduct :
+      0 ≤ (y - x) * ((Z.N T (2 * T) : ℝ) - 1) :=
+    mul_nonneg (le_of_lt hgap) (sub_nonneg.mpr hNone)
+  apply (lt_div_iff₀ hNreal).2
+  nlinarith
+
+/-- Both diagonal selections compose directly into the weighted isometric
+lower bound consumed by every frozen rung. -/
+theorem SupportedProfileQuarticLowerBound.toIsometric
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {Lyt : Layout F ι} {G : RoutedGrid Lyt}
+    {q : TrimmedMoment.Quartic}
+    {H : RoutedFourierGrid G (canonicalAtomFactorization Lyt)}
+    {hH : RoutedWindowRegularity H}
+    {hEnergy : RoutedEnergyNormalization H}
+    {period : ℝ → ℝ} {hperiod : ∀ T, 0 < period T}
+    {hv : ContDiff ℝ ∞ v}
+    {hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x}
+    {hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / period T)) ≠ 0}
+    (hProfile : SupportedProfileQuarticLowerBound q F period)
+    (R : DiagonalAnnularWindowEnergyRealization
+      F q period hperiod hv hposProfile hmass)
+    (S : DiagonalSymmetricFrequencyExhaustion q H hH) :
+    IsometricBlock.WeightedQuarticLowerBound
+      q (toIsometricData Lyt) :=
+  ((hProfile.toRoutedEnergy R).toSelectedVirtual S).toIsometric
 
 end AlignedIsometricLayout
 end Zeta85
