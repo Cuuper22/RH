@@ -141,13 +141,13 @@ theorem quarticTraceLowerBound_of_uncenteredRS
     (hp : 0 < p) (hp1 : p ≤ 1)
     (hdim : BlockDimensionLimit F) (hraw : UncenteredRSBlockLimits F)
     (q : Quartic) :
-    QuarticTransfer.ZeroKernelQuarticLowerBound q F := by
+    QuarticTransfer.FactoredZeroKernelQuarticLowerBound q F := by
   have hmom : BlockMomentConvergence F :=
     ⟨centered_moment_limits_of_fillBounds hp hp1 hraw⟩
   have hscore : QuarticTransfer.QuarticScoreConvergence q F :=
     QuarticTransfer.quarticScoreConvergence_of_moments hmom q
   exact
-    (QuarticTransfer.weightedQuarticLimit_of_separate hdim hscore).toLowerBound.toTraceLowerBound.toUncentered.toCyclic.toZeroCyclic.toTuple.toKernel
+    (QuarticTransfer.weightedQuarticLimit_of_separate hdim hscore).toLowerBound.toTraceLowerBound.toUncentered.toCyclic.toZeroCyclic.toTuple.toKernel.toFactored
 
 /-- Constructor for the existing R1b interface from the exact uncentered
 actual-block limit plus the two independent complex-Poisson clauses. -/
