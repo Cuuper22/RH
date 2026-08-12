@@ -789,6 +789,75 @@ theorem mixedPairKernel_canonical_eq_energy_sub_tail
     _ = _ :=
       selectedVirtualPairKernel_eq_energy_sub_tail H h T ρ ρ'
 
+/-- The evaluated energy-minus-tail expression, isolated as the kernel now
+consumed by the finite quartic zero contraction. -/
+def canonicalRoutedEnergyTailKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) *
+    ∑ r : ι,
+      (F.fullLength T : ℂ) *
+          ∫ u : ℝ,
+            (H.window T r u : ℂ) * H.window T r u *
+              Complex.exp
+                (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+        ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+          routedVirtualFrequencyTail H T r ρ ρ'
+
+/-- The physical mixed kernel equals the named canonical energy-tail kernel
+at every pair of complex frequencies. -/
+theorem mixedPairKernel_canonical_eq_energyTailKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : Layout F ι) (G : RoutedGrid L)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' =
+      canonicalRoutedEnergyTailKernel H T ρ ρ' := by
+  unfold canonicalRoutedEnergyTailKernel
+  exact mixedPairKernel_canonical_eq_energy_sub_tail
+    L G H h T ρ ρ'
+
+/-- Quartic numerator formed directly from the canonical evaluated
+energy-minus-tail kernel. -/
+def canonicalRoutedEnergyTailQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (q : TrimmedMoment.Quartic)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (T : ℝ) : ℝ :=
+  QuarticTransfer.pairKernelQuarticNumerator q F T
+    (canonicalRoutedEnergyTailKernel H T)
+
+/-- The complete physical mixed-block quartic numerator is exactly the
+finite zero contraction of the evaluated energy-minus-tail kernel. -/
+theorem mixedPairKernelQuarticNumerator_canonical_eq_energyTail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (q : TrimmedMoment.Quartic)
+    (L : Layout F ι) (G : RoutedGrid L)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) :
+    IsometricKernel.mixedPairKernelQuarticNumerator
+        q (toRealData L) T =
+      canonicalRoutedEnergyTailQuarticNumerator q H T := by
+  unfold IsometricKernel.mixedPairKernelQuarticNumerator
+    canonicalRoutedEnergyTailQuarticNumerator
+  apply QuarticTransfer.pairKernelQuarticNumerator_congr
+  intro ρ _ ρ' _
+  exact mixedPairKernel_canonical_eq_energyTailKernel
+    L G H h T ρ ρ'
+
 end AlignedIsometricLayout
 end Zeta85
 end RH
