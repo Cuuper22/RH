@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.SpecialFunctions.Sqrt
+import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import RH.Zeta85.Discharge.RadialShellFamily
 import RH.Zeta85.Discharge.QuarticWindowWitnesses
 
@@ -552,6 +553,173 @@ theorem ae_tendsto_frozen9506Window_sq
   ae_tendsto_shrinkingProfileWindow_sq
     QuarticWindowWitnesses.v9506 L hL
     (fun x hx => QuarticWindowWitnesses.v9506_pos hx)
+
+
+/-! ## Integral convergence of the shrinking energies -/
+
+theorem mem_scaled_halfInterval_iff
+    (L : ℝ) (hL : 0 < L) (u : ℝ) :
+    u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2) ↔
+      u ∈ Icc (-L / 2) (L / 2) := by
+  rw [Set.mem_Icc, Set.mem_Icc]
+  constructor
+  · intro hu
+    constructor
+    · have h := (le_div_iff₀ hL).1 hu.1
+      nlinarith
+    · have h := (div_le_iff₀ hL).1 hu.2
+      nlinarith
+  · intro hu
+    constructor
+    · apply (le_div_iff₀ hL).2
+      nlinarith [hu.1]
+    · apply (div_le_iff₀ hL).2
+      nlinarith [hu.2]
+
+/-- Scaling the frozen normalized profile is the ordinary physical-interval
+indicator of the scaled polynomial. -/
+theorem supportedFullProfile_div_eq_indicator
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L) :
+    (fun u : ℝ =>
+      @QuarticGramFamily.supportedFullProfile v (u / L)) =
+      (Icc (-L / 2) (L / 2)).indicator
+        (fun u : ℝ => v (u / L)) := by
+  funext u
+  by_cases hu : u ∈ Icc (-L / 2) (L / 2)
+  · have hscaled :=
+      (mem_scaled_halfInterval_iff L hL u).2 hu
+    rw [QuarticGramFamily.supportedFullProfile,
+      Set.indicator_of_mem hscaled,
+      Set.indicator_of_mem hu]
+  · have hscaled :
+        u / L ∉ Icc (-(1 : ℝ) / 2) (1 / 2) := by
+      intro hs
+      exact hu ((mem_scaled_halfInterval_iff L hL u).1 hs)
+    rw [QuarticGramFamily.supportedFullProfile,
+      Set.indicator_of_not_mem hscaled,
+      Set.indicator_of_not_mem hu]
+
+/-- A smooth normalized profile has an integrable scaled supported profile. -/
+theorem integrable_supportedFullProfile_div
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hv : ContDiff ℝ ∞ v) :
+    Integrable
+      (fun u : ℝ =>
+        @QuarticGramFamily.supportedFullProfile v (u / L)) := by
+  rw [supportedFullProfile_div_eq_indicator v L hL,
+    integrable_indicator_iff measurableSet_Icc]
+  have hscaled :
+      Continuous (fun u : ℝ => v (u / L)) :=
+    (hv.comp (contDiff_id.div_const L)).continuous
+  exact hscaled.continuousOn.integrableOn_compact isCompact_Icc
+
+/-- Every finite shrinking energy is bounded pointwise by the frozen
+supported profile. -/
+theorem shrinkingProfileWindow_sq_le_supportedFullProfile
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (u : ℝ) :
+    0 ≤ shrinkingProfileWindow v L n hL u ^ 2 ∧
+      shrinkingProfileWindow v L n hL u ^ 2 ≤
+        @QuarticGramFamily.supportedFullProfile v (u / L) := by
+  constructor
+  · positivity
+  · by_cases hmem :
+        u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2)
+    · have habs : |u / L| ≤ (1 : ℝ) / 2 :=
+        abs_le.mpr hmem
+      have hvnonneg : 0 ≤ v (u / L) :=
+        (hposProfile (u / L) habs).le
+      rw [QuarticGramFamily.supportedFullProfile,
+        Set.indicator_of_mem hmem]
+      unfold shrinkingProfileWindow
+      rw [profiledBumpWindow_sq _ _ _ _ hvnonneg]
+      have hb0 :
+          0 ≤ (shrinkingHalfPeriodBump L n hL) u :=
+        (shrinkingHalfPeriodBump L n hL).nonneg
+      have hb1 :
+          (shrinkingHalfPeriodBump L n hL) u ≤ 1 :=
+        (shrinkingHalfPeriodBump L n hL).le_one
+      nlinarith
+    · have hscaled : (1 : ℝ) / 2 < |u / L| := by
+        apply lt_of_not_ge
+        intro habs
+        exact hmem (abs_le.mp habs)
+      rw [abs_div, abs_of_pos hL] at hscaled
+      have hout : L / 2 < |u| := by
+        have hmul := (lt_div_iff₀ hL).1 hscaled
+        nlinarith
+      have hzero :
+          shrinkingProfileWindow v L n hL u = 0 := by
+        unfold shrinkingProfileWindow
+        apply profiledBumpWindow_eq_zero_of_rOut_le_abs
+        exact le_trans
+          (shrinkingHalfPeriodBump_rOut_lt L n hL).le
+          hout.le
+      rw [QuarticGramFamily.supportedFullProfile,
+        Set.indicator_of_not_mem hmem, hzero]
+      norm_num
+
+/-- Dominated convergence upgrades the pointwise construction to convergence
+of total physical energy. -/
+theorem tendsto_integral_shrinkingProfileWindow_sq
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n : ℕ =>
+        ∫ u : ℝ, shrinkingProfileWindow v L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / L))) := by
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun u : ℝ =>
+      @QuarticGramFamily.supportedFullProfile v (u / L))
+  · intro n
+    exact
+      ((shrinkingProfileWindow_contDiff
+        v L n hL hv hposProfile).continuous.pow 2).aestronglyMeasurable
+  · exact integrable_supportedFullProfile_div v L hL hv
+  · intro n
+    filter_upwards [] with u
+    have hbound :=
+      shrinkingProfileWindow_sq_le_supportedFullProfile
+        v L n hL hposProfile u
+    simpa [Real.norm_eq_abs, abs_of_nonneg hbound.1] using hbound.2
+  · exact
+      ae_tendsto_shrinkingProfileWindow_sq
+        v L hL hposProfile
+
+theorem tendsto_integral_frozen8686Window_sq
+    (L : ℝ) (hL : 0 < L) :
+    Tendsto
+      (fun n : ℕ => ∫ u : ℝ, frozen8686Window L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile
+            QuarticWindowWitnesses.v8686 (u / L))) := by
+  apply tendsto_integral_shrinkingProfileWindow_sq
+  · unfold QuarticWindowWitnesses.v8686
+    fun_prop
+  · intro x hx
+    exact QuarticWindowWitnesses.v8686_pos hx
+
+theorem tendsto_integral_frozen9506Window_sq
+    (L : ℝ) (hL : 0 < L) :
+    Tendsto
+      (fun n : ℕ => ∫ u : ℝ, frozen9506Window L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile
+            QuarticWindowWitnesses.v9506 (u / L))) := by
+  apply tendsto_integral_shrinkingProfileWindow_sq
+  · unfold QuarticWindowWitnesses.v9506
+    fun_prop
+  · intro x hx
+    exact QuarticWindowWitnesses.v9506_pos hx
 
 end SmoothRadialShell
 end Zeta85
