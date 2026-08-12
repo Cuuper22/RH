@@ -1164,6 +1164,82 @@ theorem LocalProfileTailQuarticLowerBound.toFactored
       hgapT hfull0T htotal0T hchannel0T]
   exact hT
 
+
+/-- The distinguished local-profile main term before the finite frequency
+tail is subtracted. -/
+def localProfileMainPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((F.channelEnergy T (F.distinguished T) /
+    (∫ u : ℝ, F.windowEnergy T u) : ℝ) : ℂ) *
+      localProfileFourierIntegral F T (gammaOf ρ) (gammaOf ρ')
+
+/-- The normalized error made by replacing the complete
+local-profile-minus-tail quartic numerator by its local-profile main
+numerator.  The subtraction is deliberately taken after all cyclic products
+and finite zero sums have been formed. -/
+def localProfileTailQuarticErrorDensity
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) : ℝ :=
+  QuarticTransfer.pairKernelQuarticNumerator q F T
+        (localProfileTailPairKernel F T) /
+      (Z.N T (2 * T) : ℝ) -
+    QuarticTransfer.pairKernelQuarticNumerator q F T
+        (localProfileMainPairKernel F T) /
+      (Z.N T (2 * T) : ℝ)
+
+/-- One-sided asymptotics for the local-profile main numerator. -/
+structure LocalProfileMainQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+  block_dimension_pos :
+    ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
+  eventually_gt : ∀ x : ℝ,
+    x < μ * QuarticTransfer.limitQuarticScore q μ p →
+      ∀ᶠ T in Filter.atTop,
+        x <
+          QuarticTransfer.pairKernelQuarticNumerator q F T
+              (localProfileMainPairKernel F T) /
+            (Z.N T (2 * T) : ℝ)
+
+/-- The sum-first tail error vanishes after normalization.  This asks for
+no pointwise tail bound on individual zero pairs. -/
+structure LocalProfileTailQuarticErrorVanishing
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+  vanishes : Tendsto
+    (localProfileTailQuarticErrorDensity q F)
+    Filter.atTop (nhds 0)
+
+/-- A strict lower bound survives any perturbation that tends to zero.
+Applied here, it transfers the local-profile main estimate to the exact
+local-profile-minus-finite-tail numerator. -/
+theorem localProfileTailQuarticLowerBound_of_main_of_error
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : RHLinalg.Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (hmain : LocalProfileMainQuarticLowerBound q F)
+    (herror : LocalProfileTailQuarticErrorVanishing q F) :
+    LocalProfileTailQuarticLowerBound q F := by
+  refine ⟨hmain.block_dimension_pos, ?_⟩
+  intro x hx
+  let L : ℝ := μ * QuarticTransfer.limitQuarticScore q μ p
+  let y : ℝ := (x + L) / 2
+  have hxy : x < y := by
+    dsimp [y, L]
+    linarith
+  have hyL : y < L := by
+    dsimp [y]
+    linarith
+  have herrorLower : ∀ᶠ T in Filter.atTop,
+      x - y < localProfileTailQuarticErrorDensity q F T :=
+    herror.vanishes.eventually (Ioi_mem_nhds (sub_neg.mpr hxy))
+  filter_upwards [hmain.eventually_gt y hyL, herrorLower]
+      with T hmainT herrorT
+  unfold localProfileTailQuarticErrorDensity at herrorT
+  linarith
+
 end ComplexAliasBridge
 end Zeta85
 end RH
