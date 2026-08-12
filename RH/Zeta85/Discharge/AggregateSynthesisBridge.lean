@@ -100,7 +100,6 @@ theorem coordinateFullFrequencyLattice_eq_energySum_collective
                   (Complex.I *
                     (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
       unfold AggregateComplexAlias.aggregateVirtualEnergyIntegral
-      unfold AggregateComplexAlias.aggregateVirtualEnergyIntegral
       rw [Finset.mul_sum]
       apply Finset.sum_congr rfl
       intro j hj
