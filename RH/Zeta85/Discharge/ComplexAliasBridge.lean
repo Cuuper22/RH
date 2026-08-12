@@ -77,9 +77,12 @@ theorem hasSum_channel_complexAlias
       (F.window T j (-u) : ℂ) = F.window T j u := by
     intro u
     rw [heven u]
-  simpa only [shiftAlias_eq_period_mul_complexAlias] using
-    (Poisson.hasSum_paperFT_mul_paperFT_shift_alias (T := T)
-      hL hΛ hsmooth hsupp' heven' z z')
+  have h :=
+    Poisson.hasSum_paperFT_mul_paperFT_shift_alias (T := T)
+      hL hΛ hsmooth hsupp' heven' z z'
+  refine ⟨h.1.congr (fun m =>
+    shiftAlias_eq_period_mul_complexAlias F T j z z' m), ?_⟩
+  simpa only [shiftAlias_eq_period_mul_complexAlias] using h.2
 
 /-- Infinite frequency-pair lattice for one physical channel. -/
 def channelFrequencyPairSum
@@ -1913,8 +1916,7 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
   have hsmoothR :
       ContDiff ℝ 2
         (F.window T (F.distinguished T)) :=
-    (hsmooth (F.distinguished T)).of_le
-      (show (2 : WithTop ℕ) ≤ ⊤ from le_top)
+    (hsmooth (F.distinguished T)).of_le le_top
   have hsmoothC :
       ContDiff ℝ 2
         (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
@@ -2088,9 +2090,12 @@ theorem hasSum_virtualComplexAlias
   have heven' : ∀ u, (f (-u) : ℂ) = f u := by
     intro u
     rw [heven u]
-  simpa only [virtualShiftAlias_eq_period_mul] using
-    (Poisson.hasSum_paperFT_mul_paperFT_shift_alias (T := T)
-      hL hΛ hsmooth hsupp' heven' z z')
+  have h :=
+    Poisson.hasSum_paperFT_mul_paperFT_shift_alias (T := T)
+      hL hΛ hsmooth hsupp' heven' z z'
+  refine ⟨h.1.congr (fun m =>
+    virtualShiftAlias_eq_period_mul T L f z z' m), ?_⟩
+  simpa only [virtualShiftAlias_eq_period_mul] using h.2
 
 /-- The virtual frequency lattice is its period times its alias lattice. -/
 theorem virtualFrequencyPairSum_eq_period_mul_aliasSum
