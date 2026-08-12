@@ -472,6 +472,188 @@ theorem block_apply_eq_mixedZeroSum
   rw [block_apply_eq_expandedMixedZeroEntry,
     expandedMixedZeroEntry_eq_sum]
 
+
+/-! ## Move the zero sums outside the first two cycles -/
+
+def mixedZeroCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    ∑ ρ ∈ ZeroSide.ZI Z T,
+      mixedBlockZeroSummand C T i i ρ)
+
+def mixedZeroCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    ∑ j : Fin (F.blockDim T),
+      (∑ ρ₁ ∈ ZeroSide.ZI Z T,
+        mixedBlockZeroSummand C T i j ρ₁) *
+      (∑ ρ₂ ∈ ZeroSide.ZI Z T,
+        mixedBlockZeroSummand C T j i ρ₂))
+
+theorem cyclicTrace1_block_eq_mixedZero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    QuarticTransfer.cyclicTrace1
+        (IsometricBlock.block C.toData T) =
+      mixedZeroCyclicTrace1 C T := by
+  simp only [QuarticTransfer.cyclicTrace1, mixedZeroCyclicTrace1,
+    block_apply_eq_mixedZeroSum]
+
+theorem cyclicTrace2_block_eq_mixedZero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    QuarticTransfer.cyclicTrace2
+        (IsometricBlock.block C.toData T) =
+      mixedZeroCyclicTrace2 C T := by
+  simp only [QuarticTransfer.cyclicTrace2, mixedZeroCyclicTrace2,
+    block_apply_eq_mixedZeroSum]
+
+def mixedZeroTupleCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    ∑ ρ ∈ ZeroSide.ZI Z T,
+      mixedBlockZeroSummand C T i i ρ)
+
+def mixedZeroTupleCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ i : Fin (F.blockDim T),
+    ∑ j : Fin (F.blockDim T),
+      ∑ ρ₁ ∈ ZeroSide.ZI Z T,
+      ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+        mixedBlockZeroSummand C T i j ρ₁ *
+          mixedBlockZeroSummand C T j i ρ₂)
+
+theorem mixedZeroCyclicTrace1_eq_tuple
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    mixedZeroCyclicTrace1 C T =
+      mixedZeroTupleCyclicTrace1 C T := by
+  rfl
+
+theorem mixedZeroCyclicTrace2_eq_tuple
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    mixedZeroCyclicTrace2 C T =
+      mixedZeroTupleCyclicTrace2 C T := by
+  simp [mixedZeroCyclicTrace2, mixedZeroTupleCyclicTrace2,
+    Finset.sum_mul, Finset.mul_sum]
+
+def mixedZeroKernelCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T,
+    ∑ i : Fin (F.blockDim T),
+      mixedBlockZeroSummand C T i i ρ)
+
+def mixedZeroKernelCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+      ∑ i : Fin (F.blockDim T),
+      ∑ j : Fin (F.blockDim T),
+        mixedBlockZeroSummand C T i j ρ₁ *
+          mixedBlockZeroSummand C T j i ρ₂)
+
+theorem mixedZeroTupleCyclicTrace1_eq_kernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    mixedZeroTupleCyclicTrace1 C T =
+      mixedZeroKernelCyclicTrace1 C T := by
+  unfold mixedZeroTupleCyclicTrace1 mixedZeroKernelCyclicTrace1
+  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T)]
+
+theorem mixedZeroTupleCyclicTrace2_eq_kernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    mixedZeroTupleCyclicTrace2 C T =
+      mixedZeroKernelCyclicTrace2 C T := by
+  unfold mixedZeroTupleCyclicTrace2 mixedZeroKernelCyclicTrace2
+  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T),
+    sum_fintype_finset_comm (ZeroSide.ZI Z T),
+    sum_fintype_finset_comm (ZeroSide.ZI Z T),
+    sum_fintype_finset_comm (ZeroSide.ZI Z T)]
+
+theorem mixedIndexKernel1_eq_pairCycle
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {C : RealData F} {T : ℝ} {ρ : ℂ} :
+    (∑ i : Fin (F.blockDim T),
+      mixedBlockZeroSummand C T i i ρ) =
+      QuarticTransfer.pairKernelCycle1
+        (mixedPairKernel C T) ρ := by
+  simp only [QuarticTransfer.pairKernelCycle1,
+    mixedPairKernel, Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro i _
+  simp only [mixedBlockZeroSummand]
+  ring_nf
+
+theorem mixedIndexKernel2_eq_pairCycle
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {C : RealData F} {T : ℝ} {ρ₁ ρ₂ : ℂ} :
+    (∑ i : Fin (F.blockDim T),
+      ∑ j : Fin (F.blockDim T),
+        mixedBlockZeroSummand C T i j ρ₁ *
+          mixedBlockZeroSummand C T j i ρ₂) =
+      QuarticTransfer.pairKernelCycle2
+        (mixedPairKernel C T) ρ₁ ρ₂ := by
+  simp only [QuarticTransfer.pairKernelCycle2,
+    mixedPairKernel, Finset.sum_mul, Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  simp only [mixedBlockZeroSummand]
+  ring_nf
+
+theorem mixedZeroKernelCyclicTrace1_eq_pairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    mixedZeroKernelCyclicTrace1 C T =
+      QuarticTransfer.pairKernelCyclicTrace1 Z T
+        (mixedPairKernel C T) := by
+  unfold mixedZeroKernelCyclicTrace1
+    QuarticTransfer.pairKernelCyclicTrace1
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ _
+  exact mixedIndexKernel1_eq_pairCycle
+
+theorem mixedZeroKernelCyclicTrace2_eq_pairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) :
+    mixedZeroKernelCyclicTrace2 C T =
+      QuarticTransfer.pairKernelCyclicTrace2 Z T
+        (mixedPairKernel C T) := by
+  unfold mixedZeroKernelCyclicTrace2
+    QuarticTransfer.pairKernelCyclicTrace2
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ _
+  apply Finset.sum_congr rfl
+  intro ρ₂ _
+  exact mixedIndexKernel2_eq_pairCycle
+
 end IsometricKernel
 end Zeta85
 end RH
