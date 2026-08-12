@@ -161,6 +161,44 @@ theorem fullLatticePairKernel_comm
   unfold PoissonKernelBridge.distinguishedLatticeTerm
   ring
 
+/-- The exact pair error left after replacing the completed lattice by the
+finite guarded lattice. -/
+def remoteLatticePairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  fullLatticePairKernel F T ρ ρ' -
+    PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ'
+
+theorem guardedPair_add_remote_eq_full
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ ρ' : ℂ) :
+    PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ' +
+        remoteLatticePairKernel F T ρ ρ' =
+      fullLatticePairKernel F T ρ ρ' := by
+  unfold remoteLatticePairKernel
+  ring
+
+theorem remoteLatticePairKernel_eq_scaled_remoteTails
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ ρ' : ℂ)
+    (hsum : Summable (PoissonKernelBridge.distinguishedLatticeTerm F T
+      (gammaOf ρ) (gammaOf ρ'))) :
+    remoteLatticePairKernel F T ρ ρ' =
+      PoissonKernelBridge.distinguishedLatticeScale F T *
+        ((∑' m : ℕ, PoissonKernelBridge.distinguishedLatticeTerm F T
+          (gammaOf ρ) (gammaOf ρ')
+          (-(((PoissonKernelBridge.distinguishedEndpointGuardWidth F T + m : ℕ) : ℤ) + 1))) +
+        ∑' m : ℕ, PoissonKernelBridge.distinguishedLatticeTerm F T
+          (gammaOf ρ) (gammaOf ρ')
+          ((F.channelDim T (F.distinguished T) +
+            PoissonKernelBridge.distinguishedEndpointGuardWidth F T + m : ℕ) : ℤ)) := by
+  have hguard :=
+    PoissonKernelBridge.canonicalGuardedPairKernel_eq_fullLattice_sub_remoteTails
+      F T ρ ρ' hsum
+  unfold remoteLatticePairKernel fullLatticePairKernel
+  rw [hguard]
+  ring
+
 theorem localProfile_even
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
@@ -239,6 +277,74 @@ def fullLatticeZeroCycle4
             (QuarticTransfer.zeroEdgeWeight F T ρ₂ *
               (QuarticTransfer.zeroEdgeWeight F T ρ₃ *
                 QuarticTransfer.zeroEdgeWeight F T ρ₄))))))
+
+/-- Quartic telescoping correction from the guarded grid to the completed
+Poisson lattice.  Every summand contains an explicit remote-tail pair. -/
+def remoteCorrectionZeroCycle4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
+  let G := PoissonKernelBridge.canonicalGuardedPairKernel F T
+  let R := remoteLatticePairKernel F T
+  let K := fullLatticePairKernel F T
+  (R ρ₃ ρ₄ * K ρ₁ ρ₂ * K ρ₂ ρ₃ * K ρ₁ ρ₄ +
+    G ρ₃ ρ₄ * R ρ₁ ρ₂ * K ρ₂ ρ₃ * K ρ₁ ρ₄ +
+    G ρ₃ ρ₄ * G ρ₁ ρ₂ * R ρ₂ ρ₃ * K ρ₁ ρ₄ +
+    G ρ₃ ρ₄ * G ρ₁ ρ₂ * G ρ₂ ρ₃ * R ρ₁ ρ₄) *
+      (QuarticTransfer.zeroEdgeWeight F T ρ₁ *
+        (QuarticTransfer.zeroEdgeWeight F T ρ₂ *
+          (QuarticTransfer.zeroEdgeWeight F T ρ₃ *
+            QuarticTransfer.zeroEdgeWeight F T ρ₄)))
+
+theorem guardedZeroCycle4_add_remoteCorrection_eq_full
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) :
+    QuarticTransfer.guardedZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ +
+        remoteCorrectionZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
+      fullLatticeZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
+  simp only [QuarticTransfer.guardedZeroCycle4,
+    remoteCorrectionZeroCycle4, fullLatticeZeroCycle4,
+    ← guardedPair_add_remote_eq_full F T]
+  ring
+
+def fullLatticeZeroKernelCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      fullLatticeZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+def remoteCorrectionCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      remoteCorrectionZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+theorem guardedCyclicTrace4_add_remoteCorrection_eq_full
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) :
+    QuarticTransfer.guardedZeroKernelCyclicTrace4 F T +
+        remoteCorrectionCyclicTrace4 F T =
+      fullLatticeZeroKernelCyclicTrace4 F T := by
+  unfold QuarticTransfer.guardedZeroKernelCyclicTrace4
+    remoteCorrectionCyclicTrace4 fullLatticeZeroKernelCyclicTrace4
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₄ hρ₄
+  exact guardedZeroCycle4_add_remoteCorrection_eq_full
+    F T ρ₁ ρ₂ ρ₃ ρ₄
 
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
