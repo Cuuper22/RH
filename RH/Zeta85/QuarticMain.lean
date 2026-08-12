@@ -14,6 +14,7 @@ import RH.Zeta85.Discharge.AlignedIsometricLayout
 import RH.Zeta85.Discharge.AggregateCoordinateFrame
 import RH.Zeta85.Discharge.AggregateComplexAlias
 import RH.Zeta85.Discharge.AggregateSynthesisBridge
+import RH.Zeta85.Discharge.RadialShellFamily
 import RH.Zeta85.Discharge.AlignedChannelScales
 import RH.Zeta85.Statement
 
@@ -463,6 +464,58 @@ theorem rung9506_cumulative_collective_energyTail
     simpa only [Rung9506_statement] using
       rung9506_collective_energyTail
         hfull hzero hcollective htail
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
+
+/-! ## Radial-shell energy-tail route -/
+
+/-- Frozen R-8686 from smooth even radial shells.  Shell separation proves
+collective alias cancellation; the terminal premise is only the literal
+finite energy-tail inequality. -/
+theorem rung8686_radialShell_energyTail
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.Data F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal8686.dual) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (RadialShellFamily.literalEnergyTailLowerBound_toIsometric
+      hshell htail)
+
+/-- Frozen R-9506 from the same radial-shell construction. -/
+theorem rung9506_radialShell_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.Data F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (RadialShellFamily.literalEnergyTailLowerBound_toIsometric
+      hshell htail)
+
+/-- Cumulative frozen R-9506 from smooth radial shells. -/
+theorem rung9506_cumulative_radialShell_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.Data F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_radialShell_energyTail hfull hzero hshell htail
   simpa only [Rung9506_cumulative_statement] using
     quarticCumulative hdyadic
 
