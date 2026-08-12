@@ -1,0 +1,226 @@
+/-
+Copyright (c) 2026 Anthropic, PBC. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+SPDX-License-Identifier: Apache-2.0
+-/
+
+import RH.Zeta85.Discharge.ComplexAliasBridge
+
+/-!
+# Aggregate cancellation of complex Poisson aliases
+
+Individual physical or virtual windows need not kill their nonzero Poisson
+translations.  This module changes the order of summation: channel aliases
+are added first, and only their aggregate is required to cancel.
+-/
+
+open Complex MeasureTheory Real Set
+open scoped BigOperators
+
+noncomputable section
+
+namespace RH
+namespace Zeta85
+namespace AggregateComplexAlias
+
+open Zeta23
+
+/-- Complete frequency lattices added across a finite channel family. -/
+def aggregateVirtualFrequencyPairSum
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (f : ι → ℝ → ℝ) (z z' : ℂ) : ℂ :=
+  ∑ r : ι,
+    ComplexAliasBridge.virtualFrequencyPairSum T L (f r) z z'
+
+/-- Spatial alias lattices added across the channels before cancellation. -/
+def aggregateVirtualAliasSum
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (f : ι → ℝ → ℝ) (z z' : ℂ) : ℂ :=
+  ∑ r : ι,
+    ComplexAliasBridge.virtualAliasSum T L (f r) z z'
+
+/-- Aggregate of the zero spatial translations. -/
+def aggregateVirtualZeroTranslation
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (f : ι → ℝ → ℝ) (z z' : ℂ) : ℂ :=
+  ∑ r : ι,
+    ComplexAliasBridge.virtualComplexAliasTerm T L (f r) z z' 0
+
+/-- The summed channel energy transform. -/
+def aggregateVirtualEnergyIntegral
+    {ι : Type*} [Fintype ι]
+    (f : ι → ℝ → ℝ) (z z' : ℂ) : ℂ :=
+  ∑ r : ι,
+    ∫ u : ℝ,
+      (f r u : ℂ) * f r u *
+        Complex.exp (Complex.I * (z - z') * (u : ℂ))
+
+/-- The exact remaining condition after the channel sum is formed: nonzero
+aliases may be nonzero channel by channel, but their total must vanish. -/
+structure AggregateAliasCancellation
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (f : ι → ℝ → ℝ) : Prop where
+  nonzero_sum_eq_zero :
+    ∀ z z' : ℂ,
+      (∑ r : ι,
+        ∑' m : {m : ℤ // m ≠ 0},
+          ComplexAliasBridge.virtualComplexAliasTerm
+            T L (f r) z z' m) = 0
+
+/-- Without any support-gap assumption, one channel's alias lattice splits
+into its zero translation and the sum of all nonzero translations. -/
+theorem virtualAliasSum_eq_zero_add_nonzero
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (z z' : ℂ) :
+    ComplexAliasBridge.virtualAliasSum T L f z z' =
+      ComplexAliasBridge.virtualComplexAliasTerm T L f z z' 0 +
+        ∑' m : {m : ℤ // m ≠ 0},
+          ComplexAliasBridge.virtualComplexAliasTerm T L f z z' m := by
+  have hL0 : (L : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  have hscaled :=
+    (ComplexAliasBridge.hasSum_virtualComplexAlias
+      T L Λ f hL hΛ hsmooth hsupp heven z z').1
+  have hsum :
+      Summable (fun m : ℤ =>
+        ComplexAliasBridge.virtualComplexAliasTerm T L f z z' m) :=
+    (summable_mul_left_iff hL0).1 hscaled
+  unfold ComplexAliasBridge.virtualAliasSum
+  simpa using
+    (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
+
+/-- Poisson summation is linear across the finite channel family. -/
+theorem aggregateVirtualFrequencyPairSum_eq_period_mul_aliasSum
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (Λ : ι → ℝ) (f : ι → ℝ → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ r, 0 ≤ Λ r)
+    (hsmooth : ∀ r, ContDiff ℝ 2 (fun u => (f r u : ℂ)))
+    (hsupp : ∀ r u, Λ r < |u| → f r u = 0)
+    (heven : ∀ r u, f r (-u) = f r u)
+    (z z' : ℂ) :
+    aggregateVirtualFrequencyPairSum T L f z z' =
+      (L : ℂ) * aggregateVirtualAliasSum T L f z z' := by
+  unfold aggregateVirtualFrequencyPairSum aggregateVirtualAliasSum
+  calc
+    (∑ r : ι,
+      ComplexAliasBridge.virtualFrequencyPairSum
+        T L (f r) z z') =
+        ∑ r : ι, (L : ℂ) *
+          ComplexAliasBridge.virtualAliasSum T L (f r) z z' := by
+      apply Finset.sum_congr rfl
+      intro r _
+      exact ComplexAliasBridge.virtualFrequencyPairSum_eq_period_mul_aliasSum
+        T L (Λ r) (f r) hL (hΛ r) (hsmooth r)
+        (hsupp r) (heven r) z z'
+    _ = (L : ℂ) *
+        ∑ r : ι,
+          ComplexAliasBridge.virtualAliasSum T L (f r) z z' := by
+      rw [Finset.mul_sum]
+
+/-- Aggregate nonzero-alias cancellation leaves exactly the summed zero
+translations, even when no channel cancels separately. -/
+theorem aggregateVirtualAliasSum_eq_zeroTranslation
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (Λ : ι → ℝ) (f : ι → ℝ → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ r, 0 ≤ Λ r)
+    (hsmooth : ∀ r, ContDiff ℝ 2 (fun u => (f r u : ℂ)))
+    (hsupp : ∀ r u, Λ r < |u| → f r u = 0)
+    (heven : ∀ r u, f r (-u) = f r u)
+    (hcancel : AggregateAliasCancellation T L f)
+    (z z' : ℂ) :
+    aggregateVirtualAliasSum T L f z z' =
+      aggregateVirtualZeroTranslation T L f z z' := by
+  unfold aggregateVirtualAliasSum aggregateVirtualZeroTranslation
+  calc
+    (∑ r : ι,
+      ComplexAliasBridge.virtualAliasSum T L (f r) z z') =
+        ∑ r : ι,
+          (ComplexAliasBridge.virtualComplexAliasTerm
+              T L (f r) z z' 0 +
+            ∑' m : {m : ℤ // m ≠ 0},
+              ComplexAliasBridge.virtualComplexAliasTerm
+                T L (f r) z z' m) := by
+      apply Finset.sum_congr rfl
+      intro r _
+      exact virtualAliasSum_eq_zero_add_nonzero
+        T L (Λ r) (f r) hL (hΛ r) (hsmooth r)
+        (hsupp r) (heven r) z z'
+    _ = (∑ r : ι,
+          ComplexAliasBridge.virtualComplexAliasTerm
+            T L (f r) z z' 0) +
+        ∑ r : ι,
+          ∑' m : {m : ℤ // m ≠ 0},
+            ComplexAliasBridge.virtualComplexAliasTerm
+              T L (f r) z z' m := by
+      rw [Finset.sum_add_distrib]
+    _ = ∑ r : ι,
+        ComplexAliasBridge.virtualComplexAliasTerm
+          T L (f r) z z' 0 := by
+      rw [hcancel.nonzero_sum_eq_zero z z', add_zero]
+
+/-- The aggregate zero translation is the sum of the channel energy
+transforms. -/
+theorem aggregateVirtualZeroTranslation_eq_energyIntegral
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (f : ι → ℝ → ℝ) (z z' : ℂ) :
+    aggregateVirtualZeroTranslation T L f z z' =
+      aggregateVirtualEnergyIntegral f z z' := by
+  unfold aggregateVirtualZeroTranslation aggregateVirtualEnergyIntegral
+  apply Finset.sum_congr rfl
+  intro r _
+  exact ComplexAliasBridge.virtualComplexAliasTerm_zero
+    T L (f r) z z'
+
+/-- Main multichannel Poisson identity: summing channels first permits exact
+collective alias cancellation. -/
+theorem aggregateVirtualFrequencyPairSum_eq_energyIntegral
+    {ι : Type*} [Fintype ι]
+    (T L : ℝ) (Λ : ι → ℝ) (f : ι → ℝ → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ r, 0 ≤ Λ r)
+    (hsmooth : ∀ r, ContDiff ℝ 2 (fun u => (f r u : ℂ)))
+    (hsupp : ∀ r u, Λ r < |u| → f r u = 0)
+    (heven : ∀ r u, f r (-u) = f r u)
+    (hcancel : AggregateAliasCancellation T L f)
+    (z z' : ℂ) :
+    aggregateVirtualFrequencyPairSum T L f z z' =
+      (L : ℂ) * aggregateVirtualEnergyIntegral f z z' := by
+  rw [aggregateVirtualFrequencyPairSum_eq_period_mul_aliasSum
+    T L Λ f hL hΛ hsmooth hsupp heven z z']
+  rw [aggregateVirtualAliasSum_eq_zeroTranslation
+    T L Λ f hL hΛ hsmooth hsupp heven hcancel z z']
+  rw [aggregateVirtualZeroTranslation_eq_energyIntegral]
+
+/-- Reciprocal-period normalization again cancels the common channel period,
+now after collective rather than channelwise alias cancellation. -/
+theorem aggregateVirtualNormalizedFrequencyPairSum_eq_energyIntegral
+    {ι : Type*} [Fintype ι]
+    (fullLength T L : ℝ) (Λ : ι → ℝ) (f : ι → ℝ → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ r, 0 ≤ Λ r)
+    (hsmooth : ∀ r, ContDiff ℝ 2 (fun u => (f r u : ℂ)))
+    (hsupp : ∀ r u, Λ r < |u| → f r u = 0)
+    (heven : ∀ r u, f r (-u) = f r u)
+    (hcancel : AggregateAliasCancellation T L f)
+    (z z' : ℂ) :
+    (fullLength : ℂ) / (L : ℂ) *
+        aggregateVirtualFrequencyPairSum T L f z z' =
+      (fullLength : ℂ) *
+        aggregateVirtualEnergyIntegral f z z' := by
+  have hL0 : (L : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  rw [aggregateVirtualFrequencyPairSum_eq_energyIntegral
+    T L Λ f hL hΛ hsmooth hsupp heven hcancel z z']
+  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+
+end AggregateComplexAlias
+end Zeta85
+end RH
+
+end
