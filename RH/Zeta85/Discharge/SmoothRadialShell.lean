@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
+import Mathlib.MeasureTheory.Measure.Haar.NormedSpace
 import RH.Zeta85.Discharge.RadialShellFamily
 import RH.Zeta85.Discharge.QuarticWindowWitnesses
 
@@ -826,6 +827,60 @@ theorem supportedFullProfile_div_eq_indicator
       Set.indicator_of_not_mem hscaled,
       Set.indicator_of_not_mem hu]
 
+/-- The integral of the type-level supported profile is exactly its
+interval integral; changing the closed endpoint convention costs nothing. -/
+theorem integral_supportedFullProfile
+    (v : ℝ → ℝ) :
+    (∫ x : ℝ, @QuarticGramFamily.supportedFullProfile v x) =
+      ∫ x in (-(1 : ℝ) / 2)..(1 / 2), v x := by
+  rw [QuarticGramFamily.supportedFullProfile,
+    MeasureTheory.integral_indicator measurableSet_Icc,
+    MeasureTheory.integral_Icc_eq_integral_Ioc,
+    ← intervalIntegral.integral_of_le (by norm_num :
+      (-(1 : ℝ) / 2) ≤ 1 / 2)]
+
+/-- Scaling a supported normalized profile by a positive physical length
+multiplies its total energy by that length. -/
+theorem integral_supportedFullProfile_div
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L) :
+    (∫ u : ℝ,
+      @QuarticGramFamily.supportedFullProfile v (u / L)) =
+      L * (∫ x in (-(1 : ℝ) / 2)..(1 / 2), v x) := by
+  calc
+    (∫ u : ℝ,
+      @QuarticGramFamily.supportedFullProfile v (u / L)) =
+        |L| •
+          (∫ x : ℝ,
+            @QuarticGramFamily.supportedFullProfile v x) :=
+      MeasureTheory.Measure.integral_comp_div
+        (fun x : ℝ =>
+          @QuarticGramFamily.supportedFullProfile v x) L
+    _ = L * (∫ x in (-(1 : ℝ) / 2)..(1 / 2), v x) := by
+      rw [abs_of_pos hL, integral_supportedFullProfile]
+      rfl
+
+/-- The R-8686 limiting supported energy has a closed exact value. -/
+theorem integral_supportedFullProfile_v8686_div
+    (L : ℝ) (hL : 0 < L) :
+    (∫ u : ℝ,
+      @QuarticGramFamily.supportedFullProfile
+        QuarticWindowWitnesses.v8686 (u / L)) =
+      L * (3815170470337249 / 3814073303040000 : ℝ) := by
+  rw [integral_supportedFullProfile_div
+      QuarticWindowWitnesses.v8686 L hL,
+    QuarticWindowWitnesses.integral_v8686]
+
+/-- The R-9506 limiting supported energy has a closed exact value. -/
+theorem integral_supportedFullProfile_v9506_div
+    (L : ℝ) (hL : 0 < L) :
+    (∫ u : ℝ,
+      @QuarticGramFamily.supportedFullProfile
+        QuarticWindowWitnesses.v9506 (u / L)) =
+      L * (5913507107 / 5913600000 : ℝ) := by
+  rw [integral_supportedFullProfile_div
+      QuarticWindowWitnesses.v9506 L hL,
+    QuarticWindowWitnesses.integral_v9506]
+
 /-- A smooth normalized profile has an integrable scaled supported profile. -/
 theorem integrable_supportedFullProfile_div
     (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
@@ -1120,6 +1175,30 @@ theorem tendsto_integral_frozen9506Window_sq
     fun_prop
   · intro x hx
     exact QuarticWindowWitnesses.v9506_pos hx
+
+/-- The R-8686 shrinking annular energies converge to their exact
+physical normalization. -/
+theorem tendsto_integral_frozen8686Window_sq_exact
+    (L : ℝ) (hL : 0 < L) :
+    Tendsto
+      (fun n : ℕ => ∫ u : ℝ, frozen8686Window L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (L * (3815170470337249 / 3814073303040000 : ℝ))) := by
+  simpa only [integral_supportedFullProfile_v8686_div L hL] using
+    tendsto_integral_frozen8686Window_sq L hL
+
+/-- The R-9506 shrinking annular energies converge to their exact physical
+normalization. -/
+theorem tendsto_integral_frozen9506Window_sq_exact
+    (L : ℝ) (hL : 0 < L) :
+    Tendsto
+      (fun n : ℕ => ∫ u : ℝ, frozen9506Window L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (L * (5913507107 / 5913600000 : ℝ))) := by
+  simpa only [integral_supportedFullProfile_v9506_div L hL] using
+    tendsto_integral_frozen9506Window_sq L hL
 
 end SmoothRadialShell
 end Zeta85
