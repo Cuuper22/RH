@@ -1390,6 +1390,75 @@ theorem blockPairKernelMatrix_add_canonicalBoundary_eq_guarded
   unfold canonicalLatticeBoundaryKernelMatrix
   module
 
+/-- The normalized finite endpoint contribution for one arbitrary complex
+zero pair. -/
+def canonicalBoundaryPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ ρ' : ℂ) : ℂ :=
+  distinguishedLatticeScale F T *
+    canonicalLatticeBoundaryStrip F T (gammaOf ρ) (gammaOf ρ')
+      (F.channelDim T (F.distinguished T))
+
+/-- The normalized pair contraction over the one enlarged contiguous
+modulation grid. -/
+def canonicalGuardedPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ ρ' : ℂ) : ℂ :=
+  distinguishedLatticeScale F T *
+    canonicalGuardedLatticeSegment F T (gammaOf ρ) (gammaOf ρ')
+      (F.channelDim T (F.distinguished T))
+      (distinguishedEndpointGuardWidth F T)
+
+/-- Scalar form of the guarded-grid identity: live retained contraction plus
+the two finite endpoint strips equals one enlarged finite contraction. -/
+theorem blockPairKernel_add_canonicalBoundary_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (haddress : Function.Bijective (F.columnAddress T))
+    (hcolumns : ∀ i,
+      (F.columnAddress T (F.blockEmbedding T i)).1 = F.distinguished T)
+    (hexhaustive : ∀ i,
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i)
+    (ρ ρ' : ℂ) :
+    blockPairKernel F T ρ ρ' + canonicalBoundaryPairKernel F T ρ ρ' =
+      canonicalGuardedPairKernel F T ρ ρ' := by
+  rw [blockPairKernel_eq_latticeSegment F T haddress hcolumns hexhaustive]
+  unfold canonicalBoundaryPairKernel canonicalGuardedPairKernel
+    distinguishedLatticeScale
+  rw [canonicalGuardedLatticeSegment_eq_boundary_add_segment]
+  unfold canonicalLatticeBoundaryStrip
+  dsimp only
+  ring
+
+/-- The guarded pair is also the normalized full lattice with exactly the
+two remote half-lattices removed. -/
+theorem canonicalGuardedPairKernel_eq_fullLattice_sub_remoteTails
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ ρ' : ℂ)
+    (hsum : Summable (distinguishedLatticeTerm F T
+      (gammaOf ρ) (gammaOf ρ'))) :
+    canonicalGuardedPairKernel F T ρ ρ' =
+      distinguishedLatticeScale F T *
+        ((∑' k : ℤ, distinguishedLatticeTerm F T
+          (gammaOf ρ) (gammaOf ρ') k) -
+        (∑' m : ℕ, distinguishedLatticeTerm F T
+          (gammaOf ρ) (gammaOf ρ')
+          (-(((distinguishedEndpointGuardWidth F T + m : ℕ) : ℤ) + 1))) -
+        ∑' m : ℕ, distinguishedLatticeTerm F T
+          (gammaOf ρ) (gammaOf ρ')
+          ((F.channelDim T (F.distinguished T) +
+            distinguishedEndpointGuardWidth F T + m : ℕ) : ℤ)) := by
+  have hfull := tsum_distinguishedLatticeTerm_eq_guardedSegment_add_remoteTails
+    F T (gammaOf ρ) (gammaOf ρ')
+      (F.channelDim T (F.distinguished T))
+      (distinguishedEndpointGuardWidth F T) hsum
+  unfold canonicalGuardedPairKernel
+  rw [hfull]
+  ring
+
 /-- Quantitative guarded-remainder theorem.  After a finite upper endpoint
 strip is left untouched, both infinite pieces are absolutely summable and
 bounded by explicit fourth-power grid tails.  The remaining finite strip is
@@ -2520,6 +2589,22 @@ theorem DistinguishedGuardedPoissonKernelData.canonicalBoundaryRank_isLittleO
   canonicalLatticeBoundaryKernelMatrix_rank_isLittleO F
     (fun T => F.channelDim T (F.distinguished T))
     h.bandwidth_pos hRvM h.distinguished_period
+
+/-- The guarded construction data identify the live pair kernel plus its
+finite endpoint correction with the one contiguous guarded grid at every
+sufficiently large height. -/
+theorem DistinguishedGuardedPoissonKernelData.eventually_blockPairKernel_add_boundary_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : DistinguishedGuardedPoissonKernelData F) :
+    ∀ᶠ T in atTop, ∀ ρ ρ' : ℂ,
+      blockPairKernel F T ρ ρ' + canonicalBoundaryPairKernel F T ρ ρ' =
+        canonicalGuardedPairKernel F T ρ ρ' := by
+  filter_upwards [h.column_address_bijective, h.distinguished_columns,
+    h.distinguished_exhaustive] with T haddress hcolumns hexhaustive
+  intro ρ ρ'
+  exact blockPairKernel_add_canonicalBoundary_eq_guarded
+    F T haddress hcolumns hexhaustive ρ ρ'
 
 /-- The quantitative tail-control interface makes the common remote error
 vanish even after summing one copy for every dyadic zero. -/
