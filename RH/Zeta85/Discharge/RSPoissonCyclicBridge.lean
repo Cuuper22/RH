@@ -380,6 +380,29 @@ theorem localProfile_hasCompactSupport
   rw [hadm.support _ hbound]
   ring
 
+/-- A zero ordinate normalized at an arbitrary positive-frequency scale.
+This exposes the normalization choice before the cyclic gauge is formed. -/
+def scaledZeroOrdinateAtScale (s : ℝ) (ρ : ℂ) : ℂ :=
+  ((s / (2 * Real.pi) : ℝ) : ℂ) * gammaOf ρ
+
+theorem cyclicFrequencyFour_scaled_reversed_atScale
+    {q s L : ℝ} (hperiod : L = q * s)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) :
+    RSReduction.cyclicFrequencyFour q
+      ![scaledZeroOrdinateAtScale s ρ₁,
+        scaledZeroOrdinateAtScale s ρ₄,
+        scaledZeroOrdinateAtScale s ρ₃,
+        scaledZeroOrdinateAtScale s ρ₂] =
+      ![(L : ℂ) * (gammaOf ρ₁ - gammaOf ρ₂),
+        (L : ℂ) * (gammaOf ρ₄ - gammaOf ρ₁),
+        (L : ℂ) * (gammaOf ρ₃ - gammaOf ρ₄),
+        (L : ℂ) * (gammaOf ρ₂ - gammaOf ρ₃)] := by
+  funext j
+  fin_cases j <;>
+    simp [RSReduction.cyclicFrequencyFour, scaledZeroOrdinateAtScale,
+      hperiod] <;>
+    field_simp [Real.pi_ne_zero]
+
 def scaledZeroOrdinate (T : ℝ) (ρ : ℂ) : ℂ :=
   ((Zeta23.l T / (2 * Real.pi) : ℝ) : ℂ) * gammaOf ρ
 
@@ -2297,6 +2320,61 @@ theorem norm_balancedFullLatticeZeroMatrix_le
           (Z.NIprime T : ℝ) := by
       unfold C distinguishedEnergyFraction QuarticGramFamily.hatDenominator
       field_simp [hfull.ne', htotal.ne']
+
+theorem fullLatticeZeroCycle4_eq_rsGaugeTest_atScale
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T w c q s : ℝ)
+    (hadm : AdmWindow (F.window T (F.distinguished T))
+      (F.period T (F.distinguished T)) w c)
+    (hfull : 0 < QuarticGramFamily.fullLength (σ := σ) T)
+    (hE : F.channelEnergy T (F.distinguished T) ≠ 0)
+    (htotal : (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
+    (hq : 0 < q)
+    (hperiod : F.period T (F.distinguished T) = q * s)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) :
+    (q : ℂ) ^ 4 * fullLatticeZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
+      (distinguishedEnergyFraction F T : ℂ) ^ 4 *
+        ((Z.mult ρ₁ : ℂ) * (Z.mult ρ₂ : ℂ) *
+          (Z.mult ρ₃ : ℂ) * (Z.mult ρ₄ : ℂ)) *
+        rsGaugeTest (n := 3)
+          (RSReduction.weightedCyclicSymbol (k := 4) q (F.localProfile T))
+          ![scaledZeroOrdinateAtScale s ρ₁,
+            scaledZeroOrdinateAtScale s ρ₄,
+            scaledZeroOrdinateAtScale s ρ₃,
+            scaledZeroOrdinateAtScale s ρ₂] := by
+  have hfactor : fullLatticeZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
+      (fullLatticePairKernel F T ρ₁ ρ₂ *
+        QuarticTransfer.zeroEdgeWeight F T ρ₁) *
+      (fullLatticePairKernel F T ρ₂ ρ₃ *
+        QuarticTransfer.zeroEdgeWeight F T ρ₂) *
+      (fullLatticePairKernel F T ρ₃ ρ₄ *
+        QuarticTransfer.zeroEdgeWeight F T ρ₃) *
+      (fullLatticePairKernel F T ρ₄ ρ₁ *
+        QuarticTransfer.zeroEdgeWeight F T ρ₄) := by
+    unfold fullLatticeZeroCycle4
+    rw [fullLatticePairKernel_comm F T ρ₁ ρ₄]
+    ring
+  have h12 := fullLatticePairKernel_mul_zeroEdgeWeight_eq_localProfile
+    F T w c hadm hfull hE htotal ρ₁ ρ₂
+  have h23 := fullLatticePairKernel_mul_zeroEdgeWeight_eq_localProfile
+    F T w c hadm hfull hE htotal ρ₂ ρ₃
+  have h34 := fullLatticePairKernel_mul_zeroEdgeWeight_eq_localProfile
+    F T w c hadm hfull hE htotal ρ₃ ρ₄
+  have h41 := fullLatticePairKernel_mul_zeroEdgeWeight_eq_localProfile
+    F T w c hadm hfull hE htotal ρ₄ ρ₁
+  have hrs := RSReduction.rsGaugeTest_weightedCyclicSymbol_four
+    hq (F.localProfile T)
+      (localProfile_continuous F T w c hadm)
+      (localProfile_hasCompactSupport F T w c hadm)
+      ![scaledZeroOrdinateAtScale s ρ₁,
+        scaledZeroOrdinateAtScale s ρ₄,
+        scaledZeroOrdinateAtScale s ρ₃,
+        scaledZeroOrdinateAtScale s ρ₂]
+  rw [cyclicFrequencyFour_scaled_reversed_atScale hperiod
+    ρ₁ ρ₂ ρ₃ ρ₄, Fin.prod_univ_four] at hrs
+  simp at hrs
+  rw [hfactor, h12, h23, h34, h41, hrs]
+  ring_nf
 
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
