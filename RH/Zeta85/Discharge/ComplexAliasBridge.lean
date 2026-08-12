@@ -725,6 +725,127 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedFrequencyPai
   exact zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
     F T ρ ρ' hdist hratio
 
+
+/-- A single channel with a strict support gap needs no cross-channel alias
+cancellation: its normalized infinite frequency lattice is exactly the
+Fourier integral of that channel's physical energy. -/
+theorem channelNormalizedFrequencyPairSum_eq_channelEnergyIntegral_of_support_gap
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (Λ : ℝ)
+    (hL : 0 < F.period T j) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → F.window T j u = 0)
+    (heven : ∀ u, F.window T j (-u) = F.window T j u)
+    (hgap : 2 * Λ < F.period T j)
+    (z z' : ℂ) :
+    channelNormalizedFrequencyPairSum F T j z z' =
+      (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.window T j u : ℂ) * F.window T j u *
+            cexp (I * (z - z') * (u : ℂ)) := by
+  have hsupp' : ∀ u, Λ < |u| →
+      (F.window T j u : ℂ) = 0 := by
+    intro u hu
+    rw [hsupp u hu]
+    norm_num
+  have heven' : ∀ u,
+      (F.window T j (-u) : ℂ) = F.window T j u := by
+    intro u
+    rw [heven u]
+  have hhas :=
+    Poisson.hasSum_paperFT_mul_paperFT_shift_alias_zero_only
+      hL hΛ hsmooth hsupp' heven' hgap z z'
+  have hfreq :
+      channelFrequencyPairSum F T j z z' =
+        Poisson.complexPoissonShiftAliasTerm
+          (fun u => (F.window T j u : ℂ))
+          (F.period T j) T z z' 0 := by
+    unfold channelFrequencyPairSum
+    exact hhas.tsum_eq
+  rw [shiftAlias_eq_period_mul_complexAlias] at hfreq
+  have hL0 : (F.period T j : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  unfold channelNormalizedFrequencyPairSum
+  rw [hfreq, mul_assoc, div_mul_cancel₀ _ hL0]
+  rw [complexAliasTerm_zero]
+
+/-- The actual distinguished zero-pair kernel is therefore its one-channel
+physical-energy integral minus only the finite/infinite grid tail. -/
+theorem zeroPairKernel_eq_distinguishedEnergyIntegral_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (hratio : 0 ≤
+      F.fullLength T / F.period T (F.distinguished T))
+    (Λ : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| →
+      F.window T (F.distinguished T) u = 0)
+    (heven : ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u)
+    (hgap : 2 * Λ < F.period T (F.distinguished T)) :
+    QuarticTransfer.zeroPairKernel F T ρ ρ' =
+      (F.fullLength T : ℂ) *
+          ∫ u : ℝ,
+            (F.window T (F.distinguished T) u : ℂ) *
+              F.window T (F.distinguished T) u *
+              cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+        ((F.fullLength T /
+          F.period T (F.distinguished T) : ℝ) : ℂ) *
+          distinguishedFrequencyPairTail F T ρ ρ' := by
+  rw [zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
+    F T ρ ρ' hdist hratio]
+  rw [channelNormalizedFrequencyPairSum_eq_channelEnergyIntegral_of_support_gap
+    F T (F.distinguished T) Λ hL hΛ hsmooth hsupp heven hgap]
+
+/-- The one-channel energy-minus-tail representation holds eventually for a
+principal construction as soon as its distinguished window has a strict
+support gap.  No complex-alias summability or cancellation premise appears. -/
+theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyIntegral_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hblock : PrincipalCyclicBlock F)
+    (Λ : ℝ → ℝ)
+    (hΛ : ∀ᶠ T in Filter.atTop, 0 ≤ Λ T)
+    (hsmooth : ∀ᶠ T in Filter.atTop,
+      ContDiff ℝ 2
+        (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ᶠ T in Filter.atTop, ∀ u,
+      Λ T < |u| → F.window T (F.distinguished T) u = 0)
+    (heven : ∀ᶠ T in Filter.atTop, ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u)
+    (hgap : ∀ᶠ T in Filter.atTop,
+      2 * Λ T < F.period T (F.distinguished T)) :
+    ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
+      QuarticTransfer.zeroPairKernel F T ρ ρ' =
+        (F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.window T (F.distinguished T) u : ℂ) *
+                F.window T (F.distinguished T) u *
+                cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          ((F.fullLength T /
+            F.period T (F.distinguished T) : ℝ) : ℂ) *
+            distinguishedFrequencyPairTail F T ρ ρ' := by
+  filter_upwards [
+    hblock.eventually_zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail,
+    hblock.periods_pos,
+    hΛ, hsmooth, hsupp, heven, hgap
+  ] with T hkernel hperiod hΛT hsmoothT hsuppT hevenT hgapT
+  intro ρ ρ'
+  rw [hkernel ρ ρ']
+  rw [channelNormalizedFrequencyPairSum_eq_channelEnergyIntegral_of_support_gap
+    F T (F.distinguished T) (Λ T)
+    (hperiod (F.distinguished T)) hΛT hsmoothT hsuppT hevenT hgapT]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
