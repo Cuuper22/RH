@@ -39,9 +39,9 @@ theorem shiftAlias_eq_period_mul_complexAlias
         (F.period T j) T z z' m =
       (F.period T j : ℂ) * F.complexAliasTerm T z z' j m := by
   simp only [Poisson.complexPoissonShiftAliasTerm,
-    QuarticGramFamily.complexAliasTerm, sub_eq_add_neg, add_comm]
+    QuarticGramFamily.complexAliasTerm, sub_eq_add_neg]
   push_cast
-  ring
+  ring_nf
 
 /-- The full complex-frequency lattice sum for one even compact physical
 channel, stated directly using the family complex alias term. -/
@@ -598,8 +598,11 @@ theorem zeroPairKernel_eq_distinguishedBlockFrequencyPairSum
     rw [haddr] at hi
     exact hi
   subst j
-  simp only [QuarticGramFamily.atom, haddr, sub_eq_add_neg, add_comm]
-  ring
+  have hkval :=
+    congrArg (fun a => a.2.val) haddr
+  simp only [QuarticGramFamily.atom, haddr, sub_eq_add_neg]
+  rw [hkval]
+  ring_nf
 
 /-- The preceding identity holds eventually for every zero pair in any
 literal principal construction. -/
@@ -781,7 +784,6 @@ theorem channelNormalizedFrequencyPairSum_eq_channelEnergyIntegral_of_support_ga
   rw [shiftAlias_eq_period_mul_complexAlias] at hfreq
   have hL0 : (F.period T j : ℂ) ≠ 0 := by
     exact_mod_cast hL.ne'
-  dsimp only [j] at hsum hnonzero halias hL0 ⊢
   unfold channelNormalizedFrequencyPairSum
   rw [hfreq]
   field_simp [hL0]
@@ -1304,11 +1306,12 @@ theorem distinguishedBlockLabel_bijective
       simpa only [hai'] using hdist i'
     subst j
     subst j'
-    apply Sigma.ext rfl
-    apply HEq.of_eq
-    apply Fin.ext
     have hval := congrArg Fin.val hii
-    simpa only [distinguishedBlockLabel, hai, hai'] using hval
+    have hkk : k = k' := by
+      apply Fin.ext
+      simpa only [distinguishedBlockLabel, hai, hai'] using hval
+    subst k'
+    rfl
   · intro k
     obtain ⟨c, hc⟩ :=
       haddr.2 ⟨F.distinguished T, k⟩
@@ -1821,9 +1824,10 @@ theorem distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
       hnonzero, add_zero]
   have hL0 : (F.period T j : ℂ) ≠ 0 := by
     exact_mod_cast hL.ne'
+  dsimp only [j] at hsum hnonzero halias hL0 ⊢
   unfold channelNormalizedFrequencyPairSum
   rw [channelFrequencyPairSum_eq_period_mul_aliasSum
-    F T j Λ hL hΛ hsmooth hsupp heven z z',
+    F T (F.distinguished T) Λ hL hΛ hsmooth hsupp heven z z',
     halias, complexAliasTerm_zero]
   field_simp [hL0]
 
@@ -1906,7 +1910,7 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
   have hsmoothR :
       ContDiff ℝ 2
         (F.window T (F.distinguished T)) :=
-    (hsmooth (F.distinguished T)).of_le (by norm_num)
+    (hsmooth (F.distinguished T)).of_le (by exact le_top)
   have hsmoothC :
       ContDiff ℝ 2
         (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
@@ -2046,9 +2050,9 @@ theorem virtualShiftAlias_eq_period_mul
         (fun u => (f u : ℂ)) L T z z' m =
       (L : ℂ) * virtualComplexAliasTerm T L f z z' m := by
   simp only [Poisson.complexPoissonShiftAliasTerm,
-    virtualComplexAliasTerm, sub_eq_add_neg, add_comm]
+    virtualComplexAliasTerm, sub_eq_add_neg]
   push_cast
-  ring
+  ring_nf
 
 /-- Complex Poisson summation stated entirely in virtual-window
 coordinates. -/
@@ -2254,6 +2258,7 @@ theorem tendsto_virtualSymmetricFrequencyPartialSum
     intro k
     unfold virtualFrequencyPairTerm
     push_cast
+    rfl
   have hpair :
       HasSum
         (fun n : ℕ =>
@@ -2373,7 +2378,7 @@ theorem tendsto_virtualSymmetricFrequencyTail_zero
       virtualFrequencyPairSum T L f z z' -
         virtualSymmetricFrequencyPartialSum T L f z z' n)
     Filter.atTop (nhds 0)
-  exact htail
+  simpa only [sub_self] using htail
 
 /-- Pointwise lattice-tail convergence becomes simultaneous convergence on
 every finite complex-frequency sample.  This is the exact form consumed by a
