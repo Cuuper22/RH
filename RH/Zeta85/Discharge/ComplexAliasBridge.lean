@@ -1068,7 +1068,7 @@ kernel.  The substitution is made before every higher product and finite
 zero sum. -/
 theorem factoredZeroKernelQuarticNumerator_eq_localProfileTailPairKernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic)
+    (q : TrimmedMoment.Quartic)
     (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ)
     (hdist : ∀ i : Fin (F.blockDim T),
@@ -1108,7 +1108,7 @@ distinguished local profile minus its finite-grid tail, and only then form
 the cyclic products and zero sums. -/
 structure LocalProfileTailQuarticLowerBound
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (q : TrimmedMoment.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
   block_dimension_pos :
     ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
   eventually_gt : ∀ x : ℝ,
@@ -1124,7 +1124,7 @@ zero-kernel lower bound using only the concrete, pointwise hypotheses of the
 one-channel Poisson reduction.  No principal-block structure is assumed. -/
 theorem LocalProfileTailQuarticLowerBound.toFactored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : RHLinalg.Quartic} {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic} {F : QuarticGramFamily Z σ μ p v}
     (h : LocalProfileTailQuarticLowerBound q F)
     (Λ : ℝ → ℝ)
     (hdist : ∀ᶠ T in Filter.atTop,
@@ -1182,7 +1182,7 @@ numerator.  The subtraction is deliberately taken after all cyclic products
 and finite zero sums have been formed. -/
 def localProfileTailQuarticErrorDensity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v)
+    (q : TrimmedMoment.Quartic) (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ) : ℝ :=
   QuarticTransfer.pairKernelQuarticNumerator q F T
         (localProfileTailPairKernel F T) /
@@ -1194,7 +1194,7 @@ def localProfileTailQuarticErrorDensity
 /-- One-sided asymptotics for the local-profile main numerator. -/
 structure LocalProfileMainQuarticLowerBound
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (q : TrimmedMoment.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
   block_dimension_pos :
     ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
   eventually_gt : ∀ x : ℝ,
@@ -1209,7 +1209,7 @@ structure LocalProfileMainQuarticLowerBound
 no pointwise tail bound on individual zero pairs. -/
 structure LocalProfileTailQuarticErrorVanishing
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (q : TrimmedMoment.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
   vanishes : Tendsto
     (localProfileTailQuarticErrorDensity q F)
     Filter.atTop (nhds 0)
@@ -1219,7 +1219,7 @@ Applied here, it transfers the local-profile main estimate to the exact
 local-profile-minus-finite-tail numerator. -/
 theorem localProfileTailQuarticLowerBound_of_main_of_error
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : RHLinalg.Quartic} {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic} {F : QuarticGramFamily Z σ μ p v}
     (hmain : LocalProfileMainQuarticLowerBound q F)
     (herror : LocalProfileTailQuarticErrorVanishing q F) :
     LocalProfileTailQuarticLowerBound q F := by
@@ -1279,9 +1279,10 @@ theorem distinguishedBlockLabel_bijective
   · intro i i' hii
     apply (F.blockEmbedding T).injective
     apply haddr.1
-    apply Sigma.subtype_ext
+    apply Sigma.ext
     · exact (hdist i).trans (hdist i').symm
-    · have hval := congrArg Fin.val hii
+    · apply Fin.ext
+      have hval := congrArg Fin.val hii
       simpa only [distinguishedBlockLabel] using hval
   · intro k
     obtain ⟨c, hc⟩ :=
@@ -1292,7 +1293,12 @@ theorem distinguishedBlockLabel_bijective
     obtain ⟨i, hi⟩ := hexhaustive c hcfirst
     refine ⟨i, ?_⟩
     apply Fin.ext
-    simp [distinguishedBlockLabel, hi, hc]
+    have hcval :=
+      congrArg (fun a => a.2.val) hc
+    change
+      (F.columnAddress T (F.blockEmbedding T i)).2.val = k.val
+    rw [hi]
+    exact hcval
 
 /-- The canonical equivalence between actual block columns and the complete
 distinguished finite grid. -/
@@ -1486,7 +1492,8 @@ def natFrequencyEmbedding : ℕ ↪ ℤ where
   toFun k := k
   inj' := by
     intro k k' h
-    exact_mod_cast h
+    change (k : ℤ) = (k' : ℤ) at h
+    exact Int.ofNat_inj.mp h
 
 /-- Integer frequencies retained by the finite nonnegative cutoff. -/
 def nonnegativeFrequencyRange (n : ℕ) : Finset ℤ :=
@@ -1516,7 +1523,8 @@ theorem distinguishedFiniteGridPairSum_eq_integerRange
         distinguishedIntegerFrequencyPairTerm F T ρ ρ' k := by
   unfold distinguishedFiniteGridPairSum nonnegativeFrequencyRange
   rw [Fin.sum_univ_eq_sum_range]
-  simp only [Finset.sum_map, distinguishedIntegerFrequencyPairTerm_natCast]
+  simp only [Finset.sum_map, natFrequencyEmbedding,
+    distinguishedIntegerFrequencyPairTerm_natCast]
 
 /-- The exact tail is the summable lattice restricted to the complement of
 the retained nonnegative cutoff. -/
@@ -1569,6 +1577,7 @@ theorem mem_nonnegativeFrequencyRange_iff
     Finset.mem_range]
   constructor
   · rintro ⟨a, ha, hcast⟩
+    simp only [natFrequencyEmbedding] at hcast
     subst k
     constructor <;> omega
   · intro hk
