@@ -13,6 +13,7 @@ import RH.Zeta85.Discharge.RepeatedChannelCompression
 import RH.Zeta85.Discharge.AlignedIsometricLayout
 import RH.Zeta85.Discharge.AggregateCoordinateFrame
 import RH.Zeta85.Discharge.AggregateComplexAlias
+import RH.Zeta85.Discharge.AggregateSynthesisBridge
 import RH.Zeta85.Discharge.AlignedChannelScales
 import RH.Zeta85.Statement
 
@@ -407,6 +408,61 @@ theorem rung9506_cumulative_literal_energyTail
         N0simple T (2 * T) := by
     simpa only [Rung9506_statement] using
       rung9506_literal_energyTail hfull hzero hreg htail
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
+
+/-! ## Collective aggregate energy-tail route -/
+
+/-- Frozen R-8686 from the literal block after all physical channels are
+summed and their nonzero aliases cancel collectively. -/
+theorem rung8686_collective_energyTail
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hcollective :
+      AggregateSynthesisBridge.CollectiveWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal8686.dual) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (AggregateSynthesisBridge.literalEnergyTailLowerBound_toIsometricCollective
+      hcollective htail)
+
+/-- Frozen R-9506 from the same collective alias-cancellation route. -/
+theorem rung9506_collective_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hcollective :
+      AggregateSynthesisBridge.CollectiveWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (AggregateSynthesisBridge.literalEnergyTailLowerBound_toIsometricCollective
+      hcollective htail)
+
+/-- Cumulative frozen R-9506 through collective alias cancellation. -/
+theorem rung9506_cumulative_collective_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hcollective :
+      AggregateSynthesisBridge.CollectiveWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_collective_energyTail
+        hfull hzero hcollective htail
   simpa only [Rung9506_cumulative_statement] using
     quarticCumulative hdyadic
 
