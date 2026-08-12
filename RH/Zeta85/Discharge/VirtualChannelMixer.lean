@@ -370,7 +370,9 @@ theorem analyzeComplex_synthesizeComplex
       push_cast at hsumComplex
       rw [hsumComplex]
     _ = virtual r := by
-      simp [Matrix.one_apply]
+      simp only [Matrix.one_apply]
+      push_cast
+      simp
 
 /-- With a common modulation period, orthogonal window synthesis passes
 linearly through the paper Fourier transform.  Thus the same finite mixer
@@ -487,7 +489,7 @@ theorem paperFT_synthesize_singleChannel
   rw [Finset.sum_eq_single r]
   · simp [singleChannel]
   · intro b hb hbr
-    simp [singleChannel, hbr]
+    simp [singleChannel, hbr, Zeta23.paperFT_def]
   · simp
 
 /-- Summing all synthesized Fourier atoms coherently exposes the exact
@@ -539,8 +541,9 @@ theorem rationalMixer3_orthogonal :
     rationalMixer3.transpose * rationalMixer3 = 1 := by
   ext i j
   rw [Matrix.mul_apply]
+  simp only [Matrix.transpose_apply]
   fin_cases i <;> fin_cases j <;>
-    norm_num [rationalMixer3, Matrix.transpose_apply, Fin.sum_univ_succ]
+    norm_num [rationalMixer3, Fin.sum_univ_succ]
 
 /-- Certified three-channel synthesis data. -/
 def rationalData3 : Data (Fin 3) where
@@ -582,8 +585,9 @@ theorem hadamardMixer4_orthogonal :
     hadamardMixer4.transpose * hadamardMixer4 = 1 := by
   ext i j
   rw [Matrix.mul_apply]
+  simp only [Matrix.transpose_apply]
   fin_cases i <;> fin_cases j <;>
-    norm_num [hadamardMixer4, Matrix.transpose_apply, Fin.sum_univ_succ]
+    norm_num [hadamardMixer4, Fin.sum_univ_succ]
 
 /-- Certified four-channel synthesis data. -/
 def hadamardData4 : Data (Fin 4) where
@@ -614,8 +618,9 @@ theorem rationalMixer5_orthogonal :
     rationalMixer5.transpose * rationalMixer5 = 1 := by
   ext i j
   rw [Matrix.mul_apply]
+  simp only [Matrix.transpose_apply]
   fin_cases i <;> fin_cases j <;>
-    norm_num [rationalMixer5, Matrix.transpose_apply, Fin.sum_univ_succ]
+    norm_num [rationalMixer5, Fin.sum_univ_succ]
 
 /-- Certified five-channel rational synthesis data. -/
 def rationalData5 : Data (Fin 5) where
@@ -681,7 +686,9 @@ theorem synthesizeComplex_analyzeComplex
       push_cast at hsumComplex
       rw [hsumComplex]
     _ = physical j := by
-      simp [Matrix.one_apply]
+      simp only [Matrix.one_apply]
+      push_cast
+      simp
 
 end VirtualChannelMixer
 end Zeta85
