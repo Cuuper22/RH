@@ -8,6 +8,7 @@ import RH.Zeta85.Discharge.QuarticTransfer
 import RH.Zeta85.Discharge.IsometricBlock
 import RH.Zeta85.Discharge.IsometricKernel
 import RH.Zeta85.Discharge.BalancedMixer
+import RH.Zeta85.Discharge.VirtualChannelMixer
 import RH.Zeta85.Statement
 
 /-!
