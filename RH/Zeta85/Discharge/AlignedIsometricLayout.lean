@@ -1157,6 +1157,141 @@ theorem mixedPairKernelQuarticNumerator_canonical_eq_symmetricRouted
   exact mixedPairKernel_canonical_eq_symmetricRoutedPairKernel
     L G H S T ρ ρ'
 
+
+/-- Lower bound for the complete routed energy kernel, before replacing its
+infinite frequency lattice by a finite routed grid. -/
+structure RoutedEnergyQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (q : TrimmedMoment.Quartic)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L)) : Prop where
+  block_dimension_pos :
+    ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
+  zero_count_pos :
+    ∀ᶠ T in Filter.atTop, 0 < Z.N T (2 * T)
+  eventually_gt :
+    ∀ x : ℝ,
+      x < μ * QuarticTransfer.limitQuarticScore q μ p →
+      ∀ᶠ T in Filter.atTop,
+        x < routedEnergyQuarticNumerator q H T /
+          (Z.N T (2 * T) : ℝ)
+
+/-- A finite routed grid realizes the common cutoff selected only after the
+complete quartic contraction has been formed. -/
+structure DiagonalSymmetricFrequencyExhaustion
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (q : TrimmedMoment.Quartic)
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    extends SymmetricFrequencyExhaustion H where
+  cutoff_eq :
+    ∀ T : ℝ, cutoff T = diagonalSymmetricCutoff q H h T
+
+/-- The exponentially accurate diagonal cutoff transfers every strict
+energy-kernel lower bound to the actual finite routed virtual statistic. -/
+theorem RoutedEnergyQuarticLowerBound.toSelectedVirtual
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {q : TrimmedMoment.Quartic}
+    {H : RoutedFourierGrid G (canonicalAtomFactorization L)}
+    {h : RoutedWindowRegularity H}
+    (hE : RoutedEnergyQuarticLowerBound q H)
+    (S : DiagonalSymmetricFrequencyExhaustion q H h) :
+    SelectedVirtualQuarticLowerBound q
+      (canonicalAtomFactorization L) := by
+  refine ⟨hE.block_dimension_pos, ?_⟩
+  intro x hx
+  let y : ℝ :=
+    (x + μ * QuarticTransfer.limitQuarticScore q μ p) / 2
+  have hxy : x < y := by
+    dsimp [y]
+    linarith
+  have hyTarget :
+      y < μ * QuarticTransfer.limitQuarticScore q μ p := by
+    dsimp [y]
+    linarith
+  have hgap : 0 < y - x := sub_pos.mpr hxy
+  have hclose :
+      ∀ᶠ T in Filter.atTop,
+        dist
+            (symmetricRoutedQuarticNumerator q H T
+                (diagonalSymmetricCutoff q H h T) -
+              routedEnergyQuarticNumerator q H T)
+            0 < y - x :=
+    (tendsto_diagonalSymmetricQuarticNumerator_sub_energy q H h).eventually
+      (Metric.ball_mem_nhds (0 : ℝ) hgap)
+  filter_upwards
+      [hE.eventually_gt y hyTarget, hE.zero_count_pos, hclose] with
+      T hEnergy hN hClose
+  have hSelected :
+      selectedVirtualQuarticNumerator q
+          (canonicalAtomFactorization L) T =
+        symmetricRoutedQuarticNumerator q H T
+          (diagonalSymmetricCutoff q H h T) := by
+    calc
+      selectedVirtualQuarticNumerator q
+          (canonicalAtomFactorization L) T =
+          IsometricKernel.mixedPairKernelQuarticNumerator
+            q (toRealData L) T :=
+        selectedVirtualQuarticNumerator_canonical_eq_mixed q L T
+      _ = symmetricRoutedQuarticNumerator q H T (S.cutoff T) :=
+        mixedPairKernelQuarticNumerator_canonical_eq_symmetricRouted
+          L G H S.toSymmetricFrequencyExhaustion T
+      _ = symmetricRoutedQuarticNumerator q H T
+          (diagonalSymmetricCutoff q H h T) := by
+        rw [S.cutoff_eq]
+  rw [hSelected]
+  have hNreal : (0 : ℝ) < (Z.N T (2 * T) : ℝ) := by
+    exact_mod_cast hN
+  have hNone : (1 : ℝ) ≤ (Z.N T (2 * T) : ℝ) := by
+    exact_mod_cast (Nat.succ_le_iff.mpr hN)
+  have hEnergy' :
+      y * (Z.N T (2 * T) : ℝ) <
+        routedEnergyQuarticNumerator q H T :=
+    (lt_div_iff₀ hNreal).mp hEnergy
+  have hClose' :
+      |symmetricRoutedQuarticNumerator q H T
+          (diagonalSymmetricCutoff q H h T) -
+        routedEnergyQuarticNumerator q H T| < y - x := by
+    simpa only [Real.dist_eq, sub_zero] using hClose
+  have hLower :
+      routedEnergyQuarticNumerator q H T - (y - x) <
+        symmetricRoutedQuarticNumerator q H T
+          (diagonalSymmetricCutoff q H h T) := by
+    have hNeg :=
+      neg_abs_le
+        (symmetricRoutedQuarticNumerator q H T
+            (diagonalSymmetricCutoff q H h T) -
+          routedEnergyQuarticNumerator q H T)
+    linarith
+  have hProduct :
+      0 ≤ (y - x) * ((Z.N T (2 * T) : ℝ) - 1) :=
+    mul_nonneg (le_of_lt hgap) (sub_nonneg.mpr hNone)
+  apply (lt_div_iff₀ hNreal).2
+  nlinarith
+
+/-- Direct terminal handoff: the complete routed energy lower bound supplies
+the weighted isometric lower bound consumed by every frozen rung. -/
+theorem RoutedEnergyQuarticLowerBound.toIsometric
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    {q : TrimmedMoment.Quartic}
+    {H : RoutedFourierGrid G (canonicalAtomFactorization L)}
+    {h : RoutedWindowRegularity H}
+    (hE : RoutedEnergyQuarticLowerBound q H)
+    (S : DiagonalSymmetricFrequencyExhaustion q H h) :
+    IsometricBlock.WeightedQuarticLowerBound q (toIsometricData L) :=
+  (hE.toSelectedVirtual S).toIsometric
+
 end AlignedIsometricLayout
 end Zeta85
 end RH
