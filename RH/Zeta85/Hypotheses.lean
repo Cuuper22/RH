@@ -8,7 +8,7 @@ RH/Zeta85/Hypotheses.lean — **the complete axiom set of the 85 % layer.**
 
 This is the ONLY file in `RH/` that declares an axiom.  Everything else under `RH/Zeta85/` is proved
 from Mathlib and from the base `Zeta23` library; `#print axioms` on the headline theorems of
-`RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and a subset of the seven
+`RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and a subset of the six
 axioms below, and nothing else (`AXIOMS.md` reproduces the three outputs verbatim).
 
 Each axiom carries: (a) its exact mathematical statement, (b) its source — the published paper with
@@ -23,6 +23,8 @@ statements are rendered over the vocabulary of `RH/Zeta85/Arith.lean`, which is 
 * the passage from a two-trace certificate to the ε-form (`RH/Zeta85/Transfer.lean`);
 * `SaturatedWindowCost (101/100) (2-cRung101)` via an exact rational degree-six profile
   (`RH/Zeta85/Discharge/Window101.lean`);
+* `SaturatedWindowCost σ (2-cRung125)` for an exact rational `1 < σ < 5/4`, via a nonnegative
+  degree-thirty rational profile (`RH/Zeta85/Discharge/RationalWindow125Final.lean`);
 * `SaturatedWindowCost (143/100) D_pc` (`RH.Zeta85.windowCost_143`);
 * the signed-shift reciprocal lemma of `docs/run/12` §2, equations (12)–(13)
   (`RH/Zeta85/Discharge/SignedShift.lean`, C1 — PROVED, not assumed);
@@ -36,8 +38,7 @@ statements are rendered over the vocabulary of `RH/Zeta85/Arith.lean`, which is 
                                                         ├─►  traceTransfer_saturated  ──► rungs
   bblr_poisson_blocks ─┐                                │            ▲
   shiu_majorant       ─┴► signedPair_traceGrade_lt_3_2 ─┘            │
-                                                             windowCost_125
-                                                             (windowCost_101 / _143 are PROVED)
+                                                             (all three window costs are PROVED)
 ```
 Rungs 1 (0.679) and 2 (0.797) use the left branch only: the **published** BBLR error bound.  Rung 3
 (0.85) uses the right branch: the run's cycle-5 claim.  Neither branch is used by the other, so the
@@ -45,6 +46,7 @@ axiom sets of the three rungs are genuinely different — see `AXIOMS.md`.
 -/
 import RH.Zeta85.Arith
 import RH.Zeta85.Discharge.Window101
+import RH.Zeta85.Discharge.RationalWindow125Final
 import RH.Zeta85.Transfer
 import RH.Zeta85.Statement
 import Zeta23.Statement.SeamClosed
@@ -251,35 +253,23 @@ theorem windowCost_101 : SaturatedWindowCost (101 / 100) (2 - cRung101) :=
   Window101.windowCost_101_proved
 
 /--
-**AXIOM 6 — the support-5/4 window cost.**
+**PROVED — the support-5/4 window cost.**
 
-*Exact statement.*  `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §3 (11)–(16): for the
-saturated kernel `K(t) = min(|t|,1)` at `σ = 5/4`, the Euler equation `u(x) + ∫min(|x−y|,1)u(y)dy = C`
-has the even solution `u(x) = cos(√2 x)` on `|x| ≤ 3/8` and
-`u(x) = A₀cos(|x|−1/2) + B₀ sin(√3(|x|−1/2))` on `3/8 ≤ |x| ≤ 5/8`, with
-`A₀ = 0.765651150533640…`, `B₀ = −0.479300891051646…`; then `∫u = 1.09716424928793…`,
-`C = 1.31965363103003…`, `D*_{5/4} = C/∫u = 1.20278584713866…`, `2 − D*_{5/4} = 0.79721415286134…`.
-Since `σ ↑ 5/4` is a limit, the axiom asserts the cost at *some* `σ` strictly between `1` and `5/4`,
-which is what the theorem at a fixed support needs, and at the *truncated* decimal.
-
-*Source.*  `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §3, equations (11)–(16); the same
-numbers appear at `docs/run/03_arithmetic_cycle3.md` §5 (32)–(37).
-
-*Why not discharged.*  The profile is only characterised as the solution of an integral (Euler)
-equation, so discharging it also requires proving that the displayed piecewise
-function *is* that solution.  A numerical verification outside Lean is recorded in `FINDINGS.md` §4:
-`u` satisfies the Euler equation to `1·10⁻⁹` uniformly on the support (limited by the 15 digits of
-`A₀, B₀` given in the source), `∫u = 1.0971642492879266…`, `C = 1.3196536309619744…`,
-`D = 1.2027858470766308…`, `2 − D = 0.7972141529233692…`; the truncation `0.79721415286134` is on
-the safe side.
+`RationalWindow125.windowCost_125` constructs an exact nonnegative degree-thirty rational profile
+at `σ = 5/4 - 10⁻¹²`, proves its mass and autocorrelation integrals coefficient-by-coefficient, and
+chooses an algebraic interpolation parameter whose cost is exactly the frozen rational target.
+No numerical or transcendental assumption remains.
 -/
-axiom windowCost_125 :
-    ∃ σ : ℝ, 1 < σ ∧ σ < 5 / 4 ∧ SaturatedWindowCost σ (2 - cRung125)
+theorem windowCost_125 :
+    ∃ σ : ℝ, 1 < σ ∧ σ < 5 / 4 ∧ SaturatedWindowCost σ (2 - cRung125) := by
+  have htarget : 2 - cRung125 = RationalWindow125.target125 := by
+    norm_num [RationalWindow125.target125, cRung125]
+  simpa only [htarget] using RationalWindow125.windowCost_125
 
 /-! ## 4. The trace transfer -/
 
 /--
-**AXIOM 7 — the trace transfer beyond bandwidth one (C6).**
+**AXIOM 6 — the trace transfer beyond bandwidth one (C6).**
 
 *Exact statement.*  Let `1 < σ < 3/2` and let `D` be an achievable saturated-kernel cost at support
 `σ` (`SaturatedWindowCost σ D`, i.e. `D = (∫v² + σ∬min(σ|s−t|,1)vv)/(σ(∫v)²)` for a positive profile

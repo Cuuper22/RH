@@ -130,7 +130,7 @@ function *is* the Euler solution.
 | `2 − D` | 0.67924886307… | **0.6792488630700078** |
 
 `0.6792488630700078 ≥ 0.67924886307`, so the truncated literal used in the statement is on the safe
-side: **the axiom is weaker than the source's claim**, and the theorem is not strengthened.
+side.  The current theorem realizes that same frozen literal with a different exact rational witness.
 
 *Rung 2, `σ = 5/4`:*
 
@@ -145,11 +145,11 @@ The Euler equation was checked at nine interior points; `u(x) + ∫min(|x−y|,1
 `1·10⁻⁹`, the residual being consistent with the 15 published digits of `A₀`, `B₀`.  Again
 `0.7972141529233692 ≥ 0.79721415286134`, so the truncation is on the safe side.
 
-**What replaced them.**  Axioms 6 and 7 (`windowCost_101`, `windowCost_125`), each asserting the cost
-at the *truncated* decimal — the weaker assertion — with the full numerical certificate reproduced in
-the docstring.  Rung 2's axiom additionally quantifies over "some `σ ∈ (1, 5/4)`" rather than
-asserting the limit point, because `08` §3 obtains its constant as `σ ↑ 5/4`; asserting it *at* `5/4`
-would be stronger than the source.
+**What replaced them.**  Both numerical assumptions are now proved in Lean using exact rational
+polynomial profiles.  `Window101.windowCost_101_proved` realizes the frozen rung-1 literal with a
+degree-six profile.  `RationalWindow125.windowCost_125` realizes the frozen rung-2 literal with a
+nonnegative degree-thirty profile at the exact rational support `5/4 - 10⁻¹²`, which lies strictly
+inside `(1, 5/4)` as the public statement requires.
 
 **Precedent for the truncation.**  The base repository's own `XiPrime` topic states truncated
 decimals (`0.85838`, `0.92919`, `0.86864`, `0.93432`) in `comparator/Challenge/XiPrime.lean`.  Rung 3

@@ -401,15 +401,13 @@ or theorem statement changes.
  Quot.sound,
  RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated,
- RH.Zeta85.Hypotheses.windowCost_125]
+ RH.Zeta85.Hypotheses.traceTransfer_saturated]
 'zeta85_rung_support_5_over_4_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
  RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated,
- RH.Zeta85.Hypotheses.windowCost_125]
+ RH.Zeta85.Hypotheses.traceTransfer_saturated]
 ```
 
 ### 1.3 The 0.85 theorem (support 143/100) and its corollary
@@ -864,7 +862,7 @@ dc99b510fdf1966f11535bf57a3dc53f4056c679e0275c8a649c01facf5f3bdf  verify/quartic
 |---|---|---:|---:|
 | base (Zeta23, Theorem D) | 2 − 1/c₁* = 0.6725007… | — | **0** |
 | 1 | 0.67924886307 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **3** |
-| 2 | 0.79721415286134 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`, `traceTransfer_saturated` | **4** |
+| 2 | 0.79721415286134 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **3** |
 | 3 | 1893603832049143/2227707598259143 = 0.8500235101… | `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated` | **4** |
 
 The quartic headlines use no declared research axiom, but each is conditional
@@ -889,18 +887,16 @@ The counts coincide but the **contents differ**, and that is the point:
   majorant, and is the branch whose logarithmic budget does not close (see §3, Axiom 5, and
   `FINDINGS.md` §7);
 * the only shared axioms are `traceTransfer_saturated` (used by all three) and — for rungs 1 and 2 —
-  the published BBLR bound.  Rung 3's window cost is **not** an axiom: `RH.Zeta85.windowCost_143` is
-  proved from the exact rational moments of `RH/Zeta85/Window.lean`.
+  the published BBLR bound.  None of the three window costs is an axiom.
 
-Two of the seven axioms (`bblr_error_bound`, `bblr_poisson_blocks`) are published literature; three
+Two of the six axioms (`bblr_error_bound`, `bblr_poisson_blocks`) are published literature; three
 (`shiu_majorant`, `signedPair_traceGrade_lt_5_4`, `signedPair_traceGrade_lt_3_2`) are the run's
-arithmetic claims; one (`windowCost_125`) is the remaining numerical certificate for a
-transcendental window; one (`traceTransfer_saturated`) is the support-beyond-one trace evaluation.
-The support-`101/100` cost is now proved by `RH.Zeta85.Window101.windowCost_101_proved`.
+arithmetic claims; one (`traceTransfer_saturated`) is the support-beyond-one trace evaluation.
+The support-`101/100` and support-`5/4` costs are proved by exact rational profiles.
 
 ---
 
-## 3. The seven axioms, with provenance
+## 3. The six axioms, with provenance
 
 Full docstrings — exact mathematical statement, source, and why not discharged — are in
 [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean); they are reproduced here in condensed form.
@@ -1024,24 +1020,19 @@ whose cost is exactly the frozen rational target.
 
 It therefore no longer appears in the compiler's axiom output.
 
-### Axiom 6 — `windowCost_125 : ∃ σ, 1 < σ ∧ σ < 5/4 ∧ SaturatedWindowCost σ (2 − cRung125)`
+### Proved discharge — `windowCost_125 : ∃ σ, 1 < σ ∧ σ < 5/4 ∧ SaturatedWindowCost σ (2 − cRung125)`
 
-*Status:* **[RUN CLAIM: `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §3, equations
-(11)–(16); same numbers at `docs/run/03_arithmetic_cycle3.md` §5 (32)–(37); undischarged]**.
+*Status:* **PROVED IN LEAN** by `RH.Zeta85.RationalWindow125.windowCost_125`.
 
-*Statement.*  For `K(t) = min(|t|,1)` at `σ = 5/4`, the Euler equation
-`u(x) + ∫min(|x−y|,1)u(y)dy = C` has the even solution `u(x) = cos(√2 x)` on `|x| ≤ 3/8`,
-`u(x) = A₀cos(|x|−1/2) + B₀sin(√3(|x|−1/2))` on `3/8 ≤ |x| ≤ 5/8`, with `A₀ = 0.765651150533640…`,
-`B₀ = −0.479300891051646…`; `∫u = 1.09716424928793…`, `C = 1.31965363103003…`,
-`D*_{5/4} = 1.20278584713866…`, `2 − D*_{5/4} = 0.79721415286134…`.  Since `σ ↑ 5/4` is a limit, the
-axiom asserts the cost at *some* fixed `σ ∈ (1, 5/4)` and at the truncated decimal.
+*Construction.*  At the exact rational support `σ = 5/4 - 10⁻¹²`, a degree-thirty even rational
+polynomial is proved nonnegative by sixteen positive Bernstein coefficients.  Lean proves its unit
+mass, exact square integral, and degree-sixty autocorrelation coefficient-by-coefficient.  An exact
+algebraic interpolation with the constant profile then realizes cost
+`1.20278584713866 = 2 - 0.79721415286134`.
 
-*Why not discharged.*  The transcendental profile is characterised as the solution of an integral
-equation, so discharging it also requires proving that the displayed function *is* that solution.
-Verified numerically outside Lean (`FINDINGS.md` §4): the Euler equation holds to `1·10⁻⁹` uniformly
-on the support, and `2 − D = 0.7972141529233692…`, so the truncation is on the safe side.
+It therefore no longer appears in the compiler's axiom output.
 
-### Axiom 7 — `traceTransfer_saturated : ∀ σ D, 1 < σ → σ < 3/2 → SaturatedWindowCost σ D → SignedPairTraceGrade σ → TwoTraceCert zetaZeroConfig D`
+### Axiom 6 — `traceTransfer_saturated : ∀ σ D, 1 < σ → σ < 3/2 → SaturatedWindowCost σ D → SignedPairTraceGrade σ → TwoTraceCert zetaZeroConfig D`
 
 *Status:* **[RUN CLAIM: `docs/run/01_arithmetic_cycle1.md` §2 (5)–(9),
 `docs/run/01_certificate_cycle1.md` (5)–(6), `docs/run/02_arithmetic_cycle2.md` §1,

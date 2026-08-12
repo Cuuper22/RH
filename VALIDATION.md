@@ -46,18 +46,17 @@ does.
 
 ```
 $ grep -rn "^axiom " --include=*.lean Zeta23/ RH/ comparator/
-RH/Zeta85/Hypotheses.lean:87   axiom bblr_error_bound : BBLRErrorBound
-RH/Zeta85/Hypotheses.lean:119  axiom bblr_poisson_blocks : BBLRPoissonBlocks
-RH/Zeta85/Hypotheses.lean:151  axiom shiu_majorant : …
-RH/Zeta85/Hypotheses.lean:185  axiom signedPair_traceGrade_lt_5_4 : …
-RH/Zeta85/Hypotheses.lean:232  axiom signedPair_traceGrade_lt_3_2 : …
-RH/Zeta85/Hypotheses.lean:291  axiom windowCost_125 : …
-RH/Zeta85/Hypotheses.lean:335  axiom traceTransfer_saturated : …
+RH/Zeta85/Hypotheses.lean:92   axiom bblr_error_bound : BBLRErrorBound
+RH/Zeta85/Hypotheses.lean:124  axiom bblr_poisson_blocks : BBLRPoissonBlocks
+RH/Zeta85/Hypotheses.lean:156  axiom shiu_majorant : …
+RH/Zeta85/Hypotheses.lean:190  axiom signedPair_traceGrade_lt_5_4 : …
+RH/Zeta85/Hypotheses.lean:239  axiom signedPair_traceGrade_lt_3_2 : …
+RH/Zeta85/Hypotheses.lean:310  axiom traceTransfer_saturated : …
 ```
 
-Seven legacy declarations, all in the single file `RH/Zeta85/Hypotheses.lean`.  The former
-`windowCost_101` declaration is now a theorem proved in
-`RH/Zeta85/Discharge/Window101.lean`.  These seven declarations remain the
+Six legacy declarations, all in the single file `RH/Zeta85/Hypotheses.lean`.  The former
+`windowCost_101` and `windowCost_125` declarations are now theorems proved in
+`RH/Zeta85/Discharge/Window101.lean` and the `RationalWindow125` modules.  These six declarations remain the
 conditional boundary, not the target standard.  (The two `axiom`
 lines in `Zeta23/FromPNTPlus/Tactic/AdditiveCombination.lean` sit inside a fenced code block in a
 docstring and are not declarations — this is the point `AUDIT.md` already records for the base
@@ -85,9 +84,9 @@ $ lake env lean comparator/PrintAxioms/Zeta85.lean
 ```
 
 Output reproduced verbatim in `AXIOMS.md` §1.  Summary: the support-`101/100` statements depend on
-`propext`, `Classical.choice`, `Quot.sound` and three of the seven research axioms,
+`propext`, `Classical.choice`, `Quot.sound` and three of the six research axioms,
 `{bblr_error_bound, signedPair_traceGrade_lt_5_4, traceTransfer_saturated}`.  The support-`5/4`
-statements additionally use `windowCost_125`; the 85 % statements use
+statements use the same three; the 85 % statements use
 `{bblr_poisson_blocks, shiu_majorant, signedPair_traceGrade_lt_3_2, traceTransfer_saturated}`.
 Nothing else appears.
 
@@ -104,7 +103,7 @@ systemd-run --property=RestrictAddressFamilies=~AF_UNIX --user --pty -E PATH="$P
   bash -c 'lake env /path/to/comparator/.lake/build/bin/comparator comparator/config-zeta85.json'
 ```
 
-with `comparator/config-zeta85.json` as shipped (it lists the seven `RH.Zeta85.Hypotheses` axioms in
+with `comparator/config-zeta85.json` as shipped (it lists the six `RH.Zeta85.Hypotheses` axioms in
 `permitted_axioms` alongside the standard three — see §7).
 
 What **was** executed is the repository's own documented substitute ("Quick check (no extra
@@ -140,7 +139,7 @@ only when the Zeta23 theorem it delegates to is sorry-free with `#print axioms` 
 three.*
 
 The topic `Zeta85` **deviates** from rule (5), visibly: its theorems are conditional
-on the seven named axioms, and `comparator/config-zeta85.json` lists those axioms in
+on the six named axioms, and `comparator/config-zeta85.json` lists those axioms in
 `permitted_axioms`.  This is the only such topic in the repository; the base four files
 (`Challenge.lean`, `Solution.lean`, `config.json`, `PrintAxioms.lean`) and the topics `Multiplicity`
 and `XiPrime` are untouched and remain unconditional.  A reader auditing the 85 % claim must read
@@ -151,8 +150,8 @@ current deficiency to discharge, not an accepted endpoint for the new mission.
 
 Recorded in `FINDINGS.md` §4 (exact-rational verification of the whole Phase-A certificate chain, and
 double-precision verification of the two source transcendental window costs).  The Phase-A chain is
-*also* proved inside Lean, so its external check is only corroboration.  The support-`101/100`
-target now has a different exact rational witness; `windowCost_125` remains axiomatic.
+*also* proved inside Lean, so its external check is only corroboration.  Both frozen lower-rung
+targets now have different exact rational witnesses proved in Lean.
 
 ## 9. Phase 0b inventory and status validation
 
@@ -184,7 +183,7 @@ lake build Zeta23 RH.Zeta85.Main \
 bash verify/check_axioms.sh
 ```
 
-`verify/check_axioms.sh` extracts the expected 54 lines for the eight compiled
+`verify/check_axioms.sh` extracts the expected 52 lines for the eight compiled
 Zeta85 headlines from `AXIOMS.md` §§1.1–1.3 and performs an exact diff against
 fresh Lean output.  It then runs the four base `PrintAxioms` audits.  A final
 source scan rejects proof-level `sorry` and `admit` outside the comparator
