@@ -432,6 +432,50 @@ theorem analyzeComplex_paperFT_synthesize
   rw [hphysical]
   exact analyzeComplex_synthesizeComplex C _ r
 
+/-- A single virtual window passes through physical synthesis with exactly
+one mixer coefficient at every complex frequency. -/
+theorem paperFT_synthesize_singleChannel
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (r j : ι) (f : ℝ → ℝ) (z : ℂ)
+    (hInt : ∀ s : ι, MeasureTheory.Integrable
+      (fun u : ℝ => ((singleChannel r f s u : ℝ) : ℂ) *
+        Complex.exp (Complex.I * z * u))) :
+    Zeta23.paperFT
+        (fun u : ℝ =>
+          (synthesize C (singleChannel r f) j u : ℂ)) z =
+      (C.matrix j r : ℂ) *
+        Zeta23.paperFT (fun u : ℝ => (f u : ℂ)) z := by
+  rw [paperFT_synthesize C (singleChannel r f) j z hInt]
+  simp [singleChannel, Zeta23.paperFT_def]
+
+/-- Summing all synthesized Fourier atoms coherently exposes the exact
+column-sum amplitude. -/
+theorem sum_paperFT_synthesize_singleChannel
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (r : ι) (f : ℝ → ℝ) (z : ℂ)
+    (hInt : ∀ s : ι, MeasureTheory.Integrable
+      (fun u : ℝ => ((singleChannel r f s u : ℝ) : ℂ) *
+        Complex.exp (Complex.I * z * u))) :
+    (∑ j : ι,
+      Zeta23.paperFT
+        (fun u : ℝ =>
+          (synthesize C (singleChannel r f) j u : ℂ)) z) =
+      (∑ j : ι, (C.matrix j r : ℂ)) *
+        Zeta23.paperFT (fun u : ℝ => (f u : ℂ)) z := by
+  calc
+    (∑ j : ι,
+      Zeta23.paperFT
+        (fun u : ℝ =>
+          (synthesize C (singleChannel r f) j u : ℂ)) z) =
+      ∑ j : ι, (C.matrix j r : ℂ) *
+        Zeta23.paperFT (fun u : ℝ => (f u : ℂ)) z := by
+      apply Finset.sum_congr rfl
+      intro j _
+      exact paperFT_synthesize_singleChannel C r j f z hInt
+    _ = (∑ j : ι, (C.matrix j r : ℂ)) *
+        Zeta23.paperFT (fun u : ℝ => (f u : ℂ)) z := by
+      rw [Finset.sum_mul]
+
 /-- The unweighted coherent sum of physical channels carries the column-sum
 amplitude of a single virtual channel. -/
 theorem sum_synthesize_singleChannel
