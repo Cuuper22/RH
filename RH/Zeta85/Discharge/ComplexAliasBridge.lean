@@ -503,6 +503,48 @@ theorem sum_channelNormalizedFrequencyPairSum_eq_energyIntegral_of_compact
   exact integrable_zeroAliasIntegrand
     F T j Λ hΛ (hsmooth j) (hsupp j) z z'
 
+
+/-- The BlockMomentLimits complex-alias fields now yield, for every actual
+zero pair at large height, the physical energy form of Poisson summation. -/
+theorem BlockMomentLimits.eventually_normalizedFrequencyPairSum_eq_energyIntegral
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : BlockMomentLimits F)
+    (Λ : ℝ → ℝ)
+    (hΛ : ∀ᶠ T in Filter.atTop, 0 ≤ Λ T)
+    (hL : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T), 0 < F.period T j)
+    (hsmooth : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T),
+        ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T), ∀ u,
+        Λ T < |u| → F.window T j u = 0)
+    (heven : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T), ∀ u,
+        F.window T j (-u) = F.window T j u) :
+    ∀ᶠ T in Filter.atTop,
+      ∀ ρ ∈ Z.ZIprime T, ∀ ρ' ∈ Z.ZIprime T,
+        (∑ j : Fin (F.channelCount T),
+            channelNormalizedFrequencyPairSum F T j
+              (gammaOf ρ) (gammaOf ρ')) =
+          (F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.windowEnergy T u : ℂ) *
+                cexp (I * (gammaOf ρ - gammaOf ρ') *
+                  (u : ℂ)) := by
+  filter_upwards [
+    h.complex_aliases_summable_at_zeros,
+    h.offRH_complex_poisson_at_zeros,
+    hΛ, hL, hsmooth, hsupp, heven
+  ] with T hfamily hoff hΛT hLT hsmoothT hsuppT hevenT
+  intro ρ hρ ρ' hρ'
+  exact
+    sum_channelNormalizedFrequencyPairSum_eq_energyIntegral_of_compact
+      F T (Λ T) hΛT hLT hsmoothT hsuppT hevenT
+      (gammaOf ρ) (gammaOf ρ')
+      (hfamily ρ hρ ρ' hρ') (hoff ρ hρ ρ' hρ')
+
 end ComplexAliasBridge
 end Zeta85
 end RH
