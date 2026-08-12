@@ -84,6 +84,120 @@ theorem rsPairVector_sum {n q : ℕ}
   simp only [rsPairVector, Finset.sum_sub_distrib]
   rw [hpos, hneg, sub_self]
 
+/-! ## Strict cyclic support at order four -/
+
+/-- Two points in the same closed interval differ by at most its width. -/
+theorem abs_sub_le_interval_width {a b x y : ℝ}
+    (hxa : a ≤ x) (hxb : x ≤ b) (hya : a ≤ y) (hyb : y ≤ b) :
+    |x - y| ≤ b - a := by
+  rw [abs_le]
+  constructor <;> linarith
+
+/-- If a profile is supported in one interval, a nonzero quartic cyclic
+symbol has total frequency at most four bandwidths, plus the displacement
+normal to the zero-sum hyperplane. -/
+theorem weightedCyclicSymbol_k4_l1_bound
+    (mu a b : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : ∀ x, r x ≠ 0 -> a ≤ x ∧ x ≤ b)
+    (xi : Fin 4 -> ℝ)
+    (hPhi : weightedCyclicSymbol (k := 4) mu r xi ≠ 0) :
+    ∑ i : Fin 4, |xi i| ≤
+      4 * mu * (b - a) + |∑ i : Fin 4, xi i| := by
+  let I : ℝ -> ℝ := fun x =>
+    ∏ j : Fin 4, r (x + cyclicPartialSum xi j / mu)
+  have hint : (∫ x : ℝ, I x) ≠ 0 := by
+    intro hz
+    apply hPhi
+    simp [weightedCyclicSymbol, I, hz]
+  have hex : ∃ x : ℝ, I x ≠ 0 := by
+    by_contra hx
+    push_neg at hx
+    apply hint
+    calc
+      (∫ x : ℝ, I x) = ∫ _x : ℝ, (0 : ℝ) := by
+        apply integral_congr_ae
+        filter_upwards [] with x
+        exact hx x
+      _ = 0 := integral_zero
+  rcases hex with ⟨x, hx⟩
+  have hr0 : r x ≠ 0 := by
+    intro h
+    apply hx
+    simp [I, Fin.prod_univ_succ, cyclicPartialSum, h]
+  have hr1 : r (x + xi 0 / mu) ≠ 0 := by
+    intro h
+    apply hx
+    norm_num [I, Fin.prod_univ_succ, cyclicPartialSum, h]
+  have hr2 : r (x + (xi 0 + xi 1) / mu) ≠ 0 := by
+    intro h
+    apply hx
+    norm_num [I, Fin.prod_univ_succ, cyclicPartialSum, h]
+  have hr3 : r (x + (xi 0 + xi 1 + xi 2) / mu) ≠ 0 := by
+    intro h
+    apply hx
+    norm_num [I, Fin.prod_univ_succ, cyclicPartialSum, h]
+  rcases hr x hr0 with ⟨hx0a, hx0b⟩
+  rcases hr (x + xi 0 / mu) hr1 with ⟨hx1a, hx1b⟩
+  rcases hr (x + (xi 0 + xi 1) / mu) hr2 with ⟨hx2a, hx2b⟩
+  rcases hr (x + (xi 0 + xi 1 + xi 2) / mu) hr3
+    with ⟨hx3a, hx3b⟩
+  have h0 : |xi 0| ≤ mu * (b - a) := by
+    have hd := abs_sub_le_interval_width hx1a hx1b hx0a hx0b
+    have heq :
+        xi 0 = mu * ((x + xi 0 / mu) - x) := by
+      field_simp [ne_of_gt hmu]
+    rw [heq, abs_mul, abs_of_pos hmu]
+    exact mul_le_mul_of_nonneg_left hd hmu.le
+  have h1 : |xi 1| ≤ mu * (b - a) := by
+    have hd := abs_sub_le_interval_width hx2a hx2b hx1a hx1b
+    have heq :
+        xi 1 = mu *
+          ((x + (xi 0 + xi 1) / mu) - (x + xi 0 / mu)) := by
+      field_simp [ne_of_gt hmu]
+      ring
+    rw [heq, abs_mul, abs_of_pos hmu]
+    exact mul_le_mul_of_nonneg_left hd hmu.le
+  have h2 : |xi 2| ≤ mu * (b - a) := by
+    have hd := abs_sub_le_interval_width hx3a hx3b hx2a hx2b
+    have heq :
+        xi 2 = mu *
+          ((x + (xi 0 + xi 1 + xi 2) / mu) -
+            (x + (xi 0 + xi 1) / mu)) := by
+      field_simp [ne_of_gt hmu]
+      ring
+    rw [heq, abs_mul, abs_of_pos hmu]
+    exact mul_le_mul_of_nonneg_left hd hmu.le
+  have hcycle : |xi 0 + xi 1 + xi 2| ≤ mu * (b - a) := by
+    have hd := abs_sub_le_interval_width hx3a hx3b hx0a hx0b
+    have heq :
+        xi 0 + xi 1 + xi 2 =
+          mu * ((x + (xi 0 + xi 1 + xi 2) / mu) - x) := by
+      field_simp [ne_of_gt hmu]
+    rw [heq, abs_mul, abs_of_pos hmu]
+    exact mul_le_mul_of_nonneg_left hd hmu.le
+  have hsum :
+      (∑ i : Fin 4, xi i) = xi 0 + xi 1 + xi 2 + xi 3 := by
+    norm_num [Fin.sum_univ_succ]
+  have hlastEq :
+      xi 3 = (∑ i : Fin 4, xi i) - (xi 0 + xi 1 + xi 2) := by
+    linarith
+  have hlast :
+      |xi 3| ≤ |∑ i : Fin 4, xi i| + mu * (b - a) := by
+    rw [hlastEq]
+    calc
+      |(∑ i : Fin 4, xi i) - (xi 0 + xi 1 + xi 2)| ≤
+          |∑ i : Fin 4, xi i| + |xi 0 + xi 1 + xi 2| := by
+            simpa only [sub_eq_add_neg, abs_neg] using
+              abs_add (∑ i : Fin 4, xi i) (-(xi 0 + xi 1 + xi 2))
+      _ ≤ |∑ i : Fin 4, xi i| + mu * (b - a) :=
+        add_le_add_left hcycle _
+  have habssum :
+      (∑ i : Fin 4, |xi i|) =
+        |xi 0| + |xi 1| + |xi 2| + |xi 3| := by
+    norm_num [Fin.sum_univ_succ]
+  rw [habssum]
+  nlinarith
+
 /-! ## Compact normal-coordinate extension
 
 The cyclic symbol is only used on the zero-sum hyperplane.  Multiplying by a
