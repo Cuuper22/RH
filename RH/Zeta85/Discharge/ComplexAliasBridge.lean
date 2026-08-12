@@ -1100,6 +1100,70 @@ theorem factoredZeroKernelQuarticNumerator_eq_localProfileTailPairKernel
     F T ρ ρ' hdist hratio Λ hL hΛ hsmooth hsupp heven hgap
       hfull0 htotal0 hchannel0
 
+
+/-- The exact analytic boundary after the order of operations has been
+changed: normalize each zero-pair kernel first, replace it by the
+distinguished local profile minus its finite-grid tail, and only then form
+the cyclic products and zero sums. -/
+structure LocalProfileTailQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : RHLinalg.Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+  block_dimension_pos :
+    ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
+  eventually_gt : ∀ x : ℝ,
+    x < μ * QuarticTransfer.limitQuarticScore q μ p →
+      ∀ᶠ T in Filter.atTop,
+        x <
+          QuarticTransfer.pairKernelQuarticNumerator q F T
+              (localProfileTailPairKernel F T) /
+            (Z.N T (2 * T) : ℝ)
+
+/-- The local-profile-minus-tail lower bound implies the literal factored
+zero-kernel lower bound using only the concrete, pointwise hypotheses of the
+one-channel Poisson reduction.  No principal-block structure is assumed. -/
+theorem LocalProfileTailQuarticLowerBound.toFactored
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : RHLinalg.Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : LocalProfileTailQuarticLowerBound q F)
+    (Λ : ℝ → ℝ)
+    (hdist : ∀ᶠ T in Filter.atTop,
+      ∀ i : Fin (F.blockDim T),
+        (F.columnAddress T (F.blockEmbedding T i)).1 =
+          F.distinguished T)
+    (hratio : ∀ᶠ T in Filter.atTop,
+      0 ≤ F.fullLength T / F.period T (F.distinguished T))
+    (hL : ∀ᶠ T in Filter.atTop,
+      0 < F.period T (F.distinguished T))
+    (hΛ : ∀ᶠ T in Filter.atTop, 0 ≤ Λ T)
+    (hsmooth : ∀ᶠ T in Filter.atTop,
+      ContDiff ℝ 2
+        (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ᶠ T in Filter.atTop, ∀ u,
+      Λ T < |u| →
+        F.window T (F.distinguished T) u = 0)
+    (heven : ∀ᶠ T in Filter.atTop, ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u)
+    (hgap : ∀ᶠ T in Filter.atTop,
+      2 * Λ T < F.period T (F.distinguished T))
+    (hfull0 : ∀ᶠ T in Filter.atTop, F.fullLength T ≠ 0)
+    (htotal0 : ∀ᶠ T in Filter.atTop,
+      (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
+    (hchannel0 : ∀ᶠ T in Filter.atTop,
+      F.channelEnergy T (F.distinguished T) ≠ 0) :
+    QuarticTransfer.FactoredZeroKernelQuarticLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [
+    h.eventually_gt x hx, hdist, hratio, hL, hΛ, hsmooth,
+    hsupp, heven, hgap, hfull0, htotal0, hchannel0
+  ] with T hT hdistT hratioT hLT hΛT hsmoothT
+      hsuppT hevenT hgapT hfull0T htotal0T hchannel0T
+  rw [factoredZeroKernelQuarticNumerator_eq_localProfileTailPairKernel
+    q F T hdistT hratioT (Λ T) hLT hΛT hsmoothT hsuppT hevenT
+      hgapT hfull0T htotal0T hchannel0T]
+  exact hT
+
 end ComplexAliasBridge
 end Zeta85
 end RH
