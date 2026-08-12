@@ -2,7 +2,7 @@ import RH.Zeta85.Inputs95
 import Zeta23.Poisson.ComplexAlias
 import Zeta23.Tail.Grid
 
-open Filter Matrix MeasureTheory
+open Filter Matrix MeasureTheory Asymptotics
 open scoped BigOperators Topology ContDiff
 
 noncomputable section
@@ -665,6 +665,103 @@ def canonicalLatticeBoundaryStrip
   lowerLatticeBoundaryStrip F T z z' r +
     upperLatticeBoundaryStrip F T z z' n r
 
+/-- One distinguished-lattice Fourier feature on an actual enlarged-window
+zero. -/
+def distinguishedLatticeFeature
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (k : ℤ)
+    (ρ : ↥(Zeta23.ZeroSide.ZI Z T)) : ℂ :=
+  paperFT (fun u => (F.window T (F.distinguished T) u : ℂ))
+    (gammaOf (ρ : ℂ) -
+      (T + (k : ℝ) * distinguishedGridStep F T : ℝ))
+
+/-- Lower finite boundary strip as a matrix on the actual finite zero set. -/
+def lowerLatticeBoundaryKernelMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (r : ℕ) :
+    Matrix (↥(Zeta23.ZeroSide.ZI Z T))
+      (↥(Zeta23.ZeroSide.ZI Z T)) ℂ :=
+  ∑ m ∈ Finset.range r,
+    vecMulVec
+      (distinguishedLatticeFeature F T (-((m : ℤ) + 1)))
+      (distinguishedLatticeFeature F T (-((m : ℤ) + 1)))
+
+/-- Upper finite boundary strip as a matrix on the actual finite zero set. -/
+def upperLatticeBoundaryKernelMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n r : ℕ) :
+    Matrix (↥(Zeta23.ZeroSide.ZI Z T))
+      (↥(Zeta23.ZeroSide.ZI Z T)) ℂ :=
+  ∑ m ∈ Finset.range r,
+    vecMulVec
+      (distinguishedLatticeFeature F T ((n + m : ℕ) : ℤ))
+      (distinguishedLatticeFeature F T ((n + m : ℕ) : ℤ))
+
+/-- Combined canonical endpoint strip matrix. -/
+def canonicalLatticeBoundaryKernelMatrix
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n : ℕ) :
+    Matrix (↥(Zeta23.ZeroSide.ZI Z T))
+      (↥(Zeta23.ZeroSide.ZI Z T)) ℂ :=
+  let r := distinguishedEndpointGuardWidth F T
+  lowerLatticeBoundaryKernelMatrix F T r +
+    upperLatticeBoundaryKernelMatrix F T n r
+
+/-- The zero-space boundary matrix has the canonical boundary strip as its
+literal `(ρ,ρ')` entry. -/
+theorem canonicalLatticeBoundaryKernelMatrix_apply
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n : ℕ)
+    (ρ ρ' : ↥(Zeta23.ZeroSide.ZI Z T)) :
+    canonicalLatticeBoundaryKernelMatrix F T n ρ ρ' =
+      canonicalLatticeBoundaryStrip F T
+        (gammaOf (ρ : ℂ)) (gammaOf (ρ' : ℂ)) n := by
+  simp only [canonicalLatticeBoundaryKernelMatrix,
+    canonicalLatticeBoundaryStrip, lowerLatticeBoundaryKernelMatrix,
+    upperLatticeBoundaryKernelMatrix, lowerLatticeBoundaryStrip,
+    upperLatticeBoundaryStrip, Matrix.sum_apply, Matrix.add_apply,
+    Matrix.vecMulVec_apply,
+    distinguishedLatticeFeature, distinguishedLatticeTerm,
+    distinguishedGridStep]
+
+/-- The lower endpoint strip has rank at most its number of labels. -/
+theorem lowerLatticeBoundaryKernelMatrix_rank_le
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (r : ℕ) :
+    (lowerLatticeBoundaryKernelMatrix F T r).rank ≤ r := by
+  unfold lowerLatticeBoundaryKernelMatrix
+  refine (Zeta23.ZeroSide.rank_sum_le (Finset.range r) _ (fun _ => 1) ?_).trans ?_
+  · intro m hm
+    exact rank_vecMulVec_le _ _
+  · simp
+
+/-- The upper endpoint strip has rank at most its number of labels. -/
+theorem upperLatticeBoundaryKernelMatrix_rank_le
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n r : ℕ) :
+    (upperLatticeBoundaryKernelMatrix F T n r).rank ≤ r := by
+  unfold upperLatticeBoundaryKernelMatrix
+  refine (Zeta23.ZeroSide.rank_sum_le (Finset.range r) _ (fun _ => 1) ?_).trans ?_
+  · intro m hm
+    exact rank_vecMulVec_le _ _
+  · simp
+
+/-- The entire non-decaying Poisson boundary is a rank-`2r` object.  This is
+the algebraic reason it can be charged as a vanishing-density endpoint
+strip instead of estimated pair by pair. -/
+theorem canonicalLatticeBoundaryKernelMatrix_rank_le
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (n : ℕ) :
+    (canonicalLatticeBoundaryKernelMatrix F T n).rank ≤
+      2 * distinguishedEndpointGuardWidth F T := by
+  unfold canonicalLatticeBoundaryKernelMatrix
+  exact (Zeta23.ZeroSide.rank_add_le _ _).trans (by
+    have hlo := lowerLatticeBoundaryKernelMatrix_rank_le F T
+      (distinguishedEndpointGuardWidth F T)
+    have hup := upperLatticeBoundaryKernelMatrix_rank_le F T n
+      (distinguishedEndpointGuardWidth F T)
+    omega)
+
 /-- Pointwise, the remainder is the lattice family restricted to the two
 omitted sides. -/
 theorem distinguishedLatticeRemainder_eq_indicator
@@ -1029,6 +1126,120 @@ theorem exists_ZIprime_canonicalRemainder_bound_of_hasCompactSupport
         (by simpa only [distinguishedGridStep] using hdist.2)
         (by simpa only [distinguishedGridStep] using hdist'.2)
   simpa only [canonicalLatticeBoundaryStrip, distinguishedGridStep] using hbound
+
+/-- Under the distinguished-period law, the canonical endpoint-strip width
+is `O(sqrt T * log(T/2π))`. -/
+theorem distinguishedEndpointGuardWidth_isBigO
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 < μ)
+    (hperiod : ∀ᶠ T in atTop,
+      F.period T (F.distinguished T) = μ * Zeta23.l T) :
+    (fun T => (distinguishedEndpointGuardWidth F T : ℝ)) =O[atTop]
+      fun T => Real.sqrt T * Zeta23.l T := by
+  refine IsBigO.of_bound (μ + 3) ?_
+  filter_upwards [hperiod, Zeta23.Assembly.eventually_one_le_l,
+    eventually_ge_atTop (1 : ℝ)] with T hperiodT hl hT
+  have hT0 : 0 ≤ T := by linarith
+  have hsqrt : 1 ≤ Real.sqrt T := by
+    simpa only [Real.sqrt_one] using Real.sqrt_le_sqrt hT
+  have hbase : 1 ≤ Real.sqrt T * Zeta23.l T :=
+    one_le_mul_of_one_le_of_one_le hsqrt hl
+  have hden : 0 < μ * Zeta23.l T := mul_pos hμ (lt_of_lt_of_le zero_lt_one hl)
+  let a : ℝ :=
+    2 * Zeta23.D0 T /
+      (2 * Real.pi / (μ * Zeta23.l T))
+  have ha0 : 0 ≤ a := by
+    dsimp only [a, Zeta23.D0]
+    positivity
+  have hceil := Nat.ceil_lt_add_one ha0
+  have haeq : a = μ * Real.sqrt T * Zeta23.l T / Real.pi := by
+    dsimp only [a, Zeta23.D0]
+    field_simp
+  have hnum : 0 ≤ μ * Real.sqrt T * Zeta23.l T := by positivity
+  have hale : a ≤ μ * Real.sqrt T * Zeta23.l T := by
+    rw [haeq, div_le_iff₀ Real.pi_pos]
+    have hmul := mul_le_mul_of_nonneg_left Real.two_le_pi hnum
+    nlinarith
+  have hguard :
+      (distinguishedEndpointGuardWidth F T : ℝ) ≤ a + 3 := by
+    unfold distinguishedEndpointGuardWidth distinguishedGridStep
+    rw [hperiodT]
+    unfold Zeta23.Tail.endpointGuardWidth
+    push_cast
+    change (⌈a⌉₊ : ℝ) + 2 ≤ a + 3
+    linarith
+  rw [Real.norm_eq_abs, Real.norm_eq_abs,
+    abs_of_nonneg (Nat.cast_nonneg _), abs_of_nonneg (by positivity)]
+  calc
+    (distinguishedEndpointGuardWidth F T : ℝ) ≤ a + 3 := hguard
+    _ ≤ μ * (Real.sqrt T * Zeta23.l T) + 3 := by
+      nlinarith [hale]
+    _ ≤ (μ + 3) * (Real.sqrt T * Zeta23.l T) := by
+      nlinarith
+
+/-- Hence the rank budget of the combined endpoint matrix is negligible on
+the dyadic zero-count scale. -/
+theorem canonicalLatticeBoundaryKernelRank_isLittleO
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (hμ : 0 < μ) (hRvM : RiemannVonMangoldt Z)
+    (hperiod : ∀ᶠ T in atTop,
+      F.period T (F.distinguished T) = μ * Zeta23.l T) :
+    (fun T => ((2 * distinguishedEndpointGuardWidth F T : ℕ) : ℝ)) =o[atTop]
+      fun T => (Z.N T (2 * T) : ℝ) := by
+  have hO :
+      (fun T => ((2 * distinguishedEndpointGuardWidth F T : ℕ) : ℝ)) =O[atTop]
+        fun T => Real.sqrt T * Zeta23.l T := by
+    have hg := distinguishedEndpointGuardWidth_isBigO F hμ hperiod
+    obtain ⟨c, hc⟩ := hg.bound
+    refine IsBigO.of_bound (2 * c) ?_
+    filter_upwards [hc] with T hT
+    change ‖((2 * distinguishedEndpointGuardWidth F T : ℕ) : ℝ)‖ ≤
+      (2 * c) * ‖Real.sqrt T * Zeta23.l T‖
+    rw [Nat.cast_mul, Nat.cast_ofNat, norm_mul]
+    have hnormTwo : ‖(2 : ℝ)‖ = 2 := by norm_num
+    rw [hnormTwo]
+    calc
+      2 * ‖(distinguishedEndpointGuardWidth F T : ℝ)‖ ≤
+          2 * (c * ‖Real.sqrt T * Zeta23.l T‖) :=
+        mul_le_mul_of_nonneg_left hT (by norm_num)
+      _ = (2 * c) * ‖Real.sqrt T * Zeta23.l T‖ := by ring
+  exact hO.trans_isLittleO
+    (Zeta23.Assembly.isLittleO_N_of_isLittleO_Tl Z hRvM
+      Zeta23.Assembly.isLittleO_sqrt_mul_l_Tl)
+
+/-- The rank of the actual zero-indexed endpoint matrix, for any choice of
+the retained lattice length, has density tending to zero among the dyadic
+zeros. -/
+theorem canonicalLatticeBoundaryKernelMatrix_rank_isLittleO
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (n : ℝ → ℕ)
+    (hμ : 0 < μ) (hRvM : RiemannVonMangoldt Z)
+    (hperiod : ∀ᶠ T in atTop,
+      F.period T (F.distinguished T) = μ * Zeta23.l T) :
+    (fun T => ((canonicalLatticeBoundaryKernelMatrix F T (n T)).rank : ℝ))
+        =o[atTop] fun T => (Z.N T (2 * T) : ℝ) := by
+  have hO :
+      (fun T => ((canonicalLatticeBoundaryKernelMatrix F T (n T)).rank : ℝ))
+          =O[atTop]
+        fun T => ((2 * distinguishedEndpointGuardWidth F T : ℕ) : ℝ) := by
+    refine IsBigO.of_bound 1 (Eventually.of_forall fun T => ?_)
+    have hr := canonicalLatticeBoundaryKernelMatrix_rank_le F T (n T)
+    have hr' :
+        ((canonicalLatticeBoundaryKernelMatrix F T (n T)).rank : ℝ) ≤
+          ((2 * distinguishedEndpointGuardWidth F T : ℕ) : ℝ) := by
+      exact_mod_cast hr
+    have hleft :
+        0 ≤ ((canonicalLatticeBoundaryKernelMatrix F T (n T)).rank : ℝ) :=
+      Nat.cast_nonneg _
+    have hright :
+        0 ≤ ((2 * distinguishedEndpointGuardWidth F T : ℕ) : ℝ) :=
+      Nat.cast_nonneg _
+    simpa only [Real.norm_eq_abs, abs_of_nonneg hleft,
+      abs_of_nonneg hright, one_mul] using hr'
+  exact hO.trans_isLittleO
+    (canonicalLatticeBoundaryKernelRank_isLittleO F hμ hRvM hperiod)
 
 /-- Exact Poisson remainder identity: after the actual finite segment is
 removed, the remaining lattice has sum equal to the full spatial-alias sum
