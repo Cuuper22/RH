@@ -1240,6 +1240,115 @@ theorem localProfileTailQuarticLowerBound_of_main_of_error
   unfold localProfileTailQuarticErrorDensity at herrorT
   linarith
 
+
+/-- The finite modulation label carried by an actual block column, transported
+to the distinguished channel using the proved channel identity. -/
+def distinguishedBlockLabel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (i : Fin (F.blockDim T)) :
+    Fin (F.channelDim T (F.distinguished T)) := by
+  let address := F.columnAddress T (F.blockEmbedding T i)
+  have hfirst : address.1 = F.distinguished T := by
+    simpa only [address] using hdist i
+  refine ⟨address.2.val, ?_⟩
+  rw [← hfirst]
+  exact address.2.isLt
+
+/-- Bijectivity of the global column address together with exhaustion of the
+distinguished channel makes the actual block labels a bijection onto the
+entire distinguished finite grid. -/
+theorem distinguishedBlockLabel_bijective
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i) :
+    Function.Bijective (distinguishedBlockLabel F T hdist) := by
+  constructor
+  · intro i i' hii
+    apply (F.blockEmbedding T).injective
+    apply haddr.1
+    apply Sigma.subtype_ext
+    · exact (hdist i).trans (hdist i').symm
+    · have hval := congrArg Fin.val hii
+      simpa only [distinguishedBlockLabel] using hval
+  · intro k
+    obtain ⟨c, hc⟩ :=
+      haddr.2 ⟨F.distinguished T, k⟩
+    have hcfirst :
+        (F.columnAddress T c).1 = F.distinguished T := by
+      rw [hc]
+    obtain ⟨i, hi⟩ := hexhaustive c hcfirst
+    refine ⟨i, ?_⟩
+    apply Fin.ext
+    simp [distinguishedBlockLabel, hi, hc]
+
+/-- The canonical equivalence between actual block columns and the complete
+distinguished finite grid. -/
+def distinguishedBlockLabelEquiv
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i) :
+    Fin (F.blockDim T) ≃
+      Fin (F.channelDim T (F.distinguished T)) :=
+  Equiv.ofBijective (distinguishedBlockLabel F T hdist)
+    (distinguishedBlockLabel_bijective F T hdist haddr hexhaustive)
+
+/-- Consequently the actual block dimension is exactly the distinguished
+channel's finite-grid count. -/
+theorem blockDim_eq_distinguished_channelDim
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i) :
+    F.blockDim T = F.channelDim T (F.distinguished T) := by
+  simpa using Fintype.card_congr
+    (distinguishedBlockLabelEquiv F T hdist haddr hexhaustive)
+
+/-- Every finite sum over actual block columns can now be rewritten as a
+sum over the complete distinguished finite grid. -/
+theorem sum_distinguishedBlockLabel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {M : Type*} [AddCommMonoid M]
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i)
+    (g : Fin (F.channelDim T (F.distinguished T)) → M) :
+    (∑ i : Fin (F.blockDim T),
+      g (distinguishedBlockLabel F T hdist i)) =
+      ∑ k : Fin (F.channelDim T (F.distinguished T)), g k :=
+  Equiv.sum_comp
+    (distinguishedBlockLabelEquiv F T hdist haddr hexhaustive) g
+
 end ComplexAliasBridge
 end Zeta85
 end RH
