@@ -80,6 +80,7 @@ theorem analyze_synthesize
         simpa [Matrix.mul_apply] using hentry
       rw [hsum]
     _ = virtual r x := by
+      rw [← Matrix.diagonal_one]
       simp
 
 
@@ -370,6 +371,7 @@ theorem analyzeComplex_synthesizeComplex
       push_cast at hsumComplex
       rw [hsumComplex]
     _ = virtual r := by
+      rw [← Matrix.diagonal_one]
       simp
 
 /-- With a common modulation period, orthogonal window synthesis passes
@@ -484,7 +486,8 @@ theorem paperFT_synthesize_singleChannel
       (C.matrix j r : ℂ) *
         Zeta23.paperFT (fun u : ℝ => (f u : ℂ)) z := by
   rw [paperFT_synthesize C (singleChannel r f) j z hInt]
-  simp [singleChannel, Zeta23.paperFT_def]
+  rw [Finset.sum_eq_single r] <;>
+    simp [singleChannel, Zeta23.paperFT_def]
 
 /-- Summing all synthesized Fourier atoms coherently exposes the exact
 column-sum amplitude. -/
@@ -534,8 +537,9 @@ def rationalMixer3 : Matrix (Fin 3) (Fin 3) ℝ :=
 theorem rationalMixer3_orthogonal :
     rationalMixer3.transpose * rationalMixer3 = 1 := by
   ext i j
+  rw [Matrix.mul_apply]
   fin_cases i <;> fin_cases j <;>
-    norm_num [rationalMixer3, Matrix.mul_apply, Fin.sum_univ_succ]
+    norm_num [rationalMixer3, Fin.sum_univ_succ]
 
 /-- Certified three-channel synthesis data. -/
 def rationalData3 : Data (Fin 3) where
@@ -576,8 +580,9 @@ def hadamardMixer4 : Matrix (Fin 4) (Fin 4) ℝ :=
 theorem hadamardMixer4_orthogonal :
     hadamardMixer4.transpose * hadamardMixer4 = 1 := by
   ext i j
+  rw [Matrix.mul_apply]
   fin_cases i <;> fin_cases j <;>
-    norm_num [hadamardMixer4, Matrix.mul_apply, Fin.sum_univ_succ]
+    norm_num [hadamardMixer4, Fin.sum_univ_succ]
 
 /-- Certified four-channel synthesis data. -/
 def hadamardData4 : Data (Fin 4) where
@@ -607,8 +612,9 @@ def rationalMixer5 : Matrix (Fin 5) (Fin 5) ℝ :=
 theorem rationalMixer5_orthogonal :
     rationalMixer5.transpose * rationalMixer5 = 1 := by
   ext i j
+  rw [Matrix.mul_apply]
   fin_cases i <;> fin_cases j <;>
-    norm_num [rationalMixer5, Matrix.mul_apply, Fin.sum_univ_succ]
+    norm_num [rationalMixer5, Fin.sum_univ_succ]
 
 /-- Certified five-channel rational synthesis data. -/
 def rationalData5 : Data (Fin 5) where
@@ -674,6 +680,7 @@ theorem synthesizeComplex_analyzeComplex
       push_cast at hsumComplex
       rw [hsumComplex]
     _ = physical j := by
+      rw [← Matrix.diagonal_one]
       simp
 
 end VirtualChannelMixer
