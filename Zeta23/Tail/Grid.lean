@@ -25,6 +25,35 @@ open Finset Real
 namespace Zeta23
 namespace Tail
 
+/-- Number of endpoint labels needed to cover an overhang of width `D` on
+a lattice of spacing `h`, with two further labels left as a decay buffer. -/
+def endpointGuardWidth (D h : ℝ) : ℕ :=
+  ⌈D / h⌉₊ + 2
+
+/-- The guarded lower tail starts at least three lattice spacings below an
+interval enlarged downward by `D`. -/
+theorem lower_endpointGuard_distance {T D h : ℝ} (hh : 0 < h) :
+    T - (endpointGuardWidth D h + 1) * h + 3 * h ≤ T - D := by
+  have hceil : D ≤ (⌈D / h⌉₊ : ℝ) * h := by
+    exact (div_le_iff₀ hh).mp (Nat.le_ceil (D / h))
+  unfold endpointGuardWidth
+  push_cast
+  nlinarith
+
+/-- If the retained grid length is `floor(T/h)`, the guarded upper tail
+starts more than one lattice spacing above an interval enlarged upward by
+`D`. -/
+theorem upper_endpointGuard_distance {T D h : ℝ} (hh : 0 < h) :
+    2 * T + D + h ≤
+      T + (⌊T / h⌋₊ + endpointGuardWidth D h) * h := by
+  have hfloor : T < ((⌊T / h⌋₊ : ℝ) + 1) * h := by
+    exact (div_lt_iff₀ hh).mp (Nat.lt_floor_add_one (T / h))
+  have hceil : D ≤ (⌈D / h⌉₊ : ℝ) * h := by
+    exact (div_le_iff₀ hh).mp (Nat.le_ceil (D / h))
+  unfold endpointGuardWidth
+  push_cast
+  nlinarith
+
 /-- Telescoping replacement for ∫ x⁻⁴: for a > 0, h > 0, h·(a+h)⁻⁴ ≤ (a⁻³ − (a+h)⁻³)/3. -/
 lemma inv_pow_four_step {a h : ℝ} (ha : 0 < a) (hh : 0 < h) :
     h * ((a + h) ^ 4)⁻¹ ≤ ((a ^ 3)⁻¹ - ((a + h) ^ 3)⁻¹) / 3 := by
@@ -70,6 +99,43 @@ lemma sum_inv_pow_four_le {D h : ℝ} (hD : 0 < D) (hh : 0 < h) (d : ℕ) :
     calc (D ^ 4)⁻¹ + ((D ^ 3)⁻¹ - ((D + d * h) ^ 3)⁻¹) / (3 * h)
         = (D ^ 4)⁻¹ + (D ^ 3)⁻¹ / (3 * h) - ((D + d * h) ^ 3)⁻¹ / (3 * h) := by ring
       _ ≤ _ := by linarith
+
+/-- Infinite form of the telescoping grid estimate.  This is the numerical
+majorant used for either half of an omitted Poisson lattice. -/
+theorem summable_inv_pow_four_grid {D h : ℝ} (hD : 0 < D) (hh : 0 < h) :
+    Summable (fun k : ℕ => ((D + k * h) ^ 4)⁻¹) := by
+  apply summable_of_sum_range_le (fun _ => by positivity)
+  intro d
+  exact sum_inv_pow_four_le hD hh d
+
+/-- The infinite fourth-power grid tail is bounded by the same endpoint
+plus integral expression as every finite partial sum. -/
+theorem tsum_inv_pow_four_grid_le {D h : ℝ} (hD : 0 < D) (hh : 0 < h) :
+    (∑' k : ℕ, ((D + k * h) ^ 4)⁻¹) ≤
+      (D ^ 4)⁻¹ + (D ^ 3)⁻¹ / (3 * h) := by
+  apply Real.tsum_le_of_sum_range_le (fun _ => by positivity)
+  intro d
+  exact sum_inv_pow_four_le hD hh d
+
+/-- Direct comparison with the fourth-power grid majorant, including the
+norm bound for the resulting infinite sum. -/
+theorem summable_and_norm_tsum_le_inv_pow_four_grid
+    {E : Type*} [NormedAddCommGroup E] [CompleteSpace E]
+    {g : ℕ → E} {C D h : ℝ}
+    (hC : 0 ≤ C) (hD : 0 < D) (hh : 0 < h)
+    (hg : ∀ k : ℕ, ‖g k‖ ≤ C * ((D + k * h) ^ 4)⁻¹) :
+    Summable g ∧
+      ‖∑' k : ℕ, g k‖ ≤
+        C * ((D ^ 4)⁻¹ + (D ^ 3)⁻¹ / (3 * h)) := by
+  have hbase := summable_inv_pow_four_grid hD hh
+  have hmajor : Summable (fun k : ℕ =>
+      C * ((D + k * h) ^ 4)⁻¹) := hbase.mul_left C
+  have hgsum : Summable g := hmajor.of_norm_bounded hg
+  refine ⟨hgsum, ?_⟩
+  have hnorm := hgsum.hasSum.norm_le_of_bounded hmajor.hasSum hg
+  rw [hbase.tsum_mul_left] at hnorm
+  exact hnorm.trans (mul_le_mul_of_nonneg_left
+    (tsum_inv_pow_four_grid_le hD hh) hC)
 
 /-- From D⁻⁴ + D⁻³/(3h), h = 2π/L, to L·D⁻³ "(as D ≥ 1, L ≥ 2)". -/
 lemma grid_const_bound {D L : ℝ} (hD : 1 ≤ D) (hL : 2 ≤ L) :
