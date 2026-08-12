@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 /-
 Axiom audit for the conditional 85 % topic.  Unlike the other `PrintAxioms` files, the expected
-output is NOT the three standard axioms: each line additionally lists a subset of the five axioms of
+output is NOT the three standard axioms: each line additionally lists a subset of the four axioms of
 `RH/Zeta85/Hypotheses.lean`.  `AXIOMS.md` reproduces the output verbatim with the provenance of every
 axiom.
 -/

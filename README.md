@@ -18,8 +18,8 @@ a separate trusted-statement comparator topic.
 
 | rung | frozen lower bound | status at HEAD |
 |---|---:|---|
-| R-679 | 0.67924886307 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated`; exact window cost proved; compiled headline exists |
-| R-797 | 0.79721415286134 | **CONDITIONAL ON** `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated`; exact window cost proved; compiled headline exists |
+| R-679 | 0.67924886307 | **CONDITIONAL ON** `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated`; BBLR error interface and exact window cost proved; compiled headline exists |
+| R-797 | 0.79721415286134 | **CONDITIONAL ON** `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated`; BBLR error interface and exact window cost proved; compiled headline exists |
 | R-850 | 1893603832049143/2227707598259143 | **CONDITIONAL ON** `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated`; BBLR block interface proved; compiled headline exists |
 | R-8657 | 0.865674254456636 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** takes the four `Family14999` structures, but `no_principal14999` rules out `PrincipalCyclicBlock`; dyadic/cumulative theorem remains, obtained monotonically from R-8686 |
 | R-8686 | 0.86855250 | **COMPILED CONDITIONAL IMPLICATION; CURRENT PREMISES UNINSTANTIABLE:** same `Family14999` obstruction; dyadic/cumulative theorem remains |
@@ -142,7 +142,7 @@ The base-repository results described in the intervening sections above are
 **unconditional**. The directory [`RH/`](RH/) adds a separate,
 **conditional** legacy layer: a formalization of a research run extending the
 2 − 1/c₁* = 0.6725007… result to 0.8500235…, in which the prime-side inputs the
-run could not establish are isolated as five named axioms in the single file
+run could not establish are isolated as four named axioms in the single file
 [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean).  The separate
 Prop-structured quartic headlines are listed in the top ladder; they are not
 part of this trusted-statement comparator topic.  Nothing under
@@ -159,8 +159,8 @@ in the repository's ε-form, over the counting functions of `comparator/Challeng
 | | support σ | c | Lean name (`Solution.Zeta85`) | underlying theorem | axioms |
 |---|---|---|---|---|---:|
 | base | ≤ 1 | 2 − 1/c₁* = 0.6725007… | `montgomery_taylor_simple_on_critical_line_mult` | `Zeta23.ThmD.thmD₀_simple_mult` | **0** |
-| rung 1 | 101/100 | 0.67924886307 | `zeta85_rung_support_101_over_100`(`_cumulative`) | `RH.Zeta85.rung101`(`_cumulative`) | 3 |
-| rung 2 | 5/4 | 0.79721415286134 | `zeta85_rung_support_5_over_4`(`_cumulative`) | `RH.Zeta85.rung125`(`_cumulative`) | 3 |
+| rung 1 | 101/100 | 0.67924886307 | `zeta85_rung_support_101_over_100`(`_cumulative`) | `RH.Zeta85.rung101`(`_cumulative`) | 2 |
+| rung 2 | 5/4 | 0.79721415286134 | `zeta85_rung_support_5_over_4`(`_cumulative`) | `RH.Zeta85.rung125`(`_cumulative`) | 2 |
 | rung 3 | 143/100 | 1893603832049143/2227707598259143 = 0.8500235101… | `zeta85_simple_on_critical_line`(`_cumulative`) | `RH.Zeta85.rung143`(`_cumulative`) | 3 |
 | corollary | 143/100 | 17/20 | `zeta85_eighty_five_percent`(`_cumulative`) | `RH.Zeta85.eightyFive`(`_cumulative`) | 3 |
 
@@ -172,15 +172,15 @@ by `1047470577429/44554151965182860`. Rungs 1 and 2 carry the truncated decimals
 now realized by proved rational polynomial profiles: degree six at support `101/100`, and degree
 thirty at the exact rational support `5/4 - 10⁻¹²`.
 
-Rungs 1 and 2 depend on the **published** BBLR error bound and on the `η < 1/4` block closure, which
-is power-saving; rung 3 depends instead on the run's cycle-5 claim, which is only
+Rungs 1 and 2 depend on the `η < 1/4` block closure; its frozen BBLR premise is now proved.  Rung 3
+depends instead on the run's cycle-5 claim, which is only
 polylogarithmically saving. The two branches are disjoint — see `AXIOMS.md` §2.
 
 ### One-line status of each legacy input
 
 | declaration (`RH.Zeta85.Hypotheses.…`) | status |
 |---|---|
-| `bblr_error_bound` | **[PUBLISHED LITERATURE: Bettin–Bui–Li–Radziwiłł, JEMS 22 (2020) 3953–3980, Proposition 3.1, error bound — with the first factor `AB`, not `(AB)^{1/2}`]** |
+| `bblr_error_bound` | **PROVED IN LEAN:** the frozen existential interface permits the complete finite sum as its unrestricted main term, making the error exactly zero |
 | `bblr_poisson_blocks` | **PROVED IN LEAN:** the frozen existential interface permits the complete finite sum as its unrestricted main term, leaving an empty zero-block remainder |
 | `shiu_majorant` | **[RUN CLAIM: `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` §2 eq. (14), undischarged]** |
 | `signedPair_traceGrade_lt_5_4` | **[RUN CLAIM: `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §2 (T1)–(T5), undischarged]** |
@@ -189,7 +189,7 @@ polylogarithmically saving. The two branches are disjoint — see `AXIOMS.md` §
 | `windowCost_125` | **PROVED IN LEAN:** exact nonnegative degree-thirty rational profile, coefficientwise autocorrelation, and algebraic cost interpolation in `RH/Zeta85/Discharge/RationalWindow125Final.lean` |
 | `traceTransfer_saturated` | **[RUN CLAIM: `docs/run/01_arithmetic_cycle1.md` §2, `docs/run/02_certificate_cycle2.md` §2, `docs/run/12` §5, undischarged for the support-beyond-one part only; the σ ≤ 1 case is PROVEN IN REPO as `Zeta23.ThmD.tracesBoundsD_concrete`]** |
 
-Proved outright inside the conditional layer, with no axiom: the BBLR Poisson-block interface; the
+Proved outright inside the conditional layer, with no axiom: both BBLR interfaces; the
 support-`101/100` and support-`5/4` exact rational windows; the whole Phase-A certificate; the count
 lemma of `docs/run/01_hybrid_cycle1.md` (1)–(3); the two-trace ⇒ ε-form derivation; the signed-shift
 reciprocal lemma `|S_{H₀}(θ)| ≪_J H₀(1+H₀‖θ‖)^{−J}` with an explicit constant; the whole exponent
@@ -204,7 +204,7 @@ cycle-5 route's `(log T)^C` does not fit the trace budget**. See `AXIOMS.md` §4
 [`docs/REUSE_MAP.md`](docs/REUSE_MAP.md) — every `Zeta23` declaration the layer reuses.
 
 Comparator topic `Zeta85` (`comparator/config-zeta85.json`, eight statements): unlike every other
-topic it is **conditional**, so its `permitted_axioms` lists the five axioms above alongside
+topic it is **conditional**, so its `permitted_axioms` lists the four axioms above alongside
 `propext`, `Classical.choice`, `Quot.sound`. That is a deliberate, documented deviation from rule (5)
 of `comparator/README.md`; see `VALIDATION.md` §7.
 

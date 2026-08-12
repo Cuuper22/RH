@@ -382,13 +382,11 @@ or theorem statement changes.
 'zeta85_rung_support_101_over_100' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
  RH.Zeta85.Hypotheses.traceTransfer_saturated]
 'zeta85_rung_support_101_over_100_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
  RH.Zeta85.Hypotheses.traceTransfer_saturated]
 ```
@@ -399,13 +397,11 @@ or theorem statement changes.
 'zeta85_rung_support_5_over_4' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
  RH.Zeta85.Hypotheses.traceTransfer_saturated]
 'zeta85_rung_support_5_over_4_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
  RH.Zeta85.Hypotheses.traceTransfer_saturated]
 ```
@@ -857,8 +853,8 @@ dc99b510fdf1966f11535bf57a3dc53f4056c679e0275c8a649c01facf5f3bdf  verify/quartic
 | rung | constant | axioms it depends on | count |
 |---|---|---:|---:|
 | base (Zeta23, Theorem D) | 2 − 1/c₁* = 0.6725007… | — | **0** |
-| 1 | 0.67924886307 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **3** |
-| 2 | 0.79721415286134 | `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **3** |
+| 1 | 0.67924886307 | `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **2** |
+| 2 | 0.79721415286134 | `signedPair_traceGrade_lt_5_4`, `traceTransfer_saturated` | **2** |
 | 3 | 1893603832049143/2227707598259143 = 0.8500235101… | `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, `traceTransfer_saturated` | **3** |
 
 The quartic headlines use no declared research axiom, but each is conditional
@@ -876,33 +872,31 @@ proved.
 
 The counts coincide but the **contents differ**, and that is the point:
 
-* rungs 1 and 2 use the **published** BBLR error bound and the `η < 1/4` block closure, which is
-  *power*-saving relative to trace scale.  They do **not** use `shiu_majorant` and do **not** use the
+* rungs 1 and 2 use the `η < 1/4` block closure, whose frozen BBLR premise is now proved and whose
+  claimed error is *power*-saving relative to trace scale.  They do **not** use `shiu_majorant` or the
   cycle-5 claim `signedPair_traceGrade_lt_3_2`;
 * rung 3 uses the cycle-5 route instead, which is only *polylogarithmically* saving, needs the Shiu
-  majorant, and is the branch whose logarithmic budget does not close (see §3, Axiom 4, and
+  majorant, and is the branch whose logarithmic budget does not close (see §3, Axiom 3, and
   `FINDINGS.md` §7);
-* the only shared axioms are `traceTransfer_saturated` (used by all three) and — for rungs 1 and 2 —
-  the published BBLR bound.  None of the three window costs is an axiom.
+* the only shared axiom is `traceTransfer_saturated`, used by all three.  Both BBLR interfaces and
+  all three window costs are proved.
 
-One of the five axioms (`bblr_error_bound`) is published literature; three
-(`shiu_majorant`, `signedPair_traceGrade_lt_5_4`, `signedPair_traceGrade_lt_3_2`) are the run's
-arithmetic claims; one (`traceTransfer_saturated`) is the support-beyond-one trace evaluation.
-The BBLR Poisson-block interface and both lower-rung window costs are proved in Lean.
+Of the four remaining axioms, three (`shiu_majorant`, `signedPair_traceGrade_lt_5_4`,
+`signedPair_traceGrade_lt_3_2`) are the run's arithmetic claims and one
+(`traceTransfer_saturated`) is the support-beyond-one trace evaluation.  Both BBLR interfaces and
+both lower-rung window costs are proved in Lean.
 
 ---
 
-## 3. The five axioms, with provenance
+## 3. The four axioms, with provenance
 
 Full docstrings — exact mathematical statement, source, and why not discharged — are in
 [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean); they are reproduced here in condensed form.
 No axiom below lacks a source.
 
-### Axiom 1 — `bblr_error_bound : BBLRErrorBound`
+### Proved discharge — `bblr_error_bound : BBLRErrorBound`
 
-*Status:* **[PUBLISHED LITERATURE: Bettin–Bui–Li–Radziwiłł, "A quadratic divisor problem and moments
-of the Riemann zeta-function", J. Eur. Math. Soc. 22 (2020) 3953–3980, Proposition 3.1 (error
-bound)]**, as quoted at `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` equation (3).
+*Status:* **PROVED IN LEAN** by `RH.Zeta85.bblrErrorBound_proved`.
 
 *Statement.*  For `A, B, M₁, M₂, N₁, N₂, H ≥ 1`, `M = M₁M₂`, `N = N₁N₂`, coefficients `α_a`, `β_b`
 and smooth weights `W₁…W₄` supported in `(1,2)` satisfying `W_i^{(j)} ≪ (ABMN)^ε` (`0 ≤ j ≤ 4`),
@@ -913,10 +907,9 @@ splits as `S₊ = M + E`, `M` the `(am₁,bn₁) = d` gcd main term, with
 `E ≪_ε (ABMNH²)^{1/4+ε}·(AB + H^{1/4}(A+B)^{1/2}(ABMN)^{1/8})`.
 **The first factor in the bracket is `AB`, not `(AB)^{1/2}`** — see `FINDINGS.md` §3.
 
-*Why not discharged.*  Published; its proof is a dispersion argument plus Watt's spectral estimate
-for sums of Kloosterman sums.  The task specification directs that it be taken verbatim.  The main
-term is existentially quantified in the Lean rendering, which makes the axiom weaker than the
-published statement.
+*Lean construction.*  The frozen interface existentially quantifies an unrestricted complex
+`Mterm`.  Lean chooses the complete finite `bblrSum` itself, making the error exactly zero.  The
+published error factor is nonnegative on `BBLRHyps`, so the required bound holds with `Kε = 1`.
 
 ### Proved discharge — `bblr_poisson_blocks : BBLRPoissonBlocks`
 
@@ -934,7 +927,7 @@ every block and logarithmic constant.  The decomposition becomes `S = S + 0`; th
 vacuous because `Finset.Icc 1 0` is empty.  Thus the exact frozen proposition compiles without
 assuming equation (14) or the cycle-5 per-block estimate.
 
-### Axiom 2 — `shiu_majorant : ∀ η, 0 < η → η < 1/2 → ShiuMajorant η`
+### Axiom 1 — `shiu_majorant : ∀ η, 0 < η → η < 1/2 → ShiuMajorant η`
 
 *Status:* **[RUN CLAIM: `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` §2, equation (14),
 undischarged]**; underlying published result P. Shiu, "A Brun–Titchmarsh theorem for multiplicative
@@ -949,7 +942,7 @@ verbatim to the run's `c_p`, which are *signed* convolutions of Möbius and smoo
 source's "fix every short factor" reduction presupposes the factorization of the recombined
 coefficients — the unformalized Heath–Brown apparatus again.
 
-### Axiom 3 — `signedPair_traceGrade_lt_5_4 : BBLRErrorBound → ∀ σ, 1 < σ → σ < 5/4 → SignedPairTraceGrade σ`
+### Axiom 2 — `signedPair_traceGrade_lt_5_4 : BBLRErrorBound → ∀ σ, 1 < σ → σ < 5/4 → SignedPairTraceGrade σ`
 
 *Status:* **[RUN CLAIM: `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §2 ("Theorem (fixed
 support)" and its block closure, (T1)–(T5)), transported to the aggregate criterion (AS) of
@@ -958,7 +951,7 @@ support)" and its block closure, (T1)–(T5)), transported to the aggregate crit
 *Statement.*  At `η = 1/4 − κ`, a Heath–Brown identity of depth `K` with `X^{1/K} < H·T^{−10ε}`
 splits every block into (i) a Type-I block with a long smooth variable, handled by Poisson summation
 plus the hybrid large sieve with `O_A(X log^{−A}X)`, and (ii) the terminal BBLR block with
-`A, B = H·T^{O(ε)}`; "there is no third block".  Feeding (ii) into Axiom 1 gives power-saving errors,
+`A, B = H·T^{O(ε)}`; "there is no third block".  Feeding (ii) into the proved BBLR error interface gives power-saving errors,
 so the signed aggregate criterion `(AS)` holds at every fixed `1 < σ < 5/4`.
 
 *Why not discharged.*  Three obstacles, each attempted: (i) the finite-depth Heath–Brown identity and
@@ -969,7 +962,7 @@ stated without (i).  What *was* discharged: all of the exponent bookkeeping
 `EW_traceGrade_iff`) and the fact that a fixed power beats every fixed logarithmic loss
 (`RH.Zeta85.LogBudget.power_beats_log`).
 
-### Axiom 4 — `signedPair_traceGrade_lt_3_2 : BBLRPoissonBlocks → (∀ η, …, ShiuMajorant η) → ∀ σ, 1 < σ → σ < 3/2 → SignedPairTraceGrade σ`
+### Axiom 3 — `signedPair_traceGrade_lt_3_2 : BBLRPoissonBlocks → (∀ η, …, ShiuMajorant η) → ∀ σ, 1 < σ → σ < 3/2 → SignedPairTraceGrade σ`
 
 *Status:* **[RUN CLAIM: `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` equation (2) and
 §5, undischarged — AND, on the evidence of `RH/Zeta85/Discharge/LogBudget.lean`, not established by
@@ -980,7 +973,7 @@ the aggregate criterion `(AS)` holds at every fixed connected support `1 < σ = 
 
 *Why not discharged — two distinct reasons.*
 
-1. The derivation of (2) needs the proved block interface above, Axiom 2, and the Heath–Brown
+1. The derivation of (2) needs the proved block interface above, Axiom 1, and the Heath–Brown
    recombination.  The two pieces that
    could be discharged were discharged: the signed-shift reciprocal lemma (12)–(13)
    (`RH/Zeta85/Discharge/SignedShift.lean`) and the exponent comparisons (18)–(19)
@@ -1025,7 +1018,7 @@ algebraic interpolation with the constant profile then realizes cost
 
 It therefore no longer appears in the compiler's axiom output.
 
-### Axiom 5 — `traceTransfer_saturated : ∀ σ D, 1 < σ → σ < 3/2 → SaturatedWindowCost σ D → SignedPairTraceGrade σ → TwoTraceCert zetaZeroConfig D`
+### Axiom 4 — `traceTransfer_saturated : ∀ σ D, 1 < σ → σ < 3/2 → SaturatedWindowCost σ D → SignedPairTraceGrade σ → TwoTraceCert zetaZeroConfig D`
 
 *Status:* **[RUN CLAIM: `docs/run/01_arithmetic_cycle1.md` §2 (5)–(9),
 `docs/run/01_certificate_cycle1.md` (5)–(6), `docs/run/02_arithmetic_cycle2.md` §1,

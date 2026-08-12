@@ -19,7 +19,7 @@ window `(T, 2T]` and in the cumulative window `(0, T]`:
   * the corollary:    N₀ˢ/N ≥ 17/20
 
 **These statements are CONDITIONAL.**  Unlike every other topic in this repository, they are not
-proved from Mathlib alone: `Solution.Zeta85` derives them from the five named axioms of
+proved from Mathlib alone: `Solution.Zeta85` derives them from the four named axioms of
 `RH/Zeta85/Hypotheses.lean`, and `comparator/config-zeta85.json` lists those axioms in
 `permitted_axioms` alongside `propext`, `Classical.choice`, `Quot.sound`.  A reader must therefore
 read `RH/Zeta85/Hypotheses.lean` (and `AXIOMS.md`) in addition to this file to know what is being

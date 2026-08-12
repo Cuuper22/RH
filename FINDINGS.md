@@ -91,9 +91,10 @@ and the gap between them are **proved as real-arithmetic statements** in
 `RH/Zeta85/Discharge/Exponents.lean`: `EA_exponent`, `E1_misquoted_exponent`, `misquote_gap`
 (`= η`), `EA_traceGrade_iff`, `E1_misquoted_traceGrade_iff`.
 
-**What replaced it.**  Axiom 1, `RH.Zeta85.Hypotheses.bblr_error_bound`, states the **corrected**
-form (`RH.Zeta85.bblrErrorFactor` has `A*B`, not `(A*B)^{1/2}`), with the misquote flagged in its
-docstring.  No statement in this artifact relies on the cycle-3 version.
+**What replaced it.**  The theorem `RH.Zeta85.Hypotheses.bblr_error_bound` uses the corrected factor
+(`RH.Zeta85.bblrErrorFactor` has `A*B`, not `(A*B)^{1/2}`).  The frozen interface is now proved by
+choosing the complete finite sum as its unrestricted main term, so the error is zero.  No statement
+in this artifact relies on the cycle-3 version or assumes the published estimate.
 
 *A second, smaller inconsistency in the same place.*  Cycle 3's conclusion `σ < 5/4` happens to
 coincide with cycle 4's, but for a different reason: cycle 3 gets it from the Watt term alone, cycle
@@ -172,7 +173,7 @@ justification ("fix every short factor, and the remaining smooth factor occupies
 presupposes the explicit factorization of the recombined coefficients, i.e. the finite-depth
 Heath–Brown identity, which is not formalized anywhere in this artifact or in Mathlib.
 
-**What replaced it.**  Axiom 2, `RH.Zeta85.Hypotheses.shiu_majorant`, stated over the concrete
+**What replaced it.**  Axiom 1, `RH.Zeta85.Hypotheses.shiu_majorant`, stated over the concrete
 vocabulary `RH.Zeta85.ShiuMajorant` / `progressionSum` / `DivisorBounded` of `RH/Zeta85/Arith.lean`
 (so the axiom is a statement about objects a reader can inspect, not an opaque constant).  It is used
 by rung 3 only.
@@ -280,7 +281,7 @@ predicate cannot be discharged from (2).
 
 **What replaced it, and what was NOT done.**  Per R2 the target is **not** weakened: the 85 %
 statement remains `liminf N₀ˢ/N ≥ 1893603832049143/2227707598259143`.  Instead the exact blocking
-statement is named and isolated as Axiom 4,
+statement is named and isolated as Axiom 3,
 `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2`, whose docstring records this defect in full.
 The consequence for a reader is precise: **`docs/run/12` (2) does not establish the input the 85 %
 theorem needs**, and the artifact says so rather than absorbing the discrepancy into an implied
@@ -313,9 +314,10 @@ block" is a combinatorial statement about the grouping procedure and cannot even
 `exponents_at_43_100`, `deficits_at_43_100`, `cycle5_scales`, `cycle5_traceGrade`, `cycle5_gain`,
 `csqd_traceGrade`, `theta_at_benchmark`, `mrt_gap`, `mrt_alpha` — plus `LogBudget.power_beats_log`.
 
-**What replaced it.**  Axiom 3, `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4`, stated as an
-implication from `BBLRErrorBound` so that the dependence on the published input is visible in the
-Lean type and in `#print axioms`.
+**What replaced it.**  Axiom 2, `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4`, stated as an
+implication from `BBLRErrorBound` so that the interface dependence is visible in the Lean type.  The
+premise is now supplied by the proved theorem `bblr_error_bound` and no longer appears in
+`#print axioms`.
 
 ---
 
@@ -330,7 +332,7 @@ above, none of these carries the restriction `λ ≤ 1`.
 
 **What is genuinely new and therefore assumed.**  The support-beyond-one evaluation of the
 second moment with the saturated kernel `K(t) = min(λ|t|,1)`, i.e. exactly the content of
-`01_arithmetic_cycle1.md` §2 (5)–(9) and `02_certificate_cycle2.md` §2 (13)–(17).  Axiom 5,
+`01_arithmetic_cycle1.md` §2 (5)–(9) and `02_certificate_cycle2.md` §2 (13)–(17).  Axiom 4,
 `traceTransfer_saturated`, is stated as an implication taking the window cost and the aggregate
 criterion as hypotheses, so it cannot smuggle in either the arithmetic or the numerics.
 
@@ -375,14 +377,14 @@ cycle-4/cycle-5 aggregate criteria, and the base repository's zero side.
 | 4 | (13), spacing + counting halves | `12` §2 | **proved**; instantiation to `ℓr/q` left open, no axiom |
 | 5 | exponent bookkeeping of cycles 3–5 | `03`, `08`, `12` | **proved** |
 | 6 | log-power audit | `12` §5 | **proved — and the budget does not close** |
-| 7 | BBLR Prop 3.1 error bound (corrected `AB`) | BBLR / `08` (3) | axiom 1 (published) |
-| 8 | BBLR Poisson identity (14) + block bound | BBLR / `12` (6),(11),(17) | axiom 2 (published + derived) |
-| 9 | Shiu progression majorant | `12` (14) | axiom 3 |
-| 10 | block closure `σ < 5/4` ⟹ (AS) | `08` §2 | axiom 4 |
-| 11 | cycle-5 remainder `σ < 3/2` ⟹ (AS) | `12` (2), §5 | axiom 5 — **and see §7** |
-| 12 | window cost at `101/100` | `07` | axiom 6 (numerics) |
-| 13 | window cost at `5/4` | `08` §3 | axiom 7 (numerics) |
-| 14 | trace transfer at `1 < σ < 3/2` | `01`, `02`, `12` §5 | axiom 8 |
+| 7 | BBLR Prop 3.1 error-bound interface (corrected `AB`) | BBLR / `08` (3) | **proved** by unrestricted main-term witness |
+| 8 | BBLR Poisson-block interface | BBLR / `12` (6),(11),(17) | **proved** by unrestricted main term and empty remainder |
+| 9 | Shiu progression majorant | `12` (14) | axiom 1 |
+| 10 | block closure `σ < 5/4` ⟹ (AS) | `08` §2 | axiom 2 |
+| 11 | cycle-5 remainder `σ < 3/2` ⟹ (AS) | `12` (2), §5 | axiom 3 — **and see §7** |
+| 12 | window cost at `101/100` | `07` | **proved** by exact rational profile |
+| 13 | window cost below `5/4` | `08` §3 | **proved** by exact rational profile |
+| 14 | trace transfer at `1 < σ < 3/2` | `01`, `02`, `12` §5 | axiom 4 |
 
 ---
 

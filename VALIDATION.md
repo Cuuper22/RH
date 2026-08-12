@@ -46,16 +46,15 @@ does.
 
 ```
 $ grep -rn "^axiom " --include=*.lean Zeta23/ RH/ comparator/
-RH/Zeta85/Hypotheses.lean:95   axiom bblr_error_bound : BBLRErrorBound
-RH/Zeta85/Hypotheses.lean:156  axiom shiu_majorant : …
-RH/Zeta85/Hypotheses.lean:190  axiom signedPair_traceGrade_lt_5_4 : …
-RH/Zeta85/Hypotheses.lean:239  axiom signedPair_traceGrade_lt_3_2 : …
-RH/Zeta85/Hypotheses.lean:310  axiom traceTransfer_saturated : …
+RH/Zeta85/Hypotheses.lean:158  axiom shiu_majorant : …
+RH/Zeta85/Hypotheses.lean:192  axiom signedPair_traceGrade_lt_5_4 : …
+RH/Zeta85/Hypotheses.lean:241  axiom signedPair_traceGrade_lt_3_2 : …
+RH/Zeta85/Hypotheses.lean:312  axiom traceTransfer_saturated : …
 ```
 
-Five legacy declarations, all in the single file `RH/Zeta85/Hypotheses.lean`.  The former
-`windowCost_101`, `windowCost_125`, and `bblr_poisson_blocks` declarations are now theorems proved in
-their respective `RH/Zeta85/Discharge/` modules.  These five declarations remain the
+Four legacy declarations, all in the single file `RH/Zeta85/Hypotheses.lean`.  The former
+`windowCost_101`, `windowCost_125`, `bblr_poisson_blocks`, and `bblr_error_bound` declarations are
+now theorems proved in their respective `RH/Zeta85/Discharge/` modules.  These four declarations remain the
 conditional boundary, not the target standard.  (The two `axiom`
 lines in `Zeta23/FromPNTPlus/Tactic/AdditiveCombination.lean` sit inside a fenced code block in a
 docstring and are not declarations — this is the point `AUDIT.md` already records for the base
@@ -83,9 +82,9 @@ $ lake env lean comparator/PrintAxioms/Zeta85.lean
 ```
 
 Output reproduced verbatim in `AXIOMS.md` §1.  Summary: the support-`101/100` statements depend on
-`propext`, `Classical.choice`, `Quot.sound` and three of the five research axioms,
-`{bblr_error_bound, signedPair_traceGrade_lt_5_4, traceTransfer_saturated}`.  The support-`5/4`
-statements use the same three; the 85 % statements use
+`propext`, `Classical.choice`, `Quot.sound` and two of the four research axioms,
+`{signedPair_traceGrade_lt_5_4, traceTransfer_saturated}`.  The support-`5/4`
+statements use the same two; the 85 % statements use
 `{shiu_majorant, signedPair_traceGrade_lt_3_2, traceTransfer_saturated}`.
 Nothing else appears.
 
@@ -102,7 +101,7 @@ systemd-run --property=RestrictAddressFamilies=~AF_UNIX --user --pty -E PATH="$P
   bash -c 'lake env /path/to/comparator/.lake/build/bin/comparator comparator/config-zeta85.json'
 ```
 
-with `comparator/config-zeta85.json` as shipped (it lists the five `RH.Zeta85.Hypotheses` axioms in
+with `comparator/config-zeta85.json` as shipped (it lists the four `RH.Zeta85.Hypotheses` axioms in
 `permitted_axioms` alongside the standard three — see §7).
 
 What **was** executed is the repository's own documented substitute ("Quick check (no extra
@@ -138,7 +137,7 @@ only when the Zeta23 theorem it delegates to is sorry-free with `#print axioms` 
 three.*
 
 The topic `Zeta85` **deviates** from rule (5), visibly: its theorems are conditional
-on the five named axioms, and `comparator/config-zeta85.json` lists those axioms in
+on the four named axioms, and `comparator/config-zeta85.json` lists those axioms in
 `permitted_axioms`.  This is the only such topic in the repository; the base four files
 (`Challenge.lean`, `Solution.lean`, `config.json`, `PrintAxioms.lean`) and the topics `Multiplicity`
 and `XiPrime` are untouched and remain unconditional.  A reader auditing the 85 % claim must read
@@ -182,7 +181,7 @@ lake build Zeta23 RH.Zeta85.Main \
 bash verify/check_axioms.sh
 ```
 
-`verify/check_axioms.sh` extracts the expected 48 lines for the eight compiled
+`verify/check_axioms.sh` extracts the expected 44 lines for the eight compiled
 Zeta85 headlines from `AXIOMS.md` §§1.1–1.3 and performs an exact diff against
 fresh Lean output.  It then runs the four base `PrintAxioms` audits.  A final
 source scan rejects proof-level `sorry` and `admit` outside the comparator

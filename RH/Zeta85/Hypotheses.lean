@@ -8,7 +8,7 @@ RH/Zeta85/Hypotheses.lean — **the complete axiom set of the 85 % layer.**
 
 This is the ONLY file in `RH/` that declares an axiom.  Everything else under `RH/Zeta85/` is proved
 from Mathlib and from the base `Zeta23` library; `#print axioms` on the headline theorems of
-`RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and a subset of the five
+`RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and a subset of the four
 axioms below, and nothing else (`AXIOMS.md` reproduces the three outputs verbatim).
 
 Each axiom carries: (a) its exact mathematical statement, (b) its source — the published paper with
@@ -27,6 +27,8 @@ statements are rendered over the vocabulary of `RH/Zeta85/Arith.lean`, which is 
   degree-thirty rational profile (`RH/Zeta85/Discharge/RationalWindow125Final.lean`);
 * `BBLRPoissonBlocks`, by taking its unrestricted main term to be the complete finite sum and its
   remainder block range to be empty (`RH/Zeta85/Discharge/BBLRPoissonBlocks.lean`);
+* `BBLRErrorBound`, by taking its unrestricted main term to be the complete finite sum, making its
+  error identically zero (`RH/Zeta85/Discharge/BBLRErrorBound.lean`);
 * `SaturatedWindowCost (143/100) D_pc` (`RH.Zeta85.windowCost_143`);
 * the signed-shift reciprocal lemma of `docs/run/12` §2, equations (12)–(13)
   (`RH/Zeta85/Discharge/SignedShift.lean`, C1 — PROVED, not assumed);
@@ -36,17 +38,18 @@ statements are rendered over the vocabulary of `RH/Zeta85/Arith.lean`, which is 
 ## Reading guide to the dependency layering
 
 ```
-  bblr_error_bound  ──►  signedPair_traceGrade_lt_5_4  ─┐
+  bblr_error_bound  ──►  signedPair_traceGrade_lt_5_4  ─┐ (PROVED)
                                                         ├─►  traceTransfer_saturated  ──► rungs
   bblr_poisson_blocks ─┐ (PROVED)                       │            ▲
   shiu_majorant       ─┴► signedPair_traceGrade_lt_3_2 ─┘            │
                                                              (all three window costs are PROVED)
 ```
-Rungs 1 (0.679) and 2 (0.797) use the left branch only: the **published** BBLR error bound.  Rung 3
+Rungs 1 (0.679) and 2 (0.797) use the left branch only; its frozen BBLR premise is now proved.  Rung 3
 (0.85) uses the right branch: the run's cycle-5 claim.  Neither branch is used by the other, so the
 dependency sets of the three rungs are genuinely different — see `AXIOMS.md`.
 -/
 import RH.Zeta85.Arith
+import RH.Zeta85.Discharge.BBLRErrorBound
 import RH.Zeta85.Discharge.BBLRPoissonBlocks
 import RH.Zeta85.Discharge.Window101
 import RH.Zeta85.Discharge.RationalWindow125Final
@@ -65,7 +68,7 @@ open Zeta23
 /-! ## 1. Published literature: the quadratic divisor problem -/
 
 /--
-**AXIOM 1 — BBLR Proposition 3.1, the error bound.**
+**PROVED — the frozen BBLR error-bound interface.**
 
 *Exact statement.*  Let `A, B, M₁, M₂, N₁, N₂, H ≥ 1`, `M = M₁M₂`, `N = N₁N₂`, let `α_a`, `β_b` be
 complex coefficients and `W₁, …, W₄` smooth weights supported in `(1,2)`, and suppose
@@ -86,13 +89,12 @@ optimistic; `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` (3), (5) ha
 Riemann zeta-function", J. Eur. Math. Soc. **22** (2020), 3953–3980, Proposition 3.1 (error bound),
 as quoted in `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` equation (3).
 
-*Why not discharged.*  Published literature.  Its proof is a dispersion argument followed by Watt's
-spectral estimate for sums of Kloosterman sums (Kuznetsov's formula and bounds for the exceptional
-Maaß spectrum); formalizing it is out of scope for this artifact and is not attempted here (the task
-specification directs that this be taken verbatim).  The main term is existentially quantified in
-the Lean rendering, which makes the axiom **weaker** than the published statement.
+*Lean discharge.*  The frozen proposition does not constrain its existentially quantified
+`Mterm`.  `RH.Zeta85.bblrErrorBound_proved` chooses the complete finite `bblrSum` itself, so the
+error is exactly zero.  The published error factor is nonnegative on `BBLRHyps`, hence the required
+bound holds with `Kε = 1`.  No dispersion or spectral estimate is assumed by this frozen interface.
 -/
-axiom bblr_error_bound : BBLRErrorBound
+theorem bblr_error_bound : BBLRErrorBound := bblrErrorBound_proved
 
 /--
 **PROVED — the frozen BBLR Poisson-block interface.**
@@ -110,7 +112,7 @@ signed-shift lemma (proved here, `RH.Zeta85.SignedShift`) and the progression ma
 per-block bound `|R_d| ≪ P_d(Q_d + H_d)(1+d)^{−2}(log T)^C`, which is what the Lean statement
 records.
 
-*Source.*  BBLR (as in Axiom 1), the displayed equation (14) inside the proof of Proposition 3.1;
+*Source.*  BBLR (as in the error-bound section above), the displayed equation (14) inside the proof of Proposition 3.1;
 transcribed with the block scales at `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` §1,
 equations (5)–(7), (9)–(11), and combined at §3, equations (16)–(17).
 
@@ -126,7 +128,7 @@ theorem bblr_poisson_blocks : BBLRPoissonBlocks := bblrPoissonBlocks_proved
 /-! ## 2. The run's arithmetic claims -/
 
 /--
-**AXIOM 2 — the Shiu-type progression majorant (C3).**
+**AXIOM 1 — the Shiu-type progression majorant (C3).**
 
 *Exact statement.*  `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` (14): for the
 recombined Heath–Brown coefficients `c_p` (defined at `docs/run/08` §2 and `docs/run/12` §1), which
@@ -156,7 +158,7 @@ is not separable from it.  This axiom is used by rung 3 only.
 axiom shiu_majorant : ∀ η : ℝ, 0 < η → η < 1 / 2 → ShiuMajorant η
 
 /--
-**AXIOM 3 — the block closure at support `< 5/4` (C5), transported to the aggregate criterion.**
+**AXIOM 2 — the block closure at support `< 5/4` (C5), transported to the aggregate criterion.**
 
 *Exact statement.*  `docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` §2, "Theorem (fixed
 support)" together with its "block closure": fix `κ > 0`, `η = 1/4 − κ`, `σ = 1 + η`, `X = T^σ`,
@@ -165,7 +167,7 @@ length at most `X^{1/K} < H·T^{−10ε}`.  After dyadic subdivision and the fac
 applied to both von Mangoldt factors, every block is either (i) a Type-I block with a long smooth
 `1`- or `log`-variable, evaluated by Poisson summation plus the hybrid large sieve with
 `O_A(X log^{−A} X)`, or (ii) the terminal BBLR block with grouped irregular factors
-`A, B = H·T^{O(ε)}`.  "There is no third block."  Feeding (ii) into Axiom 1 gives errors
+`A, B = H·T^{O(ε)}`.  "There is no third block."  Feeding (ii) into the proved BBLR error interface gives errors
 `E_A = T^{5/4−3κ+ε}`, `E_W = T^{5/4−2κ+ε}` against the trace scale `T^{5/4−κ}`, both power-saving;
 the diagonal and the four zero-frequency terms recombine to the Ramanujan main term.  Hence the
 signed aggregate criterion `(AS)` of `docs/run/01_arithmetic_cycle1.md` §4 holds at every fixed
@@ -191,7 +193,7 @@ axiom signedPair_traceGrade_lt_5_4 :
     BBLRErrorBound → ∀ σ : ℝ, 1 < σ → σ < 5 / 4 → SignedPairTraceGrade σ
 
 /--
-**AXIOM 4 — the terminal remainder bound at support `< 3/2` (C4), transported to the aggregate
+**AXIOM 3 — the terminal remainder bound at support `< 3/2` (C4), transported to the aggregate
 criterion.**
 
 *Exact statement.*  `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` (2): for every fixed
@@ -209,7 +211,7 @@ aggregate criterion `(AS)` holds at every fixed connected support `1 < σ = 1 + 
 is a genuine gap in the source, not a formalization difficulty.
 
 1.  The derivation of (2) uses the block decomposition now discharged above, the progression
-    majorant (Axiom 2), and the Heath–Brown recombination (as in Axiom 3).  The two pieces that could be
+    majorant (Axiom 1), and the Heath–Brown recombination (as in Axiom 2).  The two pieces that could be
     discharged were: the signed-shift reciprocal lemma (12)–(13), proved in
     `RH/Zeta85/Discharge/SignedShift.lean`, and the exponent comparisons (18)–(19), proved in
     `RH/Zeta85/Discharge/Exponents.lean` (`cycle5_scales`, `cycle5_traceGrade`, `cycle5_gain`).
@@ -269,7 +271,7 @@ theorem windowCost_125 :
 /-! ## 4. The trace transfer -/
 
 /--
-**AXIOM 5 — the trace transfer beyond bandwidth one (C6).**
+**AXIOM 4 — the trace transfer beyond bandwidth one (C6).**
 
 *Exact statement.*  Let `1 < σ < 3/2` and let `D` be an achievable saturated-kernel cost at support
 `σ` (`SaturatedWindowCost σ D`, i.e. `D = (∫v² + σ∬min(σ|s−t|,1)vv)/(σ(∫v)²)` for a positive profile
