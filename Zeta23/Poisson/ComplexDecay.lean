@@ -56,7 +56,7 @@ theorem paperFT_horizontal_decay
     nlinarith [sq_nonneg w.im]
   have h2re :
       ‖paperFT f w‖ * (z.re - s) ^ 2 ≤
-        Real.exp (|z.im| * Λ) * (∫ u, ‖deriv (deriv f) u‖) := by
+        Real.exp (|z.im| * Λ) * ∫ u, ‖deriv (deriv f) u‖ := by
     exact
       (mul_le_mul_of_nonneg_left hre (norm_nonneg _)).trans h2
   change
@@ -95,9 +95,12 @@ theorem summable_paperFT_affine_int
     (z : ℂ) (hh : h ≠ 0) :
     Summable (fun k : ℤ =>
       paperFT f (z - (T + (k : ℝ) * h : ℝ))) := by
-  have hO := paperFT_affine_horizontal_isBigO (T := T) (h := h) hf hsupp z hh
-  simpa only [Function.comp_apply] using
-    (summable_of_isBigO
+  have hO := paperFT_affine_horizontal_isBigO
+    (T := T) (h := h) hf hsupp z hh
+  exact
+    (@summable_of_isBigO ℤ ℂ
+      Complex.instNormedAddCommGroup.toSeminormedAddCommGroup
+      Complex.instCompleteSpace _ _
       (Real.summable_abs_int_rpow one_lt_two)
       (hO.comp_tendsto Int.tendsto_coe_cofinite))
 
