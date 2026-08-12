@@ -890,6 +890,93 @@ theorem normalizedZeroPairKernel_eq_energyRatioIntegral_sub_tail
   field_simp [hfull0, hL.ne', henergy0]
   <;> ring
 
+
+/-- Fourier transform of the literal distinguished local profile at the
+physical zero-difference scale. -/
+def localProfileFourierIntegral
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (z z' : ℂ) : ℂ :=
+  ∫ x : ℝ,
+    (F.localProfile T x : ℂ) *
+      cexp (I * (z - z') *
+        ((F.period T (F.distinguished T) * x : ℝ) : ℂ))
+
+/-- Exact change of variables from the distinguished physical-window energy
+integral to the normalized local-profile Fourier integral. -/
+theorem channelEnergy_mul_localProfileFourierIntegral
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (z z' : ℂ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (henergy0 : F.channelEnergy T (F.distinguished T) ≠ 0) :
+    (F.channelEnergy T (F.distinguished T) : ℂ) *
+        localProfileFourierIntegral F T z z' =
+      ∫ u : ℝ,
+        (F.window T (F.distinguished T) u : ℂ) *
+          F.window T (F.distinguished T) u *
+          cexp (I * (z - z') * (u : ℂ)) := by
+  let L : ℝ := F.period T (F.distinguished T)
+  let E : ℝ := F.channelEnergy T (F.distinguished T)
+  let w : ℝ → ℝ := F.window T (F.distinguished T)
+  unfold localProfileFourierIntegral
+  rw [← integral_const_mul_C]
+  calc
+    (∫ x : ℝ,
+        (E : ℂ) *
+          ((F.localProfile T x : ℂ) *
+            cexp (I * (z - z') * ((L * x : ℝ) : ℂ)))) =
+      ∫ x : ℝ,
+        (L : ℂ) *
+          ((w (L * x) : ℂ) * w (L * x) *
+            cexp (I * (z - z') * ((L * x : ℝ) : ℂ))) := by
+      apply integral_congr_ae
+      filter_upwards [] with x
+      simp only [QuarticGramFamily.localProfile]
+      dsimp only [L, E, w]
+      push_cast
+      field_simp [henergy0]
+      <;> ring
+    _ = (L : ℂ) *
+        ∫ x : ℝ,
+          (w (L * x) : ℂ) * w (L * x) *
+            cexp (I * (z - z') * ((L * x : ℝ) : ℂ)) :=
+      integral_const_mul_C _ _
+    _ = ∫ u : ℝ,
+        (w u : ℂ) * w u *
+          cexp (I * (z - z') * (u : ℂ)) := by
+      let J : ℝ → ℂ := fun u =>
+        (w u : ℂ) * w u *
+          cexp (I * (z - z') * (u : ℂ))
+      change (L : ℂ) * (∫ x : ℝ, J (L * x)) =
+        ∫ u : ℝ, J u
+      rw [Measure.integral_comp_mul_left J L,
+        abs_of_pos (inv_pos.mpr hL)]
+      rw [← Complex.coe_smul, smul_eq_mul, ← mul_assoc, ofReal_inv,
+        mul_inv_cancel₀ (ofReal_ne_zero.mpr hL.ne'), one_mul]
+
+/-- Dividing by total channel energy after the change of variables produces
+the exact distinguished-channel energy ratio times the local-profile
+Fourier transform. -/
+theorem channelEnergyIntegral_div_total_eq_ratio_mul_localProfile
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (z z' : ℂ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (henergy0 : F.channelEnergy T (F.distinguished T) ≠ 0) :
+    (∫ u : ℝ,
+        (F.window T (F.distinguished T) u : ℂ) *
+          F.window T (F.distinguished T) u *
+          cexp (I * (z - z') * (u : ℂ))) /
+        ((∫ u : ℝ, F.windowEnergy T u : ℝ) : ℂ) =
+      ((F.channelEnergy T (F.distinguished T) /
+        (∫ u : ℝ, F.windowEnergy T u) : ℝ) : ℂ) *
+        localProfileFourierIntegral F T z z' := by
+  rw [← channelEnergy_mul_localProfileFourierIntegral
+    F T z z' hL henergy0]
+  push_cast
+  ring
+
 end ComplexAliasBridge
 end Zeta85
 end RH
