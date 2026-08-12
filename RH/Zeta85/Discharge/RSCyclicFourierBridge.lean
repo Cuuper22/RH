@@ -569,4 +569,284 @@ theorem rsGaugeTest_weightedCyclicSymbol_three
     hmu r hcont hcompact x]
   exact cyclicSourceThree_integral hmu r x
 
+/-! ## Degree four -/
+
+private def cycleMatrixFour (mu : ℝ) : Matrix (Fin 4) (Fin 4) ℝ :=
+  ![![1, 0, 0, 0], ![-mu, mu, 0, 0],
+    ![0, -mu, mu, 0], ![0, 0, -mu, mu]]
+
+private lemma cycleMatrixFour_apply (mu : ℝ) (y : Fin 4 → ℝ) :
+    Matrix.toLin' (cycleMatrixFour mu) y =
+      ![y 0, mu * (y 1 - y 0), mu * (y 2 - y 1),
+        mu * (y 3 - y 2)] := by
+  funext i
+  change Matrix.mulVec (cycleMatrixFour mu) y i = _
+  fin_cases i <;>
+    simp [cycleMatrixFour, Matrix.mulVec, dotProduct,
+      Fin.sum_univ_four] <;> ring
+
+private lemma cycleMatrixFour_det (mu : ℝ) :
+    (cycleMatrixFour mu).det = mu ^ 3 := by
+  rw [Matrix.det_of_isLowerTriangular (cycleMatrixFour mu)]
+  · simp [cycleMatrixFour, Fin.prod_univ_four]
+    ring
+  · intro i j h
+    change i < j at h
+    fin_cases i <;> fin_cases j <;> simp_all [cycleMatrixFour]
+
+/-- The four Fourier frequencies obtained by orienting the cyclic path. -/
+def cyclicFrequencyFour (mu : ℝ) (x : Fin 4 → ℂ) : Fin 4 → ℂ :=
+  ![(2 * Real.pi : ℂ) * (mu : ℂ) * (x 0 - x 3),
+    (2 * Real.pi : ℂ) * (mu : ℂ) * (x 1 - x 0),
+    (2 * Real.pi : ℂ) * (mu : ℂ) * (x 2 - x 1),
+    (2 * Real.pi : ℂ) * (mu : ℂ) * (x 3 - x 2)]
+
+private def cyclicSourceFour (mu : ℝ) (r : ℝ → ℝ)
+    (x : Fin 4 → ℂ) (q : Fin 4 → ℝ) : ℂ :=
+  (mu : ℂ) * (r (q 0) : ℂ) * (r (q 0 + q 1 / mu) : ℂ) *
+    (r (q 0 + (q 1 + q 2) / mu) : ℂ) *
+    (r (q 0 + (q 1 + q 2 + q 3) / mu) : ℂ) *
+      Complex.exp (-(2 * Real.pi : ℂ) * Complex.I *
+        ((x 0 - x 3) * (q 1 : ℂ) +
+          (x 1 - x 3) * (q 2 : ℂ) +
+          (x 2 - x 3) * (q 3 : ℂ)))
+
+private lemma cyclicSourceFour_comp_matrix {mu : ℝ} (hmu : 0 < mu)
+    (r : ℝ → ℝ) (x : Fin 4 → ℂ) (y : Fin 4 → ℝ) :
+    cyclicSourceFour mu r x (Matrix.toLin' (cycleMatrixFour mu) y) =
+      (mu : ℂ) * ∏ j : Fin 4,
+        (r (y j) : ℂ) * Complex.exp
+          (Complex.I * cyclicFrequencyFour mu x j * (y j : ℂ)) := by
+  rw [cycleMatrixFour_apply, Fin.prod_univ_four]
+  simp [cyclicSourceFour, cyclicFrequencyFour]
+  have hy1 : y 0 + mu * (y 1 - y 0) / mu = y 1 := by
+    field_simp [hmu.ne']
+    ring
+  have hy2 : y 0 +
+      (mu * (y 1 - y 0) + mu * (y 2 - y 1)) / mu = y 2 := by
+    field_simp [hmu.ne']
+    ring
+  have hy3 : y 0 +
+      (mu * (y 1 - y 0) + mu * (y 2 - y 1) +
+        mu * (y 3 - y 2)) / mu = y 3 := by
+    field_simp [hmu.ne']
+    ring
+  rw [hy1, hy2, hy3]
+  rw [show
+      (mu : ℂ) *
+        ((r (y 0) : ℂ) * Complex.exp
+            (Complex.I * ((2 * Real.pi : ℂ) * (mu : ℂ) *
+              (x 0 - x 3)) * (y 0 : ℂ)) *
+          ((r (y 1) : ℂ) * Complex.exp
+            (Complex.I * ((2 * Real.pi : ℂ) * (mu : ℂ) *
+              (x 1 - x 0)) * (y 1 : ℂ))) *
+          ((r (y 2) : ℂ) * Complex.exp
+            (Complex.I * ((2 * Real.pi : ℂ) * (mu : ℂ) *
+              (x 2 - x 1)) * (y 2 : ℂ))) *
+          ((r (y 3) : ℂ) * Complex.exp
+            (Complex.I * ((2 * Real.pi : ℂ) * (mu : ℂ) *
+              (x 3 - x 2)) * (y 3 : ℂ)))) =
+        (mu : ℂ) * (r (y 0) : ℂ) * (r (y 1) : ℂ) *
+          (r (y 2) : ℂ) * (r (y 3) : ℂ) *
+          (Complex.exp
+              (Complex.I * ((2 * Real.pi : ℂ) * (mu : ℂ) *
+                (x 0 - x 3)) * (y 0 : ℂ)) *
+            Complex.exp
+              (Complex.I * ((2 * Real.pi : ℂ) * (mu : ℂ) *
+                (x 1 - x 0)) * (y 1 : ℂ)) *
+            Complex.exp
+              (Complex.I * ((2 * Real.pi : ℂ) * (mu : ℂ) *
+                (x 2 - x 1)) * (y 2 : ℂ)) *
+            Complex.exp
+              (Complex.I * ((2 * Real.pi : ℂ) * (mu : ℂ) *
+                (x 3 - x 2)) * (y 3 : ℂ))) by
+      ring]
+  rw [← Complex.exp_add, ← Complex.exp_add, ← Complex.exp_add]
+  congr 1
+  ring
+
+private lemma cyclicSourceFour_integrable {mu : ℝ} (hmu : 0 < mu)
+    {r : ℝ → ℝ} (hcont : Continuous r)
+    (hcompact : HasCompactSupport r) (x : Fin 4 → ℂ) :
+    Integrable (cyclicSourceFour mu r x) := by
+  let f : Fin 4 → ℝ → ℂ := fun j y =>
+    (r y : ℂ) * Complex.exp
+      (Complex.I * cyclicFrequencyFour mu x j * (y : ℂ))
+  have hf (j : Fin 4) : Integrable (f j) :=
+    paperFTKernel_integrable hcont hcompact _
+  have hprod : Integrable (fun y : Fin 4 → ℝ => ∏ j, f j (y j)) :=
+    Integrable.fintype_prod hf
+  have htrans : Integrable (fun y : Fin 4 → ℝ =>
+      cyclicSourceFour mu r x
+        (Matrix.toLin' (cycleMatrixFour mu) y)) := by
+    have hm := hprod.const_mul (mu : ℂ)
+    apply hm.congr
+    filter_upwards [] with y
+    exact (cyclicSourceFour_comp_matrix hmu r x y).symm
+  exact (integrable_linear_change_iff (cycleMatrixFour mu)
+    (by rw [cycleMatrixFour_det]; positivity)
+    (cyclicSourceFour mu r x)).mp htrans
+
+private lemma cyclicSourceFour_integral {mu : ℝ} (hmu : 0 < mu)
+    (r : ℝ → ℝ) (x : Fin 4 → ℂ) :
+    (∫ q : Fin 4 → ℝ, cyclicSourceFour mu r x q) =
+      (mu : ℂ) ^ 4 * ∏ j : Fin 4,
+        paperFT (fun y => (r y : ℂ)) (cyclicFrequencyFour mu x j) := by
+  calc
+    (∫ q : Fin 4 → ℝ, cyclicSourceFour mu r x q) =
+        ((cycleMatrixFour mu).det : ℂ) *
+          ∫ y : Fin 4 → ℝ, cyclicSourceFour mu r x
+            (Matrix.toLin' (cycleMatrixFour mu) y) :=
+      integral_linear_change (cycleMatrixFour mu)
+        (by rw [cycleMatrixFour_det]; positivity) _
+    _ = (mu : ℂ) ^ 3 *
+        ∫ y : Fin 4 → ℝ, (mu : ℂ) * ∏ j : Fin 4,
+          (r (y j) : ℂ) * Complex.exp
+            (Complex.I * cyclicFrequencyFour mu x j * (y j : ℂ)) := by
+      rw [cycleMatrixFour_det]
+      push_cast
+      congr 2
+      funext y
+      exact cyclicSourceFour_comp_matrix hmu r x y
+    _ = (mu : ℂ) ^ 4 * ∏ j : Fin 4,
+        paperFT (fun y => (r y : ℂ))
+          (cyclicFrequencyFour mu x j) := by
+      rw [integral_const_mul]
+      rw [MeasureTheory.integral_fintype_prod_volume_eq_prod
+        (fun j : Fin 4 => fun y : ℝ =>
+          (r y : ℂ) * Complex.exp
+            (Complex.I * cyclicFrequencyFour mu x j * (y : ℂ)))]
+      simp only [paperFT]
+      ring
+
+private lemma lift_fin_three_zero (xi : Fin 3 → ℝ) :
+    rsZeroSumLift xi (0 : Fin 4) = xi 0 := by
+  change Fin.lastCases (-∑ i : Fin 3, xi i) (fun i => xi i)
+    (Fin.castSucc (0 : Fin 3)) = xi 0
+  rw [Fin.lastCases_castSucc]
+
+private lemma lift_fin_three_one (xi : Fin 3 → ℝ) :
+    rsZeroSumLift xi (1 : Fin 4) = xi 1 := by
+  change Fin.lastCases (-∑ i : Fin 3, xi i) (fun i => xi i)
+    (Fin.castSucc (1 : Fin 3)) = xi 1
+  rw [Fin.lastCases_castSucc]
+
+private lemma lift_fin_three_two (xi : Fin 3 → ℝ) :
+    rsZeroSumLift xi (2 : Fin 4) = xi 2 := by
+  change Fin.lastCases (-∑ i : Fin 3, xi i) (fun i => xi i)
+    (Fin.castSucc (2 : Fin 3)) = xi 2
+  rw [Fin.lastCases_castSucc]
+
+private lemma lift_fin_three_three (xi : Fin 3 → ℝ) :
+    rsZeroSumLift xi (3 : Fin 4) = -(xi 0 + xi 1 + xi 2) := by
+  change Fin.lastCases (-∑ i : Fin 3, xi i) (fun i => xi i)
+    (Fin.last 3) = -(xi 0 + xi 1 + xi 2)
+  rw [Fin.lastCases_last, Fin.sum_univ_three]
+
+private lemma cyclic_partial_fin_four_zero (xi : Fin 3 → ℝ) :
+    cyclicPartialSum (rsZeroSumLift xi) (0 : Fin 4) = 0 := by
+  simp [cyclicPartialSum]
+
+private lemma cyclic_partial_fin_four_one (xi : Fin 3 → ℝ) :
+    cyclicPartialSum (rsZeroSumLift xi) (1 : Fin 4) = xi 0 := by
+  unfold cyclicPartialSum
+  rw [show (Finset.univ.filter fun j : Fin 4 => j < (1 : Fin 4)) =
+      {0} by
+    ext j
+    fin_cases j <;> simp]
+  simp [lift_fin_three_zero]
+
+private lemma cyclic_partial_fin_four_two (xi : Fin 3 → ℝ) :
+    cyclicPartialSum (rsZeroSumLift xi) (2 : Fin 4) = xi 0 + xi 1 := by
+  unfold cyclicPartialSum
+  rw [show (Finset.univ.filter fun j : Fin 4 => j < (2 : Fin 4)) =
+      {0, 1} by
+    ext j
+    fin_cases j <;> simp]
+  simp [lift_fin_three_zero, lift_fin_three_one]
+
+private lemma cyclic_partial_fin_four_three (xi : Fin 3 → ℝ) :
+    cyclicPartialSum (rsZeroSumLift xi) (3 : Fin 4) =
+      xi 0 + xi 1 + xi 2 := by
+  unfold cyclicPartialSum
+  rw [show (Finset.univ.filter fun j : Fin 4 => j < (3 : Fin 4)) =
+      {0, 1, 2} by
+    ext j
+    fin_cases j <;> simp]
+  simp [lift_fin_three_zero, lift_fin_three_one, lift_fin_three_two]
+  ring
+
+private lemma gauge_phase_fin_four (x : Fin 4 → ℂ) (xi : Fin 3 → ℝ) :
+    (∑ j : Fin 4, x j * (rsZeroSumLift xi j : ℂ)) =
+      (x 0 - x 3) * (xi 0 : ℂ) +
+        (x 1 - x 3) * (xi 1 : ℂ) +
+        (x 2 - x 3) * (xi 2 : ℂ) := by
+  rw [Fin.sum_univ_four, lift_fin_three_zero, lift_fin_three_one,
+    lift_fin_three_two, lift_fin_three_three]
+  push_cast
+  ring
+
+private lemma integral_fin_four_eq_iterated
+    (f : (Fin 4 → ℝ) → ℂ) (hf : Integrable f) :
+    (∫ q : Fin 4 → ℝ, f q) =
+      ∫ xi : Fin 3 → ℝ, ∫ u : ℝ, f ![u, xi 0, xi 1, xi 2] := by
+  let e := MeasurableEquiv.piFinSuccAbove
+    (fun _ : Fin 4 => ℝ) (0 : Fin 4)
+  have hp := volume_preserving_piFinSuccAbove
+    (fun _ : Fin 4 => ℝ) (0 : Fin 4)
+  have hfi : Integrable
+      (fun p : ℝ × (Fin 3 → ℝ) => f (e.symm p)) :=
+    (hp.symm e).integrable_comp_of_integrable hf
+  have hmap := (hp.symm e).integral_comp' f
+  change (∫ p : ℝ × (Fin 3 → ℝ), f (e.symm p)
+      ∂(volume.prod volume)) = (∫ q : Fin 4 → ℝ, f q) at hmap
+  rw [integral_prod_symm _ hfi] at hmap
+  rw [← hmap]
+  apply integral_congr_ae
+  filter_upwards [] with xi
+  apply integral_congr_ae
+  filter_upwards [] with u
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+private lemma rsGaugeTest_weightedCyclicSymbol_four_eq_source
+    {mu : ℝ} (hmu : 0 < mu) (r : ℝ → ℝ)
+    (hcont : Continuous r) (hcompact : HasCompactSupport r)
+    (x : Fin 4 → ℂ) :
+    rsGaugeTest (n := 3) (weightedCyclicSymbol (k := 4) mu r) x =
+      ∫ q : Fin 4 → ℝ, cyclicSourceFour mu r x q := by
+  unfold rsGaugeTest weightedCyclicSymbol
+  rw [integral_fin_four_eq_iterated _
+    (cyclicSourceFour_integrable hmu hcont hcompact x)]
+  apply integral_congr_ae
+  filter_upwards [] with xi
+  rw [gauge_phase_fin_four]
+  simp_rw [Fin.prod_univ_four, cyclic_partial_fin_four_zero,
+    cyclic_partial_fin_four_one, cyclic_partial_fin_four_two,
+    cyclic_partial_fin_four_three]
+  simp only [zero_div, add_zero]
+  unfold cyclicSourceFour
+  simp
+  rw [← integral_complex_ofReal]
+  push_cast
+  rw [← integral_const_mul, ← integral_mul_const]
+  apply integral_congr_ae
+  filter_upwards [] with u
+  ring
+
+/-- Exact Fourier evaluation of the degree-four cyclic RS test at complex
+arguments. -/
+theorem rsGaugeTest_weightedCyclicSymbol_four
+    {mu : ℝ} (hmu : 0 < mu) (r : ℝ → ℝ)
+    (hcont : Continuous r) (hcompact : HasCompactSupport r)
+    (x : Fin 4 → ℂ) :
+    rsGaugeTest (n := 3) (weightedCyclicSymbol (k := 4) mu r) x =
+      (mu : ℂ) ^ 4 * ∏ j : Fin 4,
+        paperFT (fun y => (r y : ℂ))
+          (cyclicFrequencyFour mu x j) := by
+  rw [rsGaugeTest_weightedCyclicSymbol_four_eq_source
+    hmu r hcont hcompact x]
+  exact cyclicSourceFour_integral hmu r x
+
 end RH.Zeta85.RSReduction
