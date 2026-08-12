@@ -183,6 +183,53 @@ theorem aggregateAliasCancellation_of_radialShells
       (f r) L (a r) (b r) (shell r)
       hL (ha r) (hb r) (hshell r) m hm u
 
+
+/-- A central closed-half-period core can be combined with any finite family
+of outer radial shells.  The core covers the origin; every outer channel
+uses strict radial-shell separation.  Each channel therefore has zero
+nonzero-shift integral, so their aggregate aliases cancel exactly. -/
+theorem aggregateAliasCancellation_of_coreAndRadialShells
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (T L : ℝ) (Λ : ι → ℝ) (f : ι → ℝ → ℝ)
+    (core : Finset ι)
+    (shell : ι → ℕ) (a b : ι → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ r, 0 ≤ Λ r)
+    (hsmooth : ∀ r,
+      ContDiff ℝ 2 (fun u => (f r u : ℂ)))
+    (hsuppBound : ∀ r u, Λ r < |u| → f r u = 0)
+    (heven : ∀ r u, f r (-u) = f r u)
+    (hcore : ∀ r, r ∈ core →
+      tsupport (f r) ⊆ Icc (-L / 2) (L / 2))
+    (hshell : ∀ r, r ∉ core → ∀ x, f r x ≠ 0 →
+      a r < |x| ∧ |x| < b r)
+    (ha : ∀ r, r ∉ core →
+      (shell r : ℝ) * L / 2 < a r)
+    (hb : ∀ r, r ∉ core →
+      b r < (((shell r) + 1 : ℕ) : ℝ) * L / 2) :
+    AggregateComplexAlias.AggregateAliasCancellation T L f := by
+  apply AggregateComplexAlias.aggregateAliasCancellation_of_shiftIntegrals
+    T L Λ f hL hΛ hsmooth hsuppBound heven
+  intro z z' m hm
+  apply Finset.sum_eq_zero
+  intro r hr
+  by_cases hrcore : r ∈ core
+  · exact ComplexAliasBridge.halfPeriod_complexShiftIntegral_eq_zero
+      (f r) L hL (hcore r hrcore) m hm
+      (Complex.I * (z - z'))
+  · rw [← integral_zero]
+    apply integral_congr
+    intro u
+    have hoverlap :
+        f r u * f r (u - (m : ℝ) * L) = 0 :=
+      radialShell_shift_overlap_eq_zero
+        (f r) L (a r) (b r) (shell r)
+        hL (ha r hrcore) (hb r hrcore)
+        (hshell r hrcore) m hm u
+    rcases mul_eq_zero.mp hoverlap with hu | hshift
+    · simp [hu]
+    · simp [hshift]
+
 end RadialShellAlias
 end Zeta85
 end RH
