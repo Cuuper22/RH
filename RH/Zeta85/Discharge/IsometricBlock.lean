@@ -226,6 +226,168 @@ theorem finite_affine_bridge_at
   unfold QuarticTransfer.transferError
   nlinarith
 
+
+/-- The one-sided asymptotic datum for the complete mixed-channel block.
+Only the weighted terminal polynomial is retained; no separate convergence
+of four moments and no coordinate allocation are required. -/
+structure WeightedQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic) (C : Data F) : Prop where
+  block_dimension_pos :
+    ∀ᶠ T in Filter.atTop, 0 < F.blockDim T
+  eventually_gt :
+    ∀ x : ℝ, x < μ * QuarticTransfer.limitQuarticScore q μ p →
+      ∀ᶠ T in Filter.atTop,
+        x < (F.blockDim T : ℝ) /
+              (Z.N T (2 * T) : ℝ) * quarticScore q C T
+
+/-- Eventual form of the finite affine bridge for an isometric block. -/
+theorem finite_affine_bridge
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : Data F)
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hblock : ∀ᶠ T in Filter.atTop, 0 < F.blockDim T)
+    (q : TrimmedMoment.Quartic) (cap Dbar : ℝ)
+    (hdual : TrimmedMoment.DualFeasible q cap)
+    (hcap : cap / 2 ≤ 1)
+    (hcost : profileSaturatedCost σ v ≤ Dbar) :
+    ∀ᶠ T in Filter.atTop,
+      (F.blockDim T : ℝ) * quarticScore q C T +
+          (2 - Dbar - cap / 2) *
+            (Z.N T (2 * T) : ℝ) ≤
+        (1 - cap / 2) * (Z.N0s T (2 * T) : ℝ) +
+          QuarticTransfer.transferError F T := by
+  filter_upwards [robustTailBound_eventually C hfull hzero,
+    hblock, eventually_ge_atTop (0 : ℝ)]
+      with T htail hm hT
+  exact finite_affine_bridge_at C hzero q cap Dbar hdual hcap
+    hcost T hT hm htail
+
+/-- The mixed-channel finite expression after division by the dyadic count
+and the positive affine denominator. -/
+def normalizedTransfer
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic) (cap Dbar : ℝ)
+    (C : Data F) (T : ℝ) : ℝ :=
+  (((F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ)) *
+        quarticScore q C T +
+      (2 - Dbar - cap / 2) -
+      QuarticTransfer.transferError F T /
+        (Z.N T (2 * T) : ℝ)) /
+    (1 - cap / 2)
+
+/-- Generic finite-to-asymptotic transfer for a channel-mixing isometry.
+This is the same exact density argument as the coordinate route, with the
+impossible principal-block premise replaced throughout by the actual
+isometrically compressed matrix. -/
+theorem asymptotic_eps_transfer
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hRvM : RiemannVonMangoldt Z)
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : Data F)
+    (q : TrimmedMoment.Quartic)
+    (hweighted : WeightedQuarticLowerBound q C)
+    (cap Dbar target : ℝ)
+    (hdual : TrimmedMoment.DualFeasible q cap)
+    (hcap : cap / 2 < 1)
+    (hcost : profileSaturatedCost σ v ≤ Dbar)
+    (hstrict : target <
+      (μ * QuarticTransfer.limitQuarticScore q μ p +
+          2 - Dbar - cap / 2) /
+        (1 - cap / 2)) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (target - ε) * (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) := by
+  have hden : 0 < 1 - cap / 2 := sub_pos.mpr hcap
+  have hstrict' :
+      target * (1 - cap / 2) <
+        μ * QuarticTransfer.limitQuarticScore q μ p +
+          2 - Dbar - cap / 2 :=
+    (lt_div_iff₀ hden).mp hstrict
+  let δ : ℝ :=
+    (μ * QuarticTransfer.limitQuarticScore q μ p +
+        2 - Dbar - cap / 2 -
+        target * (1 - cap / 2)) / 3
+  have hδ : 0 < δ := by
+    dsimp only [δ]
+    linarith
+  have hscore : ∀ᶠ T in Filter.atTop,
+      μ * QuarticTransfer.limitQuarticScore q μ p - δ <
+        (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
+          quarticScore q C T :=
+    hweighted.eventually_gt _ (by linarith)
+  have herror0 :=
+    (QuarticTransfer.transferError_small hRvM hfull hzero).
+      tendsto_div_nhds_zero
+  have herror : ∀ᶠ T in Filter.atTop,
+      QuarticTransfer.transferError F T /
+          (Z.N T (2 * T) : ℝ) < δ :=
+    herror0.eventually (Iio_mem_nhds hδ)
+  have hlower : ∀ᶠ T in Filter.atTop,
+      target < normalizedTransfer q cap Dbar C T := by
+    filter_upwards [hscore, herror] with T hscoreT herrorT
+    rw [normalizedTransfer]
+    apply (lt_div_iff₀ hden).2
+    dsimp only [δ] at hscoreT herrorT
+    linarith
+  have hfinite := finite_affine_bridge C hfull hzero
+    hweighted.block_dimension_pos q cap Dbar hdual
+    hcap.le hcost
+  have hNpos :=
+    (Assembly.tendsto_N_atTop Z hRvM).eventually_gt_atTop 0
+  have htarget : ∀ᶠ T in Filter.atTop,
+      target * (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) := by
+    filter_upwards [hlower, hfinite, hNpos]
+      with T hlowerT hfiniteT hNT
+    rw [normalizedTransfer] at hlowerT
+    have hlowerDen := (lt_div_iff₀ hden).mp hlowerT
+    have hrewrite :
+        (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
+              quarticScore q C T +
+              (2 - Dbar - cap / 2) -
+              QuarticTransfer.transferError F T /
+                (Z.N T (2 * T) : ℝ) =
+          ((F.blockDim T : ℝ) * quarticScore q C T +
+              (2 - Dbar - cap / 2) *
+                (Z.N T (2 * T) : ℝ) -
+              QuarticTransfer.transferError F T) /
+            (Z.N T (2 * T) : ℝ) := by
+      field_simp [hNT.ne']
+    rw [hrewrite] at hlowerDen
+    have hlowerN := (lt_div_iff₀ hNT).mp hlowerDen
+    have hmul :
+        target * (1 - cap / 2) *
+              (Z.N T (2 * T) : ℝ) <
+          (1 - cap / 2) *
+              (Z.N0s T (2 * T) : ℝ) := by
+      linarith
+    have hmul' :
+        (1 - cap / 2) *
+              (target * (Z.N T (2 * T) : ℝ)) <
+          (1 - cap / 2) *
+              (Z.N0s T (2 * T) : ℝ) := by
+      calc
+        (1 - cap / 2) *
+              (target * (Z.N T (2 * T) : ℝ)) =
+            target * (1 - cap / 2) *
+              (Z.N T (2 * T) : ℝ) := by ring
+        _ < (1 - cap / 2) *
+              (Z.N0s T (2 * T) : ℝ) := hmul
+    exact (lt_of_mul_lt_mul_left hmul' hden.le).le
+  intro ε hε
+  obtain ⟨T₀, hT₀⟩ := eventually_atTop.mp htarget
+  refine ⟨T₀, ?_⟩
+  intro T hT
+  have hmain := hT₀ T hT
+  have hNnonneg : 0 ≤ (Z.N T (2 * T) : ℝ) := by
+    positivity
+  nlinarith
+
 end IsometricBlock
 end Zeta85
 end RH
