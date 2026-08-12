@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 
-import RH.Zeta85.Inputs95
+import RH.Zeta85.Discharge.QuarticTransfer
 
 /-!
 # Isometric block architecture
@@ -111,6 +111,120 @@ theorem robustTailBound_eventually
       ((hzero.p_psd T).isHermitian.add
         (hzero.q_hermitian T)))]
   exact hrob
+
+
+/-- The terminal quartic evaluated on the first four centered moments of the
+mixed-channel block. -/
+def quarticScore
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic) (C : Data F) (T : ℝ) : ℝ :=
+  q.p0 + q.p1 * centeredMoment C 1 T +
+    q.p2 * centeredMoment C 2 T +
+    q.p3 * centeredMoment C 3 T +
+    q.p4 * centeredMoment C 4 T
+
+/-- Weak quartic duality applied directly to an isometrically compressed
+block. -/
+theorem scaled_quarticScore_le_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : Data F) (hzero : StableZeroSide F)
+    (q : TrimmedMoment.Quartic) (cap : ℝ)
+    (hdual : TrimmedMoment.DualFeasible q cap)
+    (T : ℝ) (hm : 0 < F.blockDim T) :
+    (F.blockDim T : ℝ) * quarticScore q C T -
+        (Z.s2 T + Z.p T : ℕ) * cap ≤
+      tailExcessSq (block_isHermitian C hzero T)
+        (Z.s2 T + Z.p T) := by
+  let hB := block_isHermitian C hzero T
+  have hmR : (0 : ℝ) < F.blockDim T := by
+    exact_mod_cast hm
+  have hinputs := spectral_headTrimmedMomentInputs
+    (b := Z.s2 T + Z.p T) hB hm
+  have hdualFinite := TrimmedMoment.finite_trimmed_quartic_dual q cap
+    (centeredSpectrum hB)
+    (uniformWeight (SpectralIndex (F.blockDim T)))
+    (uniformRemoved
+      (spectralHeadSet
+        (Fintype.card (Fin (F.blockDim T)))
+        (Z.s2 T + Z.p T)))
+    (spectralMoment hB 1) (spectralMoment hB 2)
+    (spectralMoment hB 3) (spectralMoment hB 4)
+    (((Z.s2 T + Z.p T : ℕ) : ℝ) / F.blockDim T)
+    hdual hinputs
+  have hscaled :=
+    mul_le_mul_of_nonneg_left hdualFinite hmR.le
+  rw [spectral_residualTail_eq_tailExcessSq_div] at hscaled
+  have hscore :
+      q.p0 + q.p1 * spectralMoment hB 1 +
+          q.p2 * spectralMoment hB 2 +
+          q.p3 * spectralMoment hB 3 +
+          q.p4 * spectralMoment hB 4 =
+        quarticScore q C T := by
+    simp only [quarticScore, centeredMoment,
+      QuarticTransfer.spectralMoment_eq_centered_rtrace]
+  rw [hscore] at hscaled
+  calc
+    (F.blockDim T : ℝ) * quarticScore q C T -
+          (Z.s2 T + Z.p T : ℕ) * cap =
+        (F.blockDim T : ℝ) *
+          (quarticScore q C T -
+            ((Z.s2 T + Z.p T : ℕ) : ℝ) /
+              F.blockDim T * cap) := by
+      field_simp [hmR.ne']
+    _ ≤ (F.blockDim T : ℝ) *
+        (tailExcessSq hB (Z.s2 T + Z.p T) /
+          F.blockDim T) := hscaled
+    _ = tailExcessSq (block_isHermitian C hzero T)
+        (Z.s2 T + Z.p T) := by
+      field_simp [hmR.ne']
+
+/-- The exact finite affine bridge for an isometric mixed-channel block. -/
+theorem finite_affine_bridge_at
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : Data F) (hzero : StableZeroSide F)
+    (q : TrimmedMoment.Quartic) (cap Dbar : ℝ)
+    (hdual : TrimmedMoment.DualFeasible q cap)
+    (hcap : cap / 2 ≤ 1)
+    (hcost : profileSaturatedCost σ v ≤ Dbar)
+    (T : ℝ) (hT : 0 ≤ T) (hm : 0 < F.blockDim T)
+    (htail :
+      tailExcessSq (block_isHermitian C hzero T)
+          (Z.s2 T + Z.p T) ≤
+        (Z.s1 T : ℝ) -
+          (2 - profileSaturatedCost σ v) *
+            (Z.N T (2 * T) : ℝ) +
+          2 * F.pTraceError T + 4 * F.traceError T +
+            F.frobError T + 2 * (Assembly.NII Z T : ℝ)) :
+    (F.blockDim T : ℝ) * quarticScore q C T +
+        (2 - Dbar - cap / 2) *
+          (Z.N T (2 * T) : ℝ) ≤
+      (1 - cap / 2) * (Z.N0s T (2 * T) : ℝ) +
+        QuarticTransfer.transferError F T := by
+  have hweak :=
+    scaled_quarticScore_le_tail C hzero q cap hdual T hm
+  have hcore := core_count_le_dyadic_add_edge Z hT
+  have hs1Nat := Assembly.s1_le Z hT
+  have hs1 : (Z.s1 T : ℝ) ≤
+      (Z.N0s T (2 * T) : ℝ) +
+        (Assembly.NII Z T : ℝ) := by
+    exact_mod_cast hs1Nat
+  have hcap0 : 0 ≤ cap / 2 :=
+    div_nonneg hdual.cap_nonneg (by norm_num)
+  have hremain : 0 ≤ 1 - cap / 2 :=
+    sub_nonneg.mpr hcap
+  have hcoreScaled :=
+    mul_le_mul_of_nonneg_left hcore hcap0
+  have hs1Scaled :=
+    mul_le_mul_of_nonneg_left hs1 hremain
+  have hN : 0 ≤ (Z.N T (2 * T) : ℝ) := by
+    positivity
+  have hcostScaled :=
+    mul_le_mul_of_nonneg_right hcost hN
+  unfold QuarticTransfer.transferError
+  nlinarith
 
 end IsometricBlock
 end Zeta85
