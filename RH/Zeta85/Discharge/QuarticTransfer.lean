@@ -93,6 +93,51 @@ def quarticScore {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     q.p3 * F.centeredBlockMoment 3 T +
     q.p4 * F.centeredBlockMoment 4 T
 
+/-- The sum-first version of the certificate statistic.  It combines the
+block-size contribution with the four raw centered matrix traces before the
+single normalization by the dyadic zero count. -/
+def quarticTraceNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  q.p0 * (F.blockDim T : ℝ) +
+    q.p1 * rtrace ((F.block T - 1) ^ 1) +
+    q.p2 * rtrace ((F.block T - 1) ^ 2) +
+    q.p3 * rtrace ((F.block T - 1) ^ 3) +
+    q.p4 * rtrace ((F.block T - 1) ^ 4)
+
+/-- On a nonempty block, multiplying the normalized quartic score by the
+block size is exactly the raw trace numerator. -/
+theorem blockDim_mul_quarticScore
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    {T : ℝ} (hm : 0 < F.blockDim T) :
+    (F.blockDim T : ℝ) * quarticScore q F T =
+      quarticTraceNumerator q F T := by
+  have hm0 : (F.blockDim T : ℝ) ≠ 0 := by
+    exact_mod_cast (Nat.ne_of_gt hm)
+  simp only [quarticScore, quarticTraceNumerator,
+    QuarticGramFamily.centeredBlockMoment]
+  field_simp [hm0]
+  <;> ring
+
+/-- The weighted normalized-moment expression is therefore exactly the
+once-normalized raw trace numerator. -/
+theorem weightedQuarticScore_eq_traceNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    {T : ℝ} (hm : 0 < F.blockDim T) :
+    (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
+        quarticScore q F T =
+      quarticTraceNumerator q F T / (Z.N T (2 * T) : ℝ) := by
+  calc
+    (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
+          quarticScore q F T =
+        ((F.blockDim T : ℝ) * quarticScore q F T) /
+          (Z.N T (2 * T) : ℝ) := by ring
+    _ = quarticTraceNumerator q F T /
+          (Z.N T (2 * T) : ℝ) := by
+      rw [blockDim_mul_quarticScore hm]
+
 /-- The same quartic evaluated at the formula-(21) limiting moments. -/
 def limitQuarticScore (q : Quartic) (μ p : ℝ) : ℝ :=
   q.p0 + q.p1 * formula21Moment 1 μ p +
@@ -133,6 +178,16 @@ structure WeightedQuarticLowerBound
     ∀ᶠ T in atTop,
       x < (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
         quarticScore q F T
+
+/-- The analytic boundary in sum-first form: a one-sided lower bound for one
+linear combination of raw centered traces, normalized only after summation. -/
+structure QuarticTraceLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
+  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
+    ∀ᶠ T in atTop,
+      x < quarticTraceNumerator q F T / (Z.N T (2 * T) : ℝ)
 
 /-- All finite errors in the affine bridge.  The coefficient `3` on the
 enlarged-window edge count is exact: `2` comes from robust stability and
@@ -249,6 +304,32 @@ theorem WeightedQuarticLimit.toLowerBound
     WeightedQuarticLowerBound q F :=
   ⟨h.block_dimension_pos, fun x hx =>
     h.weighted_score.eventually (Ioi_mem_nhds hx)⟩
+
+/-- The normalized-moment and raw-trace lower-bound interfaces are
+equivalent once eventual block nonemptiness is recorded. -/
+theorem WeightedQuarticLowerBound.toTraceLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : WeightedQuarticLowerBound q F) :
+    QuarticTraceLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx, h.block_dimension_pos]
+      with T hT hm
+  rw [weightedQuarticScore_eq_traceNumerator hm] at hT
+  exact hT
+
+theorem QuarticTraceLowerBound.toWeightedLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : QuarticTraceLowerBound q F) :
+    WeightedQuarticLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx, h.block_dimension_pos]
+      with T hT hm
+  rw [weightedQuarticScore_eq_traceNumerator hm]
+  exact hT
 
 /-- Eventual form of the finite affine bridge, obtained directly from the
 proved robust stability inequality. -/
@@ -385,7 +466,7 @@ theorem asymptotic_eps_transfer
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F)
-    (q : Quartic) (hweighted : WeightedQuarticLowerBound q F)
+    (q : Quartic) (htrace : QuarticTraceLowerBound q F)
     (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 < 1) (hcost : profileSaturatedCost σ v ≤ Dbar)
     (hstrict : target <
@@ -394,6 +475,7 @@ theorem asymptotic_eps_transfer
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (target - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
+  have hweighted := htrace.toWeightedLowerBound
   have hden : 0 < 1 - cap / 2 := sub_pos.mpr hcap
   have hstrict' :
       target * (1 - cap / 2) <
@@ -562,7 +644,7 @@ frozen R-8686 epsilon form. -/
 theorem eps_transfer_8686
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLowerBound Terminal8686.dual F) :
+    (htrace : QuarticTraceLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
@@ -572,7 +654,7 @@ theorem eps_transfer_8686
     rw [profileSaturatedCost_v8686]
     exact QuarticWindowWitnesses.D8686_lt.le
   exact asymptotic_eps_transfer hRvM hfull hzero
-    Terminal8686.dual hweighted Terminal8686.cap Terminal8686.costUpper
+    Terminal8686.dual htrace Terminal8686.cap Terminal8686.costUpper
     (86855250 / 100000000) Terminal8686.dual_feasible
     Terminal8686.cap_slope hcost strict_transfer_8686
 
@@ -581,7 +663,7 @@ frozen R-9506 epsilon form. -/
 theorem eps_transfer_9506
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLowerBound Terminal9506.dual F) :
+    (htrace : QuarticTraceLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -592,7 +674,7 @@ theorem eps_transfer_9506
     rw [profileSaturatedCost_v9506]
     exact QuarticWindowWitnesses.D9506_lt.le
   exact asymptotic_eps_transfer hRvM hfull hzero
-    Terminal9506.dual hweighted Terminal9506.cap Terminal9506.costUpper
+    Terminal9506.dual htrace Terminal9506.cap Terminal9506.costUpper
     (95063832187565 / 100000000000000) Terminal9506.dual_feasible
     Terminal9506.cap_slope hcost strict_transfer_9506
 
@@ -611,13 +693,13 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_8657
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLowerBound Terminal8686.dual F) :
+    (htrace : QuarticTraceLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   intro ε hε
-  obtain ⟨T₀, hT₀⟩ := eps_transfer_8686 hRvM hfull hzero hweighted ε hε
+  obtain ⟨T₀, hT₀⟩ := eps_transfer_8686 hRvM hfull hzero htrace ε hε
   refine ⟨T₀, ?_⟩
   intro T hT
   have hstrong := hT₀ T hT
@@ -629,13 +711,13 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_9383
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLowerBound Terminal9506.dual F) :
+    (htrace : QuarticTraceLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   intro ε hε
-  obtain ⟨T₀, hT₀⟩ := eps_transfer_9506 hRvM hfull hzero hweighted ε hε
+  obtain ⟨T₀, hT₀⟩ := eps_transfer_9506 hRvM hfull hzero htrace ε hε
   refine ⟨T₀, ?_⟩
   intro T hT
   have hstrong := hT₀ T hT
@@ -658,49 +740,49 @@ structures remain explicit. -/
 theorem zeta_eps_transfer_8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLowerBound Terminal8686.dual F) :
+    (htrace : QuarticTraceLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero hweighted)
+    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero htrace)
 
 /-- Concrete-zeta R-9506 epsilon form, conditional only on the three explicit
 per-support structures. -/
 theorem zeta_eps_transfer_9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLowerBound Terminal9506.dual F) :
+    (htrace : QuarticTraceLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hweighted)
+    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero htrace)
 
 /-- Concrete-zeta R-8657, obtained monotonically from R-8686. -/
 theorem zeta_eps_transfer_8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLowerBound Terminal8686.dual F) :
+    (htrace : QuarticTraceLowerBound Terminal8686.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero hweighted)
+    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero htrace)
 
 /-- Concrete-zeta R-9383, obtained monotonically from R-9506. -/
 theorem zeta_eps_transfer_9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hweighted : WeightedQuarticLowerBound Terminal9506.dual F) :
+    (htrace : QuarticTraceLowerBound Terminal9506.dual F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero hweighted)
+    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero htrace)
 
 end QuarticTransfer
 end Zeta85
