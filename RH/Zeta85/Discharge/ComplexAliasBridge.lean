@@ -846,6 +846,50 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
     F T (F.distinguished T) (Λ T)
     (hperiod (F.distinguished T)) hΛT hsmoothT hsuppT hevenT hgapT]
 
+
+/-- After the hat normalization is moved inside the pair contraction, its
+full-length factor cancels exactly.  The main term becomes the distinguished
+energy transform divided by total channel energy, and the finite-grid tail
+gets its exact reciprocal period-energy scale. -/
+theorem normalizedZeroPairKernel_eq_energyRatioIntegral_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (hratio : 0 ≤
+      F.fullLength T / F.period T (F.distinguished T))
+    (Λ : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| →
+      F.window T (F.distinguished T) u = 0)
+    (heven : ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u)
+    (hgap : 2 * Λ < F.period T (F.distinguished T))
+    (hfull0 : F.fullLength T ≠ 0)
+    (henergy0 : (∫ u : ℝ, F.windowEnergy T u) ≠ 0) :
+    QuarticTransfer.normalizedZeroPairKernel F T ρ ρ' =
+      (∫ u : ℝ,
+          (F.window T (F.distinguished T) u : ℂ) *
+            F.window T (F.distinguished T) u *
+            cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))) /
+        ((∫ u : ℝ, F.windowEnergy T u : ℝ) : ℂ) -
+      (((F.period T (F.distinguished T) *
+        ∫ u : ℝ, F.windowEnergy T u)⁻¹ : ℝ) : ℂ) *
+        distinguishedFrequencyPairTail F T ρ ρ' := by
+  unfold QuarticTransfer.normalizedZeroPairKernel
+  rw [zeroPairKernel_eq_distinguishedEnergyIntegral_sub_tail
+    F T ρ ρ' hdist hratio Λ hL hΛ hsmooth hsupp heven hgap]
+  simp only [QuarticGramFamily.hatDenominator]
+  push_cast
+  field_simp [hfull0, hL.ne', henergy0]
+  <;> ring
+
 end ComplexAliasBridge
 end Zeta85
 end RH
