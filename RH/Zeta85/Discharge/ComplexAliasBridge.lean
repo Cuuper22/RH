@@ -602,6 +602,60 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedBlockFreq
   exact zeroPairKernel_eq_distinguishedBlockFrequencyPairSum
     F T ρ ρ' hdist
 
+
+/-- Under the natural nonnegativity of the Fourier normalization, the square
+of the real square root is the exact reciprocal-period factor used by the
+Poisson lattice. -/
+theorem zeroPairKernel_eq_normalizedDistinguishedBlockFrequencyPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (hratio : 0 ≤
+      F.fullLength T / F.period T (F.distinguished T)) :
+    QuarticTransfer.zeroPairKernel F T ρ ρ' =
+      ((F.fullLength T / F.period T (F.distinguished T) : ℝ) : ℂ) *
+        distinguishedBlockFrequencyPairSum F T ρ ρ' := by
+  rw [zeroPairKernel_eq_distinguishedBlockFrequencyPairSum
+    F T ρ ρ' hdist]
+  have hsqrt :
+      (Real.sqrt
+          (F.fullLength T / F.period T (F.distinguished T)) : ℂ) ^ 2 =
+        ((F.fullLength T /
+          F.period T (F.distinguished T) : ℝ) : ℂ) := by
+    norm_cast
+    exact Real.sq_sqrt hratio
+  rw [hsqrt]
+
+/-- Every literal principal construction eventually has the normalized exact
+finite-frequency representation, simultaneously for all zero pairs. -/
+theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedDistinguishedBlockFrequencyPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) :
+    ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
+      QuarticTransfer.zeroPairKernel F T ρ ρ' =
+        ((F.fullLength T /
+          F.period T (F.distinguished T) : ℝ) : ℂ) *
+          distinguishedBlockFrequencyPairSum F T ρ ρ' := by
+  filter_upwards [
+    h.distinguished_columns,
+    h.periods_pos,
+    Zeta23.Assembly.eventually_l_pos
+  ] with T hdist hperiod hl
+  have hfull : 0 ≤ F.fullLength T := by
+    simp only [QuarticGramFamily.fullLength]
+    exact mul_nonneg h.support_pos.le hl.le
+  have hratio : 0 ≤
+      F.fullLength T / F.period T (F.distinguished T) :=
+    div_nonneg hfull (hperiod (F.distinguished T)).le
+  intro ρ ρ'
+  exact
+    zeroPairKernel_eq_normalizedDistinguishedBlockFrequencyPairSum
+      F T ρ ρ' hdist hratio
+
 end ComplexAliasBridge
 end Zeta85
 end RH
