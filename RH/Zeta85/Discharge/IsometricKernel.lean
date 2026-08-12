@@ -200,6 +200,52 @@ theorem mixedPairKernel_eq_projectedPairKernel
       rw [C.real_entries T j a]
       ring
 
+
+/-- Every entry of the enlarged-window matrix as its canonical finite zero
+sum, before any compression is taken. -/
+theorem A_apply_eq_zeroSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (T : ℝ) (i j : Fin (F.dim T)) :
+    F.A T i j =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        ∑ ρ ∈ ZeroSide.ZI Z T,
+          (Z.mult ρ : ℂ) * F.atom T i ρ *
+            F.atom T j ρ := by
+  unfold QuarticGramFamily.A QuarticGramFamily.rawTruncatedGram
+  rw [finsum_mem_eq_finite_toFinset_sum _
+    (ZeroSide.ZIprime_finite Z T)]
+  rfl
+
+/-- The compressed entry with the matrix products and finite zero sum fully
+opened, but before the sums are reordered. -/
+def expandedMixedZeroEntry
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ)
+    (a b : Fin (F.blockDim T)) : ℂ :=
+  ∑ j : Fin (F.dim T),
+    (∑ i : Fin (F.dim T),
+      star (C.toData.compression T i a) *
+        (((F.hatDenominator T)⁻¹ : ℂ) *
+          ∑ ρ ∈ ZeroSide.ZI Z T,
+            (Z.mult ρ : ℂ) * F.atom T i ρ *
+              F.atom T j ρ)) *
+      C.toData.compression T j b
+
+/-- Opening an isometric block entry produces the explicit finite
+column-column-zero sum above. -/
+theorem block_apply_eq_expandedMixedZeroEntry
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ)
+    (a b : Fin (F.blockDim T)) :
+    IsometricBlock.block C.toData T a b =
+      expandedMixedZeroEntry C T a b := by
+  unfold IsometricBlock.block expandedMixedZeroEntry
+  simp only [Matrix.mul_apply, Matrix.conjTranspose_apply]
+  simp_rw [A_apply_eq_zeroSum]
+
 end IsometricKernel
 end Zeta85
 end RH
