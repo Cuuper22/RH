@@ -30,7 +30,7 @@ evaluated by Fubini and two sequential scale changes.  The resulting
 coefficients.
 -/
 
-open MeasureTheory
+open MeasureTheory Zeta23
 open scoped BigOperators Matrix Convolution ContDiff
 
 noncomputable section
