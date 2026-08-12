@@ -180,6 +180,63 @@ theorem singleChannel_parseval
   simp [singleChannel]
 
 
+
+/-- The same synthesis matrix acting on complex atom vectors. -/
+def synthesizeComplex
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → ℂ) (j : ι) : ℂ :=
+  ∑ r : ι, (C.matrix j r : ℂ) * virtual r
+
+/-- Complex analysis against one real mixer column. -/
+def analyzeComplex
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (physical : ι → ℂ) (r : ι) : ℂ :=
+  ∑ j : ι, (C.matrix j r : ℂ) * physical j
+
+/-- The real orthogonality certificate also gives exact complex atom
+recovery. -/
+theorem analyzeComplex_synthesizeComplex
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : Data ι) (virtual : ι → ℂ) (r : ι) :
+    analyzeComplex C (synthesizeComplex C virtual) r = virtual r := by
+  unfold analyzeComplex synthesizeComplex
+  calc
+    (∑ j : ι, (C.matrix j r : ℂ) *
+        ∑ s : ι, (C.matrix j s : ℂ) * virtual s) =
+      ∑ j : ι, ∑ s : ι,
+        ((C.matrix j r : ℂ) * (C.matrix j s : ℂ)) *
+          virtual s := by
+      apply Finset.sum_congr rfl
+      intro j _
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro s _
+      ring
+    _ = ∑ s : ι, ∑ j : ι,
+        ((C.matrix j r : ℂ) * (C.matrix j s : ℂ)) *
+          virtual s := by
+      rw [Finset.sum_comm]
+    _ = ∑ s : ι,
+        (∑ j : ι, (C.matrix j r : ℂ) *
+          (C.matrix j s : ℂ)) * virtual s := by
+      apply Finset.sum_congr rfl
+      intro s _
+      rw [Finset.sum_mul]
+    _ = ∑ s : ι,
+        ((1 : Matrix ι ι ℝ) r s : ℂ) * virtual s := by
+      apply Finset.sum_congr rfl
+      intro s _
+      have hentry := congrFun (congrFun C.orthogonal r) s
+      have hsumReal :
+          (∑ j : ι, C.matrix j r * C.matrix j s) =
+            (1 : Matrix ι ι ℝ) r s := by
+        simpa [Matrix.mul_apply] using hentry
+      have hsumComplex := congrArg (fun y : ℝ => (y : ℂ)) hsumReal
+      push_cast at hsumComplex
+      rw [hsumComplex]
+    _ = virtual r := by
+      simp
+
 /-- With a common modulation period, orthogonal window synthesis passes
 linearly through the paper Fourier transform.  Thus the same finite mixer
 acts on the zero-side atoms before any pair contraction. -/
