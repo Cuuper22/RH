@@ -243,6 +243,70 @@ theorem profiledBumpWindow_tsupport
     exact hbu
   exact Metric.ball_subset_closedBall hball
 
+/-- Punching a smooth centered hole in a profiled bump produces a literal
+radial shell. -/
+def profiledShellWindow
+    (v : ℝ → ℝ) (L : ℝ)
+    (outer inner : ContDiffBump (0 : ℝ)) (u : ℝ) : ℝ :=
+  profiledBumpWindow v L outer u * (1 - inner u)
+
+/-- The profiled shell is smooth whenever the outer profiled bump is smooth. -/
+theorem profiledShellWindow_contDiff
+    (v : ℝ → ℝ) (L : ℝ)
+    (outer inner : ContDiffBump (0 : ℝ))
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ u, |u| ≤ outer.rOut → 0 < v (u / L)) :
+    ContDiff ℝ ∞ (profiledShellWindow v L outer inner) := by
+  unfold profiledShellWindow
+  exact
+    (profiledBumpWindow_contDiff v L outer hv hpos).mul
+      (contDiff_const.sub inner.contDiff)
+
+/-- Even profiles give even profiled shells. -/
+theorem profiledShellWindow_even
+    (v : ℝ → ℝ) (L : ℝ)
+    (outer inner : ContDiffBump (0 : ℝ))
+    (heven : ∀ x, v (-x) = v x) (u : ℝ) :
+    profiledShellWindow v L outer inner (-u) =
+      profiledShellWindow v L outer inner u := by
+  unfold profiledShellWindow
+  rw [profiledBumpWindow_even v L outer heven u, inner.neg]
+
+/-- Every nonzero profiled-shell point lies strictly outside the inner core
+and strictly inside the outer cutoff. -/
+theorem profiledShellWindow_support
+    (v : ℝ → ℝ) (L : ℝ)
+    (outer inner : ContDiffBump (0 : ℝ))
+    {u : ℝ}
+    (hu : profiledShellWindow v L outer inner u ≠ 0) :
+    inner.rIn < |u| ∧ |u| < outer.rOut := by
+  constructor
+  · by_contra hnot
+    have hle : |u| ≤ inner.rIn := le_of_not_gt hnot
+    have hinner : inner u = 1 := by
+      apply inner.one_of_mem_closedBall
+      simpa [Real.dist_eq] using hle
+    apply hu
+    simp [profiledShellWindow, hinner]
+  · by_contra hnot
+    have hle : outer.rOut ≤ |u| := le_of_not_gt hnot
+    have houter : outer u = 0 := by
+      apply outer.zero_of_le_dist
+      simpa [Real.dist_eq] using hle
+    apply hu
+    simp [profiledShellWindow, profiledBumpWindow, houter]
+
+/-- The outer bump radius is an absolute support radius for a profiled shell. -/
+theorem profiledShellWindow_supportRadius
+    (v : ℝ → ℝ) (L : ℝ)
+    (outer inner : ContDiffBump (0 : ℝ))
+    {u : ℝ} (hu : outer.rOut < |u|) :
+    profiledShellWindow v L outer inner u = 0 := by
+  have houter : outer u = 0 := by
+    apply outer.zero_of_le_dist
+    simpa [Real.dist_eq] using hu.le
+  simp [profiledShellWindow, profiledBumpWindow, houter]
+
 /-- On the bump's inner ball, its energy is exactly the requested profile. -/
 theorem profiledBumpWindow_sq_eq_profile
     (v : ℝ → ℝ) (L : ℝ) (b : ContDiffBump (0 : ℝ))
@@ -280,11 +344,40 @@ theorem shrinkingHalfPeriodBump_rOut_lt
   dsimp [shrinkingHalfPeriodBump]
   positivity
 
+/-- A centered core cutoff whose entire support shrinks to the origin. -/
+def shrinkingCoreBump
+    (L : ℝ) (n : ℕ) (hL : 0 < L) : ContDiffBump (0 : ℝ) where
+  rIn := L / (2 * ((n : ℝ) + 3))
+  rOut := L / ((n : ℝ) + 3)
+  rIn_pos := by positivity
+  rIn_lt_rOut := by
+    have hn : 0 < (n : ℝ) + 3 := by positivity
+    rw [div_lt_div_iff₀ (mul_pos (by norm_num) hn) hn]
+    nlinarith
+
+theorem shrinkingCoreBump_rOut_lt_halfPeriod
+    (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    (shrinkingCoreBump L n hL).rOut < L / 2 := by
+  dsimp [shrinkingCoreBump]
+  have hn : 0 ≤ (n : ℝ) := by positivity
+  rw [div_lt_div_iff₀
+    (by positivity : 0 < (n : ℝ) + 3)
+    (by norm_num : (0 : ℝ) < 2)]
+  nlinarith
+
 /-- The explicit shrinking-window energy approximation to a normalized
 profile. -/
 def shrinkingProfileWindow
     (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L) (u : ℝ) : ℝ :=
   profiledBumpWindow v L (shrinkingHalfPeriodBump L n hL) u
+
+/-- The one-channel annular approximation: a profiled half-period bump with
+a shrinking smooth core removed. -/
+def shrinkingProfileShellWindow
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L) (u : ℝ) : ℝ :=
+  profiledShellWindow v L
+    (shrinkingHalfPeriodBump L n hL)
+    (shrinkingCoreBump L n hL) u
 
 /-- A smooth positive profile on the normalized half interval gives a smooth
 strict-half-period window at every finite stage. -/
@@ -302,6 +395,65 @@ theorem shrinkingProfileWindow_contDiff
   have hout :=
     (shrinkingHalfPeriodBump_rOut_lt L n hL).le
   nlinarith
+
+/-- Every finite annular approximation is smooth. -/
+theorem shrinkingProfileShellWindow_contDiff
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    ContDiff ℝ ∞ (shrinkingProfileShellWindow v L n hL) := by
+  apply profiledShellWindow_contDiff
+  · exact hv
+  · intro u hu
+    apply hpos
+    rw [abs_div, abs_of_pos hL]
+    apply (div_le_iff₀ hL).2
+    have hout :=
+      (shrinkingHalfPeriodBump_rOut_lt L n hL).le
+    nlinarith
+
+/-- Even profiles give even annular approximations. -/
+theorem shrinkingProfileShellWindow_even
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    (heven : ∀ x, v (-x) = v x) (u : ℝ) :
+    shrinkingProfileShellWindow v L n hL (-u) =
+      shrinkingProfileShellWindow v L n hL u :=
+  profiledShellWindow_even v L
+    (shrinkingHalfPeriodBump L n hL)
+    (shrinkingCoreBump L n hL) heven u
+
+/-- Every nonzero annular approximation lies in the exact radial shell needed
+by the aggregate alias-cancellation theorem. -/
+theorem shrinkingProfileShellWindow_support
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    {u : ℝ}
+    (hu : shrinkingProfileShellWindow v L n hL u ≠ 0) :
+    (shrinkingCoreBump L n hL).rIn < |u| ∧
+      |u| < (shrinkingHalfPeriodBump L n hL).rOut :=
+  profiledShellWindow_support v L
+    (shrinkingHalfPeriodBump L n hL)
+    (shrinkingCoreBump L n hL) hu
+
+/-- The annular approximation vanishes beyond the physical half-period. -/
+theorem shrinkingProfileShellWindow_supportRadius
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    {u : ℝ} (hu : L / 2 < |u|) :
+    shrinkingProfileShellWindow v L n hL u = 0 := by
+  apply profiledShellWindow_supportRadius
+  exact lt_trans
+    (shrinkingHalfPeriodBump_rOut_lt L n hL) hu
+
+/-- The inner shell radius is strictly beyond shell index zero. -/
+theorem shrinkingProfileShellWindow_innerRadius_pos
+    (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    0 < (shrinkingCoreBump L n hL).rIn :=
+  (shrinkingCoreBump L n hL).rIn_pos
+
+/-- The outer shell radius is strictly below the next half-period. -/
+theorem shrinkingProfileShellWindow_outerRadius_lt
+    (L : ℝ) (n : ℕ) (hL : 0 < L) :
+    (shrinkingHalfPeriodBump L n hL).rOut < L / 2 :=
+  shrinkingHalfPeriodBump_rOut_lt L n hL
 
 /-- Every shrinking profiled window lies in the closed half-period, so every
 nonzero period translate has zero overlap. -/
