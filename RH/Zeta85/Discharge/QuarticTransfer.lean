@@ -1884,23 +1884,23 @@ def pairKernelCycle4
 
 def pairKernelCyclicTrace1
     (Z : ZeroConfig) (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
-  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, pairKernelCycle1 K ρ)
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, pairKernelCycle1 (Z := Z) K ρ)
 
 def pairKernelCyclicTrace2
     (Z : ZeroConfig) (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
   Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    pairKernelCycle2 K ρ₁ ρ₂)
+    pairKernelCycle2 (Z := Z) K ρ₁ ρ₂)
 
 def pairKernelCyclicTrace3
     (Z : ZeroConfig) (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
   Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T, pairKernelCycle3 K ρ₁ ρ₂ ρ₃)
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, pairKernelCycle3 (Z := Z) K ρ₁ ρ₂ ρ₃)
 
 def pairKernelCyclicTrace4
     (Z : ZeroConfig) (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
   Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
     ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
-      pairKernelCycle4 K ρ₁ ρ₂ ρ₃ ρ₄)
+      pairKernelCycle4 (Z := Z) K ρ₁ ρ₂ ρ₃ ρ₄)
 
 /-- The target-specific uncentered quartic numerator generated from one
 arbitrary scalar pair kernel. -/
