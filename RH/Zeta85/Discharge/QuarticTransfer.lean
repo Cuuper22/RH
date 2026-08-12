@@ -153,7 +153,7 @@ theorem quarticTraceNumerator_eq_uncentered
         (F.block T + F.block T + F.block T + F.block T) + 1 by
           noncomm_ring]
   simp only [rtrace_add, rtrace_sub, hone]
-  ring_nf
+  ring
 
 /-- Explicit cyclic index sums for the first four raw matrix traces. -/
 def cyclicTrace1 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
@@ -330,6 +330,55 @@ private theorem sum_fintype_finset_comm
       ∑ a ∈ s, ∑ i : ι, f i a := by
   rw [Finset.sum_comm]
 
+
+private theorem sum_fintypes2_finset_comm
+    {ι κ α : Type*} [Fintype ι] [Fintype κ]
+    (s : Finset α) (f : ι → κ → α → ℂ) :
+    (∑ i : ι, ∑ j : κ, ∑ a ∈ s, f i j a) =
+      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, f i j a := by
+  calc
+    (∑ i : ι, ∑ j : κ, ∑ a ∈ s, f i j a) =
+        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, f i j a := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [sum_fintype_finset_comm]
+    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, f i j a := by
+      rw [sum_fintype_finset_comm]
+
+private theorem sum_fintypes3_finset_comm
+    {ι κ ν α : Type*} [Fintype ι] [Fintype κ] [Fintype ν]
+    (s : Finset α) (f : ι → κ → ν → α → ℂ) :
+    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ a ∈ s, f i j k a) =
+      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, f i j k a := by
+  calc
+    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ a ∈ s, f i j k a) =
+        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, ∑ k : ν, f i j k a := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [sum_fintypes2_finset_comm]
+    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, f i j k a := by
+      rw [sum_fintype_finset_comm]
+
+private theorem sum_fintypes4_finset_comm
+    {ι κ ν ξ α : Type*}
+    [Fintype ι] [Fintype κ] [Fintype ν] [Fintype ξ]
+    (s : Finset α) (f : ι → κ → ν → ξ → α → ℂ) :
+    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+      ∑ a ∈ s, f i j k l a) =
+      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+        f i j k l a := by
+  calc
+    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+        ∑ a ∈ s, f i j k l a) =
+        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+          f i j k l a := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [sum_fintypes3_finset_comm]
+    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
+        f i j k l a := by
+      rw [sum_fintype_finset_comm]
+
 /-- Zero-tuple-first cyclic kernels.  Every block-index contraction now sits
 inside the contribution of one explicit ordered tuple of zeros. -/
 def zeroKernelCyclicTrace1
@@ -403,9 +452,9 @@ def factoredZeroCycle3
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
     (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
-  zeroPairKernel F T ρ₁ ρ₃ *
+  zeroPairKernel F T ρ₁ ρ₂ *
     (zeroPairKernel F T ρ₂ ρ₃ *
-      (zeroPairKernel F T ρ₁ ρ₂ *
+      (zeroPairKernel F T ρ₁ ρ₃ *
         (zeroEdgeWeight F T ρ₁ *
           (zeroEdgeWeight F T ρ₂ * zeroEdgeWeight F T ρ₃))))
 
@@ -413,10 +462,10 @@ def factoredZeroCycle4
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
     (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
-  zeroPairKernel F T ρ₁ ρ₄ *
-    (zeroPairKernel F T ρ₂ ρ₃ *
-      (zeroPairKernel F T ρ₁ ρ₂ *
-        (zeroPairKernel F T ρ₃ ρ₄ *
+  zeroPairKernel F T ρ₃ ρ₄ *
+    (zeroPairKernel F T ρ₁ ρ₂ *
+      (zeroPairKernel F T ρ₂ ρ₃ *
+        (zeroPairKernel F T ρ₁ ρ₄ *
           (zeroEdgeWeight F T ρ₁ *
             (zeroEdgeWeight F T ρ₂ *
               (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄))))))
@@ -580,47 +629,27 @@ theorem zeroTupleCyclicTrace2_eq_kernel
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroTupleCyclicTrace2 F T = zeroKernelCyclicTrace2 F T := by
   unfold zeroTupleCyclicTrace2 zeroKernelCyclicTrace2
-  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T)]
+  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
 
 theorem zeroTupleCyclicTrace3_eq_kernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroTupleCyclicTrace3 F T = zeroKernelCyclicTrace3 F T := by
   unfold zeroTupleCyclicTrace3 zeroKernelCyclicTrace3
-  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T)]
+  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes3_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
 
 theorem zeroTupleCyclicTrace4_eq_kernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroTupleCyclicTrace4 F T = zeroKernelCyclicTrace4 F T := by
   unfold zeroTupleCyclicTrace4 zeroKernelCyclicTrace4
-  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T),
-    sum_fintype_finset_comm (ZeroSide.ZI Z T)]
+  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes4_finset_comm (ZeroSide.ZI Z T),
+    sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
 
 theorem zeroCyclicTrace1_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
