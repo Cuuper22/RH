@@ -77,6 +77,70 @@ theorem hasSum_channel_complexAlias
     (Poisson.hasSum_paperFT_mul_paperFT_shift_alias
       hL hΛ hsmooth hsupp' heven' z z')
 
+/-- Infinite frequency-pair lattice for one physical channel. -/
+def channelFrequencyPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (z z' : ℂ) : ℂ :=
+  ∑' k : ℤ,
+    paperFT (fun u => (F.window T j u : ℂ))
+        (z - (T + (k : ℝ) *
+          (2 * Real.pi / F.period T j) : ℝ)) *
+      paperFT (fun u => (F.window T j u : ℂ))
+        (z' - (T + (k : ℝ) *
+          (2 * Real.pi / F.period T j) : ℝ))
+
+/-- Total spatial alias sum of one physical channel. -/
+def channelAliasSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (z z' : ℂ) : ℂ :=
+  ∑' m : ℤ, F.complexAliasTerm T z z' j m
+
+/-- The one-channel frequency lattice is its period times the unweighted
+alias sum.  This is the normalization used by the Gram atom. -/
+theorem channelFrequencyPairSum_eq_period_mul_aliasSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (Λ : ℝ)
+    (hL : 0 < F.period T j) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → F.window T j u = 0)
+    (heven : ∀ u, F.window T j (-u) = F.window T j u)
+    (z z' : ℂ) :
+    channelFrequencyPairSum F T j z z' =
+      (F.period T j : ℂ) * channelAliasSum F T j z z' := by
+  obtain ⟨_, hhas⟩ :=
+    hasSum_channel_complexAlias F T j Λ hL hΛ
+      hsmooth hsupp heven z z'
+  unfold channelFrequencyPairSum channelAliasSum
+  calc
+    (∑' k : ℤ,
+      paperFT (fun u => (F.window T j u : ℂ))
+          (z - (T + (k : ℝ) *
+            (2 * Real.pi / F.period T j) : ℝ)) *
+        paperFT (fun u => (F.window T j u : ℂ))
+          (z' - (T + (k : ℝ) *
+            (2 * Real.pi / F.period T j) : ℝ))) =
+        ∑' m : ℤ,
+          (F.period T j : ℂ) *
+            F.complexAliasTerm T z z' j m :=
+      hhas.tsum_eq
+    _ = (F.period T j : ℂ) *
+          ∑' m : ℤ, F.complexAliasTerm T z z' j m := by
+      rw [tsum_mul_left]
+
+/-- The zero spatial alias is the literal squared-window Fourier integral. -/
+theorem complexAliasTerm_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (j : Fin (F.channelCount T)) (z z' : ℂ) :
+    F.complexAliasTerm T z z' j 0 =
+      ∫ u : ℝ,
+        (F.window T j u : ℂ) * F.window T j u *
+          cexp (I * (z - z') * (u : ℂ)) := by
+  simp [QuarticGramFamily.complexAliasTerm]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
