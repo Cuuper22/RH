@@ -319,10 +319,67 @@ theorem rightSelector_divisorBounded {c : ℕ → ℝ} {K : ℝ} {k R a : ℕ}
     _ = (K * ((ArithmeticFunction.sigma 0 a : ℕ) : ℝ) ^ k) *
         ((ArithmeticFunction.sigma 0 s : ℕ) : ℝ) ^ k := by ring
 
+/-- The exact divisor weight moved from the running coefficient to the
+singleton retained factor. -/
+def divisorScale (a k : ℕ) : ℝ :=
+  ((ArithmeticFunction.sigma 0 a : ℕ) : ℝ) ^ k
+
+theorem divisorScale_pos {a k : ℕ} (ha : a ≠ 0) : 0 < divisorScale a k := by
+  have htau : 0 < ((ArithmeticFunction.sigma 0 a : ℕ) : ℝ) := by
+    exact_mod_cast ArithmeticFunction.sigma_pos 0 a ha
+  exact pow_pos htau k
+
+def weightedLeftSelector (a k d : ℕ) : ℝ :=
+  divisorScale a k * leftSelector a d
+
+def normalizedRightSelector (c : ℕ → ℝ) (R a k s : ℕ) : ℝ :=
+  rightSelector c R a s / divisorScale a k
+
+theorem weightedLeft_mul_normalizedRight (c : ℕ → ℝ) (R k d s : ℕ)
+    {a : ℕ} (ha : a ≠ 0) :
+    weightedLeftSelector a k d * normalizedRightSelector c R a k s =
+      leftSelector a d * rightSelector c R a s := by
+  have hscale : divisorScale a k ≠ 0 := (divisorScale_pos ha).ne'
+  unfold weightedLeftSelector normalizedRightSelector
+  field_simp [hscale]
+
+/-- After normalization the running factor has the original uniform
+divisor-bound constant `K`; all dependence on `a` is on the singleton side. -/
+theorem normalizedRightSelector_divisorBounded
+    {c : ℕ → ℝ} {K : ℝ} {k R a : ℕ}
+    (ha : a ≠ 0) (hK : 0 ≤ K) (hc : DivisorBounded c K k) :
+    DivisorBounded (normalizedRightSelector c R a k) K k := by
+  intro s
+  have hscale : 0 < divisorScale a k := divisorScale_pos ha
+  have hbound := rightSelector_divisorBounded (R := R) (a := a) hK hc s
+  rw [normalizedRightSelector, abs_div, abs_of_pos hscale, div_le_iff₀ hscale]
+  simpa only [divisorScale] using
+    (hbound.trans_eq (by ring))
+
+theorem abs_weightedLeftSelector_le (a k d : ℕ) :
+    |weightedLeftSelector a k d| ≤ divisorScale a k := by
+  have hscale : 0 ≤ divisorScale a k := by
+    exact pow_nonneg (by positivity) k
+  by_cases hda : d = a
+  · simp [weightedLeftSelector, leftSelector, hda, abs_of_nonneg hscale]
+  · simp [weightedLeftSelector, leftSelector, hda, hscale]
+
 /-- One literal Dirichlet-convolution piece. -/
 def convolutionPiece (c : ℕ → ℝ) (R a n : ℕ) : ℝ :=
   ∑ ds ∈ n.divisorsAntidiagonal,
     leftSelector a ds.1 * rightSelector c R a ds.2
+
+/-- The uniformly normalized literal convolution. -/
+def normalizedConvolutionPiece (c : ℕ → ℝ) (R a k n : ℕ) : ℝ :=
+  ∑ ds ∈ n.divisorsAntidiagonal,
+    weightedLeftSelector a k ds.1 * normalizedRightSelector c R a k ds.2
+
+theorem normalizedConvolutionPiece_eq (c : ℕ → ℝ) (R k n : ℕ)
+    {a : ℕ} (ha : a ≠ 0) :
+    normalizedConvolutionPiece c R a k n = convolutionPiece c R a n := by
+  apply Finset.sum_congr rfl
+  intro ds hds
+  exact weightedLeft_mul_normalizedRight c R k ds.1 ds.2 ha
 
 /-- The coefficient assigned directly to one canonical-divisor fiber. -/
 def canonicalPiece (c : ℕ → ℝ) (R a n : ℕ) : ℝ :=
