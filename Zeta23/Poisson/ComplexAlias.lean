@@ -57,7 +57,7 @@ theorem complexGaux_int_eq_alias
         rw [← Complex.exp_add]
         congr 1
         push_cast
-        ring
+        ring_nf
       rw [hexp]
       push_cast
       ring
@@ -160,6 +160,37 @@ theorem complexGaux_hasCompactSupport_general
     exact hmem
       (complexGaux_eq_zero_of_abs_gt hL hΛ hsupp (not_le.mp hnot))
   exact abs_le.mp hle
+
+/-- Compact support in an arbitrary interval is enough for continuity of the
+complex auxiliary function.  No comparison between the support radius and
+the modulation period is required. -/
+theorem complexGaux_continuous_general
+    {φ : ℝ → ℂ} {L T Λ : ℝ} {z z' : ℂ}
+    (hφc : Continuous φ)
+    (hsupp : ∀ u, Λ < |u| → φ u = 0) :
+    Continuous (complexGaux φ L T z z') := by
+  have hrestrict :
+      complexGaux φ L T z z' =
+        fun ξ => ∫ u in Icc (-Λ) Λ,
+          complexGIntegrand φ L T z z' ξ u := by
+    funext ξ
+    unfold complexGaux
+    rw [setIntegral_eq_integral_of_forall_compl_eq_zero]
+    intro u hu
+    have hfar : Λ < |u| := by
+      by_contra hnot
+      apply hu
+      rw [mem_Icc]
+      have habs : |u| ≤ Λ := le_of_not_gt hnot
+      exact
+        ⟨by linarith [neg_abs_le u],
+         by linarith [le_abs_self u]⟩
+    unfold complexGIntegrand
+    rw [hsupp u hfar]
+    simp
+  rw [hrestrict]
+  exact continuous_parametric_integral_of_continuous
+    (complexGIntegrand_continuous hφc) isCompact_Icc
 
 theorem fourier_complexGaux_general
     (hL : 0 < L) (hΛ : 0 ≤ Λ) (hφc : Continuous φ)
@@ -316,8 +347,7 @@ theorem hasSum_paperFT_mul_paperFT_alias
         mul_le_mul h1' h2 (norm_nonneg _) hC1non
   set G := complexGaux φ L T z z' with hG
   have hGc : Continuous G :=
-    complexGaux_continuous hL hφ.continuous
-      (fun u hu => hsupp u (lt_of_le_of_lt hu (by linarith)))
+    complexGaux_continuous_general hφ.continuous hsupp
   have hGO : G =O[cocompact ℝ] fun x : ℝ => |x| ^ (-2 : ℝ) := by
     refine IsBigO.of_bound 0 ?_
     have hev : ∀ᶠ x : ℝ in cocompact ℝ,
