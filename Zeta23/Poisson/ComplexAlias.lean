@@ -95,6 +95,55 @@ theorem complexGaux_eq_zero_of_abs_gt
     rw [hsupp u hfar]
     simp
 
+/-- The two-variable auxiliary integrand is compactly supported whenever
+the window is compactly supported. -/
+theorem complexGIntegrand_eq_zero_of_general_not_mem
+    {φ : ℝ → ℂ} {L T Λ : ℝ} {z z' : ℂ}
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsupp : ∀ u, Λ < |u| → φ u = 0)
+    {ξ u : ℝ}
+    (h : ¬ (|ξ| ≤ 2 * Λ / L ∧ |u| ≤ Λ)) :
+    complexGIntegrand φ L T z z' ξ u = 0 := by
+  unfold complexGIntegrand
+  by_cases hu : |u| ≤ Λ
+  · have hxi : 2 * Λ / L < |ξ| := by
+      by_contra hnot
+      exact h ⟨not_lt.mp hnot, hu⟩
+    have hscale : 2 * Λ < L * |ξ| := by
+      have hmul := (div_lt_iff₀ hL).mp hxi
+      nlinarith
+    have htri : |L * ξ| - |u| ≤ |L * ξ - u| :=
+      abs_sub_abs_le_abs_sub _ _
+    rw [abs_mul, abs_of_pos hL] at htri
+    have hfar : Λ < |L * ξ - u| := by
+      nlinarith
+    rw [hsupp _ hfar]
+    simp
+  · have hfar : Λ < |u| := lt_of_not_ge hu
+    rw [hsupp u hfar]
+    simp
+
+theorem complexGIntegrand_hasCompactSupport_general
+    {φ : ℝ → ℂ} {L T Λ : ℝ} {z z' : ℂ}
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsupp : ∀ u, Λ < |u| → φ u = 0) :
+    HasCompactSupport
+      (Function.uncurry (complexGIntegrand φ L T z z')) := by
+  refine HasCompactSupport.of_support_subset_isCompact
+    ((isCompact_Icc (a := -(2 * Λ / L)) (b := 2 * Λ / L)).prod
+      (isCompact_Icc (a := -Λ) (b := Λ))) ?_
+  rintro ⟨ξ, u⟩ hne
+  rw [Function.mem_support, Function.uncurry_apply_pair] at hne
+  by_contra hmem
+  apply hne
+    (complexGIntegrand_eq_zero_of_general_not_mem hL hΛ hsupp ?_)
+  rintro ⟨hξ, hu⟩
+  apply hmem
+  rw [mem_prod, mem_Icc, mem_Icc]
+  exact
+    ⟨⟨by linarith [neg_abs_le ξ], by linarith [le_abs_self ξ]⟩,
+     ⟨by linarith [neg_abs_le u], by linarith [le_abs_self u]⟩⟩
+
 /-- The complex auxiliary function is compactly supported for every compact
 window; no half-period support restriction is needed. -/
 theorem complexGaux_hasCompactSupport_general
@@ -111,6 +160,98 @@ theorem complexGaux_hasCompactSupport_general
     exact hmem
       (complexGaux_eq_zero_of_abs_gt hL hΛ hsupp (not_le.mp hnot))
   exact abs_le.mp hle
+
+theorem fourier_complexGaux_general
+    (hL : 0 < L) (hΛ : 0 ≤ Λ) (hφc : Continuous φ)
+    (hsupp : ∀ u, Λ < |u| → φ u = 0)
+    (w : ℝ) :
+    𝓕 (complexGaux φ L T z z') w =
+      paperFT φ (z - (T + w * (2 * Real.pi / L) : ℝ)) *
+        paperFT φ (z' - (T + w * (2 * Real.pi / L) : ℝ)) := by
+  set α : ℂ := z - (T + w * (2 * Real.pi / L) : ℝ) with hα
+  set β : ℂ := z' - (T + w * (2 * Real.pi / L) : ℝ) with hβ
+  set J : ℝ → ℝ → ℂ :=
+    fun ξ u =>
+      cexp ((-2 * Real.pi * ξ * w : ℝ) * I) *
+        complexGIntegrand φ L T z z' ξ u with hJ
+  have hJint : Integrable (Function.uncurry J) (volume.prod volume) := by
+    have hc : Continuous (Function.uncurry J) := by
+      have hcont :=
+        complexGIntegrand_continuous
+          (L := L) (T := T) (z := z) (z' := z') hφc
+      simp only [hJ]
+      apply Continuous.mul _ hcont
+      fun_prop
+    apply hc.integrable_of_hasCompactSupport
+    apply
+      (complexGIntegrand_hasCompactSupport_general
+        (T := T) (z := z) (z' := z') hL hΛ hsupp).mono
+    intro p hp
+    rw [Function.mem_support] at hp ⊢
+    intro h0
+    apply hp
+    simp only [hJ, Function.uncurry] at h0 ⊢
+    rw [show p = (p.1, p.2) from rfl] at h0
+    simp only at h0
+    rw [h0, mul_zero]
+  rw [Real.fourier_real_eq_integral_exp_smul]
+  have step1 :
+      (fun ξ : ℝ =>
+        cexp ((-2 * Real.pi * ξ * w : ℝ) * I) •
+          complexGaux φ L T z z' ξ) =
+        fun ξ => ∫ u, J ξ u := by
+    funext ξ
+    rw [smul_eq_mul, complexGaux, hJ]
+    beta_reduce
+    rw [integral_const_mul_C]
+  rw [step1]
+  rw [integral_integral_swap hJint]
+  have step3 : ∀ u : ℝ, ∫ ξ, J ξ u =
+      φ u * cexp (I * α * (u : ℂ)) * paperFT φ β := by
+    intro u
+    set F0 : ℝ → ℂ :=
+      fun v => φ v * cexp (I * β * (v : ℂ)) with hF0
+    have hpt : ∀ ξ : ℝ, J ξ u =
+        φ u * cexp (I * α * (u : ℂ)) *
+          ((L : ℂ) * ((fun y : ℝ => F0 (y - u)) (L * ξ))) := by
+      intro ξ
+      simp only [hJ, complexGIntegrand, hF0]
+      have hbook :=
+        complex_cexp_bookkeeping
+          (L := L) (T := T) (z := z) (z' := z') hL.ne' ξ u w
+      rw [← hα, ← hβ] at hbook
+      calc
+        cexp ((-2 * Real.pi * ξ * w : ℝ) * I) *
+            ((L : ℂ) * (φ u * φ (L * ξ - u) *
+              cexp (I * (z * (u : ℂ) +
+                z' * ((L * ξ - u : ℝ) : ℂ) -
+                  (T * L * ξ : ℝ))))) =
+          (L : ℂ) * φ u * φ (L * ξ - u) *
+            (cexp (I * (z * (u : ℂ) +
+              z' * ((L * ξ - u : ℝ) : ℂ) -
+                (T * L * ξ : ℝ))) *
+              cexp ((-2 * Real.pi * ξ * w : ℝ) * I)) := by ring
+        _ = (L : ℂ) * φ u * φ (L * ξ - u) *
+            (cexp (I * α * (u : ℂ)) *
+              cexp (I * β * ((L * ξ - u : ℝ) : ℂ))) := by
+              rw [hbook]
+        _ = _ := by ring
+    have hint :
+        ∫ ξ, J ξ u =
+          ∫ ξ, φ u * cexp (I * α * (u : ℂ)) *
+            ((L : ℂ) * ((fun y : ℝ => F0 (y - u)) (L * ξ))) := by
+      congr 1 with ξ
+      exact hpt ξ
+    rw [hint, integral_const_mul_C, integral_const_mul_C,
+      Measure.integral_comp_mul_left
+        (fun y : ℝ => F0 (y - u)) L,
+      integral_sub_right_eq_self F0 u, paperFT_def,
+      abs_of_pos (inv_pos.mpr hL)]
+    congr 1
+    rw [← Complex.coe_smul, smul_eq_mul, ← mul_assoc, ofReal_inv,
+      mul_inv_cancel₀ (ofReal_ne_zero.mpr hL.ne'), one_mul]
+  simp_rw [step3]
+  rw [integral_mul_const_C, paperFT_def, paperFT_def]
 
 /-- Full complex-frequency Poisson summation.  The right side is the
 summable family of all spatial aliases, rather than only its zero term. -/
@@ -196,17 +337,7 @@ theorem hasSum_paperFT_mul_paperFT_alias
       (c := z.re - T) (h := h) (C := C1 * C2) hh
     intro w
     rw [hG]
-    have hzeroHalf : ∀ u, L / 2 ≤ |u| → φ u = 0 := by
-      intro u hu
-      by_cases hrad : Λ < |u|
-      · exact hsupp u hrad
-      · have hsmall : |u| ≤ Λ := not_lt.mp hrad
-        exact False.elim (by
-          have : L / 2 ≤ Λ := le_trans hu hsmall
-          have hLamb : Λ < L / 2 := by
-            nlinarith [hΛ, hL]
-          linarith)
-    rw [fourier_complexGaux hL hφ.continuous hzeroHalf]
+    rw [fourier_complexGaux_general hL hΛ hφ.continuous hsupp]
     exact hproduct w
   have hFourierSum : Summable fun n : ℤ => 𝓕 G n :=
     summable_of_isBigO
@@ -251,17 +382,7 @@ theorem hasSum_paperFT_mul_paperFT_alias
   convert hhas using 1
   funext k
   rw [hG]
-  have hzeroHalf : ∀ u, L / 2 ≤ |u| → φ u = 0 := by
-    intro u hu
-    by_cases hrad : Λ < |u|
-    · exact hsupp u hrad
-    · have hsmall : |u| ≤ Λ := not_lt.mp hrad
-      exact False.elim (by
-        have : L / 2 ≤ Λ := le_trans hu hsmall
-        have hLamb : Λ < L / 2 := by
-          nlinarith [hΛ, hL]
-        linarith)
-  rw [fourier_complexGaux hL hφ.continuous hzeroHalf]
+  rw [fourier_complexGaux_general hL hΛ hφ.continuous hsupp]
 
 end Poisson
 end Zeta23
