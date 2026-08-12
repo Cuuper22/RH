@@ -163,6 +163,102 @@ theorem shellWindow_supportRadius
   shellWindow_eq_zero_of_outer_le_abs
     target a c d b ha hac hcd hdb hx.le
 
+
+/-- Pointwise identification with explicit smooth shell cutoffs packages an
+entire physical channel family into the radial-shell data consumed by the
+collective quartic bridge. -/
+theorem shellWindows_toRadialShellData
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (commonPeriod : ℝ → ℝ)
+    (target :
+      ∀ T : ℝ, Fin (F.channelCount T) → ℝ → ℝ)
+    (shell :
+      ∀ T : ℝ, Fin (F.channelCount T) → ℕ)
+    (a c d b :
+      ∀ T : ℝ, Fin (F.channelCount T) → ℝ)
+    (hperiod :
+      ∀ T j, F.period T j = commonPeriod T)
+    (hperiodPos :
+      ∀ T, 0 < commonPeriod T)
+    (ha :
+      ∀ T j, 0 < a T j)
+    (hac :
+      ∀ T j, a T j < c T j)
+    (hcd :
+      ∀ T j, c T j < d T j)
+    (hdb :
+      ∀ T j, d T j < b T j)
+    (htargetSmooth :
+      ∀ T j, ContDiff ℝ 2 (target T j))
+    (htargetEven :
+      ∀ T j u, target T j (-u) = target T j u)
+    (hwindow :
+      ∀ T j u,
+        F.window T j u =
+          shellWindow (target T j)
+            (a T j) (c T j) (d T j) (b T j)
+            (ha T j) (hac T j) (hcd T j) (hdb T j) u)
+    (hshellInner :
+      ∀ T j,
+        (shell T j : ℝ) * commonPeriod T / 2 < a T j)
+    (hshellOuter :
+      ∀ T j,
+        b T j <
+          (((shell T j) + 1 : ℕ) : ℝ) *
+            commonPeriod T / 2) :
+    RadialShellFamily.Data F := by
+  refine
+    { commonPeriod := commonPeriod
+      supportRadius := b
+      shell := shell
+      innerRadius := a
+      outerRadius := b
+      period_eq := hperiod
+      period_pos := hperiodPos
+      supportRadius_nonneg := ?_
+      smooth := ?_
+      support := ?_
+      even := ?_
+      shell_support := ?_
+      shell_inner := hshellInner
+      shell_outer := hshellOuter }
+  · intro T j
+    exact le_of_lt
+      (lt_trans (ha T j)
+        (lt_trans (hac T j)
+          (lt_trans (hcd T j) (hdb T j))))
+  · intro T j
+    simpa only [hwindow T j] using
+      shellWindow_contDiff_complex
+        (target T j)
+        (a T j) (c T j) (d T j) (b T j)
+        (ha T j) (hac T j) (hcd T j) (hdb T j)
+        (htargetSmooth T j)
+  · intro T j u hu
+    rw [hwindow T j u]
+    exact shellWindow_supportRadius
+      (target T j)
+      (a T j) (c T j) (d T j) (b T j)
+      (ha T j) (hac T j) (hcd T j) (hdb T j) hu
+  · intro T j u
+    rw [hwindow T j (-u), hwindow T j u]
+    exact shellWindow_even
+      (target T j)
+      (a T j) (c T j) (d T j) (b T j)
+      (ha T j) (hac T j) (hcd T j) (hdb T j)
+      (htargetEven T j) u
+  · intro T j u hu
+    have hshell :
+        shellWindow (target T j)
+          (a T j) (c T j) (d T j) (b T j)
+          (ha T j) (hac T j) (hcd T j) (hdb T j) u ≠ 0 := by
+      simpa only [hwindow T j u] using hu
+    exact shellWindow_support
+      (target T j)
+      (a T j) (c T j) (d T j) (b T j)
+      (ha T j) (hac T j) (hcd T j) (hdb T j) hshell
+
 end SmoothRadialShell
 end Zeta85
 end RH
