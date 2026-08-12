@@ -375,6 +375,52 @@ theorem normalizedRightSelector_support {c : ℕ → ℝ} {R a k s : ℕ}
   by_contra hcanon
   exact hcoeff (by simp [normalizedRightSelector, rightSelector, hcanon])
 
+theorem canonicalCofactor_eq_of_normalizedRightSelector_ne_zero
+    {c : ℕ → ℝ} {R a k s : ℕ} (hR : 0 < R)
+    (hcoeff : normalizedRightSelector c R a k s ≠ 0) :
+    canonicalCofactor (a * s) R = s := by
+  have hcanon := normalizedRightSelector_support hcoeff
+  have ha : 0 < a := by
+    rw [← hcanon]
+    exact canonicalDivisor_pos (n := a * s) hR
+  unfold canonicalCofactor
+  rw [hcanon]
+  simpa [Nat.mul_comm] using Nat.mul_div_left s ha
+
+/-- On a nonregular fiber, the running sequence is supported only on
+`B`-rough integers. -/
+theorem normalizedRightSelector_rough_support
+    {c : ℕ → ℝ} {R B a k s : ℕ} (hR : 0 < R)
+    (hrough : ¬R < a * B)
+    (hcoeff : normalizedRightSelector c R a k s ≠ 0) :
+    ∀ q : ℕ, q.Prime → q ∣ s → B < q := by
+  have hcanon := normalizedRightSelector_support hcoeff
+  have hcofactor := canonicalCofactor_eq_of_normalizedRightSelector_ne_zero hR hcoeff
+  obtain hregular | hroughCofactor :=
+    canonical_regular_or_rough (n := a * s) (B := B) hR
+  · rw [hcanon] at hregular
+    exact (hrough hregular).elim
+  · intro q hqprime hqs
+    apply hroughCofactor q hqprime
+    rwa [hcofactor]
+
+theorem normalizedRightSelector_prime_support
+    {c : ℕ → ℝ} {R B a k s : ℕ} (hR : 0 < R)
+    (hrough : ¬R < a * B)
+    (hs : 1 < s) (hsize : s < (B + 1) ^ 2)
+    (hcoeff : normalizedRightSelector c R a k s ≠ 0) : s.Prime := by
+  exact prime_of_rough_of_lt_sq hs
+    (normalizedRightSelector_rough_support hR hrough hcoeff) hsize
+
+theorem normalizedRightSelector_prime_or_semiprime_support
+    {c : ℕ → ℝ} {R B a k s : ℕ} (hR : 0 < R)
+    (hrough : ¬R < a * B)
+    (hs : 1 < s) (hsize : s < (B + 1) ^ 3)
+    (hcoeff : normalizedRightSelector c R a k s ≠ 0) :
+    s.Prime ∨ ∃ p q : ℕ, p.Prime ∧ q.Prime ∧ s = p * q := by
+  exact prime_or_product_of_two_primes_of_rough_of_lt_cube hs
+    (normalizedRightSelector_rough_support hR hrough hcoeff) hsize
+
 /-- The existing Shiu progression theorem applies to every normalized
 running fiber with the same input constant and divisor exponent. -/
 theorem shiu_normalizedRightSelector {eta : ℝ}
