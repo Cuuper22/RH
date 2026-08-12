@@ -561,6 +561,129 @@ theorem zeta_eps_transfer_9383
   simpa only [zeta_N, zeta_N0s] using
     (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero C hweighted)
 
+
+/-! ## Sum-first coordinates for mixed blocks -/
+
+/-- Combine the block-size term and four raw centered traces before the
+single dyadic normalization. -/
+def quarticTraceNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic) (C : Data F) (T : ℝ) : ℝ :=
+  q.p0 * (F.blockDim T : ℝ) +
+    q.p1 * rtrace ((block C T - 1) ^ 1) +
+    q.p2 * rtrace ((block C T - 1) ^ 2) +
+    q.p3 * rtrace ((block C T - 1) ^ 3) +
+    q.p4 * rtrace ((block C T - 1) ^ 4)
+
+/-- The same numerator after shifting the certificate from centered to raw
+eigenvalue coordinates. -/
+def uncenteredQuarticTraceNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (q : TrimmedMoment.Quartic) (C : Data F) (T : ℝ) : ℝ :=
+  let u := QuarticTransfer.uncenteredQuartic q
+  u.p0 * (F.blockDim T : ℝ) +
+    u.p1 * rtrace ((block C T) ^ 1) +
+    u.p2 * rtrace ((block C T) ^ 2) +
+    u.p3 * rtrace ((block C T) ^ 3) +
+    u.p4 * rtrace ((block C T) ^ 4)
+
+theorem blockDim_mul_quarticScore
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic} {C : Data F} {T : ℝ}
+    (hm : 0 < F.blockDim T) :
+    (F.blockDim T : ℝ) * quarticScore q C T =
+      quarticTraceNumerator q C T := by
+  have hm0 : (F.blockDim T : ℝ) ≠ 0 := by
+    exact_mod_cast (Nat.ne_of_gt hm)
+  simp only [quarticScore, quarticTraceNumerator, centeredMoment]
+  field_simp [hm0]
+  <;> ring
+
+/-- Centering the mixed block and shifting the terminal polynomial are the
+same finite operation. -/
+theorem quarticTraceNumerator_eq_uncentered
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic} {C : Data F} {T : ℝ} :
+    quarticTraceNumerator q C T =
+      uncenteredQuarticTraceNumerator q C T := by
+  have hone :
+      rtrace
+          (1 : Matrix (Fin (F.blockDim T))
+            (Fin (F.blockDim T)) ℂ) =
+        (F.blockDim T : ℝ) := by
+    simp [rtrace, Matrix.trace]
+  rw [quarticTraceNumerator, uncenteredQuarticTraceNumerator,
+    QuarticTransfer.uncenteredQuartic]
+  rw [show (block C T - 1) ^ 1 =
+      block C T ^ 1 - 1 by noncomm_ring]
+  rw [show (block C T - 1) ^ 2 =
+      block C T ^ 2 - (block C T + block C T) + 1 by
+        noncomm_ring]
+  rw [show (block C T - 1) ^ 3 =
+      block C T ^ 3 -
+        (block C T ^ 2 + block C T ^ 2 + block C T ^ 2) +
+        (block C T + block C T + block C T) - 1 by
+          noncomm_ring]
+  rw [show (block C T - 1) ^ 4 =
+      block C T ^ 4 -
+        (block C T ^ 3 + block C T ^ 3 +
+          block C T ^ 3 + block C T ^ 3) +
+        (block C T ^ 2 + block C T ^ 2 +
+          block C T ^ 2 + block C T ^ 2 +
+          block C T ^ 2 + block C T ^ 2) -
+        (block C T + block C T + block C T + block C T) +
+        1 by
+          noncomm_ring]
+  simp only [rtrace_add, rtrace_sub, hone]
+  ring_nf
+
+/-- The raw mixed-block numerator is the generic explicit cyclic trace
+functional already used by the zero-kernel route. -/
+theorem uncenteredQuarticTraceNumerator_eq_cyclic
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic} {C : Data F} {T : ℝ} :
+    uncenteredQuarticTraceNumerator q C T =
+      QuarticTransfer.cyclicQuarticTraceNumerator q
+        (block C T) := by
+  simp only [uncenteredQuarticTraceNumerator,
+    QuarticTransfer.cyclicQuarticTraceNumerator,
+    QuarticTransfer.rtrace_pow_one_eq_cyclic,
+    QuarticTransfer.rtrace_pow_two_eq_cyclic,
+    QuarticTransfer.rtrace_pow_three_eq_cyclic,
+    QuarticTransfer.rtrace_pow_four_eq_cyclic]
+
+theorem weightedQuarticScore_eq_cyclic
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {q : TrimmedMoment.Quartic} {C : Data F} {T : ℝ}
+    (hm : 0 < F.blockDim T) :
+    (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
+        quarticScore q C T =
+      QuarticTransfer.cyclicQuarticTraceNumerator q
+          (block C T) /
+        (Z.N T (2 * T) : ℝ) := by
+  calc
+    (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
+          quarticScore q C T =
+        ((F.blockDim T : ℝ) * quarticScore q C T) /
+          (Z.N T (2 * T) : ℝ) := by
+      ring
+    _ = quarticTraceNumerator q C T /
+          (Z.N T (2 * T) : ℝ) := by
+      rw [blockDim_mul_quarticScore hm]
+    _ = uncenteredQuarticTraceNumerator q C T /
+          (Z.N T (2 * T) : ℝ) := by
+      rw [quarticTraceNumerator_eq_uncentered]
+    _ = QuarticTransfer.cyclicQuarticTraceNumerator q
+          (block C T) /
+          (Z.N T (2 * T) : ℝ) := by
+      rw [uncenteredQuarticTraceNumerator_eq_cyclic]
+
 end IsometricBlock
 end Zeta85
 end RH
