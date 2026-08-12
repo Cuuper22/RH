@@ -161,6 +161,39 @@ theorem complexGaux_hasCompactSupport_general
       (complexGaux_eq_zero_of_abs_gt hL hΛ hsupp (not_le.mp hnot))
   exact abs_le.mp hle
 
+/-- The auxiliary correlation is continuous for an arbitrary compact
+window.  Restricting the parameter integral to the fixed support interval
+removes the obsolete half-period restriction. -/
+theorem complexGaux_continuous_general
+    {φ : ℝ → ℂ} {L T Λ : ℝ} {z z' : ℂ}
+    (hΛ : 0 ≤ Λ) (hφc : Continuous φ)
+    (hsupp : ∀ u, Λ < |u| → φ u = 0) :
+    Continuous (complexGaux φ L T z z') := by
+  have hrestrict :
+      complexGaux φ L T z z' =
+        fun ξ => ∫ u in Icc (-Λ) Λ,
+          complexGIntegrand φ L T z z' ξ u := by
+    funext ξ
+    unfold complexGaux
+    rw [setIntegral_eq_integral_of_forall_compl_eq_zero]
+    intro u hu
+    have habs : Λ < |u| := by
+      rw [mem_Icc] at hu
+      push_neg at hu
+      rcases hu with hu | hu
+      · have hu_neg : u < 0 := lt_of_lt_of_le hu (neg_nonpos.mpr hΛ)
+        rw [abs_of_neg hu_neg]
+        linarith
+      · have hu_pos : 0 < u := lt_of_le_of_lt hΛ hu
+        rw [abs_of_pos hu_pos]
+        exact hu
+    unfold complexGIntegrand
+    rw [hsupp u habs]
+    simp
+  rw [hrestrict]
+  exact continuous_parametric_integral_of_continuous
+    (complexGIntegrand_continuous hφc) isCompact_Icc
+
 theorem fourier_complexGaux_general
     (hL : 0 < L) (hΛ : 0 ≤ Λ) (hφc : Continuous φ)
     (hsupp : ∀ u, Λ < |u| → φ u = 0)
@@ -315,9 +348,9 @@ theorem hasSum_paperFT_mul_paperFT_alias
       _ ≤ C1 * C2 :=
         mul_le_mul h1' h2 (norm_nonneg _) hC1non
   set G := complexGaux φ L T z z' with hG
-  have hGc : Continuous G :=
-    complexGaux_continuous hL hφ.continuous
-      (fun u hu => hsupp u (lt_of_le_of_lt hu (by linarith)))
+  have hGc : Continuous G := by
+    rw [hG]
+    exact complexGaux_continuous_general hΛ hφ.continuous hsupp
   have hGO : G =O[cocompact ℝ] fun x : ℝ => |x| ^ (-2 : ℝ) := by
     refine IsBigO.of_bound 0 ?_
     have hev : ∀ᶠ x : ℝ in cocompact ℝ,
