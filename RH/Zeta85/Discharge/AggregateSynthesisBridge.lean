@@ -67,12 +67,12 @@ theorem coordinateFullFrequencyLattice_eq_energySum_collective
   calc
     (∑ j : Fin (F.channelCount T),
       ((Real.sqrt
-          (F.fullLength T / h.commonPeriod T) : ℂ) ^ 2) *
+          (@QuarticGramFamily.fullLength σ T / h.commonPeriod T) : ℂ) ^ 2) *
         ComplexAliasBridge.virtualFrequencyPairSum
           T (h.commonPeriod T) (F.window T j)
           (gammaOf ρ) (gammaOf ρ')) =
         ((Real.sqrt
-            (F.fullLength T / h.commonPeriod T) : ℂ) ^ 2) *
+            (@QuarticGramFamily.fullLength σ T / h.commonPeriod T) : ℂ) ^ 2) *
           AggregateComplexAlias.aggregateVirtualFrequencyPairSum
             T (h.commonPeriod T) (F.window T)
             (gammaOf ρ) (gammaOf ρ') := by
@@ -80,7 +80,7 @@ theorem coordinateFullFrequencyLattice_eq_energySum_collective
       rw [Finset.mul_sum]
     _ =
         ((Real.sqrt
-            (F.fullLength T / h.commonPeriod T) : ℂ) ^ 2) *
+            (@QuarticGramFamily.fullLength σ T / h.commonPeriod T) : ℂ) ^ 2) *
           ((h.commonPeriod T : ℂ) *
             AggregateComplexAlias.aggregateVirtualEnergyIntegral
               (F.window T) (gammaOf ρ) (gammaOf ρ')) := by
@@ -92,7 +92,7 @@ theorem coordinateFullFrequencyLattice_eq_energySum_collective
     _ =
         ∑ j : Fin (F.channelCount T),
           ((Real.sqrt
-              (F.fullLength T / h.commonPeriod T) : ℂ) ^ 2) *
+              (@QuarticGramFamily.fullLength σ T / h.commonPeriod T) : ℂ) ^ 2) *
             (h.commonPeriod T : ℂ) *
             ∫ u : ℝ,
               (F.window T j u : ℂ) * F.window T j u *
@@ -100,7 +100,10 @@ theorem coordinateFullFrequencyLattice_eq_energySum_collective
                   (Complex.I *
                     (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
       unfold AggregateComplexAlias.aggregateVirtualEnergyIntegral
-      rw [mul_assoc, Finset.mul_sum]
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro j hj
+      ring
 
 /-- The selected finite physical grid is the collectively evaluated energy
 minus the same one aggregate frequency tail. -/
