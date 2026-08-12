@@ -417,6 +417,12 @@ theorem convolutionPiece_eq_canonicalPiece (c : ℕ → ℝ) {R a n : ℕ}
       simp [leftSelector, rightSelector, Nat.mul_div_cancel' ha_dvd, hcanon]
     · simp [leftSelector, hda]
 
+theorem normalizedConvolutionPiece_eq_canonicalPiece (c : ℕ → ℝ)
+    {R a k n : ℕ} (ha : a ≠ 0) (hn : n ≠ 0) (hR : 0 < R) :
+    normalizedConvolutionPiece c R a k n = canonicalPiece c R a n := by
+  rw [normalizedConvolutionPiece_eq c R k n ha,
+    convolutionPiece_eq_canonicalPiece c hn hR]
+
 /-- The canonical divisor lies in the finite index set used by the
 superposition. -/
 theorem canonicalDivisor_mem_Icc {n R : ℕ} (hR : 0 < R) :
@@ -440,6 +446,18 @@ theorem sum_convolutionPiece (c : ℕ → ℝ) {R n : ℕ}
           simp [canonicalPiece, Ne.symm hne])
     _ = c n := by simp [canonicalPiece]
 
+theorem sum_normalizedConvolutionPiece (c : ℕ → ℝ) (k : ℕ) {R n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    ∑ a ∈ Finset.Icc 1 R, normalizedConvolutionPiece c R a k n = c n := by
+  calc
+    ∑ a ∈ Finset.Icc 1 R, normalizedConvolutionPiece c R a k n =
+        ∑ a ∈ Finset.Icc 1 R, convolutionPiece c R a n := by
+      apply Finset.sum_congr rfl
+      intro a ha
+      rw [normalizedConvolutionPiece_eq c R k n]
+      exact Nat.ne_of_gt (Finset.mem_Icc.mp ha).1
+    _ = c n := sum_convolutionPiece c hn hR
+
 /-- The canonical fibers do not multiply any pointwise cost which vanishes at
 zero.  In particular, the number of divisor fibers creates no pointwise
 `L1` or `L2` loss. -/
@@ -455,6 +473,101 @@ theorem sum_map_convolutionPiece (c : ℕ → ℝ) (Phi : ℝ → ℝ)
           intro a ha hne
           simp [canonicalPiece, Ne.symm hne, hPhi])
     _ = Phi (c n) := by simp [canonicalPiece]
+
+theorem sum_map_normalizedConvolutionPiece (c : ℕ → ℝ) (k : ℕ)
+    (Phi : ℝ → ℝ) (hPhi : Phi 0 = 0) {R n : ℕ}
+    (hn : n ≠ 0) (hR : 0 < R) :
+    ∑ a ∈ Finset.Icc 1 R, Phi (normalizedConvolutionPiece c R a k n) = Phi (c n) := by
+  calc
+    ∑ a ∈ Finset.Icc 1 R, Phi (normalizedConvolutionPiece c R a k n) =
+        ∑ a ∈ Finset.Icc 1 R, Phi (convolutionPiece c R a n) := by
+      apply Finset.sum_congr rfl
+      intro a ha
+      rw [normalizedConvolutionPiece_eq c R k n]
+      exact Nat.ne_of_gt (Finset.mem_Icc.mp ha).1
+    _ = Phi (c n) := sum_map_convolutionPiece c Phi hPhi hn hR
+
+/-! ## Exact recombination over arbitrary outer scales -/
+
+/-- The contribution assigned to one user-chosen outer scale.  The map
+`block` may encode dyadic scales or any other finite scale partition. -/
+def blockRefinement {ι : Type*} [DecidableEq ι]
+    (c : ℕ → ℝ) (R k : ℕ) (block : ℕ → ι) (i : ι) (n : ℕ) : ℝ :=
+  ∑ a ∈ (Finset.Icc 1 R).filter (fun a => block a = i),
+    normalizedConvolutionPiece c R a k n
+
+theorem blockRefinement_eq {ι : Type*} [DecidableEq ι]
+    (c : ℕ → ℝ) (k : ℕ) (block : ℕ → ι) (i : ι)
+    {R n : ℕ} (hn : n ≠ 0) (hR : 0 < R) :
+    blockRefinement c R k block i n =
+      if block (canonicalDivisor n R) = i then c n else 0 := by
+  let d := canonicalDivisor n R
+  have hdmem : d ∈ Finset.Icc 1 R := canonicalDivisor_mem_Icc hR
+  have hd0 : d ≠ 0 := Nat.ne_of_gt (Finset.mem_Icc.mp hdmem).1
+  by_cases hi : block d = i
+  · rw [if_pos hi]
+    unfold blockRefinement
+    have hdfilter : d ∈ (Finset.Icc 1 R).filter (fun a => block a = i) :=
+      Finset.mem_filter.mpr ⟨hdmem, hi⟩
+    calc
+      ∑ a ∈ (Finset.Icc 1 R).filter (fun a => block a = i),
+          normalizedConvolutionPiece c R a k n =
+          normalizedConvolutionPiece c R d k n := by
+        exact Finset.sum_eq_single_of_mem d hdfilter
+          (by
+            intro a ha hne
+            have haIcc := (Finset.mem_filter.mp ha).1
+            have ha0 : a ≠ 0 := Nat.ne_of_gt (Finset.mem_Icc.mp haIcc).1
+            rw [normalizedConvolutionPiece_eq_canonicalPiece c ha0 hn hR]
+            simp [canonicalPiece, d, Ne.symm hne])
+      _ = canonicalPiece c R d n :=
+        normalizedConvolutionPiece_eq_canonicalPiece c hd0 hn hR
+      _ = c n := by simp [canonicalPiece, d]
+  · rw [if_neg hi]
+    unfold blockRefinement
+    apply Finset.sum_eq_zero
+    intro a ha
+    have haData := Finset.mem_filter.mp ha
+    have ha0 : a ≠ 0 := Nat.ne_of_gt (Finset.mem_Icc.mp haData.1).1
+    have hne : d ≠ a := by
+      intro hda
+      subst a
+      exact hi haData.2
+    rw [normalizedConvolutionPiece_eq_canonicalPiece c ha0 hn hR]
+    simp [canonicalPiece, d, hne]
+
+/-- Any finite outer-scale partition recombines exactly before absolute
+values.  Only the block containing the canonical divisor contributes. -/
+theorem sum_blockRefinement {ι : Type*} [DecidableEq ι]
+    (c : ℕ → ℝ) (k : ℕ) (block : ℕ → ι) (I : Finset ι)
+    {R n : ℕ} (hn : n ≠ 0) (hR : 0 < R)
+    (hcover : block (canonicalDivisor n R) ∈ I) :
+    ∑ i ∈ I, blockRefinement c R k block i n = c n := by
+  simp_rw [blockRefinement_eq c k block _ hn hR]
+  calc
+    ∑ i ∈ I, (if block (canonicalDivisor n R) = i then c n else 0) =
+        (if block (canonicalDivisor n R) = block (canonicalDivisor n R) then c n else 0) := by
+      exact Finset.sum_eq_single_of_mem _ hcover
+        (by
+          intro i hi hne
+          simp [Ne.symm hne])
+    _ = c n := by simp
+
+theorem sum_map_blockRefinement {ι : Type*} [DecidableEq ι]
+    (c : ℕ → ℝ) (k : ℕ) (block : ℕ → ι) (I : Finset ι)
+    (Phi : ℝ → ℝ) (hPhi : Phi 0 = 0)
+    {R n : ℕ} (hn : n ≠ 0) (hR : 0 < R)
+    (hcover : block (canonicalDivisor n R) ∈ I) :
+    ∑ i ∈ I, Phi (blockRefinement c R k block i n) = Phi (c n) := by
+  simp_rw [blockRefinement_eq c k block _ hn hR]
+  calc
+    ∑ i ∈ I, Phi (if block (canonicalDivisor n R) = i then c n else 0) =
+        Phi (if block (canonicalDivisor n R) = block (canonicalDivisor n R) then c n else 0) := by
+      exact Finset.sum_eq_single_of_mem _ hcover
+        (by
+          intro i hi hne
+          simp [Ne.symm hne, hPhi])
+    _ = Phi (c n) := by simp
 
 theorem sum_abs_convolutionPiece (c : ℕ → ℝ) {R n : ℕ}
     (hn : n ≠ 0) (hR : 0 < R) :
@@ -483,6 +596,27 @@ theorem sum_convolutionPiece_eq_vonMangoldt (Z : ℕ) {R n : ℕ}
       convolutionPiece (fun m => HBDepthFour.hb4 Z m) R a n =
         ArithmeticFunction.vonMangoldt n := by
   rw [hb4_sum_convolutionPiece Z hn hR, HBDepthFour.hb4_eq_vonMangoldt Z n hnZ]
+
+/-- The actual Heath--Brown coefficient can be recombined over arbitrary
+outer scales, in the order required by a retained-variable estimate. -/
+theorem hb4_sum_blockRefinement {ι : Type*} [DecidableEq ι]
+    (Z k : ℕ) (block : ℕ → ι) (I : Finset ι)
+    {R n : ℕ} (hn : n ≠ 0) (hR : 0 < R)
+    (hcover : block (canonicalDivisor n R) ∈ I) :
+    ∑ i ∈ I,
+      blockRefinement (fun m => HBDepthFour.hb4 Z m) R k block i n =
+        HBDepthFour.hb4 Z n := by
+  exact sum_blockRefinement (fun m => HBDepthFour.hb4 Z m) k block I hn hR hcover
+
+theorem sum_blockRefinement_eq_vonMangoldt {ι : Type*} [DecidableEq ι]
+    (Z k : ℕ) (block : ℕ → ι) (I : Finset ι)
+    {R n : ℕ} (hn : n ≠ 0) (hR : 0 < R) (hnZ : n ≤ Z ^ 4)
+    (hcover : block (canonicalDivisor n R) ∈ I) :
+    ∑ i ∈ I,
+      blockRefinement (fun m => HBDepthFour.hb4 Z m) R k block i n =
+        ArithmeticFunction.vonMangoldt n := by
+  rw [hb4_sum_blockRefinement Z k block I hn hR hcover,
+    HBDepthFour.hb4_eq_vonMangoldt Z n hnZ]
 
 /-- The regular fibers, whose first factor is within multiplicative tolerance
 `B` of the target cutoff. -/
