@@ -1,6 +1,7 @@
 import RH.Zeta85.Inputs95
 import Zeta23.Poisson.ComplexAlias
 import Zeta23.Tail.Grid
+import Zeta23.ThmD.WindowCore
 
 open Filter Matrix MeasureTheory Asymptotics
 open scoped BigOperators Topology ContDiff
@@ -2107,6 +2108,83 @@ structure DistinguishedWindowNormBounds
   deriv2_l1_bounded : ∃ C : ℝ, 0 ≤ C ∧ ∀ᶠ T in atTop,
     (∫ u, ‖deriv (deriv
       (fun x => (F.window T (F.distinguished T) x : ℂ))) u‖) ≤ C
+
+private theorem admWindow_integral_norm_complex_le
+    {v : ℝ → ℝ} {L w c : ℝ} (h : AdmWindow v L w c) :
+    ∫ u, ‖(v u : ℂ)‖ ≤ L := by
+  have hint : Integrable ((Set.Icc (-(L / 2)) (L / 2)).indicator
+      fun _ : ℝ => (1 : ℝ)) :=
+    (integrable_indicator_iff measurableSet_Icc).mpr
+      (continuous_const.continuousOn.integrableOn_compact isCompact_Icc)
+  calc
+    ∫ u, ‖(v u : ℂ)‖ ≤
+        ∫ u, (Set.Icc (-(L / 2)) (L / 2)).indicator
+          (fun _ => (1 : ℝ)) u := by
+      apply integral_mono_of_nonneg
+      · exact Eventually.of_forall fun u => norm_nonneg _
+      · exact hint
+      · apply Eventually.of_forall
+        intro u
+        by_cases hu : u ∈ Set.Icc (-(L / 2)) (L / 2)
+        · rw [Set.indicator_of_mem hu]
+          change ‖(v u : ℂ)‖ ≤ 1
+          rw [Complex.norm_real, Real.norm_eq_abs,
+            abs_of_nonneg (h.nonneg u)]
+          exact h.le_one u
+        · rw [Set.indicator_of_notMem hu]
+          change ‖(v u : ℂ)‖ ≤ 0
+          rw [h.eq_zero_of_not_mem hu]
+          simp
+    _ = L := by
+      rw [integral_indicator_const _ measurableSet_Icc,
+        Real.volume_real_Icc_of_le (by linarith [h.L_pos]),
+        smul_eq_mul, mul_one]
+      ring
+
+private theorem admWindow_deriv2_complex
+    {v : ℝ → ℝ} {L w c : ℝ} (h : AdmWindow v L w c) :
+    deriv (deriv (fun u => (v u : ℂ))) =
+      fun u => ((deriv (deriv v) u : ℝ) : ℂ) := by
+  have h1 : deriv (fun u => (v u : ℂ)) =
+      fun u => ((deriv v u : ℝ) : ℂ) := by
+    funext u
+    exact ((h.contDiff.differentiable (by norm_num) u).hasDerivAt.ofReal_comp).deriv
+  rw [h1]
+  funext u
+  have hd : Differentiable ℝ (deriv v) :=
+    (h.contDiff.deriv' (n := 1)).differentiable (by norm_num)
+  exact ((hd u).hasDerivAt.ofReal_comp).deriv
+
+private theorem admWindow_integral_norm_deriv2_complex_le
+    {v : ℝ → ℝ} {L w c : ℝ} (h : AdmWindow v L w c) :
+    ∫ u, ‖deriv (deriv (fun x => (v x : ℂ))) u‖ ≤ c := by
+  rw [admWindow_deriv2_complex h]
+  simp only [Complex.norm_real, Real.norm_eq_abs]
+  exact h.l1_deriv2.trans (div_le_self h.c_nonneg h.one_le_w)
+
+/-- Every eventually admissible distinguished taper supplies all elementary
+norm estimates required by the guarded Poisson tail interface. -/
+theorem DistinguishedWindowNormBounds.of_eventually_admWindow
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hμ : μ < 1) (w c : ℝ)
+    (hadm : ∀ᶠ T in atTop,
+      AdmWindow (F.window T (F.distinguished T))
+        (F.period T (F.distinguished T)) w c) :
+    DistinguishedWindowNormBounds F where
+  bandwidth_lt_one := hμ
+  distinguished_support_half := by
+    filter_upwards [hadm] with T hT
+    intro u hu
+    by_contra hnot
+    have hz := hT.support u (by linarith)
+    exact hu hz
+  window_l1_le_period := hadm.mono fun T hT =>
+    admWindow_integral_norm_complex_le hT
+  deriv2_l1_bounded := by
+    obtain ⟨T, hT⟩ := hadm.exists
+    exact ⟨c, hT.c_nonneg, hadm.mono fun T hT =>
+      admWindow_integral_norm_deriv2_complex_le hT⟩
 
 /-- The older physical-window bundle contains the minimal Poisson-kernel
 data as a literal sub-interface. -/
