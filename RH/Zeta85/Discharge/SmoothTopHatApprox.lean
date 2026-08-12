@@ -17,7 +17,7 @@ strict-support construction, while the sequence converges pointwise to the
 translated sharp top hat.
 -/
 
-open MeasureTheory Filter Set
+open MeasureTheory Filter Set Zeta23
 open scoped BigOperators Matrix Convolution Topology ContDiff
 
 noncomputable section
