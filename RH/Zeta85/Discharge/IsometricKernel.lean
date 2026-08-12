@@ -138,6 +138,68 @@ def projectedPairKernel
       F.atom T i ρ * projection C T i j *
         F.atom T j ρ'
 
+
+/-- Mixing first and inserting the corresponding full-space projection are
+exactly the same pair contraction. -/
+theorem mixedPairKernel_eq_projectedPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ) (ρ ρ' : ℂ) :
+    mixedPairKernel C T ρ ρ' =
+      projectedPairKernel C T ρ ρ' := by
+  unfold mixedPairKernel projectedPairKernel mixedAtom projection
+  congr 1
+  simp only [Matrix.mul_apply, Matrix.conjTranspose_apply]
+  calc
+    (∑ a : Fin (F.blockDim T),
+        (∑ i : Fin (F.dim T),
+            C.toData.compression T i a * F.atom T i ρ) *
+          ∑ j : Fin (F.dim T),
+            C.toData.compression T j a * F.atom T j ρ') =
+      ∑ a : Fin (F.blockDim T),
+        ∑ i : Fin (F.dim T), ∑ j : Fin (F.dim T),
+          C.toData.compression T i a *
+            C.toData.compression T j a *
+            F.atom T i ρ * F.atom T j ρ' := by
+      apply Finset.sum_congr rfl
+      intro a _
+      rw [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro j _
+      ring
+    _ = ∑ i : Fin (F.dim T),
+        ∑ a : Fin (F.blockDim T), ∑ j : Fin (F.dim T),
+          C.toData.compression T i a *
+            C.toData.compression T j a *
+            F.atom T i ρ * F.atom T j ρ' := by
+      rw [Finset.sum_comm]
+    _ = ∑ i : Fin (F.dim T), ∑ j : Fin (F.dim T),
+        ∑ a : Fin (F.blockDim T),
+          C.toData.compression T i a *
+            C.toData.compression T j a *
+            F.atom T i ρ * F.atom T j ρ' := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [Finset.sum_comm]
+    _ = ∑ i : Fin (F.dim T), ∑ j : Fin (F.dim T),
+        F.atom T i ρ *
+          (∑ a : Fin (F.blockDim T),
+            C.toData.compression T i a *
+              star (C.toData.compression T j a)) *
+          F.atom T j ρ' := by
+      apply Finset.sum_congr rfl
+      intro i _
+      apply Finset.sum_congr rfl
+      intro j _
+      rw [Finset.mul_sum, Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro a _
+      rw [C.real_entries T j a]
+      ring
+
 end IsometricKernel
 end Zeta85
 end RH
