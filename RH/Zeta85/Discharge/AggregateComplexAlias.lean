@@ -422,6 +422,53 @@ theorem aggregateAliasCancellation_orthogonalSynthesis
   exact VirtualChannelMixer.aggregate_shift_overlap_eq_zero
     C virtual u ((m : ℝ) * L) (fun r => hvirtual r m hm u)
 
+/-- A strict sub-period support interval for each virtual channel provides the
+translated-overlap hypothesis automatically for every nonzero integer shift. -/
+theorem aggregateAliasCancellation_orthogonalSynthesis_of_intervalSupport
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (C : VirtualChannelMixer.Data ι)
+    (T L : ℝ) (Λ : ι → ℝ) (virtual : ι → ℝ → ℝ)
+    (a b : ι → ℝ)
+    (hL : 0 < L)
+    (hΛ : ∀ j, 0 ≤ Λ j)
+    (hsmooth : ∀ j,
+      ContDiff ℝ 2
+        (fun u =>
+          (VirtualChannelMixer.synthesize C virtual j u : ℂ)))
+    (hsuppPhysical : ∀ j u, Λ j < |u| →
+      VirtualChannelMixer.synthesize C virtual j u = 0)
+    (heven : ∀ j u,
+      VirtualChannelMixer.synthesize C virtual j (-u) =
+        VirtualChannelMixer.synthesize C virtual j u)
+    (hInt : ∀ (j : ι) (z z' : ℂ) (m : ℤ), m ≠ 0 →
+      Integrable
+        (fun u : ℝ =>
+          (VirtualChannelMixer.synthesize C virtual j u : ℂ) *
+            VirtualChannelMixer.synthesize C virtual j
+              (u - (m : ℝ) * L) *
+            Complex.exp
+              (Complex.I * (z - z') * (u : ℂ))))
+    (hsuppVirtual : ∀ r : ι, ∀ x : ℝ,
+      virtual r x ≠ 0 → a r ≤ x ∧ x ≤ b r)
+    (hwidth : ∀ r : ι, b r - a r < L) :
+    AggregateAliasCancellation T L
+      (VirtualChannelMixer.synthesize C virtual) := by
+  apply aggregateAliasCancellation_orthogonalSynthesis
+    C T L Λ virtual hL hΛ hsmooth hsuppPhysical heven hInt
+  intro r m hm u
+  apply VirtualChannelMixer.self_shift_overlap_eq_zero
+    (virtual r) (a r) (b r) u ((m : ℝ) * L)
+    (hsuppVirtual r)
+  have hmabs : (1 : ℝ) ≤ |(m : ℝ)| := by
+    exact_mod_cast Int.one_le_abs hm
+  calc
+    b r - a r < L := hwidth r
+    _ = 1 * L := by ring
+    _ ≤ |(m : ℝ)| * L :=
+      mul_le_mul_of_nonneg_right hmabs hL.le
+    _ = |(m : ℝ) * L| := by
+      rw [abs_mul, abs_of_pos hL]
+
 end AggregateComplexAlias
 end Zeta85
 end RH
