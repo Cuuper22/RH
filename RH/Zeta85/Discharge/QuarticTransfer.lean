@@ -219,7 +219,7 @@ theorem finite_affine_bridge
 theorem quarticScore_tendsto
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hmom : BlockMomentLimits F) (q : Quartic) :
+    (hmom : BlockMomentConvergence F) (q : Quartic) :
     Tendsto (quarticScore q F) atTop (nhds (limitQuarticScore q μ p)) := by
   change Tendsto
     (fun T => q.p0 + q.p1 * F.centeredBlockMoment 1 T +
@@ -285,7 +285,7 @@ theorem normalizedTransfer_tendsto
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F) (hr1a : BlockDensityLimit F)
-    (hmom : BlockMomentLimits F) (q : Quartic) (cap Dbar : ℝ) :
+    (hmom : BlockMomentConvergence F) (q : Quartic) (cap Dbar : ℝ) :
     Tendsto (normalizedTransfer q cap Dbar F) atTop
       (nhds ((μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2) /
         (1 - cap / 2))) := by
@@ -320,7 +320,7 @@ theorem asymptotic_eps_transfer
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F) (hr1a : BlockDensityLimit F)
-    (hmom : BlockMomentLimits F)
+    (hmom : BlockMomentConvergence F)
     (q : Quartic) (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 < 1) (hcost : profileSaturatedCost σ v ≤ Dbar)
     (hstrict : target <
@@ -473,7 +473,7 @@ frozen R-8686 epsilon form. -/
 theorem eps_transfer_8686
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentConvergence F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
@@ -492,7 +492,7 @@ frozen R-9506 epsilon form. -/
 theorem eps_transfer_9506
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentConvergence F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -522,7 +522,7 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_8657
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentConvergence F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -540,7 +540,7 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_9383
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentConvergence F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -569,7 +569,7 @@ structures remain explicit. -/
 theorem zeta_eps_transfer_8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentConvergence F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
@@ -582,7 +582,7 @@ per-support structures. -/
 theorem zeta_eps_transfer_9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentConvergence F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
@@ -595,7 +595,7 @@ theorem zeta_eps_transfer_9506
 theorem zeta_eps_transfer_8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentConvergence F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
@@ -608,7 +608,7 @@ theorem zeta_eps_transfer_8657
 theorem zeta_eps_transfer_9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : BlockDensityLimit F) (hmom : BlockMomentLimits F) :
+    (hr1a : BlockDensityLimit F) (hmom : BlockMomentConvergence F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
