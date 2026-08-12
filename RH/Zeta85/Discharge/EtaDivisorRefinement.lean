@@ -7,6 +7,7 @@ import RH.Zeta85.Discharge.HBDepthFour
 import RH.Zeta85.Discharge.BBLRGCDAllocation
 import Lean.Elab.Tactic.Omega
 import Mathlib.Data.Nat.Prime.Basic
+import Mathlib.Data.Int.CardIntervalMod
 
 /-!
 # Divisor-dependent refinement of a terminal coefficient
@@ -325,6 +326,54 @@ theorem sigma_zero_mul_le (m s : ℕ) :
     ArithmeticFunction.sigma 0 (m * s) ≤
       ArithmeticFunction.sigma 0 m * ArithmeticFunction.sigma 0 s := by
   simpa only [ArithmeticFunction.sigma_zero_apply] using card_divisors_mul_le m s
+
+theorem card_divisors_list_prod_le_two_pow_length (L : List ℕ)
+    (hprime : ∀ p ∈ L, p.Prime) :
+    L.prod.divisors.card ≤ 2 ^ L.length := by
+  induction L with
+  | nil => simp
+  | cons p ps ih =>
+      have hp : p.Prime := hprime p (by simp)
+      have hps : ∀ q ∈ ps, q.Prime := by
+        intro q hq
+        exact hprime q (by simp [hq])
+      have hpcard : p.divisors.card = 2 := by
+        rw [hp.divisors]
+        exact Finset.card_pair (Ne.symm hp.ne_one)
+      calc
+        (p :: ps).prod.divisors.card = (p * ps.prod).divisors.card := by simp
+        _ ≤ p.divisors.card * ps.prod.divisors.card :=
+          card_divisors_mul_le p ps.prod
+        _ ≤ 2 * 2 ^ ps.length := by
+          exact Nat.mul_le_mul hpcard.le (ih hps)
+        _ = 2 ^ (p :: ps).length := by simp [pow_succ']
+
+/-- The divisor count of a nonzero integer is at most two to its number of
+prime factors, counted with multiplicity. -/
+theorem card_divisors_le_two_pow_cardFactors {s : ℕ} (hs : s ≠ 0) :
+    s.divisors.card ≤ 2 ^ s.primeFactorsList.length := by
+  calc
+    s.divisors.card = s.primeFactorsList.prod.divisors.card := by
+      rw [Nat.prod_primeFactorsList hs]
+    _ ≤ 2 ^ s.primeFactorsList.length :=
+      card_divisors_list_prod_le_two_pow_length s.primeFactorsList
+        (fun p hp => Nat.prime_of_mem_primeFactorsList hp)
+
+/-- A divisor-bounded coefficient becomes uniformly bounded on a set of
+bounded prime depth. -/
+theorem abs_le_of_divisorBounded_of_prime_depth {c : ℕ → ℝ} {K : ℝ}
+    {k s r : ℕ} (hK : 0 ≤ K) (hc : DivisorBounded c K k)
+    (hs : s ≠ 0) (hdepth : s.primeFactorsList.length < r) :
+    |c s| ≤ K * (((2 : ℕ) ^ r : ℕ) : ℝ) ^ k := by
+  have htauNat : ArithmeticFunction.sigma 0 s ≤ 2 ^ r := by
+    rw [ArithmeticFunction.sigma_zero_apply]
+    exact (card_divisors_le_two_pow_cardFactors hs).trans
+      (Nat.pow_le_pow_right (by norm_num) (Nat.le_of_lt hdepth))
+  have htau :
+      ((ArithmeticFunction.sigma 0 s : ℕ) : ℝ) ≤ (((2 : ℕ) ^ r : ℕ) : ℝ) := by
+    exact_mod_cast htauNat
+  exact (hc s).trans
+    (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by positivity) htau k) hK)
 
 theorem sigma_zero_le_of_dvd {d n : ℕ} (hn : n ≠ 0) (hd : d ∣ n) :
     ArithmeticFunction.sigma 0 d ≤ ArithmeticFunction.sigma 0 n := by
@@ -1070,6 +1119,134 @@ theorem roughCoreAF_fiber_bounded_prime_depth (Z : ℕ) {R B a s r : ℕ}
     s.primeFactorsList.length < r := by
   exact normalizedRightSelector_bounded_prime_depth hR
     (Finset.mem_filter.mp ha).2 hs hsize hcoeff
+
+/-- The exceptional running coefficient is uniformly bounded once its size
+forces bounded prime depth.  The bound is independent of the retained
+divisor and of the running integer. -/
+theorem abs_roughCoreAF_fiber_le (Z : ℕ) {R B a s r : ℕ}
+    (hR : 0 < R)
+    (ha : a ∈ (Finset.Icc 1 R).filter (fun d => ¬R < d * B))
+    (hs : s ≠ 0) (hsize : s < (B + 1) ^ r) :
+    |normalizedRightSelector (hb4Core Z) R a 6 s| ≤
+      15 * (((2 : ℕ) ^ r : ℕ) : ℝ) ^ 6 := by
+  by_cases hcoeff : normalizedRightSelector (hb4Core Z) R a 6 s = 0
+  · simp [hcoeff]
+  apply abs_le_of_divisorBounded_of_prime_depth (by norm_num)
+    (hb4Core_normalizedRightSelector_divisorBounded Z
+      (Nat.ne_of_gt (Finset.mem_Icc.mp (Finset.mem_filter.mp ha).1).1)) hs
+  exact roughCoreAF_fiber_bounded_prime_depth Z hR ha hs hsize
+    hcoeff
+
+/-- An elementary progression-cardinality bound.  Once coefficients are
+uniformly bounded, no Shiu estimate is needed: a residue class contains at
+most five times the expected `P / phi(q)` number of integers in `[1,2P]`. -/
+theorem progression_filter_card_le_five {P : ℝ} {q r : ℕ}
+    (hP : 1 ≤ P) (hq : 0 < q) (hqP : (q : ℝ) ≤ P) :
+    (((Finset.Icc 1 ⌈2 * P⌉₊).filter
+      (fun p => p % q = r % q)).card : ℝ) ≤
+        5 * (P / (Nat.totient q : ℝ)) := by
+  let N : ℕ := ⌈2 * P⌉₊
+  let S : Finset ℕ :=
+    (Finset.Icc 1 N).filter (fun p => p % q = r % q)
+  have hsubset : S ⊆
+      (Finset.range (N + 1)).filter (fun p => p ≡ r [MOD q]) := by
+    intro p hp
+    have hpData := Finset.mem_filter.mp hp
+    have hpIcc := Finset.mem_Icc.mp hpData.1
+    apply Finset.mem_filter.mpr
+    exact ⟨Finset.mem_range.mpr (by omega), hpData.2⟩
+  have hcard : S.card ≤ (N + 1) / q + 1 := by
+    calc
+      S.card ≤ ((Finset.range (N + 1)).filter
+          (fun p => p ≡ r [MOD q])).card := Finset.card_le_card hsubset
+      _ = (N + 1).count (fun p => p ≡ r [MOD q]) := by
+        rw [Nat.count_eq_card_filter_range]
+      _ ≤ (N + 1) / q + 1 := by
+        rw [Nat.count_modEq_card (N + 1) hq r]
+        split <;> omega
+  have hqReal : 0 < (q : ℝ) := by exact_mod_cast hq
+  have hphiReal : 0 < (Nat.totient q : ℝ) := by
+    exact_mod_cast Nat.totient_pos.mpr hq
+  have hphiLe : (Nat.totient q : ℝ) ≤ (q : ℝ) := by
+    exact_mod_cast Nat.totient_le q
+  have hNreal : (N : ℝ) ≤ 2 * P + 1 := by
+    dsimp [N]
+    exact (Nat.ceil_lt_add_one (by positivity : 0 ≤ 2 * P)).le
+  have hNplus : ((N + 1 : ℕ) : ℝ) ≤ 2 * P + 2 := by
+    norm_num
+    linarith
+  have hnum : 2 * P + 2 + (q : ℝ) ≤ 5 * P := by
+    nlinarith
+  have hPnonneg : 0 ≤ P := by linarith
+  change (S.card : ℝ) ≤ 5 * (P / (Nat.totient q : ℝ))
+  calc
+    (S.card : ℝ) ≤ (((N + 1) / q + 1 : ℕ) : ℝ) := by
+      exact_mod_cast hcard
+    _ = (((N + 1) / q : ℕ) : ℝ) + 1 := by norm_num
+    _ ≤ ((N + 1 : ℕ) : ℝ) / (q : ℝ) + 1 := by
+      exact add_le_add Nat.cast_div_le le_rfl
+    _ ≤ (2 * P + 2) / (q : ℝ) + 1 := by
+      exact add_le_add ((div_le_div_iff_of_pos_right hqReal).2 hNplus) le_rfl
+    _ = (2 * P + 2 + (q : ℝ)) / (q : ℝ) := by
+      field_simp
+    _ ≤ (5 * P) / (q : ℝ) :=
+      (div_le_div_iff_of_pos_right hqReal).2 hnum
+    _ = 5 * (P / (q : ℝ)) := by ring
+    _ ≤ 5 * (P / (Nat.totient q : ℝ)) := by
+      exact mul_le_mul_of_nonneg_left
+        (div_le_div_of_nonneg_left hPnonneg hphiReal hphiLe) (by norm_num)
+
+/-- Summing a uniformly bounded coefficient over a progression costs only
+the progression cardinality. -/
+theorem progressionSum_le_of_uniform_bound {c : ℕ → ℝ} {P M : ℝ}
+    {q r : ℕ}
+    (hbound : ∀ p ∈ (Finset.Icc 1 ⌈2 * P⌉₊).filter
+      (fun p => p % q = r % q), |c p| ≤ M) :
+    progressionSum c P q r ≤
+      (((Finset.Icc 1 ⌈2 * P⌉₊).filter
+        (fun p => p % q = r % q)).card : ℝ) * M := by
+  unfold progressionSum
+  calc
+    ∑ p ∈ (Finset.Icc 1 ⌈2 * P⌉₊).filter
+        (fun p => p % q = r % q), |c p| ≤
+      ∑ p ∈ (Finset.Icc 1 ⌈2 * P⌉₊).filter
+        (fun p => p % q = r % q), M := by
+          exact Finset.sum_le_sum fun p hp => hbound p hp
+    _ = (((Finset.Icc 1 ⌈2 * P⌉₊).filter
+        (fun p => p % q = r % q)).card : ℝ) * M := by simp
+
+/-- Direct progression majorant for every bounded-depth exceptional fiber.
+This is the rough-family replacement for the blanket Shiu premise. -/
+theorem progressionSum_roughCoreAF_fiber_le (Z : ℕ) {R B a r q v : ℕ}
+    {P : ℝ} (hR : 0 < R)
+    (ha : a ∈ (Finset.Icc 1 R).filter (fun d => ¬R < d * B))
+    (hP : 1 ≤ P) (hq : 0 < q) (hqP : (q : ℝ) ≤ P)
+    (hsize : ⌈2 * P⌉₊ < (B + 1) ^ r) :
+    progressionSum (normalizedRightSelector (hb4Core Z) R a 6) P q v ≤
+      (5 * (15 * (((2 : ℕ) ^ r : ℕ) : ℝ) ^ 6)) *
+        (P / (Nat.totient q : ℝ)) := by
+  let M : ℝ := 15 * (((2 : ℕ) ^ r : ℕ) : ℝ) ^ 6
+  have hM : 0 ≤ M := by positivity
+  have hsum :
+      progressionSum (normalizedRightSelector (hb4Core Z) R a 6) P q v ≤
+        (((Finset.Icc 1 ⌈2 * P⌉₊).filter
+          (fun p => p % q = v % q)).card : ℝ) * M := by
+    apply progressionSum_le_of_uniform_bound
+    intro p hp
+    have hpIcc := Finset.mem_Icc.mp (Finset.mem_filter.mp hp).1
+    exact abs_roughCoreAF_fiber_le Z hR ha (Nat.ne_of_gt hpIcc.1)
+      (hpIcc.2.trans_lt hsize)
+  calc
+    progressionSum (normalizedRightSelector (hb4Core Z) R a 6) P q v ≤
+        (((Finset.Icc 1 ⌈2 * P⌉₊).filter
+          (fun p => p % q = v % q)).card : ℝ) * M := hsum
+    _ ≤ (5 * (P / (Nat.totient q : ℝ))) * M := by
+      exact mul_le_mul_of_nonneg_right
+        (progression_filter_card_le_five hP hq hqP) hM
+    _ = (5 * (15 * (((2 : ℕ) ^ r : ℕ) : ℝ) ^ 6)) *
+        (P / (Nat.totient q : ℝ)) := by
+      unfold M
+      ring
 
 /-- Exact regular/rough partition at the arithmetic-function level, before
 absolute values and before the final logarithm convolution. -/
