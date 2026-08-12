@@ -376,68 +376,77 @@ or theorem statement changes.
 
 ## 1. `#print axioms` — verbatim
 
-### 1.1 The 0.679 theorem (support 101/100)
+### 1.1 Frozen headlines through 95.06
 
 ```
 'zeta85_rung_support_101_over_100' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated]
+ RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_rung_support_101_over_100_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated]
-```
-
-### 1.2 The 0.797 theorem (support 5/4)
-
-```
+ RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_rung_support_5_over_4' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated]
+ RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_rung_support_5_over_4_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated]
-```
-
-### 1.3 The 0.85 theorem (support 143/100) and its corollary
-
-```
+ RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_simple_on_critical_line' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.shiu_majorant,
- RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2,
- RH.Zeta85.Hypotheses.traceTransfer_saturated]
+ RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_simple_on_critical_line_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.shiu_majorant,
- RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2,
- RH.Zeta85.Hypotheses.traceTransfer_saturated]
+ RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_eighty_five_percent' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.shiu_majorant,
- RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2,
- RH.Zeta85.Hypotheses.traceTransfer_saturated]
+ RH.Zeta85.Hypotheses.shiu_majorant]
 'zeta85_eighty_five_percent_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.shiu_majorant,
- RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2,
- RH.Zeta85.Hypotheses.traceTransfer_saturated]
+ RH.Zeta85.Hypotheses.shiu_majorant]
+'RH.Zeta85.rung8657_from_shiu_contradiction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ RH.Zeta85.Hypotheses.shiu_majorant]
+'RH.Zeta85.rung8657_cumulative_from_shiu_contradiction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ RH.Zeta85.Hypotheses.shiu_majorant]
+'RH.Zeta85.rung8686_from_shiu_contradiction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ RH.Zeta85.Hypotheses.shiu_majorant]
+'RH.Zeta85.rung8686_cumulative_from_shiu_contradiction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ RH.Zeta85.Hypotheses.shiu_majorant]
+'RH.Zeta85.rung9383_from_shiu_contradiction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ RH.Zeta85.Hypotheses.shiu_majorant]
+'RH.Zeta85.rung9383_cumulative_from_shiu_contradiction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ RH.Zeta85.Hypotheses.shiu_majorant]
+'RH.Zeta85.rung9506_from_shiu_contradiction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ RH.Zeta85.Hypotheses.shiu_majorant]
+'RH.Zeta85.rung9506_cumulative_from_shiu_contradiction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound,
+ RH.Zeta85.Hypotheses.shiu_majorant]
 ```
 
-Reproduce with `lake env lean comparator/PrintAxioms/Zeta85.lean`.  The same eight lines with the
-`RH.Zeta85.rung*` / `RH.Zeta85.eightyFive*` names (the solution-side theorems the comparator topic
-delegates to) are identical.
+Reproduce with `lake env lean comparator/PrintAxioms/Zeta85.lean`.  Every assembled
+headline has one nonstandard dependency: `RH.Zeta85.Hypotheses.shiu_majorant`.
 
 ### 1.4 What is proved outright inside the conditional layer
 

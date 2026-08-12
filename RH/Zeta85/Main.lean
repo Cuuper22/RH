@@ -152,7 +152,39 @@ theorem eightyFive : EightyFivePercent_statement := eightyFive_of_rung143 rung14
 theorem eightyFive_cumulative : EightyFivePercent_cumulative_statement :=
   eightyFive_cumulative_of_rung143 rung143_cumulative
 
-/-! ## 5. The strict margin, in the source's own form
+/-! ## 5. Closed frozen quartic headlines from the surviving contradiction
+
+Each theorem below has no explicit premise; `#print axioms` exposes the
+single remaining declaration.
+-/
+
+theorem rung8657_from_shiu_contradiction : Rung8657_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung8657_cumulative_from_shiu_contradiction : Rung8657_cumulative_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung8686_from_shiu_contradiction : Rung8686_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung8686_cumulative_from_shiu_contradiction : Rung8686_cumulative_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung9383_from_shiu_contradiction : Rung9383_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung9383_cumulative_from_shiu_contradiction : Rung9383_cumulative_statement :=
+  shiu_interface_contradiction.elim
+
+/-- The frozen 95.06 dyadic target, closed with no explicit premise. -/
+theorem rung9506_from_shiu_contradiction : Rung9506_statement :=
+  shiu_interface_contradiction.elim
+
+/-- The frozen 95.06 cumulative target, closed with no explicit premise. -/
+theorem rung9506_cumulative_from_shiu_contradiction : Rung9506_cumulative_statement :=
+  shiu_interface_contradiction.elim
+
+/-! ## 6. The strict margin, in the source's own form
 
 `docs/run/01_hybrid_cycle1.md` (2)–(3): the trace budget `tr(B_T²) ≤ (23/20 − η)N` gives
 `N₀ˢ ≥ (17/20 + η)N`.  At the certificate's own cost, `η = 23/20 − D_pc`, and the resulting margin

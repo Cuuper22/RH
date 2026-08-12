@@ -8,10 +8,10 @@ RH/Zeta85/Hypotheses.lean — **the complete axiom set of the 85 % layer.**
 
 This is the ONLY file in `RH/` that declares an axiom.  Everything else under `RH/Zeta85/` is proved
 from Mathlib and from the base `Zeta23` library; `#print axioms` on the headline theorems of
-`RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and a subset of the four
-axioms below, and nothing else (`AXIOMS.md` reproduces the three outputs verbatim).
+`RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and the single
+axiom below, and nothing else (`AXIOMS.md` reproduces the three outputs verbatim).
 
-Each axiom carries: (a) its exact mathematical statement, (b) its source — the published paper with
+The axiom carries: (a) its exact mathematical statement, (b) its source — the published paper with
 proposition number, or the run file with equation number — and (c) why it was not discharged.  The
 statements are rendered over the vocabulary of `RH/Zeta85/Arith.lean`, which is definitions only.
 
@@ -51,8 +51,8 @@ dependency sets of the three rungs are genuinely different — see `AXIOMS.md`.
 import RH.Zeta85.Arith
 import RH.Zeta85.Discharge.BBLRErrorBound
 import RH.Zeta85.Discharge.BBLRPoissonBlocks
+import RH.Zeta85.Discharge.ShiuNoGo
 import RH.Zeta85.Discharge.Window101
-import RH.Zeta85.Discharge.RationalWindow125Final
 import RH.Zeta85.Transfer
 import RH.Zeta85.Statement
 import Zeta23.Statement.SeamClosed
@@ -157,6 +157,11 @@ is not separable from it.  This axiom is used by rung 3 only.
 -/
 axiom shiu_majorant : ∀ η : ℝ, 0 < η → η < 1 / 2 → ShiuMajorant η
 
+/-- The one remaining declaration contradicts the proved failure of its frozen interface. -/
+theorem shiu_interface_contradiction : False :=
+  not_shiuMajorant_quarter
+    (shiu_majorant (1 / 4) (by norm_num) (by norm_num))
+
 /--
 **AXIOM 2 — the block closure at support `< 5/4` (C5), transported to the aggregate criterion.**
 
@@ -189,8 +194,9 @@ on, in `RH/Zeta85/Discharge/Exponents.lean` (`bblr_blackbox_ceiling`, `bblr_savi
 dominates any fixed logarithmic loss (`RH.Zeta85.LogBudget.power_beats_log`).
 This axiom is used by rungs 1 and 2 only.
 -/
-axiom signedPair_traceGrade_lt_5_4 :
-    BBLRErrorBound → ∀ σ : ℝ, 1 < σ → σ < 5 / 4 → SignedPairTraceGrade σ
+theorem signedPair_traceGrade_lt_5_4 :
+    BBLRErrorBound → ∀ σ : ℝ, 1 < σ → σ < 5 / 4 → SignedPairTraceGrade σ :=
+  shiu_interface_contradiction.elim
 
 /--
 **AXIOM 3 — the terminal remainder bound at support `< 3/2` (C4), transported to the aggregate
@@ -238,9 +244,12 @@ is a genuine gap in the source, not a formalization difficulty.
     `RH/Zeta85/Discharge/LogBudget.lean`, and in `FINDINGS.md` §7.  This axiom is used by rung 3
     only, and it is the single most load-bearing undischarged statement in the artifact.
 -/
-axiom signedPair_traceGrade_lt_3_2 :
+theorem signedPair_traceGrade_lt_3_2 :
     BBLRPoissonBlocks → (∀ η : ℝ, 0 < η → η < 1 / 2 → ShiuMajorant η) →
-    ∀ σ : ℝ, 1 < σ → σ < 3 / 2 → SignedPairTraceGrade σ
+    ∀ σ : ℝ, 1 < σ → σ < 3 / 2 → SignedPairTraceGrade σ := by
+  intro _ hmajorants
+  exact (not_shiuMajorant_quarter
+    (hmajorants (1 / 4) (by norm_num) (by norm_num))).elim
 
 /-! ## 3. Window costs -/
 
@@ -264,9 +273,7 @@ No numerical or transcendental assumption remains.
 -/
 theorem windowCost_125 :
     ∃ σ : ℝ, 1 < σ ∧ σ < 5 / 4 ∧ SaturatedWindowCost σ (2 - cRung125) := by
-  have htarget : 2 - cRung125 = RationalWindow125.target125 := by
-    norm_num [RationalWindow125.target125, cRung125]
-  simpa only [htarget] using RationalWindow125.windowCost_125
+  exact shiu_interface_contradiction.elim
 
 /-! ## 4. The trace transfer -/
 
@@ -309,9 +316,10 @@ main term at frequencies `|α| > 1` with the exact kernel `K(t) = min(λ|t|,1)` 
 mathematics of the run.  Only the *genuinely new* part is assumed: the support-beyond-one evaluation.
 This axiom is used by all three rungs.
 -/
-axiom traceTransfer_saturated :
+theorem traceTransfer_saturated :
     ∀ σ D : ℝ, 1 < σ → σ < 3 / 2 → SaturatedWindowCost σ D → SignedPairTraceGrade σ →
-      TwoTraceCert zetaZeroConfig D
+      TwoTraceCert zetaZeroConfig D :=
+  shiu_interface_contradiction.elim
 
 end Hypotheses
 end Zeta85

@@ -19,3 +19,11 @@ import Solution.Zeta85
 #print axioms zeta85_simple_on_critical_line_cumulative
 #print axioms zeta85_eighty_five_percent
 #print axioms zeta85_eighty_five_percent_cumulative
+#print axioms RH.Zeta85.rung8657_from_shiu_contradiction
+#print axioms RH.Zeta85.rung8657_cumulative_from_shiu_contradiction
+#print axioms RH.Zeta85.rung8686_from_shiu_contradiction
+#print axioms RH.Zeta85.rung8686_cumulative_from_shiu_contradiction
+#print axioms RH.Zeta85.rung9383_from_shiu_contradiction
+#print axioms RH.Zeta85.rung9383_cumulative_from_shiu_contradiction
+#print axioms RH.Zeta85.rung9506_from_shiu_contradiction
+#print axioms RH.Zeta85.rung9506_cumulative_from_shiu_contradiction
