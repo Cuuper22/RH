@@ -725,6 +725,120 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_normalizedFrequencyPai
   exact zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail
     F T ρ ρ' hdist hratio
 
+
+/-- The normalized infinite-frequency contribution of every channel except
+the one defining the principal block. -/
+def complementaryChannelFrequencyPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (z z' : ℂ) : ℂ :=
+  ∑ j ∈ Finset.univ.erase (F.distinguished T),
+    channelNormalizedFrequencyPairSum F T j z z'
+
+/-- The distinguished channel is the total normalized channel sum minus the
+literal complementary-channel sum. -/
+theorem distinguishedChannelFrequencyPairSum_eq_total_sub_complement
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (z z' : ℂ) :
+    channelNormalizedFrequencyPairSum F T (F.distinguished T) z z' =
+      (∑ j : Fin (F.channelCount T),
+          channelNormalizedFrequencyPairSum F T j z z') -
+        complementaryChannelFrequencyPairSum F T z z' := by
+  classical
+  have hsplit :
+      (∑ j ∈ Finset.univ.erase (F.distinguished T),
+          channelNormalizedFrequencyPairSum F T j z z') +
+        channelNormalizedFrequencyPairSum F T (F.distinguished T) z z' =
+      ∑ j : Fin (F.channelCount T),
+        channelNormalizedFrequencyPairSum F T j z z' := by
+    simpa using
+      (Finset.sum_erase_add
+        (fun j : Fin (F.channelCount T) =>
+          channelNormalizedFrequencyPairSum F T j z z')
+        (Finset.mem_univ (F.distinguished T)))
+  unfold complementaryChannelFrequencyPairSum
+  linear_combination hsplit
+
+/-- After summing channels first, the actual zero-pair kernel is a physical
+energy main term minus exactly two remainders: the unused channels and the
+finite/infinite distinguished-grid tail.  Only the two complex-alias clauses
+are assumed here; no moment limit is consumed. -/
+theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_energy_sub_remainders
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hblock : PrincipalCyclicBlock F)
+    (haliasSummable : ∀ᶠ T in Filter.atTop,
+      ∀ ρ ∈ Z.ZIprime T, ∀ ρ' ∈ Z.ZIprime T,
+        Summable (F.complexAliasFamily T (gammaOf ρ) (gammaOf ρ')))
+    (haliasZero : ∀ᶠ T in Filter.atTop,
+      ∀ ρ ∈ Z.ZIprime T, ∀ ρ' ∈ Z.ZIprime T,
+        ∑' a, F.complexAliasFamily T
+          (gammaOf ρ) (gammaOf ρ') a = 0)
+    (Λ : ℝ → ℝ)
+    (hΛ : ∀ᶠ T in Filter.atTop, 0 ≤ Λ T)
+    (hsmooth : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T),
+        ContDiff ℝ 2 (fun u => (F.window T j u : ℂ)))
+    (hsupp : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T), ∀ u,
+        Λ T < |u| → F.window T j u = 0)
+    (heven : ∀ᶠ T in Filter.atTop,
+      ∀ j : Fin (F.channelCount T), ∀ u,
+        F.window T j (-u) = F.window T j u) :
+    ∀ᶠ T in Filter.atTop,
+      ∀ ρ ∈ Z.ZIprime T, ∀ ρ' ∈ Z.ZIprime T,
+        QuarticTransfer.zeroPairKernel F T ρ ρ' =
+          (F.fullLength T : ℂ) *
+              ∫ u : ℝ,
+                (F.windowEnergy T u : ℂ) *
+                  cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+            complementaryChannelFrequencyPairSum F T
+              (gammaOf ρ) (gammaOf ρ') -
+            ((F.fullLength T /
+              F.period T (F.distinguished T) : ℝ) : ℂ) *
+              distinguishedFrequencyPairTail F T ρ ρ' := by
+  filter_upwards [
+    hblock.eventually_zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail,
+    hblock.periods_pos,
+    haliasSummable,
+    haliasZero,
+    hΛ, hsmooth, hsupp, heven
+  ] with T hkernel hperiod hfamily hoff hΛT hsmoothT hsuppT hevenT
+  intro ρ hρ ρ' hρ'
+  have htotal :=
+    sum_channelNormalizedFrequencyPairSum_eq_energyIntegral_of_compact
+      F T (Λ T) hΛT hperiod hsmoothT hsuppT hevenT
+      (gammaOf ρ) (gammaOf ρ')
+      (hfamily ρ hρ ρ' hρ') (hoff ρ hρ ρ' hρ')
+  calc
+    QuarticTransfer.zeroPairKernel F T ρ ρ' =
+        channelNormalizedFrequencyPairSum F T (F.distinguished T)
+            (gammaOf ρ) (gammaOf ρ') -
+          ((F.fullLength T /
+            F.period T (F.distinguished T) : ℝ) : ℂ) *
+            distinguishedFrequencyPairTail F T ρ ρ' :=
+      hkernel ρ ρ'
+    _ = ((∑ j : Fin (F.channelCount T),
+            channelNormalizedFrequencyPairSum F T j
+              (gammaOf ρ) (gammaOf ρ')) -
+          complementaryChannelFrequencyPairSum F T
+            (gammaOf ρ) (gammaOf ρ')) -
+        ((F.fullLength T /
+          F.period T (F.distinguished T) : ℝ) : ℂ) *
+          distinguishedFrequencyPairTail F T ρ ρ' := by
+      rw [distinguishedChannelFrequencyPairSum_eq_total_sub_complement]
+    _ = (F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.windowEnergy T u : ℂ) *
+                cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          complementaryChannelFrequencyPairSum F T
+            (gammaOf ρ) (gammaOf ρ') -
+          ((F.fullLength T /
+            F.period T (F.distinguished T) : ℝ) : ℂ) *
+            distinguishedFrequencyPairTail F T ρ ρ' := by
+      rw [htotal]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
