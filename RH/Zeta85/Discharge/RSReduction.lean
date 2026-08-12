@@ -518,6 +518,41 @@ theorem exists_unitInterval_frozenQuarticRSTest :
   · exact unitIntervalProfile_contDiff.of_le (by norm_num)
   · exact unitIntervalProfile_support
 
+/-- RS Theorem 3.1 now applies directly to the explicit frozen quartic
+cyclic test.  The compact extension disappears from both the zero-tuple sum
+and the displayed main term. -/
+theorem RS1996ZetaInputs.unitIntervalQuartic
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (g : Fin 4 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+          unitIntervalProfile) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+            unitIntervalProfile) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          rsMainTerm
+            (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+              unitIntervalProfile)‖ ≤ C * T := by
+  obtain ⟨Phi, hPhiSmooth, hPhiSupport, hGauge, hMain⟩ :=
+    exists_unitInterval_frozenQuarticRSTest
+  obtain ⟨C, T0, hC, hT0, hRS⟩ :=
+    hrs.theorem31 3 g Phi hg hPhiSmooth hPhiSupport
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  have hterm (rho : Fin 4 -> Z.carrier) :
+      rsZeroTupleTerm Z g Phi T rho =
+        rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+            unitIntervalProfile) T rho := by
+    unfold rsZeroTupleTerm
+    rw [hGauge]
+  refine ⟨hSummable.congr hterm, ?_⟩
+  simpa only [tsum_congr hterm, hMain] using hBound
+
 /-- The complete multiplicity-weighted zero-tuple summand is unchanged. -/
 theorem rsZeroTupleTerm_normalCutoffSymbol (Z : ZeroConfig) {n : ℕ}
     (g : Fin (n + 1) -> ℝ -> ℂ)
