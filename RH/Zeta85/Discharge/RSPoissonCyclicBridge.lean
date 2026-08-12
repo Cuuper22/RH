@@ -1792,6 +1792,81 @@ theorem remoteLatticePairKernel_norm_le_eight
             mul_assoc] using hupper.2
   · exact norm_nonneg _
 
+theorem remoteLatticePairScaleEight_nonneg
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hT : 0 < T)
+    (hL : 0 < F.period T (F.distinguished T)) :
+    0 ≤ remoteLatticePairScaleEight F T := by
+  unfold remoteLatticePairScaleEight distinguishedRemoteTailScaleEight
+    PoissonKernelBridge.distinguishedGridStep
+    distinguishedWindowFourierMajorantEight
+  have hD : 0 < Zeta23.D0 T := Real.sqrt_pos.2 hT
+  have hgrid : 0 < 2 * Real.pi / F.period T (F.distinguished T) := by
+    positivity
+  positivity
+
+theorem eventually_remotePair_le_scale_eight
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F) :
+    ∀ᶠ T in atTop, ∀ ρ ρ' : ↥(ZeroSide.ZI Z T),
+      ‖remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ)‖ ≤
+        remoteLatticePairScaleEight F T := by
+  filter_upwards [eventually_gt_atTop (0 : ℝ), hguard.periods_pos,
+    hguard.windows_smooth, hguard.distinguished_grid_count,
+    htail.distinguished_support_half]
+      with T hT hperiod hsmooth hcount hsupport
+  intro ρ ρ'
+  have hL : 0 < F.period T (F.distinguished T) :=
+    hperiod (F.distinguished T)
+  have hwindow : ContDiff ℝ 4
+      (fun u => (F.window T (F.distinguished T) u : ℂ)) := by
+    change ContDiff ℝ 4
+      (Complex.ofRealCLM ∘ F.window T (F.distinguished T))
+    exact (Complex.ofRealCLM.contDiff.comp
+      (hsmooth (F.distinguished T))).of_le (by
+        exact (WithTop.coe_le_coe).2
+          (show (4 : ℕ∞) ≤ ⊤ from le_top))
+  have hsupp : ∀ u,
+      (F.window T (F.distinguished T) u : ℂ) ≠ 0 →
+        |u| ≤ F.period T (F.distinguished T) / 2 := by
+    intro u hu
+    apply hsupport u
+    simpa only [Complex.ofReal_ne_zero] using hu
+  exact remoteLatticePairKernel_norm_le_eight
+    F T hT hL hcount hwindow hsupp ρ ρ'
+
+/-- Eventual balanced Frobenius control using the eighth-order pair scale. -/
+theorem eventually_balancedRemote_norm_le_eight
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (htail : PoissonKernelBridge.DistinguishedPoissonTailControl F)
+    (hguard : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
+    (hhat : ∀ᶠ T in atTop, 0 < F.hatDenominator T) :
+    ∀ᶠ T in atTop,
+      ‖balancedRemoteLatticeZeroMatrix F T‖ ≤
+        remoteLatticePairScaleEight F T *
+          ((Z.NIprime T : ℝ) / F.hatDenominator T) := by
+  filter_upwards [eventually_gt_atTop (0 : ℝ), hguard.periods_pos,
+    eventually_remotePair_le_scale_eight htail hguard, hhat]
+      with T hT hperiod hpair hhatT
+  have h := norm_balancedKernelMatrix_le
+    (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+      remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ))
+    (fun ρ : ↥(ZeroSide.ZI Z T) =>
+      (zeroVertexWeight F T (ρ : ℂ) : ℂ))
+    (remoteLatticePairScaleEight_nonneg F T hT
+      (hperiod (F.distinguished T))) hpair
+  change ‖balancedKernelMatrix
+    (fun ρ ρ' : ↥(ZeroSide.ZI Z T) =>
+      remoteLatticePairKernel F T (ρ : ℂ) (ρ' : ℂ))
+    (fun ρ : ↥(ZeroSide.ZI Z T) =>
+      (zeroVertexWeight F T (ρ : ℂ) : ℂ))‖ ≤ _
+  rw [sum_zeroVertexWeight_norm_sq F T hhatT] at h
+  exact h
+
 theorem fullLatticeZeroCycle4_eq_rsGaugeTest
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v) (T w c : ℝ)
