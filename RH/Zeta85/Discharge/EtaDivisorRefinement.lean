@@ -1322,6 +1322,37 @@ theorem hb4_eq_regularCore_mul_log_add_roughCore_mul_log
           roughCoreAF Z R B * ArithmeticFunction.log := by
       rw [add_mul]
 
+/-- Every additive signed analytic functional sees the exact divisor-family
+sum before any absolute value is taken. -/
+theorem signedFunctional_hb4_eq_sum_normalizedCore_mul_log
+    (L : HBDepthFour.AF →+ ℝ) (Z : ℕ) {R : ℕ} (hR : 0 < R) :
+    L (HBDepthFour.hb4 Z) =
+      ∑ a ∈ Finset.Icc 1 R,
+        L (normalizedConvolutionAF (hb4Core Z) R a 6 *
+          ArithmeticFunction.log) := by
+  rw [hb4_eq_sum_normalizedCore_mul_log Z hR]
+  simp
+
+/-- The same signed functional splits only after the complete regular and
+rough families have each been recombined. -/
+theorem signedFunctional_hb4_eq_regular_add_rough
+    (L : HBDepthFour.AF →+ ℝ) (Z B : ℕ) {R : ℕ} (hR : 0 < R) :
+    L (HBDepthFour.hb4 Z) =
+      L (regularCoreAF Z R B * ArithmeticFunction.log) +
+        L (roughCoreAF Z R B * ArithmeticFunction.log) := by
+  rw [hb4_eq_regularCore_mul_log_add_roughCore_mul_log Z B hR]
+  exact L.map_add _ _
+
+/-- Triangle inequality is postponed until after each complete signed family
+has been recombined.  No sum of per-fiber absolute values appears. -/
+theorem abs_signedFunctional_hb4_le_recombined_regular_add_rough
+    (L : HBDepthFour.AF →+ ℝ) (Z B : ℕ) {R : ℕ} (hR : 0 < R) :
+    |L (HBDepthFour.hb4 Z)| ≤
+      |L (regularCoreAF Z R B * ArithmeticFunction.log)| +
+        |L (roughCoreAF Z R B * ArithmeticFunction.log)| := by
+  rw [signedFunctional_hb4_eq_regular_add_rough L Z B hR]
+  exact abs_add_le _ _
+
 /-- On the depth-four range, the same pre-logarithm split reconstructs the
 actual von Mangoldt coefficient pointwise. -/
 theorem vonMangoldt_eq_regularCore_mul_log_add_roughCore_mul_log_apply
