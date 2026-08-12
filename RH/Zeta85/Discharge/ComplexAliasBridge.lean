@@ -1349,6 +1349,101 @@ theorem sum_distinguishedBlockLabel
   Equiv.sum_comp
     (distinguishedBlockLabelEquiv F T hdist haddr hexhaustive) g
 
+
+/-- One distinguished-channel Fourier-pair summand at a nonnegative
+modulation label. -/
+def distinguishedNatFrequencyPairTerm
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) (k : ℕ) : ℂ :=
+  let L := F.period T (F.distinguished T)
+  let τ : ℝ := T + 2 * Real.pi * k / L
+  paperFT (fun u => (F.window T (F.distinguished T) u : ℂ))
+      (gammaOf ρ - τ) *
+    paperFT (fun u => (F.window T (F.distinguished T) u : ℂ))
+      (gammaOf ρ' - τ)
+
+/-- The literal complete distinguished finite grid, independent of the
+particular block embedding used to enumerate it. -/
+def distinguishedFiniteGridPairSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ∑ k : Fin (F.channelDim T (F.distinguished T)),
+    distinguishedNatFrequencyPairTerm F T ρ ρ' k
+
+/-- Reindex the actual block frequency sum by the complete distinguished
+finite grid. -/
+theorem distinguishedBlockFrequencyPairSum_eq_finiteGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i) :
+    distinguishedBlockFrequencyPairSum F T ρ ρ' =
+      distinguishedFiniteGridPairSum F T ρ ρ' := by
+  simpa only [distinguishedBlockFrequencyPairSum,
+    distinguishedFiniteGridPairSum, distinguishedNatFrequencyPairTerm,
+    distinguishedBlockLabel] using
+      (sum_distinguishedBlockLabel F T hdist haddr hexhaustive
+        (fun k =>
+          distinguishedNatFrequencyPairTerm F T ρ ρ' k))
+
+/-- The formerly opaque finite/infinite discrepancy is exactly the full
+integer lattice minus the complete distinguished nonnegative cutoff grid. -/
+theorem distinguishedFrequencyPairTail_eq_full_sub_finiteGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i) :
+    distinguishedFrequencyPairTail F T ρ ρ' =
+      channelFrequencyPairSum F T (F.distinguished T)
+          (gammaOf ρ) (gammaOf ρ') -
+        distinguishedFiniteGridPairSum F T ρ ρ' := by
+  unfold distinguishedFrequencyPairTail
+  rw [distinguishedBlockFrequencyPairSum_eq_finiteGrid
+    F T ρ ρ' hdist haddr hexhaustive]
+
+/-- If the construction supplies its exact floor cutoff, the finite part of
+the tail is literally indexed by that floor. -/
+theorem distinguishedFrequencyPairTail_eq_full_sub_floorGrid
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (haddr : Function.Bijective (F.columnAddress T))
+    (hexhaustive : ∀ i : Fin (F.dim T),
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i)
+    (hgrid :
+      F.channelDim T (F.distinguished T) =
+        ⌊F.period T (F.distinguished T) * T /
+          (2 * Real.pi)⌋₊) :
+    distinguishedFrequencyPairTail F T ρ ρ' =
+      channelFrequencyPairSum F T (F.distinguished T)
+          (gammaOf ρ) (gammaOf ρ') -
+        ∑ k : Fin
+            ⌊F.period T (F.distinguished T) * T /
+              (2 * Real.pi)⌋₊,
+          distinguishedNatFrequencyPairTerm F T ρ ρ' k := by
+  rw [distinguishedFrequencyPairTail_eq_full_sub_finiteGrid
+    F T ρ ρ' hdist haddr hexhaustive]
+  unfold distinguishedFiniteGridPairSum
+  rw [hgrid]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
