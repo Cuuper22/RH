@@ -1862,6 +1862,90 @@ theorem normalizedFactoredZeroKernelQuarticNumerator_eq_pairKernel
         (normalizedZeroPairKernel F T) := by
   rfl
 
+
+/-- Pointwise equality on the actual finite enlarged-window zero set is
+enough to replace a pair kernel after all cyclic contractions and the entire
+target-specific quartic combination have been formed. -/
+theorem pairKernelCyclicTrace1_congr
+    {Z : ZeroConfig} {T : ℝ} {K K' : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      K ρ ρ' = K' ρ ρ') :
+    pairKernelCyclicTrace1 Z T K =
+      pairKernelCyclicTrace1 Z T K' := by
+  unfold pairKernelCyclicTrace1
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ hρ
+  simp only [pairKernelCycle1]
+  rw [hK ρ hρ ρ hρ]
+
+theorem pairKernelCyclicTrace2_congr
+    {Z : ZeroConfig} {T : ℝ} {K K' : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      K ρ ρ' = K' ρ ρ') :
+    pairKernelCyclicTrace2 Z T K =
+      pairKernelCyclicTrace2 Z T K' := by
+  unfold pairKernelCyclicTrace2
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  simp only [pairKernelCycle2]
+  rw [hK ρ₁ hρ₁ ρ₂ hρ₂]
+
+theorem pairKernelCyclicTrace3_congr
+    {Z : ZeroConfig} {T : ℝ} {K K' : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      K ρ ρ' = K' ρ ρ') :
+    pairKernelCyclicTrace3 Z T K =
+      pairKernelCyclicTrace3 Z T K' := by
+  unfold pairKernelCyclicTrace3
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  simp only [pairKernelCycle3]
+  rw [hK ρ₁ hρ₁ ρ₃ hρ₃, hK ρ₂ hρ₂ ρ₃ hρ₃,
+    hK ρ₁ hρ₁ ρ₂ hρ₂]
+
+theorem pairKernelCyclicTrace4_congr
+    {Z : ZeroConfig} {T : ℝ} {K K' : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      K ρ ρ' = K' ρ ρ') :
+    pairKernelCyclicTrace4 Z T K =
+      pairKernelCyclicTrace4 Z T K' := by
+  unfold pairKernelCyclicTrace4
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  apply Finset.sum_congr rfl
+  intro ρ₄ hρ₄
+  simp only [pairKernelCycle4]
+  rw [hK ρ₁ hρ₁ ρ₄ hρ₄, hK ρ₂ hρ₂ ρ₃ hρ₃,
+    hK ρ₁ hρ₁ ρ₂ hρ₂, hK ρ₃ hρ₃ ρ₄ hρ₄]
+
+theorem pairKernelQuarticNumerator_congr
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    {T : ℝ} {K K' : ℂ → ℂ → ℂ}
+    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
+      K ρ ρ' = K' ρ ρ') :
+    pairKernelQuarticNumerator q F T K =
+      pairKernelQuarticNumerator q F T K' := by
+  unfold pairKernelQuarticNumerator
+  rw [pairKernelCyclicTrace1_congr hK,
+    pairKernelCyclicTrace2_congr hK,
+    pairKernelCyclicTrace3_congr hK,
+    pairKernelCyclicTrace4_congr hK]
+
 end QuarticTransfer
 end Zeta85
 end RH
