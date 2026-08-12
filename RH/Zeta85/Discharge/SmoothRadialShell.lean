@@ -339,6 +339,126 @@ theorem shrinkingProfileWindow_sq_eq_profile
     nlinarith
   · simpa [Real.dist_eq] using hu
 
+
+/-- A point at or beyond the bump's outer radius is exactly zero. -/
+theorem profiledBumpWindow_eq_zero_of_rOut_le_abs
+    (v : ℝ → ℝ) (L : ℝ) (b : ContDiffBump (0 : ℝ))
+    (u : ℝ) (hu : b.rOut ≤ |u|) :
+    profiledBumpWindow v L b u = 0 := by
+  have hbu : b u = 0 := by
+    apply b.zero_of_le_dist
+    simpa [Real.dist_eq] using hu
+  simp [profiledBumpWindow, hbu]
+
+/-- Away from the two half-period endpoints, the shrinking window energy
+converges pointwise to the frozen supported profile.  In fact, at every
+strict interior point the sequence is eventually exactly equal to the
+profile. -/
+theorem tendsto_shrinkingProfileWindow_sq
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (u : ℝ) (hboundary : |u| ≠ L / 2) :
+    Tendsto
+      (fun n : ℕ => shrinkingProfileWindow v L n hL u ^ 2)
+      Filter.atTop
+      (nhds
+        (@QuarticGramFamily.supportedFullProfile v (u / L))) := by
+  by_cases hin : |u| < L / 2
+  · have habsScaled : |u / L| ≤ (1 : ℝ) / 2 := by
+      rw [abs_div, abs_of_pos hL]
+      apply (div_le_iff₀ hL).2
+      nlinarith
+    have hmem :
+        u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2) :=
+      abs_le.mp habsScaled
+    have htarget :
+        @QuarticGramFamily.supportedFullProfile v (u / L) =
+          v (u / L) := by
+      rw [QuarticGramFamily.supportedFullProfile,
+        Set.indicator_of_mem hmem]
+    let gap : ℝ := L / 2 - |u|
+    have hgap : 0 < gap := by
+      dsimp [gap]
+      linarith
+    obtain ⟨N, hN⟩ := exists_nat_gt (L / gap)
+    have hNmul : L < (N : ℝ) * gap :=
+      (div_lt_iff₀ hgap).1 hN
+    have hevent :
+        ∀ᶠ n : ℕ in Filter.atTop,
+          shrinkingProfileWindow v L n hL u ^ 2 =
+            v (u / L) := by
+      filter_upwards [eventually_ge_atTop N] with n hn
+      have hnR : (N : ℝ) ≤ (n : ℝ) := by
+        exact_mod_cast hn
+      have hmul :
+          (N : ℝ) * gap ≤ ((n : ℝ) + 3) * gap := by
+        nlinarith
+      have hfrac :
+          L / ((n : ℝ) + 3) < gap := by
+        apply (div_lt_iff₀ (by positivity : 0 < (n : ℝ) + 3)).2
+        exact lt_of_lt_of_le hNmul hmul
+      have huinner :
+          |u| ≤ (shrinkingHalfPeriodBump L n hL).rIn := by
+        dsimp [shrinkingHalfPeriodBump, gap] at hfrac ⊢
+        linarith
+      exact shrinkingProfileWindow_sq_eq_profile
+        v L n hL hposProfile u huinner
+    rw [htarget]
+    exact tendsto_const_nhds.congr' hevent.symm
+  · have houtside : L / 2 < |u| := by
+      exact lt_of_le_of_ne (le_of_not_gt hin) hboundary.symm
+    have hnotmem :
+        u / L ∉ Icc (-(1 : ℝ) / 2) (1 / 2) := by
+      intro hmem
+      have hscaled : |u / L| ≤ (1 : ℝ) / 2 :=
+        abs_le.mpr hmem
+      rw [abs_div, abs_of_pos hL] at hscaled
+      have hu : |u| ≤ L / 2 := by
+        have hmul := (div_le_iff₀ hL).1 hscaled
+        nlinarith
+      exact (not_le_of_gt houtside) hu
+    have htarget :
+        @QuarticGramFamily.supportedFullProfile v (u / L) = 0 := by
+      rw [QuarticGramFamily.supportedFullProfile,
+        Set.indicator_of_not_mem hnotmem]
+    have hzero :
+        ∀ n : ℕ, shrinkingProfileWindow v L n hL u = 0 := by
+      intro n
+      unfold shrinkingProfileWindow
+      apply profiledBumpWindow_eq_zero_of_rOut_le_abs
+      exact le_trans
+        (shrinkingHalfPeriodBump_rOut_lt L n hL).le
+        houtside.le
+    rw [htarget]
+    simpa [hzero] using
+      (tendsto_const_nhds :
+        Tendsto (fun _ : ℕ => (0 : ℝ))
+          Filter.atTop (nhds 0))
+
+/-- The two exceptional endpoints are null, so the shrinking smooth energies
+converge to the frozen profile almost everywhere. -/
+theorem ae_tendsto_shrinkingProfileWindow_sq
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    ∀ᵐ u : ℝ ∂volume,
+      Tendsto
+        (fun n : ℕ => shrinkingProfileWindow v L n hL u ^ 2)
+        Filter.atTop
+        (nhds
+          (@QuarticGramFamily.supportedFullProfile v (u / L))) := by
+  filter_upwards [
+    volume.ae_ne (-L / 2),
+    volume.ae_ne (L / 2)
+  ] with u hleft hright
+  apply tendsto_shrinkingProfileWindow_sq v L hL hposProfile u
+  intro hb
+  by_cases hu : 0 ≤ u
+  · apply hright
+    simpa [abs_of_nonneg hu] using hb
+  · apply hleft
+    rw [abs_of_nonpos (le_of_not_ge hu)] at hb
+    linarith
+
 end SmoothRadialShell
 end Zeta85
 end RH
