@@ -130,7 +130,13 @@ theorem complexGaux_zero (heven : ∀ u, φ (-u) = φ u) :
   rw [paperFT_def, integral_const_mul_C]
   congr 1
   congr 1 with u
-  simp only [mul_zero, zero_sub, heven, map_neg, map_zero, sub_zero]
+  simp only [mul_zero, zero_sub, heven]
+  have hneg : ((↑(-u) : ℂ)) = -(↑u : ℂ) := by
+    norm_num
+  have hzero : ((↑(0 : ℝ) : ℂ)) = 0 := by
+    norm_num
+  rw [hneg, hzero]
+  congr 2
   ring
 
 /-- Exponential bookkeeping with two genuinely complex frequencies. -/
