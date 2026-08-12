@@ -1621,6 +1621,175 @@ theorem zeta_eps_transfer_9383
   simpa only [zeta_N, zeta_N0s] using
     (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero hfactored)
 
+
+/-! ## Normalize each pair contraction before forming zero cycles -/
+
+/-- Hat-normalized scalar contraction of one ordered zero pair. -/
+def normalizedZeroPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ ρ' : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) * zeroPairKernel F T ρ ρ'
+
+/-- The factored cycles with every hat normalization absorbed into its pair
+kernel before the cycle products are formed. -/
+def normalizedFactoredZeroCycle1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
+  normalizedZeroPairKernel F T ρ ρ * (Z.mult ρ : ℂ)
+
+def normalizedFactoredZeroCycle2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ : ℂ) : ℂ :=
+  normalizedZeroPairKernel F T ρ₁ ρ₂ *
+    (normalizedZeroPairKernel F T ρ₁ ρ₂ *
+      ((Z.mult ρ₁ : ℂ) * (Z.mult ρ₂ : ℂ)))
+
+def normalizedFactoredZeroCycle3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
+  normalizedZeroPairKernel F T ρ₁ ρ₃ *
+    (normalizedZeroPairKernel F T ρ₂ ρ₃ *
+      (normalizedZeroPairKernel F T ρ₁ ρ₂ *
+        ((Z.mult ρ₁ : ℂ) *
+          ((Z.mult ρ₂ : ℂ) * (Z.mult ρ₃ : ℂ)))))
+
+def normalizedFactoredZeroCycle4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
+  normalizedZeroPairKernel F T ρ₁ ρ₄ *
+    (normalizedZeroPairKernel F T ρ₂ ρ₃ *
+      (normalizedZeroPairKernel F T ρ₁ ρ₂ *
+        (normalizedZeroPairKernel F T ρ₃ ρ₄ *
+          ((Z.mult ρ₁ : ℂ) *
+            ((Z.mult ρ₂ : ℂ) *
+              ((Z.mult ρ₃ : ℂ) * (Z.mult ρ₄ : ℂ)))))))
+
+theorem factoredZeroCycle1_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} {ρ : ℂ} :
+    factoredZeroCycle1 F T ρ =
+      normalizedFactoredZeroCycle1 F T ρ := by
+  simp only [factoredZeroCycle1, normalizedFactoredZeroCycle1,
+    normalizedZeroPairKernel, zeroEdgeWeight]
+  ring_nf
+
+theorem factoredZeroCycle2_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} {ρ₁ ρ₂ : ℂ} :
+    factoredZeroCycle2 F T ρ₁ ρ₂ =
+      normalizedFactoredZeroCycle2 F T ρ₁ ρ₂ := by
+  simp only [factoredZeroCycle2, normalizedFactoredZeroCycle2,
+    normalizedZeroPairKernel, zeroEdgeWeight]
+  ring_nf
+
+theorem factoredZeroCycle3_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    {ρ₁ ρ₂ ρ₃ : ℂ} :
+    factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ =
+      normalizedFactoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ := by
+  simp only [factoredZeroCycle3, normalizedFactoredZeroCycle3,
+    normalizedZeroPairKernel, zeroEdgeWeight]
+  ring_nf
+
+theorem factoredZeroCycle4_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    {ρ₁ ρ₂ ρ₃ ρ₄ : ℂ} :
+    factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
+      normalizedFactoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
+  simp only [factoredZeroCycle4, normalizedFactoredZeroCycle4,
+    normalizedZeroPairKernel, zeroEdgeWeight]
+  ring_nf
+
+def normalizedFactoredZeroKernelCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T,
+    normalizedFactoredZeroCycle1 F T ρ)
+
+def normalizedFactoredZeroKernelCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    normalizedFactoredZeroCycle2 F T ρ₁ ρ₂)
+
+def normalizedFactoredZeroKernelCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T,
+      normalizedFactoredZeroCycle3 F T ρ₁ ρ₂ ρ₃)
+
+def normalizedFactoredZeroKernelCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      normalizedFactoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+theorem factoredZeroKernelCyclicTrace1_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    factoredZeroKernelCyclicTrace1 F T =
+      normalizedFactoredZeroKernelCyclicTrace1 F T := by
+  simp only [factoredZeroKernelCyclicTrace1,
+    normalizedFactoredZeroKernelCyclicTrace1,
+    factoredZeroCycle1_eq_normalized]
+
+theorem factoredZeroKernelCyclicTrace2_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    factoredZeroKernelCyclicTrace2 F T =
+      normalizedFactoredZeroKernelCyclicTrace2 F T := by
+  simp only [factoredZeroKernelCyclicTrace2,
+    normalizedFactoredZeroKernelCyclicTrace2,
+    factoredZeroCycle2_eq_normalized]
+
+theorem factoredZeroKernelCyclicTrace3_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    factoredZeroKernelCyclicTrace3 F T =
+      normalizedFactoredZeroKernelCyclicTrace3 F T := by
+  simp only [factoredZeroKernelCyclicTrace3,
+    normalizedFactoredZeroKernelCyclicTrace3,
+    factoredZeroCycle3_eq_normalized]
+
+theorem factoredZeroKernelCyclicTrace4_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    factoredZeroKernelCyclicTrace4 F T =
+      normalizedFactoredZeroKernelCyclicTrace4 F T := by
+  simp only [factoredZeroKernelCyclicTrace4,
+    normalizedFactoredZeroKernelCyclicTrace4,
+    factoredZeroCycle4_eq_normalized]
+
+def normalizedFactoredZeroKernelQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  let u := uncenteredQuartic q
+  u.p0 * (F.blockDim T : ℝ) +
+    u.p1 * normalizedFactoredZeroKernelCyclicTrace1 F T +
+    u.p2 * normalizedFactoredZeroKernelCyclicTrace2 F T +
+    u.p3 * normalizedFactoredZeroKernelCyclicTrace3 F T +
+    u.p4 * normalizedFactoredZeroKernelCyclicTrace4 F T
+
+theorem factoredZeroKernelQuarticNumerator_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    factoredZeroKernelQuarticNumerator q F T =
+      normalizedFactoredZeroKernelQuarticNumerator q F T := by
+  simp only [factoredZeroKernelQuarticNumerator,
+    normalizedFactoredZeroKernelQuarticNumerator,
+    factoredZeroKernelCyclicTrace1_eq_normalized,
+    factoredZeroKernelCyclicTrace2_eq_normalized,
+    factoredZeroKernelCyclicTrace3_eq_normalized,
+    factoredZeroKernelCyclicTrace4_eq_normalized]
+
 end QuarticTransfer
 end Zeta85
 end RH
