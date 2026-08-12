@@ -310,6 +310,53 @@ theorem rung9506_cumulative_aligned_virtual
     (AlignedIsometricLayout.toIsometricData L)
     hvirtual.toIsometric
 
+
+/-! ## Canonical aligned analysis -/
+
+/-- The aligned physical family determines its virtual atom factorization
+canonically; only the resulting terminal lower bound remains analytic. -/
+theorem rung8686_aligned_canonical
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual
+        (AlignedIsometricLayout.canonicalAtomFactorization L)) :
+    Rung8686_statement :=
+  rung8686_aligned_virtual hfull hzero L
+    (AlignedIsometricLayout.canonicalAtomFactorization L) hvirtual
+
+/-- The 95.06 dyadic rung with the atom factorization eliminated by
+orthogonal analysis. -/
+theorem rung9506_aligned_canonical
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual
+        (AlignedIsometricLayout.canonicalAtomFactorization L)) :
+    Rung9506_statement :=
+  rung9506_aligned_virtual hfull hzero L
+    (AlignedIsometricLayout.canonicalAtomFactorization L) hvirtual
+
+/-- The same canonical route for the cumulative frozen 95.06 statement. -/
+theorem rung9506_cumulative_aligned_canonical
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual
+        (AlignedIsometricLayout.canonicalAtomFactorization L)) :
+    Rung9506_cumulative_statement :=
+  rung9506_cumulative_aligned_virtual hfull hzero L
+    (AlignedIsometricLayout.canonicalAtomFactorization L) hvirtual
+
 end Zeta85
 end RH
 
