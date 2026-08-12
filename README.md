@@ -139,8 +139,7 @@ run comparator as described in [`comparator/README.md`](comparator/README.md).
 The base-repository results described in the intervening sections above are
 **unconditional**. The directory [`RH/`](RH/) adds a separate,
 **conditional** legacy layer: a formalization of a research run extending the
-2 − 1/c₁* = 0.6725007… result to 0.8500235…, in which the prime-side inputs the
-run could not establish are isolated as four named axioms in the single file
+2 − 1/c₁* = 0.6725007… result to 0.8500235…, in which the surviving inconsistent input is isolated as one named axiom in the single file
 [`RH/Zeta85/Hypotheses.lean`](RH/Zeta85/Hypotheses.lean).  The separate
 Prop-structured quartic headlines are listed in the top ladder; they are not
 part of this trusted-statement comparator topic.  Nothing under
@@ -201,8 +200,8 @@ cycle-5 route's `(log T)^C` does not fit the trace budget**. See `AXIOMS.md` §4
 [`VALIDATION.md`](VALIDATION.md) — build, `sorry`/axiom audits, statement-equality check.
 [`docs/REUSE_MAP.md`](docs/REUSE_MAP.md) — every `Zeta23` declaration the layer reuses.
 
-Comparator topic `Zeta85` (`comparator/config-zeta85.json`, eight statements): unlike every other
-topic it is **conditional**, so its `permitted_axioms` lists the four axioms above alongside
+Comparator topic `Zeta85` (`comparator/config-zeta85.json`, sixteen statements): unlike every other
+topic it is **conditional**, so its `permitted_axioms` lists the single `shiu_majorant` axiom alongside
 `propext`, `Classical.choice`, `Quot.sound`. That is a deliberate, documented deviation from rule (5)
 of `comparator/README.md`; see `VALIDATION.md` §7.
 
