@@ -382,17 +382,13 @@ or theorem statement changes.
 'zeta85_rung_support_101_over_100' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated,
- RH.Zeta85.Hypotheses.windowCost_101]
+ RH.Zeta85.Hypotheses.traceTransfer_saturated]
 'zeta85_rung_support_101_over_100_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
- RH.Zeta85.Hypotheses.traceTransfer_saturated,
- RH.Zeta85.Hypotheses.windowCost_101]
+ RH.Zeta85.Hypotheses.traceTransfer_saturated]
 ```
 
 ### 1.2 The 0.797 theorem (support 5/4)
@@ -401,14 +397,12 @@ or theorem statement changes.
 'zeta85_rung_support_5_over_4' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
  RH.Zeta85.Hypotheses.traceTransfer_saturated,
  RH.Zeta85.Hypotheses.windowCost_125]
 'zeta85_rung_support_5_over_4_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_error_bound,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4,
  RH.Zeta85.Hypotheses.traceTransfer_saturated,
  RH.Zeta85.Hypotheses.windowCost_125]
@@ -420,28 +414,24 @@ or theorem statement changes.
 'zeta85_simple_on_critical_line' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_poisson_blocks,
  RH.Zeta85.Hypotheses.shiu_majorant,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2,
  RH.Zeta85.Hypotheses.traceTransfer_saturated]
 'zeta85_simple_on_critical_line_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_poisson_blocks,
  RH.Zeta85.Hypotheses.shiu_majorant,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2,
  RH.Zeta85.Hypotheses.traceTransfer_saturated]
 'zeta85_eighty_five_percent' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_poisson_blocks,
  RH.Zeta85.Hypotheses.shiu_majorant,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2,
  RH.Zeta85.Hypotheses.traceTransfer_saturated]
 'zeta85_eighty_five_percent_cumulative' depends on axioms: [propext,
  Classical.choice,
  Quot.sound,
- RH.Zeta85.Hypotheses.bblr_poisson_blocks,
  RH.Zeta85.Hypotheses.shiu_majorant,
  RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2,
  RH.Zeta85.Hypotheses.traceTransfer_saturated]
