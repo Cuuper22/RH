@@ -33,7 +33,7 @@ The existing `RS1996ZetaInputs.theorem31` and the real-frequency `k = 2`
 Poisson/EndsCore API do not provide those steps.
 -/
 
-open MeasureTheory Set
+open MeasureTheory Set Filter
 open scoped BigOperators Matrix ContDiff Convolution
 
 noncomputable section
@@ -41,6 +41,8 @@ noncomputable section
 namespace RH
 namespace Zeta85
 namespace RSReduction
+
+open TopHatMoments
 
 /-! ## The gauge-fixed weighted cyclic symbol -/
 
@@ -55,6 +57,413 @@ def weightedCyclicSymbol {k : ℕ} (mu : ℝ) (r : ℝ -> ℝ)
     (xi : Fin k -> ℝ) : ℂ :=
   (mu * ∫ x : ℝ,
     ∏ a : Fin k, r (x + cyclicPartialSum xi a / mu) : ℝ)
+
+private theorem abs_finsetProd_sub_finsetProd_le
+    {ι : Type*} [DecidableEq ι] (s : Finset ι)
+    (f g : ι → ℝ) (C : ℝ) (hC : 1 ≤ C)
+    (hf : ∀ i ∈ s, |f i| ≤ C) (hg : ∀ i ∈ s, |g i| ≤ C) :
+    |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| ≤
+      C ^ s.card * ∑ i ∈ s, |f i - g i| := by
+  have hC0 : 0 ≤ C := le_trans zero_le_one hC
+  induction s using Finset.induction_on with
+  | empty => simp
+  | @insert a s ha ih =>
+      have hfa := hf a (Finset.mem_insert_self a s)
+      have hga := hg a (Finset.mem_insert_self a s)
+      have hfs : ∀ i ∈ s, |f i| ≤ C := fun i hi =>
+        hf i (Finset.mem_insert_of_mem hi)
+      have hgs : ∀ i ∈ s, |g i| ≤ C := fun i hi =>
+        hg i (Finset.mem_insert_of_mem hi)
+      have hprodg : |∏ i ∈ s, g i| ≤ C ^ s.card := by
+        rw [Finset.abs_prod]
+        calc
+          (∏ i ∈ s, |g i|) ≤ ∏ _i ∈ s, C := by
+            apply Finset.prod_le_prod
+            · intro i hi
+              exact abs_nonneg _
+            · intro i hi
+              exact hgs i hi
+          _ = C ^ s.card := by simp
+      rw [Finset.prod_insert ha, Finset.prod_insert ha,
+        Finset.sum_insert ha, Finset.card_insert_of_notMem ha]
+      calc
+        |f a * (∏ i ∈ s, f i) - g a * ∏ i ∈ s, g i| =
+            |f a * ((∏ i ∈ s, f i) - ∏ i ∈ s, g i) +
+              (f a - g a) * ∏ i ∈ s, g i| := by
+          congr 1
+          ring
+        _ ≤ |f a * ((∏ i ∈ s, f i) - ∏ i ∈ s, g i)| +
+            |(f a - g a) * ∏ i ∈ s, g i| := abs_add_le _ _
+        _ = |f a| * |(∏ i ∈ s, f i) - ∏ i ∈ s, g i| +
+            |f a - g a| * |∏ i ∈ s, g i| := by rw [abs_mul, abs_mul]
+        _ ≤ C * (C ^ s.card * ∑ i ∈ s, |f i - g i|) +
+            |f a - g a| * C ^ s.card := by
+          gcongr
+          exact ih hfs hgs
+        _ ≤ C ^ (s.card + 1) *
+            (|f a - g a| + ∑ i ∈ s, |f i - g i|) := by
+          rw [pow_succ]
+          have hnonneg : 0 ≤ |f a - g a| * C ^ s.card * (C - 1) :=
+            mul_nonneg (mul_nonneg (abs_nonneg _) (pow_nonneg hC0 _))
+              (sub_nonneg.mpr hC)
+          nlinarith
+
+def smoothTopHat (p w x : ℝ) : ℝ :=
+  (1 / p) * Zeta23.Taper.phi Zeta23.Taper.rhoTwo p w x
+
+theorem smoothTopHat_contDiff {p w : ℝ} (hw : 0 < w) (hwp : 2 * w ≤ p) :
+    ContDiff ℝ ∞ (smoothTopHat p w) := by
+  have hphi : ContDiff ℝ ∞
+      (Zeta23.Taper.phi Zeta23.Taper.rhoTwo p w) := by
+    have hprod : Zeta23.Taper.phi Zeta23.Taper.rhoTwo p w =
+        Zeta23.Taper.fP Zeta23.Taper.rhoTwo p w *
+          Zeta23.Taper.fM Zeta23.Taper.rhoTwo p w := by
+      funext x
+      exact Zeta23.Taper.phi_eq_mul
+        Zeta23.Taper.rhoTwo_taper hw hwp x
+    rw [hprod]
+    exact (Zeta23.Taper.fP_contDiff
+      Zeta23.Taper.gevreyProfile_rhoTwo).mul
+        (Zeta23.Taper.fM_contDiff
+          Zeta23.Taper.gevreyProfile_rhoTwo)
+  unfold smoothTopHat
+  exact contDiff_const.mul hphi
+
+theorem smoothTopHat_hasCompactSupport {p w : ℝ} (hw : 0 < w) :
+    HasCompactSupport (smoothTopHat p w) := by
+  apply (Zeta23.Taper.phi_hasCompactSupport
+    (L := p) Zeta23.Taper.rhoTwo_taper hw).mono
+  intro x hx
+  simp only [Function.mem_support] at hx ⊢
+  intro hphi
+  apply hx
+  simp [smoothTopHat, hphi]
+
+theorem smoothTopHat_support {p w : ℝ} (hw : 0 < w) :
+    Function.support (smoothTopHat p w) ⊆ topHatSupport p := by
+  intro x hx
+  have hphi : x ∈ Function.support
+      (Zeta23.Taper.phi Zeta23.Taper.rhoTwo p w) := by
+    intro hzero
+    apply hx
+    simp [smoothTopHat, hzero]
+  have hbound := Zeta23.Taper.phi_support_subset
+    Zeta23.Taper.rhoTwo_taper hw hphi
+  unfold topHatSupport
+  constructor <;> linarith [hbound.1, hbound.2]
+
+theorem smoothTopHat_nonneg {p w x : ℝ} (hp : 0 < p) :
+    0 ≤ smoothTopHat p w x := by
+  unfold smoothTopHat
+  exact mul_nonneg (one_div_nonneg.mpr hp.le)
+    (Zeta23.Taper.phi_nonneg Zeta23.Taper.rhoTwo_taper x)
+
+theorem smoothTopHat_le {p w x : ℝ} (hp : 0 < p) :
+    smoothTopHat p w x ≤ 1 / p := by
+  unfold smoothTopHat
+  simpa only [mul_one] using
+    (mul_le_mul_of_nonneg_left
+      (Zeta23.Taper.phi_le_one
+        (L := p) (w := w) Zeta23.Taper.rhoTwo_taper x)
+      (one_div_nonneg.mpr hp.le))
+
+theorem smoothTopHat_eq_topHat_of_inner {p w x : ℝ}
+    (hp : 0 < p) (hw : 0 < w) (hx : |x| ≤ p / 2 - w) :
+    smoothTopHat p w x = topHat p x := by
+  rw [smoothTopHat, Zeta23.Taper.phi_eq_one
+    Zeta23.Taper.rhoTwo_taper hw hx]
+  have hsupp : x ∈ topHatSupport p := by
+    unfold topHatSupport
+    constructor <;> linarith [le_abs_self x, neg_le_abs x]
+  simp [topHat, hsupp]
+
+theorem smoothTopHat_eq_zero_of_outer {p w x : ℝ}
+    (hw : 0 < w) (hx : p / 2 ≤ |x|) :
+    smoothTopHat p w x = 0 := by
+  rw [smoothTopHat, Zeta23.Taper.phi_eq_zero
+    Zeta23.Taper.rhoTwo_taper hw hx, mul_zero]
+
+theorem integral_abs_smoothTopHat_sub_topHat_le {p w : ℝ}
+    (hp : 0 < p) (hw : 0 < w) (hwp : 2 * w ≤ p) :
+    (∫ x : ℝ, |smoothTopHat p w x - topHat p x|) ≤ 2 * w / p := by
+  let leftRamp : Set ℝ := Set.Icc (-p / 2) (-p / 2 + w)
+  let rightRamp : Set ℝ := Set.Icc (p / 2 - w) (p / 2)
+  let c : ℝ := 1 / p
+  have hc : 0 ≤ c := by dsimp [c]; positivity
+  have htopNonneg (x : ℝ) : 0 ≤ topHat p x := by
+    by_cases hx : x ∈ topHatSupport p
+    · rw [topHat, Set.indicator_of_mem hx]
+      exact one_div_nonneg.mpr hp.le
+    · rw [topHat, Set.indicator_of_notMem hx]
+  have htopLe (x : ℝ) : topHat p x ≤ c := by
+    by_cases hx : x ∈ topHatSupport p <;> simp [topHat, hx, c, hp.le]
+  have hglobal (x : ℝ) :
+      |smoothTopHat p w x - topHat p x| ≤ c := by
+    rw [abs_sub_le_iff]
+    constructor <;>
+      linarith [smoothTopHat_nonneg (p := p) (w := w) (x := x) hp,
+        smoothTopHat_le (p := p) (w := w) (x := x) hp,
+        htopNonneg x, htopLe x]
+  have hpoint (x : ℝ) :
+      |smoothTopHat p w x - topHat p x| ≤
+        leftRamp.indicator (fun _ => c) x +
+          rightRamp.indicator (fun _ => c) x := by
+    by_cases hxleft : x ∈ leftRamp
+    · rw [Set.indicator_of_mem hxleft]
+      have hrnonneg : 0 ≤ rightRamp.indicator (fun _ => c) x := by
+        by_cases hx : x ∈ rightRamp <;> simp [hx, hc]
+      exact (hglobal x).trans (le_add_of_nonneg_right hrnonneg)
+    by_cases hxright : x ∈ rightRamp
+    · rw [Set.indicator_of_mem hxright]
+      have hlnonneg : 0 ≤ leftRamp.indicator (fun _ => c) x := by
+        by_cases hx : x ∈ leftRamp <;> simp [hx, hc]
+      exact (hglobal x).trans (le_add_of_nonneg_left hlnonneg)
+    rw [Set.indicator_of_notMem hxleft,
+      Set.indicator_of_notMem hxright, zero_add]
+    have heq : smoothTopHat p w x = topHat p x := by
+      by_cases hinner : |x| ≤ p / 2 - w
+      · exact smoothTopHat_eq_topHat_of_inner hp hw hinner
+      · have houter : p / 2 < |x| := by
+          by_contra hnouter
+          have habsUpper : |x| ≤ p / 2 := le_of_not_gt hnouter
+          have habsLower : p / 2 - w < |x| := lt_of_not_ge hinner
+          rcases le_total x 0 with hxneg | hxpos
+          · apply hxleft
+            dsimp [leftRamp]
+            rw [abs_of_nonpos hxneg] at habsLower habsUpper
+            constructor <;> linarith
+          · apply hxright
+            dsimp [rightRamp]
+            rw [abs_of_nonneg hxpos] at habsLower habsUpper
+            constructor <;> linarith
+        have hsmooth : smoothTopHat p w x = 0 :=
+          smoothTopHat_eq_zero_of_outer hw houter.le
+        have hnotSupp : x ∉ topHatSupport p := by
+          intro hxs
+          unfold topHatSupport at hxs
+          have : |x| ≤ p / 2 := by
+            rw [abs_le]
+            constructor <;> linarith [hxs.1, hxs.2]
+          linarith
+        rw [hsmooth, topHat, Set.indicator_of_notMem hnotSupp]
+    rw [heq, sub_self, abs_zero]
+  have hleftInt : Integrable (leftRamp.indicator fun _ => c) :=
+    (integrableOn_const (s := leftRamp) (by simp [leftRamp])).integrable_indicator
+      (by simp [leftRamp])
+  have hrightInt : Integrable (rightRamp.indicator fun _ => c) :=
+    (integrableOn_const (s := rightRamp) (by simp [rightRamp])).integrable_indicator
+      (by simp [rightRamp])
+  calc
+    (∫ x : ℝ, |smoothTopHat p w x - topHat p x|) ≤
+        ∫ x : ℝ, leftRamp.indicator (fun _ => c) x +
+          rightRamp.indicator (fun _ => c) x :=
+      integral_mono_of_nonneg (Eventually.of_forall fun _ => abs_nonneg _)
+        (hleftInt.add hrightInt) (Eventually.of_forall hpoint)
+    _ = c * w + c * w := by
+      rw [integral_add hleftInt hrightInt,
+        integral_indicator_const _ (by simp [leftRamp]),
+        integral_indicator_const _ (by simp [rightRamp])]
+      rw [Real.volume_real_Icc_of_le (by linarith),
+        Real.volume_real_Icc_of_le (by linarith)]
+      simp only [smul_eq_mul]
+      ring
+    _ = 2 * w / p := by dsimp [c]; ring
+
+private theorem abs_smoothTopHat_sub_topHat_integrable {p w : ℝ}
+    (hp : 0 < p) (hw : 0 < w) (hwp : 2 * w ≤ p) :
+    Integrable (fun x : ℝ => |smoothTopHat p w x - topHat p x|) := by
+  have hsmooth : Integrable (smoothTopHat p w) := by
+    unfold smoothTopHat
+    exact (Zeta23.Taper.phi_integrable
+      Zeta23.Taper.rhoTwo_taper hw hwp).const_mul _
+  have htop : Integrable (topHat p) := by
+    unfold topHat topHatSupport
+    exact (integrableOn_const (s := Set.Icc (-p / 2) (p / 2))
+      (by simp [Real.volume_Icc])).integrable_indicator measurableSet_Icc
+  exact (hsmooth.sub htop).abs
+
+theorem integral_abs_smoothTopHat_cyclicProduct_sub_topHat_le
+    {p w : ℝ} (hp : 0 < p) (hw : 0 < w) (hwp : 2 * w ≤ p)
+    {k : ℕ} (shift : Fin k → ℝ) :
+    (∫ x : ℝ, |(∏ a : Fin k, smoothTopHat p w (x + shift a)) -
+        ∏ a : Fin k, topHat p (x + shift a)|) ≤
+      (max 1 (1 / p)) ^ k * k * (2 * w / p) := by
+  let C : ℝ := max 1 (1 / p)
+  have hC : 1 ≤ C := le_max_left _ _
+  have hC0 : 0 ≤ C := le_trans zero_le_one hC
+  have hsmoothBound (z : ℝ) : |smoothTopHat p w z| ≤ C := by
+    rw [abs_of_nonneg (smoothTopHat_nonneg hp)]
+    exact (smoothTopHat_le hp).trans (le_max_right _ _)
+  have htopBound (z : ℝ) : |topHat p z| ≤ C := by
+    by_cases hz : z ∈ topHatSupport p
+    · simp [topHat, hz, abs_of_pos hp, C]
+    · simp [topHat, hz, C, hC0]
+  have hpoint (x : ℝ) :
+      |(∏ a : Fin k, smoothTopHat p w (x + shift a)) -
+          ∏ a : Fin k, topHat p (x + shift a)| ≤
+        C ^ k * ∑ a : Fin k,
+          |smoothTopHat p w (x + shift a) - topHat p (x + shift a)| := by
+    simpa only [Finset.card_univ, Fintype.card_fin] using
+      (abs_finsetProd_sub_finsetProd_le Finset.univ
+        (fun a : Fin k => smoothTopHat p w (x + shift a))
+        (fun a : Fin k => topHat p (x + shift a)) C hC
+        (fun a _ => hsmoothBound _) (fun a _ => htopBound _))
+  have hbase := abs_smoothTopHat_sub_topHat_integrable hp hw hwp
+  have hshiftInt (a : Fin k) : Integrable (fun x : ℝ =>
+      |smoothTopHat p w (x + shift a) - topHat p (x + shift a)|) :=
+    hbase.comp_add_right (shift a)
+  have hsumInt : Integrable (fun x : ℝ =>
+      ∑ a : Fin k,
+        |smoothTopHat p w (x + shift a) - topHat p (x + shift a)|) :=
+    integrable_finset_sum Finset.univ (fun a _ => hshiftInt a)
+  calc
+    (∫ x : ℝ, |(∏ a : Fin k, smoothTopHat p w (x + shift a)) -
+        ∏ a : Fin k, topHat p (x + shift a)|) ≤
+      ∫ x : ℝ, C ^ k * ∑ a : Fin k,
+        |smoothTopHat p w (x + shift a) - topHat p (x + shift a)| :=
+      integral_mono_of_nonneg (Eventually.of_forall fun _ => abs_nonneg _)
+        (hsumInt.const_mul _) (Eventually.of_forall hpoint)
+    _ = C ^ k * ∑ a : Fin k,
+        ∫ x : ℝ, |smoothTopHat p w (x + shift a) -
+          topHat p (x + shift a)| := by
+      rw [integral_const_mul, integral_finset_sum Finset.univ
+        (fun a _ => hshiftInt a)]
+    _ ≤ C ^ k * ∑ _a : Fin k, (2 * w / p) := by
+      gcongr with a
+      rw [integral_add_right_eq_self
+        (fun x : ℝ => |smoothTopHat p w x - topHat p x|) (shift a)]
+      exact integral_abs_smoothTopHat_sub_topHat_le hp hw hwp
+    _ = (max 1 (1 / p)) ^ k * k * (2 * w / p) := by
+      dsimp [C]
+      simp
+      ring
+
+theorem cyclicProduct_integrable_of_continuous_compact
+    {k : ℕ} (hk : 1 ≤ k) (mu : ℝ) (r : ℝ → ℝ)
+    (hr : Continuous r) (hrc : HasCompactSupport r)
+    (xi : Fin k → ℝ) :
+    Integrable (fun x : ℝ =>
+      ∏ a : Fin k, r (x + cyclicPartialSum xi a / mu)) := by
+  apply Continuous.integrable_of_hasCompactSupport
+  · fun_prop
+  · let a0 : Fin k := ⟨0, hk⟩
+    have ha0 : cyclicPartialSum xi a0 = 0 := by
+      unfold cyclicPartialSum
+      apply Finset.sum_eq_zero
+      intro j hj
+      have hjlt : j < a0 := (Finset.mem_filter.mp hj).2
+      have : ¬j < a0 := by
+        intro h
+        change j.val < 0 at h
+        omega
+      exact (this hjlt).elim
+    apply hrc.mono
+    intro x hx
+    simp only [Function.mem_support] at hx ⊢
+    intro hr0
+    apply hx
+    apply Finset.prod_eq_zero (Finset.mem_univ a0)
+    rw [ha0, zero_div, add_zero, hr0]
+
+private theorem topHat_cyclicProduct_integrable
+    {p : ℝ} (hp : 0 < p) {k : ℕ} (hk : 1 ≤ k)
+    (mu : ℝ) (xi : Fin k → ℝ) :
+    Integrable (fun x : ℝ =>
+      ∏ a : Fin k, topHat p
+        (x + cyclicPartialSum xi a / mu)) := by
+  let a0 : Fin k := ⟨0, hk⟩
+  let rest : Finset (Fin k) := Finset.univ.erase a0
+  have htop : Integrable (topHat p) := by
+    unfold topHat topHatSupport
+    exact (integrableOn_const (s := Set.Icc (-p / 2) (p / 2))
+      (by simp [Real.volume_Icc])).integrable_indicator measurableSet_Icc
+  have hmeas (a : Fin k) : AEStronglyMeasurable (fun x : ℝ =>
+      topHat p (x + cyclicPartialSum xi a / mu)) := by
+    unfold topHat topHatSupport
+    exact ((measurable_const.indicator measurableSet_Icc).comp
+      (by fun_prop)).aestronglyMeasurable
+  have hrestMeas : AEStronglyMeasurable (fun x : ℝ =>
+      ∏ a ∈ rest, topHat p
+        (x + cyclicPartialSum xi a / mu)) :=
+    Finset.aestronglyMeasurable_fun_prod rest
+      (fun a _ => hmeas a)
+  have hfactor (z : ℝ) : ‖topHat p z‖ ≤ 1 / p := by
+    by_cases hz : z ∈ topHatSupport p
+    · simp [topHat, hz, abs_of_pos hp]
+    · simp [topHat, hz, le_of_lt hp]
+  have hrestBound : ∀ᵐ x : ℝ,
+      ‖∏ a ∈ rest, topHat p
+        (x + cyclicPartialSum xi a / mu)‖ ≤
+          (1 / p) ^ rest.card := by
+    filter_upwards [] with x
+    rw [norm_prod]
+    calc
+      (∏ a ∈ rest, ‖topHat p
+          (x + cyclicPartialSum xi a / mu)‖) ≤
+          ∏ _a ∈ rest, (1 / p) := by
+        apply Finset.prod_le_prod
+        · intro a ha
+          exact norm_nonneg _
+        · intro a ha
+          exact hfactor _
+      _ = (1 / p) ^ rest.card := by simp
+  have hmul := htop.bdd_mul hrestMeas hrestBound
+  apply hmul.congr
+  filter_upwards [] with x
+  change (∏ a ∈ rest, topHat p
+      (x + cyclicPartialSum xi a / mu)) * topHat p x = _
+  rw [mul_comm]
+  have ha0 : cyclicPartialSum xi a0 = 0 := by
+    unfold cyclicPartialSum
+    apply Finset.sum_eq_zero
+    intro j hj
+    have hjlt : j < a0 := (Finset.mem_filter.mp hj).2
+    have : ¬j < a0 := by
+      intro h
+      change j.val < 0 at h
+      omega
+    exact (this hjlt).elim
+  have herase := Finset.mul_prod_erase Finset.univ
+    (fun a : Fin k => topHat p
+      (x + cyclicPartialSum xi a / mu)) (Finset.mem_univ a0)
+  rw [ha0, zero_div, add_zero] at herase
+  simpa only [rest] using herase
+
+theorem weightedCyclicSymbol_smoothTopHat_sub_topHat_le
+    {p w mu : ℝ} (hp : 0 < p) (hw : 0 < w) (hwp : 2 * w ≤ p)
+    (hmu : 0 < mu) {k : ℕ} (hk : 1 ≤ k) (xi : Fin k → ℝ) :
+    ‖weightedCyclicSymbol mu (smoothTopHat p w) xi -
+        weightedCyclicSymbol mu (topHat p) xi‖ ≤
+      mu * (max 1 (1 / p)) ^ k * k * (2 * w / p) := by
+  let shift : Fin k → ℝ := fun a => cyclicPartialSum xi a / mu
+  let smoothProduct : ℝ → ℝ := fun x =>
+    ∏ a : Fin k, smoothTopHat p w (x + shift a)
+  let sharpProduct : ℝ → ℝ := fun x =>
+    ∏ a : Fin k, topHat p (x + shift a)
+  have hsmoothInt : Integrable smoothProduct := by
+    simpa only [smoothProduct, shift] using
+      cyclicProduct_integrable_of_continuous_compact hk mu
+        (smoothTopHat p w) (smoothTopHat_contDiff hw hwp).continuous
+        (smoothTopHat_hasCompactSupport hw) xi
+  have hsharpInt : Integrable sharpProduct := by
+    simpa only [sharpProduct, shift] using
+      topHat_cyclicProduct_integrable hp hk mu xi
+  unfold weightedCyclicSymbol
+  change ‖((mu * ∫ x, smoothProduct x : ℝ) : ℂ) -
+      ((mu * ∫ x, sharpProduct x : ℝ) : ℂ)‖ ≤ _
+  rw [← Complex.ofReal_sub, Complex.norm_real, ← mul_sub,
+    Real.norm_eq_abs, abs_mul, abs_of_pos hmu,
+    ← integral_sub hsmoothInt hsharpInt]
+  calc
+    mu * |∫ x : ℝ, smoothProduct x - sharpProduct x| ≤
+        mu * ∫ x : ℝ, |smoothProduct x - sharpProduct x| :=
+      mul_le_mul_of_nonneg_left abs_integral_le_integral_abs hmu.le
+    _ ≤ mu * ((max 1 (1 / p)) ^ k * k * (2 * w / p)) := by
+      gcongr
+      simpa only [smoothProduct, sharpProduct, shift] using
+        (integral_abs_smoothTopHat_cyclicProduct_sub_topHat_le
+          hp hw hwp shift)
+    _ = mu * (max 1 (1 / p)) ^ k * k * (2 * w / p) := by ring
 
 /-- At zero frequency, formula (23) is `mu * integral r^k`. -/
 theorem weightedCyclicSymbol_zero {k : ℕ} (mu : ℝ) (r : ℝ -> ℝ) :
