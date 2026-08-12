@@ -1426,6 +1426,41 @@ theorem routedEnergyPairKernel_eq_physicalWindowEnergyPairKernel
       push_cast
       ring
 
+
+/-- Literal normalized Fourier transform of the total physical window energy. -/
+def normalizedPhysicalWindowEnergyPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((∫ u : ℝ, F.windowEnergy T u : ℂ)⁻¹) *
+    ∫ u : ℝ,
+      (F.windowEnergy T u : ℂ) *
+        Complex.exp
+          (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))
+
+/-- Once the two literal normalization factors are nonzero, the full support
+length cancels exactly and the routed energy kernel is the normalized Fourier
+transform of total physical energy. -/
+theorem physicalWindowEnergyPairKernel_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ)
+    (hfull : F.fullLength T ≠ 0)
+    (hmass : (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
+    (ρ ρ' : ℂ) :
+    physicalWindowEnergyPairKernel F T ρ ρ' =
+      normalizedPhysicalWindowEnergyPairKernel F T ρ ρ' := by
+  unfold physicalWindowEnergyPairKernel
+    normalizedPhysicalWindowEnergyPairKernel
+    QuarticGramFamily.hatDenominator
+  have hfullC : (F.fullLength T : ℂ) ≠ 0 := by
+    exact_mod_cast hfull
+  have hmassC :
+      (∫ u : ℝ, F.windowEnergy T u : ℂ) ≠ 0 := by
+    exact_mod_cast hmass
+  push_cast
+  field_simp [hfullC, hmassC]
+
 end AlignedIsometricLayout
 end Zeta85
 end RH
