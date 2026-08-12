@@ -372,7 +372,6 @@ theorem analyzeComplex_synthesizeComplex
     _ = virtual r := by
       simp only [Matrix.one_apply]
       push_cast
-      simp
 
 /-- With a common modulation period, orthogonal window synthesis passes
 linearly through the paper Fourier transform.  Thus the same finite mixer
@@ -688,7 +687,6 @@ theorem synthesizeComplex_analyzeComplex
     _ = physical j := by
       simp only [Matrix.one_apply]
       push_cast
-      simp
 
 end VirtualChannelMixer
 end Zeta85
