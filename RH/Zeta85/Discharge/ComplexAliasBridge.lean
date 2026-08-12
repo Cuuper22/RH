@@ -977,6 +977,46 @@ theorem channelEnergyIntegral_div_total_eq_ratio_mul_localProfile
   push_cast
   ring
 
+
+/-- Final exact pair-level coordinate: the normalized actual zero-pair kernel
+is the literal local-profile Fourier transform weighted by the distinguished
+energy ratio, minus one explicitly scaled finite-grid tail. -/
+theorem normalizedZeroPairKernel_eq_localProfile_sub_tail
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ)
+    (hdist : ∀ i : Fin (F.blockDim T),
+      (F.columnAddress T (F.blockEmbedding T i)).1 =
+        F.distinguished T)
+    (hratio : 0 ≤
+      F.fullLength T / F.period T (F.distinguished T))
+    (Λ : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| →
+      F.window T (F.distinguished T) u = 0)
+    (heven : ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u)
+    (hgap : 2 * Λ < F.period T (F.distinguished T))
+    (hfull0 : F.fullLength T ≠ 0)
+    (htotal0 : (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
+    (hchannel0 : F.channelEnergy T (F.distinguished T) ≠ 0) :
+    QuarticTransfer.normalizedZeroPairKernel F T ρ ρ' =
+      ((F.channelEnergy T (F.distinguished T) /
+        (∫ u : ℝ, F.windowEnergy T u) : ℝ) : ℂ) *
+          localProfileFourierIntegral F T (gammaOf ρ) (gammaOf ρ') -
+      (((F.period T (F.distinguished T) *
+        ∫ u : ℝ, F.windowEnergy T u)⁻¹ : ℝ) : ℂ) *
+        distinguishedFrequencyPairTail F T ρ ρ' := by
+  rw [normalizedZeroPairKernel_eq_energyRatioIntegral_sub_tail
+    F T ρ ρ' hdist hratio Λ hL hΛ hsmooth hsupp heven hgap
+      hfull0 htotal0]
+  rw [channelEnergyIntegral_div_total_eq_ratio_mul_localProfile
+    F T (gammaOf ρ) (gammaOf ρ') hL hchannel0]
+
 end ComplexAliasBridge
 end Zeta85
 end RH
