@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 
+import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import RH.Zeta85.Inputs95
 
 /-!
@@ -263,7 +264,7 @@ theorem rsMainTerm_normalCutoffSymbol {n : ℕ}
 
 /-- Smoothness of the tangential test and the one-dimensional cutoff
 combine to give smoothness of the compact extension. -/
-theorem normalCutoffSymbol_contDiff {k : ℕ} {m : WithTop ℕ∞}
+theorem normalCutoffSymbol_contDiff {k : ℕ} {m : ℕ∞}
     (chi : ℝ -> ℂ) (Phi : (Fin k -> ℝ) -> ℂ)
     (hchi : ContDiff ℝ m chi) (hPhi : ContDiff ℝ m Phi) :
     ContDiff ℝ m (normalCutoffSymbol chi Phi) := by
@@ -330,6 +331,60 @@ theorem normalCutoffWeightedCyclicSymbol_k4_strictSupport
     chi (weightedCyclicSymbol (k := 4) mu r)
     (4 * mu * (b - a)) eps hchi
     (weightedCyclicSymbol_k4_l1_bound mu a b r hmu hr) hmargin
+
+/-- There is a normalized smooth cutoff in every positive normal radius. -/
+theorem exists_smooth_normalCutoff (eps : ℝ) (heps : 0 < eps) :
+    ∃ chi : ℝ -> ℂ,
+      chi 0 = 1 ∧ ContDiff ℝ ∞ chi ∧
+        ∀ s, chi s ≠ 0 -> |s| ≤ eps := by
+  obtain ⟨f, hsupport, _hcompact, hsmooth, _hrange, hzero⟩ :=
+    exists_contDiff_tsupport_subset (n := ∞)
+      (Metric.ball_mem_nhds (0 : ℝ) heps)
+  refine ⟨Complex.ofRealCLM ∘ f, ?_, ?_, ?_⟩
+  · simp [hzero]
+  · exact Complex.ofRealCLM.contDiff.comp hsmooth
+  · intro s hs
+    have hfs : f s ≠ 0 := by
+      intro hz
+      apply hs
+      simp [Function.comp_apply, hz]
+    have hball := hsupport (subset_tsupport f hfs)
+    simpa [Real.dist_eq] using hball.le
+
+/-- At the frozen bandwidth, the quartic cyclic test has a smooth compact
+extension meeting the strict RS support threshold.  The extension agrees
+with the original test in both places consumed by Theorem 3.1. -/
+theorem exists_frozenQuarticRSTest
+    (r : ℝ -> ℝ)
+    (hr : ∀ x, r x ≠ 0 -> (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (hsmooth :
+      ContDiff ℝ 1
+        (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r)) :
+    ∃ Phi : (Fin 4 -> ℝ) -> ℂ,
+      ContDiff ℝ 1 Phi ∧
+      tsupport Phi ⊆ {xi | ∑ i : Fin 4, |xi i| < 2} ∧
+      (∀ x : Fin 4 -> ℂ,
+        rsGaugeTest Phi x =
+          rsGaugeTest
+            (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) x) ∧
+      rsMainTerm Phi =
+        rsMainTerm
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) := by
+  obtain ⟨chi, hchi0, hchiSmooth, hchiSupport⟩ :=
+    exists_smooth_normalCutoff (1 / 10000 : ℝ) (by norm_num)
+  refine ⟨normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r), ?_, ?_, ?_, ?_⟩
+  · apply normalCutoffSymbol_contDiff
+    · exact hchiSmooth.of_le (by norm_num)
+    · exact hsmooth
+  · exact normalCutoffWeightedCyclicSymbol_k4_strictSupport
+      (4999 / 10000 : ℝ) 0 1 (1 / 10000 : ℝ) r chi
+      (by norm_num) hr hchiSupport (by norm_num)
+  · intro x
+    exact rsGaugeTest_normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) hchi0 x
+  · exact rsMainTerm_normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) hchi0
 
 /-- The complete multiplicity-weighted zero-tuple summand is unchanged. -/
 theorem rsZeroTupleTerm_normalCutoffSymbol (Z : ZeroConfig) {n : ℕ}
