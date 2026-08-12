@@ -2272,6 +2272,36 @@ theorem tendsto_virtualNormalizedSymmetricFrequencyPartialSum_energy
   convert ht using 1
   rw [mul_assoc, div_mul_cancel₀ _ hL0]
 
+
+/-- Tail left after the canonical finite symmetric frequency grid. -/
+def virtualSymmetricFrequencyTail
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (n : ℕ) : ℂ :=
+  virtualFrequencyPairSum T L f z z' -
+    virtualSymmetricFrequencyPartialSum T L f z z' n
+
+/-- For every fixed virtual window and pair of complex frequencies, the
+canonical finite-grid tail tends to zero. -/
+theorem tendsto_virtualSymmetricFrequencyTail_zero
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (z z' : ℂ) :
+    Tendsto
+      (virtualSymmetricFrequencyTail T L f z z')
+      Filter.atTop (nhds 0) := by
+  have hconst :
+      Tendsto
+        (fun _ : ℕ => virtualFrequencyPairSum T L f z z')
+        Filter.atTop
+        (nhds (virtualFrequencyPairSum T L f z z')) :=
+    tendsto_const_nhds
+  have htail := hconst.sub
+    (tendsto_virtualSymmetricFrequencyPartialSum
+      T L Λ f hL hΛ hsmooth hsupp heven z z')
+  simpa only [virtualSymmetricFrequencyTail, sub_self] using htail
+
 end ComplexAliasBridge
 end Zeta85
 end RH
