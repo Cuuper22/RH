@@ -384,6 +384,62 @@ theorem hasSum_paperFT_mul_paperFT_alias
   rw [hG]
   rw [fourier_complexGaux_general hL hΛ hφ.continuous hsupp]
 
+/-- The translate orientation used by the quartic family's alias term. -/
+def complexPoissonShiftAliasTerm
+    (φ : ℝ → ℂ) (L T : ℝ) (z z' : ℂ) (m : ℤ) : ℂ :=
+  (L : ℂ) *
+    cexp (I * (z' - (T : ℂ)) * ((m : ℝ) * L : ℝ)) *
+      ∫ u : ℝ, φ u * φ (u - (m : ℝ) * L) *
+        cexp (I * (z - z') * (u : ℂ))
+
+theorem complexPoissonAliasTerm_eq_shift
+    (φ : ℝ → ℂ) (L T : ℝ) (z z' : ℂ)
+    (heven : ∀ u, φ (-u) = φ u) (m : ℤ) :
+    complexPoissonAliasTerm φ L T z z' m =
+      complexPoissonShiftAliasTerm φ L T z z' m := by
+  unfold complexPoissonAliasTerm complexPoissonShiftAliasTerm
+  apply congrArg
+    (fun q : ℂ =>
+      (L : ℂ) *
+        cexp (I * (z' - (T : ℂ)) * ((m : ℝ) * L : ℝ)) * q)
+  apply integral_congr_ae
+  filter_upwards [] with u
+  have hreflect :
+      φ ((m : ℝ) * L - u) = φ (u - (m : ℝ) * L) := by
+    rw [show (m : ℝ) * L - u = -(u - (m : ℝ) * L) by ring, heven]
+  rw [hreflect]
+
+/-- For an even compact window, the complete complex Poisson theorem is
+expressed directly with the shifted-overlap alias orientation. -/
+theorem hasSum_paperFT_mul_paperFT_shift_alias
+    {φ : ℝ → ℂ} {L T Λ : ℝ}
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hφ : ContDiff ℝ 2 φ)
+    (hsupp : ∀ u, Λ < |u| → φ u = 0)
+    (heven : ∀ u, φ (-u) = φ u)
+    (z z' : ℂ) :
+    Summable (complexPoissonShiftAliasTerm φ L T z z') ∧
+      HasSum
+        (fun k : ℤ =>
+          paperFT φ
+              (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+            paperFT φ
+              (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)))
+        (∑' m : ℤ, complexPoissonShiftAliasTerm φ L T z z' m) := by
+  obtain ⟨hsum, hhas⟩ :=
+    hasSum_paperFT_mul_paperFT_alias hL hΛ hφ hsupp z z'
+  have heq : ∀ m : ℤ,
+      complexPoissonAliasTerm φ L T z z' m =
+        complexPoissonShiftAliasTerm φ L T z z' m :=
+    complexPoissonAliasTerm_eq_shift φ L T z z' heven
+  refine ⟨hsum.congr heq, ?_⟩
+  have htsum :
+      (∑' m : ℤ, complexPoissonAliasTerm φ L T z z' m) =
+        ∑' m : ℤ, complexPoissonShiftAliasTerm φ L T z z' m :=
+    tsum_congr heq
+  rw [← htsum]
+  exact hhas
+
 end Poisson
 end Zeta23
 
