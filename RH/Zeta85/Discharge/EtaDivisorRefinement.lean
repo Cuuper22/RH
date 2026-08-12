@@ -1272,6 +1272,31 @@ theorem roughCoreAF_fiber_zero_log_majorant {eta : ℝ} (heta : 0 ≤ eta)
         _ = P := mul_one P)
   simpa using progressionSum_roughCoreAF_fiber_le Z hR ha hP hq hqP hsize
 
+/-- One constant works simultaneously for every divisor-indexed summand of
+the exceptional source.  In particular, passing from a selected fiber to
+the finite rough family creates no coefficient-dependent analytic constant. -/
+theorem roughCoreAF_family_zero_log_majorant {eta : ℝ} (heta : 0 ≤ eta)
+    (Z : ℕ) {R B r : ℕ} (hR : 0 < R) :
+    ∃ K T₁ : ℝ,
+      ∀ a ∈ (Finset.Icc 1 R).filter (fun d => ¬R < d * B),
+      ∀ T ≥ T₁, ∀ P : ℝ, 1 ≤ P →
+        ⌈2 * P⌉₊ < (B + 1) ^ r →
+        ∀ q v : ℕ, 0 < q → Nat.Coprime v q →
+          (q : ℝ) ≤ P * T ^ (-eta) →
+          progressionSum (normalizedRightSelector (hb4Core Z) R a 6) P q v ≤
+            K * (P / (Nat.totient q : ℝ)) * (Real.log T) ^ (0 : ℝ) := by
+  refine ⟨5 * (15 * (((2 : ℕ) ^ r : ℕ) : ℝ) ^ 6), 1, ?_⟩
+  intro a ha T hT P hP hsize q v hq hcoprime hqRange
+  have hpow : T ^ (-eta) ≤ 1 :=
+    Real.rpow_le_one_of_one_le_of_nonpos hT (neg_nonpos.mpr heta)
+  have hPnonneg : 0 ≤ P := by linarith
+  have hqP : (q : ℝ) ≤ P := by
+    exact hqRange.trans
+      (calc
+        P * T ^ (-eta) ≤ P * 1 := mul_le_mul_of_nonneg_left hpow hPnonneg
+        _ = P := mul_one P)
+  simpa using progressionSum_roughCoreAF_fiber_le Z hR ha hP hq hqP hsize
+
 /-- Exact regular/rough partition at the arithmetic-function level, before
 absolute values and before the final logarithm convolution. -/
 theorem regularCoreAF_add_roughCoreAF (Z B : ℕ) {R : ℕ} (hR : 0 < R) :
@@ -1348,6 +1373,28 @@ def regularRefinement (c : ℕ → ℝ) (R B n : ℕ) : ℝ :=
 def roughRefinement (c : ℕ → ℝ) (R B n : ℕ) : ℝ :=
   ∑ a ∈ (Finset.Icc 1 R).filter (fun a => ¬R < a * B),
     convolutionPiece c R a n
+
+theorem regularCoreAF_apply_eq_regularRefinement (Z R B n : ℕ) :
+    regularCoreAF Z R B n = regularRefinement (hb4Core Z) R B n := by
+  unfold regularCoreAF regularRefinement
+  rw [arithmeticFunction_sum_apply]
+  apply Finset.sum_congr rfl
+  intro a ha
+  rw [normalizedConvolutionAF_apply,
+    normalizedConvolutionPiece_eq (hb4Core Z) R 6 n]
+  exact Nat.ne_of_gt
+    (Finset.mem_Icc.mp (Finset.mem_filter.mp ha).1).1
+
+theorem roughCoreAF_apply_eq_roughRefinement (Z R B n : ℕ) :
+    roughCoreAF Z R B n = roughRefinement (hb4Core Z) R B n := by
+  unfold roughCoreAF roughRefinement
+  rw [arithmeticFunction_sum_apply]
+  apply Finset.sum_congr rfl
+  intro a ha
+  rw [normalizedConvolutionAF_apply,
+    normalizedConvolutionPiece_eq (hb4Core Z) R 6 n]
+  exact Nat.ne_of_gt
+    (Finset.mem_Icc.mp (Finset.mem_filter.mp ha).1).1
 
 /-- Exact pointwise split into the terminal-scale family and the rough
 exceptional family. -/
