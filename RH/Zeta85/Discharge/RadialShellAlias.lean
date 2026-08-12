@@ -24,6 +24,53 @@ namespace RH
 namespace Zeta85
 namespace RadialShellAlias
 
+/-- The distance between two points in the same half-period radial shell is
+strictly smaller than one period. -/
+theorem radialShell_sameSign_distance_lt_period
+    (L a b x y : ℝ) (k : ℕ)
+    (hL : 0 < L)
+    (ha : (k : ℝ) * L / 2 < a)
+    (hb : b < ((k + 1 : ℕ) : ℝ) * L / 2)
+    (hxa : a < |x|) (hxb : |x| < b)
+    (hya : a < |y|) (hyb : |y| < b)
+    (hsign : (0 < x ∧ 0 < y) ∨ (x < 0 ∧ y < 0)) :
+    |x - y| < L := by
+  have hb' : b < ((k : ℝ) + 1) * L / 2 := by
+    norm_num at hb ⊢
+    exact hb
+  rcases hsign with hpos | hneg
+  · rw [abs_of_pos hpos.1, abs_of_pos hpos.2] at hxa hxb hya hyb
+    rw [abs_lt]
+    constructor <;> nlinarith [ha, hb', hL]
+  · rw [abs_of_neg hneg.1, abs_of_neg hneg.2] at hxa hxb hya hyb
+    rw [abs_lt]
+    constructor <;> nlinarith [ha, hb', hL]
+
+/-- The distance between two points in opposite halves of the same shell
+lies strictly between consecutive integer multiples of the period. -/
+theorem radialShell_oppositeSign_distance_between
+    (L a b x y : ℝ) (k : ℕ)
+    (hL : 0 < L)
+    (ha : (k : ℝ) * L / 2 < a)
+    (hb : b < ((k + 1 : ℕ) : ℝ) * L / 2)
+    (hxa : a < |x|) (hxb : |x| < b)
+    (hya : a < |y|) (hyb : |y| < b)
+    (hsign : (0 < x ∧ y < 0) ∨ (x < 0 ∧ 0 < y)) :
+    (k : ℝ) * L < |x - y| ∧
+      |x - y| < ((k : ℝ) + 1) * L := by
+  have hb' : b < ((k : ℝ) + 1) * L / 2 := by
+    norm_num at hb ⊢
+    exact hb
+  rcases hsign with hpn | hnp
+  · rw [abs_of_pos hpn.1, abs_of_neg hpn.2] at hxa hxb hya hyb
+    have hxy : 0 < x - y := by linarith
+    rw [abs_of_pos hxy]
+    constructor <;> nlinarith [ha, hb', hL]
+  · rw [abs_of_neg hnp.1, abs_of_pos hnp.2] at hxa hxb hya hyb
+    have hxy : x - y < 0 := by linarith
+    rw [abs_of_neg hxy]
+    constructor <;> nlinarith [ha, hb', hL]
+
 /-- A symmetric shell strictly between consecutive half-period radii has no
 overlap with any nonzero integer-period translate. -/
 theorem radialShell_shift_overlap_eq_zero
@@ -42,8 +89,8 @@ theorem radialShell_shift_overlap_eq_zero
   obtain ⟨hua, hub⟩ := hsupp u hu
   obtain ⟨hva, hvb⟩ :=
     hsupp (u - (m : ℝ) * L) hv
-  have hk0 : 0 ≤ (k : ℝ) := by positivity
   have ha0 : 0 < a := by
+    have hk0 : 0 ≤ (k : ℝ) := by positivity
     nlinarith [ha, hL]
   have hu_ne : u ≠ 0 := by
     intro hzero
@@ -53,94 +100,50 @@ theorem radialShell_shift_overlap_eq_zero
     intro hzero
     rw [hzero, abs_zero] at hva
     linarith
-  have hb' : b < ((k : ℝ) + 1) * L / 2 := by
-    norm_num at hb ⊢
-    exact hb
-  have hwidth : b - a < L := by
-    nlinarith [ha, hb', hL]
+  have hdistance :
+      |u - (u - (m : ℝ) * L)| =
+        |(m : ℝ)| * L := by
+    rw [show u - (u - (m : ℝ) * L) = (m : ℝ) * L by ring,
+      abs_mul, abs_of_pos hL]
   have hmabs : (1 : ℝ) ≤ |(m : ℝ)| := by
     exact_mod_cast Int.one_le_abs hm
-  have hshift_lower : L ≤ |(m : ℝ) * L| := by
-    calc
-      L = 1 * L := by ring
-      _ ≤ |(m : ℝ)| * L :=
-        mul_le_mul_of_nonneg_right hmabs hL.le
-      _ = |(m : ℝ) * L| := by
-        rw [abs_mul, abs_of_pos hL]
-  have hdiff :
-      u - (u - (m : ℝ) * L) = (m : ℝ) * L := by
-    ring
-  by_cases hu_pos : 0 < u
-  · rw [abs_of_pos hu_pos] at hua hub
-    by_cases hv_pos : 0 < u - (m : ℝ) * L
-    · rw [abs_of_pos hv_pos] at hva hvb
-      have habslt :
-          |u - (u - (m : ℝ) * L)| < b - a := by
-        rw [abs_lt]
-        constructor <;> linarith
-      rw [hdiff] at habslt
-      linarith
-    · have hv_neg : u - (m : ℝ) * L < 0 :=
-        lt_of_le_of_ne (le_of_not_gt hv_pos) hv_ne
-      rw [abs_of_neg hv_neg] at hva hvb
-      have hdiff_pos : 0 < u - (u - (m : ℝ) * L) := by
-        linarith
-      have hlower :
-          (k : ℝ) * L <
-            |u - (u - (m : ℝ) * L)| := by
-        rw [abs_of_pos hdiff_pos]
-        nlinarith [ha, hua, hva]
-      have hupper :
-          |u - (u - (m : ℝ) * L)| <
-            ((k : ℝ) + 1) * L := by
-        rw [abs_of_pos hdiff_pos]
-        nlinarith [hb', hub, hvb]
-      rw [hdiff, abs_mul, abs_of_pos hL] at hlower hupper
-      have hkabs : (k : ℝ) < |(m : ℝ)| := by
-        exact (mul_lt_mul_right hL).mp hlower
-      have habssucc : |(m : ℝ)| < (k : ℝ) + 1 := by
-        exact (mul_lt_mul_right hL).mp hupper
-      have hkabsInt : (k : ℤ) < |m| := by
-        exact_mod_cast hkabs
-      have habssuccInt : |m| < (k : ℤ) + 1 := by
-        exact_mod_cast habssucc
-      omega
-  · have hu_neg : u < 0 :=
-      lt_of_le_of_ne (le_of_not_gt hu_pos) hu_ne
-    rw [abs_of_neg hu_neg] at hua hub
-    by_cases hv_pos : 0 < u - (m : ℝ) * L
-    · rw [abs_of_pos hv_pos] at hva hvb
-      have hdiff_neg : u - (u - (m : ℝ) * L) < 0 := by
-        linarith
-      have hlower :
-          (k : ℝ) * L <
-            |u - (u - (m : ℝ) * L)| := by
-        rw [abs_of_neg hdiff_neg]
-        nlinarith [ha, hua, hva]
-      have hupper :
-          |u - (u - (m : ℝ) * L)| <
-            ((k : ℝ) + 1) * L := by
-        rw [abs_of_neg hdiff_neg]
-        nlinarith [hb', hub, hvb]
-      rw [hdiff, abs_mul, abs_of_pos hL] at hlower hupper
-      have hkabs : (k : ℝ) < |(m : ℝ)| := by
-        exact (mul_lt_mul_right hL).mp hlower
-      have habssucc : |(m : ℝ)| < (k : ℝ) + 1 := by
-        exact (mul_lt_mul_right hL).mp hupper
-      have hkabsInt : (k : ℤ) < |m| := by
-        exact_mod_cast hkabs
-      have habssuccInt : |m| < (k : ℤ) + 1 := by
-        exact_mod_cast habssucc
-      omega
-    · have hv_neg : u - (m : ℝ) * L < 0 :=
-        lt_of_le_of_ne (le_of_not_gt hv_pos) hv_ne
-      rw [abs_of_neg hv_neg] at hva hvb
-      have habslt :
-          |u - (u - (m : ℝ) * L)| < b - a := by
-        rw [abs_lt]
-        constructor <;> linarith
-      rw [hdiff] at habslt
-      linarith
+  by_cases hsame :
+      (0 < u ∧ 0 < u - (m : ℝ) * L) ∨
+        (u < 0 ∧ u - (m : ℝ) * L < 0)
+  · have hlt :=
+      radialShell_sameSign_distance_lt_period
+        L a b u (u - (m : ℝ) * L) k
+        hL ha hb hua hub hva hvb hsame
+    rw [hdistance] at hlt
+    nlinarith [mul_le_mul_of_nonneg_right hmabs hL.le]
+  · have hu_sign : 0 < u ∨ u < 0 := lt_or_gt_of_ne hu_ne
+    have hv_sign :
+        0 < u - (m : ℝ) * L ∨
+          u - (m : ℝ) * L < 0 :=
+      lt_or_gt_of_ne hv_ne
+    have hopp :
+        (0 < u ∧ u - (m : ℝ) * L < 0) ∨
+          (u < 0 ∧ 0 < u - (m : ℝ) * L) := by
+      rcases hu_sign with hu_pos | hu_neg <;>
+        rcases hv_sign with hv_pos | hv_neg
+      · exact False.elim (hsame (Or.inl ⟨hu_pos, hv_pos⟩))
+      · exact Or.inl ⟨hu_pos, hv_neg⟩
+      · exact Or.inr ⟨hu_neg, hv_pos⟩
+      · exact False.elim (hsame (Or.inr ⟨hu_neg, hv_neg⟩))
+    obtain ⟨hlower, hupper⟩ :=
+      radialShell_oppositeSign_distance_between
+        L a b u (u - (m : ℝ) * L) k
+        hL ha hb hua hub hva hvb hopp
+    rw [hdistance] at hlower hupper
+    have hkabs : (k : ℝ) < |(m : ℝ)| := by
+      exact (mul_lt_mul_right hL).mp hlower
+    have habssucc : |(m : ℝ)| < (k : ℝ) + 1 := by
+      exact (mul_lt_mul_right hL).mp hupper
+    have hkabsInt : (k : ℤ) < |m| := by
+      exact_mod_cast hkabs
+    have habssuccInt : |m| < (k : ℤ) + 1 := by
+      exact_mod_cast habssucc
+    omega
 
 /-- A finite family of smooth even radial-shell windows has exact collective
 alias cancellation.  Different shells may cover the whole growing support;
