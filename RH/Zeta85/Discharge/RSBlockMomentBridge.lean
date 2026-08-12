@@ -10,6 +10,9 @@ import Zeta23.Poisson.ComplexDecay
 import Zeta23.Poisson.Complex
 import Zeta23.Poisson.ComplexAlias
 import RH.Zeta85.Discharge.ComplexAliasBridge
+import Mathlib.Analysis.SpecificLimits.Basic
+import Mathlib.Data.Nat.Find
+import Mathlib.Order.Filter.AtTopBot.Floor
 
 /-!
 # Actual-block centering bridge for the Rudnick--Sarnak route
@@ -33,6 +36,94 @@ noncomputable section
 namespace RH.Zeta85.RSBlockMomentBridge
 
 open Zeta23 RHLinalg RSReduction
+
+/-- A slowly improving diagonal can respect an arbitrary convergence
+threshold in every fixed row.  This is the quantifier-order bridge needed
+when a fixed-test asymptotic is combined with a test profile that itself
+converges. -/
+theorem exists_tendsto_slow_diagonal
+    {E : Type*} [PseudoMetricSpace E]
+    (f : ℕ → ℝ → E) (a : ℕ → E) (A : E)
+    (hrow : ∀ n, Tendsto (f n) atTop (nhds (a n)))
+    (ha : Tendsto a atTop (nhds A)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto (fun T => f (stage T) T) atTop (nhds A) := by
+  have hrowThreshold : ∀ n : ℕ, ∃ B : ℝ, ∀ T : ℝ, B ≤ T →
+      dist (f n T) (a n) < 1 / ((n : ℝ) + 1) := by
+    intro n
+    exact (Metric.tendsto_atTop.1 (hrow n))
+      (1 / ((n : ℝ) + 1)) (by positivity)
+  choose B hB using hrowThreshold
+  have hnatThreshold : ∀ n : ℕ, ∃ N : ℕ,
+      max (B n) (n : ℝ) < (N : ℝ) := by
+    intro n
+    exact exists_nat_gt (max (B n) (n : ℝ))
+  choose N hN using hnatThreshold
+  let stage : ℝ → ℕ := fun T =>
+    Nat.findGreatest (fun n => (N n : ℝ) ≤ T) ⌈max T 0⌉₊
+  have hstage : Tendsto stage atTop atTop := by
+    refine tendsto_atTop.2 ?_
+    intro k
+    filter_upwards [eventually_ge_atTop (max (N k : ℝ) 0)] with T hT
+    have hNkT : (N k : ℝ) ≤ T :=
+      le_trans (le_max_left _ _) hT
+    have hkT : (k : ℝ) ≤ max T 0 := by
+      exact le_trans
+        (le_trans (le_max_right (B k) (k : ℝ)) (hN k).le)
+        (le_trans hNkT (le_max_left _ _))
+    have hkceil : k ≤ ⌈max T 0⌉₊ := by
+      simpa only [Nat.ceil_natCast] using Nat.ceil_mono hkT
+    change k ≤
+      Nat.findGreatest (fun n => (N n : ℝ) ≤ T) ⌈max T 0⌉₊
+    exact Nat.le_findGreatest hkceil hNkT
+  have hselected : ∀ᶠ T in atTop, (N (stage T) : ℝ) ≤ T := by
+    filter_upwards [eventually_ge_atTop (N 0 : ℝ)] with T hT
+    change
+      (N (Nat.findGreatest (fun n => (N n : ℝ) ≤ T) ⌈max T 0⌉₊) : ℝ) ≤ T
+    exact Nat.findGreatest_spec (Nat.zero_le _) hT
+  have hrowDiagonal : ∀ᶠ T in atTop,
+      dist (f (stage T) T) (a (stage T)) <
+        1 / ((stage T : ℝ) + 1) := by
+    filter_upwards [hselected] with T hT
+    apply hB (stage T) T
+    exact le_trans
+      (le_trans (le_max_left _ _) (hN (stage T)).le) hT
+  have hbound :
+      Tendsto (fun T => 1 / ((stage T : ℝ) + 1))
+        atTop (nhds 0) := by
+    simpa only [Function.comp_apply] using
+      (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).comp hstage
+  have hdistance :
+      Tendsto (fun T => dist (f (stage T) T) (a (stage T)))
+        atTop (nhds 0) := by
+    apply squeeze_zero'
+    · exact Eventually.of_forall fun _ => dist_nonneg
+    · exact hrowDiagonal.mono fun _ h => h.le
+    · exact hbound
+  refine ⟨stage, hstage, ?_⟩
+  have haDiagonal :
+      Tendsto (fun T => a (stage T)) atTop (nhds A) :=
+    ha.comp hstage
+  refine Metric.tendsto_nhds.2 ?_
+  intro ε hε
+  have hhalf : 0 < ε / 2 := half_pos hε
+  have hdistanceSmall : ∀ᶠ T in atTop,
+      dist (f (stage T) T) (a (stage T)) < ε / 2 := by
+    simpa only [Real.dist_eq, sub_zero,
+      abs_of_nonneg dist_nonneg] using
+      (Metric.tendsto_nhds.1 hdistance (ε / 2) hhalf)
+  have haSmall : ∀ᶠ T in atTop,
+      dist (a (stage T)) A < ε / 2 :=
+    Metric.tendsto_nhds.1 haDiagonal (ε / 2) hhalf
+  filter_upwards [hdistanceSmall, haSmall] with T h₁ h₂
+  calc
+    dist (f (stage T) T) A ≤
+        dist (f (stage T) T) (a (stage T)) +
+          dist (a (stage T)) A :=
+      dist_triangle _ _ _
+    _ < ε / 2 + ε / 2 := add_lt_add h₁ h₂
+    _ = ε := by ring
 
 /-- Normalized uncentered trace moment of the literal distinguished block. -/
 def uncenteredBlockMoment {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
