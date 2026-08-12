@@ -17,7 +17,7 @@ corresponding synthesized virtual atoms, mixing first recovers the selected
 virtual atom exactly.
 -/
 
-open Matrix Finset
+open Matrix Finset Set
 open scoped BigOperators ComplexConjugate
 
 noncomputable section
