@@ -49,7 +49,8 @@ theorem topHatApproxProfile_contDiff
     (p : ℝ) (n : ℕ) (hp : 0 < p) (hp1 : p < 1) :
     ContDiff ℝ ∞ (topHatApproxProfile p n hp hp1) := by
   unfold topHatApproxProfile
-  fun_prop
+  exact contDiff_const.mul
+    (topHatApproxBump p n hp hp1).contDiff
 
 theorem topHatApproxProfile_hasCompactSupport
     (p : ℝ) (n : ℕ) (hp : 0 < p) (hp1 : p < 1) :
@@ -87,6 +88,7 @@ theorem topHatApproxProfile_support
         p / 2 + (1 - p) / (2 * ((n : ℝ) + 1)) := by
     simpa [topHatApproxBump, Real.dist_eq] using hxball
   have hwidth := transitionWidth_le p n hp1
+  have habs' := abs_lt.mp habs
   constructor <;> linarith
 
 theorem topHatApproxProfile_bounds
@@ -122,19 +124,20 @@ theorem shiftedTopHat_eq_height
     (p x : ℝ) (hx : |x - 1 / 2| ≤ p / 2) :
     shiftedTopHat p x = 1 / p := by
   have hmem : x - 1 / 2 ∈ TopHatMoments.topHatSupport p := by
-    simpa [TopHatMoments.topHatSupport, Set.mem_Icc] using (abs_le.mp hx)
-  simp [shiftedTopHat, TopHatMoments.topHat, hmem]
+    rw [TopHatMoments.topHatSupport, Set.mem_Icc]
+    exact abs_le.mp hx
+  unfold shiftedTopHat TopHatMoments.topHat
+  rw [Set.indicator_of_mem hmem]
 
 theorem shiftedTopHat_eq_zero
     (p x : ℝ) (hx : p / 2 < |x - 1 / 2|) :
     shiftedTopHat p x = 0 := by
   have hnot : x - 1 / 2 ∉ TopHatMoments.topHatSupport p := by
     intro hmem
-    have hle : |x - 1 / 2| ≤ p / 2 := by
-      exact abs_le.mpr (by
-        simpa [TopHatMoments.topHatSupport, Set.mem_Icc] using hmem)
-    linarith
-  simp [shiftedTopHat, TopHatMoments.topHat, hnot]
+    rw [TopHatMoments.topHatSupport, Set.mem_Icc] at hmem
+    exact (not_le_of_gt hx) (abs_le.mpr hmem)
+  unfold shiftedTopHat TopHatMoments.topHat
+  rw [Set.indicator_of_not_mem hnot]
 
 /-- Literal pointwise convergence of legal smooth profiles to the translated
 sharp top hat, including the two boundary points. -/
@@ -207,7 +210,7 @@ theorem RS1996ZetaInputs.topHatApproxQuartic_evaluated
           (((4999 / 10000 : ℝ) *
             quarticRSScalar (4999 / 10000 : ℝ)
               (topHatApproxProfile p n hp hp1) : ℝ) : ℂ)‖ ≤ C * T := by
-  exact hrs.frozenQuartic_evaluated
+  exact RSPairIntegrals.RS1996ZetaInputs.frozenQuartic_evaluated hrs
     (topHatApproxProfile p n hp hp1)
     (topHatApproxProfile_hasCompactSupport p n hp hp1)
     (topHatApproxProfile_contDiff p n hp hp1).of_le (by norm_num)
