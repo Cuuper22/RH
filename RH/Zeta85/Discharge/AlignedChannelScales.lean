@@ -9,10 +9,10 @@ import RH.Zeta85.Discharge.VirtualChannelMixer
 /-!
 # Exact aligned-channel scales
 
-The support-1.4999 family is split into three common-period channels and the
-support-1.9999 family into four.  Both common periods lie strictly above the
-frozen block density 0.4999 and strictly below one half.  These rational
-slacks are the support gaps used by the aggregate-alias cancellation.
+Use four virtual tiles at support 1.4999 and five at support 1.9999.
+Each tile is strictly shorter than the frozen 0.4999 modulation period, while
+the extra channel gives strict coherent-gain headroom over the ratios
+14999/4999 and 19999/4999.
 -/
 
 noncomputable section
@@ -23,53 +23,63 @@ namespace AlignedChannelScales
 
 def frozenMu : ℝ := 4999 / 10000
 
-def periodRatio3 : ℝ := (14999 / 10000) / 3
+def tileRatio4 : ℝ := (14999 / 10000) / 4
 
-def periodRatio4 : ℝ := (19999 / 10000) / 4
+def tileRatio5 : ℝ := (19999 / 10000) / 5
 
-theorem periodRatio3_eq : periodRatio3 = 14999 / 30000 := by
-  norm_num [periodRatio3]
+theorem tileRatio4_eq : tileRatio4 = 14999 / 40000 := by
+  norm_num [tileRatio4]
 
-theorem periodRatio4_eq : periodRatio4 = 19999 / 40000 := by
-  norm_num [periodRatio4]
+theorem tileRatio5_eq : tileRatio5 = 19999 / 50000 := by
+  norm_num [tileRatio5]
 
-/-- Exact three-channel support slack: 1/15000. -/
-theorem periodRatio3_sub_mu :
-    periodRatio3 - frozenMu = 1 / 15000 := by
-  norm_num [periodRatio3, frozenMu]
+/-- Exact four-tile support slack below the frozen period. -/
+theorem frozenMu_sub_tileRatio4 :
+    frozenMu - tileRatio4 = 4997 / 40000 := by
+  norm_num [tileRatio4, frozenMu]
 
-/-- Exact four-channel support slack: 3/40000. -/
-theorem periodRatio4_sub_mu :
-    periodRatio4 - frozenMu = 3 / 40000 := by
-  norm_num [periodRatio4, frozenMu]
+/-- Exact five-tile support slack below the frozen period. -/
+theorem frozenMu_sub_tileRatio5 :
+    frozenMu - tileRatio5 = 4996 / 50000 := by
+  norm_num [tileRatio5, frozenMu]
 
-theorem frozenMu_lt_periodRatio3 :
-    frozenMu < periodRatio3 := by
-  norm_num [periodRatio3, frozenMu]
+theorem tileRatio4_lt_frozenMu :
+    tileRatio4 < frozenMu := by
+  norm_num [tileRatio4, frozenMu]
 
-theorem frozenMu_lt_periodRatio4 :
-    frozenMu < periodRatio4 := by
-  norm_num [periodRatio4, frozenMu]
+theorem tileRatio5_lt_frozenMu :
+    tileRatio5 < frozenMu := by
+  norm_num [tileRatio5, frozenMu]
 
-theorem periodRatio3_lt_half :
-    periodRatio3 < 1 / 2 := by
-  norm_num [periodRatio3]
+/-- Four channels have strict coherent headroom over the lower support to
+block-density ratio. -/
+theorem support14999_over_mu_lt_four :
+    (14999 / 10000 : ℝ) / frozenMu < 4 := by
+  norm_num [frozenMu]
 
-theorem periodRatio4_lt_half :
-    periodRatio4 < 1 / 2 := by
-  norm_num [periodRatio4]
+/-- Five channels have strict coherent headroom over the upper support to
+block-density ratio. -/
+theorem support19999_over_mu_lt_five :
+    (19999 / 10000 : ℝ) / frozenMu < 5 := by
+  norm_num [frozenMu]
 
-/-- Scaling by a positive logarithmic length preserves the three-channel
-strict support gap. -/
-theorem frozenLength_lt_period3 {L : ℝ} (hL : 0 < L) :
-    frozenMu * L < periodRatio3 * L :=
-  mul_lt_mul_of_pos_right frozenMu_lt_periodRatio3 hL
+/-- The previous three-channel attempt cannot carry the lower support ratio. -/
+theorem three_lt_support14999_over_mu :
+    (3 : ℝ) < (14999 / 10000 : ℝ) / frozenMu := by
+  norm_num [frozenMu]
 
-/-- Scaling by a positive logarithmic length preserves the four-channel
-strict support gap. -/
-theorem frozenLength_lt_period4 {L : ℝ} (hL : 0 < L) :
-    frozenMu * L < periodRatio4 * L :=
-  mul_lt_mul_of_pos_right frozenMu_lt_periodRatio4 hL
+/-- The previous four-channel attempt cannot carry the upper support ratio. -/
+theorem four_lt_support19999_over_mu :
+    (4 : ℝ) < (19999 / 10000 : ℝ) / frozenMu := by
+  norm_num [frozenMu]
+
+theorem tileLength4_lt_frozenPeriod {L : ℝ} (hL : 0 < L) :
+    tileRatio4 * L < frozenMu * L :=
+  mul_lt_mul_of_pos_right tileRatio4_lt_frozenMu hL
+
+theorem tileLength5_lt_frozenPeriod {L : ℝ} (hL : 0 < L) :
+    tileRatio5 * L < frozenMu * L :=
+  mul_lt_mul_of_pos_right tileRatio5_lt_frozenMu hL
 
 end AlignedChannelScales
 end Zeta85
