@@ -46,11 +46,10 @@ def shellWindow
 
 /-- The explicit shell is as smooth as its target. -/
 theorem shellWindow_contDiff
-    {n : ℕ∞}
     (target : ℝ → ℝ) (a c d b : ℝ)
     (ha : 0 < a) (hac : a < c) (hcd : c < d) (hdb : d < b)
-    (htarget : ContDiff ℝ n target) :
-    ContDiff ℝ n
+    (htarget : ContDiff ℝ 2 target) :
+    ContDiff ℝ 2
       (shellWindow target a c d b ha hac hcd hdb) := by
   unfold shellWindow
   exact
@@ -67,9 +66,10 @@ theorem shellWindow_contDiff_complex
     ContDiff ℝ 2
       (fun x =>
         (shellWindow target a c d b ha hac hcd hdb x : ℂ)) := by
-  exact Complex.ofRealCLM.contDiff.comp x
+  exact
     (shellWindow_contDiff
-      target a c d b ha hac hcd hdb htarget)
+      target a c d b ha hac hcd hdb htarget).continuousLinearMap_comp
+        Complex.ofRealCLM
 
 /-- Even targets give even radial shells. -/
 theorem shellWindow_even
