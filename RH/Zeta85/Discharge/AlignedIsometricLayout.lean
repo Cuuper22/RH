@@ -1597,20 +1597,17 @@ theorem SupportedProfileQuarticLowerBound.toRoutedEnergy
     linarith
   have hgap : 0 < y - x := sub_pos.mpr hxy
   have hclose' :=
-    (SmoothRadialShell
-      .tendsto_diagonalAnnularNormalizedQuarticNumerator_sub_profile
+    (SmoothRadialShell.tendsto_diagonalAnnularNormalizedQuarticNumerator_sub_profile
         q F v period hperiod hv hposProfile hmass).eventually
       (Metric.ball_mem_nhds (0 : ℝ) hgap)
   have hclose :
       ∀ᶠ T in Filter.atTop,
         dist
-            (SmoothRadialShell
-                .shrinkingAnnularNormalizedQuarticNumerator
+            (SmoothRadialShell.shrinkingAnnularNormalizedQuarticNumerator
                   q F v period hperiod T
                     (SmoothRadialShell.diagonalAnnularProfileStage
                       q F v period hperiod hv hposProfile hmass T) -
-              SmoothRadialShell
-                .supportedProfileNormalizedQuarticNumerator
+              SmoothRadialShell.supportedProfileNormalizedQuarticNumerator
                   q F v period T)
             0 < y - x := by
     simpa only [Metric.mem_ball] using hclose'
