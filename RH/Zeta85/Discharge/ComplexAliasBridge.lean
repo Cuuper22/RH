@@ -1638,6 +1638,670 @@ theorem distinguishedFrequencyPairTail_eq_outsideGrid_of_compact
       (summable_distinguishedIntegerFrequencyPairTerm
         F T Λ hL hΛ hsmooth hsupp heven ρ ρ')
 
+
+/-! ## Distinguished-channel aliases vanish from support alone -/
+
+
+/-- Half-period support of the distinguished local profile kills every
+nonzero spatial alias, for arbitrary complex frequencies.  Two translates
+can overlap only at the single endpoint u = m L / 2, hence the integral
+vanishes without an RH or real-frequency restriction. -/
+theorem distinguished_complexAliasTerm_eq_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (henergy : 0 < F.channelEnergy T (F.distinguished T))
+    (hsupport :
+      tsupport (F.localProfile T) ⊆ Icc (-(1 : ℝ) / 2) (1 / 2))
+    (z z' : ℂ) (m : ℤ) (hm : m ≠ 0) :
+    F.complexAliasTerm T z z' (F.distinguished T) m = 0 := by
+  let L : ℝ := F.period T (F.distinguished T)
+  have hL' : 0 < L := by simpa only [L] using hL
+  have hwindow_mem (u : ℝ)
+      (hu : F.window T (F.distinguished T) u ≠ 0) :
+      u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2) := by
+    have hlocal :
+        F.localProfile T (u / L) ≠ 0 := by
+      have harg : L * (u / L) = u := by
+        field_simp [hL'.ne']
+      unfold QuarticGramFamily.localProfile
+      dsimp only
+      rw [show F.period T (F.distinguished T) = L by rfl, harg]
+      exact div_ne_zero
+        (mul_ne_zero hL'.ne' (pow_ne_zero 2 hu))
+        henergy.ne'
+    exact hsupport (subset_tsupport _ hlocal)
+  unfold QuarticGramFamily.complexAliasTerm
+  dsimp only
+  rw [show F.period T (F.distinguished T) = L by rfl]
+  have hint :
+      (∫ u : ℝ,
+        (F.window T (F.distinguished T) u : ℂ) *
+          F.window T (F.distinguished T) (u - (m : ℝ) * L) *
+          cexp (I * (z - z') * (u : ℂ))) = 0 := by
+    rw [← integral_zero]
+    apply integral_congr_ae
+    filter_upwards [ae_neq ((m : ℝ) * L / 2)] with u hu
+    by_cases hwu : F.window T (F.distinguished T) u = 0
+    · simp [hwu]
+    by_cases hwshift :
+        F.window T (F.distinguished T) (u - (m : ℝ) * L) = 0
+    · simp [hwshift]
+    have hx := hwindow_mem u hwu
+    have hy := hwindow_mem (u - (m : ℝ) * L) hwshift
+    have hxy :
+        u / L - (u - (m : ℝ) * L) / L = (m : ℝ) := by
+      field_simp [hL'.ne']
+      ring
+    have hmloR : (-1 : ℝ) ≤ (m : ℝ) := by
+      rw [← hxy]
+      linarith [hx.1, hy.2]
+    have hmhiR : (m : ℝ) ≤ 1 := by
+      rw [← hxy]
+      linarith [hx.2, hy.1]
+    have hmlo : (-1 : ℤ) ≤ m := by
+      exact_mod_cast hmloR
+    have hmhi : m ≤ (1 : ℤ) := by
+      exact_mod_cast hmhiR
+    have hmcase : m = -1 ∨ m = 1 := by
+      omega
+    apply False.elim
+    apply hu
+    rcases hmcase with rfl | rfl
+    · have hxval : u / L = -(1 : ℝ) / 2 := by
+        norm_num at hxy
+        linarith [hx.1, hy.2]
+      have huval : u = (-(1 : ℝ) / 2) * L :=
+        (div_eq_iff hL'.ne').mp hxval
+      calc
+        u = (-(1 : ℝ) / 2) * L := huval
+        _ = ((-1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+    · have hxval : u / L = (1 : ℝ) / 2 := by
+        norm_num at hxy
+        linarith [hx.2, hy.1]
+      have huval : u = ((1 : ℝ) / 2) * L :=
+        (div_eq_iff hL'.ne').mp hxval
+      calc
+        u = ((1 : ℝ) / 2) * L := huval
+        _ = ((1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+  rw [hint, mul_zero]
+
+
+/-- The distinguished infinite frequency lattice equals its zero-translation
+energy integral under closed half-period support.  Unlike the earlier support
+gap lemma, no strict inequality between support width and period is needed. -/
+theorem distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T Λ : ℝ)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| ->
+      F.window T (F.distinguished T) u = 0)
+    (heven : ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u)
+    (henergy : 0 < F.channelEnergy T (F.distinguished T))
+    (hlocalSupport :
+      tsupport (F.localProfile T) ⊆ Icc (-(1 : ℝ) / 2) (1 / 2))
+    (z z' : ℂ) :
+    channelNormalizedFrequencyPairSum F T (F.distinguished T) z z' =
+      (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.window T (F.distinguished T) u : ℂ) *
+            F.window T (F.distinguished T) u *
+            cexp (I * (z - z') * (u : ℂ)) := by
+  let j : Fin (F.channelCount T) := F.distinguished T
+  have hsum :
+      Summable (fun m : ℤ => F.complexAliasTerm T z z' j m) :=
+    summable_channelAlias F T j Λ hL hΛ hsmooth hsupp heven z z'
+  have hnonzero :
+      (∑' m : {m : ℤ // m ≠ 0},
+        F.complexAliasTerm T z z' j m) = 0 := by
+    have hfun :
+        (fun m : {m : ℤ // m ≠ 0} =>
+          F.complexAliasTerm T z z' j m) = 0 := by
+      funext m
+      exact distinguished_complexAliasTerm_eq_zero F T
+        hL henergy hlocalSupport z z' m m.property
+    rw [hfun]
+    simp
+  have halias :
+      channelAliasSum F T j z z' =
+        F.complexAliasTerm T z z' j 0 := by
+    rw [channelAliasSum_eq_zero_add_nonzero F T j z z' hsum,
+      hnonzero, add_zero]
+  have hL0 : (F.period T j : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  unfold channelNormalizedFrequencyPairSum
+  rw [channelFrequencyPairSum_eq_period_mul_aliasSum
+    F T j Λ hL hΛ hsmooth hsupp heven z z']
+  rw [halias, mul_assoc, div_mul_cancel₀ _ hL0]
+  exact congrArg (fun w : ℂ => (F.fullLength T : ℂ) * w)
+    (complexAliasTerm_zero F T j z z')
+
+/-- The physical principal-block construction therefore supplies literal
+nonzero-alias cancellation on its distinguished channel eventually. -/
+theorem PrincipalCyclicBlock.eventually_distinguished_complexAlias_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) :
+    ∀ᶠ T in Filter.atTop,
+      ∀ z z' : ℂ, ∀ m : ℤ, m ≠ 0 ->
+        F.complexAliasTerm T z z' (F.distinguished T) m = 0 := by
+  filter_upwards [
+    h.periods_pos,
+    h.distinguished_channel_energy_pos,
+    h.local_profile_support
+  ] with T hperiod henergy hsupport
+  intro z z' m hm
+  exact distinguished_complexAliasTerm_eq_zero F T
+    (hperiod (F.distinguished T)) henergy hsupport z z' m hm
+
+
+/-- In particular, the entire nonzero distinguished-channel alias family is
+summable and has zero sum at every complex frequency pair. -/
+theorem PrincipalCyclicBlock.eventually_distinguished_nonzeroAliases
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PrincipalCyclicBlock F) :
+    ∀ᶠ T in Filter.atTop, ∀ z z' : ℂ,
+      Summable (fun m : {m : ℤ // m ≠ 0} =>
+        F.complexAliasTerm T z z' (F.distinguished T) m) ∧
+      (∑' m : {m : ℤ // m ≠ 0},
+        F.complexAliasTerm T z z' (F.distinguished T) m) = 0 := by
+  filter_upwards [
+    eventually_distinguished_complexAlias_zero h
+  ] with T hzero
+  intro z z'
+  have hfun :
+      (fun m : {m : ℤ // m ≠ 0} =>
+        F.complexAliasTerm T z z' (F.distinguished T) m) = 0 := by
+    funext m
+    exact hzero z z' m m.property
+  rw [hfun]
+  simp
+
+
+/-- Closed half-period support upgrades the actual block pair kernel to the
+energy-integral-minus-grid-tail formula with no strict support-gap premise.
+This removes the endpoint obstruction in the previous Poisson wrapper. -/
+theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyIntegral_sub_tail_closed
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hblock : PrincipalCyclicBlock F)
+    (Λ : ℝ -> ℝ)
+    (hΛ : ∀ᶠ T in Filter.atTop, 0 ≤ Λ T)
+    (hsupp : ∀ᶠ T in Filter.atTop, ∀ u,
+      Λ T < |u| ->
+        F.window T (F.distinguished T) u = 0)
+    (heven : ∀ᶠ T in Filter.atTop, ∀ u,
+      F.window T (F.distinguished T) (-u) =
+        F.window T (F.distinguished T) u) :
+    ∀ᶠ T in Filter.atTop, ∀ ρ ρ' : ℂ,
+      QuarticTransfer.zeroPairKernel F T ρ ρ' =
+        (F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.window T (F.distinguished T) u : ℂ) *
+                F.window T (F.distinguished T) u *
+                cexp (I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          ((F.fullLength T /
+            F.period T (F.distinguished T) : ℝ) : ℂ) *
+            distinguishedFrequencyPairTail F T ρ ρ' := by
+  filter_upwards [
+    eventually_zeroPairKernel_eq_normalizedFrequencyPairSum_sub_tail hblock,
+    hblock.periods_pos,
+    hblock.windows_smooth,
+    hblock.distinguished_channel_energy_pos,
+    hblock.local_profile_support,
+    hΛ, hsupp, heven
+  ] with T hkernel hperiod hsmooth henergy hlocal hΛT hsuppT hevenT
+  have hsmoothC :
+      ContDiff ℝ 2
+        (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
+    (Complex.ofRealCLM.contDiff.comp
+      (hsmooth (F.distinguished T))).of_le (by norm_num)
+  intro ρ ρ'
+  rw [hkernel ρ ρ']
+  rw [distinguishedNormalizedFrequencyPairSum_eq_energyIntegral
+    F T (Λ T) (hperiod (F.distinguished T)) hΛT
+    hsmoothC hsuppT hevenT henergy hlocal
+    (gammaOf ρ) (gammaOf ρ')]
+
+
+/-! ## Virtual-window half-period cancellation -/
+
+/-- A real window supported in one closed half-period has zero overlap,
+almost everywhere, with every nonzero integral period translate.  The only
+possible overlap for shifts `m = ±1` is a single endpoint, which is null. -/
+theorem halfPeriod_shift_product_ae_zero
+    (f : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hsupport : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (m : ℤ) (hm : m ≠ 0) :
+    ∀ᵐ u : ℝ, f u * f (u - (m : ℝ) * L) = 0 := by
+  have hmem (x : ℝ) (hx : f x ≠ 0) :
+      x / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2) := by
+    have hx' := hsupport (subset_tsupport _ hx)
+    rw [Set.mem_Icc] at hx' ⊢
+    constructor
+    · apply (le_div_iff₀ hL).2
+      nlinarith
+    · apply (div_le_iff₀ hL).2
+      nlinarith
+  filter_upwards [ae_neq ((m : ℝ) * L / 2)] with u hu
+  by_cases hfu : f u = 0
+  · simp [hfu]
+  by_cases hfshift : f (u - (m : ℝ) * L) = 0
+  · simp [hfshift]
+  have hx := hmem u hfu
+  have hy := hmem (u - (m : ℝ) * L) hfshift
+  have hxy :
+      u / L - (u - (m : ℝ) * L) / L = (m : ℝ) := by
+    field_simp [hL.ne']
+    ring
+  have hmloR : (-1 : ℝ) ≤ (m : ℝ) := by
+    rw [← hxy]
+    linarith [hx.1, hy.2]
+  have hmhiR : (m : ℝ) ≤ 1 := by
+    rw [← hxy]
+    linarith [hx.2, hy.1]
+  have hmlo : (-1 : ℤ) ≤ m := by
+    exact_mod_cast hmloR
+  have hmhi : m ≤ (1 : ℤ) := by
+    exact_mod_cast hmhiR
+  have hmcase : m = -1 ∨ m = 1 := by
+    omega
+  apply False.elim
+  apply hu
+  rcases hmcase with rfl | rfl
+  · have hxval : u / L = -(1 : ℝ) / 2 := by
+      norm_num at hxy
+      linarith [hx.1, hy.2]
+    have huval : u = (-(1 : ℝ) / 2) * L :=
+      (div_eq_iff hL.ne').mp hxval
+    calc
+      u = (-(1 : ℝ) / 2) * L := huval
+      _ = ((-1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+  · have hxval : u / L = (1 : ℝ) / 2 := by
+      norm_num at hxy
+      linarith [hx.2, hy.1]
+    have huval : u = ((1 : ℝ) / 2) * L :=
+      (div_eq_iff hL.ne').mp hxval
+    calc
+      u = ((1 : ℝ) / 2) * L := huval
+      _ = ((1 : ℤ) : ℝ) * L / 2 := by norm_num; ring
+
+/-- Multiplying the translated overlap by an arbitrary complex exponential
+still gives a zero integral. -/
+theorem halfPeriod_complexShiftIntegral_eq_zero
+    (f : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hsupport : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (m : ℤ) (hm : m ≠ 0) (phase : ℂ) :
+    (∫ u : ℝ,
+      (f u : ℂ) * f (u - (m : ℝ) * L) *
+        Complex.exp (phase * (u : ℂ))) = 0 := by
+  rw [← integral_zero]
+  apply integral_congr_ae
+  filter_upwards [
+    halfPeriod_shift_product_ae_zero f L hL hsupport m hm
+  ] with u hu
+  rcases mul_eq_zero.mp hu with hzero | hzero
+  · simp [hzero]
+  · simp [hzero]
+
+/-- The complex Poisson alias of a standalone virtual window. -/
+def virtualComplexAliasTerm
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (m : ℤ) : ℂ :=
+  Complex.exp
+      (Complex.I * (z' - T) * (m : ℝ) * L) *
+    ∫ u : ℝ,
+      (f u : ℂ) * f (u - (m : ℝ) * L) *
+        Complex.exp (Complex.I * (z - z') * (u : ℂ))
+
+/-- Every nonzero complex alias of a closed-half-period virtual window
+vanishes exactly.  This statement is independent of
+`PrincipalCyclicBlock` and is therefore usable by the routed isometry. -/
+theorem virtualComplexAliasTerm_eq_zero
+    (T L : ℝ) (f : ℝ → ℝ) (hL : 0 < L)
+    (hsupport : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) (m : ℤ) (hm : m ≠ 0) :
+    virtualComplexAliasTerm T L f z z' m = 0 := by
+  unfold virtualComplexAliasTerm
+  rw [halfPeriod_complexShiftIntegral_eq_zero
+    f L hL hsupport m hm (Complex.I * (z - z')), mul_zero]
+
+
+/-! ## Exact virtual frequency lattice -/
+
+/-- Infinite frequency-pair lattice of one standalone virtual window. -/
+def virtualFrequencyPairSum
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) : ℂ :=
+  ∑' k : ℤ,
+    paperFT (fun u => (f u : ℂ))
+        (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+      paperFT (fun u => (f u : ℂ))
+        (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ))
+
+/-- Spatial alias lattice of one standalone virtual window. -/
+def virtualAliasSum
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) : ℂ :=
+  ∑' m : ℤ, virtualComplexAliasTerm T L f z z' m
+
+/-- The generic Poisson shift term is the period times the virtual alias. -/
+theorem virtualShiftAlias_eq_period_mul
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (m : ℤ) :
+    Poisson.complexPoissonShiftAliasTerm
+        (fun u => (f u : ℂ)) L T z z' m =
+      (L : ℂ) * virtualComplexAliasTerm T L f z z' m := by
+  simp only [Poisson.complexPoissonShiftAliasTerm,
+    virtualComplexAliasTerm]
+  ring
+
+/-- Complex Poisson summation stated entirely in virtual-window
+coordinates. -/
+theorem hasSum_virtualComplexAlias
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (z z' : ℂ) :
+    Summable
+        (fun m : ℤ =>
+          (L : ℂ) * virtualComplexAliasTerm T L f z z' m) ∧
+      HasSum
+        (fun k : ℤ =>
+          paperFT (fun u => (f u : ℂ))
+              (z - (T + (k : ℝ) *
+                (2 * Real.pi / L) : ℝ)) *
+            paperFT (fun u => (f u : ℂ))
+              (z' - (T + (k : ℝ) *
+                (2 * Real.pi / L) : ℝ)))
+        (∑' m : ℤ,
+          (L : ℂ) * virtualComplexAliasTerm T L f z z' m) := by
+  have hsupp' : ∀ u, Λ < |u| → (f u : ℂ) = 0 := by
+    intro u hu
+    rw [hsupp u hu]
+    norm_num
+  have heven' : ∀ u, (f (-u) : ℂ) = f u := by
+    intro u
+    rw [heven u]
+  simpa only [virtualShiftAlias_eq_period_mul] using
+    (Poisson.hasSum_paperFT_mul_paperFT_shift_alias
+      hL hΛ hsmooth hsupp' heven' z z')
+
+/-- The virtual frequency lattice is its period times its alias lattice. -/
+theorem virtualFrequencyPairSum_eq_period_mul_aliasSum
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (z z' : ℂ) :
+    virtualFrequencyPairSum T L f z z' =
+      (L : ℂ) * virtualAliasSum T L f z z' := by
+  obtain ⟨_, hhas⟩ :=
+    hasSum_virtualComplexAlias T L Λ f
+      hL hΛ hsmooth hsupp heven z z'
+  unfold virtualFrequencyPairSum virtualAliasSum
+  calc
+    (∑' k : ℤ,
+      paperFT (fun u => (f u : ℂ))
+          (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+        paperFT (fun u => (f u : ℂ))
+          (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ))) =
+        ∑' m : ℤ,
+          (L : ℂ) * virtualComplexAliasTerm T L f z z' m :=
+      hhas.tsum_eq
+    _ = (L : ℂ) *
+          ∑' m : ℤ, virtualComplexAliasTerm T L f z z' m := by
+      rw [tsum_mul_left]
+
+/-- The zero virtual alias is the squared-window Fourier integral. -/
+theorem virtualComplexAliasTerm_zero
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) :
+    virtualComplexAliasTerm T L f z z' 0 =
+      ∫ u : ℝ,
+        (f u : ℂ) * f u *
+          Complex.exp (Complex.I * (z - z') * (u : ℂ)) := by
+  simp [virtualComplexAliasTerm]
+
+/-- Under closed half-period support the complete virtual alias lattice is
+exactly its zero translation. -/
+theorem virtualAliasSum_eq_zeroTranslation
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) :
+    virtualAliasSum T L f z z' =
+      virtualComplexAliasTerm T L f z z' 0 := by
+  have hL0 : (L : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  have hscaled :=
+    (hasSum_virtualComplexAlias T L Λ f
+      hL hΛ hsmooth hsupp heven z z').1
+  have hsum :
+      Summable (fun m : ℤ =>
+        virtualComplexAliasTerm T L f z z' m) :=
+    (summable_mul_left_iff hL0).1 hscaled
+  have hnonzero :
+      (∑' m : {m : ℤ // m ≠ 0},
+        virtualComplexAliasTerm T L f z z' m) = 0 := by
+    have hfun :
+        (fun m : {m : ℤ // m ≠ 0} =>
+          virtualComplexAliasTerm T L f z z' m) = 0 := by
+      funext m
+      exact virtualComplexAliasTerm_eq_zero
+        T L f hL hhalf z z' m m.property
+    rw [hfun]
+    simp
+  unfold virtualAliasSum
+  calc
+    (∑' m : ℤ, virtualComplexAliasTerm T L f z z' m) =
+        virtualComplexAliasTerm T L f z z' 0 +
+          ∑' m : {m : ℤ // m ≠ 0},
+            virtualComplexAliasTerm T L f z z' m := by
+      simpa using
+        (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
+    _ = virtualComplexAliasTerm T L f z z' 0 := by
+      rw [hnonzero, add_zero]
+
+/-- Closed half-period support evaluates the complete virtual frequency
+lattice exactly, with no strict support gap. -/
+theorem virtualFrequencyPairSum_eq_energyIntegral
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) :
+    virtualFrequencyPairSum T L f z z' =
+      (L : ℂ) *
+        ∫ u : ℝ,
+          (f u : ℂ) * f u *
+            Complex.exp (Complex.I * (z - z') * (u : ℂ)) := by
+  rw [virtualFrequencyPairSum_eq_period_mul_aliasSum
+    T L Λ f hL hΛ hsmooth hsupp heven z z']
+  rw [virtualAliasSum_eq_zeroTranslation
+    T L Λ f hL hΛ hsmooth hsupp heven hhalf z z']
+  rw [virtualComplexAliasTerm_zero]
+
+/-- The reciprocal-period Gram normalization cancels the virtual period,
+leaving the requested full-length energy transform. -/
+theorem virtualNormalizedFrequencyPairSum_eq_energyIntegral
+    (fullLength T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) :
+    (fullLength : ℂ) / (L : ℂ) *
+        virtualFrequencyPairSum T L f z z' =
+      (fullLength : ℂ) *
+        ∫ u : ℝ,
+          (f u : ℂ) * f u *
+            Complex.exp (Complex.I * (z - z') * (u : ℂ)) := by
+  have hL0 : (L : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  rw [virtualFrequencyPairSum_eq_energyIntegral
+    T L Λ f hL hΛ hsmooth hsupp heven hhalf z z']
+  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+
+
+/-! ## Canonical finite exhaustion of the virtual frequency lattice -/
+
+/-- One integer-frequency product in the standalone virtual lattice. -/
+def virtualFrequencyPairTerm
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (k : ℤ) : ℂ :=
+  paperFT (fun u => (f u : ℂ))
+      (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+    paperFT (fun u => (f u : ℂ))
+      (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ))
+
+/-- The first n nonnegative frequencies paired with the first n negative
+frequencies.  This enumerates every integer exactly once as n tends to
+infinity. -/
+def virtualSymmetricFrequencyPartialSum
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (n : ℕ) : ℂ :=
+  ∑ k in Finset.range n,
+    virtualFrequencyPairTerm T L f z z' (k : ℤ) +
+      virtualFrequencyPairTerm T L f z z' (-(k : ℤ) - 1)
+
+/-- The canonical finite symmetric grids converge to the complete virtual
+Poisson lattice. -/
+theorem tendsto_virtualSymmetricFrequencyPartialSum
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (z z' : ℂ) :
+    Tendsto
+      (virtualSymmetricFrequencyPartialSum T L f z z')
+      Filter.atTop
+      (nhds (virtualFrequencyPairSum T L f z z')) := by
+  have hsum :
+      Summable (virtualFrequencyPairTerm T L f z z') := by
+    simpa only [virtualFrequencyPairTerm] using
+      (hasSum_virtualComplexAlias T L Λ f
+        hL hΛ hsmooth hsupp heven z z').2.summable
+  have hpair :
+      HasSum
+        (fun n : ℕ =>
+          virtualFrequencyPairTerm T L f z z' (n : ℤ) +
+            virtualFrequencyPairTerm T L f z z' (-(n : ℤ) - 1))
+        (∑' k : ℤ, virtualFrequencyPairTerm T L f z z' k) := by
+    have hbase := hsum.hasSum.nat_add_neg_add_one
+    convert hbase using 1
+    funext n
+    congr 1
+    push_cast
+    ring
+  simpa only [virtualSymmetricFrequencyPartialSum,
+    virtualFrequencyPairSum, virtualFrequencyPairTerm] using
+      hpair.tendsto_sum_nat
+
+
+/-- With closed half-period support, the canonical finite grids converge
+directly to the evaluated energy transform. -/
+theorem tendsto_virtualSymmetricFrequencyPartialSum_energy
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) :
+    Tendsto
+      (virtualSymmetricFrequencyPartialSum T L f z z')
+      Filter.atTop
+      (nhds
+        ((L : ℂ) *
+          ∫ u : ℝ,
+            (f u : ℂ) * f u *
+              Complex.exp (Complex.I * (z - z') * (u : ℂ)))) := by
+  rw [← virtualFrequencyPairSum_eq_energyIntegral
+    T L Λ f hL hΛ hsmooth hsupp heven hhalf z z']
+  exact tendsto_virtualSymmetricFrequencyPartialSum
+    T L Λ f hL hΛ hsmooth hsupp heven z z'
+
+/-- After reciprocal-period Gram normalization, the canonical finite grids
+converge to the full-length energy transform. -/
+theorem tendsto_virtualNormalizedSymmetricFrequencyPartialSum_energy
+    (fullLength T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (hhalf : tsupport f ⊆ Icc (-L / 2) (L / 2))
+    (z z' : ℂ) :
+    Tendsto
+      (fun n =>
+        (fullLength : ℂ) / (L : ℂ) *
+          virtualSymmetricFrequencyPartialSum T L f z z' n)
+      Filter.atTop
+      (nhds
+        ((fullLength : ℂ) *
+          ∫ u : ℝ,
+            (f u : ℂ) * f u *
+              Complex.exp (Complex.I * (z - z') * (u : ℂ)))) := by
+  have hL0 : (L : ℂ) ≠ 0 := by
+    exact_mod_cast hL.ne'
+  have ht :
+      Tendsto
+        (fun n =>
+          (fullLength : ℂ) / (L : ℂ) *
+            virtualSymmetricFrequencyPartialSum T L f z z' n)
+        Filter.atTop
+        (nhds
+          (((fullLength : ℂ) / (L : ℂ)) *
+            ((L : ℂ) *
+              ∫ u : ℝ,
+                (f u : ℂ) * f u *
+                  Complex.exp
+                    (Complex.I * (z - z') * (u : ℂ))))) :=
+    tendsto_const_nhds.mul
+      (tendsto_virtualSymmetricFrequencyPartialSum_energy
+        T L Λ f hL hΛ hsmooth hsupp heven hhalf z z')
+  convert ht using 1
+  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+
+
+/-- Tail left after the canonical finite symmetric frequency grid. -/
+def virtualSymmetricFrequencyTail
+    (T L : ℝ) (f : ℝ → ℝ) (z z' : ℂ) (n : ℕ) : ℂ :=
+  virtualFrequencyPairSum T L f z z' -
+    virtualSymmetricFrequencyPartialSum T L f z z' n
+
+/-- For every fixed virtual window and pair of complex frequencies, the
+canonical finite-grid tail tends to zero. -/
+theorem tendsto_virtualSymmetricFrequencyTail_zero
+    (T L Λ : ℝ) (f : ℝ → ℝ)
+    (hL : 0 < L) (hΛ : 0 ≤ Λ)
+    (hsmooth : ContDiff ℝ 2 (fun u => (f u : ℂ)))
+    (hsupp : ∀ u, Λ < |u| → f u = 0)
+    (heven : ∀ u, f (-u) = f u)
+    (z z' : ℂ) :
+    Tendsto
+      (virtualSymmetricFrequencyTail T L f z z')
+      Filter.atTop (nhds 0) := by
+  have hconst :
+      Tendsto
+        (fun _ : ℕ => virtualFrequencyPairSum T L f z z')
+        Filter.atTop
+        (nhds (virtualFrequencyPairSum T L f z z')) :=
+    tendsto_const_nhds
+  have htail := hconst.sub
+    (tendsto_virtualSymmetricFrequencyPartialSum
+      T L Λ f hL hΛ hsmooth hsupp heven z z')
+  simpa only [virtualSymmetricFrequencyTail, sub_self] using htail
+
 end ComplexAliasBridge
 end Zeta85
 end RH
