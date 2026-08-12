@@ -201,6 +201,7 @@ theorem A_apply_eq_zeroSum
             F.atom T j ρ
   rw [finsum_mem_eq_finite_toFinset_sum _
     (ZeroSide.ZIprime_finite Z T)]
+  rfl
 
 /-- The compressed entry with the matrix products and finite zero sum fully
 opened, but before the sums are reordered. -/
@@ -790,6 +791,55 @@ def mixedZeroTupleCyclicTrace4
         (mixedBlockZeroSummand C T j l ρ₃ *
           mixedBlockZeroSummand C T l i ρ₄))
 
+private theorem sum_finset3_reverse
+    {α : Type*} (s : Finset α)
+    (f : α → α → α → ℂ) :
+    (∑ c ∈ s, ∑ b ∈ s, ∑ a ∈ s, f a b c) =
+      ∑ a ∈ s, ∑ b ∈ s, ∑ c ∈ s, f a b c := by
+  calc
+    (∑ c ∈ s, ∑ b ∈ s, ∑ a ∈ s, f a b c) =
+        ∑ c ∈ s, ∑ a ∈ s, ∑ b ∈ s, f a b c := by
+      apply Finset.sum_congr rfl
+      intro c _
+      rw [Finset.sum_comm]
+    _ = ∑ a ∈ s, ∑ c ∈ s, ∑ b ∈ s, f a b c := by
+      rw [Finset.sum_comm]
+    _ = ∑ a ∈ s, ∑ b ∈ s, ∑ c ∈ s, f a b c := by
+      apply Finset.sum_congr rfl
+      intro a _
+      rw [Finset.sum_comm]
+
+private theorem sum_finset4_reverse
+    {α : Type*} (s : Finset α)
+    (f : α → α → α → α → ℂ) :
+    (∑ d ∈ s, ∑ c ∈ s, ∑ b ∈ s, ∑ a ∈ s,
+        f a b c d) =
+      ∑ a ∈ s, ∑ b ∈ s, ∑ c ∈ s, ∑ d ∈ s,
+        f a b c d := by
+  calc
+    (∑ d ∈ s, ∑ c ∈ s, ∑ b ∈ s, ∑ a ∈ s,
+        f a b c d) =
+        ∑ d ∈ s, ∑ a ∈ s, ∑ b ∈ s, ∑ c ∈ s,
+          f a b c d := by
+      apply Finset.sum_congr rfl
+      intro d _
+      exact sum_finset3_reverse s (fun a b c => f a b c d)
+    _ = ∑ a ∈ s, ∑ d ∈ s, ∑ b ∈ s, ∑ c ∈ s,
+        f a b c d := by
+      rw [Finset.sum_comm]
+    _ = ∑ a ∈ s, ∑ b ∈ s, ∑ d ∈ s, ∑ c ∈ s,
+        f a b c d := by
+      apply Finset.sum_congr rfl
+      intro a _
+      rw [Finset.sum_comm]
+    _ = ∑ a ∈ s, ∑ b ∈ s, ∑ c ∈ s, ∑ d ∈ s,
+        f a b c d := by
+      apply Finset.sum_congr rfl
+      intro a _
+      apply Finset.sum_congr rfl
+      intro b _
+      rw [Finset.sum_comm]
+
 theorem mixedZeroCyclicTrace3_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
@@ -806,6 +856,7 @@ theorem mixedZeroCyclicTrace3_eq_tuple
   apply Finset.sum_congr rfl
   intro k _
   simp only [Finset.sum_mul, Finset.mul_sum]
+  rw [sum_finset3_reverse]
 
 theorem mixedZeroCyclicTrace4_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -826,6 +877,7 @@ theorem mixedZeroCyclicTrace4_eq_tuple
   apply Finset.sum_congr rfl
   intro l _
   simp only [Finset.sum_mul, Finset.mul_sum]
+  rw [sum_finset4_reverse]
 
 def mixedZeroKernelCyclicTrace3
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
