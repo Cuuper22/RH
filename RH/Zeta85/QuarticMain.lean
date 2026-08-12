@@ -122,6 +122,126 @@ theorem rung9506_cumulative
     simpa only [Rung9506_statement] using rung9506 hfull hzero hweighted
   simpa only [Rung9506_cumulative_statement] using quarticCumulative hdyadic
 
+
+/-! ## Mixed-channel isometric route -/
+
+/-- Frozen R-8657 from an exact mixed-channel compression and its one-sided
+terminal statistic.  No coordinate principal-block allocation is used. -/
+theorem rung8657_isometric
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    Rung8657_statement := by
+  simpa only [Rung8657_statement, cRung8657] using
+    IsometricBlock.zeta_eps_transfer_8657
+      hfull hzero C hweighted
+
+theorem rung8657_cumulative_isometric
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    Rung8657_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung8657 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung8657_statement] using
+      rung8657_isometric hfull hzero C hweighted
+  simpa only [Rung8657_cumulative_statement] using
+    quarticCumulative hdyadic
+
+/-- Frozen R-8686 from the mixed-channel compression. -/
+theorem rung8686_isometric
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    Rung8686_statement := by
+  simpa only [Rung8686_statement, cRung8686] using
+    IsometricBlock.zeta_eps_transfer_8686
+      hfull hzero C hweighted
+
+theorem rung8686_cumulative_isometric
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    Rung8686_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung8686 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung8686_statement] using
+      rung8686_isometric hfull hzero C hweighted
+  simpa only [Rung8686_cumulative_statement] using
+    quarticCumulative hdyadic
+
+/-- Frozen R-9383 from the mixed-channel compression. -/
+theorem rung9383_isometric
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    Rung9383_statement := by
+  simpa only [Rung9383_statement, cRung9383] using
+    IsometricBlock.zeta_eps_transfer_9383
+      hfull hzero C hweighted
+
+theorem rung9383_cumulative_isometric
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    Rung9383_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9383 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9383_statement] using
+      rung9383_isometric hfull hzero C hweighted
+  simpa only [Rung9383_cumulative_statement] using
+    quarticCumulative hdyadic
+
+/-- Frozen R-9506 from the mixed-channel compression. -/
+theorem rung9506_isometric
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    Rung9506_statement := by
+  simpa only [Rung9506_statement, cRung9506] using
+    IsometricBlock.zeta_eps_transfer_9506
+      hfull hzero C hweighted
+
+theorem rung9506_cumulative_isometric
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_isometric hfull hzero C hweighted
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
 end Zeta85
 end RH
 
