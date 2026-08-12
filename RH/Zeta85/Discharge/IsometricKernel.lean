@@ -366,6 +366,112 @@ def mixedPairKernelQuarticNumerator
   QuarticTransfer.pairKernelQuarticNumerator q F T
     (mixedPairKernel C T)
 
+
+/-- One zero's contribution to one entry after real column mixing. -/
+def mixedBlockZeroSummand
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ)
+    (a b : Fin (F.blockDim T)) (ρ : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) *
+    (Z.mult ρ : ℂ) *
+    mixedAtom C T a ρ * mixedAtom C T b ρ
+
+private theorem sum_fintype_finset_comm
+    {ι α : Type*} [Fintype ι]
+    (s : Finset α) (f : ι → α → ℂ) :
+    (∑ i : ι, ∑ a ∈ s, f i a) =
+      ∑ a ∈ s, ∑ i : ι, f i a := by
+  rw [Finset.sum_comm]
+
+/-- Reordering only finite sums shows that a compressed entry is again a
+literal Gram sum of the mixed atoms. -/
+theorem expandedMixedZeroEntry_eq_sum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ)
+    (a b : Fin (F.blockDim T)) :
+    expandedMixedZeroEntry C T a b =
+      ∑ ρ ∈ ZeroSide.ZI Z T,
+        mixedBlockZeroSummand C T a b ρ := by
+  unfold expandedMixedZeroEntry
+  simp_rw [C.real_entries]
+  calc
+    (∑ j : Fin (F.dim T),
+        (∑ i : Fin (F.dim T),
+          C.toData.compression T i a *
+            (((F.hatDenominator T)⁻¹ : ℂ) *
+              ∑ ρ ∈ ZeroSide.ZI Z T,
+                (Z.mult ρ : ℂ) * F.atom T i ρ *
+                  F.atom T j ρ)) *
+          C.toData.compression T j b =
+      ∑ j : Fin (F.dim T), ∑ i : Fin (F.dim T),
+        ∑ ρ ∈ ZeroSide.ZI Z T,
+          ((F.hatDenominator T)⁻¹ : ℂ) *
+            (Z.mult ρ : ℂ) *
+            C.toData.compression T i a *
+            C.toData.compression T j b *
+            F.atom T i ρ * F.atom T j ρ := by
+      apply Finset.sum_congr rfl
+      intro j _
+      rw [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro i _
+      simp only [Finset.mul_sum, Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro ρ _
+      ring
+    _ = ∑ i : Fin (F.dim T), ∑ j : Fin (F.dim T),
+        ∑ ρ ∈ ZeroSide.ZI Z T,
+          ((F.hatDenominator T)⁻¹ : ℂ) *
+            (Z.mult ρ : ℂ) *
+            C.toData.compression T i a *
+            C.toData.compression T j b *
+            F.atom T i ρ * F.atom T j ρ := by
+      rw [Finset.sum_comm]
+    _ = ∑ i : Fin (F.dim T),
+        ∑ ρ ∈ ZeroSide.ZI Z T, ∑ j : Fin (F.dim T),
+          ((F.hatDenominator T)⁻¹ : ℂ) *
+            (Z.mult ρ : ℂ) *
+            C.toData.compression T i a *
+            C.toData.compression T j b *
+            F.atom T i ρ * F.atom T j ρ := by
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [sum_fintype_finset_comm]
+    _ = ∑ ρ ∈ ZeroSide.ZI Z T,
+        ∑ i : Fin (F.dim T), ∑ j : Fin (F.dim T),
+          ((F.hatDenominator T)⁻¹ : ℂ) *
+            (Z.mult ρ : ℂ) *
+            C.toData.compression T i a *
+            C.toData.compression T j b *
+            F.atom T i ρ * F.atom T j ρ := by
+      rw [sum_fintype_finset_comm]
+    _ = ∑ ρ ∈ ZeroSide.ZI Z T,
+        mixedBlockZeroSummand C T a b ρ := by
+      apply Finset.sum_congr rfl
+      intro ρ _
+      unfold mixedBlockZeroSummand mixedAtom
+      simp only [Finset.mul_sum, Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro i _
+      apply Finset.sum_congr rfl
+      intro j _
+      ring
+
+/-- The actual isometric block entry is the finite zero Gram sum of the
+mixed atoms. -/
+theorem block_apply_eq_mixedZeroSum
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (C : RealData F) (T : ℝ)
+    (a b : Fin (F.blockDim T)) :
+    IsometricBlock.block C.toData T a b =
+      ∑ ρ ∈ ZeroSide.ZI Z T,
+        mixedBlockZeroSummand C T a b ρ := by
+  rw [block_apply_eq_expandedMixedZeroEntry,
+    expandedMixedZeroEntry_eq_sum]
+
 end IsometricKernel
 end Zeta85
 end RH
