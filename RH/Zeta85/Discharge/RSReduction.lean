@@ -84,6 +84,80 @@ theorem rsPairVector_sum {n q : ℕ}
   simp only [rsPairVector, Finset.sum_sub_distrib]
   rw [hpos, hneg, sub_self]
 
+/-! ## Compact normal-coordinate extension
+
+The cyclic symbol is only used on the zero-sum hyperplane.  Multiplying by a
+cutoff in the normal coordinate gives a genuinely compactly supported test
+without changing the gauge integral or any RS contraction. -/
+
+/-- Multiply a Fourier test by a cutoff in the coordinate normal to the
+zero-sum hyperplane. -/
+def normalCutoffSymbol {k : ℕ} (chi : ℝ -> ℂ)
+    (Phi : (Fin k -> ℝ) -> ℂ) (xi : Fin k -> ℝ) : ℂ :=
+  chi (∑ i, xi i) * Phi xi
+
+/-- A normalized normal cutoff is invisible on the zero-sum hyperplane. -/
+theorem normalCutoffSymbol_eq_of_sum_eq_zero {k : ℕ}
+    (chi : ℝ -> ℂ) (Phi : (Fin k -> ℝ) -> ℂ) (hchi : chi 0 = 1)
+    {xi : Fin k -> ℝ} (hxi : ∑ i, xi i = 0) :
+    normalCutoffSymbol chi Phi xi = Phi xi := by
+  simp [normalCutoffSymbol, hxi, hchi]
+
+/-- The canonical gauge lift lands exactly on the zero-sum hyperplane. -/
+theorem rsZeroSumLift_sum {n : ℕ} (xi : Fin n -> ℝ) :
+    ∑ j : Fin (n + 1), rsZeroSumLift xi j = 0 := by
+  rw [Fin.sum_univ_castSucc]
+  simp [rsZeroSumLift]
+
+/-- Normal cutoff does not change the gauge-fixed Fourier test. -/
+theorem rsGaugeTest_normalCutoffSymbol {n : ℕ}
+    (chi : ℝ -> ℂ) (Phi : (Fin (n + 1) -> ℝ) -> ℂ)
+    (hchi : chi 0 = 1) (x : Fin (n + 1) -> ℂ) :
+    rsGaugeTest (normalCutoffSymbol chi Phi) x = rsGaugeTest Phi x := by
+  unfold rsGaugeTest
+  apply integral_congr_ae
+  filter_upwards [] with xi
+  rw [normalCutoffSymbol_eq_of_sum_eq_zero chi Phi hchi
+    (rsZeroSumLift_sum xi)]
+
+/-- Normal cutoff does not change any disjoint-pair contraction. -/
+theorem rsPairIntegral_normalCutoffSymbol {n q : ℕ}
+    (chi : ℝ -> ℂ) (Phi : (Fin (n + 1) -> ℝ) -> ℂ)
+    (hchi : chi 0 = 1)
+    (pairing : (Fin q -> Fin (n + 1)) × (Fin q -> Fin (n + 1))) :
+    rsPairIntegral (normalCutoffSymbol chi Phi) pairing =
+      rsPairIntegral Phi pairing := by
+  unfold rsPairIntegral
+  apply integral_congr_ae
+  filter_upwards [] with w
+  rw [normalCutoffSymbol_eq_of_sum_eq_zero chi Phi hchi
+    (rsPairVector_sum pairing w)]
+
+/-- Consequently the full RS main term is invariant under normal cutoff. -/
+theorem rsMainTerm_normalCutoffSymbol {n : ℕ}
+    (chi : ℝ -> ℂ) (Phi : (Fin (n + 1) -> ℝ) -> ℂ)
+    (hchi : chi 0 = 1) :
+    rsMainTerm (normalCutoffSymbol chi Phi) = rsMainTerm Phi := by
+  unfold rsMainTerm
+  rw [normalCutoffSymbol_eq_of_sum_eq_zero chi Phi hchi (by simp)]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro q hq
+  apply Finset.sum_congr rfl
+  intro pairing hpairing
+  exact rsPairIntegral_normalCutoffSymbol chi Phi hchi pairing
+
+/-- The complete multiplicity-weighted zero-tuple summand is unchanged. -/
+theorem rsZeroTupleTerm_normalCutoffSymbol (Z : ZeroConfig) {n : ℕ}
+    (g : Fin (n + 1) -> ℝ -> ℂ)
+    (chi : ℝ -> ℂ) (Phi : (Fin (n + 1) -> ℝ) -> ℂ)
+    (hchi : chi 0 = 1) (T : ℝ)
+    (rho : Fin (n + 1) -> Z.carrier) :
+    rsZeroTupleTerm Z g (normalCutoffSymbol chi Phi) T rho =
+      rsZeroTupleTerm Z g Phi T rho := by
+  unfold rsZeroTupleTerm
+  rw [rsGaugeTest_normalCutoffSymbol chi Phi hchi]
+
 /-! ## Exact enumeration of the RS disjoint-pair main term -/
 
 /-- The `k = 1` (`n = 0`) main term has no contraction. -/
