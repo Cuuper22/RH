@@ -18,7 +18,7 @@ translated sharp top hat.
 -/
 
 open MeasureTheory Filter Set
-open scoped BigOperators Matrix Convolution Topology
+open scoped BigOperators Matrix Convolution Topology ContDiff
 
 noncomputable section
 
