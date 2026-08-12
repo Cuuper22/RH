@@ -12,6 +12,7 @@ import RH.Zeta85.Discharge.VirtualChannelMixer
 import RH.Zeta85.Discharge.RepeatedChannelCompression
 import RH.Zeta85.Discharge.AlignedIsometricLayout
 import RH.Zeta85.Discharge.AggregateCoordinateFrame
+import RH.Zeta85.Discharge.AggregateComplexAlias
 import RH.Zeta85.Discharge.AlignedChannelScales
 import RH.Zeta85.Statement
 
