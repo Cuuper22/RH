@@ -423,6 +423,37 @@ theorem SampledVirtualQuarticLowerBound.toIsometric
   simpa only [mixedPairKernelQuarticNumerator_eq_sampledVirtual] using
     h.eventually_gt x hx
 
+
+/-! ## Canonical virtual analysis of every aligned physical family -/
+
+/-- Every aligned layout admits an atom factorization automatically: analyze
+the physical atom vector at each modulation label against the orthogonal
+mixer.  No independent entire-function identity is required. -/
+def canonicalAtomFactorization
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : Layout F ι) : AtomFactorization L where
+  virtualAtom := fun T r k ρ =>
+    analyzeComplex L.frame
+      (fun j =>
+        F.atom T ((L.rowEquiv T).symm (j, k)) ρ) r
+  atom_eq := by
+    intro T i ρ
+    unfold physicalAtom
+    change
+      F.atom T i ρ =
+        synthesizeComplex L.frame
+          (fun r =>
+            analyzeComplex L.frame
+              (fun j =>
+                F.atom T
+                  ((L.rowEquiv T).symm
+                    (j, (L.rowEquiv T i).2)) ρ) r)
+          (L.rowEquiv T i).1
+    rw [synthesizeComplex_analyzeComplex]
+    simp
+
 end AlignedIsometricLayout
 end Zeta85
 end RH
