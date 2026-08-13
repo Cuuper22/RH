@@ -1474,7 +1474,8 @@ def AnnularFamilyRealization.toRadialShellData
       (shrinkingProfileShellWindow_contDiff
         v (h.commonPeriod T) (h.stage T j) (h.period_pos T)
         h.profile_smooth h.profile_pos).of_le
-          (show (2 : ℕ∞ω) ≤ ∞ from mod_cast le_top)
+          (WithTop.coe_le_coe.2
+            (show (2 : ℕ∞) ≤ ⊤ from le_top))
     exact hsmooth.continuousLinearMap_comp Complex.ofRealCLM
   · intro T j u hu
     rw [h.window_eq T j u]
