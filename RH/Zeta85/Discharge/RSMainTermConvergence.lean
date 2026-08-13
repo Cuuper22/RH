@@ -190,10 +190,23 @@ theorem integrable_frozen_distanceKernel_pows
               v (z.1 - 1 / 2) ^ a *
               v (z.2 - 1 / 2) ^ b) := by
     funext z
-    by_cases hx : z.1 ∈ Icc (0 : ℝ) 1 <;>
-      by_cases hy : z.2 ∈ Icc (0 : ℝ) 1 <;>
-      simp [distanceKernel, frozenRSProfile, mem_prod, hx, hy,
-        zero_pow ha.ne', zero_pow hb.ne']
+    by_cases hx : z.1 ∈ Icc (0 : ℝ) 1
+    · by_cases hy : z.2 ∈ Icc (0 : ℝ) 1
+      · rw [Set.indicator_of_mem (show z ∈
+            Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1 from ⟨hx, hy⟩)]
+        simp [distanceKernel, frozenRSProfile, hx, hy]
+      · rw [Set.indicator_of_notMem
+            (show z ∉ Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1 by
+              intro hz
+              exact hy hz.2)]
+        simp [distanceKernel, frozenRSProfile, hx, hy,
+          zero_pow hb.ne']
+    · rw [Set.indicator_of_notMem
+          (show z ∉ Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1 by
+            intro hz
+            exact hx hz.1)]
+      simp [distanceKernel, frozenRSProfile, hx,
+        zero_pow ha.ne']
   rw [heq, integrable_indicator_iff
     (measurableSet_Icc.prod measurableSet_Icc)]
   have hc :
@@ -669,15 +682,37 @@ theorem integrable_crossingRawKernel_one_frozen
                 v (p.2 + p.1.1 + p.1.2 - 1 / 2) *
                 v (p.2 + p.1.2 - 1 / 2))) := by
     funext p
-    by_cases hx : p.2 ∈ Icc (0 : ℝ) 1 <;>
-      by_cases hy : p.2 + p.1.1 ∈ Icc (0 : ℝ) 1 <;>
-      by_cases hz : p.2 + p.1.1 + p.1.2 ∈ Icc (0 : ℝ) 1 <;>
-      by_cases hw : p.2 + p.1.2 ∈ Icc (0 : ℝ) 1 <;>
-      simp only [crossingRawKernel, div_one, one_mul, frozenRSProfile,
-        K, A0, A1, A2, A3, indicator_apply, mem_inter_iff,
-        mem_preimage]
-      simp [hx, hy, hz, hw] <;> ring
-  rw [heq, integrable_indicator_iff hKclosed.measurableSet]
+    by_cases hx : p.2 ∈ Icc (0 : ℝ) 1
+    · by_cases hy : p.2 + p.1.1 ∈ Icc (0 : ℝ) 1
+      · by_cases hz : p.2 + p.1.1 + p.1.2 ∈ Icc (0 : ℝ) 1
+        · by_cases hw : p.2 + p.1.2 ∈ Icc (0 : ℝ) 1
+          · rw [Set.indicator_of_mem
+                (show p ∈ K by
+                  exact ⟨⟨⟨hx, hy⟩, hz⟩, hw⟩)]
+            simp [crossingRawKernel, frozenRSProfile, hx, hy, hz, hw]
+            ring
+          · rw [Set.indicator_of_notMem
+                (show p ∉ K by
+                  intro hp
+                  exact hw hp.2)]
+            simp [crossingRawKernel, frozenRSProfile, hx, hy, hz, hw]
+        · rw [Set.indicator_of_notMem
+              (show p ∉ K by
+                intro hp
+                exact hz hp.1.2)]
+          simp [crossingRawKernel, frozenRSProfile, hx, hy, hz]
+      · rw [Set.indicator_of_notMem
+            (show p ∉ K by
+              intro hp
+              exact hy hp.1.1.2)]
+        simp [crossingRawKernel, frozenRSProfile, hx, hy]
+    · rw [Set.indicator_of_notMem
+          (show p ∉ K by
+            intro hp
+            exact hx hp.1.1.1)]
+      simp [crossingRawKernel, frozenRSProfile, hx]
+  rw [heq]
+  rw [integrable_indicator_iff hKclosed.measurableSet]
   have hvcont : Continuous v := hv.continuous
   have hc :
       Continuous
@@ -761,17 +796,21 @@ theorem tendsto_integral_crossingRawKernel_annular
     have hkernelNonneg :
         0 ≤ crossingRawKernel 1 (annularRSProfile v n) p := by
       simp only [crossingRawKernel, div_one, one_mul]
+      have hz' :
+          0 ≤ annularRSProfile v n
+            (p.2 + (p.1.1 + p.1.2)) := by
+        simpa only [add_assoc] using hz.1
       exact
         mul_nonneg
-          (mul_nonneg (abs_nonneg _) (abs_nonneg _))
+          (mul_nonneg (abs_nonneg p.1.1) (abs_nonneg p.1.2))
           (mul_nonneg
             (mul_nonneg
-              (mul_nonneg hx.1 hy.1) hz.1)
+              (mul_nonneg hx.1 hy.1) hz')
             hw.1)
     rw [Real.norm_eq_abs, abs_of_nonneg hkernelNonneg]
-    simpa only [crossingRawKernel, div_one, one_mul] using
-      mul_le_mul_of_nonneg_left hall
-        (mul_nonneg (abs_nonneg _) (abs_nonneg _))
+    have hall' := mul_le_mul_of_nonneg_left hall
+      (mul_nonneg (abs_nonneg p.1.1) (abs_nonneg p.1.2))
+    simpa only [crossingRawKernel, div_one, one_mul, add_assoc] using hall'
   · have hx :=
       ae_tendsto_annularRSProfile_add_shift
         v hpos (fun _ => 0) (by fun_prop)
