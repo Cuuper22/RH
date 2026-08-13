@@ -30,13 +30,13 @@ Poisson clauses remain separate hypotheses of the final constructor.
 -/
 
 open Filter Matrix MeasureTheory
-open scoped BigOperators Topology
+open scoped BigOperators ContDiff Topology
 
 noncomputable section
 
 namespace RH.Zeta85.RSBlockMomentBridge
 
-open Zeta23 RHLinalg RSReduction RSPairIntegrals
+open Zeta23 RHLinalg RSReduction RSPairIntegrals TrimmedMoment
 
 /-- A slowly improving diagonal can respect an arbitrary convergence
 threshold in every fixed row.  This is the quantifier-order bridge needed
@@ -82,7 +82,8 @@ theorem exists_tendsto_slow_diagonal
     filter_upwards [eventually_ge_atTop (N 0 : ℝ)] with T hT
     change
       (N (Nat.findGreatest (fun n => (N n : ℝ) ≤ T) ⌈max T 0⌉₊) : ℝ) ≤ T
-    exact Nat.findGreatest_spec (Nat.zero_le _) hT
+    exact Nat.findGreatest_spec
+      (P := fun n => (N n : ℝ) ≤ T) (Nat.zero_le _) hT
   have hrowDiagonal : ∀ᶠ T in atTop,
       dist (f (stage T) T) (a (stage T)) <
         1 / ((stage T : ℝ) + 1) := by
@@ -93,7 +94,10 @@ theorem exists_tendsto_slow_diagonal
   have hbound :
       Tendsto (fun T => 1 / ((stage T : ℝ) + 1))
         atTop (nhds 0) := by
-    simpa only [Function.comp_apply] using
+    change Tendsto
+      ((fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 1)) ∘ stage)
+      atTop (nhds 0)
+    exact
       (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).comp hstage
   have hdistance :
       Tendsto (fun T => dist (f (stage T) T) (a (stage T)))
@@ -165,7 +169,7 @@ theorem tendsto_normalized_of_linear_error
     field_simp [hscaleC]
   have hnormScale :
       ‖(rsQuarticScale T : ℂ)‖ = rsQuarticScale T := by
-    rw [Complex.norm_real, abs_of_pos hscale]
+    rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hscale]
   have hratioEq :
       C * T / rsQuarticScale T =
         C * (2 * Real.pi) / Real.log T := by
@@ -182,9 +186,8 @@ theorem tendsto_normalized_of_linear_error
       (div_le_div_iff_of_pos_right hscale).2 (herror T hT)
     _ = C * (2 * Real.pi) / Real.log T := hratioEq
     _ < ε := by
-      simpa only [Real.dist_eq, sub_zero,
-        abs_of_nonneg
-          (div_nonneg (mul_nonneg hC (by positivity)) hlog.le)] using hratio
+      apply lt_of_le_of_lt (le_abs_self _)
+      simpa only [Real.dist_eq, sub_zero] using hratio
 
 /-- The normalized all-zero four-point statistic for one fixed smooth
 profile. -/
