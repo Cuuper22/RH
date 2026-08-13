@@ -41,4 +41,17 @@ jobs:
         run: lake exe cache get
 
       - name: Compile RS main-term bridge
+        id: compile
+        continue-on-error: true
         run: lake build RH.Zeta85.Discharge.RSMainTermConvergence
+
+      - name: Save partial Lean build cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .lake/build
+          key: rh-lean-rs-targeted-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+
+      - name: Propagate compiler failure
+        if: steps.compile.outcome == 'failure'
+        run: exit 1
