@@ -38,15 +38,17 @@ theorem frozenRSProfile_eq_supported
   · have hcenter : x - 1 / 2 ∈
         Icc (-(1 : ℝ) / 2) (1 / 2) := by
       constructor <;> linarith [hx.1, hx.2]
-    simp [frozenRSProfile, QuarticGramFamily.supportedFullProfile,
-      hx, hcenter]
+    rw [frozenRSProfile, Set.indicator_of_mem hx,
+      QuarticGramFamily.supportedFullProfile,
+      Set.indicator_of_mem hcenter]
   · have hcenter : x - 1 / 2 ∉
         Icc (-(1 : ℝ) / 2) (1 / 2) := by
       intro h
       apply hx
       constructor <;> linarith [h.1, h.2]
-    simp [frozenRSProfile, QuarticGramFamily.supportedFullProfile,
-      hx, hcenter]
+    rw [frozenRSProfile, Set.indicator_of_notMem hx,
+      QuarticGramFamily.supportedFullProfile,
+      Set.indicator_of_notMem hcenter]
 
 /-- Nonzero frozen-profile points lie in the unit interval. -/
 theorem frozenRSProfile_support
@@ -121,7 +123,7 @@ theorem integrable_frozenRSProfile_pow
           (fun x => v (x - 1 / 2) ^ k) := by
     funext x
     by_cases hx : x ∈ Icc (0 : ℝ) 1 <;>
-      simp [frozenRSProfile, hx, zero_pow hk]
+      simp [frozenRSProfile, hx, zero_pow hk.ne']
   rw [heq, integrable_indicator_iff measurableSet_Icc]
   have hcontinuous :
       Continuous (fun x : ℝ => v (x - 1 / 2) ^ k) :=
@@ -190,8 +192,8 @@ theorem integrable_frozen_distanceKernel_pows
     funext z
     by_cases hx : z.1 ∈ Icc (0 : ℝ) 1 <;>
       by_cases hy : z.2 ∈ Icc (0 : ℝ) 1 <;>
-      simp [distanceKernel, frozenRSProfile, hx, hy,
-        zero_pow ha, zero_pow hb]
+      simp [distanceKernel, frozenRSProfile, mem_prod, hx, hy,
+        zero_pow ha.ne', zero_pow hb.ne']
   rw [heq, integrable_indicator_iff
     (measurableSet_Icc.prod measurableSet_Icc)]
   have hc :
@@ -276,14 +278,18 @@ theorem tendsto_integral_annular_distanceKernel_pows
           (fun x => annularRSProfile v n x ^ a)
           (fun y => annularRSProfile v n y ^ b) z := by
       unfold distanceKernel
-      positivity
+      exact
+        mul_nonneg
+          (mul_nonneg (abs_nonneg _)
+            (pow_nonneg hx.1 a))
+          (pow_nonneg hy.1 b)
     rw [Real.norm_eq_abs, abs_of_nonneg hkernelNonneg]
     unfold distanceKernel
     exact mul_le_mul
-      (mul_le_mul_of_nonneg_left hxpow abs_nonneg)
+      (mul_le_mul_of_nonneg_left hxpow (abs_nonneg _))
       hypow
       (pow_nonneg hy.1 b)
-      (mul_nonneg abs_nonneg
+      (mul_nonneg (abs_nonneg _)
         (pow_nonneg (frozenRSProfile_nonneg v hpos z.1) a))
   · have hae := ae_tendsto_annularRSProfile v hpos
     have hfst :
@@ -374,7 +380,7 @@ theorem annular_distance_weight_le_frozen
     have hdist : |y - x| ≤ |x| + 1 := by
       calc
         |y - x| ≤ |y| + |x| := abs_sub y x
-        _ ≤ 1 + |x| := add_le_add_right hyabs _
+        _ ≤ 1 + |x| := by linarith
         _ = |x| + 1 := by ring
     exact mul_le_mul hdist hprofile.2 hprofile.1 (by positivity)
   · have hfrozen : frozenRSProfile v y = 0 := by
@@ -409,7 +415,7 @@ theorem tendsto_pairDistancePotential_annular
     filter_upwards [] with y
     have hnonneg :
         0 ≤ |y - x| * annularRSProfile v n y :=
-      mul_nonneg abs_nonneg
+      mul_nonneg (abs_nonneg _)
         (annularRSProfile_le_frozen v n hpos y).1
     rw [Real.norm_eq_abs, abs_of_nonneg hnonneg]
     exact annular_distance_weight_le_frozen v n hpos x y
@@ -439,7 +445,7 @@ theorem norm_pairDistancePotential_annular_le
         filter_upwards [] with y
         have hnonneg :
             0 ≤ |y - x| * annularRSProfile v n y :=
-          mul_nonneg abs_nonneg
+          mul_nonneg (abs_nonneg _)
             (annularRSProfile_le_frozen v n hpos y).1
         rw [Real.norm_eq_abs, abs_of_nonneg hnonneg]
         exact annular_distance_weight_le_frozen v n hpos x y)
@@ -453,7 +459,7 @@ theorem pairDistancePotential_annular_nonneg
     0 ≤ pairDistancePotential (annularRSProfile v n) x := by
   unfold pairDistancePotential
   exact integral_nonneg fun y =>
-    mul_nonneg abs_nonneg
+    mul_nonneg (abs_nonneg _)
       (annularRSProfile_le_frozen v n hpos y).1
 
 /-- The annular distance potential is strongly measurable as a function
@@ -470,8 +476,10 @@ theorem aestronglyMeasurable_pairDistancePotential_annular
     ((continuous_snd.sub continuous_fst).abs.mul
       ((annularRSProfile_contDiff v n hv hpos).continuous.comp
         continuous_snd)).stronglyMeasurable
-  simpa only [pairDistancePotential] using
-    hk.integral_prod_right'.aestronglyMeasurable
+  change AEStronglyMeasurable
+    (fun x : ℝ =>
+      ∫ y : ℝ, |y - x| * annularRSProfile v n y)
+  exact hk.integral_prod_right'.aestronglyMeasurable
 
 /-- The separated two-pair functional converges to its literal frozen
 profile value. -/
@@ -505,7 +513,9 @@ theorem tendsto_pairSquaredPotentialIntegral_annular
   · intro n
     filter_upwards [] with x
     by_cases hxzero : annularRSProfile v n x = 0
-    · simp [hxzero]
+    · simp only [hxzero, zero_pow (by norm_num : (2 : ℕ) ≠ 0),
+        zero_mul, norm_zero]
+      positivity
     · have hsupport :=
         annularRSProfile_support v n x hxzero
       have hxabs : |x| ≤ 1 := by
@@ -525,8 +535,8 @@ theorem tendsto_pairSquaredPotentialIntegral_annular
             2 * mass := by
         calc
           pairDistancePotential (annularRSProfile v n) x ≤
-              ‖pairDistancePotential (annularRSProfile v n) x‖ :=
-            le_norm_self _
+              ‖pairDistancePotential (annularRSProfile v n) x‖ := by
+            rw [Real.norm_eq_abs, abs_of_nonneg hpotentialNonneg]
           _ ≤ (|x| + 1) * mass := by
             simpa only [mass] using
               norm_pairDistancePotential_annular_le
@@ -663,8 +673,10 @@ theorem integrable_crossingRawKernel_one_frozen
       by_cases hy : p.2 + p.1.1 ∈ Icc (0 : ℝ) 1 <;>
       by_cases hz : p.2 + p.1.1 + p.1.2 ∈ Icc (0 : ℝ) 1 <;>
       by_cases hw : p.2 + p.1.2 ∈ Icc (0 : ℝ) 1 <;>
-      simp [crossingRawKernel, frozenRSProfile, K, A0, A1, A2, A3,
-        hx, hy, hz, hw] <;> ring
+      simp only [crossingRawKernel, div_one, one_mul, frozenRSProfile,
+        K, A0, A1, A2, A3, indicator_apply, mem_inter_iff,
+        mem_preimage]
+      simp [hx, hy, hz, hw] <;> ring
   rw [heq, integrable_indicator_iff hKclosed.measurableSet]
   have hvcont : Continuous v := hv.continuous
   have hc :
@@ -749,11 +761,17 @@ theorem tendsto_integral_crossingRawKernel_annular
     have hkernelNonneg :
         0 ≤ crossingRawKernel 1 (annularRSProfile v n) p := by
       simp only [crossingRawKernel, div_one, one_mul]
-      positivity
+      exact
+        mul_nonneg
+          (mul_nonneg (abs_nonneg _) (abs_nonneg _))
+          (mul_nonneg
+            (mul_nonneg
+              (mul_nonneg hx.1 hy.1) hz.1)
+            hw.1)
     rw [Real.norm_eq_abs, abs_of_nonneg hkernelNonneg]
     simpa only [crossingRawKernel, div_one, one_mul] using
       mul_le_mul_of_nonneg_left hall
-        (mul_nonneg abs_nonneg abs_nonneg)
+        (mul_nonneg (abs_nonneg _) (abs_nonneg _))
   · have hx :=
       ae_tendsto_annularRSProfile_add_shift
         v hpos (fun _ => 0) (by fun_prop)
@@ -880,13 +898,88 @@ theorem tendsto_quarticRSScalar_annular
   have hcross :=
     tendsto_crossingFunctional_annular v hv hpos
   unfold quarticRSScalar
-  exact
-    ((hfour.add
-      (tendsto_const_nhds.mul
-        ((tendsto_const_nhds.mul h31).add
-          (tendsto_const_nhds.mul h22)))).add
-      (tendsto_const_nhds.mul
-        ((tendsto_const_nhds.mul hpair).add hcross)))
+  have h31w :
+      Tendsto
+        (fun n =>
+          (4 : ℝ) *
+            distanceIntegral
+              (fun x => annularRSProfile v n x ^ 3)
+              (fun y => annularRSProfile v n y ^ 1))
+        atTop
+        (nhds
+          ((4 : ℝ) *
+            distanceIntegral
+              (fun x => frozenRSProfile v x ^ 3)
+              (fun y => frozenRSProfile v y ^ 1))) :=
+    (show Tendsto (fun _ : ℕ => (4 : ℝ)) atTop (nhds (4 : ℝ))
+      from tendsto_const_nhds).mul h31
+  have h22w :
+      Tendsto
+        (fun n =>
+          (2 : ℝ) *
+            distanceIntegral
+              (fun x => annularRSProfile v n x ^ 2)
+              (fun y => annularRSProfile v n y ^ 2))
+        atTop
+        (nhds
+          ((2 : ℝ) *
+            distanceIntegral
+              (fun x => frozenRSProfile v x ^ 2)
+              (fun y => frozenRSProfile v y ^ 2))) :=
+    (show Tendsto (fun _ : ℕ => (2 : ℝ)) atTop (nhds (2 : ℝ))
+      from tendsto_const_nhds).mul h22
+  have hmu2 :
+      Tendsto
+        (fun n =>
+          mu ^ 2 *
+            ((4 : ℝ) *
+                distanceIntegral
+                  (fun x => annularRSProfile v n x ^ 3)
+                  (fun y => annularRSProfile v n y ^ 1) +
+              (2 : ℝ) *
+                distanceIntegral
+                  (fun x => annularRSProfile v n x ^ 2)
+                  (fun y => annularRSProfile v n y ^ 2)))
+        atTop
+        (nhds
+          (mu ^ 2 *
+            ((4 : ℝ) *
+                distanceIntegral
+                  (fun x => frozenRSProfile v x ^ 3)
+                  (fun y => frozenRSProfile v y ^ 1) +
+              (2 : ℝ) *
+                distanceIntegral
+                  (fun x => frozenRSProfile v x ^ 2)
+                  (fun y => frozenRSProfile v y ^ 2)))) :=
+    (show Tendsto (fun _ : ℕ => mu ^ 2) atTop (nhds (mu ^ 2))
+      from tendsto_const_nhds).mul (h31w.add h22w)
+  have hpairw :
+      Tendsto
+        (fun n =>
+          (2 : ℝ) *
+            pairSquaredPotentialIntegral (annularRSProfile v n))
+        atTop
+        (nhds
+          ((2 : ℝ) *
+            pairSquaredPotentialIntegral (frozenRSProfile v))) :=
+    (show Tendsto (fun _ : ℕ => (2 : ℝ)) atTop (nhds (2 : ℝ))
+      from tendsto_const_nhds).mul hpair
+  have hmu4 :
+      Tendsto
+        (fun n =>
+          mu ^ 4 *
+            ((2 : ℝ) *
+                pairSquaredPotentialIntegral (annularRSProfile v n) +
+              crossingFunctional (annularRSProfile v n)))
+        atTop
+        (nhds
+          (mu ^ 4 *
+            ((2 : ℝ) *
+                pairSquaredPotentialIntegral (frozenRSProfile v) +
+              crossingFunctional (frozenRSProfile v)))) :=
+    (show Tendsto (fun _ : ℕ => mu ^ 4) atTop (nhds (mu ^ 4))
+      from tendsto_const_nhds).mul (hpairw.add hcross)
+  simpa only [pow_one] using (hfour.add hmu2).add hmu4
 
 /-- The fixed-profile complex main term follows the same annular limit. -/
 theorem tendsto_frozenQuarticRSMain_annular
@@ -928,7 +1021,7 @@ theorem tendsto_frozenQuarticRSMain_annular
           ((((4999 / 10000 : ℝ) *
             quarticRSScalar (4999 / 10000 : ℝ)
               (frozenRSProfile v) : ℝ) : ℂ))) := by
-    simpa only [Complex.ofRealCLM_apply] using
+    simpa only [Function.comp_def, Complex.ofRealCLM_apply] using
       (Complex.ofRealCLM.continuous.tendsto _).comp hreal
   unfold RSBlockMomentBridge.frozenQuarticRSMain
   exact tendsto_const_nhds.mul hcast
