@@ -15,7 +15,7 @@ rational sums by `Zeta23.XiPrime.integral_polyEval`.
 import RH.Zeta85.Certificate
 import Zeta23.XiPrime.Certificate.Poly
 
-open scoped BigOperators
+open scoped BigOperators ContDiff
 open Set intervalIntegral MeasureTheory
 
 noncomputable section
