@@ -228,7 +228,7 @@ theorem RS1996ZetaInputs.tendsto_normalizedFrozenLinearRSStatistic
   have hbound := (hRS T hT).2
   convert hbound using 1 <;>
     simp only [frozenLinearRSMain, rsQuarticScale] <;>
-    ring
+    push_cast <;> ring
 
 /-- The degree-one main term is the profile mass times the bandwidth. -/
 theorem frozenLinearRSMain_eq
@@ -244,6 +244,133 @@ theorem frozenLinearRSMain_eq
     Complex.ofReal_ne_zero.mpr hmu.ne'
   have hmain :=
     (div_eq_iff hmuC).mp hnorm
+  rw [hmain]
+  push_cast
+  ring
+
+/-- The normalized all-zero degree-two statistic at the frozen
+bandwidth. -/
+def normalizedFrozenQuadraticRSStatistic
+    {Z : ZeroConfig} (r : ℝ → ℝ)
+    (g : Fin 2 → ℝ → ℂ) (T : ℝ) : ℂ :=
+  (∑' rho, rsZeroTupleTerm Z g
+      (weightedCyclicSymbol (k := 2) (4999 / 10000 : ℝ) r) T rho) /
+    (rsQuarticScale T : ℂ)
+
+/-- The unevaluated fixed-profile degree-two RS main term. -/
+def frozenQuadraticRSMain
+    (r : ℝ → ℝ) (g : Fin 2 → ℝ → ℂ) : ℂ :=
+  rsHeightFactor g *
+    rsMainTerm
+      (weightedCyclicSymbol (k := 2) (4999 / 10000 : ℝ) r)
+
+/-- Every smooth unit-interval profile has a genuine normalized degree-two
+limit at the frozen bandwidth. -/
+theorem RS1996ZetaInputs.tendsto_normalizedFrozenQuadraticRSStatistic
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℝ → ℝ) (hrc : HasCompactSupport r)
+    (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 → (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (g : Fin 2 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    Tendsto
+      (normalizedFrozenQuadraticRSStatistic (Z := Z) r g)
+      atTop (nhds (frozenQuadraticRSMain r g)) := by
+  unfold normalizedFrozenQuadraticRSStatistic
+  apply tendsto_normalized_of_linear_error
+  obtain ⟨C, T0, hC, _hT0, hRS⟩ :=
+    RSReduction.RS1996ZetaInputs.frozenQuadratic
+      hrs (4999 / 10000 : ℝ) 0 1 (1 / 2 : ℝ) r
+      (by norm_num) hrc hrSmooth hrSupport
+      (by norm_num) (by norm_num) g hg
+  refine ⟨C, T0, hC, ?_⟩
+  intro T hT
+  have hbound := (hRS T hT).2
+  convert hbound using 1 <;>
+    simp only [frozenQuadraticRSMain, rsQuarticScale] <;>
+    push_cast <;> ring
+
+/-- The degree-two main term is the evaluated one-pair contraction. -/
+theorem frozenQuadraticRSMain_eq
+    (r : ℝ → ℝ) (g : Fin 2 → ℝ → ℂ)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    frozenQuadraticRSMain r g =
+      rsHeightFactor g *
+        (((4999 / 10000 : ℝ) *
+          ((∫ x : ℝ, r x ^ 2) +
+            (4999 / 10000 : ℝ) ^ 2 * distanceIntegral r r) : ℝ) : ℂ) := by
+  unfold frozenQuadraticRSMain
+  have hnorm :=
+    RSPairIntegrals.normalizedRSMainTerm_k2_of_continuous_compactSupport
+      (4999 / 10000 : ℝ) r (by norm_num) hr hrc
+  unfold RSPairIntegrals.normalizedRSMainTerm at hnorm
+  have hmuC : ((4999 / 10000 : ℝ) : ℂ) ≠ 0 := by
+    norm_num
+  have hmain := (div_eq_iff hmuC).mp hnorm
+  rw [hmain]
+  push_cast
+  ring
+
+/-- The normalized all-zero degree-three statistic at the frozen
+bandwidth. -/
+def normalizedFrozenCubicRSStatistic
+    {Z : ZeroConfig} (r : ℝ → ℝ)
+    (g : Fin 3 → ℝ → ℂ) (T : ℝ) : ℂ :=
+  (∑' rho, rsZeroTupleTerm Z g
+      (weightedCyclicSymbol (k := 3) (4999 / 10000 : ℝ) r) T rho) /
+    (rsQuarticScale T : ℂ)
+
+/-- The unevaluated fixed-profile degree-three RS main term. -/
+def frozenCubicRSMain
+    (r : ℝ → ℝ) (g : Fin 3 → ℝ → ℂ) : ℂ :=
+  rsHeightFactor g *
+    rsMainTerm
+      (weightedCyclicSymbol (k := 3) (4999 / 10000 : ℝ) r)
+
+/-- Every smooth unit-interval profile has a genuine normalized degree-three
+limit at the frozen bandwidth. -/
+theorem RS1996ZetaInputs.tendsto_normalizedFrozenCubicRSStatistic
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℝ → ℝ) (hrc : HasCompactSupport r)
+    (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 → (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (g : Fin 3 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    Tendsto
+      (normalizedFrozenCubicRSStatistic (Z := Z) r g)
+      atTop (nhds (frozenCubicRSMain r g)) := by
+  unfold normalizedFrozenCubicRSStatistic
+  apply tendsto_normalized_of_linear_error
+  obtain ⟨C, T0, hC, _hT0, hRS⟩ :=
+    RSReduction.RS1996ZetaInputs.frozenCubic
+      hrs (4999 / 10000 : ℝ) 0 1 (1 / 4 : ℝ) r
+      (by norm_num) hrc hrSmooth hrSupport
+      (by norm_num) (by norm_num) g hg
+  refine ⟨C, T0, hC, ?_⟩
+  intro T hT
+  have hbound := (hRS T hT).2
+  convert hbound using 1 <;>
+    simp only [frozenCubicRSMain, rsQuarticScale] <;>
+    push_cast <;> ring
+
+/-- The degree-three main term is the evaluated three-cycle contraction. -/
+theorem frozenCubicRSMain_eq
+    (r : ℝ → ℝ) (g : Fin 3 → ℝ → ℂ)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    frozenCubicRSMain r g =
+      rsHeightFactor g *
+        (((4999 / 10000 : ℝ) *
+          ((∫ x : ℝ, r x ^ 3) +
+            3 * (4999 / 10000 : ℝ) ^ 2 *
+              distanceIntegral (fun x => r x ^ 2) r) : ℝ) : ℂ) := by
+  unfold frozenCubicRSMain
+  have hnorm :=
+    RSPairIntegrals.normalizedRSMainTerm_k3_of_continuous_compactSupport
+      (4999 / 10000 : ℝ) r (by norm_num) hr hrc
+  unfold RSPairIntegrals.normalizedRSMainTerm at hnorm
+  have hmuC : ((4999 / 10000 : ℝ) : ℂ) ≠ 0 := by
+    norm_num
+  have hmain := (div_eq_iff hmuC).mp hnorm
   rw [hmain]
   push_cast
   ring
