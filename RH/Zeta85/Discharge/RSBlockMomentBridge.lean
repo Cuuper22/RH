@@ -214,7 +214,7 @@ theorem RS1996ZetaInputs.tendsto_normalizedFrozenQuarticRSStatistic
     (hrSupport : ∀ x, r x ≠ 0 → (0 : ℝ) ≤ x ∧ x ≤ 1)
     (g : Fin 4 → ℝ → ℂ)
     (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
-    Tendsto (normalizedFrozenQuarticRSStatistic r g)
+    Tendsto (normalizedFrozenQuarticRSStatistic (Z := Z) r g)
       atTop (nhds (frozenQuarticRSMain r g)) := by
   unfold normalizedFrozenQuarticRSStatistic
   apply tendsto_normalized_of_linear_error
@@ -225,7 +225,8 @@ theorem RS1996ZetaInputs.tendsto_normalizedFrozenQuarticRSStatistic
   intro T hT
   have hbound := (hRS T hT).2
   convert hbound using 1 <;>
-    simp only [frozenQuarticRSMain, rsQuarticScale] <;> ring
+    simp only [frozenQuarticRSMain, rsQuarticScale] <;>
+    push_cast <;> ring
 
 /-- A sequence of increasingly sharp smooth profiles may be selected slowly
 enough that its fixed-test RS estimates and its limiting main term hold on
@@ -246,15 +247,15 @@ theorem RS1996ZetaInputs.exists_tendsto_profile_diagonal
       Tendsto stage atTop atTop ∧
       Tendsto
         (fun T =>
-          normalizedFrozenQuarticRSStatistic (r (stage T)) g T)
+          normalizedFrozenQuarticRSStatistic (Z := Z) (r (stage T)) g T)
         atTop (nhds A) := by
   apply exists_tendsto_slow_diagonal
-    (fun n T => normalizedFrozenQuarticRSStatistic (r n) g T)
+    (fun n T => normalizedFrozenQuarticRSStatistic (Z := Z) (r n) g T)
     (fun n => frozenQuarticRSMain (r n) g) A
   · intro n
     exact
       RS1996ZetaInputs.tendsto_normalizedFrozenQuarticRSStatistic
-        hrs (r n) (hrc n) (hrSmooth n)
+        (Z := Z) hrs (r n) (hrc n) (hrSmooth n)
           (hrSupport n) g hg
   · exact hmain
 
