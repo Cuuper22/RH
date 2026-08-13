@@ -54,7 +54,14 @@ theorem annularRSProfile_support
         v 1 n (by norm_num) (x - 1 / 2) ≠ 0 := by
     intro hzero
     apply hx
-    simp [annularRSProfile, hzero]
+    change
+      shrinkingProfileShellWindow
+        v 1 n (by norm_num) (x - 1 / 2) ^ 2 = 0
+    calc
+      shrinkingProfileShellWindow
+          v 1 n (by norm_num) (x - 1 / 2) ^ 2 =
+        0 ^ 2 := congrArg (fun y : ℝ => y ^ 2) hzero
+      _ = 0 := by norm_num
   have hsupp :=
     shrinkingProfileShellWindow_support
       v 1 n (by norm_num) hshell
