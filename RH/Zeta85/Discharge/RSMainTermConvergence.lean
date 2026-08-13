@@ -1718,6 +1718,339 @@ theorem tendsto_distanceIntegral_topHatApprox_pows
     tendsto_integral_topHatApprox_distanceKernel_pows
       p hp hp1 a b ha hb
 
+
+/-- The degree-two scalar follows the smooth top-hat sequence to its sharp
+limit. -/
+theorem tendsto_quadraticRSScalar_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
+    Tendsto
+      (fun n =>
+        quadraticRSScalar
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1))
+      atTop
+      (nhds
+        (quadraticRSScalar
+          (SmoothTopHatApprox.shiftedTopHat p))) := by
+  have hpow :=
+    tendsto_integral_topHatApproxProfile_pow
+      p hp hp1 2 (by norm_num)
+  have hdist :=
+    tendsto_distanceIntegral_topHatApprox_pows
+      p hp hp1 1 1 (by norm_num) (by norm_num)
+  have hweighted :
+      Tendsto
+        (fun n =>
+          (4999 / 10000 : ℝ) ^ 2 *
+            distanceIntegral
+              (fun x =>
+                SmoothTopHatApprox.topHatApproxProfile
+                  p n hp hp1 x ^ 1)
+              (fun y =>
+                SmoothTopHatApprox.topHatApproxProfile
+                  p n hp hp1 y ^ 1))
+        atTop
+        (nhds
+          ((4999 / 10000 : ℝ) ^ 2 *
+            distanceIntegral
+              (fun x =>
+                SmoothTopHatApprox.shiftedTopHat p x ^ 1)
+              (fun y =>
+                SmoothTopHatApprox.shiftedTopHat p y ^ 1))) :=
+    (show Tendsto
+        (fun _ : ℕ => (4999 / 10000 : ℝ) ^ 2)
+        atTop (nhds ((4999 / 10000 : ℝ) ^ 2)) from
+      tendsto_const_nhds).mul hdist
+  have hsum := hpow.add hweighted
+  have hscaled :=
+    (show Tendsto
+        (fun _ : ℕ => (4999 / 10000 : ℝ))
+        atTop (nhds (4999 / 10000 : ℝ)) from
+      tendsto_const_nhds).mul hsum
+  simpa only [quadraticRSScalar, pow_one] using hscaled
+
+/-- The degree-three scalar follows the smooth top-hat sequence to its sharp
+limit. -/
+theorem tendsto_cubicRSScalar_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
+    Tendsto
+      (fun n =>
+        cubicRSScalar
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1))
+      atTop
+      (nhds
+        (cubicRSScalar
+          (SmoothTopHatApprox.shiftedTopHat p))) := by
+  have hpow :=
+    tendsto_integral_topHatApproxProfile_pow
+      p hp hp1 3 (by norm_num)
+  have hdist :=
+    tendsto_distanceIntegral_topHatApprox_pows
+      p hp hp1 2 1 (by norm_num) (by norm_num)
+  have hweighted :
+      Tendsto
+        (fun n =>
+          (3 * (4999 / 10000 : ℝ) ^ 2) *
+            distanceIntegral
+              (fun x =>
+                SmoothTopHatApprox.topHatApproxProfile
+                  p n hp hp1 x ^ 2)
+              (fun y =>
+                SmoothTopHatApprox.topHatApproxProfile
+                  p n hp hp1 y ^ 1))
+        atTop
+        (nhds
+          ((3 * (4999 / 10000 : ℝ) ^ 2) *
+            distanceIntegral
+              (fun x =>
+                SmoothTopHatApprox.shiftedTopHat p x ^ 2)
+              (fun y =>
+                SmoothTopHatApprox.shiftedTopHat p y ^ 1))) :=
+    (show Tendsto
+        (fun _ : ℕ => 3 * (4999 / 10000 : ℝ) ^ 2)
+        atTop (nhds (3 * (4999 / 10000 : ℝ) ^ 2)) from
+      tendsto_const_nhds).mul hdist
+  have hsum := hpow.add hweighted
+  have hscaled :=
+    (show Tendsto
+        (fun _ : ℕ => (4999 / 10000 : ℝ))
+        atTop (nhds (4999 / 10000 : ℝ)) from
+      tendsto_const_nhds).mul hsum
+  simpa only [cubicRSScalar, pow_one] using hscaled
+
+/-- The degree-two fixed RS main term reaches the literal sharp top hat. -/
+theorem tendsto_frozenQuadraticRSMain_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (g : Fin 2 → ℝ → ℂ) :
+    Tendsto
+      (fun n =>
+        RSBlockMomentBridge.frozenQuadraticRSMain
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g)
+      atTop
+      (nhds
+        (evaluatedQuadraticRSMain
+          (SmoothTopHatApprox.shiftedTopHat p) g)) := by
+  have hscalar :=
+    tendsto_quadraticRSScalar_topHatApprox p hp hp1
+  have hcast :
+      Tendsto
+        (fun n =>
+          ((quadraticRSScalar
+            (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) : ℝ) : ℂ))
+        atTop
+        (nhds
+          ((quadraticRSScalar
+            (SmoothTopHatApprox.shiftedTopHat p) : ℝ) : ℂ)) := by
+    simpa only [Function.comp_def, Complex.ofRealCLM_apply] using
+      (Complex.ofRealCLM.continuous.tendsto _).comp hscalar
+  have hmain :
+      Tendsto
+        (fun n =>
+          rsHeightFactor g *
+            ((quadraticRSScalar
+              (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) : ℝ) : ℂ))
+        atTop
+        (nhds
+          (rsHeightFactor g *
+            ((quadraticRSScalar
+              (SmoothTopHatApprox.shiftedTopHat p) : ℝ) : ℂ))) :=
+    (show Tendsto
+        (fun _ : ℕ => rsHeightFactor g)
+        atTop (nhds (rsHeightFactor g)) from
+      tendsto_const_nhds).mul hcast
+  have heval (n : ℕ) :
+      RSBlockMomentBridge.frozenQuadraticRSMain
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g =
+        evaluatedQuadraticRSMain
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g := by
+    rw [RSBlockMomentBridge.frozenQuadraticRSMain_eq
+      (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g
+      (SmoothTopHatApprox.topHatApproxProfile_contDiff
+        p n hp hp1).continuous
+      (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+        p n hp hp1)]
+    rfl
+  rw [show
+    (fun n =>
+      RSBlockMomentBridge.frozenQuadraticRSMain
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g) =
+      (fun n =>
+        evaluatedQuadraticRSMain
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g) by
+        funext n
+        exact heval n]
+  simpa only [evaluatedQuadraticRSMain] using hmain
+
+/-- The degree-three fixed RS main term reaches the literal sharp top hat. -/
+theorem tendsto_frozenCubicRSMain_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (g : Fin 3 → ℝ → ℂ) :
+    Tendsto
+      (fun n =>
+        RSBlockMomentBridge.frozenCubicRSMain
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g)
+      atTop
+      (nhds
+        (evaluatedCubicRSMain
+          (SmoothTopHatApprox.shiftedTopHat p) g)) := by
+  have hscalar :=
+    tendsto_cubicRSScalar_topHatApprox p hp hp1
+  have hcast :
+      Tendsto
+        (fun n =>
+          ((cubicRSScalar
+            (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) : ℝ) : ℂ))
+        atTop
+        (nhds
+          ((cubicRSScalar
+            (SmoothTopHatApprox.shiftedTopHat p) : ℝ) : ℂ)) := by
+    simpa only [Function.comp_def, Complex.ofRealCLM_apply] using
+      (Complex.ofRealCLM.continuous.tendsto _).comp hscalar
+  have hmain :
+      Tendsto
+        (fun n =>
+          rsHeightFactor g *
+            ((cubicRSScalar
+              (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) : ℝ) : ℂ))
+        atTop
+        (nhds
+          (rsHeightFactor g *
+            ((cubicRSScalar
+              (SmoothTopHatApprox.shiftedTopHat p) : ℝ) : ℂ))) :=
+    (show Tendsto
+        (fun _ : ℕ => rsHeightFactor g)
+        atTop (nhds (rsHeightFactor g)) from
+      tendsto_const_nhds).mul hcast
+  have heval (n : ℕ) :
+      RSBlockMomentBridge.frozenCubicRSMain
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g =
+        evaluatedCubicRSMain
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g := by
+    rw [RSBlockMomentBridge.frozenCubicRSMain_eq
+      (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g
+      (SmoothTopHatApprox.topHatApproxProfile_contDiff
+        p n hp hp1).continuous
+      (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+        p n hp hp1)]
+    rfl
+  rw [show
+    (fun n =>
+      RSBlockMomentBridge.frozenCubicRSMain
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g) =
+      (fun n =>
+        evaluatedCubicRSMain
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g) by
+        funext n
+        exact heval n]
+  simpa only [evaluatedCubicRSMain] using hmain
+
+/-- One slow height diagonal carries the sharp top-hat degree-two limit. -/
+theorem RS1996ZetaInputs.exists_tendsto_topHatApproxQuadraticMain
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (g : Fin 2 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          RSBlockMomentBridge.normalizedFrozenQuadraticRSStatistic
+            (Z := Z)
+            (SmoothTopHatApprox.topHatApproxProfile
+              p (stage T) hp hp1)
+            g T)
+        atTop
+        (nhds
+          (evaluatedQuadraticRSMain
+            (SmoothTopHatApprox.shiftedTopHat p) g)) := by
+  apply RSBlockMomentBridge.exists_tendsto_slow_diagonal
+    (fun n T =>
+      RSBlockMomentBridge.normalizedFrozenQuadraticRSStatistic
+        (Z := Z)
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        g T)
+    (fun n =>
+      RSBlockMomentBridge.frozenQuadraticRSMain
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        g)
+    (evaluatedQuadraticRSMain
+      (SmoothTopHatApprox.shiftedTopHat p) g)
+  · intro n
+    have hsmooth :
+        ContDiff ℝ 1
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) := by
+      exact
+        (SmoothTopHatApprox.topHatApproxProfile_contDiff
+          p n hp hp1).of_le
+            (WithTop.coe_le_coe.2
+              (show (1 : ℕ∞) ≤ ⊤ from le_top))
+    exact
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenQuadraticRSStatistic
+        hrs
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+          p n hp hp1)
+        hsmooth
+        (SmoothTopHatApprox.topHatApproxProfile_support
+          p n hp hp1)
+        g hg
+  · exact
+      tendsto_frozenQuadraticRSMain_topHatApprox
+        p hp hp1 g
+
+/-- One slow height diagonal carries the sharp top-hat degree-three limit. -/
+theorem RS1996ZetaInputs.exists_tendsto_topHatApproxCubicMain
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (g : Fin 3 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          RSBlockMomentBridge.normalizedFrozenCubicRSStatistic
+            (Z := Z)
+            (SmoothTopHatApprox.topHatApproxProfile
+              p (stage T) hp hp1)
+            g T)
+        atTop
+        (nhds
+          (evaluatedCubicRSMain
+            (SmoothTopHatApprox.shiftedTopHat p) g)) := by
+  apply RSBlockMomentBridge.exists_tendsto_slow_diagonal
+    (fun n T =>
+      RSBlockMomentBridge.normalizedFrozenCubicRSStatistic
+        (Z := Z)
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        g T)
+    (fun n =>
+      RSBlockMomentBridge.frozenCubicRSMain
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        g)
+    (evaluatedCubicRSMain
+      (SmoothTopHatApprox.shiftedTopHat p) g)
+  · intro n
+    have hsmooth :
+        ContDiff ℝ 1
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) := by
+      exact
+        (SmoothTopHatApprox.topHatApproxProfile_contDiff
+          p n hp hp1).of_le
+            (WithTop.coe_le_coe.2
+              (show (1 : ℕ∞) ≤ ⊤ from le_top))
+    exact
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenCubicRSStatistic
+        hrs
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+          p n hp hp1)
+        hsmooth
+        (SmoothTopHatApprox.topHatApproxProfile_support
+          p n hp hp1)
+        g hg
+  · exact
+      tendsto_frozenCubicRSMain_topHatApprox
+        p hp hp1 g
+
 /-- All five component limits assemble into convergence of the complete
 quartic Rudnick--Sarnak scalar. -/
 theorem tendsto_quarticRSScalar_annular
