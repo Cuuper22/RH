@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import RH.Zeta85.Discharge.RSAnnularDiagonal
 import RH.Zeta85.Discharge.QuarticWindowWitnesses
+import RH.Zeta85.Discharge.SmoothTopHatApprox
 
 /-!
 # Convergence of annular Rudnick--Sarnak main terms
@@ -1224,6 +1225,202 @@ theorem tendsto_frozenCubicRSMain_annular
         funext n
         exact heval n]
   simpa only [evaluatedCubicRSMain] using hmain
+
+
+/-- A fixed integrable envelope for every positive power of the shrinking
+smooth top-hat approximations. -/
+def topHatPowerEnvelope (p : ℝ) (k : ℕ) (x : ℝ) : ℝ :=
+  (Icc (0 : ℝ) 1).indicator (fun _ => (1 / p) ^ k) x
+
+theorem integrable_topHatPowerEnvelope
+    (p : ℝ) (k : ℕ) :
+    Integrable (topHatPowerEnvelope p k) := by
+  unfold topHatPowerEnvelope
+  exact
+    (MeasureTheory.integrableOn_const
+      (s := Icc (0 : ℝ) 1)
+      (by simp [Real.volume_Icc])).integrable_indicator measurableSet_Icc
+
+/-- Every positive power of the legal smooth top-hat sequence converges in
+integral to the literal shifted sharp top hat. -/
+theorem tendsto_integral_topHatApproxProfile_pow
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (k : ℕ) (hk : 0 < k) :
+    Tendsto
+      (fun n =>
+        ∫ x : ℝ,
+          SmoothTopHatApprox.topHatApproxProfile p n hp hp1 x ^ k)
+      atTop
+      (nhds
+        (∫ x : ℝ,
+          SmoothTopHatApprox.shiftedTopHat p x ^ k)) := by
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (topHatPowerEnvelope p k)
+  · intro n
+    exact
+      ((SmoothTopHatApprox.topHatApproxProfile_contDiff
+        p n hp hp1).continuous.pow k).aestronglyMeasurable
+  · exact integrable_topHatPowerEnvelope p k
+  · intro n
+    filter_upwards [] with x
+    have hb :=
+      SmoothTopHatApprox.topHatApproxProfile_bounds
+        p n hp hp1 x
+    by_cases hx : x ∈ Icc (0 : ℝ) 1
+    · rw [topHatPowerEnvelope, Set.indicator_of_mem hx,
+        Real.norm_eq_abs,
+        abs_of_nonneg (pow_nonneg hb.1 k)]
+      exact pow_le_pow_left₀ hb.1 hb.2 k
+    · have hz :
+          SmoothTopHatApprox.topHatApproxProfile p n hp hp1 x = 0 := by
+        by_contra hne
+        exact hx
+          (SmoothTopHatApprox.topHatApproxProfile_support
+            p n hp hp1 x hne)
+      simp [topHatPowerEnvelope, hx, hz, zero_pow hk.ne']
+  · filter_upwards [] with x
+    exact
+      (SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 x).pow k
+
+/-- The degree-one scalar follows the smooth top-hat sequence to its sharp
+limit. -/
+theorem tendsto_linearRSScalar_topHatApprox
+    (mu p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
+    Tendsto
+      (fun n =>
+        linearRSScalar mu
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1))
+      atTop
+      (nhds
+        (linearRSScalar mu
+          (SmoothTopHatApprox.shiftedTopHat p))) := by
+  have hmass :=
+    tendsto_integral_topHatApproxProfile_pow
+      p hp hp1 1 (by norm_num)
+  have hscaled :
+      Tendsto
+        (fun n =>
+          mu * ∫ x : ℝ,
+            SmoothTopHatApprox.topHatApproxProfile p n hp hp1 x ^ 1)
+        atTop
+        (nhds
+          (mu * ∫ x : ℝ,
+            SmoothTopHatApprox.shiftedTopHat p x ^ 1)) :=
+    (show Tendsto (fun _ : ℕ => mu) atTop (nhds mu) from
+      tendsto_const_nhds).mul hmass
+  simpa only [linearRSScalar, pow_one] using hscaled
+
+/-- The degree-one fixed RS main term converges to the literal sharp
+top-hat main term. -/
+theorem tendsto_frozenLinearRSMain_topHatApprox
+    (mu : ℝ) (hmu : 0 < mu)
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (g : Fin 1 → ℝ → ℂ) :
+    Tendsto
+      (fun n =>
+        RSBlockMomentBridge.frozenLinearRSMain mu
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g)
+      atTop
+      (nhds
+        (evaluatedLinearRSMain mu
+          (SmoothTopHatApprox.shiftedTopHat p) g)) := by
+  have hscalar :=
+    tendsto_linearRSScalar_topHatApprox mu p hp hp1
+  have hcast :
+      Tendsto
+        (fun n =>
+          ((linearRSScalar mu
+            (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) : ℝ) : ℂ))
+        atTop
+        (nhds
+          ((linearRSScalar mu
+            (SmoothTopHatApprox.shiftedTopHat p) : ℝ) : ℂ)) := by
+    simpa only [Function.comp_def, Complex.ofRealCLM_apply] using
+      (Complex.ofRealCLM.continuous.tendsto _).comp hscalar
+  have hmain :
+      Tendsto
+        (fun n =>
+          rsHeightFactor g *
+            ((linearRSScalar mu
+              (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) : ℝ) : ℂ))
+        atTop
+        (nhds
+          (rsHeightFactor g *
+            ((linearRSScalar mu
+              (SmoothTopHatApprox.shiftedTopHat p) : ℝ) : ℂ))) :=
+    (show Tendsto
+        (fun _ : ℕ => rsHeightFactor g)
+        atTop (nhds (rsHeightFactor g)) from
+      tendsto_const_nhds).mul hcast
+  have heval (n : ℕ) :
+      RSBlockMomentBridge.frozenLinearRSMain mu
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g =
+        evaluatedLinearRSMain mu
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g := by
+    rw [RSBlockMomentBridge.frozenLinearRSMain_eq
+      mu (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g hmu]
+    rfl
+  rw [show
+    (fun n =>
+      RSBlockMomentBridge.frozenLinearRSMain mu
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g) =
+      (fun n =>
+        evaluatedLinearRSMain mu
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) g) by
+        funext n
+        exact heval n]
+  simpa only [evaluatedLinearRSMain] using hmain
+
+/-- One slow height diagonal already carries the actual sharp top-hat
+degree-one limit. -/
+theorem RS1996ZetaInputs.exists_tendsto_topHatApproxLinearMain
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (g : Fin 1 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          RSBlockMomentBridge.normalizedFrozenLinearRSStatistic
+            (Z := Z) (4999 / 10000 : ℝ)
+            (SmoothTopHatApprox.topHatApproxProfile
+              p (stage T) hp hp1)
+            g T)
+        atTop
+        (nhds
+          (evaluatedLinearRSMain (4999 / 10000 : ℝ)
+            (SmoothTopHatApprox.shiftedTopHat p) g)) := by
+  apply RSBlockMomentBridge.exists_tendsto_slow_diagonal
+    (fun n T =>
+      RSBlockMomentBridge.normalizedFrozenLinearRSStatistic
+        (Z := Z) (4999 / 10000 : ℝ)
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        g T)
+    (fun n =>
+      RSBlockMomentBridge.frozenLinearRSMain
+        (4999 / 10000 : ℝ)
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        g)
+    (evaluatedLinearRSMain (4999 / 10000 : ℝ)
+      (SmoothTopHatApprox.shiftedTopHat p) g)
+  · intro n
+    exact
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenLinearRSStatistic
+        hrs (4999 / 10000 : ℝ)
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+          p n hp hp1)
+        ((SmoothTopHatApprox.topHatApproxProfile_contDiff
+          p n hp hp1).of_le
+            (WithTop.coe_le_coe.2
+              (show (1 : ℕ∞) ≤ ⊤ from le_top)))
+        g hg
+  · exact
+      tendsto_frozenLinearRSMain_topHatApprox
+        (4999 / 10000 : ℝ) (by norm_num)
+        p hp hp1 g
 
 /-- All five component limits assemble into convergence of the complete
 quartic Rudnick--Sarnak scalar. -/
