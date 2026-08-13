@@ -925,6 +925,306 @@ theorem tendsto_crossingFunctional_annular
   exact tendsto_integral_crossingRawKernel_annular v hv hpos
 
 
+
+/-- The evaluated degree-one RS scalar. -/
+def linearRSScalar (mu : ℝ) (r : ℝ → ℝ) : ℝ :=
+  mu * ∫ x : ℝ, r x
+
+/-- The evaluated degree-two RS scalar at the frozen bandwidth. -/
+def quadraticRSScalar (r : ℝ → ℝ) : ℝ :=
+  (4999 / 10000 : ℝ) *
+    ((∫ x : ℝ, r x ^ 2) +
+      (4999 / 10000 : ℝ) ^ 2 * distanceIntegral r r)
+
+/-- The evaluated degree-three RS scalar at the frozen bandwidth. -/
+def cubicRSScalar (r : ℝ → ℝ) : ℝ :=
+  (4999 / 10000 : ℝ) *
+    ((∫ x : ℝ, r x ^ 3) +
+      3 * (4999 / 10000 : ℝ) ^ 2 *
+        distanceIntegral (fun x => r x ^ 2) r)
+
+/-- Degree-one scalar convergence follows from the profile-mass limit. -/
+theorem tendsto_linearRSScalar_annular
+    (mu : ℝ) (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n => linearRSScalar mu (annularRSProfile v n))
+      atTop
+      (nhds (linearRSScalar mu (frozenRSProfile v))) := by
+  have hmass :=
+    tendsto_integral_annularRSProfile_pow
+      v hv hpos 1 (by norm_num)
+  have hscaled :
+      Tendsto
+        (fun n => mu * ∫ x : ℝ, annularRSProfile v n x ^ 1)
+        atTop
+        (nhds (mu * ∫ x : ℝ, frozenRSProfile v x ^ 1)) :=
+    (show Tendsto (fun _ : ℕ => mu) atTop (nhds mu) from
+      tendsto_const_nhds).mul hmass
+  simpa only [linearRSScalar, pow_one] using hscaled
+
+/-- Degree-two scalar convergence follows from the mass-square and one-pair
+contraction limits. -/
+theorem tendsto_quadraticRSScalar_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n => quadraticRSScalar (annularRSProfile v n))
+      atTop
+      (nhds (quadraticRSScalar (frozenRSProfile v))) := by
+  have hpow :=
+    tendsto_integral_annularRSProfile_pow
+      v hv hpos 2 (by norm_num)
+  have hdist :=
+    tendsto_distanceIntegral_annularRSProfile_pows
+      v hv hpos 1 1 (by norm_num) (by norm_num)
+  have hweighted :
+      Tendsto
+        (fun n =>
+          (4999 / 10000 : ℝ) ^ 2 *
+            distanceIntegral
+              (fun x => annularRSProfile v n x ^ 1)
+              (fun y => annularRSProfile v n y ^ 1))
+        atTop
+        (nhds
+          ((4999 / 10000 : ℝ) ^ 2 *
+            distanceIntegral
+              (fun x => frozenRSProfile v x ^ 1)
+              (fun y => frozenRSProfile v y ^ 1))) :=
+    (show Tendsto
+        (fun _ : ℕ => (4999 / 10000 : ℝ) ^ 2)
+        atTop (nhds ((4999 / 10000 : ℝ) ^ 2)) from
+      tendsto_const_nhds).mul hdist
+  have hsum := hpow.add hweighted
+  have hscaled :=
+    (show Tendsto
+        (fun _ : ℕ => (4999 / 10000 : ℝ))
+        atTop (nhds (4999 / 10000 : ℝ)) from
+      tendsto_const_nhds).mul hsum
+  simpa only [quadraticRSScalar, pow_one] using hscaled
+
+/-- Degree-three scalar convergence follows from the cube-mass and
+two-one contraction limits. -/
+theorem tendsto_cubicRSScalar_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n => cubicRSScalar (annularRSProfile v n))
+      atTop
+      (nhds (cubicRSScalar (frozenRSProfile v))) := by
+  have hpow :=
+    tendsto_integral_annularRSProfile_pow
+      v hv hpos 3 (by norm_num)
+  have hdist :=
+    tendsto_distanceIntegral_annularRSProfile_pows
+      v hv hpos 2 1 (by norm_num) (by norm_num)
+  have hweighted :
+      Tendsto
+        (fun n =>
+          (3 * (4999 / 10000 : ℝ) ^ 2) *
+            distanceIntegral
+              (fun x => annularRSProfile v n x ^ 2)
+              (fun y => annularRSProfile v n y ^ 1))
+        atTop
+        (nhds
+          ((3 * (4999 / 10000 : ℝ) ^ 2) *
+            distanceIntegral
+              (fun x => frozenRSProfile v x ^ 2)
+              (fun y => frozenRSProfile v y ^ 1))) :=
+    (show Tendsto
+        (fun _ : ℕ => 3 * (4999 / 10000 : ℝ) ^ 2)
+        atTop (nhds (3 * (4999 / 10000 : ℝ) ^ 2)) from
+      tendsto_const_nhds).mul hdist
+  have hsum := hpow.add hweighted
+  have hscaled :=
+    (show Tendsto
+        (fun _ : ℕ => (4999 / 10000 : ℝ))
+        atTop (nhds (4999 / 10000 : ℝ)) from
+      tendsto_const_nhds).mul hsum
+  simpa only [cubicRSScalar, pow_one] using hscaled
+
+/-- The literal evaluated degree-one complex main term. -/
+def evaluatedLinearRSMain
+    (mu : ℝ) (r : ℝ → ℝ) (g : Fin 1 → ℝ → ℂ) : ℂ :=
+  rsHeightFactor g * ((linearRSScalar mu r : ℝ) : ℂ)
+
+/-- The literal evaluated degree-two complex main term. -/
+def evaluatedQuadraticRSMain
+    (r : ℝ → ℝ) (g : Fin 2 → ℝ → ℂ) : ℂ :=
+  rsHeightFactor g * ((quadraticRSScalar r : ℝ) : ℂ)
+
+/-- The literal evaluated degree-three complex main term. -/
+def evaluatedCubicRSMain
+    (r : ℝ → ℝ) (g : Fin 3 → ℝ → ℂ) : ℂ :=
+  rsHeightFactor g * ((cubicRSScalar r : ℝ) : ℂ)
+
+/-- The unevaluated degree-one fixed RS main converges through the annular
+profiles to its literal frozen value. -/
+theorem tendsto_frozenLinearRSMain_annular
+    (mu : ℝ) (hmu : 0 < mu)
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (g : Fin 1 → ℝ → ℂ) :
+    Tendsto
+      (fun n =>
+        RSBlockMomentBridge.frozenLinearRSMain
+          mu (annularRSProfile v n) g)
+      atTop
+      (nhds (evaluatedLinearRSMain mu (frozenRSProfile v) g)) := by
+  have hscalar :=
+    tendsto_linearRSScalar_annular mu v hv hpos
+  have hcast :
+      Tendsto
+        (fun n =>
+          ((linearRSScalar mu (annularRSProfile v n) : ℝ) : ℂ))
+        atTop
+        (nhds
+          ((linearRSScalar mu (frozenRSProfile v) : ℝ) : ℂ)) := by
+    simpa only [Function.comp_def, Complex.ofRealCLM_apply] using
+      (Complex.ofRealCLM.continuous.tendsto _).comp hscalar
+  have hmain :
+      Tendsto
+        (fun n =>
+          rsHeightFactor g *
+            ((linearRSScalar mu (annularRSProfile v n) : ℝ) : ℂ))
+        atTop
+        (nhds
+          (rsHeightFactor g *
+            ((linearRSScalar mu (frozenRSProfile v) : ℝ) : ℂ))) :=
+    (show Tendsto
+        (fun _ : ℕ => rsHeightFactor g)
+        atTop (nhds (rsHeightFactor g)) from
+      tendsto_const_nhds).mul hcast
+  have heval (n : ℕ) :
+      RSBlockMomentBridge.frozenLinearRSMain
+          mu (annularRSProfile v n) g =
+        evaluatedLinearRSMain mu (annularRSProfile v n) g := by
+    rw [RSBlockMomentBridge.frozenLinearRSMain_eq
+      mu (annularRSProfile v n) g hmu]
+    rfl
+  rw [show
+    (fun n =>
+      RSBlockMomentBridge.frozenLinearRSMain
+        mu (annularRSProfile v n) g) =
+      (fun n => evaluatedLinearRSMain mu (annularRSProfile v n) g) by
+        funext n
+        exact heval n]
+  simpa only [evaluatedLinearRSMain] using hmain
+
+/-- The unevaluated degree-two fixed RS main converges through the annular
+profiles to its literal frozen value. -/
+theorem tendsto_frozenQuadraticRSMain_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (g : Fin 2 → ℝ → ℂ) :
+    Tendsto
+      (fun n =>
+        RSBlockMomentBridge.frozenQuadraticRSMain
+          (annularRSProfile v n) g)
+      atTop
+      (nhds (evaluatedQuadraticRSMain (frozenRSProfile v) g)) := by
+  have hscalar :=
+    tendsto_quadraticRSScalar_annular v hv hpos
+  have hcast :
+      Tendsto
+        (fun n =>
+          ((quadraticRSScalar (annularRSProfile v n) : ℝ) : ℂ))
+        atTop
+        (nhds
+          ((quadraticRSScalar (frozenRSProfile v) : ℝ) : ℂ)) := by
+    simpa only [Function.comp_def, Complex.ofRealCLM_apply] using
+      (Complex.ofRealCLM.continuous.tendsto _).comp hscalar
+  have hmain :
+      Tendsto
+        (fun n =>
+          rsHeightFactor g *
+            ((quadraticRSScalar (annularRSProfile v n) : ℝ) : ℂ))
+        atTop
+        (nhds
+          (rsHeightFactor g *
+            ((quadraticRSScalar (frozenRSProfile v) : ℝ) : ℂ))) :=
+    (show Tendsto
+        (fun _ : ℕ => rsHeightFactor g)
+        atTop (nhds (rsHeightFactor g)) from
+      tendsto_const_nhds).mul hcast
+  have heval (n : ℕ) :
+      RSBlockMomentBridge.frozenQuadraticRSMain
+          (annularRSProfile v n) g =
+        evaluatedQuadraticRSMain (annularRSProfile v n) g := by
+    rw [RSBlockMomentBridge.frozenQuadraticRSMain_eq
+      (annularRSProfile v n) g
+      (annularRSProfile_contDiff v n hv hpos).continuous
+      (annularRSProfile_hasCompactSupport v n)]
+    rfl
+  rw [show
+    (fun n =>
+      RSBlockMomentBridge.frozenQuadraticRSMain
+        (annularRSProfile v n) g) =
+      (fun n => evaluatedQuadraticRSMain (annularRSProfile v n) g) by
+        funext n
+        exact heval n]
+  simpa only [evaluatedQuadraticRSMain] using hmain
+
+/-- The unevaluated degree-three fixed RS main converges through the annular
+profiles to its literal frozen value. -/
+theorem tendsto_frozenCubicRSMain_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (g : Fin 3 → ℝ → ℂ) :
+    Tendsto
+      (fun n =>
+        RSBlockMomentBridge.frozenCubicRSMain
+          (annularRSProfile v n) g)
+      atTop
+      (nhds (evaluatedCubicRSMain (frozenRSProfile v) g)) := by
+  have hscalar :=
+    tendsto_cubicRSScalar_annular v hv hpos
+  have hcast :
+      Tendsto
+        (fun n =>
+          ((cubicRSScalar (annularRSProfile v n) : ℝ) : ℂ))
+        atTop
+        (nhds
+          ((cubicRSScalar (frozenRSProfile v) : ℝ) : ℂ)) := by
+    simpa only [Function.comp_def, Complex.ofRealCLM_apply] using
+      (Complex.ofRealCLM.continuous.tendsto _).comp hscalar
+  have hmain :
+      Tendsto
+        (fun n =>
+          rsHeightFactor g *
+            ((cubicRSScalar (annularRSProfile v n) : ℝ) : ℂ))
+        atTop
+        (nhds
+          (rsHeightFactor g *
+            ((cubicRSScalar (frozenRSProfile v) : ℝ) : ℂ))) :=
+    (show Tendsto
+        (fun _ : ℕ => rsHeightFactor g)
+        atTop (nhds (rsHeightFactor g)) from
+      tendsto_const_nhds).mul hcast
+  have heval (n : ℕ) :
+      RSBlockMomentBridge.frozenCubicRSMain
+          (annularRSProfile v n) g =
+        evaluatedCubicRSMain (annularRSProfile v n) g := by
+    rw [RSBlockMomentBridge.frozenCubicRSMain_eq
+      (annularRSProfile v n) g
+      (annularRSProfile_contDiff v n hv hpos).continuous
+      (annularRSProfile_hasCompactSupport v n)]
+    rfl
+  rw [show
+    (fun n =>
+      RSBlockMomentBridge.frozenCubicRSMain
+        (annularRSProfile v n) g) =
+      (fun n => evaluatedCubicRSMain (annularRSProfile v n) g) by
+        funext n
+        exact heval n]
+  simpa only [evaluatedCubicRSMain] using hmain
+
 /-- All five component limits assemble into convergence of the complete
 quartic Rudnick--Sarnak scalar. -/
 theorem tendsto_quarticRSScalar_annular
