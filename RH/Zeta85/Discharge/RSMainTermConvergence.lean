@@ -3463,9 +3463,10 @@ theorem integral_topHat_pow_whole
     by_cases hx : x ∈ TopHatMoments.topHatSupport p
     · simp [TopHatMoments.topHat, hx]
     · simp [TopHatMoments.topHat, hx, hk.ne']
-  rw [heq, MeasureTheory.integral_indicator_const _
-    measurableSet_Icc]
+  rw [heq]
   unfold TopHatMoments.topHatSupport
+  rw [MeasureTheory.integral_indicator_const _
+    measurableSet_Icc]
   rw [Real.volume_real_Icc_of_le (by linarith : -p / 2 ≤ p / 2)]
   simp only [smul_eq_mul]
   ring
