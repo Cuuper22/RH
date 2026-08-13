@@ -403,7 +403,12 @@ theorem weightedCyclicSymbol_contDiff
     dsimp only [g]
     apply Finset.prod_eq_zero (Finset.mem_univ j0)
     have hpartial : cyclicPartialSum xi j0 = 0 := by
-      simp [cyclicPartialSum, j0]
+      unfold cyclicPartialSum
+      apply Finset.sum_eq_zero
+      intro j hj
+      have hjlt : j < j0 := (Finset.mem_filter.mp hj).2
+      have : j.val < 0 := by simpa [j0] using hjlt
+      omega
     rw [hpartial, zero_div, add_zero]
     exact image_eq_zero_of_notMem_tsupport hneg
   have hg : ContDiff ℝ 1 ↿g := by
