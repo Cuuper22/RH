@@ -2818,7 +2818,7 @@ theorem tendsto_pairSquaredPotentialIntegral_topHatApprox
           (pow_nonneg hpotentialNonneg 2)
       have henvelope :
           topHatPowerEnvelope p 2 x = (1 / p) ^ 2 := by
-        rw [topHatPowerEnvelope, Set.indicator_of_mem hsupport]
+        simp [topHatPowerEnvelope, hsupport.1, hsupport.2]
       rw [Real.norm_eq_abs, abs_of_nonneg hintegrandNonneg,
         henvelope]
       exact mul_le_mul hprofilePow hpotentialPow
@@ -2913,12 +2913,18 @@ theorem norm_crossingRawKernel_one_le_topHatCrossingEnvelope
           ((1 : ℝ) * 1) *
             ((1 / p) * (1 / p) * (1 / p) * (1 / p)) :=
       mul_le_mul hweight hall hprodNonneg (by norm_num)
+    have hprodNonneg' :
+        0 ≤
+          r z.2 * r (z.2 + z.1.1) *
+            r (z.2 + (z.1.1 + z.1.2)) *
+            r (z.2 + z.1.2) := by
+      simpa only [add_assoc] using hprodNonneg
     have hkernelNonneg :
         0 ≤ crossingRawKernel 1 r z := by
       simp only [crossingRawKernel, div_one, one_mul]
       exact mul_nonneg
         (mul_nonneg (abs_nonneg _) (abs_nonneg _))
-        hprodNonneg
+        hprodNonneg'
     rw [topHatCrossingEnvelope, Set.indicator_of_mem hz,
       Real.norm_eq_abs, abs_of_nonneg hkernelNonneg]
     calc
