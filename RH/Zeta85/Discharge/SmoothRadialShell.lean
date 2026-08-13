@@ -1369,7 +1369,7 @@ all of its physical windows are the shrinking profiled shells in one common
 period. -/
 structure AnnularFamilyRealization
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (F : QuarticGramFamily Z σ μ p v) : Type where
   commonPeriod : ℝ → ℝ
   stage : ∀ T : ℝ, Fin (F.channelCount T) → ℕ
   period_eq : ∀ T j, F.period T j = commonPeriod T
@@ -1384,7 +1384,7 @@ structure AnnularFamilyRealization
 
 /-- The annular realization discharges every field of the radial-shell
 interface consumed by aggregate alias cancellation. -/
-theorem AnnularFamilyRealization.toRadialShellData
+def AnnularFamilyRealization.toRadialShellData
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : AnnularFamilyRealization F) :
@@ -1452,7 +1452,7 @@ theorem AnnularFamilyRealization.toRadialShellData
 
 /-- Hence the annular realization gives collective complex-alias cancellation
 without a separate cancellation premise. -/
-theorem AnnularFamilyRealization.toCollectiveWindowRegularity
+def AnnularFamilyRealization.toCollectiveWindowRegularity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : AnnularFamilyRealization F) :
