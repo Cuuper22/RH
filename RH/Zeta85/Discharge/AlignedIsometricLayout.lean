@@ -1478,7 +1478,7 @@ structure DiagonalAnnularWindowEnergyRealization
       ∀ T : ℝ,
         (∫ u : ℝ,
           @QuarticGramFamily.supportedFullProfile v (u / L T)) ≠ 0) :
-    Prop where
+    Type where
   stage : ℝ → ℕ
   window_energy_eq :
     ∀ (T u : ℝ),
