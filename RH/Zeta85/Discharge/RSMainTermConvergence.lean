@@ -260,7 +260,7 @@ theorem tendsto_integral_annular_distanceKernel_pows
         (positivePower_hasCompactSupport
           (annularRSProfile v n) b hb
           (annularRSProfile_hasCompactSupport v n))).aestronglyMeasurable
-  · exact integrable_frozen_distanceKernel_pows v hv a b
+  · exact integrable_frozen_distanceKernel_pows v hv a b ha hb
   · intro n
     filter_upwards [] with z
     have hx := annularRSProfile_le_frozen v n hpos z.1
