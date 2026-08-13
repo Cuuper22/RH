@@ -491,6 +491,39 @@ theorem exists_frozenLinearRSTest
   · exact rsMainTerm_normalCutoffSymbol chi
       (weightedCyclicSymbol (k := 1) mu r) hchi0
 
+/-- RS Theorem 3.1 applies directly to every fixed smooth
+degree-one cyclic profile after the normal cutoff is eliminated from both
+the tuple sum and the main term. -/
+theorem RS1996ZetaInputs.frozenLinear
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (mu : ℝ) (r : ℝ -> ℝ)
+    (hrc : HasCompactSupport r) (hrSmooth : ContDiff ℝ 1 r)
+    (g : Fin 1 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 1) mu r) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 1) mu r) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          rsMainTerm
+            (weightedCyclicSymbol (k := 1) mu r)‖ ≤ C * T := by
+  obtain ⟨Phi, hPhiSmooth, hPhiSupport, hGauge, hMain⟩ :=
+    exists_frozenLinearRSTest mu r hrc hrSmooth
+  obtain ⟨C, T0, hC, hT0, hRS⟩ :=
+    hrs.theorem31 0 g Phi hg hPhiSmooth hPhiSupport
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  have hterm (rho : Fin 1 -> Z.carrier) :
+      rsZeroTupleTerm Z g Phi T rho =
+        rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 1) mu r) T rho := by
+    unfold rsZeroTupleTerm
+    rw [hGauge]
+  refine ⟨hSummable.congr hterm, ?_⟩
+  simpa only [tsum_congr hterm, hMain] using hBound
+
 /-- Smooth compactly supported profiles produce a smooth quartic cyclic
 symbol.  The fixed factor at cyclic position zero supplies one compact
 integration domain for every frequency parameter. -/
