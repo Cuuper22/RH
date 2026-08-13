@@ -1917,8 +1917,8 @@ theorem PrincipalCyclicBlock.eventually_zeroPairKernel_eq_distinguishedEnergyInt
       ContDiff ℝ 2
         (F.window T (F.distinguished T)) :=
     (hsmooth (F.distinguished T)).of_le (by
-      change (2 : ℕ∞) ≤ ⊤
-      exact le_top)
+      exact WithTop.coe_le_coe.2
+        (show (2 : ℕ∞) ≤ ⊤ from le_top))
   have hsmoothC :
       ContDiff ℝ 2
         (fun u => (F.window T (F.distinguished T) u : ℂ)) :=
