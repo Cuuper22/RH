@@ -376,6 +376,74 @@ theorem exists_smooth_normalCutoff (eps : ℝ) (heps : 0 < eps) :
       simpa [Real.dist_eq] using hdist
     exact habs.le
 
+/-- Smooth compactly supported profiles produce a smooth cyclic symbol
+in every positive degree.  The factor at cyclic position zero supplies one
+compact integration domain independently of all frequency parameters. -/
+theorem weightedCyclicSymbol_contDiff
+    {k : ℕ} (hk : 0 < k)
+    (mu : ℝ) (r : ℝ -> ℝ)
+    (hrc : HasCompactSupport r) (hr : ContDiff ℝ 1 r) :
+    ContDiff ℝ 1 (weightedCyclicSymbol (k := k) mu r) := by
+  let j0 : Fin k := ⟨0, hk⟩
+  let g : (Fin k -> ℝ) -> ℝ -> ℝ := fun xi y =>
+    ∏ j : Fin k, r (-y + cyclicPartialSum xi j / mu)
+  let K : Set ℝ := -tsupport r
+  have hK : IsCompact K := by
+    dsimp only [K]
+    exact hrc.isCompact.neg
+  have hgs :
+      ∀ xi : Fin k -> ℝ, ∀ y : ℝ,
+        xi ∈ (Set.univ : Set (Fin k -> ℝ)) -> y ∉ K -> g xi y = 0 := by
+    intro xi y _hy hyK
+    have hneg : -y ∉ tsupport r := by
+      intro h
+      apply hyK
+      dsimp only [K]
+      simpa using (Set.neg_mem_neg.mpr h)
+    dsimp only [g]
+    apply Finset.prod_eq_zero (Finset.mem_univ j0)
+    simpa [cyclicPartialSum, j0] using
+      image_eq_zero_of_notMem_tsupport hneg
+  have hg : ContDiff ℝ 1 ↿g := by
+    change ContDiff ℝ 1 (fun q : (Fin k -> ℝ) × ℝ =>
+      ∏ j : Fin k, r (-q.2 + cyclicPartialSum q.1 j / mu))
+    simp only [cyclicPartialSum]
+    fun_prop
+  have hconv :=
+    MeasureTheory.contDiffOn_convolution_right_with_param
+      (f := fun _x : ℝ => (1 : ℝ)) (g := g)
+      (s := Set.univ) (k := K) (μ := volume)
+      (ContinuousLinearMap.mul ℝ ℝ)
+      isOpen_univ hK hgs (locallyIntegrable_const (1 : ℝ)) hg.contDiffOn
+  have hconv' :
+      ContDiff ℝ 1 (fun q : (Fin k -> ℝ) × ℝ =>
+        ((fun _x : ℝ => (1 : ℝ)) ⋆[
+          ContinuousLinearMap.mul ℝ ℝ, volume] g q.1) q.2) := by
+    rw [← contDiffOn_univ]
+    simpa using hconv
+  have heval :
+      ContDiff ℝ 1 (fun xi : Fin k -> ℝ =>
+        ((fun _x : ℝ => (1 : ℝ)) ⋆[
+          ContinuousLinearMap.mul ℝ ℝ, volume] g xi) 0) := by
+    simpa [Function.comp_def] using
+      hconv'.comp
+        (by fun_prop :
+          ContDiff ℝ 1 (fun xi : Fin k -> ℝ => (xi, (0 : ℝ))))
+  have hintegral :
+      ContDiff ℝ 1 (fun xi : Fin k -> ℝ =>
+        ∫ x : ℝ, ∏ j : Fin k,
+          r (x + cyclicPartialSum xi j / mu)) := by
+    simpa [MeasureTheory.convolution_def, g] using heval
+  have hreal :
+      ContDiff ℝ 1 (fun xi : Fin k -> ℝ =>
+        mu * ∫ x : ℝ, ∏ j : Fin k,
+          r (x + cyclicPartialSum xi j / mu)) :=
+    contDiff_const.mul hintegral
+  change ContDiff ℝ 1 (fun xi : Fin k -> ℝ =>
+    ((mu * ∫ x : ℝ, ∏ j : Fin k,
+      r (x + cyclicPartialSum xi j / mu) : ℝ) : ℂ))
+  exact Complex.ofRealCLM.contDiff.comp hreal
+
 /-- Smooth compactly supported profiles produce a smooth quartic cyclic
 symbol.  The fixed factor at cyclic position zero supplies one compact
 integration domain for every frequency parameter. -/
