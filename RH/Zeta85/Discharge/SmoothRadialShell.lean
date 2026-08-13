@@ -1189,7 +1189,7 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
             (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ))
           Filter.atTop
           (nhds
-            (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
+            (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) := by
       simpa only [Function.comp_apply, map_pow] using
         (Complex.continuous_ofReal.continuousAt.tendsto.comp hu)
     exact hcast.mul_const
@@ -1245,7 +1245,7 @@ theorem tendsto_shrinkingProfileShellNormalizedPairKernel
         Filter.atTop
         (nhds
           (∫ u : ℝ,
-            @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
+            @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) := by
     simpa only [Function.comp_apply,
       ← MeasureTheory.integral_complex_ofReal, map_pow] using
       (Complex.continuous_ofReal.continuousAt.tendsto.comp hmassR)
@@ -1473,7 +1473,8 @@ def AnnularFamilyRealization.toRadialShellData
             (h.commonPeriod T) (h.stage T j) (h.period_pos T)) :=
       (shrinkingProfileShellWindow_contDiff
         v (h.commonPeriod T) (h.stage T j) (h.period_pos T)
-        h.profile_smooth h.profile_pos).of_le (by exact le_top)
+        h.profile_smooth h.profile_pos).of_le
+          (show (2 : ℕ∞) ≤ ⊤ from le_top)
     exact hsmooth.continuousLinearMap_comp Complex.ofRealCLM
   · intro T j u hu
     rw [h.window_eq T j u]
