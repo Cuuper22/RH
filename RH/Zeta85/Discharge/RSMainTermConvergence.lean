@@ -2560,6 +2560,274 @@ theorem RS1996ZetaInputs.exists_tendsto_v9506_annularPositiveDegreeBundle
       evaluatedPositiveDegreeRSMainBundle] using
       h1.prodMk_nhds (h2.prodMk_nhds (h3.prodMk_nhds h4))
 
+
+/-- The fixed top-hat power envelope is pointwise nonnegative. -/
+theorem topHatPowerEnvelope_nonneg
+    (p : ℝ) (hp : 0 < p) (k : ℕ) (x : ℝ) :
+    0 ≤ topHatPowerEnvelope p k x := by
+  unfold topHatPowerEnvelope
+  by_cases hx : x ∈ Icc (0 : ℝ) 1
+  · rw [Set.indicator_of_mem hx]
+    exact pow_nonneg (one_div_nonneg.mpr hp.le) k
+  · rw [Set.indicator_of_notMem hx]
+
+/-- A unit-interval profile of height at most one over p has a common
+one-variable distance envelope. -/
+theorem topHat_distance_weight_le
+    (p : ℝ) (hp : 0 < p)
+    (r : ℝ → ℝ)
+    (hrbounds : ∀ x, 0 ≤ r x ∧ r x ≤ 1 / p)
+    (hrsupport : ∀ x, r x ≠ 0 → x ∈ Icc (0 : ℝ) 1)
+    (x y : ℝ) :
+    |y - x| * r y ≤
+      (|x| + 1) * topHatPowerEnvelope p 1 y := by
+  by_cases hy : y ∈ Icc (0 : ℝ) 1
+  · have hyabs : |y| ≤ 1 := by
+      rw [abs_of_nonneg hy.1]
+      exact hy.2
+    have hdist : |y - x| ≤ |x| + 1 := by
+      calc
+        |y - x| ≤ |y| + |x| := abs_sub y x
+        _ ≤ 1 + |x| := by linarith
+        _ = |x| + 1 := by ring
+    have hry := hrbounds y
+    rw [topHatPowerEnvelope, Set.indicator_of_mem hy, pow_one]
+    exact mul_le_mul hdist hry.2 hry.1 (by positivity)
+  · have hry : r y = 0 := by
+      by_contra hne
+      exact hy (hrsupport y hne)
+    simp [topHatPowerEnvelope, hy, hry]
+
+/-- The distance potential of a smooth top-hat approximation converges
+pointwise to the literal sharp-top-hat potential. -/
+theorem tendsto_pairDistancePotential_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (x : ℝ) :
+    Tendsto
+      (fun n =>
+        pairDistancePotential
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) x)
+      atTop
+      (nhds
+        (pairDistancePotential
+          (SmoothTopHatApprox.shiftedTopHat p) x)) := by
+  unfold pairDistancePotential
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun y => (|x| + 1) * topHatPowerEnvelope p 1 y)
+  · intro n
+    exact
+      ((continuous_id.sub continuous_const).abs.mul
+        (SmoothTopHatApprox.topHatApproxProfile_contDiff
+          p n hp hp1).continuous).aestronglyMeasurable
+  · exact
+      (integrable_topHatPowerEnvelope p 1).const_mul (|x| + 1)
+  · intro n
+    filter_upwards [] with y
+    have hb :=
+      SmoothTopHatApprox.topHatApproxProfile_bounds
+        p n hp hp1 y
+    have hnonneg :
+        0 ≤ |y - x| *
+          SmoothTopHatApprox.topHatApproxProfile p n hp hp1 y :=
+      mul_nonneg (abs_nonneg _) hb.1
+    rw [Real.norm_eq_abs, abs_of_nonneg hnonneg]
+    exact
+      topHat_distance_weight_le p hp
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        (SmoothTopHatApprox.topHatApproxProfile_bounds
+          p n hp hp1)
+        (fun y hy =>
+          SmoothTopHatApprox.topHatApproxProfile_support
+            p n hp hp1 y hy)
+        x y
+  · filter_upwards [] with y
+    exact tendsto_const_nhds.mul
+      (SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 y)
+
+/-- The same compact envelope gives a uniform quantitative bound on every
+finite-stage distance potential. -/
+theorem norm_pairDistancePotential_topHatApprox_le
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (n : ℕ) (x : ℝ) :
+    ‖pairDistancePotential
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) x‖ ≤
+      (|x| + 1) * ∫ y : ℝ, topHatPowerEnvelope p 1 y := by
+  unfold pairDistancePotential
+  have hdom :
+      Integrable
+        (fun y : ℝ =>
+          (|x| + 1) * topHatPowerEnvelope p 1 y) :=
+    (integrable_topHatPowerEnvelope p 1).const_mul (|x| + 1)
+  have hbound :=
+    norm_integral_le_of_norm_le hdom
+      (show ∀ᵐ y : ℝ ∂volume,
+          ‖|y - x| *
+              SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1 y‖ ≤
+            (|x| + 1) * topHatPowerEnvelope p 1 y by
+        filter_upwards [] with y
+        have hb :=
+          SmoothTopHatApprox.topHatApproxProfile_bounds
+            p n hp hp1 y
+        have hnonneg :
+            0 ≤ |y - x| *
+              SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1 y :=
+          mul_nonneg (abs_nonneg _) hb.1
+        rw [Real.norm_eq_abs, abs_of_nonneg hnonneg]
+        exact
+          topHat_distance_weight_le p hp
+            (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+            (SmoothTopHatApprox.topHatApproxProfile_bounds
+              p n hp hp1)
+            (fun y hy =>
+              SmoothTopHatApprox.topHatApproxProfile_support
+                p n hp hp1 y hy)
+            x y)
+  simpa only [integral_const_mul] using hbound
+
+/-- Smooth top-hat distance potentials are nonnegative. -/
+theorem pairDistancePotential_topHatApprox_nonneg
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (n : ℕ) (x : ℝ) :
+    0 ≤ pairDistancePotential
+      (SmoothTopHatApprox.topHatApproxProfile p n hp hp1) x := by
+  unfold pairDistancePotential
+  exact integral_nonneg fun y =>
+    mul_nonneg (abs_nonneg _)
+      (SmoothTopHatApprox.topHatApproxProfile_bounds
+        p n hp hp1 y).1
+
+/-- The finite-stage top-hat distance potential is strongly measurable in
+its external point. -/
+theorem aestronglyMeasurable_pairDistancePotential_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (n : ℕ) :
+    AEStronglyMeasurable
+      (pairDistancePotential
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)) := by
+  have hk :
+      StronglyMeasurable (fun z : ℝ × ℝ =>
+        |z.2 - z.1| *
+          SmoothTopHatApprox.topHatApproxProfile
+            p n hp hp1 z.2) :=
+    ((continuous_snd.sub continuous_fst).abs.mul
+      ((SmoothTopHatApprox.topHatApproxProfile_contDiff
+        p n hp hp1).continuous.comp continuous_snd)).stronglyMeasurable
+  change AEStronglyMeasurable
+    (fun x : ℝ =>
+      ∫ y : ℝ, |y - x| *
+        SmoothTopHatApprox.topHatApproxProfile p n hp hp1 y)
+  exact hk.integral_prod_right'.aestronglyMeasurable
+
+/-- The separated pair-square contraction reaches the literal sharp top
+hat by a second dominated-convergence pass. -/
+theorem tendsto_pairSquaredPotentialIntegral_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
+    Tendsto
+      (fun n =>
+        pairSquaredPotentialIntegral
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1))
+      atTop
+      (nhds
+        (pairSquaredPotentialIntegral
+          (SmoothTopHatApprox.shiftedTopHat p))) := by
+  unfold pairSquaredPotentialIntegral
+  let mass : ℝ := ∫ y : ℝ, topHatPowerEnvelope p 1 y
+  have hmass : 0 ≤ mass := by
+    dsimp only [mass]
+    exact integral_nonneg fun y =>
+      topHatPowerEnvelope_nonneg p hp 1 y
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun x =>
+      topHatPowerEnvelope p 2 x * (2 * mass) ^ 2)
+  · intro n
+    exact
+      ((SmoothTopHatApprox.topHatApproxProfile_contDiff
+        p n hp hp1).continuous.pow 2
+        |>.aestronglyMeasurable).mul
+        ((aestronglyMeasurable_pairDistancePotential_topHatApprox
+          p hp hp1 n).pow 2)
+  · exact
+      (integrable_topHatPowerEnvelope p 2).mul_const
+        ((2 * mass) ^ 2)
+  · intro n
+    filter_upwards [] with x
+    by_cases hxzero :
+        SmoothTopHatApprox.topHatApproxProfile
+          p n hp hp1 x = 0
+    · simp only [hxzero,
+        zero_pow (by norm_num : (2 : ℕ) ≠ 0),
+        zero_mul, norm_zero]
+      exact mul_nonneg
+        (topHatPowerEnvelope_nonneg p hp 2 x)
+        (pow_nonneg (2 * mass) 2)
+    · have hsupport :=
+        SmoothTopHatApprox.topHatApproxProfile_support
+          p n hp hp1 x hxzero
+      have hxabs : |x| ≤ 1 := by
+        rw [abs_of_nonneg hsupport.1]
+        exact hsupport.2
+      have hprofile :=
+        SmoothTopHatApprox.topHatApproxProfile_bounds
+          p n hp hp1 x
+      have hprofilePow :
+          SmoothTopHatApprox.topHatApproxProfile
+              p n hp hp1 x ^ 2 ≤
+            (1 / p) ^ 2 :=
+        pow_le_pow_left₀ hprofile.1 hprofile.2 2
+      have hpotentialNonneg :=
+        pairDistancePotential_topHatApprox_nonneg
+          p hp hp1 n x
+      have hpotentialBound :
+          pairDistancePotential
+              (SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1) x ≤
+            2 * mass := by
+        calc
+          pairDistancePotential
+              (SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1) x ≤
+              ‖pairDistancePotential
+                (SmoothTopHatApprox.topHatApproxProfile
+                  p n hp hp1) x‖ := by
+            rw [Real.norm_eq_abs,
+              abs_of_nonneg hpotentialNonneg]
+          _ ≤ (|x| + 1) * mass := by
+            simpa only [mass] using
+              norm_pairDistancePotential_topHatApprox_le
+                p hp hp1 n x
+          _ ≤ 2 * mass := by
+            apply mul_le_mul_of_nonneg_right _ hmass
+            linarith
+      have hpotentialPow :
+          pairDistancePotential
+              (SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1) x ^ 2 ≤
+            (2 * mass) ^ 2 :=
+        pow_le_pow_left₀ hpotentialNonneg hpotentialBound 2
+      have hintegrandNonneg :
+          0 ≤
+            SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1 x ^ 2 *
+              pairDistancePotential
+                (SmoothTopHatApprox.topHatApproxProfile
+                  p n hp hp1) x ^ 2 :=
+        mul_nonneg (pow_nonneg hprofile.1 2)
+          (pow_nonneg hpotentialNonneg 2)
+      rw [Real.norm_eq_abs, abs_of_nonneg hintegrandNonneg,
+        topHatPowerEnvelope, Set.indicator_of_mem hsupport]
+      exact mul_le_mul hprofilePow hpotentialPow
+        (pow_nonneg hpotentialNonneg 2)
+        (pow_nonneg (one_div_nonneg.mpr hp.le) 2)
+  · filter_upwards [] with x
+    exact
+      ((SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 x).pow 2).mul
+        ((tendsto_pairDistancePotential_topHatApprox
+          p hp hp1 x).pow 2)
+
 end RH.Zeta85.RSMainTermConvergence
 
 end
