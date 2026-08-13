@@ -310,6 +310,26 @@ theorem tendsto_uncenteredBlockMoment_zero
   simpa [uncenteredContractionMoment] using
     (tendsto_const_nhds.congr' heq)
 
+/-- A positive limiting block density forces the literal block dimension
+to be nonzero eventually.  No growth theorem for the ambient zero count is
+needed: if the numerator vanished, the displayed ratio would be zero. -/
+theorem BlockDimensionLimit.eventually_blockDim_ne_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hdim : BlockDimensionLimit F) :
+    ∀ᶠ T in atTop, F.blockDim T ≠ 0 := by
+  have hhalf : μ / 2 < μ := by
+    linarith [hdim.bandwidth_pos]
+  have hratio :
+      ∀ᶠ T in atTop,
+        μ / 2 <
+          (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) :=
+    (tendsto_order.1 hdim.block_dimension).1 _ hhalf
+  filter_upwards [hratio] with T hT
+  intro hz
+  simp [hz] at hT
+  linarith [hdim.bandwidth_pos]
+
 /-- Consequently the actual analytic attack only has to prove degrees one
 through four; the zeroth clause of `UncenteredRSBlockLimits` is filled by
 the finite identity above. -/
