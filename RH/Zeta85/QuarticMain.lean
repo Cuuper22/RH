@@ -136,6 +136,42 @@ theorem rung9506_cumulative
   simpa only [Rung9506_cumulative_statement] using quarticCumulative hdyadic
 
 
+/-- The frozen 95.06 rung from the literal block after eliminating degree
+zero exactly.  The analytic moment input now contains only degrees one
+through four; no complex-alias premise is used by this route. -/
+theorem rung9506_positiveDegreeRS
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hdim : BlockDimensionLimit F)
+    (hpositive :
+      RSBlockMomentBridge.PositiveDegreeUncenteredRSBlockLimits F) :
+    Rung9506_statement := by
+  apply rung9506 hfull hzero
+  exact
+    RSBlockMomentBridge.quarticTraceLowerBound_of_uncenteredRS
+      (F := F) (by norm_num) (by norm_num) hdim
+      (RSBlockMomentBridge.uncenteredRSBlockLimits_of_blockDimension_positiveDegree
+        hdim hpositive)
+      TrimmedMoment.Terminal9506.dual
+
+/-- Cumulative 95.06 through the same positive-degree-only actual-block
+route. -/
+theorem rung9506_cumulative_positiveDegreeRS
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hdim : BlockDimensionLimit F)
+    (hpositive :
+      RSBlockMomentBridge.PositiveDegreeUncenteredRSBlockLimits F) :
+    Rung9506_cumulative_statement := by
+  apply rung9506_cumulative hfull hzero
+  exact
+    RSBlockMomentBridge.quarticTraceLowerBound_of_uncenteredRS
+      (F := F) (by norm_num) (by norm_num) hdim
+      (RSBlockMomentBridge.uncenteredRSBlockLimits_of_blockDimension_positiveDegree
+        hdim hpositive)
+      TrimmedMoment.Terminal9506.dual
+
+
 /-! ## Mixed-channel isometric route -/
 
 /-- Frozen R-8657 from an exact mixed-channel compression and its one-sided
