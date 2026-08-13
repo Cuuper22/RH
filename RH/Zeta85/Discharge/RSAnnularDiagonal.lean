@@ -96,11 +96,11 @@ theorem RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal
       Tendsto
         (fun T =>
           RSBlockMomentBridge.normalizedFrozenQuarticRSStatistic
-            (annularRSProfile v (stage T)) g T)
+            (Z := Z) (annularRSProfile v (stage T)) g T)
         atTop (nhds A) := by
   apply
     RSBlockMomentBridge.RS1996ZetaInputs.exists_tendsto_profile_diagonal
-      hrs (fun n => annularRSProfile v n)
+      (Z := Z) hrs (fun n => annularRSProfile v n)
   · intro n
     exact annularRSProfile_hasCompactSupport v n
   · intro n
