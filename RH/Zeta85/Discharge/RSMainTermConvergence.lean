@@ -947,7 +947,7 @@ theorem RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal_frozenMain
       Tendsto
         (fun T =>
           RSBlockMomentBridge.normalizedFrozenQuarticRSStatistic
-            (annularRSProfile v (stage T)) g T)
+            (Z := Z) (annularRSProfile v (stage T)) g T)
         atTop
         (nhds
           (RSBlockMomentBridge.frozenQuarticRSMain
@@ -969,7 +969,7 @@ theorem RS1996ZetaInputs.exists_tendsto_v9506_annularQuarticMain
       Tendsto
         (fun T =>
           RSBlockMomentBridge.normalizedFrozenQuarticRSStatistic
-            (annularRSProfile QuarticWindowWitnesses.v9506 (stage T))
+            (Z := Z) (annularRSProfile QuarticWindowWitnesses.v9506 (stage T))
             g T)
         atTop
         (nhds
