@@ -272,7 +272,8 @@ theorem RSReduction.RS1996ZetaInputs.exists_outer_core_diagonal_tendsto_zero
     (hp : 0 < p) (hp1 : p ≤ 1)
     (hdelta : 0 < delta) (hmu : 0 < mu)
     (hbudget : (n + 1 : ℝ) * mu + delta < 2) :
-    ∃ T : ℕ → ℝ, Tendsto T atTop atTop ∧
+    ∃ T : ℕ → ℝ, (∀ q : ℕ, ((q : ℝ) + 1) ^ 4 ≤ T q) ∧
+      Tendsto T atTop atTop ∧
       (∀ q, Summable (rsZeroTupleTerm Z
           (outerAveragedHeightFamily (n := n)
             (RSReduction.topHatSmoothingWidth 1 q) ((q : ℝ) + 1))
@@ -353,15 +354,18 @@ theorem RSReduction.RS1996ZetaInputs.exists_outer_core_diagonal_tendsto_zero
   let eps : ℕ → ℝ := fun q => 1 / ((q : ℝ) + 1)
   have heps : ∀ q, 0 < eps q := fun q => by dsimp [eps]; positivity
   have hTexists : ∀ q : ℕ, ∃ T : ℝ, (q : ℝ) ≤ T ∧
+      ((q : ℝ) + 1) ^ 4 ≤ T ∧
       (Summable (rsZeroTupleTerm Z (go q) (Phi q) T) ∧
         Summable (rsZeroTupleTerm Z (gc q) (Phi q) T)) ∧
       dist (f q T) (a q) < eps q := by
     intro q
     exact ((eventually_ge_atTop (q : ℝ)).and
-      ((hgood q).and (Metric.tendsto_nhds.1 (hf q) (eps q) (heps q)))).exists
-  choose T hTlarge hTgood hTclose using hTexists
-  refine ⟨T, tendsto_atTop_mono hTlarge tendsto_natCast_atTop_atTop,
-    hTgood, ?_⟩
+      ((eventually_ge_atTop (((q : ℝ) + 1) ^ 4)).and
+        ((hgood q).and
+          (Metric.tendsto_nhds.1 (hf q) (eps q) (heps q))))).exists
+  choose T hTlarge hTpower hTgood hTclose using hTexists
+  refine ⟨T, hTpower,
+    tendsto_atTop_mono hTlarge tendsto_natCast_atTop_atTop, hTgood, ?_⟩
   have heps0 : Tendsto eps atTop (𝓝 0) := by
     have hden : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
       tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
