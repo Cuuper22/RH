@@ -624,11 +624,8 @@ theorem tendsto_shrinkingProfileWindow_sq
       exact (not_le_of_gt houtside) hu
     have htarget :
         @QuarticGramFamily.supportedFullProfile v (u / L) = 0 := by
-      have hnotmem' :
-          u / L ∉ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
-        simpa only [Set.mem_Icc, neg_div] using hnotmem
       rw [QuarticGramFamily.supportedFullProfile,
-        Set.indicator_of_notMem hnotmem']
+        Set.indicator_of_notMem hnotmem]
     have hzero :
         ∀ n : ℕ, shrinkingProfileWindow v L n hL u = 0 := by
       intro n
@@ -845,11 +842,8 @@ theorem supportedFullProfile_div_eq_indicator
         u / L ∉ Icc (-(1 : ℝ) / 2) (1 / 2) := by
       intro hs
       exact hu ((mem_scaled_halfInterval_iff L hL u).1 hs)
-    have hscaled' :
-        u / L ∉ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
-      simpa only [Set.mem_Icc, neg_div] using hscaled
     rw [QuarticGramFamily.supportedFullProfile,
-      Set.indicator_of_notMem hscaled',
+      Set.indicator_of_notMem hscaled,
       Set.indicator_of_notMem hu]
 
 /-- The integral of the type-level supported profile is exactly its
@@ -858,14 +852,18 @@ theorem integral_supportedFullProfile
     (v : ℝ → ℝ) :
     (∫ x : ℝ, @QuarticGramFamily.supportedFullProfile v x) =
       ∫ x in (-(1 : ℝ) / 2)..(1 / 2), v x := by
-  change
-    (∫ x : ℝ,
-      (Icc (-(1 / 2 : ℝ)) (1 / 2)).indicator v x) =
-        ∫ x in (-(1 : ℝ) / 2)..(1 / 2), v x
-  rw [MeasureTheory.integral_indicator measurableSet_Icc,
-    MeasureTheory.integral_Icc_eq_integral_Ioc,
-    ← intervalIntegral.integral_of_le (by norm_num :
-      (-(1 : ℝ) / 2) ≤ 1 / 2)]
+  calc
+    (∫ x : ℝ, @QuarticGramFamily.supportedFullProfile v x) =
+        ∫ x : ℝ,
+          (Icc (-(1 : ℝ) / 2) (1 / 2)).indicator v x := by
+      apply MeasureTheory.integral_congr_ae
+      filter_upwards [] with x
+      rw [QuarticGramFamily.supportedFullProfile]
+    _ = ∫ x in (-(1 : ℝ) / 2)..(1 / 2), v x := by
+      rw [MeasureTheory.integral_indicator measurableSet_Icc,
+        MeasureTheory.integral_Icc_eq_integral_Ioc,
+        ← intervalIntegral.integral_of_le (by norm_num :
+          (-(1 : ℝ) / 2) ≤ 1 / 2)]
 
 /-- Scaling a supported normalized profile by a positive physical length
 multiplies its total energy by that length. -/
@@ -980,11 +978,8 @@ theorem shrinkingProfileWindow_sq_le_supportedFullProfile
         exact le_trans
           (shrinkingHalfPeriodBump_rOut_lt L n hL).le
           hout.le
-      have hmem' :
-          u / L ∉ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
-        simpa only [Set.mem_Icc, neg_div] using hmem
       rw [QuarticGramFamily.supportedFullProfile,
-        Set.indicator_of_notMem hmem', hzero]
+        Set.indicator_of_notMem hmem, hzero]
       norm_num
 
 /-- Every finite annular energy is bounded by the same frozen supported
@@ -1177,11 +1172,8 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
           ring
     · have hprofile :
           @QuarticGramFamily.supportedFullProfile v (u / L) = 0 := by
-        have hmem' :
-            u / L ∉ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
-          simpa only [Set.mem_Icc, neg_div] using hmem
         rw [QuarticGramFamily.supportedFullProfile,
-          Set.indicator_of_notMem hmem']
+          Set.indicator_of_notMem hmem]
       have hshell :
           shrinkingProfileShellWindow v L n hL u ^ 2 = 0 := by
         rw [hprofile] at hbound
@@ -1198,7 +1190,8 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
           Filter.atTop
           (nhds
             (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
-      Complex.continuous_ofReal.continuousAt.tendsto.comp hu
+      simpa only [Function.comp_apply, map_pow] using
+        (Complex.continuous_ofReal.continuousAt.tendsto.comp hu)
     exact hcast.mul_const
       (Complex.exp (Complex.I * z * (u : ℂ)))
 
@@ -1253,7 +1246,9 @@ theorem tendsto_shrinkingProfileShellNormalizedPairKernel
         (nhds
           (∫ u : ℝ,
             @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
-    Complex.continuous_ofReal.continuousAt.tendsto.comp hmassR
+    simpa only [Function.comp_apply,
+      ← MeasureTheory.integral_complex_ofReal, map_pow] using
+      (Complex.continuous_ofReal.continuousAt.tendsto.comp hmassR)
   have hmassC_ne :
       (∫ u : ℝ,
         @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ) ≠ 0 := by
@@ -1478,7 +1473,7 @@ def AnnularFamilyRealization.toRadialShellData
             (h.commonPeriod T) (h.stage T j) (h.period_pos T)) :=
       (shrinkingProfileShellWindow_contDiff
         v (h.commonPeriod T) (h.stage T j) (h.period_pos T)
-        h.profile_smooth h.profile_pos).of_le (by norm_num)
+        h.profile_smooth h.profile_pos).of_le (by exact le_top)
     exact hsmooth.continuousLinearMap_comp Complex.ofRealCLM
   · intro T j u hu
     rw [h.window_eq T j u]
