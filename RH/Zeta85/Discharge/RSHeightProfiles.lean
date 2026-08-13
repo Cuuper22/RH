@@ -324,4 +324,141 @@ theorem averagedHeightWeightOf_tendsto
   filter_upwards [eventually_gt_atTop (0 : ℝ)] with R hR
   rw [averagedHeightWeightOf_eq_kernelIntegral hH hHc hR]
 
+theorem averagedHeightWeightOf_eq_convolution
+    {H : ℝ → ℝ} (hH : Continuous H) (hHc : HasCompactSupport H)
+    {R : ℝ} (hR : 0 < R) (x : ℝ) :
+    averagedHeightWeightOf H R x =
+      convolution H (scaledBaseHeightKernel R)
+        (ContinuousLinearMap.mul ℝ ℝ) volume x := by
+  rw [averagedHeightWeightOf,
+    paperFT_averagedHeightTestOf_real_formula hH hHc hR]
+  simp only [Complex.ofReal_re, convolution_def, ContinuousLinearMap.mul_apply']
+  unfold scaledBaseHeightKernel
+  rw [← integral_const_mul]
+  apply integral_congr_ae
+  filter_upwards [] with c
+  ring
+
+theorem averagedHeightWeightOf_integrable
+    {H : ℝ → ℝ} (hH : Continuous H) (hHc : HasCompactSupport H)
+    {R : ℝ} (hR : 0 < R) :
+    Integrable (averagedHeightWeightOf H R) := by
+  rw [funext (averagedHeightWeightOf_eq_convolution hH hHc hR)]
+  exact (hH.integrable_of_hasCompactSupport hHc).integrable_convolution
+    (ContinuousLinearMap.mul ℝ ℝ) (scaledBaseHeightKernel_integrable hR)
+
+theorem integral_averagedHeightWeightOf
+    {H : ℝ → ℝ} (hH : Continuous H) (hHc : HasCompactSupport H)
+    {R : ℝ} (hR : 0 < R) :
+    ∫ x, averagedHeightWeightOf H R x = ∫ x, H x := by
+  rw [funext (averagedHeightWeightOf_eq_convolution hH hHc hR)]
+  rw [integral_convolution (ContinuousLinearMap.mul ℝ ℝ)
+    (hH.integrable_of_hasCompactSupport hHc)
+    (scaledBaseHeightKernel_integrable hR)]
+  rw [ContinuousLinearMap.mul_apply', integral_scaledBaseHeightKernel hR, mul_one]
+
+theorem averagedHeightWeightOf_continuous
+    {H : ℝ → ℝ} (hH : Continuous H) (hHc : HasCompactSupport H)
+    {R : ℝ} (hR : 0 < R) :
+    Continuous (averagedHeightWeightOf H R) := by
+  unfold averagedHeightWeightOf
+  exact (Zeta23.Taper.contDiff_re_paperFT_ofReal
+    (averagedHeightTestOf_contDiff hH hHc hR).continuous
+    (averagedHeightTestOf_hasCompactSupport H hR) 0).continuous
+
+theorem paperFT_averagedHeightTestOf_real
+    {H : ℝ → ℝ} (hH : Continuous H) (hHc : HasCompactSupport H)
+    {R : ℝ} (hR : 0 < R) (x : ℝ) :
+    paperFT (averagedHeightTestOf H R) (x : ℂ) =
+      (averagedHeightWeightOf H R x : ℂ) := by
+  rw [averagedHeightWeightOf,
+    paperFT_averagedHeightTestOf_real_formula hH hHc hR]
+  rfl
+
+def averagedHeightFamilyOf {n : ℕ} (H : Fin (n + 1) → ℝ → ℝ) (R : ℝ) :
+    Fin (n + 1) → ℝ → ℂ :=
+  fun j => averagedHeightTestOf (H j) R
+
+theorem rsHeightFactor_averagedHeightFamilyOf
+    {n : ℕ} {H : Fin (n + 1) → ℝ → ℝ}
+    (hH : ∀ j, Continuous (H j)) (hHc : ∀ j, HasCompactSupport (H j))
+    {R : ℝ} (hR : 0 < R) :
+    RH.Zeta85.rsHeightFactor (averagedHeightFamilyOf H R) =
+      ((∫ x, ∏ j, averagedHeightWeightOf (H j) R x : ℝ) : ℂ) := by
+  unfold RH.Zeta85.rsHeightFactor averagedHeightFamilyOf
+  simp_rw [paperFT_averagedHeightTestOf_real (hH _) (hHc _) hR]
+  have hprod : ∀ x : ℝ,
+      (∏ j, (averagedHeightWeightOf (H j) R x : ℂ)) =
+        ((∏ j, averagedHeightWeightOf (H j) R x : ℝ) : ℂ) := by
+    intro x
+    push_cast
+    rfl
+  simp_rw [hprod]
+  exact Zeta23.integral_ofReal_C _
+
+theorem norm_rsHeightFactor_averagedHeightFamilyOf_le_integral
+    {n : ℕ} {H : Fin (n + 1) → ℝ → ℝ}
+    (hH : ∀ j, Continuous (H j)) (hHc : ∀ j, HasCompactSupport (H j))
+    (hH0 : ∀ j x, 0 ≤ H j x) (hH1 : ∀ j x, H j x ≤ 1)
+    {R : ℝ} (hR : 0 < R) (i : Fin (n + 1)) :
+    ‖RH.Zeta85.rsHeightFactor (averagedHeightFamilyOf H R)‖ ≤
+      ∫ x, H i x := by
+  let W : Fin (n + 1) → ℝ → ℝ :=
+    fun j x => averagedHeightWeightOf (H j) R x
+  have hWIcc : ∀ j x, W j x ∈ Set.Icc (0 : ℝ) 1 := by
+    intro j x
+    simpa only [W, averagedHeightWeightOf] using
+      (paperFT_averagedHeightTestOf_real_mem_Icc
+        (hH j) (hHc j) (hH0 j) (hH1 j) hR x)
+  have hWiInt : Integrable (W i) := by
+    simpa only [W] using averagedHeightWeightOf_integrable (hH i) (hHc i) hR
+  let rest : Finset (Fin (n + 1)) := Finset.univ.erase i
+  have hrestCont : Continuous (fun x => ∏ j ∈ rest, W j x) := by
+    apply continuous_finset_prod
+    intro j hj
+    simpa only [W] using averagedHeightWeightOf_continuous (hH j) (hHc j) hR
+  have hrestBound : ∀ᵐ x : ℝ, ‖∏ j ∈ rest, W j x‖ ≤ 1 := by
+    filter_upwards [] with x
+    rw [norm_prod]
+    apply Finset.prod_le_one
+    · intro j hj
+      exact norm_nonneg _
+    · intro j hj
+      rw [Real.norm_eq_abs, abs_of_nonneg (hWIcc j x).1]
+      exact (hWIcc j x).2
+  have hfullInt : Integrable (fun x => ∏ j, W j x) := by
+    have hmul := hWiInt.mul_bdd hrestCont.aestronglyMeasurable hrestBound
+    apply hmul.congr
+    filter_upwards [] with x
+    exact Finset.mul_prod_erase Finset.univ (fun j => W j x) (Finset.mem_univ i)
+  have hprod0 : ∀ x, 0 ≤ ∏ j, W j x := by
+    intro x
+    exact Finset.prod_nonneg fun j _ => (hWIcc j x).1
+  have hprodle : ∀ x, (∏ j, W j x) ≤ W i x := by
+    intro x
+    have hrest0 : ∀ j ∈ rest, 0 ≤ W j x := by
+      intro j hj
+      exact (hWIcc j x).1
+    have hrest1 : ∀ j ∈ rest, W j x ≤ 1 := by
+      intro j hj
+      exact (hWIcc j x).2
+    have hrestle : (∏ j ∈ rest, W j x) ≤ 1 :=
+      Finset.prod_le_one hrest0 hrest1
+    have herase := Finset.mul_prod_erase Finset.univ
+      (fun j => W j x) (Finset.mem_univ i)
+    calc
+      (∏ j, W j x) = W i x * ∏ j ∈ rest, W j x := by
+        simpa only [rest] using herase.symm
+      _ ≤ W i x * 1 :=
+        mul_le_mul_of_nonneg_left hrestle (hWIcc i x).1
+      _ = W i x := mul_one _
+  have hle : (∫ x, ∏ j, W j x) ≤ ∫ x, W i x := by
+    exact integral_mono hfullInt hWiInt hprodle
+  have hright : ∫ x, W i x = ∫ x, H i x := by
+    simpa only [W] using integral_averagedHeightWeightOf (hH i) (hHc i) hR
+  rw [rsHeightFactor_averagedHeightFamilyOf hH hHc hR,
+    Complex.norm_real, Real.norm_eq_abs,
+    abs_of_nonneg (by simpa only [W] using integral_nonneg hprod0)]
+  simpa only [W] using hle.trans_eq hright
+
 end RH.Zeta85.RSPoissonCyclicBridge
