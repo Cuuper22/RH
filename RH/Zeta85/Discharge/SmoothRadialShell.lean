@@ -209,7 +209,10 @@ theorem profiledBumpWindow_contDiff
       have hby : b y = 0 :=
         b.zero_of_le_dist hyout.le
       simp [profiledBumpWindow, hby]
-    exact contDiff_zero.contDiffAt.congr_of_eventuallyEq heq
+    have hzero :
+        ContDiffAt ℝ ∞ (fun _ : ℝ => (0 : ℝ)) x :=
+      contDiff_const.contDiffAt
+    exact hzero.congr_of_eventuallyEq heq
 
 /-- An even profile gives an even profiled bump. -/
 theorem profiledBumpWindow_even
@@ -621,7 +624,11 @@ theorem tendsto_shrinkingProfileWindow_sq
       exact (not_le_of_gt houtside) hu
     have htarget :
         @QuarticGramFamily.supportedFullProfile v (u / L) = 0 := by
-      simp [QuarticGramFamily.supportedFullProfile, hnotmem]
+      have hnotmem' :
+          u / L ∉ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
+        simpa only [Set.mem_Icc, neg_div] using hnotmem
+      rw [QuarticGramFamily.supportedFullProfile,
+        Set.indicator_of_notMem hnotmem']
     have hzero :
         ∀ n : ℕ, shrinkingProfileWindow v L n hL u = 0 := by
       intro n
@@ -838,7 +845,12 @@ theorem supportedFullProfile_div_eq_indicator
         u / L ∉ Icc (-(1 : ℝ) / 2) (1 / 2) := by
       intro hs
       exact hu ((mem_scaled_halfInterval_iff L hL u).1 hs)
-    simp [QuarticGramFamily.supportedFullProfile, hscaled, hu]
+    have hscaled' :
+        u / L ∉ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
+      simpa only [Set.mem_Icc, neg_div] using hscaled
+    rw [QuarticGramFamily.supportedFullProfile,
+      Set.indicator_of_notMem hscaled',
+      Set.indicator_of_notMem hu]
 
 /-- The integral of the type-level supported profile is exactly its
 interval integral; changing the closed endpoint convention costs nothing. -/
@@ -846,8 +858,11 @@ theorem integral_supportedFullProfile
     (v : ℝ → ℝ) :
     (∫ x : ℝ, @QuarticGramFamily.supportedFullProfile v x) =
       ∫ x in (-(1 : ℝ) / 2)..(1 / 2), v x := by
-  rw [QuarticGramFamily.supportedFullProfile,
-    MeasureTheory.integral_indicator measurableSet_Icc,
+  change
+    (∫ x : ℝ,
+      (Icc (-(1 / 2 : ℝ)) (1 / 2)).indicator v x) =
+        ∫ x in (-(1 : ℝ) / 2)..(1 / 2), v x
+  rw [MeasureTheory.integral_indicator measurableSet_Icc,
     MeasureTheory.integral_Icc_eq_integral_Ioc,
     ← intervalIntegral.integral_of_le (by norm_num :
       (-(1 : ℝ) / 2) ≤ 1 / 2)]
@@ -965,7 +980,12 @@ theorem shrinkingProfileWindow_sq_le_supportedFullProfile
         exact le_trans
           (shrinkingHalfPeriodBump_rOut_lt L n hL).le
           hout.le
-      simp [QuarticGramFamily.supportedFullProfile, hmem, hzero]
+      have hmem' :
+          u / L ∉ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
+        simpa only [Set.mem_Icc, neg_div] using hmem
+      rw [QuarticGramFamily.supportedFullProfile,
+        Set.indicator_of_notMem hmem', hzero]
+      norm_num
 
 /-- Every finite annular energy is bounded by the same frozen supported
 profile as its centered parent. -/
@@ -1101,9 +1121,9 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
         Continuous
           (fun u : ℝ =>
             (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ)) :=
-      Complex.continuous_ofReal.comp
-        ((shrinkingProfileShellWindow_contDiff
-          v L n hL hv hposProfile).continuous.pow 2)
+      (Complex.continuous_ofReal.comp
+        (shrinkingProfileShellWindow_contDiff
+          v L n hL hv hposProfile).continuous).pow 2
     exact
       (hshell.mul
         (Complex.continuous_exp.comp
@@ -1116,7 +1136,11 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
       shrinkingProfileShellWindow_sq_le_supportedFullProfile
         v L n hL hposProfile u
     by_cases hmem : u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2)
-    · have hscaled : |u / L| ≤ (1 : ℝ) / 2 := abs_le.mpr hmem
+    · have hscaled : |u / L| ≤ (1 : ℝ) / 2 := by
+        apply abs_le.mpr
+        constructor
+        · linarith [hmem.1]
+        · exact hmem.2
       rw [abs_div, abs_of_pos hL] at hscaled
       have huabs : |u| ≤ L / 2 := by
         have hmul := (div_le_iff₀ hL).mp hscaled
@@ -1153,7 +1177,11 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
           ring
     · have hprofile :
           @QuarticGramFamily.supportedFullProfile v (u / L) = 0 := by
-        simp [QuarticGramFamily.supportedFullProfile, hmem]
+        have hmem' :
+            u / L ∉ Icc (-(1 / 2 : ℝ)) (1 / 2) := by
+          simpa only [Set.mem_Icc, neg_div] using hmem
+        rw [QuarticGramFamily.supportedFullProfile,
+          Set.indicator_of_notMem hmem']
       have hshell :
           shrinkingProfileShellWindow v L n hL u ^ 2 = 0 := by
         rw [hprofile] at hbound
@@ -1170,7 +1198,7 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
           Filter.atTop
           (nhds
             (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
-      Complex.continuous_ofReal.continuousAt.comp hu
+      Complex.continuous_ofReal.continuousAt.tendsto.comp hu
     exact hcast.mul_const
       (Complex.exp (Complex.I * z * (u : ℂ)))
 
@@ -1225,7 +1253,7 @@ theorem tendsto_shrinkingProfileShellNormalizedPairKernel
         (nhds
           (∫ u : ℝ,
             @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
-    Complex.continuous_ofReal.continuousAt.comp hmassR
+    Complex.continuous_ofReal.continuousAt.tendsto.comp hmassR
   have hmassC_ne :
       (∫ u : ℝ,
         @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ) ≠ 0 := by
@@ -1444,12 +1472,14 @@ def AnnularFamilyRealization.toRadialShellData
       funext u
       rw [h.window_eq T j u]
     rw [hwindow]
-    exact
-      ((shrinkingProfileShellWindow_contDiff
+    have hsmooth :
+        ContDiff ℝ 2
+          (shrinkingProfileShellWindow v
+            (h.commonPeriod T) (h.stage T j) (h.period_pos T)) :=
+      (shrinkingProfileShellWindow_contDiff
         v (h.commonPeriod T) (h.stage T j) (h.period_pos T)
-        h.profile_smooth h.profile_pos).of_le
-          (by exact le_top)).continuousLinearMap_comp
-            Complex.ofRealCLM
+        h.profile_smooth h.profile_pos).of_le (by norm_num)
+    exact hsmooth.continuousLinearMap_comp Complex.ofRealCLM
   · intro T j u hu
     rw [h.window_eq T j u]
     exact
