@@ -1422,6 +1422,300 @@ theorem RS1996ZetaInputs.exists_tendsto_topHatApproxLinearMain
         (4999 / 10000 : ℝ) (by norm_num)
         p hp hp1 g
 
+
+/-- A compact product envelope for all powered top-hat distance kernels. -/
+def topHatDistanceEnvelope
+    (p : ℝ) (a b : ℕ) (z : ℝ × ℝ) : ℝ :=
+  (Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1).indicator
+    (fun _ => (1 / p) ^ a * (1 / p) ^ b) z
+
+theorem integrable_topHatDistanceEnvelope
+    (p : ℝ) (a b : ℕ) :
+    Integrable (topHatDistanceEnvelope p a b) := by
+  unfold topHatDistanceEnvelope
+  rw [integrable_indicator_iff
+    (measurableSet_Icc.prod measurableSet_Icc)]
+  exact continuous_const.continuousOn.integrableOn_compact
+    (isCompact_Icc.prod isCompact_Icc)
+
+/-- The compact envelope controls a powered distance kernel for any
+nonnegative unit-interval profile of height at most 1/p. -/
+theorem norm_distanceKernel_le_topHatDistanceEnvelope
+    (p : ℝ) (hp : 0 < p)
+    (r : ℝ → ℝ)
+    (hrbounds : ∀ x, 0 ≤ r x ∧ r x ≤ 1 / p)
+    (hrsupport : ∀ x, r x ≠ 0 → x ∈ Icc (0 : ℝ) 1)
+    (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (z : ℝ × ℝ) :
+    ‖distanceKernel
+        (fun x => r x ^ a)
+        (fun y => r y ^ b) z‖ ≤
+      topHatDistanceEnvelope p a b z := by
+  by_cases hz : z ∈ Icc (0 : ℝ) 1 ×ˢ Icc (0 : ℝ) 1
+  · have hx := hz.1
+    have hy := hz.2
+    have hxb := hrbounds z.1
+    have hyb := hrbounds z.2
+    have hdist : |z.2 - z.1| ≤ 1 := by
+      rw [abs_le]
+      constructor <;> linarith [hx.1, hx.2, hy.1, hy.2]
+    have hxa : r z.1 ^ a ≤ (1 / p) ^ a :=
+      pow_le_pow_left₀ hxb.1 hxb.2 a
+    have hybpow : r z.2 ^ b ≤ (1 / p) ^ b :=
+      pow_le_pow_left₀ hyb.1 hyb.2 b
+    have hleft :
+        |z.2 - z.1| * r z.1 ^ a ≤
+          1 * (1 / p) ^ a :=
+      mul_le_mul hdist hxa
+        (pow_nonneg hxb.1 a) (by norm_num)
+    have hall :
+        |z.2 - z.1| * r z.1 ^ a * r z.2 ^ b ≤
+          (1 * (1 / p) ^ a) * (1 / p) ^ b :=
+      mul_le_mul hleft hybpow
+        (pow_nonneg hyb.1 b)
+        (mul_nonneg (by norm_num)
+          (pow_nonneg (one_div_nonneg.mpr hp.le) a))
+    have hnonneg :
+        0 ≤ distanceKernel
+          (fun x => r x ^ a)
+          (fun y => r y ^ b) z := by
+      unfold distanceKernel
+      exact mul_nonneg
+        (mul_nonneg (abs_nonneg _)
+          (pow_nonneg hxb.1 a))
+        (pow_nonneg hyb.1 b)
+    rw [topHatDistanceEnvelope, Set.indicator_of_mem hz,
+      Real.norm_eq_abs, abs_of_nonneg hnonneg]
+    simpa only [distanceKernel, one_mul] using hall
+  · rw [topHatDistanceEnvelope, Set.indicator_of_notMem hz]
+    by_cases hx : z.1 ∈ Icc (0 : ℝ) 1
+    · have hy : z.2 ∉ Icc (0 : ℝ) 1 := by
+        intro hy
+        exact hz ⟨hx, hy⟩
+      have hry : r z.2 = 0 := by
+        by_contra hne
+        exact hy (hrsupport z.2 hne)
+      simp [distanceKernel, hry, zero_pow hb.ne']
+    · have hrx : r z.1 = 0 := by
+        by_contra hne
+        exact hx (hrsupport z.1 hne)
+      simp [distanceKernel, hrx, zero_pow ha.ne']
+
+theorem shiftedTopHat_bounds
+    (p : ℝ) (hp : 0 < p) (x : ℝ) :
+    0 ≤ SmoothTopHatApprox.shiftedTopHat p x ∧
+      SmoothTopHatApprox.shiftedTopHat p x ≤ 1 / p := by
+  unfold SmoothTopHatApprox.shiftedTopHat
+    TopHatMoments.topHat
+  by_cases hx :
+      x - 1 / 2 ∈ TopHatMoments.topHatSupport p
+  · rw [Set.indicator_of_mem hx]
+    exact ⟨(one_div_pos.mpr hp).le, le_rfl⟩
+  · rw [Set.indicator_of_notMem hx]
+    exact ⟨le_rfl, one_div_nonneg.mpr hp.le⟩
+
+theorem shiftedTopHat_support
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (x : ℝ)
+    (hx : SmoothTopHatApprox.shiftedTopHat p x ≠ 0) :
+    x ∈ Icc (0 : ℝ) 1 := by
+  have hmem :
+      x - 1 / 2 ∈ TopHatMoments.topHatSupport p := by
+    by_contra hnot
+    apply hx
+    simp [SmoothTopHatApprox.shiftedTopHat,
+      TopHatMoments.topHat, hnot]
+  rw [TopHatMoments.topHatSupport, Set.mem_Icc] at hmem
+  constructor <;> linarith [hmem.1, hmem.2]
+
+theorem measurable_shiftedTopHat (p : ℝ) :
+    Measurable (SmoothTopHatApprox.shiftedTopHat p) := by
+  unfold SmoothTopHatApprox.shiftedTopHat
+  have htop : Measurable (TopHatMoments.topHat p) := by
+    unfold TopHatMoments.topHat TopHatMoments.topHatSupport
+    exact measurable_const.indicator measurableSet_Icc
+  exact htop.comp (measurable_id.sub measurable_const)
+
+theorem aestronglyMeasurable_shiftedTopHat_distanceKernel_pows
+    (p : ℝ) (a b : ℕ) :
+    AEStronglyMeasurable
+      (distanceKernel
+        (fun x => SmoothTopHatApprox.shiftedTopHat p x ^ a)
+        (fun y => SmoothTopHatApprox.shiftedTopHat p y ^ b)) := by
+  have hr := measurable_shiftedTopHat p
+  unfold distanceKernel
+  fun_prop
+
+theorem integrable_shiftedTopHat_distanceKernel_pows
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (a b : ℕ) (ha : 0 < a) (hb : 0 < b) :
+    Integrable
+      (distanceKernel
+        (fun x => SmoothTopHatApprox.shiftedTopHat p x ^ a)
+        (fun y => SmoothTopHatApprox.shiftedTopHat p y ^ b)) := by
+  apply (integrable_topHatDistanceEnvelope p a b).mono'
+  · exact
+      aestronglyMeasurable_shiftedTopHat_distanceKernel_pows
+        p a b
+  · filter_upwards [] with z
+    exact norm_distanceKernel_le_topHatDistanceEnvelope
+      p hp (SmoothTopHatApprox.shiftedTopHat p)
+      (shiftedTopHat_bounds p hp)
+      (shiftedTopHat_support p hp hp1)
+      a b ha hb z
+
+/-- The powered two-variable distance kernels of the smooth top-hat
+sequence converge in integral to the literal sharp kernel. -/
+theorem tendsto_integral_topHatApprox_distanceKernel_pows
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (a b : ℕ) (ha : 0 < a) (hb : 0 < b) :
+    Tendsto
+      (fun n =>
+        ∫ z : ℝ × ℝ,
+          distanceKernel
+            (fun x =>
+              SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1 x ^ a)
+            (fun y =>
+              SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1 y ^ b) z)
+      atTop
+      (nhds
+        (∫ z : ℝ × ℝ,
+          distanceKernel
+            (fun x =>
+              SmoothTopHatApprox.shiftedTopHat p x ^ a)
+            (fun y =>
+              SmoothTopHatApprox.shiftedTopHat p y ^ b) z)) := by
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (topHatDistanceEnvelope p a b)
+  · intro n
+    exact
+      (distanceKernel_integrable_of_continuous_compact
+        (fun x =>
+          SmoothTopHatApprox.topHatApproxProfile
+            p n hp hp1 x ^ a)
+        (fun y =>
+          SmoothTopHatApprox.topHatApproxProfile
+            p n hp hp1 y ^ b)
+        ((SmoothTopHatApprox.topHatApproxProfile_contDiff
+          p n hp hp1).continuous.pow a)
+        ((SmoothTopHatApprox.topHatApproxProfile_contDiff
+          p n hp hp1).continuous.pow b)
+        (positivePower_hasCompactSupport
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+          a ha
+          (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+            p n hp hp1))
+        (positivePower_hasCompactSupport
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+          b hb
+          (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+            p n hp hp1))).aestronglyMeasurable
+  · exact integrable_topHatDistanceEnvelope p a b
+  · intro n
+    filter_upwards [] with z
+    exact norm_distanceKernel_le_topHatDistanceEnvelope
+      p hp
+      (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+      (SmoothTopHatApprox.topHatApproxProfile_bounds
+        p n hp hp1)
+      (fun x hx =>
+        SmoothTopHatApprox.topHatApproxProfile_support
+          p n hp hp1 x hx)
+      a b ha hb z
+  · filter_upwards [] with z
+    have hx :=
+      SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 z.1
+    have hy :=
+      SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 z.2
+    unfold distanceKernel
+    exact (tendsto_const_nhds.mul (hx.pow a)).mul (hy.pow b)
+
+/-- Hence every positive powered distance contraction converges to its
+literal sharp top-hat value. -/
+theorem tendsto_distanceIntegral_topHatApprox_pows
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (a b : ℕ) (ha : 0 < a) (hb : 0 < b) :
+    Tendsto
+      (fun n =>
+        distanceIntegral
+          (fun x =>
+            SmoothTopHatApprox.topHatApproxProfile
+              p n hp hp1 x ^ a)
+          (fun y =>
+            SmoothTopHatApprox.topHatApproxProfile
+              p n hp hp1 y ^ b))
+      atTop
+      (nhds
+        (distanceIntegral
+          (fun x =>
+            SmoothTopHatApprox.shiftedTopHat p x ^ a)
+          (fun y =>
+            SmoothTopHatApprox.shiftedTopHat p y ^ b))) := by
+  have happ :
+      (fun n =>
+        distanceIntegral
+          (fun x =>
+            SmoothTopHatApprox.topHatApproxProfile
+              p n hp hp1 x ^ a)
+          (fun y =>
+            SmoothTopHatApprox.topHatApproxProfile
+              p n hp hp1 y ^ b)) =
+      (fun n =>
+        ∫ z : ℝ × ℝ,
+          distanceKernel
+            (fun x =>
+              SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1 x ^ a)
+            (fun y =>
+              SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1 y ^ b) z) := by
+    funext n
+    apply distanceIntegral_eq_integral_distanceKernel
+    exact distanceKernel_integrable_of_continuous_compact
+      (fun x =>
+        SmoothTopHatApprox.topHatApproxProfile
+          p n hp hp1 x ^ a)
+      (fun y =>
+        SmoothTopHatApprox.topHatApproxProfile
+          p n hp hp1 y ^ b)
+      ((SmoothTopHatApprox.topHatApproxProfile_contDiff
+        p n hp hp1).continuous.pow a)
+      ((SmoothTopHatApprox.topHatApproxProfile_contDiff
+        p n hp hp1).continuous.pow b)
+      (positivePower_hasCompactSupport
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        a ha
+        (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+          p n hp hp1))
+      (positivePower_hasCompactSupport
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        b hb
+        (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+          p n hp hp1))
+  have hsharp :
+      distanceIntegral
+          (fun x =>
+            SmoothTopHatApprox.shiftedTopHat p x ^ a)
+          (fun y =>
+            SmoothTopHatApprox.shiftedTopHat p y ^ b) =
+        ∫ z : ℝ × ℝ,
+          distanceKernel
+            (fun x =>
+              SmoothTopHatApprox.shiftedTopHat p x ^ a)
+            (fun y =>
+              SmoothTopHatApprox.shiftedTopHat p y ^ b) z :=
+    distanceIntegral_eq_integral_distanceKernel _ _
+      (integrable_shiftedTopHat_distanceKernel_pows
+        p hp hp1 a b ha hb)
+  rw [happ, hsharp]
+  exact
+    tendsto_integral_topHatApprox_distanceKernel_pows
+      p hp hp1 a b ha hb
+
 /-- All five component limits assemble into convergence of the complete
 quartic Rudnick--Sarnak scalar. -/
 theorem tendsto_quarticRSScalar_annular
