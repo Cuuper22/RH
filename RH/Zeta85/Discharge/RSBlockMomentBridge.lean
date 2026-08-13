@@ -275,9 +275,92 @@ structure UncenteredRSBlockLimits {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → 
     Tendsto (uncenteredBlockMoment F k) atTop
       (nhds (uncenteredContractionMoment (topHatR3Terms p) μ k))
 
+/-- The positive-degree analytic content of the actual-block limit.
+Degree zero is separated because it is only the normalized trace of the
+identity matrix and needs no Rudnick--Sarnak contraction. -/
+structure PositiveDegreeUncenteredRSBlockLimits
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) : Prop where
+  moments : ∀ k : ℕ, 1 ≤ k → k ≤ 4 →
+    Tendsto (uncenteredBlockMoment F k) atTop
+      (nhds (uncenteredContractionMoment (topHatR3Terms p) μ k))
+
 private theorem rtrace_one_fin {d : ℕ} :
     rtrace (1 : Matrix (Fin d) (Fin d) ℂ) = d := by
   simp [rtrace, Matrix.trace]
+
+/-- In positive dimension, the normalized zeroth block moment is exactly
+one. -/
+theorem uncenteredBlockMoment_zero_eq_one
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (hdim : F.blockDim T ≠ 0) :
+    uncenteredBlockMoment F 0 T = 1 := by
+  simp [uncenteredBlockMoment, rtrace_one_fin, hdim]
+
+/-- Eventual nonzero block dimension discharges the entire degree-zero
+limit, independently of every RS or Poisson estimate. -/
+theorem tendsto_uncenteredBlockMoment_zero
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hdim : ∀ᶠ T in atTop, F.blockDim T ≠ 0) :
+    Tendsto (uncenteredBlockMoment F 0) atTop
+      (nhds (uncenteredContractionMoment (topHatR3Terms p) μ 0)) := by
+  have heq :
+      (fun _ : ℝ => (1 : ℝ)) =ᶠ[atTop]
+        uncenteredBlockMoment F 0 := by
+    filter_upwards [hdim] with T hT
+    exact (uncenteredBlockMoment_zero_eq_one F T hT).symm
+  simpa [uncenteredContractionMoment] using
+    (tendsto_const_nhds.congr' heq)
+
+/-- A positive limiting block density forces the literal block dimension
+to be nonzero eventually.  No growth theorem for the ambient zero count is
+needed: if the numerator vanished, the displayed ratio would be zero. -/
+theorem eventually_blockDim_ne_zero_of_limit
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hdim : BlockDimensionLimit F) :
+    ∀ᶠ T in atTop, F.blockDim T ≠ 0 := by
+  have hhalf : μ / 2 < μ := by
+    linarith [hdim.bandwidth_pos]
+  have hratio :
+      ∀ᶠ T in atTop,
+        μ / 2 <
+          (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) :=
+    (tendsto_order.1 hdim.block_dimension).1 _ hhalf
+  filter_upwards [hratio] with T hT
+  intro hz
+  simp [hz] at hT
+  linarith [hdim.bandwidth_pos]
+
+/-- Consequently the actual analytic attack only has to prove degrees one
+through four; the zeroth clause of `UncenteredRSBlockLimits` is filled by
+the finite identity above. -/
+theorem uncenteredRSBlockLimits_of_positiveDegree
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hdim : ∀ᶠ T in atTop, F.blockDim T ≠ 0)
+    (hpositive : PositiveDegreeUncenteredRSBlockLimits F) :
+    UncenteredRSBlockLimits F where
+  moments k hk := by
+    by_cases hk0 : k = 0
+    · subst k
+      exact tendsto_uncenteredBlockMoment_zero hdim
+    · exact hpositive.moments k
+        (Nat.one_le_iff_ne_zero.mpr hk0) hk
+
+/-- The existing terminal block-density interface therefore removes degree
+zero automatically; the only remaining moment attack is degrees one through
+four. -/
+theorem uncenteredRSBlockLimits_of_blockDimension_positiveDegree
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hdim : BlockDimensionLimit F)
+    (hpositive : PositiveDegreeUncenteredRSBlockLimits F) :
+    UncenteredRSBlockLimits F :=
+  uncenteredRSBlockLimits_of_positiveDegree
+    (eventually_blockDim_ne_zero_of_limit hdim) hpositive
 
 /-- At every positive block dimension, finite matrix centering is exactly the
 scalar binomial transform used in formula (28). -/
