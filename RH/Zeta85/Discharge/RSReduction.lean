@@ -444,6 +444,53 @@ theorem weightedCyclicSymbol_contDiff
       r (x + cyclicPartialSum xi j / mu) : ℝ) : ℂ))
   exact Complex.ofRealCLM.contDiff.comp hreal
 
+/-- In degree one the total-frequency coordinate is the only
+coordinate, so a normal cutoff alone gives the strict RS support bound. -/
+theorem normalCutoffWeightedCyclicSymbol_k1_strictSupport
+    (mu eps : ℝ) (r : ℝ -> ℝ) (chi : ℝ -> ℂ)
+    (hchi : ∀ s, chi s ≠ 0 -> |s| ≤ eps)
+    (heps : eps < 2) :
+    tsupport
+        (normalCutoffSymbol chi
+          (weightedCyclicSymbol (k := 1) mu r)) ⊆
+      {xi | ∑ i : Fin 1, |xi i| < 2} := by
+  apply normalCutoffSymbol_strictSupport
+    chi (weightedCyclicSymbol (k := 1) mu r) 0 eps hchi
+  · intro xi _hxi
+    simp
+  · linarith
+
+/-- Every smooth compactly supported profile supplies an admissible
+degree-one RS test; no tangential bandwidth budget is needed in this
+degree. -/
+theorem exists_frozenLinearRSTest
+    (mu : ℝ) (r : ℝ -> ℝ)
+    (hrc : HasCompactSupport r) (hrSmooth : ContDiff ℝ 1 r) :
+    ∃ Phi : (Fin 1 -> ℝ) -> ℂ,
+      ContDiff ℝ 1 Phi ∧
+      tsupport Phi ⊆ {xi | ∑ i : Fin 1, |xi i| < 2} ∧
+      (∀ x : Fin 1 -> ℂ,
+        rsGaugeTest Phi x =
+          rsGaugeTest
+            (weightedCyclicSymbol (k := 1) mu r) x) ∧
+      rsMainTerm Phi =
+        rsMainTerm (weightedCyclicSymbol (k := 1) mu r) := by
+  obtain ⟨chi, hchi0, hchiSmooth, hchiSupport⟩ :=
+    exists_smooth_normalCutoff (1 : ℝ) (by norm_num)
+  refine ⟨normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 1) mu r), ?_, ?_, ?_, ?_⟩
+  · apply normalCutoffSymbol_contDiff
+    · exact hchiSmooth.of_le (by norm_num)
+    · exact weightedCyclicSymbol_contDiff
+        (k := 1) (by norm_num) mu r hrc hrSmooth
+  · exact normalCutoffWeightedCyclicSymbol_k1_strictSupport
+      mu 1 r chi hchiSupport (by norm_num)
+  · intro x
+    exact rsGaugeTest_normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 1) mu r) hchi0 x
+  · exact rsMainTerm_normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 1) mu r) hchi0
+
 /-- Smooth compactly supported profiles produce a smooth quartic cyclic
 symbol.  The fixed factor at cyclic position zero supplies one compact
 integration domain for every frequency parameter. -/
