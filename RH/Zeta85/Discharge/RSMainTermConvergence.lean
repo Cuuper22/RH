@@ -1522,9 +1522,11 @@ theorem shiftedTopHat_support
   have hmem :
       x - 1 / 2 ∈ TopHatMoments.topHatSupport p := by
     by_contra hnot
-    apply hx
-    simp [SmoothTopHatApprox.shiftedTopHat,
-      TopHatMoments.topHat, hnot]
+    have hz : SmoothTopHatApprox.shiftedTopHat p x = 0 := by
+      unfold SmoothTopHatApprox.shiftedTopHat
+        TopHatMoments.topHat
+      rw [Set.indicator_of_notMem hnot]
+    exact hx hz
   rw [TopHatMoments.topHatSupport, Set.mem_Icc] at hmem
   constructor <;> linarith [hmem.1, hmem.2]
 
