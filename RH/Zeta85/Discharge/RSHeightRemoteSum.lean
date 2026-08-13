@@ -478,12 +478,20 @@ theorem dyadic_remote_height_sum_normalized_le_of_local_count
       field_simp [hTpos.ne', baseHeightKernelMass_pos.ne',
         (by positivity : (q : ℝ) + 1 ≠ 0),
         (by positivity : Real.sqrt ((q : ℝ) + 1) ≠ 0)]
-      nlinarith
+      have hfour : Real.sqrt ((q : ℝ) + 1) ^ 4 =
+          ((q : ℝ) + 1) ^ 2 := by
+        calc
+          Real.sqrt ((q : ℝ) + 1) ^ 4 =
+              (Real.sqrt ((q : ℝ) + 1) ^ 2) ^ 2 := by ring
+          _ = ((q : ℝ) + 1) ^ 2 := by rw [hsquare]
+      rw [hfour]
+      ring
 
 theorem rvm_dyadic_far_height_sum_tendsto_zero
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
-    (T : ℕ → ℝ) (hTpower : ∀ q, ((q : ℝ) + 1) ^ 4 ≤ T q)
-    (w : ℕ → ℝ) (hw : ∀ q, 0 < w q) (hw1 : ∀ q, 2 * w q ≤ 1)
+    (T : ℕ → ℝ) (hTpower : ∀ q : ℕ, ((q : ℝ) + 1) ^ 4 ≤ T q)
+    (w : ℕ → ℝ) (hw : ∀ q : ℕ, 0 < w q)
+    (hw1 : ∀ q : ℕ, 2 * w q ≤ 1)
     (s : ℕ → Finset Z.carrier)
     (hs : ∀ q rho, rho ∈ s q →
       (rho : ℂ).im / T q ≤ 1 - dyadicRemoteHeightGap q ∨
@@ -501,7 +509,9 @@ theorem rvm_dyadic_far_height_sum_tendsto_zero
     (baseHeightRemoteDecayConstant / baseHeightKernelMass)
   have hC0 : 0 ≤ C := by
     dsimp only [C]
-    positivity
+    exact mul_nonneg (mul_nonneg (by norm_num) (by linarith : 0 ≤ A0))
+      (div_nonneg baseHeightRemoteDecayConstant_nonneg
+        baseHeightKernelMass_pos.le)
   have hbase : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
     tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
   have hinv : Tendsto (fun q : ℕ => (((q : ℝ) + 1))⁻¹)
@@ -581,7 +591,7 @@ theorem remote_height_partial_sum_le_of_local_count
         ∑ rho ∈ s, (Z.mult rho : ℝ) *
           ‖paperFT (windowAveragedHeightTest R w)
             (gammaOf (rho : ℂ) / T)‖ := by
-      rw [s, Finset.sum_map]
+      simp only [s, Finset.sum_map]
       rfl
     _ ≤ _ := hraw
 
@@ -620,5 +630,189 @@ theorem tsum_remote_height_scalar_le_of_local_count
     (fun _ => mul_nonneg (Nat.cast_nonneg _) (norm_nonneg _))
     (remote_height_partial_sum_le_of_local_count
       hcount hR hw hw1 hT hRT hD)
+
+def dyadicFarHeightZeroSet (Z : ZeroConfig) (T : ℝ) (q : ℕ) :
+    Set Z.carrier :=
+  {rho | (rho : ℂ).im / T ≤ 1 - dyadicRemoteHeightGap q ∨
+    2 + dyadicRemoteHeightGap q ≤ (rho : ℂ).im / T}
+
+theorem dyadic_far_height_tsum_normalized_le_of_local_count
+    {Z : ZeroConfig} {A0 w T : ℝ} (q : ℕ) (hq : 1 ≤ q)
+    (hcount : Tail.LocalCount
+      (fun rho : Z.carrier => (rho : ℂ).im)
+        (fun rho : Z.carrier => Z.mult (rho : ℂ)) A0)
+    (hw : 0 < w) (hw1 : 2 * w ≤ 1)
+    (hTpower : ((q : ℝ) + 1) ^ 4 ≤ T) :
+    (∑' rho : ↥(dyadicFarHeightZeroSet Z T q),
+      (Z.mult (rho : Z.carrier) : ℝ) *
+        ‖paperFT (windowAveragedHeightTest ((q : ℝ) + 1) w)
+          (gammaOf (rho : ℂ) / T)‖) /
+          (T * Real.log T) ≤
+      (10 * A0 *
+        (baseHeightRemoteDecayConstant / baseHeightKernelMass)) *
+          (((q : ℝ) + 1) * Real.sqrt ((q : ℝ) + 1))⁻¹ := by
+  let X : ℝ := (q : ℝ) + 1
+  have hX2 : 2 ≤ X := by
+    dsimp only [X]
+    exact_mod_cast Nat.add_le_add_right hq 1
+  have hX : 0 < X := by linarith
+  have hTpos : 0 < T :=
+    lt_of_lt_of_le (pow_pos hX 4) (by simpa only [X] using hTpower)
+  have hlogTpos : 0 < Real.log T := by
+    apply Real.log_pos
+    have hp := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 2) hX2 4
+    norm_num at hp ⊢
+    linarith [hp, hTpower]
+  let C : ℝ := (10 * A0 *
+    (baseHeightRemoteDecayConstant / baseHeightKernelMass)) *
+      (X * Real.sqrt X)⁻¹
+  have hpartial : ∀ u : Finset ↥(dyadicFarHeightZeroSet Z T q),
+      ∑ rho ∈ u, (Z.mult (rho : Z.carrier) : ℝ) *
+          ‖paperFT (windowAveragedHeightTest X w)
+            (gammaOf (rho : ℂ) / T)‖ ≤ C * (T * Real.log T) := by
+    intro u
+    let s : Finset Z.carrier := u.map (Function.Embedding.subtype _)
+    have hs : ∀ rho ∈ s,
+        (rho : ℂ).im / T ≤ 1 - dyadicRemoteHeightGap q ∨
+          2 + dyadicRemoteHeightGap q ≤ (rho : ℂ).im / T := by
+      intro rho hrho
+      simp only [s, Finset.mem_map] at hrho
+      obtain ⟨x, hx, rfl⟩ := hrho
+      exact x.property
+    have hraw := dyadic_remote_height_sum_normalized_le_of_local_count
+      q hq hcount hw hw1 hTpower s hs
+    rw [div_le_iff₀ (mul_pos hTpos hlogTpos)] at hraw
+    calc
+      ∑ rho ∈ u, (Z.mult (rho : Z.carrier) : ℝ) *
+            ‖paperFT (windowAveragedHeightTest X w)
+              (gammaOf (rho : ℂ) / T)‖ =
+          ∑ rho ∈ s, (Z.mult rho : ℝ) *
+            ‖paperFT (windowAveragedHeightTest X w)
+              (gammaOf (rho : ℂ) / T)‖ := by
+        simp only [s, Finset.sum_map]
+        rfl
+      _ ≤ C * (T * Real.log T) := by
+        simpa only [C, X] using hraw
+  rw [div_le_iff₀ (mul_pos hTpos hlogTpos)]
+  exact Real.tsum_le_of_sum_le
+    (fun _ => mul_nonneg (Nat.cast_nonneg _) (norm_nonneg _)) hpartial
+
+theorem summable_dyadic_far_height_scalar_of_local_count
+    {Z : ZeroConfig} {A0 w T : ℝ} (q : ℕ) (hq : 1 ≤ q)
+    (hcount : Tail.LocalCount
+      (fun rho : Z.carrier => (rho : ℂ).im)
+        (fun rho : Z.carrier => Z.mult (rho : ℂ)) A0)
+    (hw : 0 < w) (hw1 : 2 * w ≤ 1)
+    (hTpower : ((q : ℝ) + 1) ^ 4 ≤ T) :
+    Summable (fun rho : ↥(dyadicFarHeightZeroSet Z T q) =>
+      (Z.mult (rho : Z.carrier) : ℝ) *
+        ‖paperFT (windowAveragedHeightTest ((q : ℝ) + 1) w)
+          (gammaOf (rho : ℂ) / T)‖) := by
+  let X : ℝ := (q : ℝ) + 1
+  have hX2 : 2 ≤ X := by
+    dsimp only [X]
+    exact_mod_cast Nat.add_le_add_right hq 1
+  have hX : 0 < X := by linarith
+  have hTpos : 0 < T :=
+    lt_of_lt_of_le (pow_pos hX 4) (by simpa only [X] using hTpower)
+  have hlogTpos : 0 < Real.log T := by
+    apply Real.log_pos
+    have hp := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 2) hX2 4
+    norm_num at hp ⊢
+    linarith [hp, hTpower]
+  let C : ℝ := (10 * A0 *
+    (baseHeightRemoteDecayConstant / baseHeightKernelMass)) *
+      (X * Real.sqrt X)⁻¹ * (T * Real.log T)
+  apply summable_of_sum_le
+    (fun _ => mul_nonneg (Nat.cast_nonneg _) (norm_nonneg _))
+  intro u
+  let s : Finset Z.carrier := u.map (Function.Embedding.subtype _)
+  have hs : ∀ rho ∈ s,
+      (rho : ℂ).im / T ≤ 1 - dyadicRemoteHeightGap q ∨
+        2 + dyadicRemoteHeightGap q ≤ (rho : ℂ).im / T := by
+    intro rho hrho
+    simp only [s, Finset.mem_map] at hrho
+    obtain ⟨x, hx, rfl⟩ := hrho
+    exact x.property
+  have hraw := dyadic_remote_height_sum_normalized_le_of_local_count
+    q hq hcount hw hw1 hTpower s hs
+  rw [div_le_iff₀ (mul_pos hTpos hlogTpos)] at hraw
+  calc
+    ∑ rho ∈ u, (Z.mult (rho : Z.carrier) : ℝ) *
+          ‖paperFT (windowAveragedHeightTest X w)
+            (gammaOf (rho : ℂ) / T)‖ =
+        ∑ rho ∈ s, (Z.mult rho : ℝ) *
+          ‖paperFT (windowAveragedHeightTest X w)
+            (gammaOf (rho : ℂ) / T)‖ := by
+      simp only [s, Finset.sum_map]
+      rfl
+    _ ≤ C := by simpa only [C, X, mul_assoc] using hraw
+
+theorem rvm_dyadic_far_height_tsum_tendsto_zero
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
+    (T : ℕ → ℝ) (hTpower : ∀ q : ℕ, ((q : ℝ) + 1) ^ 4 ≤ T q)
+    (w : ℕ → ℝ) (hw : ∀ q : ℕ, 0 < w q)
+    (hw1 : ∀ q : ℕ, 2 * w q ≤ 1) :
+    Tendsto
+      (fun q : ℕ =>
+        (∑' rho : ↥(dyadicFarHeightZeroSet Z (T q) q),
+          (Z.mult (rho : Z.carrier) : ℝ) *
+            ‖paperFT
+              (windowAveragedHeightTest ((q : ℝ) + 1) (w q))
+              (gammaOf (rho : ℂ) / T q)‖) /
+          (T q * Real.log (T q)))
+      atTop (nhds 0) := by
+  obtain ⟨A0, hA0, hlocal⟩ := hRvM.local_count
+  have hcount := Tail.LocalCount.ofWindowCount Z hA0 hlocal
+  let C : ℝ := 10 * A0 *
+    (baseHeightRemoteDecayConstant / baseHeightKernelMass)
+  have hC0 : 0 ≤ C := by
+    dsimp only [C]
+    exact mul_nonneg (mul_nonneg (by norm_num) (by linarith : 0 ≤ A0))
+      (div_nonneg baseHeightRemoteDecayConstant_nonneg
+        baseHeightKernelMass_pos.le)
+  have hbase : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
+    tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
+  have hinv : Tendsto (fun q : ℕ => (((q : ℝ) + 1))⁻¹)
+      atTop (nhds 0) := tendsto_inv_atTop_zero.comp hbase
+  have hupper : Tendsto (fun q : ℕ => C * (((q : ℝ) + 1))⁻¹)
+      atTop (nhds 0) := by
+    simpa only [mul_zero] using
+      (show Tendsto (fun _ : ℕ => C) atTop (nhds C) from
+        tendsto_const_nhds).mul hinv
+  apply squeeze_zero' ?_ ?_ hupper
+  · filter_upwards [eventually_ge_atTop 1] with q hq
+    let X : ℝ := (q : ℝ) + 1
+    have hX : 0 < X := by dsimp only [X]; positivity
+    have hTpos : 0 < T q :=
+      lt_of_lt_of_le (pow_pos hX 4)
+        (by simpa only [X] using hTpower q)
+    have hlog : 0 < Real.log (T q) := by
+      apply Real.log_pos
+      have hq2 : (2 : ℝ) ≤ X := by
+        dsimp only [X]
+        exact_mod_cast Nat.add_le_add_right hq 1
+      have hp := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 2) hq2 4
+      norm_num at hp ⊢
+      linarith [hp, hTpower q]
+    exact div_nonneg (tsum_nonneg fun _ =>
+      mul_nonneg (Nat.cast_nonneg _) (norm_nonneg _))
+      (mul_nonneg hTpos.le hlog.le)
+  · filter_upwards [eventually_ge_atTop 1] with q hq
+    have hraw := dyadic_far_height_tsum_normalized_le_of_local_count
+      q hq hcount (hw q) (hw1 q) (hTpower q)
+    let X : ℝ := (q : ℝ) + 1
+    have hX2 : 2 ≤ X := by
+      dsimp only [X]
+      exact_mod_cast Nat.add_le_add_right hq 1
+    have hX : 0 < X := by linarith
+    have hsqrt1 : 1 ≤ Real.sqrt X := by
+      rw [Real.le_sqrt (by norm_num) hX.le]
+      nlinarith
+    have hden : X ≤ X * Real.sqrt X := by nlinarith
+    have hinvle : (X * Real.sqrt X)⁻¹ ≤ X⁻¹ := inv_anti₀ hX hden
+    have hbound : C * (X * Real.sqrt X)⁻¹ ≤ C * X⁻¹ :=
+      mul_le_mul_of_nonneg_left hinvle hC0
+    exact hraw.trans (by simpa only [C, X] using hbound)
 
 end RH.Zeta85.RSPoissonCyclicBridge
