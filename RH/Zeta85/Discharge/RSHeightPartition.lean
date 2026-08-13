@@ -304,6 +304,42 @@ theorem rsZeroTupleTerm_replace_outer_eq_core_add_edge
   change (∏ j, f j) * _ = (∏ j, g j) * _ + (∏ j, h j) * _
   rw [← add_mul, hprod]
 
+theorem normalizedRSZeroTupleSum_replace_outer_eq_core_add_edge
+    {Z : ZeroConfig} {n : ℕ} {B : Fin (n + 1) → ℝ → ℝ}
+    (i : Fin (n + 1)) {d w R T : ℝ}
+    (hd : 0 < d) (hw : 0 < w) (hw1 : 2 * w ≤ 1) (hR : 0 < R)
+    (Phi : (Fin (n + 1) → ℝ) → ℂ)
+    (hcore : Summable (rsZeroTupleTerm Z
+      (averagedHeightFamilyOf
+        (replaceHeightProfile B i (smoothHeightWindow w)) R) Phi T))
+    (hedge : Summable (rsZeroTupleTerm Z
+      (averagedHeightFamilyOf
+        (replaceHeightProfile B i (dyadicEdgeRemainder d w)) R) Phi T)) :
+    RH.Zeta85.RSReduction.normalizedRSZeroTupleSum Z
+        (averagedHeightFamilyOf
+          (replaceHeightProfile B i (outerHeightProfile d)) R) Phi T =
+      RH.Zeta85.RSReduction.normalizedRSZeroTupleSum Z
+          (averagedHeightFamilyOf
+            (replaceHeightProfile B i (smoothHeightWindow w)) R) Phi T +
+        RH.Zeta85.RSReduction.normalizedRSZeroTupleSum Z
+          (averagedHeightFamilyOf
+            (replaceHeightProfile B i (dyadicEdgeRemainder d w)) R) Phi T := by
+  unfold RH.Zeta85.RSReduction.normalizedRSZeroTupleSum
+  have hfun : (fun rho => rsZeroTupleTerm Z
+      (averagedHeightFamilyOf
+        (replaceHeightProfile B i (outerHeightProfile d)) R) Phi T rho) =
+      fun rho => rsZeroTupleTerm Z
+          (averagedHeightFamilyOf
+            (replaceHeightProfile B i (smoothHeightWindow w)) R) Phi T rho +
+        rsZeroTupleTerm Z
+          (averagedHeightFamilyOf
+            (replaceHeightProfile B i (dyadicEdgeRemainder d w)) R) Phi T rho := by
+    funext rho
+    exact rsZeroTupleTerm_replace_outer_eq_core_add_edge
+      i hd hw hw1 hR Phi rho
+  rw [hfun, hcore.tsum_add hedge]
+  ring
+
 theorem dyadicEdgeRemainder_nonneg
     {d w x : ℝ} (hd : 0 < d) (hw : 0 < w) :
     0 ≤ dyadicEdgeRemainder d w x := by
@@ -334,6 +370,50 @@ theorem integral_dyadicEdgeRemainder_le
     (outerHeightProfile_integrable hd) (smoothHeightWindow_integrable hw hw1)]
   linarith [integral_outerHeightProfile_le hd,
     integral_smoothHeightWindow_ge hw hw1]
+
+theorem norm_rsHeightFactor_replace_edge_le
+    {n : ℕ} {B : Fin (n + 1) → ℝ → ℝ} (i : Fin (n + 1))
+    (hB : ∀ j, Continuous (B j)) (hBc : ∀ j, HasCompactSupport (B j))
+    (hB0 : ∀ j x, 0 ≤ B j x) (hB1 : ∀ j x, B j x ≤ 1)
+    {d w R : ℝ} (hd : 0 < d) (hw : 0 < w) (hw1 : 2 * w ≤ 1)
+    (hR : 0 < R) :
+    ‖RH.Zeta85.rsHeightFactor
+      (averagedHeightFamilyOf
+        (replaceHeightProfile B i (dyadicEdgeRemainder d w)) R)‖ ≤
+      4 * d + 2 * w := by
+  let H := replaceHeightProfile B i (dyadicEdgeRemainder d w)
+  have hH : ∀ j, Continuous (H j) := by
+    intro j
+    by_cases hji : j = i
+    · simp only [H, replaceHeightProfile, hji, if_true]
+      exact dyadicEdgeRemainder_continuous hd hw hw1
+    · simp only [H, replaceHeightProfile, hji, if_false]
+      exact hB j
+  have hHc : ∀ j, HasCompactSupport (H j) := by
+    intro j
+    by_cases hji : j = i
+    · simp only [H, replaceHeightProfile, hji, if_true]
+      exact dyadicEdgeRemainder_hasCompactSupport hd hw
+    · simp only [H, replaceHeightProfile, hji, if_false]
+      exact hBc j
+  have hH0 : ∀ j x, 0 ≤ H j x := by
+    intro j x
+    by_cases hji : j = i
+    · simp only [H, replaceHeightProfile, hji, if_true]
+      exact dyadicEdgeRemainder_nonneg hd hw
+    · simp only [H, replaceHeightProfile, hji, if_false]
+      exact hB0 j x
+  have hH1 : ∀ j x, H j x ≤ 1 := by
+    intro j x
+    by_cases hji : j = i
+    · simp only [H, replaceHeightProfile, hji, if_true]
+      exact dyadicEdgeRemainder_le_one hd
+    · simp only [H, replaceHeightProfile, hji, if_false]
+      exact hB1 j x
+  refine (norm_rsHeightFactor_averagedHeightFamilyOf_le_integral
+    hH hHc hH0 hH1 hR i).trans ?_
+  simpa only [H, replaceHeightProfile, if_pos] using
+    integral_dyadicEdgeRemainder_le hd hw hw1
 
 def mixedDyadicEdgeRemainderProfiles {n : ℕ} (i : Fin (n + 1))
     (d w : ℝ) : Fin (n + 1) → ℝ → ℝ :=
