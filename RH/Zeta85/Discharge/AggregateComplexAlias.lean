@@ -91,7 +91,7 @@ theorem virtualAliasSum_eq_zero_add_nonzero
         ComplexAliasBridge.virtualComplexAliasTerm T L f z z' m) :=
     (summable_mul_left_iff hL0).1 hscaled
   unfold ComplexAliasBridge.virtualAliasSum
-  simpa only [Set.mem_singleton_iff] using
+  simpa only [Finset.sum_singleton, Finset.mem_singleton] using
     (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
 
 /-- Poisson summation is linear across the finite channel family. -/
@@ -287,7 +287,8 @@ theorem aggregateAliasCancellation_of_termwise
                 T L (f r) z z' m) = 0 := by
         funext m
         exact hterm z z' m
-      simpa [hzero]
+      rw [hzero]
+      exact tsum_zero
 
 /-- It is enough to cancel the summed shifted overlap integrals.  The
 translation-dependent exponential is common to every channel and factors
