@@ -513,12 +513,12 @@ theorem literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail
     (ρ ρ' : ℂ) :
     literalCoordinateEnergyTailPairKernel F T ρ ρ' =
       ((F.hatDenominator T)⁻¹ : ℂ) *
-        ((@QuarticGramFamily.fullLength σ T : ℂ) *
+        (((@QuarticGramFamily.fullLength σ T : ℂ) *
             ∫ u : ℝ,
               (F.windowEnergy T u : ℂ) *
                 Complex.exp
                   (Complex.I *
-                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ))) -
           coordinateFrequencyTail
             (literalBlockSelection F) T ρ ρ') := by
   unfold literalCoordinateEnergyTailPairKernel
