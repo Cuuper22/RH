@@ -77,6 +77,16 @@ def v9506 (s : ℝ) : ℝ :=
     - (238517 / 10000) * s ^ 6 + (362157 / 5000) * s ^ 8
     - (476329 / 5000) * s ^ 10
 
+/-- The R-8686 rational profile is smooth to every order. -/
+theorem v8686_contDiff : ContDiff ℝ ∞ v8686 := by
+  unfold v8686
+  fun_prop
+
+/-- The R-9506 rational profile is smooth to every order. -/
+theorem v9506_contDiff : ContDiff ℝ ∞ v9506 := by
+  unfold v9506
+  fun_prop
+
 private def bern8686 : List ℝ :=
   [35776089 / 52428800,
    1817332619 / 2359296000,
