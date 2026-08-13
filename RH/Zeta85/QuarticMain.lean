@@ -540,22 +540,17 @@ theorem rung9506_diagonal_annular_routed
     (hH : AlignedIsometricLayout.RoutedWindowRegularity H)
     (hEnergy : AlignedIsometricLayout.RoutedEnergyNormalization H)
     (period : ℝ → ℝ) (hperiod : ∀ T, 0 < period T)
-    (hv : ContDiff ℝ ∞ QuarticWindowWitnesses.v9506)
-    (hposProfile :
-      ∀ x, |x| ≤ (1 : ℝ) / 2 →
-        0 < QuarticWindowWitnesses.v9506 x)
-    (hmass :
-      ∀ T : ℝ,
-        (∫ u : ℝ,
-          @QuarticGramFamily.supportedFullProfile
-            QuarticWindowWitnesses.v9506 (u / period T)) ≠ 0)
     (hProfile :
       AlignedIsometricLayout.SupportedProfileQuarticLowerBound
         TrimmedMoment.Terminal9506.dual F period)
     (R :
       AlignedIsometricLayout.DiagonalAnnularWindowEnergyRealization
-        F TrimmedMoment.Terminal9506.dual
-          period hperiod hv hposProfile hmass)
+        F TrimmedMoment.Terminal9506.dual period hperiod
+          SmoothRadialShell.v9506_contDiff
+          SmoothRadialShell.v9506_pos_on_half
+          (fun T =>
+            SmoothRadialShell.integral_supportedFullProfile_v9506_div_ne_zero
+              (period T) (hperiod T)))
     (S :
       AlignedIsometricLayout.DiagonalSymmetricFrequencyExhaustion
         TrimmedMoment.Terminal9506.dual H hH) :
@@ -577,22 +572,17 @@ theorem rung9506_cumulative_diagonal_annular_routed
     (hH : AlignedIsometricLayout.RoutedWindowRegularity H)
     (hEnergy : AlignedIsometricLayout.RoutedEnergyNormalization H)
     (period : ℝ → ℝ) (hperiod : ∀ T, 0 < period T)
-    (hv : ContDiff ℝ ∞ QuarticWindowWitnesses.v9506)
-    (hposProfile :
-      ∀ x, |x| ≤ (1 : ℝ) / 2 →
-        0 < QuarticWindowWitnesses.v9506 x)
-    (hmass :
-      ∀ T : ℝ,
-        (∫ u : ℝ,
-          @QuarticGramFamily.supportedFullProfile
-            QuarticWindowWitnesses.v9506 (u / period T)) ≠ 0)
     (hProfile :
       AlignedIsometricLayout.SupportedProfileQuarticLowerBound
         TrimmedMoment.Terminal9506.dual F period)
     (R :
       AlignedIsometricLayout.DiagonalAnnularWindowEnergyRealization
-        F TrimmedMoment.Terminal9506.dual
-          period hperiod hv hposProfile hmass)
+        F TrimmedMoment.Terminal9506.dual period hperiod
+          SmoothRadialShell.v9506_contDiff
+          SmoothRadialShell.v9506_pos_on_half
+          (fun T =>
+            SmoothRadialShell.integral_supportedFullProfile_v9506_div_ne_zero
+              (period T) (hperiod T)))
     (S :
       AlignedIsometricLayout.DiagonalSymmetricFrequencyExhaustion
         TrimmedMoment.Terminal9506.dual H hH) :
