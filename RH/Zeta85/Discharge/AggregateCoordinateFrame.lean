@@ -523,7 +523,6 @@ theorem literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail
             (literalBlockSelection F) T ρ ρ') := by
   unfold literalCoordinateEnergyTailPairKernel
   rw [coordinateEnergySum_eq_fullLength_windowEnergy h T hfull]
-  ring
 
 end AggregateCoordinateFrame
 end Zeta85
