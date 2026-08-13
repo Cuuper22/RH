@@ -2831,6 +2831,260 @@ theorem tendsto_pairSquaredPotentialIntegral_topHatApprox
         ((tendsto_pairDistancePotential_topHatApprox
           p hp hp1 x).pow 2)
 
+
+/-- A compact box controls every unit-scale crossing kernel built from a
+unit-interval top-hat profile. -/
+def topHatCrossingEnvelope
+    (p : ℝ) (z : (ℝ × ℝ) × ℝ) : ℝ :=
+  ((Icc (-(1 : ℝ)) 1 ×ˢ Icc (-(1 : ℝ)) 1) ×ˢ
+      Icc (0 : ℝ) 1).indicator
+    (fun _ => (1 / p) ^ 4) z
+
+theorem integrable_topHatCrossingEnvelope
+    (p : ℝ) :
+    Integrable (topHatCrossingEnvelope p) := by
+  unfold topHatCrossingEnvelope
+  rw [integrable_indicator_iff
+    ((measurableSet_Icc.prod measurableSet_Icc).prod
+      measurableSet_Icc)]
+  exact continuous_const.continuousOn.integrableOn_compact
+    ((isCompact_Icc.prod isCompact_Icc).prod isCompact_Icc)
+
+/-- Nonnegative unit-interval profiles of height at most one over p are
+uniformly dominated in the full crossing coordinates. -/
+theorem norm_crossingRawKernel_one_le_topHatCrossingEnvelope
+    (p : ℝ) (hp : 0 < p)
+    (r : ℝ → ℝ)
+    (hrbounds : ∀ x, 0 ≤ r x ∧ r x ≤ 1 / p)
+    (hrsupport : ∀ x, r x ≠ 0 → x ∈ Icc (0 : ℝ) 1)
+    (z : (ℝ × ℝ) × ℝ) :
+    ‖crossingRawKernel 1 r z‖ ≤
+      topHatCrossingEnvelope p z := by
+  by_cases hz :
+      z ∈
+        ((Icc (-(1 : ℝ)) 1 ×ˢ Icc (-(1 : ℝ)) 1) ×ˢ
+          Icc (0 : ℝ) 1)
+  · have hu := hz.1.1
+    have hv := hz.1.2
+    have hx := hz.2
+    have huabs : |z.1.1| ≤ 1 := by
+      rw [abs_le]
+      exact hu
+    have hvabs : |z.1.2| ≤ 1 := by
+      rw [abs_le]
+      exact hv
+    have h0 := hrbounds z.2
+    have h1 := hrbounds (z.2 + z.1.1)
+    have h2 := hrbounds (z.2 + z.1.1 + z.1.2)
+    have h3 := hrbounds (z.2 + z.1.2)
+    have hc : 0 ≤ 1 / p := one_div_nonneg.mpr hp.le
+    have h01 :
+        r z.2 * r (z.2 + z.1.1) ≤
+          (1 / p) * (1 / p) :=
+      mul_le_mul h0.2 h1.2 h1.1 hc
+    have h012 :
+        r z.2 * r (z.2 + z.1.1) *
+              r (z.2 + z.1.1 + z.1.2) ≤
+          (1 / p) * (1 / p) * (1 / p) :=
+      mul_le_mul h01 h2.2 h2.1
+        (mul_nonneg hc hc)
+    have hall :
+        r z.2 * r (z.2 + z.1.1) *
+              r (z.2 + z.1.1 + z.1.2) *
+              r (z.2 + z.1.2) ≤
+          (1 / p) * (1 / p) * (1 / p) * (1 / p) :=
+      mul_le_mul h012 h3.2 h3.1
+        (mul_nonneg (mul_nonneg hc hc) hc)
+    have hweight :
+        |z.1.1| * |z.1.2| ≤ (1 : ℝ) * 1 :=
+      mul_le_mul huabs hvabs (abs_nonneg _) (by norm_num)
+    have hprodNonneg :
+        0 ≤
+          r z.2 * r (z.2 + z.1.1) *
+            r (z.2 + z.1.1 + z.1.2) *
+            r (z.2 + z.1.2) :=
+      mul_nonneg
+        (mul_nonneg (mul_nonneg h0.1 h1.1) h2.1) h3.1
+    have hweighted :
+        |z.1.1| * |z.1.2| *
+            (r z.2 * r (z.2 + z.1.1) *
+              r (z.2 + z.1.1 + z.1.2) *
+              r (z.2 + z.1.2)) ≤
+          ((1 : ℝ) * 1) *
+            ((1 / p) * (1 / p) * (1 / p) * (1 / p)) :=
+      mul_le_mul hweight hall hprodNonneg (by norm_num)
+    have hkernelNonneg :
+        0 ≤ crossingRawKernel 1 r z := by
+      simp only [crossingRawKernel, div_one, one_mul]
+      exact mul_nonneg
+        (mul_nonneg (abs_nonneg _) (abs_nonneg _))
+        hprodNonneg
+    rw [topHatCrossingEnvelope, Set.indicator_of_mem hz,
+      Real.norm_eq_abs, abs_of_nonneg hkernelNonneg]
+    calc
+      crossingRawKernel 1 r z =
+          |z.1.1| * |z.1.2| *
+            (r z.2 * r (z.2 + z.1.1) *
+              r (z.2 + z.1.1 + z.1.2) *
+              r (z.2 + z.1.2)) := by
+        simp only [crossingRawKernel, div_one, one_mul, add_assoc]
+      _ ≤ ((1 : ℝ) * 1) *
+            ((1 / p) * (1 / p) * (1 / p) * (1 / p)) :=
+        hweighted
+      _ = (1 / p) ^ 4 := by ring
+  · rw [topHatCrossingEnvelope, Set.indicator_of_notMem hz]
+    by_cases hx : z.2 ∈ Icc (0 : ℝ) 1
+    · by_cases hu : z.1.1 ∈ Icc (-(1 : ℝ)) 1
+      · by_cases hv : z.1.2 ∈ Icc (-(1 : ℝ)) 1
+        · exact False.elim (hz ⟨⟨hu, hv⟩, hx⟩)
+        · have hrv : r (z.2 + z.1.2) = 0 := by
+            by_contra hne
+            have hm := hrsupport (z.2 + z.1.2) hne
+            apply hv
+            constructor <;> linarith [hx.1, hx.2, hm.1, hm.2]
+          simp [crossingRawKernel, hrv]
+      · have hru : r (z.2 + z.1.1) = 0 := by
+          by_contra hne
+          have hm := hrsupport (z.2 + z.1.1) hne
+          apply hu
+          constructor <;> linarith [hx.1, hx.2, hm.1, hm.2]
+        simp [crossingRawKernel, hru]
+    · have hrx : r z.2 = 0 := by
+        by_contra hne
+        exact hx (hrsupport z.2 hne)
+      simp [crossingRawKernel, hrx]
+
+theorem aestronglyMeasurable_crossingRawKernel_one_shiftedTopHat
+    (p : ℝ) :
+    AEStronglyMeasurable
+      (crossingRawKernel 1
+        (SmoothTopHatApprox.shiftedTopHat p)) := by
+  have hr := measurable_shiftedTopHat p
+  unfold crossingRawKernel
+  fun_prop
+
+theorem integrable_crossingRawKernel_one_shiftedTopHat
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
+    Integrable
+      (crossingRawKernel 1
+        (SmoothTopHatApprox.shiftedTopHat p)) := by
+  apply (integrable_topHatCrossingEnvelope p).mono'
+  · exact
+      aestronglyMeasurable_crossingRawKernel_one_shiftedTopHat p
+  · filter_upwards [] with z
+    exact
+      norm_crossingRawKernel_one_le_topHatCrossingEnvelope
+        p hp (SmoothTopHatApprox.shiftedTopHat p)
+        (shiftedTopHat_bounds p hp)
+        (shiftedTopHat_support p hp hp1)
+        z
+
+/-- The full three-variable crossing kernel converges in integral from the
+legal smooth profiles to the sharp top hat. -/
+theorem tendsto_integral_crossingRawKernel_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
+    Tendsto
+      (fun n =>
+        ∫ z : (ℝ × ℝ) × ℝ,
+          crossingRawKernel 1
+            (SmoothTopHatApprox.topHatApproxProfile
+              p n hp hp1) z)
+      atTop
+      (nhds
+        (∫ z : (ℝ × ℝ) × ℝ,
+          crossingRawKernel 1
+            (SmoothTopHatApprox.shiftedTopHat p) z)) := by
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (topHatCrossingEnvelope p)
+  · intro n
+    exact
+      (crossingRawKernel_integrable_of_continuous_compact
+        1
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        one_ne_zero
+        (SmoothTopHatApprox.topHatApproxProfile_contDiff
+          p n hp hp1).continuous
+        (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+          p n hp hp1)).aestronglyMeasurable
+  · exact integrable_topHatCrossingEnvelope p
+  · intro n
+    filter_upwards [] with z
+    exact
+      norm_crossingRawKernel_one_le_topHatCrossingEnvelope
+        p hp
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        (SmoothTopHatApprox.topHatApproxProfile_bounds
+          p n hp hp1)
+        (fun x hx =>
+          SmoothTopHatApprox.topHatApproxProfile_support
+            p n hp hp1 x hx)
+        z
+  · filter_upwards [] with z
+    have h0 :=
+      SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 z.2
+    have h1 :=
+      SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 (z.2 + z.1.1)
+    have h2 :=
+      SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 (z.2 + z.1.1 + z.1.2)
+    have h3 :=
+      SmoothTopHatApprox.topHatApproxProfile_tendsto
+        p hp hp1 (z.2 + z.1.2)
+    have hprod := ((h0.mul h1).mul h2).mul h3
+    simpa only [crossingRawKernel, div_one, one_mul, add_assoc] using
+      (tendsto_const_nhds.mul hprod)
+
+/-- The crossing contraction itself reaches its literal sharp-top-hat
+value. -/
+theorem tendsto_crossingFunctional_topHatApprox
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
+    Tendsto
+      (fun n =>
+        crossingFunctional
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1))
+      atTop
+      (nhds
+        (crossingFunctional
+          (SmoothTopHatApprox.shiftedTopHat p))) := by
+  have happ :
+      (fun n =>
+        crossingFunctional
+          (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)) =
+        (fun n =>
+          ∫ z : (ℝ × ℝ) × ℝ,
+            crossingRawKernel 1
+              (SmoothTopHatApprox.topHatApproxProfile
+                p n hp hp1) z) := by
+    funext n
+    symm
+    exact integral_crossingRawKernel_one_eq_crossingFunctional
+      (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+      (crossingRawKernel_integrable_of_continuous_compact
+        1
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        one_ne_zero
+        (SmoothTopHatApprox.topHatApproxProfile_contDiff
+          p n hp hp1).continuous
+        (SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+          p n hp hp1))
+  have hsharp :
+      crossingFunctional
+          (SmoothTopHatApprox.shiftedTopHat p) =
+        ∫ z : (ℝ × ℝ) × ℝ,
+          crossingRawKernel 1
+            (SmoothTopHatApprox.shiftedTopHat p) z := by
+    symm
+    exact integral_crossingRawKernel_one_eq_crossingFunctional
+      (SmoothTopHatApprox.shiftedTopHat p)
+      (integrable_crossingRawKernel_one_shiftedTopHat
+        p hp hp1)
+  rw [happ, hsharp]
+  exact
+    tendsto_integral_crossingRawKernel_topHatApprox
+      p hp hp1
+
 end RH.Zeta85.RSMainTermConvergence
 
 end
