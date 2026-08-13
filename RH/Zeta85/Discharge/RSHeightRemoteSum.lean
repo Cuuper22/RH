@@ -547,4 +547,78 @@ theorem rvm_dyadic_far_height_sum_tendsto_zero
       mul_le_mul_of_nonneg_left hinvle hC0
     exact hraw.trans (by simpa only [C, X] using hbound)
 
+def remoteHeightZeroSet (Z : ZeroConfig) (T D : ℝ) : Set Z.carrier :=
+  {rho | (rho : ℂ).im ≤ T - D ∨ 2 * T + D ≤ (rho : ℂ).im}
+
+theorem remote_height_partial_sum_le_of_local_count
+    {Z : ZeroConfig} {A0 R w T D : ℝ}
+    (hcount : Tail.LocalCount
+      (fun rho : Z.carrier => (rho : ℂ).im)
+        (fun rho : Z.carrier => Z.mult (rho : ℂ)) A0)
+    (hR : 0 < R) (hw : 0 < w) (hw1 : 2 * w ≤ 1)
+    (hT : 0 < T) (hRT : R ≤ 2 * T) (hD : 2 ≤ D)
+    (u : Finset ↥(remoteHeightZeroSet Z T D)) :
+    ∑ rho ∈ u, (Z.mult (rho : Z.carrier) : ℝ) *
+        ‖paperFT (windowAveragedHeightTest R w)
+          (gammaOf (rho : ℂ) / T)‖ ≤
+      (T ^ 4 / (baseHeightKernelMass * R ^ 3)) *
+        baseHeightRemoteDecayConstant *
+          (2 * A0 * D⁻¹ * remoteTailCubicWindowBound T D) := by
+  classical
+  let s : Finset Z.carrier := u.map (Function.Embedding.subtype _)
+  have hs : ∀ rho ∈ s,
+      (rho : ℂ).im ≤ T - D ∨ 2 * T + D ≤ (rho : ℂ).im := by
+    intro rho hrho
+    simp only [s, Finset.mem_map] at hrho
+    obtain ⟨x, hx, rfl⟩ := hrho
+    exact x.property
+  have hraw := remote_height_sum_le_of_local_count
+    hcount hR hw hw1 hT hRT hD s hs
+  calc
+    ∑ rho ∈ u, (Z.mult (rho : Z.carrier) : ℝ) *
+          ‖paperFT (windowAveragedHeightTest R w)
+            (gammaOf (rho : ℂ) / T)‖ =
+        ∑ rho ∈ s, (Z.mult rho : ℝ) *
+          ‖paperFT (windowAveragedHeightTest R w)
+            (gammaOf (rho : ℂ) / T)‖ := by
+      rw [s, Finset.sum_map]
+      rfl
+    _ ≤ _ := hraw
+
+theorem summable_remote_height_scalar_of_local_count
+    {Z : ZeroConfig} {A0 R w T D : ℝ}
+    (hcount : Tail.LocalCount
+      (fun rho : Z.carrier => (rho : ℂ).im)
+        (fun rho : Z.carrier => Z.mult (rho : ℂ)) A0)
+    (hR : 0 < R) (hw : 0 < w) (hw1 : 2 * w ≤ 1)
+    (hT : 0 < T) (hRT : R ≤ 2 * T) (hD : 2 ≤ D) :
+    Summable (fun rho : ↥(remoteHeightZeroSet Z T D) =>
+      (Z.mult (rho : Z.carrier) : ℝ) *
+        ‖paperFT (windowAveragedHeightTest R w)
+          (gammaOf (rho : ℂ) / T)‖) := by
+  apply summable_of_sum_le (fun _ =>
+    mul_nonneg (Nat.cast_nonneg _) (norm_nonneg _))
+  intro u
+  exact remote_height_partial_sum_le_of_local_count
+    hcount hR hw hw1 hT hRT hD u
+
+theorem tsum_remote_height_scalar_le_of_local_count
+    {Z : ZeroConfig} {A0 R w T D : ℝ}
+    (hcount : Tail.LocalCount
+      (fun rho : Z.carrier => (rho : ℂ).im)
+        (fun rho : Z.carrier => Z.mult (rho : ℂ)) A0)
+    (hR : 0 < R) (hw : 0 < w) (hw1 : 2 * w ≤ 1)
+    (hT : 0 < T) (hRT : R ≤ 2 * T) (hD : 2 ≤ D) :
+    (∑' rho : ↥(remoteHeightZeroSet Z T D),
+      (Z.mult (rho : Z.carrier) : ℝ) *
+        ‖paperFT (windowAveragedHeightTest R w)
+          (gammaOf (rho : ℂ) / T)‖) ≤
+      (T ^ 4 / (baseHeightKernelMass * R ^ 3)) *
+        baseHeightRemoteDecayConstant *
+          (2 * A0 * D⁻¹ * remoteTailCubicWindowBound T D) := by
+  exact Real.tsum_le_of_sum_le
+    (fun _ => mul_nonneg (Nat.cast_nonneg _) (norm_nonneg _))
+    (remote_height_partial_sum_le_of_local_count
+      hcount hR hw hw1 hT hRT hD)
+
 end RH.Zeta85.RSPoissonCyclicBridge
