@@ -3344,6 +3344,109 @@ theorem RS1996ZetaInputs.exists_tendsto_topHatApproxQuarticMain
       tendsto_frozenQuarticRSMain_topHatApprox
         p hp hp1 g
 
+
+/-- One slow profile-and-height schedule simultaneously carries all four
+positive degrees to the literal sharp top hat. -/
+theorem RS1996ZetaInputs.exists_tendsto_topHatApproxPositiveDegreeBundle
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (p : ℝ) (hp : 0 < p) (hp1 : p < 1)
+    (g1 : Fin 1 → ℝ → ℂ) (g2 : Fin 2 → ℝ → ℂ)
+    (g3 : Fin 3 → ℝ → ℂ) (g4 : Fin 4 → ℝ → ℂ)
+    (hg1 : ∀ j, ContDiff ℝ ∞ (g1 j) ∧ HasCompactSupport (g1 j))
+    (hg2 : ∀ j, ContDiff ℝ ∞ (g2 j) ∧ HasCompactSupport (g2 j))
+    (hg3 : ∀ j, ContDiff ℝ ∞ (g3 j) ∧ HasCompactSupport (g3 j))
+    (hg4 : ∀ j, ContDiff ℝ ∞ (g4 j) ∧ HasCompactSupport (g4 j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          normalizedPositiveDegreeRSBundle
+            (Z := Z)
+            (SmoothTopHatApprox.topHatApproxProfile
+              p (stage T) hp hp1)
+            g1 g2 g3 g4 T)
+        atTop
+        (nhds
+          (evaluatedPositiveDegreeRSMainBundle
+            (SmoothTopHatApprox.shiftedTopHat p)
+            g1 g2 g3 g4)) := by
+  apply RSBlockMomentBridge.exists_tendsto_slow_diagonal
+    (fun n T =>
+      normalizedPositiveDegreeRSBundle
+        (Z := Z)
+        (SmoothTopHatApprox.topHatApproxProfile
+          p n hp hp1)
+        g1 g2 g3 g4 T)
+    (fun n =>
+      frozenPositiveDegreeRSMainBundle
+        (SmoothTopHatApprox.topHatApproxProfile
+          p n hp hp1)
+        g1 g2 g3 g4)
+    (evaluatedPositiveDegreeRSMainBundle
+      (SmoothTopHatApprox.shiftedTopHat p)
+      g1 g2 g3 g4)
+  · intro n
+    have hcompact :
+        HasCompactSupport
+          (SmoothTopHatApprox.topHatApproxProfile
+            p n hp hp1) :=
+      SmoothTopHatApprox.topHatApproxProfile_hasCompactSupport
+        p n hp hp1
+    have hsmooth :
+        ContDiff ℝ 1
+          (SmoothTopHatApprox.topHatApproxProfile
+            p n hp hp1) :=
+      (SmoothTopHatApprox.topHatApproxProfile_contDiff
+        p n hp hp1).of_le
+          (WithTop.coe_le_coe.2
+            (show (1 : ℕ∞) ≤ ⊤ from le_top))
+    have hsupport :
+        ∀ x,
+          SmoothTopHatApprox.topHatApproxProfile
+              p n hp hp1 x ≠ 0 →
+            (0 : ℝ) ≤ x ∧ x ≤ 1 :=
+      SmoothTopHatApprox.topHatApproxProfile_support
+        p n hp hp1
+    have h1 :=
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenLinearRSStatistic
+        hrs (4999 / 10000 : ℝ)
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        hcompact hsmooth g1 hg1
+    have h2 :=
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenQuadraticRSStatistic
+        hrs
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        hcompact hsmooth hsupport g2 hg2
+    have h3 :=
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenCubicRSStatistic
+        hrs
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        hcompact hsmooth hsupport g3 hg3
+    have h4 :=
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenQuarticRSStatistic
+        hrs
+        (SmoothTopHatApprox.topHatApproxProfile p n hp hp1)
+        hcompact hsmooth hsupport g4 hg4
+    simpa only [normalizedPositiveDegreeRSBundle,
+      frozenPositiveDegreeRSMainBundle] using
+      h1.prodMk_nhds (h2.prodMk_nhds (h3.prodMk_nhds h4))
+  · have h1 :=
+      tendsto_frozenLinearRSMain_topHatApprox
+        (4999 / 10000 : ℝ) (by norm_num)
+        p hp hp1 g1
+    have h2 :=
+      tendsto_frozenQuadraticRSMain_topHatApprox
+        p hp hp1 g2
+    have h3 :=
+      tendsto_frozenCubicRSMain_topHatApprox
+        p hp hp1 g3
+    have h4 :=
+      tendsto_frozenQuarticRSMain_topHatApprox
+        p hp hp1 g4
+    simpa only [frozenPositiveDegreeRSMainBundle,
+      evaluatedPositiveDegreeRSMainBundle] using
+      h1.prodMk_nhds (h2.prodMk_nhds (h3.prodMk_nhds h4))
+
 end RH.Zeta85.RSMainTermConvergence
 
 end
