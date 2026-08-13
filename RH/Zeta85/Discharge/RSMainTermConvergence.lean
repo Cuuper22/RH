@@ -689,7 +689,12 @@ theorem integrable_crossingRawKernel_one_frozen
           · rw [Set.indicator_of_mem
                 (show p ∈ K by
                   exact ⟨⟨⟨hx, hy⟩, hz⟩, hw⟩)]
-            simp [crossingRawKernel, frozenRSProfile, hx, hy, hz, hw]
+            have hz' :
+                p.2 + (p.1.1 + p.1.2) ∈ Icc (0 : ℝ) 1 := by
+              simpa only [add_assoc] using hz
+            simp only [crossingRawKernel, div_one, one_mul, frozenRSProfile]
+            rw [Set.indicator_of_mem hx, Set.indicator_of_mem hy,
+              Set.indicator_of_mem hz', Set.indicator_of_mem hw]
             ring
           · rw [Set.indicator_of_notMem
                 (show p ∉ K by
@@ -700,7 +705,13 @@ theorem integrable_crossingRawKernel_one_frozen
               (show p ∉ K by
                 intro hp
                 exact hz hp.1.2)]
-          simp [crossingRawKernel, frozenRSProfile, hx, hy, hz]
+          have hz' :
+              p.2 + (p.1.1 + p.1.2) ∉ Icc (0 : ℝ) 1 := by
+            simpa only [add_assoc] using hz
+          simp only [crossingRawKernel, div_one, one_mul, frozenRSProfile]
+          rw [Set.indicator_of_mem hx, Set.indicator_of_mem hy,
+            Set.indicator_of_notMem hz']
+          simp
       · rw [Set.indicator_of_notMem
             (show p ∉ K by
               intro hp
