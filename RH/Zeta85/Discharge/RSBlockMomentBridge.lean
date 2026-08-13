@@ -317,7 +317,7 @@ theorem tendsto_uncenteredBlockMoment_zero
 /-- A positive limiting block density forces the literal block dimension
 to be nonzero eventually.  No growth theorem for the ambient zero count is
 needed: if the numerator vanished, the displayed ratio would be zero. -/
-theorem BlockDimensionLimit.eventually_blockDim_ne_zero
+theorem eventually_blockDim_ne_zero_of_limit
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (hdim : BlockDimensionLimit F) :
@@ -360,7 +360,7 @@ theorem uncenteredRSBlockLimits_of_blockDimension_positiveDegree
     (hpositive : PositiveDegreeUncenteredRSBlockLimits F) :
     UncenteredRSBlockLimits F :=
   uncenteredRSBlockLimits_of_positiveDegree
-    hdim.eventually_blockDim_ne_zero hpositive
+    (eventually_blockDim_ne_zero_of_limit hdim) hpositive
 
 /-- At every positive block dimension, finite matrix centering is exactly the
 scalar binomial transform used in formula (28). -/
