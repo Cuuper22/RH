@@ -407,7 +407,8 @@ theorem weightedCyclicSymbol_contDiff
       apply Finset.sum_eq_zero
       intro j hj
       have hjlt : j < j0 := (Finset.mem_filter.mp hj).2
-      have : j.val < 0 := by simpa [j0] using hjlt
+      change j.val < j0.val at hjlt
+      dsimp only [j0] at hjlt
       omega
     rw [hpartial, zero_div, add_zero]
     exact image_eq_zero_of_notMem_tsupport hneg
