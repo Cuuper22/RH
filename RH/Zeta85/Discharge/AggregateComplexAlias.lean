@@ -91,8 +91,15 @@ theorem virtualAliasSum_eq_zero_add_nonzero
         ComplexAliasBridge.virtualComplexAliasTerm T L f z z' m) :=
     (summable_mul_left_iff hL0).1 hscaled
   unfold ComplexAliasBridge.virtualAliasSum
-  simpa only [Finset.sum_singleton, Finset.mem_singleton] using
+  have hsplit :=
     (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
+  have hpred :
+      (fun m : ℤ => m ∉ ({0} : Finset ℤ)) =
+        (fun m : ℤ => m ≠ 0) := by
+    funext m
+    simp
+  rw [hpred] at hsplit
+  simpa only [Finset.sum_singleton] using hsplit
 
 /-- Poisson summation is linear across the finite channel family. -/
 theorem aggregateVirtualFrequencyPairSum_eq_period_mul_aliasSum
