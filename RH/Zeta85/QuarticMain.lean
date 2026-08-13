@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import RH.Zeta85.Discharge.QuarticTransfer
 import RH.Zeta85.Discharge.RSBlockMomentBridge
+import RH.Zeta85.Discharge.RSAnnularDiagonal
 import RH.Zeta85.Discharge.IsometricBlock
 import RH.Zeta85.Discharge.IsometricKernel
 import RH.Zeta85.Discharge.BalancedMixer
