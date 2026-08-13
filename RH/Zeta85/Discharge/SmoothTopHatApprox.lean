@@ -214,12 +214,16 @@ theorem RS1996ZetaInputs.topHatApproxQuartic_evaluated
           (((4999 / 10000 : ℝ) *
             quarticRSScalar (4999 / 10000 : ℝ)
               (topHatApproxProfile p n hp hp1) : ℝ) : ℂ)‖ ≤ C * T := by
+  have hsmooth :
+      ContDiff ℝ 1 (topHatApproxProfile p n hp hp1) := by
+    exact
+      (topHatApproxProfile_contDiff p n hp hp1).of_le
+        (WithTop.coe_le_coe.2
+          (show (1 : ℕ∞) ≤ ⊤ from le_top))
   exact RSPairIntegrals.RS1996ZetaInputs.frozenQuartic_evaluated hrs
     (topHatApproxProfile p n hp hp1)
     (topHatApproxProfile_hasCompactSupport p n hp hp1)
-    (topHatApproxProfile_contDiff p n hp hp1).of_le
-      (WithTop.coe_le_coe.2
-        (show (1 : ℕ∞) ≤ ⊤ from le_top))
+    hsmooth
     (topHatApproxProfile_support p n hp hp1) g hg
 
 end RH.Zeta85.SmoothTopHatApprox
