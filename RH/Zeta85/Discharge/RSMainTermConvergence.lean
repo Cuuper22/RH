@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 
 import RH.Zeta85.Discharge.RSAnnularDiagonal
+import RH.Zeta85.Discharge.QuarticWindowWitnesses
 
 /-!
 # Convergence of annular Rudnick--Sarnak main terms
@@ -938,6 +939,31 @@ theorem RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal_frozenMain
     RSAnnularDiagonal.RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal
       hrs v hv hpos g hg
   exact tendsto_frozenQuarticRSMain_annular v hv hpos g
+
+
+/-- Concrete R-9506 specialization: its rational profile supplies both
+smoothness and strict positivity, so no profile regularity premise remains. -/
+theorem RS1996ZetaInputs.exists_tendsto_v9506_annularQuarticMain
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (g : Fin 4 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          RSBlockMomentBridge.normalizedFrozenQuarticRSStatistic
+            (annularRSProfile QuarticWindowWitnesses.v9506 (stage T))
+            g T)
+        atTop
+        (nhds
+          (RSBlockMomentBridge.frozenQuarticRSMain
+            (frozenRSProfile QuarticWindowWitnesses.v9506) g)) := by
+  exact
+    RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal_frozenMain
+      hrs QuarticWindowWitnesses.v9506
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
+        g hg
 
 end RH.Zeta85.RSMainTermConvergence
 
