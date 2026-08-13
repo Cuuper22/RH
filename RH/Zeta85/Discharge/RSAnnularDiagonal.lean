@@ -105,7 +105,7 @@ theorem RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal
     exact annularRSProfile_hasCompactSupport v n
   · intro n
     exact (annularRSProfile_contDiff v n hv hpos).of_le
-      (by norm_num)
+      (show (1 : ℕ∞ω) ≤ ∞ from mod_cast le_top)
   · intro n x hx
     exact annularRSProfile_support v n x hx
   · exact hg
