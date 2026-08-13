@@ -3447,6 +3447,72 @@ theorem RS1996ZetaInputs.exists_tendsto_topHatApproxPositiveDegreeBundle
       evaluatedPositiveDegreeRSMainBundle] using
       h1.prodMk_nhds (h2.prodMk_nhds (h3.prodMk_nhds h4))
 
+
+/-- Every positive power of the centered sharp top hat has the expected
+whole-line mass. -/
+theorem integral_topHat_pow_whole
+    (p : ℝ) (hp : 0 < p)
+    (k : ℕ) (hk : 0 < k) :
+    (∫ x : ℝ, TopHatMoments.topHat p x ^ k) =
+      p * (1 / p) ^ k := by
+  have heq :
+      (fun x : ℝ => TopHatMoments.topHat p x ^ k) =
+        (TopHatMoments.topHatSupport p).indicator
+          (fun _ => (1 / p) ^ k) := by
+    funext x
+    by_cases hx : x ∈ TopHatMoments.topHatSupport p
+    · simp [TopHatMoments.topHat, hx]
+    · simp [TopHatMoments.topHat, hx, hk.ne']
+  rw [heq, MeasureTheory.integral_indicator_const _
+    measurableSet_Icc]
+  unfold TopHatMoments.topHatSupport
+  rw [Real.volume_real_Icc_of_le (by linarith : -p / 2 ≤ p / 2)]
+  simp only [smul_eq_mul]
+  ring
+
+/-- Translating the sharp top hat onto the RS unit interval preserves every
+positive power integral. -/
+theorem integral_shiftedTopHat_pow
+    (p : ℝ) (hp : 0 < p)
+    (k : ℕ) (hk : 0 < k) :
+    (∫ x : ℝ, SmoothTopHatApprox.shiftedTopHat p x ^ k) =
+      p * (1 / p) ^ k := by
+  calc
+    (∫ x : ℝ,
+        SmoothTopHatApprox.shiftedTopHat p x ^ k) =
+        ∫ x : ℝ,
+          TopHatMoments.topHat p (x - 1 / 2) ^ k := by
+      rfl
+    _ = ∫ x : ℝ, TopHatMoments.topHat p x ^ k := by
+      exact
+        MeasureTheory.integral_sub_right_eq_self
+          (μ := volume)
+          (fun x : ℝ => TopHatMoments.topHat p x ^ k)
+          (1 / 2)
+    _ = p * (1 / p) ^ k :=
+      integral_topHat_pow_whole p hp k hk
+
+/-- The sharp degree-one scalar is exactly bandwidth times the formula-(27)
+uncentered first moment. -/
+theorem linearRSScalar_shiftedTopHat_eq_uncentered
+    (mu p : ℝ) (hp : 0 < p) (hp1 : p < 1) :
+    linearRSScalar mu
+        (SmoothTopHatApprox.shiftedTopHat p) =
+      mu *
+        RSReduction.uncenteredContractionMoment
+          (RSReduction.topHatR3Terms p) mu 1 := by
+  unfold linearRSScalar
+  rw [show
+    (∫ x : ℝ, SmoothTopHatApprox.shiftedTopHat p x) = 1 by
+      have h :=
+        integral_shiftedTopHat_pow p hp 1 (by norm_num)
+      simpa only [pow_one, one_div,
+        mul_inv_cancel₀ hp.ne'] using h]
+  simp only [RSReduction.uncenteredContractionMoment,
+    RSReduction.topHatR3Terms]
+  rw [TopHatMoments.centeredMoment_one hp hp1.le]
+  ring
+
 end RH.Zeta85.RSMainTermConvergence
 
 end
