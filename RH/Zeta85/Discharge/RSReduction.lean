@@ -685,6 +685,194 @@ theorem RS1996ZetaInputs.frozenQuadratic
   refine ⟨hSummable.congr hterm, ?_⟩
   simpa only [tsum_congr hterm, hMain] using hBound
 
+/-- A nonzero degree-three cyclic symbol has at most three
+bandwidths of tangential variation, plus its normal displacement. -/
+theorem weightedCyclicSymbol_k3_l1_bound
+    (mu a b : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : ∀ x, r x ≠ 0 -> a ≤ x ∧ x ≤ b)
+    (xi : Fin 3 -> ℝ)
+    (hPhi : weightedCyclicSymbol (k := 3) mu r xi ≠ 0) :
+    ∑ i : Fin 3, |xi i| ≤
+      3 * mu * (b - a) + |∑ i : Fin 3, xi i| := by
+  let I : ℝ -> ℝ := fun x =>
+    ∏ j : Fin 3, r (x + cyclicPartialSum xi j / mu)
+  have hint : (∫ x : ℝ, I x) ≠ 0 := by
+    intro hz
+    apply hPhi
+    simp [weightedCyclicSymbol, I, hz]
+  have hex : ∃ x : ℝ, I x ≠ 0 := by
+    by_contra hx
+    push_neg at hx
+    apply hint
+    calc
+      (∫ x : ℝ, I x) = ∫ _x : ℝ, (0 : ℝ) := by
+        apply integral_congr_ae
+        filter_upwards [] with x
+        exact hx x
+      _ = 0 := by simp
+  rcases hex with ⟨x, hx⟩
+  have hfactor (j : Fin 3) :
+      r (x + cyclicPartialSum xi j / mu) ≠ 0 := by
+    intro h
+    apply hx
+    dsimp only [I]
+    exact Finset.prod_eq_zero (Finset.mem_univ j) h
+  have hcp1 : cyclicPartialSum xi (1 : Fin 3) = xi 0 := by
+    rw [cyclicPartialSum,
+      show Finset.filter (fun j : Fin 3 => j < (1 : Fin 3))
+          Finset.univ = {0} by decide]
+    simp
+  have hcp2 : cyclicPartialSum xi (2 : Fin 3) = xi 0 + xi 1 := by
+    rw [cyclicPartialSum,
+      show Finset.filter (fun j : Fin 3 => j < (2 : Fin 3))
+          Finset.univ = {0, 1} by decide]
+    simp
+  have hr0 : r x ≠ 0 := by
+    simpa [cyclicPartialSum] using hfactor (0 : Fin 3)
+  have hr1 : r (x + xi 0 / mu) ≠ 0 := by
+    simpa only [hcp1] using hfactor (1 : Fin 3)
+  have hr2 : r (x + (xi 0 + xi 1) / mu) ≠ 0 := by
+    simpa only [hcp2] using hfactor (2 : Fin 3)
+  rcases hr x hr0 with ⟨hx0a, hx0b⟩
+  rcases hr (x + xi 0 / mu) hr1 with ⟨hx1a, hx1b⟩
+  rcases hr (x + (xi 0 + xi 1) / mu) hr2 with ⟨hx2a, hx2b⟩
+  have h0 : |xi 0| ≤ mu * (b - a) := by
+    have hd := abs_sub_le_interval_width hx1a hx1b hx0a hx0b
+    have heq :
+        xi 0 = mu * ((x + xi 0 / mu) - x) := by
+      field_simp [ne_of_gt hmu]
+      ring
+    rw [heq, abs_mul, abs_of_pos hmu]
+    exact mul_le_mul_of_nonneg_left hd hmu.le
+  have h1 : |xi 1| ≤ mu * (b - a) := by
+    have hd := abs_sub_le_interval_width hx2a hx2b hx1a hx1b
+    have heq :
+        xi 1 = mu *
+          ((x + (xi 0 + xi 1) / mu) - (x + xi 0 / mu)) := by
+      field_simp [ne_of_gt hmu]
+      ring
+    rw [heq, abs_mul, abs_of_pos hmu]
+    exact mul_le_mul_of_nonneg_left hd hmu.le
+  have hcycle : |xi 0 + xi 1| ≤ mu * (b - a) := by
+    have hd := abs_sub_le_interval_width hx2a hx2b hx0a hx0b
+    have heq :
+        xi 0 + xi 1 =
+          mu * ((x + (xi 0 + xi 1) / mu) - x) := by
+      field_simp [ne_of_gt hmu]
+      ring
+    rw [heq, abs_mul, abs_of_pos hmu]
+    exact mul_le_mul_of_nonneg_left hd hmu.le
+  have hsum :
+      (∑ i : Fin 3, xi i) = xi 0 + xi 1 + xi 2 := by
+    norm_num [Fin.sum_univ_succ]
+  have hlastEq :
+      xi 2 = (∑ i : Fin 3, xi i) - (xi 0 + xi 1) := by
+    linarith
+  have hlast :
+      |xi 2| ≤ |∑ i : Fin 3, xi i| + mu * (b - a) := by
+    rw [hlastEq]
+    calc
+      |(∑ i : Fin 3, xi i) - (xi 0 + xi 1)| ≤
+          |∑ i : Fin 3, xi i| + |xi 0 + xi 1| := by
+            simpa only [sub_eq_add_neg, abs_neg] using
+              abs_add_le (∑ i : Fin 3, xi i) (-(xi 0 + xi 1))
+      _ ≤ |∑ i : Fin 3, xi i| + mu * (b - a) :=
+        add_le_add (le_refl _) hcycle
+  have habssum :
+      (∑ i : Fin 3, |xi i|) =
+        |xi 0| + |xi 1| + |xi 2| := by
+    norm_num [Fin.sum_univ_succ]
+  rw [habssum]
+  nlinarith
+
+/-- The degree-three cyclic test meets strict RS support whenever its three
+tangential bandwidths and the normal cutoff leave margin below two. -/
+theorem normalCutoffWeightedCyclicSymbol_k3_strictSupport
+    (mu a b eps : ℝ) (r : ℝ -> ℝ) (chi : ℝ -> ℂ)
+    (hmu : 0 < mu)
+    (hr : ∀ x, r x ≠ 0 -> a ≤ x ∧ x ≤ b)
+    (hchi : ∀ s, chi s ≠ 0 -> |s| ≤ eps)
+    (hmargin : 3 * mu * (b - a) + eps < 2) :
+    tsupport
+        (normalCutoffSymbol chi
+          (weightedCyclicSymbol (k := 3) mu r)) ⊆
+      {xi | ∑ i : Fin 3, |xi i| < 2} := by
+  exact normalCutoffSymbol_strictSupport
+    chi (weightedCyclicSymbol (k := 3) mu r)
+    (3 * mu * (b - a)) eps hchi
+    (weightedCyclicSymbol_k3_l1_bound mu a b r hmu hr) hmargin
+
+/-- Every smooth degree-three cyclic profile satisfying the three-bandwidth
+budget has an admissible compact RS extension. -/
+theorem exists_frozenCubicRSTest
+    (mu a b eps : ℝ) (r : ℝ -> ℝ)
+    (hmu : 0 < mu)
+    (hrc : HasCompactSupport r) (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 -> a ≤ x ∧ x ≤ b)
+    (heps : 0 < eps)
+    (hmargin : 3 * mu * (b - a) + eps < 2) :
+    ∃ Phi : (Fin 3 -> ℝ) -> ℂ,
+      ContDiff ℝ 1 Phi ∧
+      tsupport Phi ⊆ {xi | ∑ i : Fin 3, |xi i| < 2} ∧
+      (∀ x : Fin 3 -> ℂ,
+        rsGaugeTest Phi x =
+          rsGaugeTest
+            (weightedCyclicSymbol (k := 3) mu r) x) ∧
+      rsMainTerm Phi =
+        rsMainTerm (weightedCyclicSymbol (k := 3) mu r) := by
+  obtain ⟨chi, hchi0, hchiSmooth, hchiSupport⟩ :=
+    exists_smooth_normalCutoff eps heps
+  refine ⟨normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 3) mu r), ?_, ?_, ?_, ?_⟩
+  · apply normalCutoffSymbol_contDiff
+    · exact hchiSmooth.of_le (by norm_num)
+    · exact weightedCyclicSymbol_contDiff
+        (k := 3) (by norm_num) mu r hrc hrSmooth
+  · exact normalCutoffWeightedCyclicSymbol_k3_strictSupport
+      mu a b eps r chi hmu hrSupport hchiSupport hmargin
+  · intro x
+    exact rsGaugeTest_normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 3) mu r) hchi0 x
+  · exact rsMainTerm_normalCutoffSymbol chi
+      (weightedCyclicSymbol (k := 3) mu r) hchi0
+
+/-- RS Theorem 3.1 applies directly to every fixed admissible degree-three
+cyclic profile. -/
+theorem RS1996ZetaInputs.frozenCubic
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (mu a b eps : ℝ) (r : ℝ -> ℝ)
+    (hmu : 0 < mu)
+    (hrc : HasCompactSupport r) (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 -> a ≤ x ∧ x ≤ b)
+    (heps : 0 < eps)
+    (hmargin : 3 * mu * (b - a) + eps < 2)
+    (g : Fin 3 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 3) mu r) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 3) mu r) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          rsMainTerm
+            (weightedCyclicSymbol (k := 3) mu r)‖ ≤ C * T := by
+  obtain ⟨Phi, hPhiSmooth, hPhiSupport, hGauge, hMain⟩ :=
+    exists_frozenCubicRSTest
+      mu a b eps r hmu hrc hrSmooth hrSupport heps hmargin
+  obtain ⟨C, T0, hC, hT0, hRS⟩ :=
+    hrs.theorem31 2 g Phi hg hPhiSmooth hPhiSupport
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  have hterm (rho : Fin 3 -> Z.carrier) :
+      rsZeroTupleTerm Z g Phi T rho =
+        rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 3) mu r) T rho := by
+    unfold rsZeroTupleTerm
+    rw [hGauge]
+  refine ⟨hSummable.congr hterm, ?_⟩
+  simpa only [tsum_congr hterm, hMain] using hBound
+
 /-- Smooth compactly supported profiles produce a smooth quartic cyclic
 symbol.  The fixed factor at cyclic position zero supplies one compact
 integration domain for every frequency parameter. -/
