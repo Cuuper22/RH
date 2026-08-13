@@ -32,7 +32,7 @@ Unlike PhysicalWindowRegularity, this imposes no channelwise half-period
 support.  Nonzero aliases are allowed and cancel only after channel summation. -/
 structure CollectiveWindowRegularity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (F : QuarticGramFamily Z σ μ p v) : Type where
   commonPeriod : ℝ → ℝ
   supportRadius :
     ∀ T : ℝ, Fin (F.channelCount T) → ℝ
