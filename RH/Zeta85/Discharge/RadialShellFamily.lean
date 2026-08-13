@@ -31,7 +31,7 @@ open AggregateCoordinateFrame
 common modulation period. -/
 structure Data
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (F : QuarticGramFamily Z σ μ p v) : Type where
   commonPeriod : ℝ → ℝ
   supportRadius :
     ∀ T : ℝ, Fin (F.channelCount T) → ℝ
@@ -68,7 +68,7 @@ structure Data
 
 /-- Radial shells derive the collective alias-cancellation regularity with no
 additional analytic premise. -/
-theorem Data.toCollectiveWindowRegularity
+def Data.toCollectiveWindowRegularity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : Data F) :
