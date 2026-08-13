@@ -189,6 +189,65 @@ theorem tendsto_normalized_of_linear_error
       apply lt_of_le_of_lt (le_abs_self _)
       simpa only [Real.dist_eq, sub_zero] using hratio
 
+/-! ## Positive-degree fixed-test normalized limits -/
+
+/-- The normalized all-zero degree-one statistic for one fixed smooth
+profile. -/
+def normalizedFrozenLinearRSStatistic
+    {Z : ZeroConfig} (mu : ℝ) (r : ℝ → ℝ)
+    (g : Fin 1 → ℝ → ℂ) (T : ℝ) : ℂ :=
+  (∑' rho, rsZeroTupleTerm Z g
+      (weightedCyclicSymbol (k := 1) mu r) T rho) /
+    (rsQuarticScale T : ℂ)
+
+/-- The unevaluated fixed-profile degree-one RS main term. -/
+def frozenLinearRSMain
+    (mu : ℝ) (r : ℝ → ℝ) (g : Fin 1 → ℝ → ℂ) : ℂ :=
+  rsHeightFactor g *
+    rsMainTerm (weightedCyclicSymbol (k := 1) mu r)
+
+/-- Every fixed smooth profile has a genuine normalized degree-one limit.
+The published linear error disappears against the extra logarithm in the
+height scale. -/
+theorem RS1996ZetaInputs.tendsto_normalizedFrozenLinearRSStatistic
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (mu : ℝ) (r : ℝ → ℝ)
+    (hrc : HasCompactSupport r) (hrSmooth : ContDiff ℝ 1 r)
+    (g : Fin 1 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    Tendsto
+      (normalizedFrozenLinearRSStatistic (Z := Z) mu r g)
+      atTop (nhds (frozenLinearRSMain mu r g)) := by
+  unfold normalizedFrozenLinearRSStatistic
+  apply tendsto_normalized_of_linear_error
+  obtain ⟨C, T0, hC, _hT0, hRS⟩ :=
+    RSReduction.RS1996ZetaInputs.frozenLinear
+      hrs mu r hrc hrSmooth g hg
+  refine ⟨C, T0, hC, ?_⟩
+  intro T hT
+  have hbound := (hRS T hT).2
+  convert hbound using 1 <;>
+    simp only [frozenLinearRSMain, rsQuarticScale] <;>
+    ring
+
+/-- The degree-one main term is the profile mass times the bandwidth. -/
+theorem frozenLinearRSMain_eq
+    (mu : ℝ) (r : ℝ → ℝ) (g : Fin 1 → ℝ → ℂ)
+    (hmu : 0 < mu) :
+    frozenLinearRSMain mu r g =
+      rsHeightFactor g * ((mu * (∫ x : ℝ, r x) : ℝ) : ℂ) := by
+  unfold frozenLinearRSMain
+  have hnorm :=
+    RSPairIntegrals.normalizedRSMainTerm_k1 mu r hmu
+  unfold RSPairIntegrals.normalizedRSMainTerm at hnorm
+  have hmuC : (mu : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr hmu.ne'
+  have hmain :=
+    (div_eq_iff hmuC).mp hnorm
+  rw [hmain]
+  push_cast
+  ring
+
 /-- The normalized all-zero four-point statistic for one fixed smooth
 profile. -/
 def normalizedFrozenQuarticRSStatistic
