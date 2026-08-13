@@ -443,4 +443,100 @@ theorem remoteRSCyclicFourNormSum_le
   rw [remoteRSCyclicFourNormSum_eq s remote r hmu hrcont hrcompact]
   exact mul_le_mul_of_nonneg_left hcycle (pow_nonneg hmu.le 4)
 
+def smoothTopHatSobolevMassFour (p w : ℝ) : ℝ :=
+  (∫ u, ‖(RSReduction.smoothTopHat p w u : ℂ)‖) +
+    ∫ u, ‖derivFour
+      (fun x => (RSReduction.smoothTopHat p w x : ℂ)) u‖
+
+theorem rsCyclicFourKernel_smoothTopHat_weighted_gap_le
+    {Z : ZeroConfig} {mu p w T : ℝ}
+    (hmu : 0 < mu) (hT : 1 ≤ T)
+    (hw : 0 < w) (hwp : 2 * w ≤ p)
+    (rho rho' : Z.carrier) :
+    rsCyclicFourKernel mu T (RSReduction.smoothTopHat p w)
+        (rho : ℂ) (rho' : ℂ) *
+      (1 + (mu * Real.log T *
+        ((rho' : ℂ).im - (rho : ℂ).im)) ^ 4) ≤
+      Real.exp ((mu * Real.log T) * (p / 2)) *
+        smoothTopHatSobolevMassFour p w := by
+  have hp : 0 < p := by linarith
+  have hlog : 0 ≤ Real.log T := Real.log_nonneg hT
+  have hscale : 0 ≤ mu * Real.log T := mul_nonneg hmu.le hlog
+  have hf : ContDiff ℝ 4
+      (fun x => (RSReduction.smoothTopHat p w x : ℂ)) := by
+    change ContDiff ℝ 4
+      (Complex.ofRealCLM ∘ RSReduction.smoothTopHat p w)
+    exact (Complex.ofRealCLM.contDiff.comp
+      (RSReduction.smoothTopHat_contDiff hw hwp)).of_le (by
+        exact (WithTop.coe_le_coe).2
+          (show (4 : ℕ∞) ≤ ⊤ from le_top))
+  have hsupp : ∀ u,
+      (RSReduction.smoothTopHat p w u : ℂ) ≠ 0 → |u| ≤ p / 2 := by
+    intro u hu
+    have hur : RSReduction.smoothTopHat p w u ≠ 0 := by
+      simpa only [Complex.ofReal_ne_zero] using hu
+    have hus := RSReduction.smoothTopHat_support hw hur
+    unfold TopHatMoments.topHatSupport at hus
+    change -p / 2 ≤ u ∧ u ≤ p / 2 at hus
+    rw [abs_le]
+    constructor <;> linarith [hus.1, hus.2]
+  let z : ℂ := ((mu * Real.log T : ℝ) : ℂ) *
+    (gammaOf (rho' : ℂ) - gammaOf (rho : ℂ))
+  have hstrip : 0 ≤ (rho : ℂ).re ∧ (rho : ℂ).re ≤ 1 :=
+    Z.strip (rho : ℂ) rho.property
+  have hstrip' : 0 ≤ (rho' : ℂ).re ∧ (rho' : ℂ).re ≤ 1 :=
+    Z.strip (rho' : ℂ) rho'.property
+  have himdiff :
+      (gammaOf (rho' : ℂ) - gammaOf (rho : ℂ)).im =
+        (rho : ℂ).re - (rho' : ℂ).re := by
+    simp [gammaOf, Complex.div_I]
+  have hrediff :
+      (gammaOf (rho' : ℂ) - gammaOf (rho : ℂ)).re =
+        (rho' : ℂ).im - (rho : ℂ).im := by
+    simp [gammaOf, Complex.div_I]
+    ring
+  have hdiff : |(rho : ℂ).re - (rho' : ℂ).re| ≤ 1 := by
+    rw [abs_le]
+    constructor <;> linarith
+  have him : |z.im| ≤ mu * Real.log T := by
+    dsimp only [z]
+    rw [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im,
+      zero_mul, add_zero, himdiff, abs_mul, abs_of_nonneg hscale]
+    nlinarith [mul_le_mul_of_nonneg_left hdiff hscale]
+  have hre : z.re = mu * Real.log T *
+      ((rho' : ℂ).im - (rho : ℂ).im) := by
+    dsimp only [z]
+    rw [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im,
+      zero_mul, sub_zero, hrediff]
+  have hbound := paperFT_horizontal_decay_four_uniform
+    hf hsupp (by linarith) hscale z him 0
+  rw [sub_zero, hre] at hbound
+  simpa only [rsCyclicFourKernel, smoothTopHatSobolevMassFour, z,
+    Complex.ofReal_zero, sub_zero] using hbound
+
+theorem rsCyclicFourKernel_smoothTopHat_le
+    {Z : ZeroConfig} {mu p w T : ℝ}
+    (hmu : 0 < mu) (hT : 1 ≤ T)
+    (hw : 0 < w) (hwp : 2 * w ≤ p)
+    (rho rho' : Z.carrier) :
+    rsCyclicFourKernel mu T (RSReduction.smoothTopHat p w)
+        (rho : ℂ) (rho' : ℂ) ≤
+      Real.exp ((mu * Real.log T) * (p / 2)) *
+        smoothTopHatSobolevMassFour p w := by
+  let K := rsCyclicFourKernel mu T (RSReduction.smoothTopHat p w)
+    (rho : ℂ) (rho' : ℂ)
+  let d := mu * Real.log T * ((rho' : ℂ).im - (rho : ℂ).im)
+  have hweighted := rsCyclicFourKernel_smoothTopHat_weighted_gap_le
+    hmu hT hw hwp rho rho'
+  have hK0 : 0 ≤ K := by
+    dsimp only [K, rsCyclicFourKernel]
+    exact norm_nonneg _
+  have hfactor : 1 ≤ 1 + d ^ 4 := by
+    nlinarith [sq_nonneg (d ^ 2)]
+  calc
+    K ≤ K * (1 + d ^ 4) := by nlinarith
+    _ ≤ Real.exp ((mu * Real.log T) * (p / 2)) *
+        smoothTopHatSobolevMassFour p w := by
+      simpa only [K, d] using hweighted
+
 end RH.Zeta85.RSPoissonCyclicBridge
