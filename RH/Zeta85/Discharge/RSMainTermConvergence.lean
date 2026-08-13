@@ -838,6 +838,107 @@ theorem tendsto_crossingFunctional_annular
   rw [hann, hfrozen]
   exact tendsto_integral_crossingRawKernel_annular v hv hpos
 
+
+/-- All five component limits assemble into convergence of the complete
+quartic Rudnick--Sarnak scalar. -/
+theorem tendsto_quarticRSScalar_annular
+    (mu : ℝ) (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n => quarticRSScalar mu (annularRSProfile v n))
+      atTop
+      (nhds (quarticRSScalar mu (frozenRSProfile v))) := by
+  have hfour :=
+    tendsto_integral_annularRSProfile_pow_four v hv hpos
+  have h31 :=
+    tendsto_distanceIntegral_annularRSProfile_pows
+      v hv hpos 3 1 (by norm_num) (by norm_num)
+  have h22 :=
+    tendsto_distanceIntegral_annularRSProfile_pows
+      v hv hpos 2 2 (by norm_num) (by norm_num)
+  have hpair :=
+    tendsto_pairSquaredPotentialIntegral_annular v hv hpos
+  have hcross :=
+    tendsto_crossingFunctional_annular v hv hpos
+  unfold quarticRSScalar
+  exact
+    ((hfour.add
+      (tendsto_const_nhds.mul
+        ((tendsto_const_nhds.mul h31).add
+          (tendsto_const_nhds.mul h22)))).add
+      (tendsto_const_nhds.mul
+        ((tendsto_const_nhds.mul hpair).add hcross)))
+
+/-- The fixed-profile complex main term follows the same annular limit. -/
+theorem tendsto_frozenQuarticRSMain_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (g : Fin 4 → ℝ → ℂ) :
+    Tendsto
+      (fun n =>
+        RSBlockMomentBridge.frozenQuarticRSMain
+          (annularRSProfile v n) g)
+      atTop
+      (nhds
+        (RSBlockMomentBridge.frozenQuarticRSMain
+          (frozenRSProfile v) g)) := by
+  have hscalar :=
+    tendsto_quarticRSScalar_annular
+      (4999 / 10000 : ℝ) v hv hpos
+  have hreal :
+      Tendsto
+        (fun n =>
+          (4999 / 10000 : ℝ) *
+            quarticRSScalar (4999 / 10000 : ℝ)
+              (annularRSProfile v n))
+        atTop
+        (nhds
+          ((4999 / 10000 : ℝ) *
+            quarticRSScalar (4999 / 10000 : ℝ)
+              (frozenRSProfile v))) :=
+    tendsto_const_nhds.mul hscalar
+  have hcast :
+      Tendsto
+        (fun n =>
+          (((4999 / 10000 : ℝ) *
+            quarticRSScalar (4999 / 10000 : ℝ)
+              (annularRSProfile v n) : ℝ) : ℂ))
+        atTop
+        (nhds
+          ((((4999 / 10000 : ℝ) *
+            quarticRSScalar (4999 / 10000 : ℝ)
+              (frozenRSProfile v) : ℝ) : ℂ))) := by
+    simpa only [Complex.ofRealCLM_apply] using
+      (Complex.ofRealCLM.continuous.tendsto _).comp hreal
+  unfold RSBlockMomentBridge.frozenQuarticRSMain
+  exact tendsto_const_nhds.mul hcast
+
+/-- The scalar bridge required by the slow RS diagonal is now discharged
+for the explicit annular profiles. -/
+theorem RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal_frozenMain
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (g : Fin 4 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          RSBlockMomentBridge.normalizedFrozenQuarticRSStatistic
+            (annularRSProfile v (stage T)) g T)
+        atTop
+        (nhds
+          (RSBlockMomentBridge.frozenQuarticRSMain
+            (frozenRSProfile v) g)) := by
+  apply
+    RSAnnularDiagonal.RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal
+      hrs v hv hpos g hg
+  exact tendsto_frozenQuarticRSMain_annular v hv hpos g
+
 end RH.Zeta85.RSMainTermConvergence
 
 end
