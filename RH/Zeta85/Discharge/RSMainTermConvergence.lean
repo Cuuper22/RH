@@ -535,6 +535,309 @@ theorem tendsto_pairSquaredPotentialIntegral_annular
         ((tendsto_pairDistancePotential_annular
           v hv hpos x).pow 2)
 
+
+/-- Pointwise annular convergence away from the three exceptional points. -/
+theorem tendsto_annularRSProfile_of_ne
+    (v : ℝ → ℝ)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (x : ℝ) (hx0 : x ≠ 0)
+    (hxmid : x ≠ 1 / 2) (hx1 : x ≠ 1) :
+    Tendsto (fun n => annularRSProfile v n x)
+      atTop (nhds (frozenRSProfile v x)) := by
+  have hboundary : |x - 1 / 2| ≠ (1 : ℝ) / 2 := by
+    intro h
+    rcases (abs_eq (by norm_num : 0 ≤ (1 / 2 : ℝ))).mp h with h | h
+    · apply hx1
+      linarith
+    · apply hx0
+      linarith
+  have ht :=
+    tendsto_shrinkingProfileShellWindow_sq
+      v 1 (by norm_num) hpos (x - 1 / 2)
+        (sub_ne_zero.mpr hxmid) hboundary
+  simpa [annularRSProfile, frozenRSProfile_eq_supported] using ht
+
+/-- Adding a continuous shift to the last coordinate preserves avoidance
+of every single exceptional value almost everywhere. -/
+theorem ae_ne_add_continuous_shift
+    (s : ℝ × ℝ → ℝ) (hs : Continuous s) (c : ℝ) :
+    ∀ᵐ p : (ℝ × ℝ) × ℝ ∂volume,
+      p.2 + s p.1 ≠ c := by
+  rw [Measure.volume_eq_prod]
+  refine (Measure.ae_prod_iff_ae_ae ?_).2 ?_
+  · change MeasurableSet
+      ({p : (ℝ × ℝ) × ℝ | p.2 + s p.1 = c}ᶜ)
+    exact
+      (isClosed_eq
+        (continuous_snd.add (hs.comp continuous_fst))
+        continuous_const).measurableSet.compl
+  · filter_upwards [] with uv
+    filter_upwards [volume.ae_ne (c - s uv)] with x hx
+    intro heq
+    apply hx
+    linarith
+
+/-- Annular convergence may therefore be pulled through any such affine
+coordinate of the three-variable crossing kernel. -/
+theorem ae_tendsto_annularRSProfile_add_shift
+    (v : ℝ → ℝ)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (s : ℝ × ℝ → ℝ) (hs : Continuous s) :
+    ∀ᵐ p : (ℝ × ℝ) × ℝ ∂volume,
+      Tendsto
+        (fun n => annularRSProfile v n (p.2 + s p.1))
+        atTop
+        (nhds (frozenRSProfile v (p.2 + s p.1))) := by
+  filter_upwards [
+    ae_ne_add_continuous_shift s hs 0,
+    ae_ne_add_continuous_shift s hs (1 / 2),
+    ae_ne_add_continuous_shift s hs 1
+  ] with p h0 hmid h1
+  exact tendsto_annularRSProfile_of_ne
+    v hpos (p.2 + s p.1) h0 hmid h1
+
+/-- The frozen crossing kernel is integrable.  Its four cutoff conditions
+form a closed subset of a compact box in the raw crossing coordinates. -/
+theorem integrable_crossingRawKernel_one_frozen
+    (v : ℝ → ℝ) (hv : ContDiff ℝ ∞ v) :
+    Integrable (crossingRawKernel 1 (frozenRSProfile v)) := by
+  let A0 : Set ((ℝ × ℝ) × ℝ) :=
+    (fun p => p.2) ⁻¹' Icc (0 : ℝ) 1
+  let A1 : Set ((ℝ × ℝ) × ℝ) :=
+    (fun p => p.2 + p.1.1) ⁻¹' Icc (0 : ℝ) 1
+  let A2 : Set ((ℝ × ℝ) × ℝ) :=
+    (fun p => p.2 + p.1.1 + p.1.2) ⁻¹' Icc (0 : ℝ) 1
+  let A3 : Set ((ℝ × ℝ) × ℝ) :=
+    (fun p => p.2 + p.1.2) ⁻¹' Icc (0 : ℝ) 1
+  let K : Set ((ℝ × ℝ) × ℝ) := A0 ∩ A1 ∩ A2 ∩ A3
+  have hKclosed : IsClosed K := by
+    exact
+      (((isClosed_Icc.preimage (by fun_prop)).inter
+        (isClosed_Icc.preimage (by fun_prop))).inter
+        (isClosed_Icc.preimage (by fun_prop))).inter
+        (isClosed_Icc.preimage (by fun_prop))
+  have hKsubset :
+      K ⊆
+        ((Icc (-(1 : ℝ)) 1 ×ˢ Icc (-(1 : ℝ)) 1) ×ˢ
+          Icc (0 : ℝ) 1) := by
+    intro p hp
+    simp only [K, A0, A1, A2, A3, mem_inter_iff,
+      mem_preimage, mem_Icc] at hp
+    rcases hp with ⟨⟨⟨hx, hy⟩, hz⟩, hw⟩
+    simp only [mem_prod, mem_Icc]
+    refine ⟨⟨?_, ?_⟩, hx⟩
+    · constructor <;> linarith [hx.1, hx.2, hy.1, hy.2]
+    · constructor <;> linarith [hx.1, hx.2, hw.1, hw.2]
+  have hKcompact : IsCompact K :=
+    ((isCompact_Icc.prod isCompact_Icc).prod isCompact_Icc).of_isClosed_subset
+      hKclosed hKsubset
+  have heq :
+      crossingRawKernel 1 (frozenRSProfile v) =
+        K.indicator
+          (fun p : (ℝ × ℝ) × ℝ =>
+            |p.1.1| * |p.1.2| *
+              (v (p.2 - 1 / 2) *
+                v (p.2 + p.1.1 - 1 / 2) *
+                v (p.2 + p.1.1 + p.1.2 - 1 / 2) *
+                v (p.2 + p.1.2 - 1 / 2))) := by
+    funext p
+    by_cases hx : p.2 ∈ Icc (0 : ℝ) 1 <;>
+      by_cases hy : p.2 + p.1.1 ∈ Icc (0 : ℝ) 1 <;>
+      by_cases hz : p.2 + p.1.1 + p.1.2 ∈ Icc (0 : ℝ) 1 <;>
+      by_cases hw : p.2 + p.1.2 ∈ Icc (0 : ℝ) 1 <;>
+      simp [crossingRawKernel, frozenRSProfile, K, A0, A1, A2, A3,
+        hx, hy, hz, hw] <;> ring
+  rw [heq, integrable_indicator_iff hKclosed.measurableSet]
+  have hvcont : Continuous v := hv.continuous
+  have hc :
+      Continuous
+        (fun p : (ℝ × ℝ) × ℝ =>
+          |p.1.1| * |p.1.2| *
+            (v (p.2 - 1 / 2) *
+              v (p.2 + p.1.1 - 1 / 2) *
+              v (p.2 + p.1.1 + p.1.2 - 1 / 2) *
+              v (p.2 + p.1.2 - 1 / 2))) := by
+    fun_prop
+  exact hc.continuousOn.integrableOn_compact hKcompact
+
+/-- The raw crossing kernel converges in integral from the smooth annular
+profiles to the frozen cutoff profile. -/
+theorem tendsto_integral_crossingRawKernel_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n =>
+        ∫ p : (ℝ × ℝ) × ℝ,
+          crossingRawKernel 1 (annularRSProfile v n) p)
+      atTop
+      (nhds
+        (∫ p : (ℝ × ℝ) × ℝ,
+          crossingRawKernel 1 (frozenRSProfile v) p)) := by
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (crossingRawKernel 1 (frozenRSProfile v))
+  · intro n
+    exact
+      (crossingRawKernel_integrable_of_continuous_compact
+        1 (annularRSProfile v n) one_ne_zero
+        (annularRSProfile_contDiff v n hv hpos).continuous
+        (annularRSProfile_hasCompactSupport v n)).aestronglyMeasurable
+  · exact integrable_crossingRawKernel_one_frozen v hv
+  · intro n
+    filter_upwards [] with p
+    have hx :=
+      annularRSProfile_le_frozen v n hpos p.2
+    have hy :=
+      annularRSProfile_le_frozen v n hpos (p.2 + p.1.1)
+    have hz :=
+      annularRSProfile_le_frozen v n hpos
+        (p.2 + p.1.1 + p.1.2)
+    have hw :=
+      annularRSProfile_le_frozen v n hpos (p.2 + p.1.2)
+    have hxy :
+        annularRSProfile v n p.2 *
+            annularRSProfile v n (p.2 + p.1.1) ≤
+          frozenRSProfile v p.2 *
+            frozenRSProfile v (p.2 + p.1.1) :=
+      mul_le_mul hx.2 hy.2 hy.1
+        (frozenRSProfile_nonneg v hpos p.2)
+    have hxyz :
+        annularRSProfile v n p.2 *
+              annularRSProfile v n (p.2 + p.1.1) *
+              annularRSProfile v n (p.2 + p.1.1 + p.1.2) ≤
+          frozenRSProfile v p.2 *
+              frozenRSProfile v (p.2 + p.1.1) *
+              frozenRSProfile v (p.2 + p.1.1 + p.1.2) :=
+      mul_le_mul hxy hz.2 hz.1
+        (mul_nonneg
+          (frozenRSProfile_nonneg v hpos p.2)
+          (frozenRSProfile_nonneg v hpos (p.2 + p.1.1)))
+    have hall :
+        annularRSProfile v n p.2 *
+              annularRSProfile v n (p.2 + p.1.1) *
+              annularRSProfile v n (p.2 + p.1.1 + p.1.2) *
+              annularRSProfile v n (p.2 + p.1.2) ≤
+          frozenRSProfile v p.2 *
+              frozenRSProfile v (p.2 + p.1.1) *
+              frozenRSProfile v (p.2 + p.1.1 + p.1.2) *
+              frozenRSProfile v (p.2 + p.1.2) :=
+      mul_le_mul hxyz hw.2 hw.1
+        (mul_nonneg
+          (mul_nonneg
+            (frozenRSProfile_nonneg v hpos p.2)
+            (frozenRSProfile_nonneg v hpos (p.2 + p.1.1)))
+          (frozenRSProfile_nonneg v hpos
+            (p.2 + p.1.1 + p.1.2)))
+    have hkernelNonneg :
+        0 ≤ crossingRawKernel 1 (annularRSProfile v n) p := by
+      simp only [crossingRawKernel, div_one, one_mul]
+      positivity
+    rw [Real.norm_eq_abs, abs_of_nonneg hkernelNonneg]
+    simpa only [crossingRawKernel, div_one, one_mul] using
+      mul_le_mul_of_nonneg_left hall
+        (mul_nonneg abs_nonneg abs_nonneg)
+  · have hx :=
+      ae_tendsto_annularRSProfile_add_shift
+        v hpos (fun _ => 0) (by fun_prop)
+    have hy :=
+      ae_tendsto_annularRSProfile_add_shift
+        v hpos (fun uv => uv.1) (by fun_prop)
+    have hz :=
+      ae_tendsto_annularRSProfile_add_shift
+        v hpos (fun uv => uv.1 + uv.2) (by fun_prop)
+    have hw :=
+      ae_tendsto_annularRSProfile_add_shift
+        v hpos (fun uv => uv.2) (by fun_prop)
+    filter_upwards [hx, hy, hz, hw] with p hx hy hz hw
+    have hprod := ((hx.mul hy).mul hz).mul hw
+    simpa only [crossingRawKernel, div_one, one_mul, add_zero] using
+      (tendsto_const_nhds.mul hprod)
+
+/-- For every integrable profile, the raw kernel at unit scale is exactly
+the displayed crossing functional. -/
+theorem integral_crossingRawKernel_one_eq_crossingFunctional
+    (r : ℝ → ℝ)
+    (hint : Integrable (crossingRawKernel 1 r)) :
+    (∫ p : (ℝ × ℝ) × ℝ, crossingRawKernel 1 r p) =
+      crossingFunctional r := by
+  have hiter :
+      (∫ p : (ℝ × ℝ) × ℝ, crossingRawKernel 1 r p) =
+        ∫ uv : ℝ × ℝ, ∫ x : ℝ,
+          crossingRawKernel 1 r (uv, x) := by
+    rw [Measure.volume_eq_prod, integral_prod _ hint]
+  have hcoordinate :
+      twoPairCoordinateIntegral (crossingTwoPairCore 1 r) =
+        ∫ uv : ℝ × ℝ, ∫ x : ℝ,
+          crossingRawKernel 1 r (uv, x) := by
+    unfold twoPairCoordinateIntegral crossingTwoPairCore
+    apply integral_congr_ae
+    filter_upwards [] with uv
+    calc
+      |uv.1| * |uv.2| *
+            (1 * ∫ x : ℝ,
+              r x * r (x + uv.1 / 1) *
+                r (x + (uv.1 + uv.2) / 1) *
+                r (x + uv.2 / 1)) =
+          (|uv.1| * |uv.2| * 1) *
+            ∫ x : ℝ,
+              r x * r (x + uv.1 / 1) *
+                r (x + (uv.1 + uv.2) / 1) *
+                r (x + uv.2 / 1) := by ring
+      _ = ∫ x : ℝ, (|uv.1| * |uv.2| * 1) *
+            (r x * r (x + uv.1 / 1) *
+              r (x + (uv.1 + uv.2) / 1) *
+              r (x + uv.2 / 1)) := by
+        rw [integral_const_mul]
+      _ = ∫ x : ℝ, crossingRawKernel 1 r (uv, x) := by
+        apply integral_congr_ae
+        filter_upwards [] with x
+        simp only [crossingRawKernel]
+        ring
+  calc
+    (∫ p : (ℝ × ℝ) × ℝ, crossingRawKernel 1 r p) =
+        ∫ uv : ℝ × ℝ, ∫ x : ℝ,
+          crossingRawKernel 1 r (uv, x) := hiter
+    _ = twoPairCoordinateIntegral (crossingTwoPairCore 1 r) :=
+      hcoordinate.symm
+    _ = crossingFunctional r := by
+      simpa using
+        crossingTwoPairCoordinateIntegral_eq
+          1 r zero_lt_one hint
+
+/-- The crossing functional itself therefore converges to the literal
+frozen-profile value. -/
+theorem tendsto_crossingFunctional_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n => crossingFunctional (annularRSProfile v n))
+      atTop
+      (nhds (crossingFunctional (frozenRSProfile v))) := by
+  have hann :
+      (fun n => crossingFunctional (annularRSProfile v n)) =
+        (fun n =>
+          ∫ p : (ℝ × ℝ) × ℝ,
+            crossingRawKernel 1 (annularRSProfile v n) p) := by
+    funext n
+    symm
+    exact integral_crossingRawKernel_one_eq_crossingFunctional
+      (annularRSProfile v n)
+      (crossingRawKernel_integrable_of_continuous_compact
+        1 (annularRSProfile v n) one_ne_zero
+        (annularRSProfile_contDiff v n hv hpos).continuous
+        (annularRSProfile_hasCompactSupport v n))
+  have hfrozen :
+      crossingFunctional (frozenRSProfile v) =
+        ∫ p : (ℝ × ℝ) × ℝ,
+          crossingRawKernel 1 (frozenRSProfile v) p := by
+    symm
+    exact integral_crossingRawKernel_one_eq_crossingFunctional
+      (frozenRSProfile v)
+      (integrable_crossingRawKernel_one_frozen v hv)
+  rw [hann, hfrozen]
+  exact tendsto_integral_crossingRawKernel_annular v hv hpos
+
 end RH.Zeta85.RSMainTermConvergence
 
 end
