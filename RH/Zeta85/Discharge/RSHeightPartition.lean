@@ -154,6 +154,38 @@ theorem outerHeightProfile_eq_smooth_add_edge (d w x : ℝ) :
   unfold dyadicEdgeRemainder
   ring
 
+theorem dualHeightProfile_add
+    {H K : ℝ → ℝ} (hH : Continuous H) (hHc : HasCompactSupport H)
+    (hK : Continuous K) (hKc : HasCompactSupport K) (u : ℝ) :
+    dualHeightProfile (H + K) u = dualHeightProfile H u + dualHeightProfile K u := by
+  unfold dualHeightProfile paperFT
+  have hHi : Integrable (fun x : ℝ => (H x : ℂ) *
+      Complex.exp (Complex.I * (-u : ℂ) * (x : ℂ))) :=
+    ((Complex.continuous_ofReal.comp hH).mul (by fun_prop)).integrable_of_hasCompactSupport
+      ((hHc.comp_left Complex.ofReal_zero).mul_right)
+  have hKi : Integrable (fun x : ℝ => (K x : ℂ) *
+      Complex.exp (Complex.I * (-u : ℂ) * (x : ℂ))) :=
+    ((Complex.continuous_ofReal.comp hK).mul (by fun_prop)).integrable_of_hasCompactSupport
+      ((hKc.comp_left Complex.ofReal_zero).mul_right)
+  rw [show (fun x : ℝ => ((H + K) x : ℂ) *
+      Complex.exp (Complex.I * (-u : ℂ) * (x : ℂ))) =
+      fun x => (H x : ℂ) * Complex.exp (Complex.I * (-u : ℂ) * (x : ℂ)) +
+        (K x : ℂ) * Complex.exp (Complex.I * (-u : ℂ) * (x : ℂ)) by
+        funext x
+        simp only [Pi.add_apply]
+        push_cast
+        ring]
+  exact integral_add hHi hKi
+
+theorem averagedHeightTestOf_add
+    {H K : ℝ → ℝ} (hH : Continuous H) (hHc : HasCompactSupport H)
+    (hK : Continuous K) (hKc : HasCompactSupport K) (R u : ℝ) :
+    averagedHeightTestOf (H + K) R u =
+      averagedHeightTestOf H R u + averagedHeightTestOf K R u := by
+  unfold averagedHeightTestOf
+  rw [dualHeightProfile_add hH hHc hK hKc]
+  ring
+
 theorem dyadicEdgeRemainder_continuous
     {d w : ℝ} (hd : 0 < d) (hw : 0 < w) (hw1 : 2 * w ≤ 1) :
     Continuous (dyadicEdgeRemainder d w) :=
@@ -166,6 +198,111 @@ theorem dyadicEdgeRemainder_hasCompactSupport
   unfold dyadicEdgeRemainder
   exact (outerHeightProfile_hasCompactSupport hd).sub
     (smoothHeightWindow_hasCompactSupport hw)
+
+theorem averagedHeightTestOf_outer_eq_core_add_edge
+    {d w : ℝ} (hd : 0 < d) (hw : 0 < w) (hw1 : 2 * w ≤ 1) (R u : ℝ) :
+    averagedHeightTestOf (outerHeightProfile d) R u =
+      averagedHeightTestOf (smoothHeightWindow w) R u +
+        averagedHeightTestOf (dyadicEdgeRemainder d w) R u := by
+  have hfun : outerHeightProfile d =
+      smoothHeightWindow w + dyadicEdgeRemainder d w := by
+    funext x
+    exact outerHeightProfile_eq_smooth_add_edge d w x
+  rw [hfun, averagedHeightTestOf_add
+    (smoothHeightWindow_contDiff hw hw1).continuous
+    (smoothHeightWindow_hasCompactSupport hw)
+    (dyadicEdgeRemainder_continuous hd hw hw1)
+    (dyadicEdgeRemainder_hasCompactSupport hd hw)]
+
+theorem paperFT_add_of_continuous_compact
+    {f g : ℝ → ℂ} (hf : Continuous f) (hfc : HasCompactSupport f)
+    (hg : Continuous g) (hgc : HasCompactSupport g) (z : ℂ) :
+    paperFT (f + g) z = paperFT f z + paperFT g z := by
+  unfold paperFT
+  have hfi : Integrable (fun x : ℝ => f x *
+      Complex.exp (Complex.I * z * (x : ℂ))) :=
+    (hf.mul (by fun_prop)).integrable_of_hasCompactSupport hfc.mul_right
+  have hgi : Integrable (fun x : ℝ => g x *
+      Complex.exp (Complex.I * z * (x : ℂ))) :=
+    (hg.mul (by fun_prop)).integrable_of_hasCompactSupport hgc.mul_right
+  rw [show (fun x : ℝ => (f + g) x *
+      Complex.exp (Complex.I * z * (x : ℂ))) =
+      fun x => f x * Complex.exp (Complex.I * z * (x : ℂ)) +
+        g x * Complex.exp (Complex.I * z * (x : ℂ)) by
+        funext x
+        simp only [Pi.add_apply]
+        ring]
+  exact integral_add hfi hgi
+
+theorem paperFT_averagedHeightTestOf_outer_eq_core_add_edge
+    {d w R : ℝ} (hd : 0 < d) (hw : 0 < w) (hw1 : 2 * w ≤ 1)
+    (hR : 0 < R) (z : ℂ) :
+    paperFT (averagedHeightTestOf (outerHeightProfile d) R) z =
+      paperFT (averagedHeightTestOf (smoothHeightWindow w) R) z +
+        paperFT (averagedHeightTestOf (dyadicEdgeRemainder d w) R) z := by
+  have heq : averagedHeightTestOf (outerHeightProfile d) R =
+      averagedHeightTestOf (smoothHeightWindow w) R +
+        averagedHeightTestOf (dyadicEdgeRemainder d w) R := by
+    funext u
+    exact averagedHeightTestOf_outer_eq_core_add_edge hd hw hw1 R u
+  rw [heq]
+  exact paperFT_add_of_continuous_compact
+    (averagedHeightTestOf_contDiff
+      (smoothHeightWindow_contDiff hw hw1).continuous
+      (smoothHeightWindow_hasCompactSupport hw) hR).continuous
+    (averagedHeightTestOf_hasCompactSupport _ hR)
+    (averagedHeightTestOf_contDiff
+      (dyadicEdgeRemainder_continuous hd hw hw1)
+      (dyadicEdgeRemainder_hasCompactSupport hd hw) hR).continuous
+    (averagedHeightTestOf_hasCompactSupport _ hR) z
+
+def replaceHeightProfile {n : ℕ} (B : Fin (n + 1) → ℝ → ℝ)
+    (i : Fin (n + 1)) (K : ℝ → ℝ) : Fin (n + 1) → ℝ → ℝ :=
+  fun j => if j = i then K else B j
+
+theorem rsZeroTupleTerm_replace_outer_eq_core_add_edge
+    {Z : ZeroConfig} {n : ℕ} {B : Fin (n + 1) → ℝ → ℝ}
+    (i : Fin (n + 1)) {d w R T : ℝ}
+    (hd : 0 < d) (hw : 0 < w) (hw1 : 2 * w ≤ 1) (hR : 0 < R)
+    (Phi : (Fin (n + 1) → ℝ) → ℂ)
+    (rho : Fin (n + 1) → Z.carrier) :
+    rsZeroTupleTerm Z
+        (averagedHeightFamilyOf
+          (replaceHeightProfile B i (outerHeightProfile d)) R) Phi T rho =
+      rsZeroTupleTerm Z
+        (averagedHeightFamilyOf
+          (replaceHeightProfile B i (smoothHeightWindow w)) R) Phi T rho +
+      rsZeroTupleTerm Z
+        (averagedHeightFamilyOf
+          (replaceHeightProfile B i (dyadicEdgeRemainder d w)) R) Phi T rho := by
+  unfold rsZeroTupleTerm averagedHeightFamilyOf replaceHeightProfile
+  let f : Fin (n + 1) → ℂ := fun j =>
+    (Z.mult (rho j) : ℂ) * paperFT
+      (averagedHeightTestOf (if j = i then outerHeightProfile d else B j) R)
+      (gammaOf (rho j) / T)
+  let g : Fin (n + 1) → ℂ := fun j =>
+    (Z.mult (rho j) : ℂ) * paperFT
+      (averagedHeightTestOf (if j = i then smoothHeightWindow w else B j) R)
+      (gammaOf (rho j) / T)
+  let h : Fin (n + 1) → ℂ := fun j =>
+    (Z.mult (rho j) : ℂ) * paperFT
+      (averagedHeightTestOf (if j = i then dyadicEdgeRemainder d w else B j) R)
+      (gammaOf (rho j) / T)
+  have hi : g i + h i = f i := by
+    simp only [f, g, h, if_pos]
+    rw [paperFT_averagedHeightTestOf_outer_eq_core_add_edge
+      hd hw hw1 hR]
+    ring
+  have hg : ∀ j ∈ Finset.univ, j ≠ i → g j = f j := by
+    intro j hj hji
+    simp only [f, g, if_neg hji]
+  have hh : ∀ j ∈ Finset.univ, j ≠ i → h j = f j := by
+    intro j hj hji
+    simp only [f, h, if_neg hji]
+  have hprod := Finset.prod_add_prod_eq (s := Finset.univ) (i := i)
+    (f := f) (g := g) (h := h) (Finset.mem_univ i) hi hg hh
+  change (∏ j, f j) * _ = (∏ j, g j) * _ + (∏ j, h j) * _
+  rw [← add_mul, hprod]
 
 theorem dyadicEdgeRemainder_nonneg
     {d w x : ℝ} (hd : 0 < d) (hw : 0 < w) :
