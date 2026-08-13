@@ -1581,6 +1581,159 @@ theorem RS1996ZetaInputs.exists_tendsto_v9506_annularQuarticMain
         (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
         g hg
 
+
+/-- Four complex coordinates carrying the positive-degree RS statistics on
+one common profile and height. -/
+abbrev PositiveDegreeRSBundle :=
+  ℂ × (ℂ × (ℂ × ℂ))
+
+/-- The four normalized positive-degree zero statistics, bundled before
+taking the slow diagonal. -/
+def normalizedPositiveDegreeRSBundle
+    {Z : ZeroConfig} (r : ℝ → ℝ)
+    (g1 : Fin 1 → ℝ → ℂ) (g2 : Fin 2 → ℝ → ℂ)
+    (g3 : Fin 3 → ℝ → ℂ) (g4 : Fin 4 → ℝ → ℂ)
+    (T : ℝ) : PositiveDegreeRSBundle :=
+  (RSBlockMomentBridge.normalizedFrozenLinearRSStatistic
+      (Z := Z) (4999 / 10000 : ℝ) r g1 T,
+    (RSBlockMomentBridge.normalizedFrozenQuadraticRSStatistic
+        (Z := Z) r g2 T,
+      (RSBlockMomentBridge.normalizedFrozenCubicRSStatistic
+          (Z := Z) r g3 T,
+        RSBlockMomentBridge.normalizedFrozenQuarticRSStatistic
+          (Z := Z) r g4 T)))
+
+/-- The fixed-profile RS main terms before annular-shell evaluation. -/
+def frozenPositiveDegreeRSMainBundle
+    (r : ℝ → ℝ)
+    (g1 : Fin 1 → ℝ → ℂ) (g2 : Fin 2 → ℝ → ℂ)
+    (g3 : Fin 3 → ℝ → ℂ) (g4 : Fin 4 → ℝ → ℂ) :
+    PositiveDegreeRSBundle :=
+  (RSBlockMomentBridge.frozenLinearRSMain
+      (4999 / 10000 : ℝ) r g1,
+    (RSBlockMomentBridge.frozenQuadraticRSMain r g2,
+      (RSBlockMomentBridge.frozenCubicRSMain r g3,
+        RSBlockMomentBridge.frozenQuarticRSMain r g4)))
+
+/-- The four literal frozen-profile positive-degree main terms. -/
+def evaluatedPositiveDegreeRSMainBundle
+    (r : ℝ → ℝ)
+    (g1 : Fin 1 → ℝ → ℂ) (g2 : Fin 2 → ℝ → ℂ)
+    (g3 : Fin 3 → ℝ → ℂ) (g4 : Fin 4 → ℝ → ℂ) :
+    PositiveDegreeRSBundle :=
+  (evaluatedLinearRSMain (4999 / 10000 : ℝ) r g1,
+    (evaluatedQuadraticRSMain r g2,
+      (evaluatedCubicRSMain r g3,
+        RSBlockMomentBridge.frozenQuarticRSMain r g4)))
+
+/-- One slow R-9506 schedule simultaneously carries all four positive
+degrees.  This is stronger than four unrelated diagonal extractions and is
+the form needed by one actual matrix block. -/
+theorem RS1996ZetaInputs.exists_tendsto_v9506_annularPositiveDegreeBundle
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (g1 : Fin 1 → ℝ → ℂ) (g2 : Fin 2 → ℝ → ℂ)
+    (g3 : Fin 3 → ℝ → ℂ) (g4 : Fin 4 → ℝ → ℂ)
+    (hg1 : ∀ j, ContDiff ℝ ∞ (g1 j) ∧ HasCompactSupport (g1 j))
+    (hg2 : ∀ j, ContDiff ℝ ∞ (g2 j) ∧ HasCompactSupport (g2 j))
+    (hg3 : ∀ j, ContDiff ℝ ∞ (g3 j) ∧ HasCompactSupport (g3 j))
+    (hg4 : ∀ j, ContDiff ℝ ∞ (g4 j) ∧ HasCompactSupport (g4 j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          normalizedPositiveDegreeRSBundle
+            (Z := Z)
+            (annularRSProfile QuarticWindowWitnesses.v9506 (stage T))
+            g1 g2 g3 g4 T)
+        atTop
+        (nhds
+          (evaluatedPositiveDegreeRSMainBundle
+            (frozenRSProfile QuarticWindowWitnesses.v9506)
+            g1 g2 g3 g4)) := by
+  apply RSBlockMomentBridge.exists_tendsto_slow_diagonal
+    (fun n T =>
+      normalizedPositiveDegreeRSBundle
+        (Z := Z)
+        (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        g1 g2 g3 g4 T)
+    (fun n =>
+      frozenPositiveDegreeRSMainBundle
+        (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        g1 g2 g3 g4)
+    (evaluatedPositiveDegreeRSMainBundle
+      (frozenRSProfile QuarticWindowWitnesses.v9506)
+      g1 g2 g3 g4)
+  · intro n
+    have hcompact :
+        HasCompactSupport
+          (annularRSProfile QuarticWindowWitnesses.v9506 n) :=
+      annularRSProfile_hasCompactSupport
+        QuarticWindowWitnesses.v9506 n
+    have hsmooth :
+        ContDiff ℝ 1
+          (annularRSProfile QuarticWindowWitnesses.v9506 n) :=
+      (annularRSProfile_contDiff
+        QuarticWindowWitnesses.v9506 n
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)).of_le
+          (WithTop.coe_le_coe.2
+            (show (1 : ℕ∞) ≤ ⊤ from le_top))
+    have hsupport :
+        ∀ x,
+          annularRSProfile QuarticWindowWitnesses.v9506 n x ≠ 0 →
+            (0 : ℝ) ≤ x ∧ x ≤ 1 :=
+      fun x hx =>
+        annularRSProfile_support
+          QuarticWindowWitnesses.v9506 n x hx
+    have h1 :=
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenLinearRSStatistic
+        hrs (4999 / 10000 : ℝ)
+        (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        hcompact hsmooth g1 hg1
+    have h2 :=
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenQuadraticRSStatistic
+        hrs (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        hcompact hsmooth hsupport g2 hg2
+    have h3 :=
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenCubicRSStatistic
+        hrs (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        hcompact hsmooth hsupport g3 hg3
+    have h4 :=
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenQuarticRSStatistic
+        hrs (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        hcompact hsmooth hsupport g4 hg4
+    simpa only [normalizedPositiveDegreeRSBundle,
+      frozenPositiveDegreeRSMainBundle] using
+      h1.prodMk_nhds (h2.prodMk_nhds (h3.prodMk_nhds h4))
+  · have h1 :=
+      tendsto_frozenLinearRSMain_annular
+        (4999 / 10000 : ℝ) (by norm_num)
+        QuarticWindowWitnesses.v9506
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
+        g1
+    have h2 :=
+      tendsto_frozenQuadraticRSMain_annular
+        QuarticWindowWitnesses.v9506
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
+        g2
+    have h3 :=
+      tendsto_frozenCubicRSMain_annular
+        QuarticWindowWitnesses.v9506
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
+        g3
+    have h4 :=
+      tendsto_frozenQuarticRSMain_annular
+        QuarticWindowWitnesses.v9506
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
+        g4
+    simpa only [frozenPositiveDegreeRSMainBundle,
+      evaluatedPositiveDegreeRSMainBundle] using
+      h1.prodMk_nhds (h2.prodMk_nhds (h3.prodMk_nhds h4))
+
 end RH.Zeta85.RSMainTermConvergence
 
 end
