@@ -1376,6 +1376,162 @@ theorem tendsto_frozenQuarticRSMain_annular
   unfold RSBlockMomentBridge.frozenQuarticRSMain
   exact tendsto_const_nhds.mul hcast
 
+
+/-- The degree-one fixed-test estimates and the sharpening R-9506 profile
+can be followed on one slow height diagonal. -/
+theorem RS1996ZetaInputs.exists_tendsto_v9506_annularLinearMain
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (g : Fin 1 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          RSBlockMomentBridge.normalizedFrozenLinearRSStatistic
+            (Z := Z) (4999 / 10000 : ℝ)
+            (annularRSProfile QuarticWindowWitnesses.v9506 (stage T))
+            g T)
+        atTop
+        (nhds
+          (evaluatedLinearRSMain (4999 / 10000 : ℝ)
+            (frozenRSProfile QuarticWindowWitnesses.v9506) g)) := by
+  apply RSBlockMomentBridge.exists_tendsto_slow_diagonal
+    (fun n T =>
+      RSBlockMomentBridge.normalizedFrozenLinearRSStatistic
+        (Z := Z) (4999 / 10000 : ℝ)
+        (annularRSProfile QuarticWindowWitnesses.v9506 n) g T)
+    (fun n =>
+      RSBlockMomentBridge.frozenLinearRSMain
+        (4999 / 10000 : ℝ)
+        (annularRSProfile QuarticWindowWitnesses.v9506 n) g)
+    (evaluatedLinearRSMain (4999 / 10000 : ℝ)
+      (frozenRSProfile QuarticWindowWitnesses.v9506) g)
+  · intro n
+    exact
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenLinearRSStatistic
+        hrs (4999 / 10000 : ℝ)
+        (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        (annularRSProfile_hasCompactSupport
+          QuarticWindowWitnesses.v9506 n)
+        ((annularRSProfile_contDiff
+          QuarticWindowWitnesses.v9506 n
+          QuarticWindowWitnesses.v9506_contDiff
+          (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)).of_le
+            (WithTop.coe_le_coe.2
+              (show (1 : ℕ∞) ≤ ⊤ from le_top)))
+        g hg
+  · exact
+      tendsto_frozenLinearRSMain_annular
+        (4999 / 10000 : ℝ) (by norm_num)
+        QuarticWindowWitnesses.v9506
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
+        g
+
+/-- The degree-two fixed-test estimates and the sharpening R-9506 profile
+can be followed on one slow height diagonal. -/
+theorem RS1996ZetaInputs.exists_tendsto_v9506_annularQuadraticMain
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (g : Fin 2 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          RSBlockMomentBridge.normalizedFrozenQuadraticRSStatistic
+            (Z := Z)
+            (annularRSProfile QuarticWindowWitnesses.v9506 (stage T))
+            g T)
+        atTop
+        (nhds
+          (evaluatedQuadraticRSMain
+            (frozenRSProfile QuarticWindowWitnesses.v9506) g)) := by
+  apply RSBlockMomentBridge.exists_tendsto_slow_diagonal
+    (fun n T =>
+      RSBlockMomentBridge.normalizedFrozenQuadraticRSStatistic
+        (Z := Z)
+        (annularRSProfile QuarticWindowWitnesses.v9506 n) g T)
+    (fun n =>
+      RSBlockMomentBridge.frozenQuadraticRSMain
+        (annularRSProfile QuarticWindowWitnesses.v9506 n) g)
+    (evaluatedQuadraticRSMain
+      (frozenRSProfile QuarticWindowWitnesses.v9506) g)
+  · intro n
+    exact
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenQuadraticRSStatistic
+        hrs
+        (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        (annularRSProfile_hasCompactSupport
+          QuarticWindowWitnesses.v9506 n)
+        ((annularRSProfile_contDiff
+          QuarticWindowWitnesses.v9506 n
+          QuarticWindowWitnesses.v9506_contDiff
+          (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)).of_le
+            (WithTop.coe_le_coe.2
+              (show (1 : ℕ∞) ≤ ⊤ from le_top)))
+        (fun x hx =>
+          annularRSProfile_support
+            QuarticWindowWitnesses.v9506 n x hx)
+        g hg
+  · exact
+      tendsto_frozenQuadraticRSMain_annular
+        QuarticWindowWitnesses.v9506
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
+        g
+
+/-- The degree-three fixed-test estimates and the sharpening R-9506 profile
+can be followed on one slow height diagonal. -/
+theorem RS1996ZetaInputs.exists_tendsto_v9506_annularCubicMain
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (g : Fin 3 → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ stage : ℝ → ℕ,
+      Tendsto stage atTop atTop ∧
+      Tendsto
+        (fun T =>
+          RSBlockMomentBridge.normalizedFrozenCubicRSStatistic
+            (Z := Z)
+            (annularRSProfile QuarticWindowWitnesses.v9506 (stage T))
+            g T)
+        atTop
+        (nhds
+          (evaluatedCubicRSMain
+            (frozenRSProfile QuarticWindowWitnesses.v9506) g)) := by
+  apply RSBlockMomentBridge.exists_tendsto_slow_diagonal
+    (fun n T =>
+      RSBlockMomentBridge.normalizedFrozenCubicRSStatistic
+        (Z := Z)
+        (annularRSProfile QuarticWindowWitnesses.v9506 n) g T)
+    (fun n =>
+      RSBlockMomentBridge.frozenCubicRSMain
+        (annularRSProfile QuarticWindowWitnesses.v9506 n) g)
+    (evaluatedCubicRSMain
+      (frozenRSProfile QuarticWindowWitnesses.v9506) g)
+  · intro n
+    exact
+      RSBlockMomentBridge.RS1996ZetaInputs.tendsto_normalizedFrozenCubicRSStatistic
+        hrs
+        (annularRSProfile QuarticWindowWitnesses.v9506 n)
+        (annularRSProfile_hasCompactSupport
+          QuarticWindowWitnesses.v9506 n)
+        ((annularRSProfile_contDiff
+          QuarticWindowWitnesses.v9506 n
+          QuarticWindowWitnesses.v9506_contDiff
+          (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)).of_le
+            (WithTop.coe_le_coe.2
+              (show (1 : ℕ∞) ≤ ⊤ from le_top)))
+        (fun x hx =>
+          annularRSProfile_support
+            QuarticWindowWitnesses.v9506 n x hx)
+        g hg
+  · exact
+      tendsto_frozenCubicRSMain_annular
+        QuarticWindowWitnesses.v9506
+        QuarticWindowWitnesses.v9506_contDiff
+        (fun _ hx => QuarticWindowWitnesses.v9506_pos hx)
+        g
+
 /-- The scalar bridge required by the slow RS diagonal is now discharged
 for the explicit annular profiles. -/
 theorem RS1996ZetaInputs.exists_tendsto_annularProfile_diagonal_frozenMain
