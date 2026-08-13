@@ -2762,7 +2762,7 @@ theorem tendsto_pairSquaredPotentialIntegral_topHatApprox
         zero_mul, norm_zero]
       exact mul_nonneg
         (topHatPowerEnvelope_nonneg p hp 2 x)
-        (pow_nonneg (2 * mass) 2)
+        (pow_nonneg (mul_nonneg (by norm_num) hmass) 2)
     · have hsupport :=
         SmoothTopHatApprox.topHatApproxProfile_support
           p n hp hp1 x hxzero
@@ -2816,8 +2816,11 @@ theorem tendsto_pairSquaredPotentialIntegral_topHatApprox
                   p n hp hp1) x ^ 2 :=
         mul_nonneg (pow_nonneg hprofile.1 2)
           (pow_nonneg hpotentialNonneg 2)
+      have henvelope :
+          topHatPowerEnvelope p 2 x = (1 / p) ^ 2 := by
+        rw [topHatPowerEnvelope, Set.indicator_of_mem hsupport]
       rw [Real.norm_eq_abs, abs_of_nonneg hintegrandNonneg,
-        topHatPowerEnvelope, Set.indicator_of_mem hsupport]
+        henvelope]
       exact mul_le_mul hprofilePow hpotentialPow
         (pow_nonneg hpotentialNonneg 2)
         (pow_nonneg (one_div_nonneg.mpr hp.le) 2)
