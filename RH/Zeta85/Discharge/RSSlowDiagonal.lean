@@ -11,14 +11,16 @@ theorem exists_slow_diagonal_four_stage
     (f : ℕ → ℝ → ℕ → ℝ → X)
     (a : ℕ → ℝ → ℕ → X)
     (b : ℕ → ℝ → X) (c : ℕ → X) (d : X)
+    (good : ℕ → ℝ → ℕ → ℝ → Prop)
     (hf : ∀ q R, 0 < R → ∀ m,
       Tendsto (f q R m) atTop (𝓝 (a q R m)))
     (ha : ∀ q R, 0 < R → Tendsto (a q R) atTop (𝓝 (b q R)))
     (hb : ∀ q, Tendsto (b q) atTop (𝓝 (c q)))
-    (hc : Tendsto c atTop (𝓝 d)) :
+    (hc : Tendsto c atTop (𝓝 d))
+    (hgood : ∀ q R, 0 < R → ∀ m, ∀ᶠ T in atTop, good q R m T) :
     ∃ R : ℕ → ℝ, ∃ m : ℕ → ℕ, ∃ T : ℕ → ℝ,
       (∀ q, 0 < R q) ∧ Tendsto R atTop atTop ∧ Tendsto m atTop atTop ∧
-      Tendsto T atTop atTop ∧
+      Tendsto T atTop atTop ∧ (∀ q, good q (R q) (m q) (T q)) ∧
       Tendsto (fun q => f q (R q) (m q) (T q)) atTop (𝓝 d) := by
   let eps : ℕ → ℝ := fun q => 1 / ((q : ℝ) + 1)
   have heps_pos (q : ℕ) : 0 < eps q := by
@@ -40,16 +42,18 @@ theorem exists_slow_diagonal_four_stage
   choose m hmlarge hmclose using hmexists
   have hTexists : ∀ q : ℕ, ∃ T : ℝ,
       (q : ℝ) ≤ T ∧
+        good q (R q) (m q) T ∧
         dist (f q (R q) (m q) T) (a q (R q) (m q)) < eps q := by
     intro q
     exact ((eventually_ge_atTop (q : ℝ)).and
-      (Metric.tendsto_nhds.1 (hf q (R q) (hRpos q) (m q)) (eps q)
-        (heps_pos q))).exists
-  choose T hTlarge hTclose using hTexists
+      ((hgood q (R q) (hRpos q) (m q)).and
+        (Metric.tendsto_nhds.1 (hf q (R q) (hRpos q) (m q)) (eps q)
+          (heps_pos q)))).exists
+  choose T hTlarge hTgood hTclose using hTexists
   refine ⟨R, m, T, hRpos,
     tendsto_atTop_mono hRlarge tendsto_natCast_atTop_atTop,
     tendsto_atTop_mono hmlarge tendsto_id,
-    tendsto_atTop_mono hTlarge tendsto_natCast_atTop_atTop, ?_⟩
+    tendsto_atTop_mono hTlarge tendsto_natCast_atTop_atTop, hTgood, ?_⟩
   have heps_zero : Tendsto (fun q : ℕ => 3 * eps q) atTop (𝓝 0) := by
     have hden : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
       tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
@@ -92,6 +96,11 @@ theorem RS1996ZetaInputs.exists_normalized_windowAveragedHeight_diagonal
     ∃ R : ℕ → ℝ, ∃ m : ℕ → ℕ, ∃ T : ℕ → ℝ,
       (∀ q, 0 < R q) ∧ Tendsto R atTop atTop ∧
       Tendsto m atTop atTop ∧ Tendsto T atTop atTop ∧
+      (∀ q, Summable (rsZeroTupleTerm Z
+        (windowAveragedHeightFamily (n := n) (R q)
+          (topHatSmoothingWidth 1 q))
+        (weightedCyclicSymbol (k := n + 1) mu
+          (smoothTopHat p (topHatSmoothingWidth p (m q)))) (T q))) ∧
       Tendsto
         (fun q : ℕ => normalizedRSZeroTupleSum Z
           (windowAveragedHeightFamily (n := n) (R q)
@@ -121,8 +130,27 @@ theorem RS1996ZetaInputs.exists_normalized_windowAveragedHeight_diagonal
       (topHatSmoothingWidth 1 q) x ^ (n + 1)) *
       evaluatedTopHatCyclicMain n p mu)
     (d := evaluatedTopHatCyclicMain n p mu)
+    (good := fun q R m T => Summable (rsZeroTupleTerm Z
+      (windowAveragedHeightFamily (n := n) R
+        (topHatSmoothingWidth 1 q))
+      (weightedCyclicSymbol (k := n + 1) mu
+        (smoothTopHat p (topHatSmoothingWidth p m))) T))
     (fun q R hR m => (hstages.1 q R hR).1 m)
     (fun q R hR => (hstages.1 q R hR).2)
     hstages.2.1 hstages.2.2
+    (fun q R hR m => by
+      obtain ⟨hfixed, _hsharp⟩ :=
+        RH.Zeta85.RSReduction.RS1996ZetaInputs.theorem31_fixedSmoothTopHatFamily_evaluated
+          hRS n hn
+          (windowAveragedHeightFamily (n := n) R
+            (topHatSmoothingWidth 1 q))
+          (windowAveragedHeightFamily_admissible hR
+            (topHatSmoothingWidth_pos (show (0 : ℝ) < 1 by norm_num) q)
+            (two_mul_topHatSmoothingWidth_le
+              (show (0 : ℝ) < 1 by norm_num) q))
+          hp hp1 hdelta hmu hbudget
+      obtain ⟨C, T0, hC, hT0, hbound⟩ := hfixed m
+      filter_upwards [eventually_ge_atTop T0] with T hT
+      exact (hbound T hT).1)
 
 end RH.Zeta85.RSReduction
