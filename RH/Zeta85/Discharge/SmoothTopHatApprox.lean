@@ -125,7 +125,8 @@ theorem shiftedTopHat_eq_height
     shiftedTopHat p x = 1 / p := by
   have hmem : x - 1 / 2 ∈ TopHatMoments.topHatSupport p := by
     rw [TopHatMoments.topHatSupport, Set.mem_Icc]
-    exact abs_le.mp hx
+    have habs := abs_le.mp hx
+    constructor <;> linarith [habs.1, habs.2]
   unfold shiftedTopHat TopHatMoments.topHat
   rw [Set.indicator_of_mem hmem]
 
@@ -135,9 +136,12 @@ theorem shiftedTopHat_eq_zero
   have hnot : x - 1 / 2 ∉ TopHatMoments.topHatSupport p := by
     intro hmem
     rw [TopHatMoments.topHatSupport, Set.mem_Icc] at hmem
-    exact (not_le_of_gt hx) (abs_le.mpr hmem)
+    have habs :
+        -(p / 2) ≤ x - 1 / 2 ∧ x - 1 / 2 ≤ p / 2 := by
+      constructor <;> linarith [hmem.1, hmem.2]
+    exact (not_le_of_gt hx) (abs_le.mpr habs)
   unfold shiftedTopHat TopHatMoments.topHat
-  rw [Set.indicator_of_not_mem hnot]
+  rw [Set.indicator_of_notMem hnot]
 
 /-- Literal pointwise convergence of legal smooth profiles to the translated
 sharp top hat, including the two boundary points. -/
@@ -213,7 +217,9 @@ theorem RS1996ZetaInputs.topHatApproxQuartic_evaluated
   exact RSPairIntegrals.RS1996ZetaInputs.frozenQuartic_evaluated hrs
     (topHatApproxProfile p n hp hp1)
     (topHatApproxProfile_hasCompactSupport p n hp hp1)
-    (topHatApproxProfile_contDiff p n hp hp1).of_le (by norm_num)
+    (topHatApproxProfile_contDiff p n hp hp1).of_le
+      (WithTop.coe_le_coe.2
+        (show (1 : ℕ∞) ≤ ⊤ from le_top))
     (topHatApproxProfile_support p n hp hp1) g hg
 
 end RH.Zeta85.SmoothTopHatApprox
