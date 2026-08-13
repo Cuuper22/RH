@@ -134,11 +134,11 @@ def rsQuarticScale (T : ℝ) : ℝ :=
 by the four-point scale, whose extra logarithm tends to infinity. -/
 theorem tendsto_normalized_of_linear_error
     (S : ℝ → ℂ) (M : ℂ)
-    (herror : ∃ C T₀ : ℝ, ∀ T ≥ T₀,
+    (herror : ∃ C T₀ : ℝ, 0 ≤ C ∧ ∀ T ≥ T₀,
       ‖S T - (rsQuarticScale T : ℂ) * M‖ ≤ C * T) :
     Tendsto (fun T => S T / (rsQuarticScale T : ℂ))
       atTop (nhds M) := by
-  obtain ⟨C, T₀, herror⟩ := herror
+  obtain ⟨C, T₀, hC, herror⟩ := herror
   have hratioZero :
       Tendsto (fun T : ℝ => C * (2 * Real.pi) / Real.log T)
         atTop (nhds 0) := by
@@ -183,8 +183,8 @@ theorem tendsto_normalized_of_linear_error
     _ = C * (2 * Real.pi) / Real.log T := hratioEq
     _ < ε := by
       simpa only [Real.dist_eq, sub_zero,
-        abs_of_nonneg (by positivity :
-          0 ≤ C * (2 * Real.pi) / Real.log T)] using hratio
+        abs_of_nonneg
+          (div_nonneg (mul_nonneg hC (by positivity)) hlog.le)] using hratio
 
 /-- The normalized all-zero four-point statistic for one fixed smooth
 profile. -/
@@ -215,10 +215,10 @@ theorem RS1996ZetaInputs.tendsto_normalizedFrozenQuarticRSStatistic
       atTop (nhds (frozenQuarticRSMain r g)) := by
   unfold normalizedFrozenQuarticRSStatistic
   apply tendsto_normalized_of_linear_error
-  obtain ⟨C, T₀, _hC, _hT₀, hRS⟩ :=
+  obtain ⟨C, T₀, hC, _hT₀, hRS⟩ :=
     RSPairIntegrals.RS1996ZetaInputs.frozenQuartic_evaluated
       hrs r hrc hrSmooth hrSupport g hg
-  refine ⟨C, T₀, ?_⟩
+  refine ⟨C, T₀, hC, ?_⟩
   intro T hT
   have hbound := (hRS T hT).2
   convert hbound using 1 <;>
