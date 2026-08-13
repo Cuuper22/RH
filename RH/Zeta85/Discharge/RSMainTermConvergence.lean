@@ -112,7 +112,8 @@ theorem ae_tendsto_annularRSProfile
 
 /-- Every positive power of the frozen shifted profile is integrable. -/
 theorem integrable_frozenRSProfile_pow
-    (v : ℝ → ℝ) (hv : ContDiff ℝ ∞ v) (k : ℕ) :
+    (v : ℝ → ℝ) (hv : ContDiff ℝ ∞ v)
+    (k : ℕ) (hk : 0 < k) :
     Integrable (fun x => frozenRSProfile v x ^ k) := by
   have heq :
       (fun x => frozenRSProfile v x ^ k) =
@@ -120,7 +121,7 @@ theorem integrable_frozenRSProfile_pow
           (fun x => v (x - 1 / 2) ^ k) := by
     funext x
     by_cases hx : x ∈ Icc (0 : ℝ) 1 <;>
-      simp [frozenRSProfile, hx]
+      simp [frozenRSProfile, hx, zero_pow hk]
   rw [heq, integrable_indicator_iff measurableSet_Icc]
   have hcontinuous :
       Continuous (fun x : ℝ => v (x - 1 / 2) ^ k) :=
@@ -128,8 +129,34 @@ theorem integrable_frozenRSProfile_pow
       (continuous_id.sub continuous_const)).pow k)
   exact hcontinuous.continuousOn.integrableOn_compact isCompact_Icc
 
-/-- The zeroth-contraction quartic integral converges to its literal frozen
-profile value. -/
+/-- Every positive annular profile power converges in integral to its
+literal frozen-profile value. -/
+theorem tendsto_integral_annularRSProfile_pow
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (k : ℕ) (hk : 0 < k) :
+    Tendsto
+      (fun n => ∫ x : ℝ, annularRSProfile v n x ^ k)
+      atTop
+      (nhds (∫ x : ℝ, frozenRSProfile v x ^ k)) := by
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun x => frozenRSProfile v x ^ k)
+  · intro n
+    exact
+      ((annularRSProfile_contDiff v n hv hpos).continuous.pow k).aestronglyMeasurable
+  · exact integrable_frozenRSProfile_pow v hv k hk
+  · intro n
+    filter_upwards [] with x
+    have hbound := annularRSProfile_le_frozen v n hpos x
+    rw [Real.norm_eq_abs,
+      abs_of_nonneg (pow_nonneg hbound.1 k)]
+    exact pow_le_pow_left₀ hbound.1 hbound.2 k
+  · filter_upwards [ae_tendsto_annularRSProfile v hpos] with x hx
+    exact hx.pow k
+
+/-- The zeroth-contraction quartic integral is the fourth-power
+specialization of the positive-power theorem. -/
 theorem tendsto_integral_annularRSProfile_pow_four
     (v : ℝ → ℝ)
     (hv : ContDiff ℝ ∞ v)
@@ -137,27 +164,16 @@ theorem tendsto_integral_annularRSProfile_pow_four
     Tendsto
       (fun n => ∫ x : ℝ, annularRSProfile v n x ^ 4)
       atTop
-      (nhds (∫ x : ℝ, frozenRSProfile v x ^ 4)) := by
-  apply MeasureTheory.tendsto_integral_of_dominated_convergence
-    (fun x => frozenRSProfile v x ^ 4)
-  · intro n
-    exact
-      ((annularRSProfile_contDiff v n hv hpos).continuous.pow 4).aestronglyMeasurable
-  · exact integrable_frozenRSProfile_pow v hv 4
-  · intro n
-    filter_upwards [] with x
-    have hbound := annularRSProfile_le_frozen v n hpos x
-    rw [Real.norm_eq_abs,
-      abs_of_nonneg (pow_nonneg hbound.1 4)]
-    exact pow_le_pow_left₀ hbound.1 hbound.2 4
-  · filter_upwards [ae_tendsto_annularRSProfile v hpos] with x hx
-    exact hx.pow 4
+      (nhds (∫ x : ℝ, frozenRSProfile v x ^ 4)) :=
+  tendsto_integral_annularRSProfile_pow
+    v hv hpos 4 (by norm_num)
 
 
 /-- Frozen powered profiles give an integrable two-variable distance
 kernel, despite the two endpoint jumps of the frozen cutoff. -/
 theorem integrable_frozen_distanceKernel_pows
-    (v : ℝ → ℝ) (hv : ContDiff ℝ ∞ v) (a b : ℕ) :
+    (v : ℝ → ℝ) (hv : ContDiff ℝ ∞ v)
+    (a b : ℕ) (ha : 0 < a) (hb : 0 < b) :
     Integrable
       (distanceKernel
         (fun x => frozenRSProfile v x ^ a)
@@ -174,7 +190,8 @@ theorem integrable_frozen_distanceKernel_pows
     funext z
     by_cases hx : z.1 ∈ Icc (0 : ℝ) 1 <;>
       by_cases hy : z.2 ∈ Icc (0 : ℝ) 1 <;>
-      simp [distanceKernel, frozenRSProfile, hx, hy]
+      simp [distanceKernel, frozenRSProfile, hx, hy,
+        zero_pow ha, zero_pow hb]
   rw [heq, integrable_indicator_iff
     (measurableSet_Icc.prod measurableSet_Icc)]
   have hc :
@@ -334,7 +351,7 @@ theorem tendsto_distanceIntegral_annularRSProfile_pows
             (fun x => frozenRSProfile v x ^ a)
             (fun y => frozenRSProfile v y ^ b) z :=
     distanceIntegral_eq_integral_distanceKernel _ _
-      (integrable_frozen_distanceKernel_pows v hv a b)
+      (integrable_frozen_distanceKernel_pows v hv a b ha hb)
   rw [hann, hfrozen]
   exact
     tendsto_integral_annular_distanceKernel_pows
@@ -387,7 +404,7 @@ theorem tendsto_pairDistancePotential_annular
       ((continuous_id.sub continuous_const).abs.mul
         (annularRSProfile_contDiff v n hv hpos).continuous).aestronglyMeasurable
   · simpa only [pow_one] using
-      (integrable_frozenRSProfile_pow v hv 1).const_mul (|x| + 1)
+      (integrable_frozenRSProfile_pow v hv 1 (by norm_num)).const_mul (|x| + 1)
   · intro n
     filter_upwards [] with y
     have hnonneg :
@@ -413,7 +430,7 @@ theorem norm_pairDistancePotential_annular_le
       Integrable (fun y : ℝ =>
         (|x| + 1) * frozenRSProfile v y) := by
     simpa only [pow_one] using
-      (integrable_frozenRSProfile_pow v hv 1).const_mul (|x| + 1)
+      (integrable_frozenRSProfile_pow v hv 1 (by norm_num)).const_mul (|x| + 1)
   have hbound :=
     norm_integral_le_of_norm_le hdom
       (show ∀ᵐ y : ℝ ∂volume,
@@ -483,7 +500,7 @@ theorem tendsto_pairSquaredPotentialIntegral_annular
         ((aestronglyMeasurable_pairDistancePotential_annular
           v n hv hpos).pow 2)
   · exact
-      (integrable_frozenRSProfile_pow v hv 2).mul_const
+      (integrable_frozenRSProfile_pow v hv 2 (by norm_num)).mul_const
         ((2 * mass) ^ 2)
   · intro n
     filter_upwards [] with x
