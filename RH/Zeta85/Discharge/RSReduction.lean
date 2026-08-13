@@ -402,8 +402,10 @@ theorem weightedCyclicSymbol_contDiff
       simpa using (Set.neg_mem_neg.mpr h)
     dsimp only [g]
     apply Finset.prod_eq_zero (Finset.mem_univ j0)
-    simpa [cyclicPartialSum, j0] using
-      image_eq_zero_of_notMem_tsupport hneg
+    have hpartial : cyclicPartialSum xi j0 = 0 := by
+      simp [cyclicPartialSum, j0]
+    rw [hpartial, zero_div, add_zero]
+    exact image_eq_zero_of_notMem_tsupport hneg
   have hg : ContDiff ℝ 1 ↿g := by
     change ContDiff ℝ 1 (fun q : (Fin k -> ℝ) × ℝ =>
       ∏ j : Fin k, r (-q.2 + cyclicPartialSum q.1 j / mu))
@@ -538,7 +540,11 @@ theorem weightedCyclicSymbol_k2_l1_bound
   have hint : (∫ x : ℝ, I x) ≠ 0 := by
     intro hz
     apply hPhi
-    simp [weightedCyclicSymbol, I, hz]
+    have hz' :
+        (∫ x : ℝ,
+          ∏ j : Fin 2, r (x + cyclicPartialSum xi j / mu)) = 0 := by
+      simpa only [I] using hz
+    simp only [weightedCyclicSymbol, hz', mul_zero, Complex.ofReal_zero]
   have hex : ∃ x : ℝ, I x ≠ 0 := by
     by_contra hx
     push_neg at hx
@@ -765,6 +771,7 @@ theorem weightedCyclicSymbol_k3_l1_bound
   have hsum :
       (∑ i : Fin 3, xi i) = xi 0 + xi 1 + xi 2 := by
     norm_num [Fin.sum_univ_succ]
+    ring
   have hlastEq :
       xi 2 = (∑ i : Fin 3, xi i) - (xi 0 + xi 1) := by
     linarith
@@ -782,6 +789,7 @@ theorem weightedCyclicSymbol_k3_l1_bound
       (∑ i : Fin 3, |xi i|) =
         |xi 0| + |xi 1| + |xi 2| := by
     norm_num [Fin.sum_univ_succ]
+    ring
   rw [habssum]
   nlinarith
 
