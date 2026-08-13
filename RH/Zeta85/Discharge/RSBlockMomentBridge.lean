@@ -346,6 +346,18 @@ theorem uncenteredRSBlockLimits_of_positiveDegree
     · exact hpositive.moments k
         (Nat.one_le_iff_ne_zero.mpr hk0) hk
 
+/-- The existing terminal block-density interface therefore removes degree
+zero automatically; the only remaining moment attack is degrees one through
+four. -/
+theorem uncenteredRSBlockLimits_of_blockDimension_positiveDegree
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (hdim : BlockDimensionLimit F)
+    (hpositive : PositiveDegreeUncenteredRSBlockLimits F) :
+    UncenteredRSBlockLimits F :=
+  uncenteredRSBlockLimits_of_positiveDegree
+    hdim.eventually_blockDim_ne_zero hpositive
+
 /-- At every positive block dimension, finite matrix centering is exactly the
 scalar binomial transform used in formula (28). -/
 theorem centeredBlockMoment_eq_centeredTransform
