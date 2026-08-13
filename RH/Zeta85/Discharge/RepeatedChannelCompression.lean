@@ -46,8 +46,10 @@ theorem isometry
   ext a b
   by_cases hab : a = b
   · subst b
-    have hentry :=
-      congrArg (fun M : Matrix ι ι ℝ => M r r) C.orthogonal
+    have hentry :
+        (C.matrix.transpose * C.matrix) r r =
+          (1 : Matrix ι ι ℝ) r r := by
+      exact congrFun (congrFun C.orthogonal r) r
     have hsumReal :
         (∑ j : ι, C.matrix j r * C.matrix j r) = (1 : ℝ) := by
       simpa [Matrix.mul_apply] using hentry
