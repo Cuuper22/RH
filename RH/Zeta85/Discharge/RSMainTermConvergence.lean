@@ -339,6 +339,202 @@ theorem tendsto_distanceIntegral_annularRSProfile_pows
     tendsto_integral_annular_distanceKernel_pows
       v hv hpos a b ha hb
 
+
+/-- On the unit support, the distance weight is uniformly controlled by
+the distance of the external point from the origin. -/
+theorem annular_distance_weight_le_frozen
+    (v : ℝ → ℝ) (n : ℕ)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (x y : ℝ) :
+    |y - x| * annularRSProfile v n y ≤
+      (|x| + 1) * frozenRSProfile v y := by
+  have hprofile := annularRSProfile_le_frozen v n hpos y
+  by_cases hy : y ∈ Icc (0 : ℝ) 1
+  · have hyabs : |y| ≤ 1 := by
+      rw [abs_of_nonneg hy.1]
+      exact hy.2
+    have hdist : |y - x| ≤ |x| + 1 := by
+      calc
+        |y - x| ≤ |y| + |x| := abs_sub y x
+        _ ≤ 1 + |x| := add_le_add_right hyabs _
+        _ = |x| + 1 := by ring
+    exact mul_le_mul hdist hprofile.2 hprofile.1 (by positivity)
+  · have hfrozen : frozenRSProfile v y = 0 := by
+      simp [frozenRSProfile, hy]
+    have hannular : annularRSProfile v n y = 0 := by
+      apply le_antisymm
+      · simpa [hfrozen] using hprofile.2
+      · exact hprofile.1
+    simp [hannular, hfrozen]
+
+/-- The annular distance potential converges pointwise to the frozen
+distance potential. -/
+theorem tendsto_pairDistancePotential_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (x : ℝ) :
+    Tendsto
+      (fun n => pairDistancePotential (annularRSProfile v n) x)
+      atTop
+      (nhds (pairDistancePotential (frozenRSProfile v) x)) := by
+  unfold pairDistancePotential
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun y => (|x| + 1) * frozenRSProfile v y)
+  · intro n
+    exact
+      ((continuous_id.sub continuous_const).abs.mul
+        (annularRSProfile_contDiff v n hv hpos).continuous).aestronglyMeasurable
+  · simpa only [pow_one] using
+      (integrable_frozenRSProfile_pow v hv 1).const_mul (|x| + 1)
+  · intro n
+    filter_upwards [] with y
+    have hnonneg :
+        0 ≤ |y - x| * annularRSProfile v n y :=
+      mul_nonneg abs_nonneg
+        (annularRSProfile_le_frozen v n hpos y).1
+    rw [Real.norm_eq_abs, abs_of_nonneg hnonneg]
+    exact annular_distance_weight_le_frozen v n hpos x y
+  · filter_upwards [ae_tendsto_annularRSProfile v hpos] with y hy
+    exact tendsto_const_nhds.mul hy
+
+/-- The same domination gives a quantitative bound for every finite-stage
+distance potential. -/
+theorem norm_pairDistancePotential_annular_le
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (n : ℕ) (x : ℝ) :
+    ‖pairDistancePotential (annularRSProfile v n) x‖ ≤
+      (|x| + 1) * ∫ y : ℝ, frozenRSProfile v y := by
+  unfold pairDistancePotential
+  have hdom :
+      Integrable (fun y : ℝ =>
+        (|x| + 1) * frozenRSProfile v y) := by
+    simpa only [pow_one] using
+      (integrable_frozenRSProfile_pow v hv 1).const_mul (|x| + 1)
+  have hbound :=
+    norm_integral_le_of_norm_le hdom
+      (show ∀ᵐ y : ℝ ∂volume,
+          ‖|y - x| * annularRSProfile v n y‖ ≤
+            (|x| + 1) * frozenRSProfile v y by
+        filter_upwards [] with y
+        have hnonneg :
+            0 ≤ |y - x| * annularRSProfile v n y :=
+          mul_nonneg abs_nonneg
+            (annularRSProfile_le_frozen v n hpos y).1
+        rw [Real.norm_eq_abs, abs_of_nonneg hnonneg]
+        exact annular_distance_weight_le_frozen v n hpos x y)
+  simpa only [integral_const_mul] using hbound
+
+/-- Annular distance potentials are nonnegative. -/
+theorem pairDistancePotential_annular_nonneg
+    (v : ℝ → ℝ) (n : ℕ)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (x : ℝ) :
+    0 ≤ pairDistancePotential (annularRSProfile v n) x := by
+  unfold pairDistancePotential
+  exact integral_nonneg fun y =>
+    mul_nonneg abs_nonneg
+      (annularRSProfile_le_frozen v n hpos y).1
+
+/-- The annular distance potential is strongly measurable as a function
+of its external point. -/
+theorem aestronglyMeasurable_pairDistancePotential_annular
+    (v : ℝ → ℝ) (n : ℕ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    AEStronglyMeasurable
+      (pairDistancePotential (annularRSProfile v n)) := by
+  have hk :
+      StronglyMeasurable (fun z : ℝ × ℝ =>
+        |z.2 - z.1| * annularRSProfile v n z.2) :=
+    ((continuous_snd.sub continuous_fst).abs.mul
+      ((annularRSProfile_contDiff v n hv hpos).continuous.comp
+        continuous_snd)).stronglyMeasurable
+  simpa only [pairDistancePotential] using
+    hk.integral_prod_right'.aestronglyMeasurable
+
+/-- The separated two-pair functional converges to its literal frozen
+profile value. -/
+theorem tendsto_pairSquaredPotentialIntegral_annular
+    (v : ℝ → ℝ)
+    (hv : ContDiff ℝ ∞ v)
+    (hpos : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x) :
+    Tendsto
+      (fun n =>
+        pairSquaredPotentialIntegral (annularRSProfile v n))
+      atTop
+      (nhds
+        (pairSquaredPotentialIntegral (frozenRSProfile v))) := by
+  unfold pairSquaredPotentialIntegral
+  let mass : ℝ := ∫ y : ℝ, frozenRSProfile v y
+  have hmass : 0 ≤ mass := by
+    dsimp only [mass]
+    exact integral_nonneg fun y =>
+      frozenRSProfile_nonneg v hpos y
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun x => frozenRSProfile v x ^ 2 * (2 * mass) ^ 2)
+  · intro n
+    exact
+      ((annularRSProfile_contDiff v n hv hpos).continuous.pow 2
+        |>.aestronglyMeasurable).mul
+        ((aestronglyMeasurable_pairDistancePotential_annular
+          v n hv hpos).pow 2)
+  · exact
+      (integrable_frozenRSProfile_pow v hv 2).mul_const
+        ((2 * mass) ^ 2)
+  · intro n
+    filter_upwards [] with x
+    by_cases hxzero : annularRSProfile v n x = 0
+    · simp [hxzero]
+    · have hsupport :=
+        annularRSProfile_support v n x hxzero
+      have hxabs : |x| ≤ 1 := by
+        rw [abs_of_nonneg hsupport.1]
+        exact hsupport.2
+      have hprofile :=
+        annularRSProfile_le_frozen v n hpos x
+      have hprofilePow :
+          annularRSProfile v n x ^ 2 ≤
+            frozenRSProfile v x ^ 2 :=
+        pow_le_pow_left₀ hprofile.1 hprofile.2 2
+      have hpotentialNonneg :=
+        pairDistancePotential_annular_nonneg
+          v n hpos x
+      have hpotentialBound :
+          pairDistancePotential (annularRSProfile v n) x ≤
+            2 * mass := by
+        calc
+          pairDistancePotential (annularRSProfile v n) x ≤
+              ‖pairDistancePotential (annularRSProfile v n) x‖ :=
+            le_norm_self _
+          _ ≤ (|x| + 1) * mass := by
+            simpa only [mass] using
+              norm_pairDistancePotential_annular_le
+                v hv hpos n x
+          _ ≤ 2 * mass := by
+            apply mul_le_mul_of_nonneg_right _ hmass
+            linarith
+      have hpotentialPow :
+          pairDistancePotential (annularRSProfile v n) x ^ 2 ≤
+            (2 * mass) ^ 2 :=
+        pow_le_pow_left₀ hpotentialNonneg hpotentialBound 2
+      have hintegrandNonneg :
+          0 ≤ annularRSProfile v n x ^ 2 *
+            pairDistancePotential (annularRSProfile v n) x ^ 2 :=
+        mul_nonneg (pow_nonneg hprofile.1 2)
+          (pow_nonneg hpotentialNonneg 2)
+      rw [Real.norm_eq_abs, abs_of_nonneg hintegrandNonneg]
+      exact mul_le_mul hprofilePow hpotentialPow
+        (pow_nonneg hpotentialNonneg 2)
+        (pow_nonneg (frozenRSProfile_nonneg v hpos x) 2)
+  · filter_upwards [ae_tendsto_annularRSProfile v hpos] with x hx
+    exact
+      (hx.pow 2).mul
+        ((tendsto_pairDistancePotential_annular
+          v hv hpos x).pow 2)
+
 end RH.Zeta85.RSMainTermConvergence
 
 end
