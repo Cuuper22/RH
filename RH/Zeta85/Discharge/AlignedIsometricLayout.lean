@@ -19,7 +19,7 @@ virtual atom exactly.
 -/
 
 open Matrix Finset Set
-open scoped BigOperators ComplexConjugate
+open scoped BigOperators ComplexConjugate ContDiff Topology
 
 noncomputable section
 
