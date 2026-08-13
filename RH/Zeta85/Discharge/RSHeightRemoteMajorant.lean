@@ -225,4 +225,94 @@ theorem norm_windowAveragedHeight_of_zero_outside_le
       hR hw hw1 heta hout
   exact htri.trans (add_le_add hvertical hreal)
 
+def dyadicRemoteHeightGap (q : ℕ) : ℝ :=
+  1 / Real.sqrt ((q : ℝ) + 1)
+
+def dyadicRemoteHeightLeakageBound (q : ℕ) : ℝ :=
+  baseHeightKernelMass⁻¹ * (((q : ℝ) + 1) ^ 2)⁻¹ +
+    baseHeightKernelMass⁻¹ *
+      baseHeightKernelTail (Real.sqrt ((q : ℝ) + 1))
+
+theorem dyadicRemoteHeightGap_pos (q : ℕ) :
+    0 < dyadicRemoteHeightGap q := by
+  unfold dyadicRemoteHeightGap
+  positivity
+
+theorem dyadicRemoteHeightLeakageBound_tendsto_zero :
+    Tendsto dyadicRemoteHeightLeakageBound atTop (nhds 0) := by
+  have hbase : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
+    tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
+  have hsq : Tendsto (fun q : ℕ => ((q : ℝ) + 1) ^ 2) atTop atTop :=
+    (tendsto_pow_atTop (by norm_num : (2 : ℕ) ≠ 0)).comp hbase
+  have hinv : Tendsto (fun q : ℕ => (((q : ℝ) + 1) ^ 2)⁻¹)
+      atTop (nhds 0) := tendsto_inv_atTop_zero.comp hsq
+  have hfirst : Tendsto
+      (fun q : ℕ => baseHeightKernelMass⁻¹ * (((q : ℝ) + 1) ^ 2)⁻¹)
+      atTop (nhds 0) := by
+    simpa only [mul_zero] using
+      (show Tendsto (fun _ : ℕ => baseHeightKernelMass⁻¹) atTop
+        (nhds baseHeightKernelMass⁻¹) from tendsto_const_nhds).mul hinv
+  have hsqrt : Tendsto (fun q : ℕ => Real.sqrt ((q : ℝ) + 1))
+      atTop atTop := Real.tendsto_sqrt_atTop.comp hbase
+  have htail : Tendsto
+      (fun q : ℕ => baseHeightKernelTail (Real.sqrt ((q : ℝ) + 1)))
+      atTop (nhds 0) := baseHeightKernelTail_tendsto_zero.comp hsqrt
+  have hsecond : Tendsto
+      (fun q : ℕ => baseHeightKernelMass⁻¹ *
+        baseHeightKernelTail (Real.sqrt ((q : ℝ) + 1)))
+      atTop (nhds 0) := by
+    simpa only [mul_zero] using
+      (show Tendsto (fun _ : ℕ => baseHeightKernelMass⁻¹) atTop
+        (nhds baseHeightKernelMass⁻¹) from tendsto_const_nhds).mul htail
+  change Tendsto
+    (fun q : ℕ => baseHeightKernelMass⁻¹ * (((q : ℝ) + 1) ^ 2)⁻¹ +
+      baseHeightKernelMass⁻¹ *
+        baseHeightKernelTail (Real.sqrt ((q : ℝ) + 1))) atTop (nhds 0)
+  simpa only [zero_add] using hfirst.add hsecond
+
+theorem norm_windowAveragedHeight_of_far_zero_le_dyadicLeakage
+    {Z : ZeroConfig} {w T : ℝ} (q : ℕ)
+    (hw : 0 < w) (hw1 : 2 * w ≤ 1)
+    (hTpower : ((q : ℝ) + 1) ^ 4 ≤ T) (rho : Z.carrier)
+    (hout : (rho : ℂ).im / T ≤ 1 - dyadicRemoteHeightGap q ∨
+      2 + dyadicRemoteHeightGap q ≤ (rho : ℂ).im / T) :
+    ‖paperFT (windowAveragedHeightTest ((q : ℝ) + 1) w)
+        (gammaOf (rho : ℂ) / T)‖ ≤
+      dyadicRemoteHeightLeakageBound q := by
+  let X : ℝ := (q : ℝ) + 1
+  have hX : 0 < X := by dsimp [X]; positivity
+  have hX1 : 1 ≤ X := by
+    dsimp [X]
+    have hq : (0 : ℝ) ≤ q := Nat.cast_nonneg q
+    linarith
+  have hXpow : X ≤ X ^ 4 := by
+    nlinarith [sq_nonneg (X - 1), mul_nonneg (sq_nonneg X) (sq_nonneg (X - 1))]
+  have hT : 0 < T := lt_of_lt_of_le (pow_pos hX 4) hTpower
+  have hXT : X ≤ 2 * T := by linarith
+  have hsqrt : 0 < Real.sqrt X := Real.sqrt_pos.mpr hX
+  have hgap : X * dyadicRemoteHeightGap q = Real.sqrt X := by
+    unfold dyadicRemoteHeightGap
+    dsimp only [X]
+    field_simp [hsqrt.ne']
+    exact (Real.sq_sqrt hX.le).symm
+  have hfirst : (X / T) * (X / baseHeightKernelMass) ≤
+      baseHeightKernelMass⁻¹ * (X ^ 2)⁻¹ := by
+    have hM : 0 < baseHeightKernelMass := baseHeightKernelMass_pos
+    calc
+      (X / T) * (X / baseHeightKernelMass) =
+          X ^ 2 / (baseHeightKernelMass * T) := by field_simp
+      _ ≤ X ^ 2 / (baseHeightKernelMass * X ^ 4) := by
+        exact div_le_div_of_nonneg_left (sq_nonneg X)
+          (mul_pos hM (pow_pos hX 4))
+          (mul_le_mul_of_nonneg_left hTpower hM.le)
+      _ = baseHeightKernelMass⁻¹ * (X ^ 2)⁻¹ := by
+        field_simp [hM.ne', hX.ne']
+  have hraw := norm_windowAveragedHeight_of_zero_outside_le
+    (Z := Z) hX hw hw1 hT hXT (dyadicRemoteHeightGap_pos q) rho hout
+  apply hraw.trans
+  unfold dyadicRemoteHeightLeakageBound
+  dsimp only [X] at hfirst hgap ⊢
+  rw [hgap]
+  exact add_le_add hfirst le_rfl
+
 end RH.Zeta85.RSPoissonCyclicBridge
