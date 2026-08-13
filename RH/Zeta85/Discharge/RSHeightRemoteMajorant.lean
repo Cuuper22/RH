@@ -238,6 +238,19 @@ theorem dyadicRemoteHeightGap_pos (q : ℕ) :
   unfold dyadicRemoteHeightGap
   positivity
 
+theorem dyadicRemoteHeightGap_tendsto_zero :
+    Tendsto dyadicRemoteHeightGap atTop (nhds 0) := by
+  have hbase : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
+    tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
+  have hsqrt : Tendsto (fun q : ℕ => Real.sqrt ((q : ℝ) + 1))
+      atTop atTop := Real.tendsto_sqrt_atTop.comp hbase
+  unfold dyadicRemoteHeightGap
+  rw [show (fun q : ℕ => 1 / Real.sqrt ((q : ℝ) + 1)) =
+      (fun r : ℝ => r⁻¹) ∘ (fun q : ℕ => Real.sqrt ((q : ℝ) + 1)) by
+    funext q
+    simp only [Function.comp_apply, one_div]]
+  exact tendsto_inv_atTop_zero.comp hsqrt
+
 theorem dyadicRemoteHeightLeakageBound_tendsto_zero :
     Tendsto dyadicRemoteHeightLeakageBound atTop (nhds 0) := by
   have hbase : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
@@ -314,5 +327,87 @@ theorem norm_windowAveragedHeight_of_far_zero_le_dyadicLeakage
   dsimp only [X] at hfirst hgap ⊢
   rw [hgap]
   exact add_le_add hfirst le_rfl
+
+theorem rvm_dyadic_near_edge_count_tendsto_zero
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
+    (T : ℕ → ℝ) (hTpower : ∀ q : ℕ, ((q : ℝ) + 1) ^ 4 ≤ T q)
+    (s : ℕ → Finset Z.carrier)
+    (hs : ∀ q rho, rho ∈ s q →
+      (((1 - dyadicRemoteHeightGap q) * T q < (rho : ℂ).im ∧
+          (rho : ℂ).im ≤ (1 + dyadicRemoteHeightGap q) * T q) ∨
+       ((2 - dyadicRemoteHeightGap q) * T q < (rho : ℂ).im ∧
+          (rho : ℂ).im ≤ (2 + dyadicRemoteHeightGap q) * T q))) :
+    Tendsto
+      (fun q : ℕ =>
+        (∑ rho ∈ s q, (Z.mult rho : ℝ)) / (T q * Real.log (T q)))
+      atTop (nhds 0) := by
+  obtain ⟨A0, hA0, hlocal⟩ := hRvM.local_count
+  have hbase : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
+    tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
+  have hpow : Tendsto (fun q : ℕ => ((q : ℝ) + 1) ^ 4) atTop atTop :=
+    (tendsto_pow_atTop (by norm_num : (4 : ℕ) ≠ 0)).comp hbase
+  have hinv : Tendsto (fun q : ℕ => (((q : ℝ) + 1) ^ 4)⁻¹)
+      atTop (nhds 0) := tendsto_inv_atTop_zero.comp hpow
+  have hgapPart : Tendsto
+      (fun q : ℕ => (8 * A0) * dyadicRemoteHeightGap q)
+      atTop (nhds 0) := by
+    simpa only [mul_zero] using
+      (show Tendsto (fun _ : ℕ => 8 * A0) atTop (nhds (8 * A0)) from
+        tendsto_const_nhds).mul dyadicRemoteHeightGap_tendsto_zero
+  have hinvPart : Tendsto
+      (fun q : ℕ => (4 * A0) * (((q : ℝ) + 1) ^ 4)⁻¹)
+      atTop (nhds 0) := by
+    simpa only [mul_zero] using
+      (show Tendsto (fun _ : ℕ => 4 * A0) atTop (nhds (4 * A0)) from
+        tendsto_const_nhds).mul hinv
+  have hupper : Tendsto
+      (fun q : ℕ => (8 * A0) * dyadicRemoteHeightGap q +
+        (4 * A0) * (((q : ℝ) + 1) ^ 4)⁻¹)
+      atTop (nhds 0) := by
+    simpa only [zero_add] using hgapPart.add hinvPart
+  apply squeeze_zero' ?_ ?_ hupper
+  · filter_upwards [eventually_ge_atTop 3] with q hq
+    have hq4 : 4 ≤ q + 1 := by omega
+    have hX4 : (4 : ℝ) ≤ (q : ℝ) + 1 := by exact_mod_cast hq4
+    have hpow6 : (6 : ℝ) ≤ ((q : ℝ) + 1) ^ 4 := by
+      have hp := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 4) hX4 4
+      norm_num at hp ⊢
+      linarith
+    have hT6 : 6 ≤ T q := hpow6.trans (hTpower q)
+    exact div_nonneg (Finset.sum_nonneg fun _ _ => Nat.cast_nonneg _)
+      (mul_nonneg (by linarith) (Real.log_nonneg (by linarith)))
+  · filter_upwards [eventually_ge_atTop 3] with q hq
+    let X : ℝ := (q : ℝ) + 1
+    have hX4 : (4 : ℝ) ≤ X := by
+      dsimp only [X]
+      have hq4 : 4 ≤ q + 1 := by omega
+      exact_mod_cast hq4
+    have hX : 0 < X := lt_of_lt_of_le (by norm_num) hX4
+    have hsqrt2 : 2 ≤ Real.sqrt X := by
+      rw [Real.le_sqrt (by norm_num) (by positivity)]
+      nlinarith
+    have hgapHalf : dyadicRemoteHeightGap q ≤ 1 / 2 := by
+      unfold dyadicRemoteHeightGap
+      change 1 / Real.sqrt X ≤ 1 / 2
+      rw [div_le_iff₀ (Real.sqrt_pos.mpr hX)]
+      nlinarith
+    have hpow6 : (6 : ℝ) ≤ X ^ 4 := by
+      have hp := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 4) hX4 4
+      norm_num at hp ⊢
+      linarith
+    have hT6 : 6 ≤ T q := hpow6.trans (by simpa only [X] using hTpower q)
+    have hraw := two_edge_band_normalized_le_of_local_count
+      hA0 hlocal (dyadicRemoteHeightGap_pos q) hgapHalf hT6 (s q) (hs q)
+    have hTpos : 0 < T q := by linarith
+    have hnum : 0 ≤ 4 * A0 := by nlinarith
+    have hsecond : 4 * A0 / T q ≤ (4 * A0) * (X ^ 4)⁻¹ := by
+      rw [div_eq_mul_inv]
+      exact mul_le_mul_of_nonneg_left
+        (inv_anti₀ (pow_pos hX 4) (by simpa only [X] using hTpower q)) hnum
+    have hraw' :
+        (∑ rho ∈ s q, (Z.mult rho : ℝ)) / (T q * Real.log (T q)) ≤
+          (8 * A0) * dyadicRemoteHeightGap q + 4 * A0 / T q := by
+      simpa only [mul_assoc] using hraw
+    exact hraw'.trans (add_le_add le_rfl hsecond)
 
 end RH.Zeta85.RSPoissonCyclicBridge
