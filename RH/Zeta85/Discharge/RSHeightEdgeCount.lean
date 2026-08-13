@@ -45,18 +45,17 @@ theorem interval_mult_count_le
         (Real.log_le_log (by positivity) (hB j hj))
         hcount.A₀_pos.le
 
-theorem rvm_two_edge_band_count_le
-    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
+theorem two_edge_band_count_le_of_local_count
+    {Z : ZeroConfig} {A0 : ℝ} (hA0 : 1 ≤ A0)
+    (hlocal : ∀ t : ℝ,
+      (Z.N t (t + 1) : ℝ) ≤ A0 * Real.log (|t| + 3))
     {d T : ℝ} (hd : 0 < d) (hd1 : d ≤ 1 / 2) (hT : 6 ≤ T)
     (s : Finset Z.carrier)
     (hs : ∀ rho ∈ s,
       (((1 - d) * T < (rho : ℂ).im ∧ (rho : ℂ).im ≤ (1 + d) * T) ∨
        ((2 - d) * T < (rho : ℂ).im ∧ (rho : ℂ).im ≤ (2 + d) * T))) :
-    ∃ A0 : ℝ, 1 ≤ A0 ∧
-      ∑ rho ∈ s, (Z.mult rho : ℝ) ≤
-        2 * (⌈2 * d * T⌉₊ : ℝ) * A0 * Real.log (4 * T) := by
-  obtain ⟨A0, hA0, hlocal⟩ := hRvM.local_count
-  refine ⟨A0, hA0, ?_⟩
+    ∑ rho ∈ s, (Z.mult rho : ℝ) ≤
+      2 * (⌈2 * d * T⌉₊ : ℝ) * A0 * Real.log (4 * T) := by
   have hLC := Tail.LocalCount.ofWindowCount Z hA0 hlocal
   let slo : Finset Z.carrier :=
     s.filter fun rho : Z.carrier => (rho : ℂ).im ≤ (1 + d) * T
@@ -108,7 +107,7 @@ theorem rvm_two_edge_band_count_le
   simp only [shi] at hhi
   nlinarith
 
-theorem rvm_two_edge_band_normalized_le
+theorem rvm_two_edge_band_count_le
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
     {d T : ℝ} (hd : 0 < d) (hd1 : d ≤ 1 / 2) (hT : 6 ≤ T)
     (s : Finset Z.carrier)
@@ -116,11 +115,25 @@ theorem rvm_two_edge_band_normalized_le
       (((1 - d) * T < (rho : ℂ).im ∧ (rho : ℂ).im ≤ (1 + d) * T) ∨
        ((2 - d) * T < (rho : ℂ).im ∧ (rho : ℂ).im ≤ (2 + d) * T))) :
     ∃ A0 : ℝ, 1 ≤ A0 ∧
-      (∑ rho ∈ s, (Z.mult rho : ℝ)) / (T * Real.log T) ≤
-        8 * A0 * d + 4 * A0 / T := by
-  obtain ⟨A0, hA0, hraw⟩ :=
-    rvm_two_edge_band_count_le hRvM hd hd1 hT s hs
-  refine ⟨A0, hA0, ?_⟩
+      ∑ rho ∈ s, (Z.mult rho : ℝ) ≤
+        2 * (⌈2 * d * T⌉₊ : ℝ) * A0 * Real.log (4 * T) := by
+  obtain ⟨A0, hA0, hlocal⟩ := hRvM.local_count
+  exact ⟨A0, hA0,
+    two_edge_band_count_le_of_local_count hA0 hlocal hd hd1 hT s hs⟩
+
+theorem two_edge_band_normalized_le_of_local_count
+    {Z : ZeroConfig} {A0 : ℝ} (hA0 : 1 ≤ A0)
+    (hlocal : ∀ t : ℝ,
+      (Z.N t (t + 1) : ℝ) ≤ A0 * Real.log (|t| + 3))
+    {d T : ℝ} (hd : 0 < d) (hd1 : d ≤ 1 / 2) (hT : 6 ≤ T)
+    (s : Finset Z.carrier)
+    (hs : ∀ rho ∈ s,
+      (((1 - d) * T < (rho : ℂ).im ∧ (rho : ℂ).im ≤ (1 + d) * T) ∨
+       ((2 - d) * T < (rho : ℂ).im ∧ (rho : ℂ).im ≤ (2 + d) * T))) :
+    (∑ rho ∈ s, (Z.mult rho : ℝ)) / (T * Real.log T) ≤
+      8 * A0 * d + 4 * A0 / T := by
+  have hraw := two_edge_band_count_le_of_local_count
+    hA0 hlocal hd hd1 hT s hs
   have hTpos : 0 < T := by linarith
   have hlogT : 0 < Real.log T := Real.log_pos (by linarith)
   have hceil : (⌈2 * d * T⌉₊ : ℝ) ≤ 2 * d * T + 1 :=
@@ -140,5 +153,20 @@ theorem rvm_two_edge_band_normalized_le
     _ = (8 * A0 * d + 4 * A0 / T) * (T * Real.log T) := by
       field_simp [hTpos.ne']
       ring
+
+theorem rvm_two_edge_band_normalized_le
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z)
+    {d T : ℝ} (hd : 0 < d) (hd1 : d ≤ 1 / 2) (hT : 6 ≤ T)
+    (s : Finset Z.carrier)
+    (hs : ∀ rho ∈ s,
+      (((1 - d) * T < (rho : ℂ).im ∧ (rho : ℂ).im ≤ (1 + d) * T) ∨
+       ((2 - d) * T < (rho : ℂ).im ∧ (rho : ℂ).im ≤ (2 + d) * T))) :
+    ∃ A0 : ℝ, 1 ≤ A0 ∧
+      (∑ rho ∈ s, (Z.mult rho : ℝ)) / (T * Real.log T) ≤
+        8 * A0 * d + 4 * A0 / T := by
+  obtain ⟨A0, hA0, hlocal⟩ := hRvM.local_count
+  exact ⟨A0, hA0,
+    two_edge_band_normalized_le_of_local_count
+      hA0 hlocal hd hd1 hT s hs⟩
 
 end RH.Zeta85.RSPoissonCyclicBridge
