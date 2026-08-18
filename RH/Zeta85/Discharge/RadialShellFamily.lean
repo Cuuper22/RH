@@ -31,7 +31,7 @@ open AggregateCoordinateFrame
 common modulation period. -/
 structure Data
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (F : QuarticGramFamily Z σ μ p v) where
   commonPeriod : ℝ → ℝ
   supportRadius :
     ∀ T : ℝ, Fin (F.channelCount T) → ℝ
@@ -68,7 +68,7 @@ structure Data
 
 /-- Radial shells derive the collective alias-cancellation regularity with no
 additional analytic premise. -/
-theorem Data.toCollectiveWindowRegularity
+def Data.toCollectiveWindowRegularity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : Data F) :
@@ -110,7 +110,7 @@ theorem literalEnergyTailLowerBound_toIsometric
 radial shells.  This structure permits nonzero energy at the origin. -/
 structure CoreData
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (F : QuarticGramFamily Z σ μ p v) where
   commonPeriod : ℝ → ℝ
   supportRadius :
     ∀ T : ℝ, Fin (F.channelCount T) → ℝ
@@ -154,7 +154,7 @@ structure CoreData
 /-- The core-plus-shell family has exact collective alias cancellation and
 therefore supplies the regularity object used by the literal quartic
 coordinate. -/
-theorem CoreData.toCollectiveWindowRegularity
+def CoreData.toCollectiveWindowRegularity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : CoreData F) :

@@ -1463,7 +1463,7 @@ all of its physical windows are the shrinking profiled shells in one common
 period. -/
 structure AnnularFamilyRealization
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (F : QuarticGramFamily Z σ μ p v) where
   commonPeriod : ℝ → ℝ
   stage : ∀ T : ℝ, Fin (F.channelCount T) → ℕ
   period_eq : ∀ T j, F.period T j = commonPeriod T
