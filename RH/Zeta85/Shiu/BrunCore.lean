@@ -11,6 +11,7 @@ import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Algebra.BigOperators.Associated
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Order.Interval.Finset.Basic
+import Mathlib.Algebra.Order.Floor.Semifield
 import Mathlib.NumberTheory.EulerProduct.Basic
 import Mathlib.NumberTheory.Harmonic.Bounds
 import Mathlib.NumberTheory.PrimeCounting
@@ -43,11 +44,16 @@ majorant, following the explicit Bordellès-style treatment, arXiv:2402.12333):
   and the lower bound `log ≤` harmonic from `Mathlib.NumberTheory.Harmonic.Bounds`.
   No Mertens-type theorem is used.
 
-As a stretch prefix towards the rough-number count in an interval, we also provide the
-exact divisor count on `(u, u+v]` (`brun_Ioc_filter_dvd_card`), its real-valued error
-form, and the interval-sum interchange (`brun_interval_sieve`) which bounds the number
-of `P`-rough integers in `(u, u+v]` by the signed sum of divisor counts over subsets
-`S ⊆ P` with `|S| ≤ 2k`.
+As a stretch prefix towards the rough-number count in an interval, we assemble:
+the exact divisor count on `(u, u+v]` (`brun_Ioc_filter_dvd_card`) and its real-valued
+error form (`brun_cast_div_lt_succ`, `brun_Ioc_filter_dvd_card_error`: the count is
+within `1` of `v/d`); the interval-sum interchange (`brun_interval_sieve`), which bounds
+the number of `P`-rough integers in `(u, u+v]` by the signed sum of divisor counts over
+subsets `S ⊆ P` with `|S| ≤ 2k`; and, combining the two through a signed rounding step
+(`brun_signed_error_le`), the rough-number count `brun_rough_count_le`:
+`#{n ∈ (u, u+v] : n is P-rough} ≤ ∑_{S ⊆ P, |S| ≤ 2k} (-1)^{|S|} · v/∏S + #{S ⊆ P : |S| ≤ 2k}`.
+Identifying that signed main term with `v · ∏_{p ∈ P} (1 - 1/p)` up to the Bonferroni
+tail is the next, separate step of the Route 3 assembly; it consumes part (b).
 
 ## References
 
@@ -185,15 +191,15 @@ saving of Shiu's majorant on rough numbers. -/
 theorem brun_prod_one_sub_le (z : ℕ) (hz : 2 ≤ z) :
     ∏ p ∈ (Finset.range (z + 1)).filter Nat.Prime, (1 - 1 / (p : ℝ)) ≤ 1 / Real.log z := by
   rw [← Nat.primesBelow_eq_filter_range]
-  -- positivity of every factor, hence of the product
-  have hfac_pos : ∀ p ∈ Nat.primesBelow (z + 1), 0 < 1 - 1 / (p : ℝ) := by
+  -- every prime factor `p ≤ z` satisfies `1/p < 1`; hence every factor is positive
+  have hp_lt : ∀ p ∈ Nat.primesBelow (z + 1), 1 / (p : ℝ) < 1 := by
     intro p hp
     have hp1 : (1 : ℝ) < (p : ℝ) := by
       exact_mod_cast (Nat.prime_of_mem_primesBelow hp).one_lt
-    have h1 : 1 / (p : ℝ) < 1 := by
-      rw [div_lt_one (by linarith)]
-      exact hp1
-    linarith
+    rw [div_lt_one (by linarith)]
+    exact hp1
+  have hfac_pos : ∀ p ∈ Nat.primesBelow (z + 1), 0 < 1 - 1 / (p : ℝ) :=
+    fun p hp => by linarith [hp_lt p hp]
   have hB : 0 < ∏ p ∈ Nat.primesBelow (z + 1), (1 - 1 / (p : ℝ)) :=
     Finset.prod_pos hfac_pos
   -- the Euler product over `(z+1)`-smooth numbers for the function `n ↦ 1/n`
@@ -224,17 +230,12 @@ theorem brun_prod_one_sub_le (z : ℕ) (hz : 2 ≤ z) :
   have hprodval : ∏ p ∈ Nat.primesBelow (z + 1), (∑' e : ℕ, (fun n : ℕ => (1 : ℝ) / n) (p ^ e))
       = ∏ p ∈ Nat.primesBelow (z + 1), (1 - 1 / (p : ℝ))⁻¹ := by
     refine Finset.prod_congr rfl fun p hp => ?_
-    have hp1 : (1 : ℝ) < (p : ℝ) := by
-      exact_mod_cast (Nat.prime_of_mem_primesBelow hp).one_lt
-    have h1 : 1 / (p : ℝ) < 1 := by
-      rw [div_lt_one (by linarith)]
-      exact hp1
     calc ∑' e : ℕ, (fun n : ℕ => (1 : ℝ) / n) (p ^ e)
         = ∑' e : ℕ, ((1 : ℝ) / p) ^ e := by
           refine tsum_congr fun e => ?_
           simp only [Nat.cast_pow]
           rw [one_div_pow]
-      _ = (1 - 1 / (p : ℝ))⁻¹ := tsum_geometric_of_lt_one (by positivity) h1
+      _ = (1 - 1 / (p : ℝ))⁻¹ := tsum_geometric_of_lt_one (by positivity) (hp_lt p hp)
   rw [hprodval] at hHasSum
   -- pass from the subtype sum to the indicator sum on `ℕ`
   have hInd : HasSum (Set.indicator (Nat.smoothNumbers (z + 1)) (fun n : ℕ => (1 : ℝ) / n))
@@ -285,41 +286,33 @@ theorem brun_prod_one_sub_le (z : ℕ) (hz : 2 ≤ z) :
 `#{n ∈ (u, u+v] : d ∣ n} = ⌊(u+v)/d⌋ - ⌊u/d⌋` (natural-number division). -/
 theorem brun_Ioc_filter_dvd_card (u v d : ℕ) :
     ((Finset.Ioc u (u + v)).filter (fun x => d ∣ x)).card = (u + v) / d - u / d := by
-  have hdisj : Disjoint (Finset.Ioc 0 u) (Finset.Ioc u (u + v)) :=
-    Finset.disjoint_left.mpr fun x hx hx' =>
-      absurd (Finset.mem_Ioc.mp hx).2 (not_le.mpr (Finset.mem_Ioc.mp hx').1)
   have h := Nat.Ioc_filter_dvd_card_eq_div (u + v) d
   rw [← Finset.Ioc_union_Ioc_eq_Ioc (Nat.zero_le u) (Nat.le_add_right u v),
     Finset.filter_union,
     Finset.card_union_of_disjoint
-      (hdisj.mono (Finset.filter_subset _ _) (Finset.filter_subset _ _)),
+      (Finset.disjoint_filter_filter (Finset.Ioc_disjoint_Ioc_of_le le_rfl)),
     Nat.Ioc_filter_dvd_card_eq_div u d] at h
   omega
 
-/-- Cast comparison for natural division, lower bound: `m/d < ⌊m/d⌋ + 1` in `ℝ`. -/
-theorem brun_cast_div_lt_succ (m d : ℕ) (hd : 0 < d) :
+/-- Cast comparison for natural division, lower bound: `m/d < ⌊m/d⌋ + 1` in `ℝ`.
+No positivity of `d` is needed: at `d = 0` the claim reads `0 < 0 + 1`. -/
+theorem brun_cast_div_lt_succ (m d : ℕ) :
     (m : ℝ) / (d : ℝ) < ((m / d : ℕ) : ℝ) + 1 := by
-  have hd0 : (0 : ℝ) < d := by exact_mod_cast hd
-  rw [div_lt_iff₀ hd0]
-  have hnat : m < (m / d + 1) * d := by
-    have hmod : m % d < d := Nat.mod_lt _ hd
-    have hdm : d * (m / d) + m % d = m := Nat.div_add_mod m d
-    calc m = d * (m / d) + m % d := hdm.symm
-      _ < d * (m / d) + d := by omega
-      _ = (m / d + 1) * d := by ring
-  exact_mod_cast hnat
+  have h := Nat.lt_floor_add_one ((m : ℝ) / (d : ℝ))
+  rwa [Nat.floor_div_eq_div] at h
 
 /-- The count of multiples of `d` in `(u, u+v]` differs from `v/d` by at most `1`
-(real-valued form of `brun_Ioc_filter_dvd_card`). -/
-theorem brun_Ioc_filter_dvd_card_error (u v d : ℕ) (hd : 0 < d) :
+(real-valued form of `brun_Ioc_filter_dvd_card`).  As with `brun_cast_div_lt_succ`,
+`d = 0` is allowed: both the count and `v/d` are then `0`. -/
+theorem brun_Ioc_filter_dvd_card_error (u v d : ℕ) :
     |((((Finset.Ioc u (u + v)).filter (fun x => d ∣ x)).card : ℝ)) - (v : ℝ) / (d : ℝ)| ≤ 1 := by
   have hle : u / d ≤ (u + v) / d := Nat.div_le_div_right (Nat.le_add_right u v)
   have hupA : (((u + v) / d : ℕ) : ℝ) ≤ ((u + v : ℕ) : ℝ) / (d : ℝ) := Nat.cast_div_le
   have hupB : ((u / d : ℕ) : ℝ) ≤ (u : ℝ) / (d : ℝ) := Nat.cast_div_le
   have hlowA : ((u + v : ℕ) : ℝ) / (d : ℝ) < (((u + v) / d : ℕ) : ℝ) + 1 :=
-    brun_cast_div_lt_succ (u + v) d hd
+    brun_cast_div_lt_succ (u + v) d
   have hlowB : (u : ℝ) / (d : ℝ) < ((u / d : ℕ) : ℝ) + 1 :=
-    brun_cast_div_lt_succ u d hd
+    brun_cast_div_lt_succ u d
   have hsplit : ((u + v : ℕ) : ℝ) / (d : ℝ) = (u : ℝ) / (d : ℝ) + (v : ℝ) / (d : ℝ) := by
     push_cast
     rw [add_div]
@@ -413,11 +406,15 @@ theorem brun_rough_count_le (P : Finset ℕ) (hP : ∀ p ∈ P, p.Prime) (u v k 
       = ∑ _S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k), (1 : ℝ) := by
     rw [Finset.sum_const, nsmul_eq_mul, mul_one]
   rw [hcardsum, ← Finset.sum_add_distrib]
-  refine Finset.sum_le_sum fun S hS => ?_
-  have hSsub : S ⊆ P := Finset.mem_powerset.mp (Finset.mem_filter.mp hS).1
-  have hD : 0 < S.prod id := Finset.prod_pos fun p hp => (hP p (hSsub hp)).pos
-  exact brun_signed_error_le S.card (brun_Ioc_filter_dvd_card_error u v (S.prod id) hD)
+  refine Finset.sum_le_sum fun S _ => ?_
+  exact brun_signed_error_le S.card (brun_Ioc_filter_dvd_card_error u v (S.prod id))
 
 end Shiu
 end Zeta85
 end RH
+
+-- Axiom audit: every result above rests only on Lean's three standard axioms.
+#print axioms RH.Zeta85.Shiu.brun_bonferroni_even
+#print axioms RH.Zeta85.Shiu.brun_indicator_le
+#print axioms RH.Zeta85.Shiu.brun_prod_one_sub_le
+#print axioms RH.Zeta85.Shiu.brun_rough_count_le
