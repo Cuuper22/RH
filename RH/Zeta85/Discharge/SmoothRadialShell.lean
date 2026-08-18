@@ -1143,6 +1143,319 @@ theorem tendsto_integral_shrinkingProfileShellWindow_sq
       ae_tendsto_shrinkingProfileShellWindow_sq
         v L hL hposProfile
 
+
+/-- The full complex Fourier-weighted energy of the shrinking annular shell
+converges to the Fourier transform of the frozen supported profile. -/
+theorem tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (z : ℂ) :
+    Tendsto
+      (fun n : ℕ =>
+        ∫ u : ℝ,
+          (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ) *
+            Complex.exp (Complex.I * z * (u : ℂ)))
+      Filter.atTop
+      (nhds
+        (∫ u : ℝ,
+          (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ) *
+            Complex.exp (Complex.I * z * (u : ℂ)))) := by
+  let C : ℝ := Real.exp (‖z‖ * (L / 2))
+  apply MeasureTheory.tendsto_integral_of_dominated_convergence
+    (fun u : ℝ =>
+      C * @QuarticGramFamily.supportedFullProfile v (u / L))
+  · intro n
+    have hshell :
+        Continuous
+          (fun u : ℝ =>
+            (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ)) :=
+      Complex.continuous_ofReal.comp
+        ((shrinkingProfileShellWindow_contDiff
+          v L n hL hv hposProfile).continuous.pow 2)
+    exact
+      (hshell.mul
+        (Complex.continuous_exp.comp
+          (continuous_const.mul Complex.continuous_ofReal))).aestronglyMeasurable
+  · exact
+      (integrable_supportedFullProfile_div v L hL hv).const_mul C
+  · intro n
+    filter_upwards [] with u
+    have hbound :=
+      shrinkingProfileShellWindow_sq_le_supportedFullProfile
+        v L n hL hposProfile u
+    by_cases hmem : u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2)
+    · have hscaled : |u / L| ≤ (1 : ℝ) / 2 := abs_le.mpr hmem
+      rw [abs_div, abs_of_pos hL] at hscaled
+      have huabs : |u| ≤ L / 2 := by
+        have hmul := (div_le_iff₀ hL).mp hscaled
+        linarith
+      have hre :
+          (Complex.I * z * (u : ℂ)).re ≤ ‖z‖ * (L / 2) := by
+        calc
+          (Complex.I * z * (u : ℂ)).re ≤
+              ‖Complex.I * z * (u : ℂ)‖ :=
+            Complex.re_le_norm _
+          _ = ‖z‖ * |u| := by
+            simp [norm_mul]
+          _ ≤ ‖z‖ * (L / 2) :=
+            mul_le_mul_of_nonneg_left huabs (norm_nonneg z)
+      have hexp :
+          ‖Complex.exp (Complex.I * z * (u : ℂ))‖ ≤ C := by
+        dsimp [C]
+        rw [Complex.norm_exp]
+        exact Real.exp_le_exp.mpr hre
+      have hprofile_nonneg :
+          0 ≤ @QuarticGramFamily.supportedFullProfile v (u / L) :=
+        le_trans hbound.1 hbound.2
+      calc
+        ‖(shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ) *
+            Complex.exp (Complex.I * z * (u : ℂ))‖ =
+            shrinkingProfileShellWindow v L n hL u ^ 2 *
+              ‖Complex.exp (Complex.I * z * (u : ℂ))‖ := by
+                rw [norm_mul]
+                simp [Real.norm_eq_abs, abs_of_nonneg hbound.1]
+        _ ≤
+            @QuarticGramFamily.supportedFullProfile v (u / L) * C :=
+          mul_le_mul hbound.2 hexp (norm_nonneg _) hprofile_nonneg
+        _ = C * @QuarticGramFamily.supportedFullProfile v (u / L) := by
+          ring
+    · have hprofile :
+          @QuarticGramFamily.supportedFullProfile v (u / L) = 0 := by
+        simp [QuarticGramFamily.supportedFullProfile, hmem]
+      have hshell :
+          shrinkingProfileShellWindow v L n hL u ^ 2 = 0 := by
+        rw [hprofile] at hbound
+        exact le_antisymm hbound.2 hbound.1
+      simp [hshell, hprofile]
+  · filter_upwards [
+      ae_tendsto_shrinkingProfileShellWindow_sq
+        v L hL hposProfile
+    ] with u hu
+    have hcast :
+        Tendsto
+          (fun n : ℕ =>
+            (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ))
+          Filter.atTop
+          (nhds
+            (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
+      Complex.continuous_ofReal.continuousAt.comp hu
+    exact hcast.mul_const
+      (Complex.exp (Complex.I * z * (u : ℂ)))
+
+
+/-- Hat-normalized pair kernel of one shrinking annular profile. -/
+def shrinkingProfileShellNormalizedPairKernel
+    (v : ℝ → ℝ) (L : ℝ) (n : ℕ) (hL : 0 < L)
+    (ρ ρ' : ℂ) : ℂ :=
+  ((∫ u : ℝ, shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ)⁻¹) *
+    ∫ u : ℝ,
+      (shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ) *
+        Complex.exp
+          (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))
+
+/-- Hat-normalized pair kernel of the frozen supported profile. -/
+def supportedProfileNormalizedPairKernel
+    (v : ℝ → ℝ) (L : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((∫ u : ℝ,
+      @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)⁻¹) *
+    ∫ u : ℝ,
+      (@QuarticGramFamily.supportedFullProfile v (u / L) : ℂ) *
+        Complex.exp
+          (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))
+
+/-- Normalization commutes with the annular Fourier limit whenever the frozen
+profile has nonzero mass. -/
+theorem tendsto_shrinkingProfileShellNormalizedPairKernel
+    (v : ℝ → ℝ) (L : ℝ) (hL : 0 < L)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (hmass :
+      (∫ u : ℝ,
+        @QuarticGramFamily.supportedFullProfile v (u / L)) ≠ 0)
+    (ρ ρ' : ℂ) :
+    Tendsto
+      (fun n : ℕ =>
+        shrinkingProfileShellNormalizedPairKernel
+          v L n hL ρ ρ')
+      Filter.atTop
+      (nhds (supportedProfileNormalizedPairKernel v L ρ ρ')) := by
+  unfold shrinkingProfileShellNormalizedPairKernel
+    supportedProfileNormalizedPairKernel
+  have hmassR :=
+    tendsto_integral_shrinkingProfileShellWindow_sq
+      v L hL hv hposProfile
+  have hmassC :
+      Tendsto
+        (fun n : ℕ =>
+          (∫ u : ℝ,
+            shrinkingProfileShellWindow v L n hL u ^ 2 : ℂ))
+        Filter.atTop
+        (nhds
+          (∫ u : ℝ,
+            @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ)) :=
+    Complex.continuous_ofReal.continuousAt.comp hmassR
+  have hmassC_ne :
+      (∫ u : ℝ,
+        @QuarticGramFamily.supportedFullProfile v (u / L) : ℂ) ≠ 0 := by
+    exact_mod_cast hmass
+  exact
+    (hmassC.inv₀ hmassC_ne).mul
+      (tendsto_integral_shrinkingProfileShellWindow_sq_mul_cexp
+        v L hL hv hposProfile (gammaOf ρ - gammaOf ρ'))
+
+/-- Complete finite zero contraction of the normalized shrinking annular
+pair kernel. -/
+def shrinkingAnnularNormalizedQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {w : ℝ → ℝ}
+    (q : TrimmedMoment.Quartic)
+    (F : QuarticGramFamily Z σ μ p w)
+    (v : ℝ → ℝ) (L : ℝ → ℝ) (hL : ∀ T, 0 < L T)
+    (T : ℝ) (n : ℕ) : ℝ :=
+  QuarticTransfer.pairKernelQuarticNumerator q F T
+    (shrinkingProfileShellNormalizedPairKernel
+      v (L T) n (hL T))
+
+/-- Complete finite zero contraction of the normalized frozen profile
+kernel. -/
+def supportedProfileNormalizedQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {w : ℝ → ℝ}
+    (q : TrimmedMoment.Quartic)
+    (F : QuarticGramFamily Z σ μ p w)
+    (v : ℝ → ℝ) (L : ℝ → ℝ) (T : ℝ) : ℝ :=
+  QuarticTransfer.pairKernelQuarticNumerator q F T
+    (supportedProfileNormalizedPairKernel v (L T))
+
+/-- At each fixed height, form the whole zero contraction first; its annular
+version then converges to the frozen-profile contraction. -/
+theorem tendsto_shrinkingAnnularNormalizedQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {w : ℝ → ℝ}
+    (q : TrimmedMoment.Quartic)
+    (F : QuarticGramFamily Z σ μ p w)
+    (v : ℝ → ℝ) (L : ℝ → ℝ) (hL : ∀ T, 0 < L T)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / L T)) ≠ 0)
+    (T : ℝ) :
+    Tendsto
+      (shrinkingAnnularNormalizedQuarticNumerator
+        q F v L hL T)
+      Filter.atTop
+      (nhds
+        (supportedProfileNormalizedQuarticNumerator q F v L T)) := by
+  apply QuarticTransfer.tendsto_pairKernelQuarticNumerator
+  intro ρ hρ ρ' hρ'
+  exact tendsto_shrinkingProfileShellNormalizedPairKernel
+    v (L T) (hL T) hv hposProfile (hmass T) ρ ρ'
+
+/-- At each height, some finite annular stage approximates the complete
+frozen-profile zero contraction to any prescribed positive error. -/
+theorem exists_shrinkingAnnularNormalizedQuarticNumerator_dist_lt
+    {Z : ZeroConfig} {σ μ p : ℝ} {w : ℝ → ℝ}
+    (q : TrimmedMoment.Quartic)
+    (F : QuarticGramFamily Z σ μ p w)
+    (v : ℝ → ℝ) (L : ℝ → ℝ) (hL : ∀ T, 0 < L T)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / L T)) ≠ 0)
+    (T ε : ℝ) (hε : 0 < ε) :
+    ∃ n : ℕ,
+      dist
+        (shrinkingAnnularNormalizedQuarticNumerator
+          q F v L hL T n)
+        (supportedProfileNormalizedQuarticNumerator
+          q F v L T) < ε := by
+  have he :=
+    (tendsto_shrinkingAnnularNormalizedQuarticNumerator
+      q F v L hL hv hposProfile hmass T).eventually
+        (Metric.ball_mem_nhds _ hε)
+  simpa only [Metric.mem_ball] using he.exists
+
+/-- Select the annular smoothing stage only after the complete quartic zero
+contraction has been formed at each height. -/
+noncomputable def diagonalAnnularProfileStage
+    {Z : ZeroConfig} {σ μ p : ℝ} {w : ℝ → ℝ}
+    (q : TrimmedMoment.Quartic)
+    (F : QuarticGramFamily Z σ μ p w)
+    (v : ℝ → ℝ) (L : ℝ → ℝ) (hL : ∀ T, 0 < L T)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / L T)) ≠ 0)
+    (T : ℝ) : ℕ :=
+  Classical.choose
+    (exists_shrinkingAnnularNormalizedQuarticNumerator_dist_lt
+      q F v L hL hv hposProfile hmass T
+      (Real.exp (-T)) (Real.exp_pos _))
+
+/-- The post-contraction annular stage has exponentially small error at every
+height. -/
+theorem diagonalAnnularProfileStage_spec
+    {Z : ZeroConfig} {σ μ p : ℝ} {w : ℝ → ℝ}
+    (q : TrimmedMoment.Quartic)
+    (F : QuarticGramFamily Z σ μ p w)
+    (v : ℝ → ℝ) (L : ℝ → ℝ) (hL : ∀ T, 0 < L T)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / L T)) ≠ 0)
+    (T : ℝ) :
+    dist
+      (shrinkingAnnularNormalizedQuarticNumerator
+        q F v L hL T
+          (diagonalAnnularProfileStage
+            q F v L hL hv hposProfile hmass T))
+      (supportedProfileNormalizedQuarticNumerator
+        q F v L T) < Real.exp (-T) :=
+  Classical.choose_spec
+    (exists_shrinkingAnnularNormalizedQuarticNumerator_dist_lt
+      q F v L hL hv hposProfile hmass T
+      (Real.exp (-T)) (Real.exp_pos _))
+
+/-- Diagonal annular selection turns fixed-height dominated convergence into
+a height-asymptotic quartic statement without any uniform zero-frequency
+estimate. -/
+theorem tendsto_diagonalAnnularNormalizedQuarticNumerator_sub_profile
+    {Z : ZeroConfig} {σ μ p : ℝ} {w : ℝ → ℝ}
+    (q : TrimmedMoment.Quartic)
+    (F : QuarticGramFamily Z σ μ p w)
+    (v : ℝ → ℝ) (L : ℝ → ℝ) (hL : ∀ T, 0 < L T)
+    (hv : ContDiff ℝ ∞ v)
+    (hposProfile : ∀ x, |x| ≤ (1 : ℝ) / 2 → 0 < v x)
+    (hmass :
+      ∀ T : ℝ,
+        (∫ u : ℝ,
+          @QuarticGramFamily.supportedFullProfile v (u / L T)) ≠ 0) :
+    Tendsto
+      (fun T : ℝ =>
+        shrinkingAnnularNormalizedQuarticNumerator
+            q F v L hL T
+              (diagonalAnnularProfileStage
+                q F v L hL hv hposProfile hmass T) -
+          supportedProfileNormalizedQuarticNumerator
+            q F v L T)
+      Filter.atTop (nhds 0) := by
+  rw [tendsto_zero_iff_norm_tendsto_zero]
+  apply squeeze_zero
+  · intro T
+    exact norm_nonneg _
+  · intro T
+    have hs :=
+      diagonalAnnularProfileStage_spec
+        q F v L hL hv hposProfile hmass T
+    simpa only [Real.norm_eq_abs, Real.dist_eq] using hs.le
+  · exact Real.tendsto_exp_atBot.comp tendsto_neg_atTop_atBot
+
 /-! ## Direct family realization -/
 
 /-- A quartic family is realized by the one-channel annular construction when

@@ -1294,6 +1294,173 @@ theorem RoutedEnergyQuarticLowerBound.toIsometric
     IsometricBlock.WeightedQuarticLowerBound q (toIsometricData L) :=
   (hE.toSelectedVirtual S).toIsometric
 
+
+/-- Exact identification of the summed routed-window energy with the literal
+physical energy used by the hat normalization. -/
+structure RoutedEnergyNormalization
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L)) : Prop where
+  window_energy_eq :
+    ∀ (T u : ℝ),
+      (∑ r : ι, H.window T r u ^ 2) = F.windowEnergy T u
+
+/-- Compact support and smoothness give integrability of every routed energy
+Fourier integrand at every pair of complex frequencies. -/
+theorem integrable_routedEnergyIntegrand
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (T : ℝ) (r : ι) (ρ ρ' : ℂ) :
+    MeasureTheory.Integrable (fun u : ℝ =>
+      (H.window T r u : ℂ) * H.window T r u *
+        Complex.exp
+          (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))) := by
+  have hcontinuous :
+      Continuous (fun u : ℝ =>
+        (H.window T r u : ℂ) * H.window T r u *
+          Complex.exp
+            (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))) :=
+    ((h.smooth T r).continuous.mul (h.smooth T r).continuous).mul
+      (Complex.continuous_exp.comp
+        (continuous_const.mul Complex.continuous_ofReal))
+  have hcompactWindow :
+      HasCompactSupport (fun u : ℝ => (H.window T r u : ℂ)) := by
+    refine HasCompactSupport.intro
+      (K := Icc (-H.supportRadius T r) (H.supportRadius T r))
+      isCompact_Icc ?_
+    intro u hu
+    have habs : H.supportRadius T r < |u| := by
+      simp only [mem_Icc, not_and_or, not_le] at hu
+      rcases hu with hu | hu
+      · rw [abs_of_neg
+          (lt_of_lt_of_le hu
+            (neg_nonpos.mpr (h.supportRadius_nonneg T r)))]
+        linarith
+      · rw [abs_of_pos
+          (lt_of_le_of_lt (h.supportRadius_nonneg T r) hu)]
+        exact hu
+    simp [h.support T r u habs]
+  have hcompact :
+      HasCompactSupport (fun u : ℝ =>
+        (H.window T r u : ℂ) * H.window T r u *
+          Complex.exp
+            (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))) := by
+    apply hcompactWindow.mono
+    intro u hu
+    change
+      (H.window T r u : ℂ) * H.window T r u *
+        Complex.exp
+          (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) ≠ 0 at hu
+    change (H.window T r u : ℂ) ≠ 0
+    intro hzero
+    apply hu
+    simp [hzero]
+  exact hcontinuous.integrable_of_hasCompactSupport hcompact
+
+/-- The complete physical window-energy Fourier kernel with the repository's
+literal hat normalization left intact. -/
+def physicalWindowEnergyPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((F.hatDenominator T)⁻¹ : ℂ) *
+    (F.fullLength T : ℂ) *
+      ∫ u : ℝ,
+        (F.windowEnergy T u : ℂ) *
+          Complex.exp
+            (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))
+
+/-- After the channel sum is formed, routed energy is exactly the literal
+physical window-energy Fourier kernel. -/
+theorem routedEnergyPairKernel_eq_physicalWindowEnergyPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {L : Layout F ι} {G : RoutedGrid L}
+    (H : RoutedFourierGrid G (canonicalAtomFactorization L))
+    (h : RoutedWindowRegularity H)
+    (hE : RoutedEnergyNormalization H)
+    (T : ℝ) (ρ ρ' : ℂ) :
+    routedEnergyPairKernel H T ρ ρ' =
+      physicalWindowEnergyPairKernel F T ρ ρ' := by
+  unfold routedEnergyPairKernel physicalWindowEnergyPairKernel
+  rw [← mul_assoc]
+  apply congrArg
+    (fun w : ℂ => ((F.hatDenominator T)⁻¹ : ℂ) * w)
+  rw [← Finset.mul_sum]
+  apply congrArg (fun w : ℂ => (F.fullLength T : ℂ) * w)
+  let f : ι → ℝ → ℂ := fun r u =>
+    (H.window T r u : ℂ) * H.window T r u *
+      Complex.exp
+        (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))
+  have hInt : ∀ r : ι, MeasureTheory.Integrable (f r) := by
+    intro r
+    exact integrable_routedEnergyIntegrand H h T r ρ ρ'
+  calc
+    (∑ r : ι, ∫ u : ℝ, f r u) =
+        ∫ u : ℝ, ∑ r : ι, f r u := by
+      symm
+      simpa using
+        (MeasureTheory.integral_finset_sum
+          (Finset.univ : Finset ι)
+          (fun r _ => hInt r))
+    _ = ∫ u : ℝ,
+        (F.windowEnergy T u : ℂ) *
+          Complex.exp
+            (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+      apply MeasureTheory.integral_congr_ae
+      filter_upwards [] with u
+      have hcast :=
+        congrArg (fun x : ℝ => (x : ℂ)) (hE.window_energy_eq T u)
+      push_cast at hcast
+      rw [← hcast, Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro r _
+      dsimp [f]
+      push_cast
+      ring
+
+
+/-- Literal normalized Fourier transform of the total physical window energy. -/
+def normalizedPhysicalWindowEnergyPairKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
+  ((∫ u : ℝ, F.windowEnergy T u : ℂ)⁻¹) *
+    ∫ u : ℝ,
+      (F.windowEnergy T u : ℂ) *
+        Complex.exp
+          (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))
+
+/-- Once the two literal normalization factors are nonzero, the full support
+length cancels exactly and the routed energy kernel is the normalized Fourier
+transform of total physical energy. -/
+theorem physicalWindowEnergyPairKernel_eq_normalized
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v)
+    (T : ℝ)
+    (hfull : F.fullLength T ≠ 0)
+    (hmass : (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
+    (ρ ρ' : ℂ) :
+    physicalWindowEnergyPairKernel F T ρ ρ' =
+      normalizedPhysicalWindowEnergyPairKernel F T ρ ρ' := by
+  unfold physicalWindowEnergyPairKernel
+    normalizedPhysicalWindowEnergyPairKernel
+    QuarticGramFamily.hatDenominator
+  have hfullC : (F.fullLength T : ℂ) ≠ 0 := by
+    exact_mod_cast hfull
+  have hmassC :
+      (∫ u : ℝ, F.windowEnergy T u : ℂ) ≠ 0 := by
+    exact_mod_cast hmass
+  push_cast
+  field_simp [hfullC, hmassC]
+
 end AlignedIsometricLayout
 end Zeta85
 end RH
