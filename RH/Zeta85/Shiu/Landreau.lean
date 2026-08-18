@@ -61,12 +61,6 @@ namespace RH
 namespace Zeta85
 namespace Shiu
 
-/-- `a ≤ a ^ k` for `k ≠ 0` (including the degenerate case `a = 0`). -/
-private lemma landreau_le_self_pow (a k : ℕ) (hk : k ≠ 0) : a ≤ a ^ k := by
-  rcases Nat.eq_zero_or_pos a with rfl | ha
-  · exact Nat.zero_le _
-  · exact le_self_pow (by omega) hk
-
 /-- Submultiplicativity of the divisor-counting function, `τ (a * b) ≤ τ a * τ b`,
 via `Nat.divisors_mul` and `Finset.card_mul_le`. -/
 private lemma landreau_card_divisors_mul_le (a b : ℕ) :
@@ -144,7 +138,7 @@ private lemma landreau_smooth (n : ℕ) (hn : 1 ≤ n) :
   | zero =>
     intro m _ hsize
     rw [pow_one] at hsize
-    exact ⟨m, dvd_rfl, hsize, landreau_le_self_pow _ _ (by omega)⟩
+    exact ⟨m, dvd_rfl, hsize, Nat.le_self_pow (by omega) _⟩
   | succ t ih =>
     intro m hprimes hsize
     by_cases hbig : n < m ^ 4
@@ -193,7 +187,7 @@ private lemma landreau_smooth (n : ℕ) (hn : 1 ≤ n) :
             Nat.mul_le_mul (Nat.mul_le_mul hb1 hb2)
               (hτ'.trans (Nat.pow_le_pow_left hb3 _))
         _ = e.divisors.card ^ (2 * (t + 1) + 1) := by ring
-    · exact ⟨m, dvd_rfl, Nat.not_lt.mp hbig, landreau_le_self_pow _ _ (by omega)⟩
+    · exact ⟨m, dvd_rfl, Nat.not_lt.mp hbig, Nat.le_self_pow (by omega) _⟩
 
 /-- **Peeling the huge primes.**  Every `n ≥ 1` factors as `n = m * h` where all prime
 factors of `m` are small (`p ^ 4 ≤ n`) and the huge-prime part `h` satisfies `τ h ≤ 8`:
