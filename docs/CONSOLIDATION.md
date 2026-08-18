@@ -107,7 +107,7 @@ nothing in the CI cone) still contains unfinished work and is left unwired.
 
 - Warm incremental build + gates on the campaign's build image (worker
   `zeta-clone`).
-- From-scratch clean-room build + gates (worker `worker-golden`).
+- From-scratch clean-room build + gates (worker `cleanroom-01`).
 - Independent local build of the diagonal carrier.
 - GitHub CI on the consolidation branch.
 
