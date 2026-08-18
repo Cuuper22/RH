@@ -73,6 +73,36 @@ Categories (full per-branch list in the consolidation PR):
 Every deleted branch tip is preserved as a tag `archive/<branch-name>` so no
 commit is lost; `git tag -l 'archive/*'` lists them.
 
+## Finishing the frontier
+
+The carrier's last-day files (the aggregate/virtual-channel program) had never
+compiled anywhere — the campaign died mid-construction. Consolidation finished
+them: roughly thirty repairs across twelve files, each verified by rebuild.
+Recurring defect classes, recorded for future campaign configuration:
+
+- **Data-carrying `Prop` structures** (5 structures in 4 files): regularity
+  records holding `commonPeriod`/`supportRadius` functions were declared
+  `: Prop`, which cannot generate projections. De-Propped; their constructors
+  became `def`s.
+- **Swallowed subtractions** (5 theorem/def statements): `∫ u, f u - tail` and
+  `∑ r, a * ∫ ... - tail` parse with the subtraction inside the binder body.
+  Parenthesized to the intended reading.
+- **Uninferable implicit/explicit arguments**: field notation on
+  `fullLength`/`supportedFullProfile` (whose `include F` is inert on defs),
+  simp rewrites whose key variable occurs only on the right-hand side,
+  `(κ :=)`/`(q :=)`/`(F :=)` pins, and one application-precedence bug
+  (`f x.of_le (by ...)` passes the projection and the tactic block as separate
+  arguments).
+- **Mathlib drift**: `Set.indicator_of_not_mem` → `Set.indicator_of_notMem`,
+  `integral_congr` → `integral_congr_ae`, order-coercion proofs through
+  `WithTop ℕ∞` (`(WithTop.coe_le_coe).2`), `integral_complex_ofReal`.
+- **Tactic-level regressions at the twins' tip**: three proofs where
+  `agent/aligned-virtual-channel-frame` held the working form and
+  `agent/diagonal-lower-bound-transfer` had regressed it.
+
+`RH/Zeta85/Discharge/SmoothRadialShell.lean` (an experiment leaf imported by
+nothing in the CI cone) still contains unfinished work and is left unwired.
+
 ## Verification evidence for the consolidated tip
 
 - Warm incremental build + gates on the campaign's build image (worker
