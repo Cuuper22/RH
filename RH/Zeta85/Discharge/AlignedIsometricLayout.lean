@@ -17,7 +17,7 @@ corresponding synthesized virtual atoms, mixing first recovers the selected
 virtual atom exactly.
 -/
 
-open Matrix Finset Set
+open MeasureTheory Filter Matrix Finset Set
 open scoped BigOperators ComplexConjugate
 
 noncomputable section
@@ -217,7 +217,9 @@ theorem mixedPairKernelQuarticNumerator_eq_selectedVirtual
       selectedVirtualQuarticNumerator q A T := by
   unfold IsometricKernel.mixedPairKernelQuarticNumerator
     selectedVirtualQuarticNumerator
-  rw [mixedPairKernel_eq_selectedVirtualPairKernel A]
+  apply QuarticTransfer.pairKernelQuarticNumerator_congr
+  intro ρ hρ ρ' hρ'
+  exact mixedPairKernel_eq_selectedVirtualPairKernel A T ρ ρ'
 
 /-- The sole remaining analytic statement in routed virtual coordinates. -/
 structure SelectedVirtualQuarticLowerBound
@@ -248,7 +250,7 @@ theorem SelectedVirtualQuarticLowerBound.toMixed
       q (toRealData L) := by
   refine ⟨h.block_dimension_pos, ?_⟩
   intro x hx
-  simpa only [mixedPairKernelQuarticNumerator_eq_selectedVirtual] using
+  simpa only [mixedPairKernelQuarticNumerator_eq_selectedVirtual (A := A)] using
     h.eventually_gt x hx
 
 /-- Direct handoff from routed virtual atoms to the isometric terminal
@@ -418,10 +420,12 @@ theorem SampledVirtualQuarticLowerBound.toIsometric
     (h : SampledVirtualQuarticLowerBound q A) :
     IsometricBlock.WeightedQuarticLowerBound
       q (toIsometricData L) := by
+  show IsometricBlock.WeightedQuarticLowerBound q
+    (IsometricKernel.RealData.toData (toRealData L))
   apply IsometricKernel.MixedPairKernelQuarticLowerBound.toIsometric
   refine ⟨h.block_dimension_pos, ?_⟩
   intro x hx
-  simpa only [mixedPairKernelQuarticNumerator_eq_sampledVirtual] using
+  simpa only [mixedPairKernelQuarticNumerator_eq_sampledVirtual (A := A)] using
     h.eventually_gt x hx
 
 
@@ -596,7 +600,7 @@ structure RoutedFourierGrid
       (ρ ρ' : ℂ),
       routedVirtualAtom G A T r k ρ *
           routedVirtualAtom G A T r k ρ' =
-        ((F.fullLength T : ℂ) / (period T r : ℂ)) *
+        ((@QuarticGramFamily.fullLength σ T : ℂ) / (period T r : ℂ)) *
           (paperFT (fun u => (window T r u : ℂ))
               (gammaOf ρ -
                 (T + (frequency T r k : ℝ) *
@@ -661,7 +665,7 @@ theorem routedVirtualPairSum_eq_frequencyGrid
     (T : ℝ) (ρ ρ' : ℂ) :
     routedVirtualPairSum G A T ρ ρ' =
       ∑ r : ι,
-        ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+        ((@QuarticGramFamily.fullLength σ T : ℂ) / (H.period T r : ℂ)) *
           ∑ k : Fin (G.labelCount T),
             paperFT (fun u => (H.window T r u : ℂ))
                 (gammaOf ρ -
@@ -689,7 +693,7 @@ theorem routedVirtualPairSum_eq_fullLattice_sub_tail
     (T : ℝ) (ρ ρ' : ℂ) :
     routedVirtualPairSum G A T ρ ρ' =
       ∑ r : ι,
-        ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+        ((@QuarticGramFamily.fullLength σ T : ℂ) / (H.period T r : ℂ)) *
           (ComplexAliasBridge.virtualFrequencyPairSum
               T (H.period T r) (H.window T r)
               (gammaOf ρ) (gammaOf ρ') -
@@ -713,19 +717,19 @@ theorem routedVirtualPairSum_eq_energy_sub_tail
     (T : ℝ) (ρ ρ' : ℂ) :
     routedVirtualPairSum G A T ρ ρ' =
       ∑ r : ι,
-        (F.fullLength T : ℂ) *
-            ∫ u : ℝ,
+        ((@QuarticGramFamily.fullLength σ T : ℂ) *
+            (∫ u : ℝ,
               (H.window T r u : ℂ) * H.window T r u *
                 Complex.exp
-                  (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
-          ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
-            routedVirtualFrequencyTail H T r ρ ρ' := by
+                  (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))) -
+          ((@QuarticGramFamily.fullLength σ T : ℂ) / (H.period T r : ℂ)) *
+            routedVirtualFrequencyTail H T r ρ ρ') := by
   rw [routedVirtualPairSum_eq_fullLattice_sub_tail H]
   apply Finset.sum_congr rfl
   intro r _
   rw [mul_sub]
   rw [ComplexAliasBridge.virtualNormalizedFrequencyPairSum_eq_energyIntegral
-    (F.fullLength T) T (H.period T r) (H.supportRadius T r)
+    (@QuarticGramFamily.fullLength σ T) T (H.period T r) (H.supportRadius T r)
     (H.window T r) (h.period_pos T r)
     (h.supportRadius_nonneg T r) (h.smooth T r)
     (h.support T r) (h.even T r) (h.half_support T r)
@@ -745,13 +749,13 @@ theorem selectedVirtualPairKernel_eq_energy_sub_tail
     selectedVirtualPairKernel A T ρ ρ' =
       ((F.hatDenominator T)⁻¹ : ℂ) *
         ∑ r : ι,
-          (F.fullLength T : ℂ) *
-              ∫ u : ℝ,
+          ((@QuarticGramFamily.fullLength σ T : ℂ) *
+              (∫ u : ℝ,
                 (H.window T r u : ℂ) * H.window T r u *
                   Complex.exp
-                    (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
-            ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
-              routedVirtualFrequencyTail H T r ρ ρ' := by
+                    (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))) -
+            ((@QuarticGramFamily.fullLength σ T : ℂ) / (H.period T r : ℂ)) *
+              routedVirtualFrequencyTail H T r ρ ρ') := by
   rw [selectedVirtualPairKernel_eq_routedGrid G]
   rw [routedVirtualPairSum_eq_energy_sub_tail H h]
 
@@ -772,13 +776,13 @@ theorem mixedPairKernel_canonical_eq_energy_sub_tail
     IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' =
       ((F.hatDenominator T)⁻¹ : ℂ) *
         ∑ r : ι,
-          (F.fullLength T : ℂ) *
-              ∫ u : ℝ,
+          ((@QuarticGramFamily.fullLength σ T : ℂ) *
+              (∫ u : ℝ,
                 (H.window T r u : ℂ) * H.window T r u *
                   Complex.exp
-                    (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
-            ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
-              routedVirtualFrequencyTail H T r ρ ρ' := by
+                    (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))) -
+            ((@QuarticGramFamily.fullLength σ T : ℂ) / (H.period T r : ℂ)) *
+              routedVirtualFrequencyTail H T r ρ ρ') := by
   calc
     IsometricKernel.mixedPairKernel (toRealData L) T ρ ρ' =
         selectedVirtualPairKernel
@@ -799,13 +803,13 @@ def canonicalRoutedEnergyTailKernel
     (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
   ((F.hatDenominator T)⁻¹ : ℂ) *
     ∑ r : ι,
-      (F.fullLength T : ℂ) *
-          ∫ u : ℝ,
+      ((@QuarticGramFamily.fullLength σ T : ℂ) *
+          (∫ u : ℝ,
             (H.window T r u : ℂ) * H.window T r u *
               Complex.exp
-                (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
-        ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
-          routedVirtualFrequencyTail H T r ρ ρ'
+                (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ))) -
+        ((@QuarticGramFamily.fullLength σ T : ℂ) / (H.period T r : ℂ)) *
+          routedVirtualFrequencyTail H T r ρ ρ')
 
 /-- The physical mixed kernel equals the named canonical energy-tail kernel
 at every pair of complex frequencies. -/
@@ -871,7 +875,7 @@ def symmetricRoutedPairKernel
     (T : ℝ) (n : ℕ) (ρ ρ' : ℂ) : ℂ :=
   ((F.hatDenominator T)⁻¹ : ℂ) *
     ∑ r : ι,
-      ((F.fullLength T : ℂ) / (H.period T r : ℂ)) *
+      ((@QuarticGramFamily.fullLength σ T : ℂ) / (H.period T r : ℂ)) *
         ComplexAliasBridge.virtualSymmetricFrequencyPartialSum
           T (H.period T r) (H.window T r)
           (gammaOf ρ) (gammaOf ρ') n
@@ -887,7 +891,7 @@ def routedEnergyPairKernel
     (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
   ((F.hatDenominator T)⁻¹ : ℂ) *
     ∑ r : ι,
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (H.window T r u : ℂ) * H.window T r u *
             Complex.exp
@@ -913,7 +917,7 @@ theorem tendsto_symmetricRoutedPairKernel_energy
   intro r hr
   exact
     ComplexAliasBridge.tendsto_virtualNormalizedSymmetricFrequencyPartialSum_energy
-      (F.fullLength T) T (H.period T r) (H.supportRadius T r)
+      (@QuarticGramFamily.fullLength σ T) T (H.period T r) (H.supportRadius T r)
       (H.window T r) (h.period_pos T r)
       (h.supportRadius_nonneg T r) (h.smooth T r)
       (h.support T r) (h.even T r) (h.half_support T r)
@@ -976,7 +980,7 @@ theorem exists_symmetricRoutedQuarticNumerator_gt
     (hx : x < routedEnergyQuarticNumerator q H T) :
     ∃ n : ℕ, x < symmetricRoutedQuarticNumerator q H T n := by
   have he :=
-    (tendsto_symmetricRoutedQuarticNumerator_energy H h T).eventually
+    (tendsto_symmetricRoutedQuarticNumerator_energy (q := q) H h T).eventually
       (Ioi_mem_nhds hx)
   exact he.exists
 
@@ -996,7 +1000,7 @@ theorem exists_symmetricRoutedQuarticNumerator_dist_lt
       dist (symmetricRoutedQuarticNumerator q H T n)
         (routedEnergyQuarticNumerator q H T) < ε := by
   have he :=
-    (tendsto_symmetricRoutedQuarticNumerator_energy H h T).eventually
+    (tendsto_symmetricRoutedQuarticNumerator_energy (q := q) H h T).eventually
       (Metric.ball_mem_nhds _ hε)
   simpa only [Metric.mem_ball] using he.exists
 
@@ -1336,7 +1340,7 @@ theorem integrable_routedEnergyIntegrand
       isCompact_Icc ?_
     intro u hu
     have habs : H.supportRadius T r < |u| := by
-      simp only [mem_Icc, not_and_or, not_le] at hu
+      simp only [Set.mem_Icc, not_and_or, not_le] at hu
       rcases hu with hu | hu
       · rw [abs_of_neg
           (lt_of_lt_of_le hu
@@ -1370,7 +1374,7 @@ def physicalWindowEnergyPairKernel
     (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
   ((F.hatDenominator T)⁻¹ : ℂ) *
-    (F.fullLength T : ℂ) *
+    (@QuarticGramFamily.fullLength σ T : ℂ) *
       ∫ u : ℝ,
         (F.windowEnergy T u : ℂ) *
           Complex.exp
@@ -1390,11 +1394,11 @@ theorem routedEnergyPairKernel_eq_physicalWindowEnergyPairKernel
     routedEnergyPairKernel H T ρ ρ' =
       physicalWindowEnergyPairKernel F T ρ ρ' := by
   unfold routedEnergyPairKernel physicalWindowEnergyPairKernel
-  rw [← mul_assoc]
+  rw [mul_assoc]
   apply congrArg
     (fun w : ℂ => ((F.hatDenominator T)⁻¹ : ℂ) * w)
   rw [← Finset.mul_sum]
-  apply congrArg (fun w : ℂ => (F.fullLength T : ℂ) * w)
+  apply congrArg (fun w : ℂ => (@QuarticGramFamily.fullLength σ T : ℂ) * w)
   let f : ι → ℝ → ℂ := fun r u =>
     (H.window T r u : ℂ) * H.window T r u *
       Complex.exp
@@ -1445,7 +1449,7 @@ theorem physicalWindowEnergyPairKernel_eq_normalized
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     (F : QuarticGramFamily Z σ μ p v)
     (T : ℝ)
-    (hfull : F.fullLength T ≠ 0)
+    (hfull : @QuarticGramFamily.fullLength σ T ≠ 0)
     (hmass : (∫ u : ℝ, F.windowEnergy T u) ≠ 0)
     (ρ ρ' : ℂ) :
     physicalWindowEnergyPairKernel F T ρ ρ' =
@@ -1453,12 +1457,13 @@ theorem physicalWindowEnergyPairKernel_eq_normalized
   unfold physicalWindowEnergyPairKernel
     normalizedPhysicalWindowEnergyPairKernel
     QuarticGramFamily.hatDenominator
-  have hfullC : (F.fullLength T : ℂ) ≠ 0 := by
+  have hfullC : (@QuarticGramFamily.fullLength σ T : ℂ) ≠ 0 := by
     exact_mod_cast hfull
   have hmassC :
       (∫ u : ℝ, F.windowEnergy T u : ℂ) ≠ 0 := by
     exact_mod_cast hmass
   push_cast
+  rw [integral_complex_ofReal]
   field_simp [hfullC, hmassC]
 
 end AlignedIsometricLayout
