@@ -39,6 +39,100 @@ def centeredBump
   rIn_pos := hIn
   rIn_lt_rOut := hRadii
 
+
+/-- A smooth central core cutoff.  It preserves the target on the inner
+closed ball and vanishes outside the outer ball. -/
+def coreWindow
+    (target : ℝ → ℝ) (c d : ℝ)
+    (hc : 0 < c) (hcd : c < d)
+    (x : ℝ) : ℝ :=
+  centeredBump c d hc hcd x * target x
+
+/-- The central core is as smooth as its target. -/
+theorem coreWindow_contDiff
+    (target : ℝ → ℝ) (c d : ℝ)
+    (hc : 0 < c) (hcd : c < d)
+    (htarget : ContDiff ℝ 2 target) :
+    ContDiff ℝ 2 (coreWindow target c d hc hcd) := by
+  unfold coreWindow
+  exact (centeredBump c d hc hcd).contDiff.mul htarget
+
+/-- Complex coercion preserves twice-smoothness of the core. -/
+theorem coreWindow_contDiff_complex
+    (target : ℝ → ℝ) (c d : ℝ)
+    (hc : 0 < c) (hcd : c < d)
+    (htarget : ContDiff ℝ 2 target) :
+    ContDiff ℝ 2
+      (fun x => (coreWindow target c d hc hcd x : ℂ)) := by
+  exact Complex.ofRealCLM.contDiff.comp
+    (coreWindow_contDiff target c d hc hcd htarget)
+
+/-- An even target gives an even central core. -/
+theorem coreWindow_even
+    (target : ℝ → ℝ) (c d : ℝ)
+    (hc : 0 < c) (hcd : c < d)
+    (htarget : ∀ x, target (-x) = target x)
+    (x : ℝ) :
+    coreWindow target c d hc hcd (-x) =
+      coreWindow target c d hc hcd x := by
+  unfold coreWindow
+  rw [ContDiffBump.neg, htarget]
+
+/-- The central core vanishes at and beyond its outer radius. -/
+theorem coreWindow_eq_zero_of_outer_le_abs
+    (target : ℝ → ℝ) (c d : ℝ)
+    (hc : 0 < c) (hcd : c < d)
+    {x : ℝ} (hx : d ≤ |x|) :
+    coreWindow target c d hc hcd x = 0 := by
+  have hout : centeredBump c d hc hcd x = 0 := by
+    apply ContDiffBump.zero_of_le_dist
+    simpa [Real.dist_eq] using hx
+  unfold coreWindow
+  rw [hout]
+  ring
+
+/-- The topological support of the central core lies in its closed outer
+ball. -/
+theorem coreWindow_tsupport_subset
+    (target : ℝ → ℝ) (c d : ℝ)
+    (hc : 0 < c) (hcd : c < d) :
+    tsupport (coreWindow target c d hc hcd) ⊆ Icc (-d) d := by
+  change
+    closure (Function.support (coreWindow target c d hc hcd)) ⊆
+      Icc (-d) d
+  apply closure_minimal
+  · intro x hx
+    change coreWindow target c d hc hcd x ≠ 0 at hx
+    have habs : |x| < d := by
+      by_contra hnot
+      exact hx
+        (coreWindow_eq_zero_of_outer_le_abs
+          target c d hc hcd (le_of_not_gt hnot))
+    exact ⟨(abs_lt.mp habs).1.le, (abs_lt.mp habs).2.le⟩
+  · exact isClosed_Icc
+
+/-- If the outer core radius is at most half a period, the core satisfies
+the closed-half-period alias condition exactly. -/
+theorem coreWindow_halfPeriodSupport
+    (target : ℝ → ℝ) (c d L : ℝ)
+    (hc : 0 < c) (hcd : c < d)
+    (hd : d ≤ L / 2) :
+    tsupport (coreWindow target c d hc hcd) ⊆
+      Icc (-L / 2) (L / 2) := by
+  intro x hx
+  have hxd :=
+    coreWindow_tsupport_subset target c d hc hcd hx
+  exact ⟨by linarith [hxd.1, hd], by linarith [hxd.2, hd]⟩
+
+/-- A strict absolute support-radius clause for the central core. -/
+theorem coreWindow_supportRadius
+    (target : ℝ → ℝ) (c d : ℝ)
+    (hc : 0 < c) (hcd : c < d)
+    {x : ℝ} (hx : d < |x|) :
+    coreWindow target c d hc hcd x = 0 :=
+  coreWindow_eq_zero_of_outer_le_abs
+    target c d hc hcd hx.le
+
 /-- A smooth radial shell.  It vanishes on the closed ball of radius a and
 outside the open ball of radius b.  It equals target on c ≤ |x| ≤ d. -/
 def shellWindow

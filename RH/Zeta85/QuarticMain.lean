@@ -519,6 +519,57 @@ theorem rung9506_cumulative_radialShell_energyTail
   simpa only [Rung9506_cumulative_statement] using
     quarticCumulative hdyadic
 
+
+/-! ## Central-core radial-shell energy-tail route -/
+
+/-- Frozen R-8686 from a complete central core plus smooth outer radial
+shells. -/
+theorem rung8686_coreRadialShell_energyTail
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.CoreData F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal8686.dual) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (hshell.literalEnergyTailLowerBound_toIsometric htail)
+
+/-- Frozen R-9506 from a complete central core plus smooth outer radial
+shells. -/
+theorem rung9506_coreRadialShell_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.CoreData F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (hshell.literalEnergyTailLowerBound_toIsometric htail)
+
+/-- Cumulative frozen R-9506 from the core-plus-shell construction. -/
+theorem rung9506_cumulative_coreRadialShell_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.CoreData F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_coreRadialShell_energyTail
+        hfull hzero hshell htail
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
 end Zeta85
 end RH
 
