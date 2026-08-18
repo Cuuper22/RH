@@ -4,9 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 import Mathlib.Data.Nat.Choose.Basic
+import Mathlib.Data.Nat.Factorization.Basic
 import Mathlib.Data.Finset.Powerset
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.BigOperators.Ring.Finset
+import Mathlib.Algebra.BigOperators.Associated
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
+import Mathlib.Order.Interval.Finset.Basic
 import Mathlib.NumberTheory.EulerProduct.Basic
 import Mathlib.NumberTheory.Harmonic.Bounds
 import Mathlib.NumberTheory.PrimeCounting
@@ -274,6 +278,145 @@ theorem brun_prod_one_sub_le (z : ℕ) (hz : 2 ≤ z) :
           * (∏ p ∈ Nat.primesBelow (z + 1), (1 - 1 / (p : ℝ)))⁻¹ :=
         mul_le_mul_of_nonneg_left hkey hB.le
     _ = 1 := mul_inv_cancel₀ hB.ne'
+
+/-! ## Part (c), stretch prefix: divisor counts in an interval and the sieve interchange -/
+
+/-- Exact count of multiples of `d` in the half-open interval `(u, u+v]`:
+`#{n ∈ (u, u+v] : d ∣ n} = ⌊(u+v)/d⌋ - ⌊u/d⌋` (natural-number division). -/
+theorem brun_Ioc_filter_dvd_card (u v d : ℕ) :
+    ((Finset.Ioc u (u + v)).filter (fun x => d ∣ x)).card = (u + v) / d - u / d := by
+  have hdisj : Disjoint (Finset.Ioc 0 u) (Finset.Ioc u (u + v)) :=
+    Finset.disjoint_left.mpr fun x hx hx' =>
+      absurd (Finset.mem_Ioc.mp hx).2 (not_le.mpr (Finset.mem_Ioc.mp hx').1)
+  have h := Nat.Ioc_filter_dvd_card_eq_div (u + v) d
+  rw [← Finset.Ioc_union_Ioc_eq_Ioc (Nat.zero_le u) (Nat.le_add_right u v),
+    Finset.filter_union,
+    Finset.card_union_of_disjoint
+      (hdisj.mono (Finset.filter_subset _ _) (Finset.filter_subset _ _)),
+    Nat.Ioc_filter_dvd_card_eq_div u d] at h
+  omega
+
+/-- Cast comparison for natural division, lower bound: `m/d < ⌊m/d⌋ + 1` in `ℝ`. -/
+theorem brun_cast_div_lt_succ (m d : ℕ) (hd : 0 < d) :
+    (m : ℝ) / (d : ℝ) < ((m / d : ℕ) : ℝ) + 1 := by
+  have hd0 : (0 : ℝ) < d := by exact_mod_cast hd
+  rw [div_lt_iff₀ hd0]
+  have hnat : m < (m / d + 1) * d := by
+    have hmod : m % d < d := Nat.mod_lt _ hd
+    have hdm : d * (m / d) + m % d = m := Nat.div_add_mod m d
+    calc m = d * (m / d) + m % d := hdm.symm
+      _ < d * (m / d) + d := by omega
+      _ = (m / d + 1) * d := by ring
+  exact_mod_cast hnat
+
+/-- The count of multiples of `d` in `(u, u+v]` differs from `v/d` by at most `1`
+(real-valued form of `brun_Ioc_filter_dvd_card`). -/
+theorem brun_Ioc_filter_dvd_card_error (u v d : ℕ) (hd : 0 < d) :
+    |((((Finset.Ioc u (u + v)).filter (fun x => d ∣ x)).card : ℝ)) - (v : ℝ) / (d : ℝ)| ≤ 1 := by
+  have hle : u / d ≤ (u + v) / d := Nat.div_le_div_right (Nat.le_add_right u v)
+  have hupA : (((u + v) / d : ℕ) : ℝ) ≤ ((u + v : ℕ) : ℝ) / (d : ℝ) := Nat.cast_div_le
+  have hupB : ((u / d : ℕ) : ℝ) ≤ (u : ℝ) / (d : ℝ) := Nat.cast_div_le
+  have hlowA : ((u + v : ℕ) : ℝ) / (d : ℝ) < (((u + v) / d : ℕ) : ℝ) + 1 :=
+    brun_cast_div_lt_succ (u + v) d hd
+  have hlowB : (u : ℝ) / (d : ℝ) < ((u / d : ℕ) : ℝ) + 1 :=
+    brun_cast_div_lt_succ u d hd
+  have hsplit : ((u + v : ℕ) : ℝ) / (d : ℝ) = (u : ℝ) / (d : ℝ) + (v : ℝ) / (d : ℝ) := by
+    push_cast
+    rw [add_div]
+  rw [brun_Ioc_filter_dvd_card, Nat.cast_sub hle, abs_le]
+  constructor
+  · linarith
+  · linarith
+
+/-- **Interval-sum interchange for the truncated sieve.**  The number of `P`-rough
+integers in `(u, u+v]` is at most the signed sum, over the subsets `S ⊆ P` with
+`|S| ≤ 2k`, of the counts of multiples of `∏ S` in the interval.  This is the pointwise
+Bonferroni bound `brun_indicator_le` summed over the interval, with the order of
+summation exchanged. -/
+theorem brun_interval_sieve (P : Finset ℕ) (hP : ∀ p ∈ P, p.Prime) (u v k : ℕ) :
+    (((Finset.Ioc u (u + v)).filter (fun m => ∀ p ∈ P, ¬ p ∣ m)).card : ℤ)
+      ≤ ∑ S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k),
+          (-1 : ℤ) ^ S.card
+            * (((Finset.Ioc u (u + v)).filter (fun m => S.prod id ∣ m)).card : ℤ) := by
+  calc (((Finset.Ioc u (u + v)).filter (fun m => ∀ p ∈ P, ¬ p ∣ m)).card : ℤ)
+      = ∑ m ∈ Finset.Ioc u (u + v), (if ∀ p ∈ P, ¬ p ∣ m then (1 : ℤ) else 0) :=
+        Finset.natCast_card_filter _ _
+    _ ≤ ∑ m ∈ Finset.Ioc u (u + v),
+          ∑ S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k ∧ ∀ p ∈ S, p ∣ m),
+            (-1 : ℤ) ^ S.card :=
+        Finset.sum_le_sum fun m hm =>
+          brun_indicator_le P hP m (by have h := (Finset.mem_Ioc.mp hm).1; omega) k
+    _ = ∑ m ∈ Finset.Ioc u (u + v),
+          ∑ S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k),
+            (if ∀ p ∈ S, p ∣ m then (-1 : ℤ) ^ S.card else 0) := by
+        refine Finset.sum_congr rfl fun m _ => ?_
+        rw [← Finset.filter_filter, Finset.sum_filter]
+    _ = ∑ S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k),
+          ∑ m ∈ Finset.Ioc u (u + v),
+            (if ∀ p ∈ S, p ∣ m then (-1 : ℤ) ^ S.card else 0) := Finset.sum_comm
+    _ = ∑ S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k),
+          (-1 : ℤ) ^ S.card
+            * (((Finset.Ioc u (u + v)).filter (fun m => S.prod id ∣ m)).card : ℤ) := by
+        refine Finset.sum_congr rfl fun S hS => ?_
+        have hSsub : S ⊆ P := Finset.mem_powerset.mp (Finset.mem_filter.mp hS).1
+        have hcond : ∀ m : ℕ, (∀ p ∈ S, p ∣ m) ↔ S.prod id ∣ m := by
+          intro m
+          constructor
+          · intro h
+            exact Finset.prod_primes_dvd m (fun p hp => (hP p (hSsub hp)).prime) h
+          · intro h p hp
+            exact dvd_trans (Finset.dvd_prod_of_mem id hp) h
+        calc ∑ m ∈ Finset.Ioc u (u + v), (if ∀ p ∈ S, p ∣ m then (-1 : ℤ) ^ S.card else 0)
+            = ∑ m ∈ Finset.Ioc u (u + v),
+                (if S.prod id ∣ m then (-1 : ℤ) ^ S.card else 0) :=
+              Finset.sum_congr rfl fun m _ => if_congr (hcond m) rfl rfl
+          _ = ∑ m ∈ (Finset.Ioc u (u + v)).filter (fun m => S.prod id ∣ m),
+                (-1 : ℤ) ^ S.card := by rw [Finset.sum_filter]
+          _ = ((Finset.Ioc u (u + v)).filter (fun m => S.prod id ∣ m)).card
+                • (-1 : ℤ) ^ S.card := Finset.sum_const _
+          _ = (-1 : ℤ) ^ S.card
+                * (((Finset.Ioc u (u + v)).filter (fun m => S.prod id ∣ m)).card : ℤ) := by
+              rw [nsmul_eq_mul, mul_comm]
+
+/-- A signed rounding step: if `|x - y| ≤ 1` then `(-1)^c x ≤ (-1)^c y + 1`. -/
+theorem brun_signed_error_le {x y : ℝ} (c : ℕ) (h : |x - y| ≤ 1) :
+    (-1 : ℝ) ^ c * x ≤ (-1 : ℝ) ^ c * y + 1 := by
+  have h1 : (-1 : ℝ) ^ c * (x - y) ≤ 1 := by
+    calc (-1 : ℝ) ^ c * (x - y) ≤ |(-1 : ℝ) ^ c * (x - y)| := le_abs_self _
+      _ = |(-1 : ℝ) ^ c| * |x - y| := abs_mul _ _
+      _ = |x - y| := by rw [abs_pow, abs_neg, abs_one, one_pow, one_mul]
+      _ ≤ 1 := h
+  have h2 : (-1 : ℝ) ^ c * x - (-1 : ℝ) ^ c * y ≤ 1 := by
+    have hexp : (-1 : ℝ) ^ c * x - (-1 : ℝ) ^ c * y = (-1 : ℝ) ^ c * (x - y) := by ring
+    rw [hexp]
+    exact h1
+  linarith
+
+/-- **Rough-number count in an interval, with explicit truncation error.**
+For a finite set `P` of primes, the number of `P`-rough integers in `(u, u+v]` is at
+most the signed density sum `∑_{S ⊆ P, |S| ≤ 2k} (-1)^{|S|} · v/∏S` plus one unit of
+rounding error per subset, i.e. plus `#{S ⊆ P : |S| ≤ 2k}`.  The identification of the
+signed main term with `v · ∏_{p ∈ P} (1 - 1/p)` up to the Bonferroni tail is the next,
+separate step of the Route 3 assembly (it consumes `brun_prod_one_sub_le`). -/
+theorem brun_rough_count_le (P : Finset ℕ) (hP : ∀ p ∈ P, p.Prime) (u v k : ℕ) :
+    (((Finset.Ioc u (u + v)).filter (fun m => ∀ p ∈ P, ¬ p ∣ m)).card : ℝ)
+      ≤ (∑ S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k),
+            (-1 : ℝ) ^ S.card * ((v : ℝ) / ((S.prod id : ℕ) : ℝ)))
+          + ((P.powerset.filter (fun S => S.card ≤ 2 * k)).card : ℝ) := by
+  have hR : (((Finset.Ioc u (u + v)).filter (fun m => ∀ p ∈ P, ¬ p ∣ m)).card : ℝ)
+      ≤ ∑ S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k),
+          (-1 : ℝ) ^ S.card
+            * (((Finset.Ioc u (u + v)).filter (fun m => S.prod id ∣ m)).card : ℝ) := by
+    exact_mod_cast brun_interval_sieve P hP u v k
+  refine hR.trans ?_
+  have hcardsum : ((P.powerset.filter (fun S => S.card ≤ 2 * k)).card : ℝ)
+      = ∑ _S ∈ P.powerset.filter (fun S => S.card ≤ 2 * k), (1 : ℝ) := by
+    rw [Finset.sum_const, nsmul_eq_mul, mul_one]
+  rw [hcardsum, ← Finset.sum_add_distrib]
+  refine Finset.sum_le_sum fun S hS => ?_
+  have hSsub : S ⊆ P := Finset.mem_powerset.mp (Finset.mem_filter.mp hS).1
+  have hD : 0 < S.prod id := Finset.prod_pos fun p hp => (hP p (hSsub hp)).pos
+  exact brun_signed_error_le S.card (brun_Ioc_filter_dvd_card_error u v (S.prod id) hD)
 
 end Shiu
 end Zeta85
