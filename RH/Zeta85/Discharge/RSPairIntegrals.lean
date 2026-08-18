@@ -30,14 +30,14 @@ evaluated by Fubini and two sequential scale changes.  The resulting
 coefficients.
 -/
 
-open MeasureTheory
-open scoped BigOperators Matrix Convolution
+open MeasureTheory Zeta23
+open scoped BigOperators Matrix Convolution ContDiff
 
 noncomputable section
 
 namespace RH.Zeta85.RSPairIntegrals
 
-open RSReduction
+open RSReduction TopHatMoments
 
 lemma integral_abs_mul_shift_div (mu x : ℝ) (f : ℝ → ℝ) (hmu : 0 < mu) :
     (∫ w : ℝ, |w| * f (x + w / mu)) =
@@ -1371,5 +1371,473 @@ theorem normalizedRSMainTerm_k4_of_continuous_compactSupport
       mu r hmu.ne' hr hrc)
     (nestedDistanceKernel_integrable_of_continuous_compact r hr hrc)
     (crossingRawKernel_integrable_of_continuous_compact mu r hmu.ne' hr hrc)
+
+
+/-! ## Concrete quartic scalar carried by the frozen smooth test -/
+
+/-- The real scalar appearing in the normalized quartic RS main term. -/
+def quarticRSScalar (mu : ℝ) (r : ℝ -> ℝ) : ℝ :=
+  (∫ x : ℝ, r x ^ 4) +
+    mu ^ 2 * (4 * distanceIntegral (fun x => r x ^ 3) r +
+      2 * distanceIntegral (fun x => r x ^ 2) (fun x => r x ^ 2)) +
+    mu ^ 4 * (2 * pairSquaredPotentialIntegral r + crossingFunctional r)
+
+/-- The normalized quartic main term is exactly the displayed real
+contraction scalar. -/
+theorem normalizedRSMainTerm_k4_eq_quarticRSScalar
+    (mu : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    normalizedRSMainTerm mu (weightedCyclicSymbol (k := 4) mu r) =
+      (quarticRSScalar mu r : ℝ) := by
+  simpa only [quarticRSScalar] using
+    normalizedRSMainTerm_k4_of_continuous_compactSupport mu r hmu hr hrc
+
+/-- Undoing the normalization exposes the literal scalar multiplying the
+height factor in the four-point theorem. -/
+theorem rsMainTerm_k4_eq_mu_mul_quarticRSScalar
+    (mu : ℝ) (r : ℝ -> ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    rsMainTerm (weightedCyclicSymbol (k := 4) mu r) =
+      (mu * quarticRSScalar mu r : ℝ) := by
+  have h :=
+    normalizedRSMainTerm_k4_eq_quarticRSScalar mu r hmu hr hrc
+  change rsMainTerm (weightedCyclicSymbol (k := 4) mu r) / (mu : ℂ) =
+    (quarticRSScalar mu r : ℂ) at h
+  have hmuC : (mu : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr hmu.ne'
+  have hm := (div_eq_iff hmuC).mp h
+  simpa [mul_comm] using hm
+
+/-- The literal profile used by the frozen strict-support construction has a
+fully evaluated quartic RS main term. -/
+theorem unitIntervalProfile_rsMainTerm :
+    rsMainTerm
+        (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+          unitIntervalProfile) =
+      ((4999 / 10000 : ℝ) *
+        quarticRSScalar (4999 / 10000 : ℝ) unitIntervalProfile : ℝ) := by
+  apply rsMainTerm_k4_eq_mu_mul_quarticRSScalar
+  · norm_num
+  · exact unitIntervalProfile_contDiff.continuous
+  · exact unitIntervalProfile_hasCompactSupport
+
+/-- The four-point RS theorem for the frozen smooth test, with its main term
+rewritten as the concrete quartic contraction scalar. -/
+theorem RS1996ZetaInputs.unitIntervalQuartic_evaluated
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (g : Fin 4 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+          unitIntervalProfile) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ)
+            unitIntervalProfile) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          (((4999 / 10000 : ℝ) *
+            quarticRSScalar (4999 / 10000 : ℝ)
+              unitIntervalProfile : ℝ) : ℂ)‖ ≤ C * T := by
+  obtain ⟨C, T0, hC, hT0, hRS⟩ := RSReduction.RS1996ZetaInputs.unitIntervalQuartic hrs g hg
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  refine ⟨hSummable, ?_⟩
+  rw [unitIntervalProfile_rsMainTerm] at hBound
+  exact hBound
+
+
+/-- The four-point theorem for an arbitrary smooth unit-interval profile,
+with the main term completely reduced to the quartic contraction scalar. -/
+theorem RS1996ZetaInputs.frozenQuartic_evaluated
+    {Z : ZeroConfig} (hrs : RS1996ZetaInputs Z)
+    (r : ℝ -> ℝ) (hrc : HasCompactSupport r)
+    (hrSmooth : ContDiff ℝ 1 r)
+    (hrSupport : ∀ x, r x ≠ 0 -> (0 : ℝ) ≤ x ∧ x ≤ 1)
+    (g : Fin 4 -> ℝ -> ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j)) :
+    ∃ C T0 : ℝ, 0 ≤ C ∧ 1 ≤ T0 ∧ ∀ T ≥ T0,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := 4) (4999 / 10000 : ℝ) r) T rho) -
+        rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+          (((4999 / 10000 : ℝ) *
+            quarticRSScalar (4999 / 10000 : ℝ) r : ℝ) : ℂ)‖ ≤ C * T := by
+  obtain ⟨C, T0, hC, hT0, hRS⟩ :=
+    RSReduction.RS1996ZetaInputs.frozenQuartic hrs r hrc hrSmooth hrSupport g hg
+  refine ⟨C, T0, hC, hT0, ?_⟩
+  intro T hT
+  obtain ⟨hSummable, hBound⟩ := hRS T hT
+  refine ⟨hSummable, ?_⟩
+  rw [rsMainTerm_k4_eq_mu_mul_quarticRSScalar
+    (4999 / 10000 : ℝ) r (by norm_num)
+    hrSmooth.continuous hrc] at hBound
+  exact hBound
+
+/-! ## Exact sharp top-hat contractions -/
+
+open RSReduction TopHatMoments
+
+theorem integral_topHat_pow_univ {p : ℝ} {k : ℕ}
+    (hp : 0 < p) (hk : k ≠ 0) :
+    (∫ x : ℝ, topHat p x ^ k) = p * (1 / p) ^ k := by
+  have heq : (fun x : ℝ => topHat p x ^ k) =
+      (topHatSupport p).indicator (fun _ => (1 / p) ^ k) := by
+    funext x
+    by_cases hx : x ∈ topHatSupport p
+    · simp [topHat, hx]
+    · simp [topHat, hx, hk]
+  rw [heq]
+  unfold topHatSupport
+  rw [integral_indicator_const _ measurableSet_Icc]
+  rw [Real.volume_real_Icc_of_le (by linarith), smul_eq_mul]
+  ring
+
+theorem integral_topHat_univ {p : ℝ} (hp : 0 < p) :
+    (∫ x : ℝ, topHat p x) = 1 := by
+  rw [show (fun x : ℝ => topHat p x) = fun x => topHat p x ^ 1 by
+    funext x; simp]
+  rw [integral_topHat_pow_univ hp (by norm_num)]
+  field_simp [ne_of_gt hp]
+
+theorem pairDistancePotential_topHat {p : ℝ} (hp : 0 < p) (x : ℝ) :
+    pairDistancePotential (topHat p) x = distancePotential p x := by
+  have heq : (fun y : ℝ => |y - x| * topHat p y) =
+      (topHatSupport p).indicator (fun y => |y - x| * (1 / p)) := by
+    funext y
+    by_cases hy : y ∈ topHatSupport p
+    · simp [topHat, hy]
+    · simp [topHat, hy]
+  unfold pairDistancePotential
+  rw [heq]
+  unfold topHatSupport distancePotential
+  rw [integral_indicator measurableSet_Icc,
+    integral_Icc_eq_integral_Ioc]
+  simpa [abs_sub_comm, div_eq_mul_inv] using
+    (intervalIntegral.integral_of_le (μ := MeasureTheory.volume)
+      (a := -p / 2) (b := p / 2)
+      (f := fun y : ℝ => |y - x| * (1 / p)) (by linarith)).symm
+
+theorem distanceIntegral_topHat {p : ℝ} (hp : 0 < p) :
+    distanceIntegral (topHat p) (topHat p) = rDistanceIntegral p := by
+  unfold distanceIntegral
+  change (∫ x : ℝ,
+    topHat p x * pairDistancePotential (topHat p) x) = rDistanceIntegral p
+  simp_rw [pairDistancePotential_topHat hp]
+  have heq : (fun x : ℝ => topHat p x * distancePotential p x) =
+      (topHatSupport p).indicator
+        (fun x => (1 / p) * distancePotential p x) := by
+    funext x
+    by_cases hx : x ∈ topHatSupport p
+    · simp [topHat, hx]
+    · simp [topHat, hx]
+  rw [heq]
+  unfold topHatSupport rDistanceIntegral
+  rw [integral_indicator measurableSet_Icc,
+    integral_Icc_eq_integral_Ioc]
+  simpa using
+    (intervalIntegral.integral_of_le (μ := MeasureTheory.volume)
+      (a := -p / 2) (b := p / 2)
+      (f := fun x : ℝ => (1 / p) * distancePotential p x)
+        (by linarith)).symm
+
+theorem pairSquaredPotential_topHat {p : ℝ} (hp : 0 < p) :
+    pairSquaredPotentialIntegral (topHat p) = squaredPotentialIntegral p := by
+  unfold pairSquaredPotentialIntegral
+  simp_rw [pairDistancePotential_topHat hp]
+  have heq :
+      (fun x : ℝ => topHat p x ^ 2 * distancePotential p x ^ 2) =
+        (topHatSupport p).indicator
+          (fun x => (1 / p) ^ 2 * distancePotential p x ^ 2) := by
+    funext x
+    by_cases hx : x ∈ topHatSupport p
+    · simp [topHat, hx]
+    · simp [topHat, hx]
+  rw [heq]
+  unfold topHatSupport squaredPotentialIntegral
+  rw [integral_indicator measurableSet_Icc,
+    integral_Icc_eq_integral_Ioc]
+  rw [← intervalIntegral.integral_of_le (μ := MeasureTheory.volume)
+    (a := -p / 2) (b := p / 2)
+    (f := fun x : ℝ => (1 / p) ^ 2 * distancePotential p x ^ 2)
+      (by linarith)]
+
+theorem distanceIntegral_const_mul_left (c : ℝ) (f g : ℝ → ℝ) :
+    distanceIntegral (fun x => c * f x) g = c * distanceIntegral f g := by
+  unfold distanceIntegral
+  rw [← integral_const_mul]
+  apply integral_congr_ae
+  filter_upwards [] with x
+  ring
+
+theorem distanceIntegral_const_mul_right (c : ℝ) (f g : ℝ → ℝ) :
+    distanceIntegral f (fun x => c * g x) = c * distanceIntegral f g := by
+  unfold distanceIntegral
+  rw [← integral_const_mul]
+  apply integral_congr_ae
+  filter_upwards [] with x
+  have hinner : (∫ y : ℝ, |y - x| * (c * g y)) =
+      c * ∫ y : ℝ, |y - x| * g y := by
+    rw [← integral_const_mul]
+    apply integral_congr_ae
+    filter_upwards [] with y
+    ring
+  rw [hinner]
+  ring
+
+theorem topHat_pow_eq_mul {p : ℝ} {k : ℕ} (hk : 0 < k) (x : ℝ) :
+    topHat p x ^ k = (1 / p) ^ (k - 1) * topHat p x := by
+  cases k with
+  | zero => omega
+  | succ k =>
+      by_cases hx : x ∈ topHatSupport p
+      · simp [topHat, hx, pow_succ]
+      · simp [topHat, hx]
+
+theorem distanceIntegral_topHat_powers {p : ℝ} (hp : 0 < p)
+    {a b : ℕ} (ha : 0 < a) (hb : 0 < b) :
+    distanceIntegral (fun x => topHat p x ^ a) (fun x => topHat p x ^ b) =
+      (1 / p) ^ (a - 1) * (1 / p) ^ (b - 1) * rDistanceIntegral p := by
+  simp_rw [topHat_pow_eq_mul ha, topHat_pow_eq_mul hb]
+  rw [distanceIntegral_const_mul_left,
+    distanceIntegral_const_mul_right,
+    distanceIntegral_topHat hp]
+  ring
+
+theorem distanceIntegral_topHat_power_left {p : ℝ} (hp : 0 < p)
+    {a : ℕ} (ha : 0 < a) :
+    distanceIntegral (fun x => topHat p x ^ a) (topHat p) =
+      (1 / p) ^ (a - 1) * rDistanceIntegral p := by
+  simpa only [pow_one, Nat.reduceSub, pow_zero, mul_one] using
+    (distanceIntegral_topHat_powers (p := p) hp
+      (a := a) (b := 1) ha (by norm_num))
+
+theorem integral_eq_baseInterval_of_eq_zero_outside
+    (f : ℝ → ℝ)
+    (hzero : ∀ x ∉ baseWindow, f x = 0) :
+    (∫ x : ℝ, f x) =
+      ∫ x in (-(1 : ℝ) / 2)..(1 / 2), f x := by
+  rw [← setIntegral_eq_integral_of_forall_compl_eq_zero hzero]
+  unfold baseWindow
+  rw [integral_Icc_eq_integral_Ioc]
+  simpa using
+    (intervalIntegral.integral_of_le (μ := MeasureTheory.volume)
+      (a := (-(1 : ℝ) / 2)) (b := (1 / 2)) (f := f) (by norm_num)).symm
+
+theorem topHat_eq_zero_outside_base {p x : ℝ}
+    (hp : 0 < p) (hp1 : p ≤ 1) (hx : x ∉ baseWindow) :
+    topHat p x = 0 := by
+  have hnot : x ∉ topHatSupport p := by
+    intro hxsupp
+    apply hx
+    unfold topHatSupport at hxsupp
+    unfold baseWindow
+    constructor <;> linarith [hxsupp.1, hxsupp.2]
+  rw [topHat, Set.indicator_of_notMem hnot]
+
+theorem baseIndicator_topHat {p A w : ℝ}
+    (hp : 0 < p) (hp1 : p ≤ 1) :
+    baseWindow.indicator (fun z => A * topHat p z) w = A * topHat p w := by
+  by_cases hw : w ∈ baseWindow
+  · rw [Set.indicator_of_mem hw]
+  · rw [Set.indicator_of_notMem hw, topHat_eq_zero_outside_base hp hp1 hw,
+      mul_zero]
+
+theorem crossingFunctional_topHat {p : ℝ}
+    (hp : 0 < p) (hp1 : p ≤ 1) :
+    crossingFunctional (topHat p) = formulaCrossingIntegral p := by
+  unfold crossingFunctional formulaCrossingIntegral
+  calc
+    (∫ x : ℝ, topHat p x *
+        ∫ y : ℝ, |y - x| * topHat p y *
+          ∫ z : ℝ, |z - y| * topHat p z * topHat p (x + z - y)) =
+      ∫ x in (-(1 : ℝ) / 2)..(1 / 2), topHat p x *
+        ∫ y : ℝ, |y - x| * topHat p y *
+          ∫ z : ℝ, |z - y| * topHat p z * topHat p (x + z - y) := by
+      apply integral_eq_baseInterval_of_eq_zero_outside
+      intro x hx
+      rw [topHat_eq_zero_outside_base hp hp1 hx, zero_mul]
+    _ = _ := by
+      apply intervalIntegral.integral_congr
+      intro x hx
+      calc
+        topHat p x *
+            ∫ y : ℝ, |y - x| * topHat p y *
+              ∫ z : ℝ, |z - y| * topHat p z * topHat p (x + z - y) =
+          ∫ y : ℝ, topHat p x *
+            (|y - x| * topHat p y *
+              ∫ z : ℝ, |z - y| * topHat p z * topHat p (x + z - y)) := by
+            rw [integral_const_mul]
+        _ = ∫ y in (-(1 : ℝ) / 2)..(1 / 2), topHat p x *
+            (|y - x| * topHat p y *
+              ∫ z : ℝ, |z - y| * topHat p z * topHat p (x + z - y)) := by
+          apply integral_eq_baseInterval_of_eq_zero_outside
+          intro y hy
+          rw [topHat_eq_zero_outside_base hp hp1 hy]
+          ring
+        _ = _ := by
+          apply intervalIntegral.integral_congr
+          intro y hy
+          calc
+            topHat p x * (|y - x| * topHat p y *
+                ∫ z : ℝ, |z - y| * topHat p z * topHat p (x + z - y)) =
+              ∫ z : ℝ,
+                (topHat p x * |y - x| * topHat p y) *
+                  (|z - y| * topHat p z * topHat p (x + z - y)) := by
+              rw [integral_const_mul]
+              ring
+            _ = ∫ z in (-(1 : ℝ) / 2)..(1 / 2),
+                (topHat p x * |y - x| * topHat p y) *
+                  (|z - y| * topHat p z * topHat p (x + z - y)) := by
+              apply integral_eq_baseInterval_of_eq_zero_outside
+              intro z hz
+              rw [topHat_eq_zero_outside_base hp hp1 hz]
+              ring
+            _ = _ := by
+              apply intervalIntegral.integral_congr
+              intro z hz
+              change _ = baseWindow.indicator
+                (fun w =>
+                  (|x - y| * |y - z| * topHat p x * topHat p y *
+                    topHat p z) * topHat p w) (x + z - y)
+              rw [baseIndicator_topHat (p := p) (hp := hp)
+                (hp1 := hp1)]
+              change topHat p x * |y - x| * topHat p y *
+                    (|z - y| * topHat p z * topHat p (x + z - y)) =
+                  |x - y| * |y - z| * topHat p x * topHat p y *
+                    topHat p z * topHat p (x + z - y)
+              rw [abs_sub_comm y x, abs_sub_comm z y]
+              ring
+
+
+
+/-! ## The evaluated RS theorem through degree four -/
+
+/-- The four uncentered cyclic moments produced by the evaluated RS
+contractions. -/
+def cyclicUncenteredMoment (mu : ℝ) (r : ℝ → ℝ) : ℕ → ℝ
+  | 0 => 1
+  | 1 => ∫ x : ℝ, r x
+  | 2 => (∫ x : ℝ, r x ^ 2) + mu ^ 2 * distanceIntegral r r
+  | 3 => (∫ x : ℝ, r x ^ 3) +
+      3 * mu ^ 2 * distanceIntegral (fun x => r x ^ 2) r
+  | 4 => (∫ x : ℝ, r x ^ 4) +
+      mu ^ 2 * (4 * distanceIntegral (fun x => r x ^ 3) r +
+        2 * distanceIntegral (fun x => r x ^ 2) (fun x => r x ^ 2)) +
+      mu ^ 4 * (2 * pairSquaredPotentialIntegral r + crossingFunctional r)
+  | _ => 0
+
+theorem cyclicUncenteredMoment_topHat_eq_uncenteredContractionMoment
+    {p mu : ℝ} (hp : 0 < p) (hp1 : p ≤ 1)
+    (k : ℕ) (hk1 : 1 ≤ k) (hk4 : k ≤ 4) :
+    cyclicUncenteredMoment mu (topHat p) k =
+      uncenteredContractionMoment (topHatR3Terms p) mu k := by
+  have hp0 : p ≠ 0 := ne_of_gt hp
+  interval_cases k
+  · simp only [cyclicUncenteredMoment, uncenteredContractionMoment,
+      topHatR3Terms]
+    rw [integral_topHat_univ hp,
+      centeredMoment_one hp hp1]
+    field_simp [hp0]
+    ring
+  · simp only [cyclicUncenteredMoment, uncenteredContractionMoment,
+      topHatR3Terms]
+    rw [integral_topHat_pow_univ hp (by norm_num),
+      distanceIntegral_topHat hp,
+      centeredMoment_one hp hp1, centeredMoment_two hp hp1]
+    norm_num [one_div] at *
+    field_simp [hp0]
+    ring
+  · simp only [cyclicUncenteredMoment, uncenteredContractionMoment,
+      topHatR3Terms]
+    rw [integral_topHat_pow_univ hp (by norm_num),
+      distanceIntegral_topHat_power_left hp (a := 2) (by norm_num),
+      centeredMoment_one hp hp1, centeredMoment_two hp hp1,
+      centeredMoment_three hp hp1,
+      rDistanceIntegral_eq hp, qrDistanceIntegral_eq hp]
+    norm_num [one_div] at *
+    field_simp [hp0]
+    ring
+  · simp only [cyclicUncenteredMoment, uncenteredContractionMoment,
+      topHatR3Terms]
+    rw [integral_topHat_pow_univ hp (by norm_num),
+      distanceIntegral_topHat_power_left hp (a := 3) (by norm_num),
+      distanceIntegral_topHat_powers hp (a := 2) (b := 2)
+        (by norm_num) (by norm_num),
+      pairSquaredPotential_topHat hp,
+      crossingFunctional_topHat hp hp1,
+      centeredMoment_one hp hp1, centeredMoment_two hp hp1,
+      centeredMoment_three hp hp1, centeredMoment_four hp hp1,
+      rDistanceIntegral_eq hp, qrDistanceIntegral_eq hp,
+      qSquaredRDistanceIntegral_eq hp, doubleQrDistanceIntegral_eq hp,
+      squaredPotentialIntegral_eq hp, crossingReduction hp hp1,
+      crossingSimplexIntegral_eq hp]
+    norm_num [one_div] at *
+    field_simp [hp0]
+    ring
+
+/-- One statement packages every contraction evaluation in degrees one
+through four. -/
+theorem normalizedRSMainTerm_eq_cyclicUncenteredMoment
+    {n : ℕ} (hn : n ≤ 3) (mu : ℝ) (r : ℝ → ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    normalizedRSMainTerm mu (weightedCyclicSymbol (k := n + 1) mu r) =
+      (cyclicUncenteredMoment mu r (n + 1) : ℝ) := by
+  interval_cases n
+  · exact normalizedRSMainTerm_k1 mu r hmu
+  · exact normalizedRSMainTerm_k2_of_continuous_compactSupport
+      mu r hmu hr hrc
+  · exact normalizedRSMainTerm_k3_of_continuous_compactSupport
+      mu r hmu hr hrc
+  · exact normalizedRSMainTerm_k4_of_continuous_compactSupport
+      mu r hmu hr hrc
+
+private theorem rsMainTerm_eq_mu_mul_of_normalized_eq
+    {n : ℕ} {mu : ℝ} (hmu : 0 < mu)
+    (Phi : (Fin (n + 1) → ℝ) → ℂ) (a : ℂ)
+    (h : normalizedRSMainTerm mu Phi = a) :
+    rsMainTerm Phi = (mu : ℂ) * a := by
+  unfold normalizedRSMainTerm at h
+  have hu := (div_eq_iff (Complex.ofReal_ne_zero.mpr hmu.ne')).mp h
+  rw [hu]
+  ring
+
+theorem rsMainTerm_eq_cyclicUncenteredMoment
+    {n : ℕ} (hn : n ≤ 3) (mu : ℝ) (r : ℝ → ℝ) (hmu : 0 < mu)
+    (hr : Continuous r) (hrc : HasCompactSupport r) :
+    rsMainTerm (weightedCyclicSymbol (k := n + 1) mu r) =
+      (mu : ℂ) * (cyclicUncenteredMoment mu r (n + 1) : ℝ) := by
+  apply rsMainTerm_eq_mu_mul_of_normalized_eq hmu
+  exact normalizedRSMainTerm_eq_cyclicUncenteredMoment
+    hn mu r hmu hr hrc
+
+/-- The published all-tuples theorem with its main term completely evaluated
+through degree four.  The compact gauge repair is absent from the conclusion
+because it is exactly equal to the raw cyclic test on every consumed vector. -/
+theorem theorem31_cyclicUncenteredMoment
+    {Z : Zeta23.ZeroConfig} (hRS : RS1996ZetaInputs Z)
+    (n : ℕ) (hn : n ≤ 3) (g : Fin (n + 1) → ℝ → ℂ)
+    (hg : ∀ j, ContDiff ℝ ∞ (g j) ∧ HasCompactSupport (g j))
+    {delta mu : ℝ} (r : ℝ → ℝ)
+    (hr : ContDiff ℝ ∞ r) (hrc : HasCompactSupport r)
+    (hrsupp : Function.support r ⊆ Set.Icc (-(1 : ℝ) / 2) (1 / 2))
+    (hdelta : 0 < delta) (hmu : 0 < mu)
+    (hbudget : (n + 1 : ℝ) * mu + delta < 2) :
+    ∃ C T₀ : ℝ, 0 ≤ C ∧ 1 ≤ T₀ ∧ ∀ T ≥ T₀,
+      Summable (rsZeroTupleTerm Z g
+        (weightedCyclicSymbol (k := n + 1) mu r) T) ∧
+      ‖(∑' rho, rsZeroTupleTerm Z g
+          (weightedCyclicSymbol (k := n + 1) mu r) T rho) -
+          rsHeightFactor g * (T * Real.log T / (2 * Real.pi)) *
+            ((mu : ℂ) * (cyclicUncenteredMoment mu r (n + 1) : ℝ))‖ ≤
+        C * T := by
+  obtain ⟨C, T₀, hC, hT₀, hmain⟩ :=
+    RSReduction.RS1996ZetaInputs.theorem31_weightedCyclicSymbol
+      hRS n g hg r hr hrc hrsupp hdelta hmu hbudget
+  refine ⟨C, T₀, hC, hT₀, ?_⟩
+  intro T hT
+  simpa only [rsMainTerm_eq_cyclicUncenteredMoment
+    hn mu r hmu hr.continuous hrc] using hmain T hT
 
 end RH.Zeta85.RSPairIntegrals

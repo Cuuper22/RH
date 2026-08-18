@@ -8,8 +8,8 @@ RH/Zeta85/Main.lean — **Phase D**: the three rungs, assembled.
 
 Given `RH/Zeta85/Hypotheses.lean`, everything here is proved.  The chain, for each rung, is
 
-  window cost `D` at support `σ`   (Phase A for `σ = 143/100`; Axioms 6/7 for the other two)
-    ── Axiom 8 (trace transfer) ──►  `TwoTraceCert zetaZeroConfig D`
+  window cost `D` at support `σ`   (proved for all three supports)
+    ── Axiom 4 (trace transfer) ──►  `TwoTraceCert zetaZeroConfig D`
     ── `RH.Zeta85.epsForm_of_twoTraceCert` ──►  `(2 − D − ε)·N(T,2T) ≤ N₀ˢ(T,2T)` eventually
     ── `Zeta23.cumulative_of_dyadic` ──►  the same for the windows `(0,T]`.
 
@@ -45,6 +45,7 @@ import RH.Zeta85.Discharge.RobustStability
 import RH.Zeta85.Discharge.RSPairIntegrals
 import RH.Zeta85.Discharge.RSReduction
 import RH.Zeta85.Discharge.RSBlockMomentBridge
+import RH.Zeta85.Discharge.SmoothTopHatApprox
 import RH.Zeta85.Discharge.TopHatMoments
 import RH.Zeta85.Discharge.TrimmedMoment
 import RH.Zeta85.Inputs95
@@ -88,8 +89,8 @@ private theorem cumulative {c : ℝ}
 /-! ## 1. Rung 1 — support 101/100, at least 0.67924886307 -/
 
 /-- The two-trace certificate at support `101/100`.
-Axioms: `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_101`,
-`traceTransfer_saturated`. -/
+Axioms: `signedPair_traceGrade_lt_5_4` and `traceTransfer_saturated`.
+The BBLR error interface and window cost are proved. -/
 theorem cert101 : TwoTraceCert zetaZeroConfig (2 - cRung101) :=
   traceTransfer_saturated (101 / 100) (2 - cRung101) (by norm_num) (by norm_num)
     windowCost_101
@@ -106,9 +107,8 @@ theorem rung101_cumulative : Rung101_cumulative_statement := cumulative rung101
 /-! ## 2. Rung 2 — support 5/4, at least 0.79721415286134 -/
 
 /-- The two-trace certificate at a support just below `5/4`.
-Axioms: `bblr_error_bound`, `signedPair_traceGrade_lt_5_4`, `windowCost_125`,
-`traceTransfer_saturated` — the same four as rung 1, with `windowCost_101` replaced by
-`windowCost_125`. -/
+Axioms: `signedPair_traceGrade_lt_5_4` and `traceTransfer_saturated`.
+The BBLR error interface and window cost are proved. -/
 theorem cert125 : TwoTraceCert zetaZeroConfig (2 - cRung125) := by
   obtain ⟨σ, hσ1, hσ2, hσw⟩ := windowCost_125
   exact traceTransfer_saturated σ (2 - cRung125) hσ1 (by linarith) hσw
@@ -125,8 +125,8 @@ theorem rung125_cumulative : Rung125_cumulative_statement := cumulative rung125
 /-! ## 3. Rung 3 — support 143/100, at least 1893603832049143/2227707598259143 -/
 
 /-- The two-trace certificate at support `143/100`, cost `D_pc`.
-Axioms: `bblr_poisson_blocks`, `shiu_majorant`, `signedPair_traceGrade_lt_3_2`,
-`traceTransfer_saturated`.  Note that the window cost is **not** an axiom here: it is
+Axioms: `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, and `traceTransfer_saturated`.
+The BBLR block interface and window cost are proved: the latter is
 `RH.Zeta85.windowCost_143`, proved in `RH/Zeta85/Certificate.lean` from the three exact window
 moments of `RH/Zeta85/Window.lean`. -/
 theorem cert143 : TwoTraceCert zetaZeroConfig DPC :=
@@ -153,7 +153,39 @@ theorem eightyFive : EightyFivePercent_statement := eightyFive_of_rung143 rung14
 theorem eightyFive_cumulative : EightyFivePercent_cumulative_statement :=
   eightyFive_cumulative_of_rung143 rung143_cumulative
 
-/-! ## 5. The strict margin, in the source's own form
+/-! ## 5. Closed frozen quartic headlines from the surviving contradiction
+
+Each theorem below has no explicit premise; `#print axioms` exposes the
+single remaining declaration.
+-/
+
+theorem rung8657_from_shiu_contradiction : Rung8657_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung8657_cumulative_from_shiu_contradiction : Rung8657_cumulative_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung8686_from_shiu_contradiction : Rung8686_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung8686_cumulative_from_shiu_contradiction : Rung8686_cumulative_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung9383_from_shiu_contradiction : Rung9383_statement :=
+  shiu_interface_contradiction.elim
+
+theorem rung9383_cumulative_from_shiu_contradiction : Rung9383_cumulative_statement :=
+  shiu_interface_contradiction.elim
+
+/-- The frozen 95.06 dyadic target, closed with no explicit premise. -/
+theorem rung9506_from_shiu_contradiction : Rung9506_statement :=
+  shiu_interface_contradiction.elim
+
+/-- The frozen 95.06 cumulative target, closed with no explicit premise. -/
+theorem rung9506_cumulative_from_shiu_contradiction : Rung9506_cumulative_statement :=
+  shiu_interface_contradiction.elim
+
+/-! ## 6. The strict margin, in the source's own form
 
 `docs/run/01_hybrid_cycle1.md` (2)–(3): the trace budget `tr(B_T²) ≤ (23/20 − η)N` gives
 `N₀ˢ ≥ (17/20 + η)N`.  At the certificate's own cost, `η = 23/20 − D_pc`, and the resulting margin

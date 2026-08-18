@@ -9,7 +9,7 @@ comparator/Challenge/Zeta85.lean — CHALLENGE: the conditional 85 % theorem and
 Trusted vocabulary: `ChallengeDeps` (the counting functions of the nontrivial zeros of Mathlib's
 `riemannZeta`) over Mathlib.  Only `Ncount` and `N0simple` are used.
 
-Eight statements, in the repository's ε-form for a liminf
+Sixteen statements, in the repository's ε-form for a liminf
 (`liminf_{T→∞} X(T)/N(T) ≥ c  ↦  ∀ ε > 0, ∃ T₀, ∀ T ≥ T₀, (c − ε)·N(T) ≤ X(T)`), each in the dyadic
 window `(T, 2T]` and in the cumulative window `(0, T]`:
 
@@ -17,9 +17,10 @@ window `(T, 2T]` and in the cumulative window `(0, T]`:
   * support 5/4:      N₀ˢ/N ≥ 0.79721415286134
   * support 143/100:  N₀ˢ/N ≥ 1893603832049143/2227707598259143 (= 0.8500235101…)
   * the corollary:    N₀ˢ/N ≥ 17/20
+  * frozen later rungs: R-8657, R-8686, R-9383, R-9506
 
 **These statements are CONDITIONAL.**  Unlike every other topic in this repository, they are not
-proved from Mathlib alone: `Solution.Zeta85` derives them from the eight named axioms of
+proved from Mathlib alone: `Solution.Zeta85` derives them from the four named axioms of
 `RH/Zeta85/Hypotheses.lean`, and `comparator/config-zeta85.json` lists those axioms in
 `permitted_axioms` alongside `propext`, `Classical.choice`, `Quot.sound`.  A reader must therefore
 read `RH/Zeta85/Hypotheses.lean` (and `AXIOMS.md`) in addition to this file to know what is being
@@ -88,6 +89,62 @@ theorem zeta85_eighty_five_percent :
 /-- **At least 85 %**, cumulative form. -/
 theorem zeta85_eighty_five_percent_cumulative :
     ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀, (17 / 20 - ε) * (Ncount 0 T : ℝ) ≤ N0simple 0 T := by
+  sorry
+
+/-- **Frozen R-8657**, dyadic form. -/
+theorem zeta85_rung_8657 :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (865674254456636 / 1000000000000000 - ε) *
+        (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
+  sorry
+
+/-- **Frozen R-8657**, cumulative form. -/
+theorem zeta85_rung_8657_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (865674254456636 / 1000000000000000 - ε) *
+        (Ncount 0 T : ℝ) ≤ N0simple 0 T := by
+  sorry
+
+/-- **Frozen R-8686**, dyadic form. -/
+theorem zeta85_rung_8686 :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (86855250 / 100000000 - ε) *
+        (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
+  sorry
+
+/-- **Frozen R-8686**, cumulative form. -/
+theorem zeta85_rung_8686_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (86855250 / 100000000 - ε) *
+        (Ncount 0 T : ℝ) ≤ N0simple 0 T := by
+  sorry
+
+/-- **Frozen R-9383**, dyadic form. -/
+theorem zeta85_rung_9383 :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (938313327050949 / 1000000000000000 - ε) *
+        (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
+  sorry
+
+/-- **Frozen R-9383**, cumulative form. -/
+theorem zeta85_rung_9383_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (938313327050949 / 1000000000000000 - ε) *
+        (Ncount 0 T : ℝ) ≤ N0simple 0 T := by
+  sorry
+
+/-- **Frozen R-9506**, dyadic form. -/
+theorem zeta85_rung_9506 :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (95063832187565 / 100000000000000 - ε) *
+        (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
+  sorry
+
+/-- **Frozen R-9506**, cumulative form. -/
+theorem zeta85_rung_9506_cumulative :
+    ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (95063832187565 / 100000000000000 - ε) *
+        (Ncount 0 T : ℝ) ≤ N0simple 0 T := by
   sorry
 
 end

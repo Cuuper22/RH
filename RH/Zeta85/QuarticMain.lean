@@ -5,15 +5,26 @@ SPDX-License-Identifier: Apache-2.0
 -/
 
 import RH.Zeta85.Discharge.QuarticTransfer
+import RH.Zeta85.Discharge.IsometricBlock
+import RH.Zeta85.Discharge.IsometricKernel
+import RH.Zeta85.Discharge.BalancedMixer
+import RH.Zeta85.Discharge.VirtualChannelMixer
+import RH.Zeta85.Discharge.RepeatedChannelCompression
+import RH.Zeta85.Discharge.AlignedIsometricLayout
+import RH.Zeta85.Discharge.AggregateCoordinateFrame
+import RH.Zeta85.Discharge.AggregateComplexAlias
+import RH.Zeta85.Discharge.AggregateSynthesisBridge
+import RH.Zeta85.Discharge.RadialShellFamily
+import RH.Zeta85.Discharge.AlignedChannelScales
 import RH.Zeta85.Statement
 
 /-!
 # Conditional frozen quartic rungs
 
-Each headline has exactly four explicit per-support premises.  The base
+Each headline has exactly three explicit per-support premises.  The base
 repository discharges the zeta Riemann--von Mangoldt and dyadic-to-cumulative
 steps.  No signed-pair or Rudnick--Sarnak structure is accepted here as a
-substitute for the trace, zero-side, construction, or moment premise.
+substitute for the trace, zero-side, or one-sided factorized zero-pair-kernel bound.
 -/
 
 open Filter Topology
@@ -35,91 +46,529 @@ private theorem quarticCumulative {c : ℝ}
 
 /-! ## Support `14999/10000` -/
 
-/-- Frozen R-8657, conditional on exactly the four support-`14999/10000`
+/-- Frozen R-8657, conditional on exactly the three support-`14999/10000`
 analytic structures. -/
 theorem rung8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hweighted : QuarticTransfer.FactoredZeroKernelQuarticLowerBound TrimmedMoment.Terminal8686.dual F) :
     Rung8657_statement := by
   simpa only [Rung8657_statement, cRung8657] using
-    QuarticTransfer.zeta_eps_transfer_8657 hfull hzero hr1a hmom
+    QuarticTransfer.zeta_eps_transfer_8657 hfull hzero hweighted
 
-/-- Cumulative frozen R-8657 under the same four premises. -/
+/-- Cumulative frozen R-8657 under the same three premises. -/
 theorem rung8657_cumulative
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hweighted : QuarticTransfer.FactoredZeroKernelQuarticLowerBound TrimmedMoment.Terminal8686.dual F) :
     Rung8657_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung8657 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
-    simpa only [Rung8657_statement] using rung8657 hfull hzero hr1a hmom
+    simpa only [Rung8657_statement] using rung8657 hfull hzero hweighted
   simpa only [Rung8657_cumulative_statement] using quarticCumulative hdyadic
 
-/-- Frozen R-8686, conditional on exactly the four support-`14999/10000`
+/-- Frozen R-8686, conditional on exactly the three support-`14999/10000`
 analytic structures. -/
 theorem rung8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hweighted : QuarticTransfer.FactoredZeroKernelQuarticLowerBound TrimmedMoment.Terminal8686.dual F) :
     Rung8686_statement := by
   simpa only [Rung8686_statement, cRung8686] using
-    QuarticTransfer.zeta_eps_transfer_8686 hfull hzero hr1a hmom
+    QuarticTransfer.zeta_eps_transfer_8686 hfull hzero hweighted
 
-/-- Cumulative frozen R-8686 under the same four premises. -/
+/-- Cumulative frozen R-8686 under the same three premises. -/
 theorem rung8686_cumulative
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hweighted : QuarticTransfer.FactoredZeroKernelQuarticLowerBound TrimmedMoment.Terminal8686.dual F) :
     Rung8686_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung8686 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
-    simpa only [Rung8686_statement] using rung8686 hfull hzero hr1a hmom
+    simpa only [Rung8686_statement] using rung8686 hfull hzero hweighted
   simpa only [Rung8686_cumulative_statement] using quarticCumulative hdyadic
 
 /-! ## Support `19999/10000` -/
 
-/-- Frozen R-9383, conditional on exactly the four support-`19999/10000`
+/-- Frozen R-9383, conditional on exactly the three support-`19999/10000`
 analytic structures. -/
 theorem rung9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hweighted : QuarticTransfer.FactoredZeroKernelQuarticLowerBound TrimmedMoment.Terminal9506.dual F) :
     Rung9383_statement := by
   simpa only [Rung9383_statement, cRung9383] using
-    QuarticTransfer.zeta_eps_transfer_9383 hfull hzero hr1a hmom
+    QuarticTransfer.zeta_eps_transfer_9383 hfull hzero hweighted
 
-/-- Cumulative frozen R-9383 under the same four premises. -/
+/-- Cumulative frozen R-9383 under the same three premises. -/
 theorem rung9383_cumulative
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hweighted : QuarticTransfer.FactoredZeroKernelQuarticLowerBound TrimmedMoment.Terminal9506.dual F) :
     Rung9383_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung9383 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
-    simpa only [Rung9383_statement] using rung9383 hfull hzero hr1a hmom
+    simpa only [Rung9383_statement] using rung9383 hfull hzero hweighted
   simpa only [Rung9383_cumulative_statement] using quarticCumulative hdyadic
 
-/-- Frozen R-9506, conditional on exactly the four support-`19999/10000`
+/-- Frozen R-9506, conditional on exactly the three support-`19999/10000`
 analytic structures. -/
 theorem rung9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hweighted : QuarticTransfer.FactoredZeroKernelQuarticLowerBound TrimmedMoment.Terminal9506.dual F) :
     Rung9506_statement := by
   simpa only [Rung9506_statement, cRung9506] using
-    QuarticTransfer.zeta_eps_transfer_9506 hfull hzero hr1a hmom
+    QuarticTransfer.zeta_eps_transfer_9506 hfull hzero hweighted
 
-/-- Cumulative frozen R-9506 under the same four premises. -/
+/-- Cumulative frozen R-9506 under the same three premises. -/
 theorem rung9506_cumulative
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
+    (hweighted : QuarticTransfer.FactoredZeroKernelQuarticLowerBound TrimmedMoment.Terminal9506.dual F) :
     Rung9506_cumulative_statement := by
   have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤ N0simple T (2 * T) := by
-    simpa only [Rung9506_statement] using rung9506 hfull hzero hr1a hmom
+    simpa only [Rung9506_statement] using rung9506 hfull hzero hweighted
   simpa only [Rung9506_cumulative_statement] using quarticCumulative hdyadic
+
+
+/-! ## Mixed-channel isometric route -/
+
+/-- Frozen R-8657 from an exact mixed-channel compression and its one-sided
+terminal statistic.  No coordinate principal-block allocation is used. -/
+theorem rung8657_isometric
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    Rung8657_statement := by
+  simpa only [Rung8657_statement, cRung8657] using
+    IsometricBlock.zeta_eps_transfer_8657
+      hfull hzero C hweighted
+
+theorem rung8657_cumulative_isometric
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    Rung8657_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung8657 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung8657_statement] using
+      rung8657_isometric hfull hzero C hweighted
+  simpa only [Rung8657_cumulative_statement] using
+    quarticCumulative hdyadic
+
+/-- Frozen R-8686 from the mixed-channel compression. -/
+theorem rung8686_isometric
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    Rung8686_statement := by
+  simpa only [Rung8686_statement, cRung8686] using
+    IsometricBlock.zeta_eps_transfer_8686
+      hfull hzero C hweighted
+
+theorem rung8686_cumulative_isometric
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual C) :
+    Rung8686_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung8686 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung8686_statement] using
+      rung8686_isometric hfull hzero C hweighted
+  simpa only [Rung8686_cumulative_statement] using
+    quarticCumulative hdyadic
+
+/-- Frozen R-9383 from the mixed-channel compression. -/
+theorem rung9383_isometric
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    Rung9383_statement := by
+  simpa only [Rung9383_statement, cRung9383] using
+    IsometricBlock.zeta_eps_transfer_9383
+      hfull hzero C hweighted
+
+theorem rung9383_cumulative_isometric
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    Rung9383_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9383 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9383_statement] using
+      rung9383_isometric hfull hzero C hweighted
+  simpa only [Rung9383_cumulative_statement] using
+    quarticCumulative hdyadic
+
+/-- Frozen R-9506 from the mixed-channel compression. -/
+theorem rung9506_isometric
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    Rung9506_statement := by
+  simpa only [Rung9506_statement, cRung9506] using
+    IsometricBlock.zeta_eps_transfer_9506
+      hfull hzero C hweighted
+
+theorem rung9506_cumulative_isometric
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (C : IsometricBlock.Data F)
+    (hweighted :
+      IsometricBlock.WeightedQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual C) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_isometric hfull hzero C hweighted
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
+/-! ## Routed virtual-channel route -/
+
+/-- Frozen R-8686 from the routed virtual-atom quartic lower bound. -/
+theorem rung8686_aligned_virtual
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (A : AlignedIsometricLayout.AtomFactorization L)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual A) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData L)
+    hvirtual.toIsometric
+
+/-- Cumulative R-8686 from the same routed virtual construction. -/
+theorem rung8686_cumulative_aligned_virtual
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (A : AlignedIsometricLayout.AtomFactorization L)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual A) :
+    Rung8686_cumulative_statement :=
+  rung8686_cumulative_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData L)
+    hvirtual.toIsometric
+
+/-- Frozen R-9506 from the routed virtual-atom quartic lower bound. -/
+theorem rung9506_aligned_virtual
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (A : AlignedIsometricLayout.AtomFactorization L)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual A) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData L)
+    hvirtual.toIsometric
+
+/-- Cumulative R-9506 from the same routed virtual construction. -/
+theorem rung9506_cumulative_aligned_virtual
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (A : AlignedIsometricLayout.AtomFactorization L)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual A) :
+    Rung9506_cumulative_statement :=
+  rung9506_cumulative_isometric hfull hzero
+    (AlignedIsometricLayout.toIsometricData L)
+    hvirtual.toIsometric
+
+
+/-! ## Canonical aligned analysis -/
+
+/-- The aligned physical family determines its virtual atom factorization
+canonically; only the resulting terminal lower bound remains analytic. -/
+theorem rung8686_aligned_canonical
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal8686.dual
+        (AlignedIsometricLayout.canonicalAtomFactorization L)) :
+    Rung8686_statement :=
+  rung8686_aligned_virtual hfull hzero L
+    (AlignedIsometricLayout.canonicalAtomFactorization L) hvirtual
+
+/-- The 95.06 dyadic rung with the atom factorization eliminated by
+orthogonal analysis. -/
+theorem rung9506_aligned_canonical
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual
+        (AlignedIsometricLayout.canonicalAtomFactorization L)) :
+    Rung9506_statement :=
+  rung9506_aligned_virtual hfull hzero L
+    (AlignedIsometricLayout.canonicalAtomFactorization L) hvirtual
+
+/-- The same canonical route for the cumulative frozen 95.06 statement. -/
+theorem rung9506_cumulative_aligned_canonical
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : AlignedIsometricLayout.Layout F ι)
+    (hvirtual :
+      AlignedIsometricLayout.SelectedVirtualQuarticLowerBound
+        TrimmedMoment.Terminal9506.dual
+        (AlignedIsometricLayout.canonicalAtomFactorization L)) :
+    Rung9506_cumulative_statement :=
+  rung9506_cumulative_aligned_virtual hfull hzero L
+    (AlignedIsometricLayout.canonicalAtomFactorization L) hvirtual
+
+/-! ## Literal aggregate energy-tail route -/
+
+/-- Frozen R-8686 from the exact literal block after summing complete channel
+lattices first and isolating one aggregate finite-grid tail. -/
+theorem rung8686_literal_energyTail
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hreg :
+      AggregateCoordinateFrame.PhysicalWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal8686.dual) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (htail.toIsometric hreg)
+
+/-- Frozen R-9506 from the same literal aggregate energy-tail coordinate. -/
+theorem rung9506_literal_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hreg :
+      AggregateCoordinateFrame.PhysicalWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (htail.toIsometric hreg)
+
+/-- Cumulative frozen R-9506 through the aggregate energy-tail route. -/
+theorem rung9506_cumulative_literal_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hreg :
+      AggregateCoordinateFrame.PhysicalWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_literal_energyTail hfull hzero hreg htail
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
+
+/-! ## Collective aggregate energy-tail route -/
+
+/-- Frozen R-8686 from the literal block after all physical channels are
+summed and their nonzero aliases cancel collectively. -/
+theorem rung8686_collective_energyTail
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hcollective :
+      AggregateSynthesisBridge.CollectiveWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal8686.dual) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (AggregateSynthesisBridge.literalEnergyTailLowerBound_toIsometricCollective
+      hcollective htail)
+
+/-- Frozen R-9506 from the same collective alias-cancellation route. -/
+theorem rung9506_collective_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hcollective :
+      AggregateSynthesisBridge.CollectiveWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (AggregateSynthesisBridge.literalEnergyTailLowerBound_toIsometricCollective
+      hcollective htail)
+
+/-- Cumulative frozen R-9506 through collective alias cancellation. -/
+theorem rung9506_cumulative_collective_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hcollective :
+      AggregateSynthesisBridge.CollectiveWindowRegularity F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_collective_energyTail
+        hfull hzero hcollective htail
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
+
+/-! ## Radial-shell energy-tail route -/
+
+/-- Frozen R-8686 from smooth even radial shells.  Shell separation proves
+collective alias cancellation; the terminal premise is only the literal
+finite energy-tail inequality. -/
+theorem rung8686_radialShell_energyTail
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.Data F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal8686.dual) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (RadialShellFamily.literalEnergyTailLowerBound_toIsometric
+      hshell htail)
+
+/-- Frozen R-9506 from the same radial-shell construction. -/
+theorem rung9506_radialShell_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.Data F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (RadialShellFamily.literalEnergyTailLowerBound_toIsometric
+      hshell htail)
+
+/-- Cumulative frozen R-9506 from smooth radial shells. -/
+theorem rung9506_cumulative_radialShell_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.Data F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_radialShell_energyTail hfull hzero hshell htail
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
+
+
+/-! ## Central-core radial-shell energy-tail route -/
+
+/-- Frozen R-8686 from a complete central core plus smooth outer radial
+shells. -/
+theorem rung8686_coreRadialShell_energyTail
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.CoreData F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal8686.dual) :
+    Rung8686_statement :=
+  rung8686_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (hshell.literalEnergyTailLowerBound_toIsometric htail)
+
+/-- Frozen R-9506 from a complete central core plus smooth outer radial
+shells. -/
+theorem rung9506_coreRadialShell_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.CoreData F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_statement :=
+  rung9506_isometric hfull hzero
+    (AggregateCoordinateFrame.coordinateData
+      (AggregateCoordinateFrame.literalBlockSelection F))
+    (hshell.literalEnergyTailLowerBound_toIsometric htail)
+
+/-- Cumulative frozen R-9506 from the core-plus-shell construction. -/
+theorem rung9506_cumulative_coreRadialShell_energyTail
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hshell : RadialShellFamily.CoreData F)
+    (htail :
+      AggregateCoordinateFrame.LiteralEnergyTailQuarticLowerBound
+        (F := F) TrimmedMoment.Terminal9506.dual) :
+    Rung9506_cumulative_statement := by
+  have hdyadic : ∀ ε > 0, ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      (cRung9506 - ε) * (Ncount T (2 * T) : ℝ) ≤
+        N0simple T (2 * T) := by
+    simpa only [Rung9506_statement] using
+      rung9506_coreRadialShell_energyTail
+        hfull hzero hshell htail
+  simpa only [Rung9506_cumulative_statement] using
+    quarticCumulative hdyadic
 
 end Zeta85
 end RH
