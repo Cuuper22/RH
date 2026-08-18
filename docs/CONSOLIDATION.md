@@ -103,7 +103,10 @@ Recurring defect classes, recorded for future campaign configuration:
   `agent/diagonal-lower-bound-transfer` had regressed it.
 
 `RH/Zeta85/Discharge/SmoothRadialShell.lean` (an experiment leaf imported by
-nothing in the CI cone) still contains unfinished work and is left unwired.
+nothing in the CI cone) still contains unfinished work in its second half
+(~34 outstanding errors, including references to nonexistent measure-theory
+API) and is left unwired; its front half was repaired here. It is removed
+from the targeted `bridge` workflow's build list until completed.
 
 ## Verification evidence for the consolidated tip
 

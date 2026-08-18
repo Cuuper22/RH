@@ -44,6 +44,5 @@ jobs:
           lake build
           RH.Zeta85.Discharge.RadialShellAlias
           RH.Zeta85.Discharge.RadialShellFamily
-          RH.Zeta85.Discharge.SmoothRadialShell
           RH.Zeta85.Discharge.AggregateSynthesisBridge
           RH.Zeta85.QuarticMain

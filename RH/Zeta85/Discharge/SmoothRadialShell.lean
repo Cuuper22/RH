@@ -20,8 +20,8 @@ two transition layers the shell equals the requested smooth even target
 exactly.
 -/
 
-open Filter Matrix Finset Set
-open scoped BigOperators ComplexConjugate
+open MeasureTheory Filter Matrix Finset Set
+open scoped BigOperators ComplexConjugate ContDiff Topology
 
 noncomputable section
 
@@ -86,7 +86,7 @@ theorem coreWindow_eq_zero_of_outer_le_abs
     coreWindow target c d hc hcd x = 0 := by
   have hout : centeredBump c d hc hcd x = 0 := by
     apply ContDiffBump.zero_of_le_dist
-    simpa [Real.dist_eq] using hx
+    simpa [centeredBump, Real.dist_eq] using hx
   unfold coreWindow
   rw [hout]
   ring
@@ -189,7 +189,7 @@ theorem shellWindow_eq_zero_of_outer_le_abs
   have hout :
       centeredBump d b (lt_trans ha (lt_trans hac hcd)) hdb x = 0 := by
     apply ContDiffBump.zero_of_le_dist
-    simpa [Real.dist_eq] using hx
+    simpa [centeredBump, Real.dist_eq] using hx
   unfold shellWindow
   rw [hout]
   ring
@@ -208,7 +208,7 @@ theorem shellWindow_support
     have hin :
         centeredBump a c ha hac x = 1 := by
       apply ContDiffBump.one_of_mem_closedBall
-      simpa [Real.dist_eq] using hle
+      simpa [centeredBump, Real.dist_eq] using hle
     apply hx
     unfold shellWindow
     rw [hin]
@@ -228,11 +228,11 @@ theorem shellWindow_eq_target
   have hin :
       centeredBump a c ha hac x = 0 := by
     apply ContDiffBump.zero_of_le_dist
-    simpa [Real.dist_eq] using hinner
+    simpa [centeredBump, Real.dist_eq] using hinner
   have hout :
       centeredBump d b (lt_trans ha (lt_trans hac hcd)) hdb x = 1 := by
     apply ContDiffBump.one_of_mem_closedBall
-    simpa [Real.dist_eq] using houter
+    simpa [centeredBump, Real.dist_eq] using houter
   unfold shellWindow
   rw [hin, hout]
   ring
@@ -283,7 +283,7 @@ theorem profiledBumpWindow_contDiff
   intro x
   by_cases hx : x ∈ Metric.closedBall (0 : ℝ) b.rOut
   · have hxabs : |x| ≤ b.rOut := by
-      simpa [Real.dist_eq] using hx
+      simpa [centeredBump, Real.dist_eq] using hx
     have hscaled :
         ContDiff ℝ ∞ (fun y : ℝ => v (y / L)) :=
       hv.comp (contDiff_id.div_const L)
@@ -292,7 +292,7 @@ theorem profiledBumpWindow_contDiff
         b.contDiffAt
   · have hopen :
         IsOpen ((Metric.closedBall (0 : ℝ) b.rOut)ᶜ) :=
-      isClosed_closedBall.isOpen_compl
+      Metric.isClosed_closedBall.isOpen_compl
     have heq :
         profiledBumpWindow v L b =ᶠ[𝓝 x] (fun _ : ℝ => (0 : ℝ)) := by
       filter_upwards [hopen.mem_nhds hx] with y hy
@@ -301,7 +301,7 @@ theorem profiledBumpWindow_contDiff
       have hby : b y = 0 :=
         b.zero_of_le_dist hyout.le
       simp [profiledBumpWindow, hby]
-    exact contDiff_zero.contDiffAt.congr_of_eventuallyEq heq
+    exact contDiffAt_const.congr_of_eventuallyEq heq
 
 /-- An even profile gives an even profiled bump. -/
 theorem profiledBumpWindow_even
@@ -327,7 +327,7 @@ theorem profiledBumpWindow_tsupport
     tsupport (profiledBumpWindow v L b) ⊆
       Metric.closedBall (0 : ℝ) b.rOut := by
   rw [tsupport]
-  refine closure_minimal ?_ isClosed_closedBall
+  refine closure_minimal ?_ Metric.isClosed_closedBall
   intro u hu
   have hbu : b u ≠ 0 := by
     intro hzero
@@ -380,14 +380,14 @@ theorem profiledShellWindow_support
     have hle : |u| ≤ inner.rIn := le_of_not_gt hnot
     have hinner : inner u = 1 := by
       apply inner.one_of_mem_closedBall
-      simpa [Real.dist_eq] using hle
+      simpa [centeredBump, Real.dist_eq] using hle
     apply hu
     simp [profiledShellWindow, hinner]
   · by_contra hnot
     have hle : outer.rOut ≤ |u| := le_of_not_gt hnot
     have houter : outer u = 0 := by
       apply outer.zero_of_le_dist
-      simpa [Real.dist_eq] using hle
+      simpa [centeredBump, Real.dist_eq] using hle
     apply hu
     simp [profiledShellWindow, profiledBumpWindow, houter]
 
@@ -399,7 +399,7 @@ theorem profiledShellWindow_supportRadius
     profiledShellWindow v L outer inner u = 0 := by
   have houter : outer u = 0 := by
     apply outer.zero_of_le_dist
-    simpa [Real.dist_eq] using hu.le
+    simpa [centeredBump, Real.dist_eq] using hu.le
   simp [profiledShellWindow, profiledBumpWindow, houter]
 
 /-- On the bump's inner ball, its energy is exactly the requested profile. -/
@@ -437,7 +437,7 @@ theorem shrinkingHalfPeriodBump_rOut_lt
     (L : ℝ) (n : ℕ) (hL : 0 < L) :
     (shrinkingHalfPeriodBump L n hL).rOut < L / 2 := by
   dsimp [shrinkingHalfPeriodBump]
-  positivity
+  exact sub_lt_self _ (by positivity)
 
 /-- A centered core cutoff whose entire support shrinks to the origin. -/
 def shrinkingCoreBump
@@ -475,7 +475,7 @@ theorem shrinkingCoreBump_eventually_zero
   have hfrac : L / ((n : ℝ) + 3) < |u| := by
     apply (div_lt_iff₀ (by positivity : 0 < (n : ℝ) + 3)).2
     have hmul :
-        (N : ℝ) * |u| ≤ ((n : ℝ) + 3) * |u| := by
+        (N : ℝ) * |u| ≤ |u| * ((n : ℝ) + 3) := by
       nlinarith [mul_le_mul_of_nonneg_right hnR huabs.le]
     exact lt_of_lt_of_le hNmul hmul
   apply (shrinkingCoreBump L n hL).zero_of_le_dist
@@ -593,9 +593,10 @@ theorem shrinkingProfileWindow_tsupport
       (shrinkingHalfPeriodBump L n hL) hu
   have habs :
       |u| ≤ (shrinkingHalfPeriodBump L n hL).rOut := by
-    simpa [Real.dist_eq] using hclosed
-  exact abs_le.mp
+    simpa [centeredBump, Real.dist_eq] using hclosed
+  have h := abs_le.mp
     (le_trans habs (shrinkingHalfPeriodBump_rOut_lt L n hL).le)
+  exact Set.mem_Icc.mpr ⟨by linarith [h.1], h.2⟩
 
 /-- The shrinking window is literally the target energy away from its two
 transition layers. -/
@@ -617,7 +618,7 @@ theorem shrinkingProfileWindow_sq_eq_profile
     have hout :=
       (shrinkingHalfPeriodBump_rOut_lt L n hL).le
     nlinarith
-  · simpa [Real.dist_eq] using hu
+  · simpa [centeredBump, Real.dist_eq] using hu
 
 
 /-- A point at or beyond the bump's outer radius is exactly zero. -/
@@ -627,7 +628,7 @@ theorem profiledBumpWindow_eq_zero_of_rOut_le_abs
     profiledBumpWindow v L b u = 0 := by
   have hbu : b u = 0 := by
     apply b.zero_of_le_dist
-    simpa [Real.dist_eq] using hu
+    simpa [centeredBump, Real.dist_eq] using hu
   simp [profiledBumpWindow, hbu]
 
 /-- Away from the two half-period endpoints, the shrinking window energy
@@ -649,8 +650,9 @@ theorem tendsto_shrinkingProfileWindow_sq
       apply (div_le_iff₀ hL).2
       nlinarith
     have hmem :
-        u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2) :=
-      abs_le.mp habsScaled
+        u / L ∈ Icc (-(1 : ℝ) / 2) (1 / 2) := by
+      have h := abs_le.mp habsScaled
+      exact Set.mem_Icc.mpr ⟨by linarith [h.1], h.2⟩
     have htarget :
         @QuarticGramFamily.supportedFullProfile v (u / L) =
           v (u / L) := by
@@ -671,7 +673,7 @@ theorem tendsto_shrinkingProfileWindow_sq
       have hnR : (N : ℝ) ≤ (n : ℝ) := by
         exact_mod_cast hn
       have hmul :
-          (N : ℝ) * gap ≤ ((n : ℝ) + 3) * gap := by
+          (N : ℝ) * gap ≤ gap * ((n : ℝ) + 3) := by
         nlinarith
       have hfrac :
           L / ((n : ℝ) + 3) < gap := by
@@ -684,14 +686,15 @@ theorem tendsto_shrinkingProfileWindow_sq
       exact shrinkingProfileWindow_sq_eq_profile
         v L n hL hposProfile u huinner
     rw [htarget]
-    exact tendsto_const_nhds.congr' hevent.symm
+    exact tendsto_const_nhds.congr' (Filter.EventuallyEq.symm hevent)
   · have houtside : L / 2 < |u| := by
       exact lt_of_le_of_ne (le_of_not_gt hin) hboundary.symm
     have hnotmem :
         u / L ∉ Icc (-(1 : ℝ) / 2) (1 / 2) := by
       intro hmem
-      have hscaled : |u / L| ≤ (1 : ℝ) / 2 :=
-        abs_le.mpr hmem
+      have hscaled : |u / L| ≤ (1 : ℝ) / 2 := by
+        have h := Set.mem_Icc.mp hmem
+        exact abs_le.mpr ⟨by linarith [h.1], h.2⟩
       rw [abs_div, abs_of_pos hL] at hscaled
       have hu : |u| ≤ L / 2 := by
         have hmul := (div_le_iff₀ hL).1 hscaled
@@ -700,7 +703,7 @@ theorem tendsto_shrinkingProfileWindow_sq
     have htarget :
         @QuarticGramFamily.supportedFullProfile v (u / L) = 0 := by
       rw [QuarticGramFamily.supportedFullProfile,
-        Set.indicator_of_not_mem hnotmem]
+        Set.indicator_of_notMem hnotmem]
     have hzero :
         ∀ n : ℕ, shrinkingProfileWindow v L n hL u = 0 := by
       intro n
@@ -918,8 +921,8 @@ theorem supportedFullProfile_div_eq_indicator
       intro hs
       exact hu ((mem_scaled_halfInterval_iff L hL u).1 hs)
     rw [QuarticGramFamily.supportedFullProfile,
-      Set.indicator_of_not_mem hscaled,
-      Set.indicator_of_not_mem hu]
+      Set.indicator_of_notMem hscaled,
+      Set.indicator_of_notMem hu]
 
 /-- The integral of the type-level supported profile is exactly its
 interval integral; changing the closed endpoint convention costs nothing. -/
@@ -1033,7 +1036,7 @@ theorem shrinkingProfileWindow_sq_le_supportedFullProfile
           (shrinkingHalfPeriodBump_rOut_lt L n hL).le
           hout.le
       rw [QuarticGramFamily.supportedFullProfile,
-        Set.indicator_of_not_mem hmem, hzero]
+        Set.indicator_of_notMem hmem, hzero]
       norm_num
 
 /-- Every finite annular energy is bounded by the same frozen supported
