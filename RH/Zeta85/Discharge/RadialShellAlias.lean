@@ -15,7 +15,7 @@ between consecutive half-period radii.  Every shell is exactly disjoint from
 all of its nonzero integer-period translates.
 -/
 
-open Filter Matrix Finset Set
+open MeasureTheory Filter Matrix Finset Set
 open scoped BigOperators ComplexConjugate
 
 noncomputable section
@@ -39,10 +39,12 @@ theorem radialShell_sameSign_distance_lt_period
     norm_num at hb ⊢
     exact hb
   rcases hsign with hpos | hneg
-  · rw [abs_of_pos hpos.1, abs_of_pos hpos.2] at hxa hxb hya hyb
+  · rw [abs_of_pos hpos.1] at hxa hxb
+    rw [abs_of_pos hpos.2] at hya hyb
     rw [abs_lt]
     constructor <;> nlinarith [ha, hb', hL]
-  · rw [abs_of_neg hneg.1, abs_of_neg hneg.2] at hxa hxb hya hyb
+  · rw [abs_of_neg hneg.1] at hxa hxb
+    rw [abs_of_neg hneg.2] at hya hyb
     rw [abs_lt]
     constructor <;> nlinarith [ha, hb', hL]
 
@@ -62,11 +64,13 @@ theorem radialShell_oppositeSign_distance_between
     norm_num at hb ⊢
     exact hb
   rcases hsign with hpn | hnp
-  · rw [abs_of_pos hpn.1, abs_of_neg hpn.2] at hxa hxb hya hyb
+  · rw [abs_of_pos hpn.1] at hxa hxb
+    rw [abs_of_neg hpn.2] at hya hyb
     have hxy : 0 < x - y := by linarith
     rw [abs_of_pos hxy]
     constructor <;> nlinarith [ha, hb', hL]
-  · rw [abs_of_neg hnp.1, abs_of_pos hnp.2] at hxa hxb hya hyb
+  · rw [abs_of_neg hnp.1] at hxa hxb
+    rw [abs_of_pos hnp.2] at hya hyb
     have hxy : x - y < 0 := by linarith
     rw [abs_of_neg hxy]
     constructor <;> nlinarith [ha, hb', hL]
@@ -140,10 +144,10 @@ theorem radialShell_shift_overlap_eq_zero
         L a b u (u - (m : ℝ) * L) k
         hL ha hb hua hub hva hvb hopp
     rw [hdistance] at hlower hupper
-    have hkabs : (k : ℝ) < |(m : ℝ)| := by
-      exact (mul_lt_mul_right hL).mp hlower
-    have habssucc : |(m : ℝ)| < (k : ℝ) + 1 := by
-      exact (mul_lt_mul_right hL).mp hupper
+    have hkabs : (k : ℝ) < |(m : ℝ)| :=
+      lt_of_mul_lt_mul_right hlower hL.le
+    have habssucc : |(m : ℝ)| < (k : ℝ) + 1 :=
+      lt_of_mul_lt_mul_right hupper hL.le
     have hkabsInt : (k : ℤ) < |m| := by
       exact_mod_cast hkabs
     have habssuccInt : |m| < (k : ℤ) + 1 := by
@@ -218,8 +222,8 @@ theorem aggregateAliasCancellation_of_coreAndRadialShells
       (f r) L hL (hcore r hrcore) m hm
       (Complex.I * (z - z'))
   · rw [← integral_zero]
-    apply integral_congr
-    intro u
+    apply integral_congr_ae
+    filter_upwards [] with u
     have hoverlap :
         f r u * f r (u - (m : ℝ) * L) = 0 :=
       radialShell_shift_overlap_eq_zero
