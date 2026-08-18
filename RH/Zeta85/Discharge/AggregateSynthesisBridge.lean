@@ -15,7 +15,7 @@ summing the channels.  Individual channels need not be alias-free.  The only
 cancellation premise is that the total nonzero alias contribution vanishes.
 -/
 
-open Filter Matrix Finset Set
+open MeasureTheory Filter Matrix Finset Set
 open scoped BigOperators ComplexConjugate
 
 noncomputable section
@@ -32,7 +32,7 @@ Unlike PhysicalWindowRegularity, this imposes no channelwise half-period
 support.  Nonzero aliases are allowed and cancel only after channel summation. -/
 structure CollectiveWindowRegularity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (F : QuarticGramFamily Z σ μ p v) where
   commonPeriod : ℝ → ℝ
   supportRadius :
     ∀ T : ℝ, Fin (F.channelCount T) → ℝ
@@ -100,7 +100,7 @@ theorem coordinateFullFrequencyLattice_eq_energySum_collective
                   (Complex.I *
                     (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
       unfold AggregateComplexAlias.aggregateVirtualEnergyIntegral
-      rw [Finset.mul_sum]
+      rw [Finset.mul_sum, Finset.mul_sum]
       apply Finset.sum_congr rfl
       intro j hj
       ring
@@ -113,10 +113,10 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy_collective
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : CollectiveWindowRegularity F)
-    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (T : ℝ) (hfull : 0 ≤ @QuarticGramFamily.fullLength σ T)
     (ρ ρ' : ℂ) :
     coordinateEnergySum F T ρ ρ' =
-      (F.fullLength T : ℂ) *
+      (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (F.windowEnergy T u : ℂ) *
             Complex.exp
@@ -124,7 +124,7 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy_collective
   unfold coordinateEnergySum
   calc
     (∑ j : Fin (F.channelCount T),
-      ((Real.sqrt (F.fullLength T / F.period T j) : ℂ) ^ 2) *
+      ((Real.sqrt (@QuarticGramFamily.fullLength σ T / F.period T j) : ℂ) ^ 2) *
         (F.period T j : ℂ) *
         ∫ u : ℝ,
           (F.window T j u : ℂ) * F.window T j u *
@@ -132,7 +132,7 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy_collective
               (Complex.I *
                 (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
         ∑ j : Fin (F.channelCount T),
-          (F.fullLength T : ℂ) *
+          (@QuarticGramFamily.fullLength σ T : ℂ) *
             ∫ u : ℝ,
               (F.window T j u : ℂ) * F.window T j u *
                 Complex.exp
@@ -143,19 +143,19 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy_collective
       have hperiod : 0 < F.period T j := by
         rw [h.period_eq T j]
         exact h.period_pos T
-      have hquot : 0 ≤ F.fullLength T / F.period T j :=
+      have hquot : 0 ≤ @QuarticGramFamily.fullLength σ T / F.period T j :=
         div_nonneg hfull hperiod.le
       have hreal :
-          Real.sqrt (F.fullLength T / F.period T j) ^ 2 *
+          Real.sqrt (@QuarticGramFamily.fullLength σ T / F.period T j) ^ 2 *
               F.period T j =
-            F.fullLength T := by
+            @QuarticGramFamily.fullLength σ T := by
         rw [Real.sq_sqrt hquot]
         exact div_mul_cancel₀ _ hperiod.ne'
       have hcomplex :=
         congrArg (fun x : ℝ => (x : ℂ)) hreal
       push_cast at hcomplex
       rw [hcomplex]
-    _ = (F.fullLength T : ℂ) *
+    _ = (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∑ j : Fin (F.channelCount T),
           ∫ u : ℝ,
             (F.window T j u : ℂ) * F.window T j u *
@@ -163,7 +163,7 @@ theorem coordinateEnergySum_eq_fullLength_windowEnergy_collective
                 (Complex.I *
                   (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
       rw [Finset.mul_sum]
-    _ = (F.fullLength T : ℂ) *
+    _ = (@QuarticGramFamily.fullLength σ T : ℂ) *
         ∫ u : ℝ,
           (F.windowEnergy T u : ℂ) *
             Complex.exp
@@ -201,16 +201,16 @@ theorem literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail_collectiv
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : CollectiveWindowRegularity F)
-    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (T : ℝ) (hfull : 0 ≤ @QuarticGramFamily.fullLength σ T)
     (ρ ρ' : ℂ) :
     literalCoordinateEnergyTailPairKernel F T ρ ρ' =
       ((F.hatDenominator T)⁻¹ : ℂ) *
-        ((F.fullLength T : ℂ) *
-            ∫ u : ℝ,
+        ((@QuarticGramFamily.fullLength σ T : ℂ) *
+            (∫ u : ℝ,
               (F.windowEnergy T u : ℂ) *
                 Complex.exp
                   (Complex.I *
-                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ))) -
           coordinateFrequencyTail
             (literalBlockSelection F) T ρ ρ') := by
   unfold literalCoordinateEnergyTailPairKernel
@@ -225,21 +225,21 @@ theorem literalCoordinateEnergyTailPairKernel_eq_supportedProfile_sub_tail_colle
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (h : CollectiveWindowRegularity F)
-    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (T : ℝ) (hfull : 0 ≤ @QuarticGramFamily.fullLength σ T)
     (henergy :
       ∀ᵐ u : ℝ,
         F.windowEnergy T u =
-          F.supportedFullProfile (u / F.fullLength T))
+          @QuarticGramFamily.supportedFullProfile v (u / @QuarticGramFamily.fullLength σ T))
     (ρ ρ' : ℂ) :
     literalCoordinateEnergyTailPairKernel F T ρ ρ' =
       ((F.hatDenominator T)⁻¹ : ℂ) *
-        ((F.fullLength T : ℂ) *
-            ∫ u : ℝ,
-              (F.supportedFullProfile
-                  (u / F.fullLength T) : ℂ) *
+        ((@QuarticGramFamily.fullLength σ T : ℂ) *
+            (∫ u : ℝ,
+              (@QuarticGramFamily.supportedFullProfile v
+                  (u / @QuarticGramFamily.fullLength σ T) : ℂ) *
                 Complex.exp
                   (Complex.I *
-                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ))) -
           coordinateFrequencyTail
             (literalBlockSelection F) T ρ ρ') := by
   rw [
@@ -252,8 +252,8 @@ theorem literalCoordinateEnergyTailPairKernel_eq_supportedProfile_sub_tail_colle
             (Complex.I *
               (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
         ∫ u : ℝ,
-          (F.supportedFullProfile
-              (u / F.fullLength T) : ℂ) *
+          (@QuarticGramFamily.supportedFullProfile v
+              (u / @QuarticGramFamily.fullLength σ T) : ℂ) *
             Complex.exp
               (Complex.I *
                 (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
