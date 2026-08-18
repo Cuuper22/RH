@@ -8,10 +8,10 @@ RH/Zeta85/Hypotheses.lean — **the complete axiom set of the 85 % layer.**
 
 This is the ONLY file in `RH/` that declares an axiom.  Everything else under `RH/Zeta85/` is proved
 from Mathlib and from the base `Zeta23` library; `#print axioms` on the headline theorems of
-`RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and the single
-axiom below, and nothing else (`AXIOMS.md` reproduces the three outputs verbatim).
+`RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and a subset of the four
+axioms below, and nothing else (`AXIOMS.md` reproduces the three outputs verbatim).
 
-The axiom carries: (a) its exact mathematical statement, (b) its source — the published paper with
+Each axiom carries: (a) its exact mathematical statement, (b) its source — the published paper with
 proposition number, or the run file with equation number — and (c) why it was not discharged.  The
 statements are rendered over the vocabulary of `RH/Zeta85/Arith.lean`, which is definitions only.
 
@@ -33,15 +33,21 @@ statements are rendered over the vocabulary of `RH/Zeta85/Arith.lean`, which is 
 * the signed-shift reciprocal lemma of `docs/run/12` §2, equations (12)–(13)
   (`RH/Zeta85/Discharge/SignedShift.lean`, C1 — PROVED, not assumed);
 * every exponent comparison of cycles 3, 4 and 5 (`RH/Zeta85/Discharge/Exponents.lean`);
-* the logarithmic-power audit (`RH/Zeta85/Discharge/LogBudget.lean`, C7).
+* the logarithmic-power audit (`RH/Zeta85/Discharge/LogBudget.lean`, C7);
+* the **refutation of the frozen progression-majorant interface**: `¬ ShiuMajorant (1/4)`
+  (`RH.Zeta85.not_shiuMajorant_quarter`, `RH/Zeta85/Discharge/ShiuNoGo.lean`).  Axiom 1 below
+  therefore asserts the corrected interface `ShiuMajorant₂` (`RH/Zeta85/ShiuInterface.lean`),
+  never the refuted one.
 
 ## Reading guide to the dependency layering
 
+Nodes marked `(PROVED)` are Lean theorems; every other node is one of the four axioms.
+
 ```
-  bblr_error_bound  ──►  signedPair_traceGrade_lt_5_4  ─┐ (PROVED)
-                                                        ├─►  traceTransfer_saturated  ──► rungs
-  bblr_poisson_blocks ─┐ (PROVED)                       │            ▲
-  shiu_majorant       ─┴► signedPair_traceGrade_lt_3_2 ─┘            │
+  bblr_error_bound (PROVED) ──►  signedPair_traceGrade_lt_5_4  ─┐
+                                                                ├─►  traceTransfer_saturated ──► rungs
+  bblr_poisson_blocks (PROVED) ─┐                               │            ▲
+  shiu_majorant₂               ─┴► signedPair_traceGrade_lt_3_2 ─┘            │
                                                              (all three window costs are PROVED)
 ```
 Rungs 1 (0.679) and 2 (0.797) use the left branch only; its frozen BBLR premise is now proved.  Rung 3
@@ -51,8 +57,14 @@ dependency sets of the three rungs are genuinely different — see `AXIOMS.md`.
 import RH.Zeta85.Arith
 import RH.Zeta85.Discharge.BBLRErrorBound
 import RH.Zeta85.Discharge.BBLRPoissonBlocks
+import RH.Zeta85.Discharge.RationalWindow125Final
+-- `ShiuNoGo` is imported for its build-graph effect, not for a name used below: it carries
+-- `not_shiuMajorant_quarter`, the refutation of the frozen `ShiuMajorant` that Axiom 1 replaces.
+-- Nothing in this file references it, so DO NOT drop this import as unused — that would take the
+-- refutation out of `lake build RH` (only `RH.lean`'s transitive closure is built).
 import RH.Zeta85.Discharge.ShiuNoGo
 import RH.Zeta85.Discharge.Window101
+import RH.Zeta85.ShiuInterface
 import RH.Zeta85.Transfer
 import RH.Zeta85.Statement
 import Zeta23.Statement.SeamClosed
@@ -128,18 +140,34 @@ theorem bblr_poisson_blocks : BBLRPoissonBlocks := bblrPoissonBlocks_proved
 /-! ## 2. The run's arithmetic claims -/
 
 /--
-**AXIOM 1 — the Shiu-type progression majorant (C3).**
+**AXIOM 1 — the Shiu-type progression majorant (C3), corrected interface.**
 
 *Exact statement.*  `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` (14): for the
 recombined Heath–Brown coefficients `c_p` (defined at `docs/run/08` §2 and `docs/run/12` §1), which
 are divisor-bounded,
 
-  `Σ_{p ≍ P, p ≡ r (mod q), (r,q) = 1} |c_p| ≪ (P/φ(q))·(log T)^C`,
+  `Σ_{p ≍ P, p ≡ r (mod q), (r,q) = 1} |c_p| ≪ (P/φ(q))·(log P)^C`,
 
-uniformly for `q ≤ P·T^{−η+o(1)}`, with `C` fixed.  The source's own justification: "fix every short
-factor, and the remaining smooth factor occupies one residue class; the interval contains
-`P/q ≫ T^{η−o(1)}` representatives.  Equivalently, (14) is the standard Shiu/Brun upper bound for a
-fixed-divisor majorant."
+uniformly for `q ≤ P^{1−η}`, with `C, K` and the threshold `P₁` depending only on the divisor-bound
+class of the coefficients.  The source's own justification: "fix every short factor, and the
+remaining smooth factor occupies one residue class; the interval contains `P/q ≫ T^{η−o(1)}`
+representatives.  Equivalently, (14) is the standard Shiu/Brun upper bound for a fixed-divisor
+majorant."
+
+*The frozen interface was refuted and replaced.*  The earlier rendering `ShiuMajorant`
+(`RH/Zeta85/Arith.lean`) fixed `T` — and with it its `(log T)^C` right-hand side — *before*
+quantifying the interval scale `P`, and took the mixed modulus range `q ≤ P·T^{−η}`.  That
+statement is **false**, and this repository proves it:
+`RH.Zeta85.not_shiuMajorant_quarter` (`RH/Zeta85/Discharge/ShiuNoGo.lean`) exhibits a
+`τ(3^m)`-spike isolated by a power-of-two modulus that beats any `(log T)^C` bound.
+`ShiuMajorant₂` (`RH/Zeta85/ShiuInterface.lean`) corrects three defects — D1: majorant scale
+`(log P)^C`, `T` gone entirely; D2: modulus range `q ≤ P^(1−η)`, Shiu's own range; D3:
+class-uniform constants, `∃ C K P₁` after the class `(Kc, k)` but before the family `c`.  D1 and D2
+are the two the refutation exploits (it fixes one coefficient family and drives `P` far past `T`),
+and either alone defeats it; D3 does not enter the refutation at all — it is a separate
+faithfulness correction matching the class-uniform constants of Shiu's published theorem, and it
+makes the statement *stronger* on that axis rather than weaker.  See
+`RH/Zeta85/ShiuInterface.lean` for the full accounting.
 
 *Source.*  `docs/run/12_arithmetic_cycle5_support_3over2_86p5674.md` §2, equation (14).  The
 underlying published result is P. Shiu, "A Brun–Titchmarsh theorem for multiplicative functions",
@@ -155,12 +183,7 @@ that factorization is exactly the unformalized Heath–Brown apparatus.  What co
 the elementary counting once a divisor majorant is granted — is subsumed by the statement below and
 is not separable from it.  This axiom is used by rung 3 only.
 -/
-axiom shiu_majorant : ∀ η : ℝ, 0 < η → η < 1 / 2 → ShiuMajorant η
-
-/-- The one remaining declaration contradicts the proved failure of its frozen interface. -/
-theorem shiu_interface_contradiction : False :=
-  not_shiuMajorant_quarter
-    (shiu_majorant (1 / 4) (by norm_num) (by norm_num))
+axiom shiu_majorant₂ : ∀ η : ℝ, 0 < η → η < 1 / 2 → ShiuMajorant₂ η
 
 /--
 **AXIOM 2 — the block closure at support `< 5/4` (C5), transported to the aggregate criterion.**
@@ -194,9 +217,8 @@ on, in `RH/Zeta85/Discharge/Exponents.lean` (`bblr_blackbox_ceiling`, `bblr_savi
 dominates any fixed logarithmic loss (`RH.Zeta85.LogBudget.power_beats_log`).
 This axiom is used by rungs 1 and 2 only.
 -/
-theorem signedPair_traceGrade_lt_5_4 :
-    BBLRErrorBound → ∀ σ : ℝ, 1 < σ → σ < 5 / 4 → SignedPairTraceGrade σ :=
-  shiu_interface_contradiction.elim
+axiom signedPair_traceGrade_lt_5_4 :
+    BBLRErrorBound → ∀ σ : ℝ, 1 < σ → σ < 5 / 4 → SignedPairTraceGrade σ
 
 /--
 **AXIOM 3 — the terminal remainder bound at support `< 3/2` (C4), transported to the aggregate
@@ -244,12 +266,9 @@ is a genuine gap in the source, not a formalization difficulty.
     `RH/Zeta85/Discharge/LogBudget.lean`, and in `FINDINGS.md` §7.  This axiom is used by rung 3
     only, and it is the single most load-bearing undischarged statement in the artifact.
 -/
-theorem signedPair_traceGrade_lt_3_2 :
-    BBLRPoissonBlocks → (∀ η : ℝ, 0 < η → η < 1 / 2 → ShiuMajorant η) →
-    ∀ σ : ℝ, 1 < σ → σ < 3 / 2 → SignedPairTraceGrade σ := by
-  intro _ hmajorants
-  exact (not_shiuMajorant_quarter
-    (hmajorants (1 / 4) (by norm_num) (by norm_num))).elim
+axiom signedPair_traceGrade_lt_3_2 :
+    BBLRPoissonBlocks → (∀ η : ℝ, 0 < η → η < 1 / 2 → ShiuMajorant₂ η) →
+    ∀ σ : ℝ, 1 < σ → σ < 3 / 2 → SignedPairTraceGrade σ
 
 /-! ## 3. Window costs -/
 
@@ -273,7 +292,9 @@ No numerical or transcendental assumption remains.
 -/
 theorem windowCost_125 :
     ∃ σ : ℝ, 1 < σ ∧ σ < 5 / 4 ∧ SaturatedWindowCost σ (2 - cRung125) := by
-  exact shiu_interface_contradiction.elim
+  have htarget : 2 - cRung125 = RationalWindow125.target125 := by
+    norm_num [RationalWindow125.target125, cRung125]
+  simpa only [htarget] using RationalWindow125.windowCost_125
 
 /-! ## 4. The trace transfer -/
 
@@ -316,10 +337,9 @@ main term at frequencies `|α| > 1` with the exact kernel `K(t) = min(λ|t|,1)` 
 mathematics of the run.  Only the *genuinely new* part is assumed: the support-beyond-one evaluation.
 This axiom is used by all three rungs.
 -/
-theorem traceTransfer_saturated :
+axiom traceTransfer_saturated :
     ∀ σ D : ℝ, 1 < σ → σ < 3 / 2 → SaturatedWindowCost σ D → SignedPairTraceGrade σ →
-      TwoTraceCert zetaZeroConfig D :=
-  shiu_interface_contradiction.elim
+      TwoTraceCert zetaZeroConfig D
 
 end Hypotheses
 end Zeta85
