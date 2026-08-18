@@ -39,8 +39,9 @@ The class `{n ∈ [1, N] : n ≡ r (mod q)}` has `N/q + O(1)` elements.  We reco
 one-sided bounds first (`Nat` division, no error term), then the real forms. -/
 
 /-- ℕ-exact upper bound: `#{n ∈ [1, N] : n ≡ r (mod q)} ≤ N/q + 1` (`Nat` division).
-Holds for every `q`, including `q = 0` (where the class is the single point `r`).
-Proof: `n ↦ n / q` is injective on the class, with values `< N/q + 1`. -/
+Holds for every `q`, including `q = 0` (where the filter is `{n ∈ [1, N] : n = r}`, of
+cardinality at most one).  Proof: `n ↦ n / q` is injective on the class, with values
+`< N/q + 1`. -/
 lemma progCount_le_nat (q r N : ℕ) :
     ((Finset.Icc 1 N).filter (fun n => n % q = r % q)).card ≤ N / q + 1 := by
   have h : ((Finset.Icc 1 N).filter (fun n => n % q = r % q)).card
@@ -198,6 +199,21 @@ lemma progCount_coprime_partition {q : ℕ} (hq : 0 < q) (N : ℕ) :
     rw [h]
     exact hr.2
 
+/-- Variant of `progCount_coprime_partition` with the summands' filters in the
+mod-normalised form `n % q = r % q` used by `progressionSum` and by every counting bound
+above (`progCount_le`, `progCount_totient`, …), so the partition chains with them
+directly.  For `r < q` the two filters agree, since `r % q = r`. -/
+lemma progCount_coprime_partition' {q : ℕ} (hq : 0 < q) (N : ℕ) :
+    ((Finset.Icc 1 N).filter (fun n => Nat.Coprime n q)).card
+      = ∑ r ∈ (Finset.range q).filter (fun r => Nat.Coprime r q),
+          ((Finset.Icc 1 N).filter (fun n => n % q = r % q)).card := by
+  rw [progCount_coprime_partition hq N]
+  refine Finset.sum_congr rfl fun r hr => ?_
+  simp only [Finset.mem_filter, Finset.mem_range] at hr
+  congr 1
+  refine Finset.filter_congr fun n _ => ?_
+  rw [Nat.mod_eq_of_lt hr.1]
+
 /-! ## 4. The `progressionSum` interface
 
 `progressionSum c P q r = Σ_{p ∈ [1, ⌈2P⌉], p ≡ r (q)} |c p|` is the object the Shiu-type
@@ -284,6 +300,7 @@ theorem progressionSum_le_totient {c : ℕ → ℝ} {Kc : ℝ} (hc : DivisorBoun
 #print axioms progCount_le_two_div
 #print axioms progCount_totient
 #print axioms progCount_coprime_partition
+#print axioms progCount_coprime_partition'
 #print axioms progressionSum_mono
 #print axioms progressionSum_add_le
 #print axioms progressionSum_smul
