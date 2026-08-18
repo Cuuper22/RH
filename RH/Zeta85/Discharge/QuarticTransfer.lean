@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 
-import RH.Zeta85.Inputs95
+import RH.Zeta85.Discharge.PoissonKernelBridge
 import RH.Zeta85.Discharge.TrimmedMoment
 import Zeta23.Final
 import Zeta23.Tail
@@ -154,7 +154,8 @@ theorem quarticTraceNumerator_eq_uncentered
           noncomm_ring]
   simp only [rtrace_add, rtrace_sub, hone]
   ring_nf
-  ring
+  simp only [mul_comm]
+  abel_nf
 
 /-- Explicit cyclic index sums for the first four raw matrix traces. -/
 def cyclicTrace1 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
@@ -331,54 +332,197 @@ private theorem sum_fintype_finset_comm
       ∑ a ∈ s, ∑ i : ι, f i a := by
   rw [Finset.sum_comm]
 
-
-private theorem sum_fintypes2_finset_comm
-    {ι κ α : Type*} [Fintype ι] [Fintype κ]
-    (s : Finset α) (f : ι → κ → α → ℂ) :
-    (∑ i : ι, ∑ j : κ, ∑ a ∈ s, f i j a) =
-      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, f i j a := by
+private theorem sum_fintype_finset2_comm
+    {ι α : Type*} [Fintype ι]
+    (s : Finset α) (f : ι → α → α → ℂ) :
+    (∑ i : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, f i a₁ a₂) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ i : ι, f i a₁ a₂ := by
   calc
-    (∑ i : ι, ∑ j : κ, ∑ a ∈ s, f i j a) =
-        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, f i j a := by
+    (∑ i : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, f i a₁ a₂) =
+        ∑ a₁ ∈ s, ∑ i : ι, ∑ a₂ ∈ s, f i a₁ a₂ :=
+      sum_fintype_finset_comm s
+        (fun i a₁ => ∑ a₂ ∈ s, f i a₁ a₂)
+    _ = ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ i : ι, f i a₁ a₂ := by
+      apply Finset.sum_congr rfl
+      intro a₁ _
+      exact sum_fintype_finset_comm s (fun i a₂ => f i a₁ a₂)
+
+private theorem sum_fintype_finset3_comm
+    {ι α : Type*} [Fintype ι]
+    (s : Finset α) (f : ι → α → α → α → ℂ) :
+    (∑ i : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s,
+      f i a₁ a₂ a₃) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ i : ι,
+        f i a₁ a₂ a₃ := by
+  calc
+    (∑ i : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s,
+        f i a₁ a₂ a₃) =
+        ∑ a₁ ∈ s, ∑ i : ι, ∑ a₂ ∈ s, ∑ a₃ ∈ s,
+          f i a₁ a₂ a₃ :=
+      sum_fintype_finset_comm s
+        (fun i a₁ => ∑ a₂ ∈ s, ∑ a₃ ∈ s, f i a₁ a₂ a₃)
+    _ = ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ i : ι,
+          f i a₁ a₂ a₃ := by
+      apply Finset.sum_congr rfl
+      intro a₁ _
+      exact sum_fintype_finset2_comm s
+        (fun i a₂ a₃ => f i a₁ a₂ a₃)
+
+private theorem sum_fintype_finset4_comm
+    {ι α : Type*} [Fintype ι]
+    (s : Finset α) (f : ι → α → α → α → α → ℂ) :
+    (∑ i : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+      f i a₁ a₂ a₃ a₄) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s, ∑ i : ι,
+        f i a₁ a₂ a₃ a₄ := by
+  calc
+    (∑ i : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+        f i a₁ a₂ a₃ a₄) =
+        ∑ a₁ ∈ s, ∑ i : ι, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+          f i a₁ a₂ a₃ a₄ :=
+      sum_fintype_finset_comm s
+        (fun i a₁ =>
+          ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s, f i a₁ a₂ a₃ a₄)
+    _ = ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s, ∑ i : ι,
+          f i a₁ a₂ a₃ a₄ := by
+      apply Finset.sum_congr rfl
+      intro a₁ _
+      exact sum_fintype_finset3_comm s
+        (fun i a₂ a₃ a₄ => f i a₁ a₂ a₃ a₄)
+
+private theorem sum_fintype2_finset2_comm
+    {ι α : Type*} [Fintype ι]
+    (s : Finset α) (f : ι → ι → α → α → ℂ) :
+    (∑ i : ι, ∑ j : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, f i j a₁ a₂) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ i : ι, ∑ j : ι, f i j a₁ a₂ := by
+  calc
+    (∑ i : ι, ∑ j : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, f i j a₁ a₂) =
+        ∑ i : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ j : ι, f i j a₁ a₂ := by
       apply Finset.sum_congr rfl
       intro i _
-      rw [sum_fintype_finset_comm]
-    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, f i j a := by
-      rw [sum_fintype_finset_comm]
+      exact sum_fintype_finset2_comm s (fun j a₁ a₂ => f i j a₁ a₂)
+    _ = ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ i : ι, ∑ j : ι, f i j a₁ a₂ :=
+      sum_fintype_finset2_comm s
+        (fun i a₁ a₂ => ∑ j : ι, f i j a₁ a₂)
 
-private theorem sum_fintypes3_finset_comm
-    {ι κ ν α : Type*} [Fintype ι] [Fintype κ] [Fintype ν]
-    (s : Finset α) (f : ι → κ → ν → α → ℂ) :
-    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ a ∈ s, f i j k a) =
-      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, f i j k a := by
+private theorem sum_fintype3_finset3_comm
+    {ι α : Type*} [Fintype ι]
+    (s : Finset α) (f : ι → ι → ι → α → α → α → ℂ) :
+    (∑ i : ι, ∑ j : ι, ∑ k : ι,
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, f i j k a₁ a₂ a₃) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s,
+        ∑ i : ι, ∑ j : ι, ∑ k : ι, f i j k a₁ a₂ a₃ := by
   calc
-    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ a ∈ s, f i j k a) =
-        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, ∑ k : ν, f i j k a := by
+    (∑ i : ι, ∑ j : ι, ∑ k : ι,
+        ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, f i j k a₁ a₂ a₃) =
+        ∑ i : ι, ∑ j : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s,
+          ∑ k : ι, f i j k a₁ a₂ a₃ := by
       apply Finset.sum_congr rfl
       intro i _
-      rw [sum_fintypes2_finset_comm]
-    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, f i j k a := by
-      rw [sum_fintype_finset_comm]
-
-private theorem sum_fintypes4_finset_comm
-    {ι κ ν ξ α : Type*}
-    [Fintype ι] [Fintype κ] [Fintype ν] [Fintype ξ]
-    (s : Finset α) (f : ι → κ → ν → ξ → α → ℂ) :
-    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-      ∑ a ∈ s, f i j k l a) =
-      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-        f i j k l a := by
-  calc
-    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-        ∑ a ∈ s, f i j k l a) =
-        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-          f i j k l a := by
+      apply Finset.sum_congr rfl
+      intro j _
+      exact sum_fintype_finset3_comm s
+        (fun k a₁ a₂ a₃ => f i j k a₁ a₂ a₃)
+    _ = ∑ i : ι, ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s,
+          ∑ j : ι, ∑ k : ι, f i j k a₁ a₂ a₃ := by
       apply Finset.sum_congr rfl
       intro i _
-      rw [sum_fintypes3_finset_comm]
-    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-        f i j k l a := by
-      rw [sum_fintype_finset_comm]
+      exact sum_fintype_finset3_comm s
+        (fun j a₁ a₂ a₃ => ∑ k : ι, f i j k a₁ a₂ a₃)
+    _ = ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s,
+          ∑ i : ι, ∑ j : ι, ∑ k : ι, f i j k a₁ a₂ a₃ :=
+      sum_fintype_finset3_comm s
+        (fun i a₁ a₂ a₃ => ∑ j : ι, ∑ k : ι, f i j k a₁ a₂ a₃)
+
+private theorem sum_fintype4_finset4_comm
+    {ι α : Type*} [Fintype ι]
+    (s : Finset α) (f : ι → ι → ι → ι → α → α → α → α → ℂ) :
+    (∑ i : ι, ∑ j : ι, ∑ k : ι, ∑ l : ι,
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+        f i j k l a₁ a₂ a₃ a₄) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+        ∑ i : ι, ∑ j : ι, ∑ k : ι, ∑ l : ι,
+          f i j k l a₁ a₂ a₃ a₄ := by
+  calc
+    (∑ i : ι, ∑ j : ι, ∑ k : ι, ∑ l : ι,
+        ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+          f i j k l a₁ a₂ a₃ a₄) =
+        ∑ i : ι, ∑ j : ι, ∑ k : ι,
+          ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+            ∑ l : ι, f i j k l a₁ a₂ a₃ a₄ := by
+      apply Finset.sum_congr rfl
+      intro i _
+      apply Finset.sum_congr rfl
+      intro j _
+      apply Finset.sum_congr rfl
+      intro k _
+      exact sum_fintype_finset4_comm s
+        (fun l a₁ a₂ a₃ a₄ => f i j k l a₁ a₂ a₃ a₄)
+    _ = ∑ i : ι, ∑ j : ι,
+          ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+            ∑ k : ι, ∑ l : ι, f i j k l a₁ a₂ a₃ a₄ := by
+      apply Finset.sum_congr rfl
+      intro i _
+      apply Finset.sum_congr rfl
+      intro j _
+      exact sum_fintype_finset4_comm s
+        (fun k a₁ a₂ a₃ a₄ => ∑ l : ι, f i j k l a₁ a₂ a₃ a₄)
+    _ = ∑ i : ι,
+          ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+            ∑ j : ι, ∑ k : ι, ∑ l : ι, f i j k l a₁ a₂ a₃ a₄ := by
+      apply Finset.sum_congr rfl
+      intro i _
+      exact sum_fintype_finset4_comm s
+        (fun j a₁ a₂ a₃ a₄ =>
+          ∑ k : ι, ∑ l : ι, f i j k l a₁ a₂ a₃ a₄)
+    _ = ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+          ∑ i : ι, ∑ j : ι, ∑ k : ι, ∑ l : ι,
+            f i j k l a₁ a₂ a₃ a₄ :=
+      sum_fintype_finset4_comm s
+        (fun i a₁ a₂ a₃ a₄ =>
+          ∑ j : ι, ∑ k : ι, ∑ l : ι, f i j k l a₁ a₂ a₃ a₄)
+
+private theorem finsetSum_product2
+    {α : Type*} (s : Finset α) (f₁ f₂ : α → ℂ) :
+    (∑ a₁ ∈ s, f₁ a₁) * (∑ a₂ ∈ s, f₂ a₂) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, f₁ a₁ * f₂ a₂ := by
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro a₁ _
+  rw [Finset.mul_sum]
+
+private theorem finsetSum_product3
+    {α : Type*} (s : Finset α) (f₁ f₂ f₃ : α → ℂ) :
+    ((∑ a₁ ∈ s, f₁ a₁) * (∑ a₂ ∈ s, f₂ a₂)) *
+        (∑ a₃ ∈ s, f₃ a₃) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s,
+        (f₁ a₁ * f₂ a₂) * f₃ a₃ := by
+  rw [finsetSum_product2]
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro a₁ _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro a₂ _
+  rw [Finset.mul_sum]
+
+private theorem finsetSum_product4
+    {α : Type*} (s : Finset α) (f₁ f₂ f₃ f₄ : α → ℂ) :
+    ((∑ a₁ ∈ s, f₁ a₁) * (∑ a₂ ∈ s, f₂ a₂)) *
+        ((∑ a₃ ∈ s, f₃ a₃) * (∑ a₄ ∈ s, f₄ a₄)) =
+      ∑ a₁ ∈ s, ∑ a₂ ∈ s, ∑ a₃ ∈ s, ∑ a₄ ∈ s,
+        (f₁ a₁ * f₂ a₂) * (f₃ a₃ * f₄ a₄) := by
+  rw [finsetSum_product2, finsetSum_product2]
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro a₁ _
+  rw [Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro a₂ _
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro a₃ _
+  rw [Finset.mul_sum]
 
 /-- Zero-tuple-first cyclic kernels.  Every block-index contraction now sits
 inside the contribution of one explicit ordered tuple of zeros. -/
@@ -428,6 +572,30 @@ def zeroPairKernel
     F.atom T (F.blockEmbedding T i) ρ *
       F.atom T (F.blockEmbedding T i) ρ'
 
+/-- Complex Poisson summation, column bijectivity, and distinguished-channel
+exhaustion evaluate the literal scalar kernel as the full spatial-alias sum
+minus the explicit frequencies omitted by the finite block. -/
+theorem zeroPairKernel_eq_poissonAliasCompletedPair
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T Λ : ℝ)
+    (haddress : Function.Bijective (F.columnAddress T))
+    (hcolumns : ∀ i,
+      (F.columnAddress T (F.blockEmbedding T i)).1 = F.distinguished T)
+    (hexhaustive : ∀ i,
+      (F.columnAddress T i).1 = F.distinguished T →
+        ∃ b, F.blockEmbedding T b = i)
+    (hL : 0 < F.period T (F.distinguished T))
+    (hΛ : 0 ≤ Λ)
+    (hwindow : ContDiff ℝ 2
+      (fun u => (F.window T (F.distinguished T) u : ℂ)))
+    (hsupport : ∀ u, Λ < |u| →
+      (F.window T (F.distinguished T) u : ℂ) = 0)
+    (ρ ρ' : ℂ) :
+    zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ' := by
+  exact PoissonKernelBridge.blockPairKernel_eq_poissonAliasCompletedPair
+    F T Λ haddress hcolumns hexhaustive hL hΛ hwindow hsupport ρ ρ'
+
 /-- The normalization and multiplicity carried by one zero edge. -/
 def zeroEdgeWeight
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -470,6 +638,81 @@ def factoredZeroCycle4
           (zeroEdgeWeight F T ρ₁ *
             (zeroEdgeWeight F T ρ₂ *
               (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄))))))
+
+/-- The same factored tuple contributions after replacing every finite
+column contraction by its exact Poisson-completed value. -/
+def poissonZeroCycle1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
+  PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ *
+    zeroEdgeWeight F T ρ
+
+def poissonZeroCycle2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ₁ ρ₂ : ℂ) : ℂ :=
+  PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₂ *
+    (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₂ *
+      (zeroEdgeWeight F T ρ₁ * zeroEdgeWeight F T ρ₂))
+
+def poissonZeroCycle3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
+  PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₂ *
+    (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₂ ρ₃ *
+      (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₃ *
+        (zeroEdgeWeight F T ρ₁ *
+          (zeroEdgeWeight F T ρ₂ * zeroEdgeWeight F T ρ₃))))
+
+def poissonZeroCycle4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
+  PoissonKernelBridge.poissonAliasCompletedPair F T ρ₃ ρ₄ *
+    (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₂ *
+      (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₂ ρ₃ *
+        (PoissonKernelBridge.poissonAliasCompletedPair F T ρ₁ ρ₄ *
+          (zeroEdgeWeight F T ρ₁ *
+            (zeroEdgeWeight F T ρ₂ *
+              (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄))))))
+
+theorem factoredZeroCycle1_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ')
+    (ρ : ℂ) :
+    factoredZeroCycle1 F T ρ = poissonZeroCycle1 F T ρ := by
+  simp only [factoredZeroCycle1, poissonZeroCycle1, hpair]
+
+theorem factoredZeroCycle2_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ')
+    (ρ₁ ρ₂ : ℂ) :
+    factoredZeroCycle2 F T ρ₁ ρ₂ = poissonZeroCycle2 F T ρ₁ ρ₂ := by
+  simp only [factoredZeroCycle2, poissonZeroCycle2, hpair]
+
+theorem factoredZeroCycle3_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ')
+    (ρ₁ ρ₂ ρ₃ : ℂ) :
+    factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ =
+      poissonZeroCycle3 F T ρ₁ ρ₂ ρ₃ := by
+  simp only [factoredZeroCycle3, poissonZeroCycle3, hpair]
+
+theorem factoredZeroCycle4_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ')
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) :
+    factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
+      poissonZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
+  simp only [factoredZeroCycle4, poissonZeroCycle4, hpair]
 
 theorem zeroIndexKernel1_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -566,6 +809,70 @@ def factoredZeroKernelCyclicTrace4
     ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
       factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
 
+def poissonZeroKernelCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, poissonZeroCycle1 F T ρ)
+
+def poissonZeroKernelCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    poissonZeroCycle2 F T ρ₁ ρ₂)
+
+def poissonZeroKernelCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, poissonZeroCycle3 F T ρ₁ ρ₂ ρ₃)
+
+def poissonZeroKernelCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      poissonZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+theorem factoredZeroKernelCyclicTrace1_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelCyclicTrace1 F T =
+      poissonZeroKernelCyclicTrace1 F T := by
+  unfold factoredZeroKernelCyclicTrace1 poissonZeroKernelCyclicTrace1
+  simp_rw [factoredZeroCycle1_eq_poisson hpair]
+
+theorem factoredZeroKernelCyclicTrace2_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelCyclicTrace2 F T =
+      poissonZeroKernelCyclicTrace2 F T := by
+  unfold factoredZeroKernelCyclicTrace2 poissonZeroKernelCyclicTrace2
+  simp_rw [factoredZeroCycle2_eq_poisson hpair]
+
+theorem factoredZeroKernelCyclicTrace3_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelCyclicTrace3 F T =
+      poissonZeroKernelCyclicTrace3 F T := by
+  unfold factoredZeroKernelCyclicTrace3 poissonZeroKernelCyclicTrace3
+  simp_rw [factoredZeroCycle3_eq_poisson hpair]
+
+theorem factoredZeroKernelCyclicTrace4_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelCyclicTrace4 F T =
+      poissonZeroKernelCyclicTrace4 F T := by
+  unfold factoredZeroKernelCyclicTrace4 poissonZeroKernelCyclicTrace4
+  simp_rw [factoredZeroCycle4_eq_poisson hpair]
+
 theorem zeroKernelCyclicTrace1_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
@@ -631,10 +938,9 @@ theorem zeroTupleCyclicTrace2_eq_kernel
     zeroTupleCyclicTrace2 F T = zeroKernelCyclicTrace2 F T := by
   unfold zeroTupleCyclicTrace2 zeroKernelCyclicTrace2
   apply congrArg Complex.re
-  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
+  exact sum_fintype2_finset2_comm (ZeroSide.ZI Z T)
+    (fun i j ρ₁ ρ₂ =>
+      blockZeroSummand F T i j ρ₁ * blockZeroSummand F T j i ρ₂)
 
 theorem zeroTupleCyclicTrace3_eq_kernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -642,13 +948,11 @@ theorem zeroTupleCyclicTrace3_eq_kernel
     zeroTupleCyclicTrace3 F T = zeroKernelCyclicTrace3 F T := by
   unfold zeroTupleCyclicTrace3 zeroKernelCyclicTrace3
   apply congrArg Complex.re
-  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
+  exact sum_fintype3_finset3_comm (ZeroSide.ZI Z T)
+    (fun i j k ρ₁ ρ₂ ρ₃ =>
+      (blockZeroSummand F T i k ρ₁ *
+        blockZeroSummand F T k j ρ₂) *
+          blockZeroSummand F T j i ρ₃)
 
 theorem zeroTupleCyclicTrace4_eq_kernel
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -656,16 +960,12 @@ theorem zeroTupleCyclicTrace4_eq_kernel
     zeroTupleCyclicTrace4 F T = zeroKernelCyclicTrace4 F T := by
   unfold zeroTupleCyclicTrace4 zeroKernelCyclicTrace4
   apply congrArg Complex.re
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₃ _
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
+  exact sum_fintype4_finset4_comm (ZeroSide.ZI Z T)
+    (fun i j k l ρ₁ ρ₂ ρ₃ ρ₄ =>
+      (blockZeroSummand F T i k ρ₁ *
+        blockZeroSummand F T k j ρ₂) *
+      (blockZeroSummand F T j l ρ₃ *
+        blockZeroSummand F T l i ρ₄))
 
 theorem zeroCyclicTrace1_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -679,23 +979,20 @@ theorem zeroCyclicTrace2_eq_tuple
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroCyclicTrace2 F T = zeroTupleCyclicTrace2 F T := by
   unfold zeroCyclicTrace2 zeroTupleCyclicTrace2
-  simp only [blockZeroEntry_eq_finsetSum]
   apply congrArg Complex.re
   apply Finset.sum_congr rfl
   intro i _
   apply Finset.sum_congr rfl
   intro j _
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [Finset.mul_sum]
+  rw [blockZeroEntry_eq_finsetSum, blockZeroEntry_eq_finsetSum]
+  exact finsetSum_product2 (ZeroSide.ZI Z T)
+    (blockZeroSummand F T i j) (blockZeroSummand F T j i)
 
 theorem zeroCyclicTrace3_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroCyclicTrace3 F T = zeroTupleCyclicTrace3 F T := by
   unfold zeroCyclicTrace3 zeroTupleCyclicTrace3
-  simp only [blockZeroEntry_eq_finsetSum]
   apply congrArg Complex.re
   apply Finset.sum_congr rfl
   intro i _
@@ -704,24 +1001,17 @@ theorem zeroCyclicTrace3_eq_tuple
   rw [Finset.sum_mul]
   apply Finset.sum_congr rfl
   intro k _
-  rw [mul_assoc]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [Finset.sum_mul]
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  simp only [mul_assoc]
+  rw [blockZeroEntry_eq_finsetSum, blockZeroEntry_eq_finsetSum,
+    blockZeroEntry_eq_finsetSum]
+  exact finsetSum_product3 (ZeroSide.ZI Z T)
+    (blockZeroSummand F T i k) (blockZeroSummand F T k j)
+      (blockZeroSummand F T j i)
 
 theorem zeroCyclicTrace4_eq_tuple
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
     zeroCyclicTrace4 F T = zeroTupleCyclicTrace4 F T := by
   unfold zeroCyclicTrace4 zeroTupleCyclicTrace4
-  simp only [blockZeroEntry_eq_finsetSum]
   apply congrArg Complex.re
   apply Finset.sum_congr rfl
   intro i _
@@ -733,23 +1023,86 @@ theorem zeroCyclicTrace4_eq_tuple
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro l _
-  rw [mul_assoc]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [Finset.sum_mul]
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [Finset.sum_mul]
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro ρ₃ _
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  simp only [mul_assoc]
+  rw [blockZeroEntry_eq_finsetSum, blockZeroEntry_eq_finsetSum,
+    blockZeroEntry_eq_finsetSum, blockZeroEntry_eq_finsetSum]
+  exact finsetSum_product4 (ZeroSide.ZI Z T)
+    (blockZeroSummand F T i k) (blockZeroSummand F T k j)
+      (blockZeroSummand F T j l) (blockZeroSummand F T l i)
+
+/-- The zero-tuple-first coordinate for one raw trace power through degree
+four.  Values outside the active range are deliberately zero. -/
+def zeroKernelRawTrace
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (k : ℕ) (T : ℝ) : ℝ :=
+  match k with
+  | 1 => zeroKernelCyclicTrace1 F T
+  | 2 => zeroKernelCyclicTrace2 F T
+  | 3 => zeroKernelCyclicTrace3 F T
+  | 4 => zeroKernelCyclicTrace4 F T
+  | _ => 0
+
+theorem rtrace_block_pow_one_eq_zeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    rtrace ((F.block T) ^ 1) = zeroKernelCyclicTrace1 F T := by
+  calc
+    rtrace ((F.block T) ^ 1) = cyclicTrace1 (F.block T) :=
+      rtrace_pow_one_eq_cyclic (F.block T)
+    _ = zeroCyclicTrace1 F T := by
+      simp only [cyclicTrace1, zeroCyclicTrace1, block_apply_eq_zeroEntry]
+    _ = zeroTupleCyclicTrace1 F T := zeroCyclicTrace1_eq_tuple
+    _ = zeroKernelCyclicTrace1 F T := zeroTupleCyclicTrace1_eq_kernel
+
+theorem rtrace_block_pow_two_eq_zeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    rtrace ((F.block T) ^ 2) = zeroKernelCyclicTrace2 F T := by
+  calc
+    rtrace ((F.block T) ^ 2) = cyclicTrace2 (F.block T) :=
+      rtrace_pow_two_eq_cyclic (F.block T)
+    _ = zeroCyclicTrace2 F T := by
+      simp only [cyclicTrace2, zeroCyclicTrace2, block_apply_eq_zeroEntry]
+    _ = zeroTupleCyclicTrace2 F T := zeroCyclicTrace2_eq_tuple
+    _ = zeroKernelCyclicTrace2 F T := zeroTupleCyclicTrace2_eq_kernel
+
+theorem rtrace_block_pow_three_eq_zeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    rtrace ((F.block T) ^ 3) = zeroKernelCyclicTrace3 F T := by
+  calc
+    rtrace ((F.block T) ^ 3) = cyclicTrace3 (F.block T) :=
+      rtrace_pow_three_eq_cyclic (F.block T)
+    _ = zeroCyclicTrace3 F T := by
+      simp only [cyclicTrace3, zeroCyclicTrace3, block_apply_eq_zeroEntry]
+    _ = zeroTupleCyclicTrace3 F T := zeroCyclicTrace3_eq_tuple
+    _ = zeroKernelCyclicTrace3 F T := zeroTupleCyclicTrace3_eq_kernel
+
+theorem rtrace_block_pow_four_eq_zeroKernel
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
+    rtrace ((F.block T) ^ 4) = zeroKernelCyclicTrace4 F T := by
+  calc
+    rtrace ((F.block T) ^ 4) = cyclicTrace4 (F.block T) :=
+      rtrace_pow_four_eq_cyclic (F.block T)
+    _ = zeroCyclicTrace4 F T := by
+      simp only [cyclicTrace4, zeroCyclicTrace4, block_apply_eq_zeroEntry]
+    _ = zeroTupleCyclicTrace4 F T := zeroCyclicTrace4_eq_tuple
+    _ = zeroKernelCyclicTrace4 F T := zeroTupleCyclicTrace4_eq_kernel
+
+/-- Uniform exact expansion of every active raw block trace: first expand
+the entries into zeros, then commute all block indices inside each ordered
+zero tuple. -/
+theorem rtrace_block_pow_eq_zeroKernelRawTrace
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    {k : ℕ} (hk1 : 1 ≤ k) (hk4 : k ≤ 4) :
+    rtrace ((F.block T) ^ k) = zeroKernelRawTrace F k T := by
+  interval_cases k <;>
+    simp only [zeroKernelRawTrace,
+      rtrace_block_pow_one_eq_zeroKernel,
+      rtrace_block_pow_two_eq_zeroKernel,
+      rtrace_block_pow_three_eq_zeroKernel,
+      rtrace_block_pow_four_eq_zeroKernel]
 
 def zeroCyclicQuarticNumerator
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -794,6 +1147,369 @@ def factoredZeroKernelQuarticNumerator
     u.p2 * factoredZeroKernelCyclicTrace2 F T +
     u.p3 * factoredZeroKernelCyclicTrace3 F T +
     u.p4 * factoredZeroKernelCyclicTrace4 F T
+
+/-- The terminal quartic numerator after every scalar block contraction has
+been expanded as a full spatial-alias sum minus its two explicit lattice
+tails. -/
+def poissonZeroKernelQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  let u := uncenteredQuartic q
+  u.p0 * (F.blockDim T : ℝ) +
+    u.p1 * poissonZeroKernelCyclicTrace1 F T +
+    u.p2 * poissonZeroKernelCyclicTrace2 F T +
+    u.p3 * poissonZeroKernelCyclicTrace3 F T +
+    u.p4 * poissonZeroKernelCyclicTrace4 F T
+
+/-! ## Guarded finite-grid quartic coordinate -/
+
+/-- Cyclic zero contributions formed from the one contiguous guarded
+modulation grid. -/
+def guardedZeroCycle1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ *
+    zeroEdgeWeight F T ρ
+
+def guardedZeroCycle2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ₁ ρ₂ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂ *
+    (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂ *
+      (zeroEdgeWeight F T ρ₁ * zeroEdgeWeight F T ρ₂))
+
+def guardedZeroCycle3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂ *
+    (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₂ ρ₃ *
+      (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₃ *
+        (zeroEdgeWeight F T ρ₁ *
+          (zeroEdgeWeight F T ρ₂ * zeroEdgeWeight F T ρ₃))))
+
+def guardedZeroCycle4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₃ ρ₄ *
+    (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂ *
+      (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₂ ρ₃ *
+        (PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₄ *
+          (zeroEdgeWeight F T ρ₁ *
+            (zeroEdgeWeight F T ρ₂ *
+              (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄))))))
+
+/-- Telescoping corrections from the retained grid to the guarded grid.
+Each summand contains a literal endpoint-boundary factor. -/
+def boundaryCorrectionZeroCycle1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ *
+    zeroEdgeWeight F T ρ
+
+def boundaryCorrectionZeroCycle2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ₁ ρ₂ : ℂ) : ℂ :=
+  PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ₁ ρ₂ *
+    (zeroPairKernel F T ρ₁ ρ₂ +
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ₁ ρ₂) *
+    (zeroEdgeWeight F T ρ₁ * zeroEdgeWeight F T ρ₂)
+
+def boundaryCorrectionZeroCycle3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
+  let K := zeroPairKernel F T
+  let B := PoissonKernelBridge.canonicalBoundaryPairKernel F T
+  let G := PoissonKernelBridge.canonicalGuardedPairKernel F T
+  (B ρ₁ ρ₂ * G ρ₂ ρ₃ * G ρ₁ ρ₃ +
+    K ρ₁ ρ₂ * B ρ₂ ρ₃ * G ρ₁ ρ₃ +
+    K ρ₁ ρ₂ * K ρ₂ ρ₃ * B ρ₁ ρ₃) *
+      (zeroEdgeWeight F T ρ₁ *
+        (zeroEdgeWeight F T ρ₂ * zeroEdgeWeight F T ρ₃))
+
+def boundaryCorrectionZeroCycle4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
+  let K := zeroPairKernel F T
+  let B := PoissonKernelBridge.canonicalBoundaryPairKernel F T
+  let G := PoissonKernelBridge.canonicalGuardedPairKernel F T
+  (B ρ₃ ρ₄ * G ρ₁ ρ₂ * G ρ₂ ρ₃ * G ρ₁ ρ₄ +
+    K ρ₃ ρ₄ * B ρ₁ ρ₂ * G ρ₂ ρ₃ * G ρ₁ ρ₄ +
+    K ρ₃ ρ₄ * K ρ₁ ρ₂ * B ρ₂ ρ₃ * G ρ₁ ρ₄ +
+    K ρ₃ ρ₄ * K ρ₁ ρ₂ * K ρ₂ ρ₃ * B ρ₁ ρ₄) *
+      (zeroEdgeWeight F T ρ₁ *
+        (zeroEdgeWeight F T ρ₂ *
+          (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄)))
+
+theorem factoredZeroCycle1_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ')
+    (ρ : ℂ) :
+    factoredZeroCycle1 F T ρ + boundaryCorrectionZeroCycle1 F T ρ =
+      guardedZeroCycle1 F T ρ := by
+  simp only [factoredZeroCycle1, boundaryCorrectionZeroCycle1,
+    guardedZeroCycle1, ← hpair]
+  ring
+
+theorem factoredZeroCycle2_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ')
+    (ρ₁ ρ₂ : ℂ) :
+    factoredZeroCycle2 F T ρ₁ ρ₂ +
+        boundaryCorrectionZeroCycle2 F T ρ₁ ρ₂ =
+      guardedZeroCycle2 F T ρ₁ ρ₂ := by
+  simp only [factoredZeroCycle2, boundaryCorrectionZeroCycle2,
+    guardedZeroCycle2, ← hpair]
+  ring
+
+theorem factoredZeroCycle3_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ')
+    (ρ₁ ρ₂ ρ₃ : ℂ) :
+    factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ +
+        boundaryCorrectionZeroCycle3 F T ρ₁ ρ₂ ρ₃ =
+      guardedZeroCycle3 F T ρ₁ ρ₂ ρ₃ := by
+  simp only [factoredZeroCycle3, boundaryCorrectionZeroCycle3,
+    guardedZeroCycle3, ← hpair]
+  ring
+
+theorem factoredZeroCycle4_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ')
+    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) :
+    factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ +
+        boundaryCorrectionZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
+      guardedZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
+  simp only [factoredZeroCycle4, boundaryCorrectionZeroCycle4,
+    guardedZeroCycle4, ← hpair]
+  ring
+
+def guardedZeroKernelCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, guardedZeroCycle1 F T ρ)
+
+def guardedZeroKernelCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    guardedZeroCycle2 F T ρ₁ ρ₂)
+
+def guardedZeroKernelCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, guardedZeroCycle3 F T ρ₁ ρ₂ ρ₃)
+
+def guardedZeroKernelCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      guardedZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+def boundaryCorrectionCyclicTrace1
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T,
+    boundaryCorrectionZeroCycle1 F T ρ)
+
+def boundaryCorrectionCyclicTrace2
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    boundaryCorrectionZeroCycle2 F T ρ₁ ρ₂)
+
+def boundaryCorrectionCyclicTrace3
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T,
+      boundaryCorrectionZeroCycle3 F T ρ₁ ρ₂ ρ₃)
+
+def boundaryCorrectionCyclicTrace4
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
+    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
+      boundaryCorrectionZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
+
+theorem factoredCyclicTrace1_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelCyclicTrace1 F T + boundaryCorrectionCyclicTrace1 F T =
+      guardedZeroKernelCyclicTrace1 F T := by
+  unfold factoredZeroKernelCyclicTrace1 boundaryCorrectionCyclicTrace1
+    guardedZeroKernelCyclicTrace1
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ hρ
+  exact factoredZeroCycle1_add_boundaryCorrection_eq_guarded hpair ρ
+
+theorem factoredCyclicTrace2_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelCyclicTrace2 F T + boundaryCorrectionCyclicTrace2 F T =
+      guardedZeroKernelCyclicTrace2 F T := by
+  unfold factoredZeroKernelCyclicTrace2 boundaryCorrectionCyclicTrace2
+    guardedZeroKernelCyclicTrace2
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  exact factoredZeroCycle2_add_boundaryCorrection_eq_guarded hpair ρ₁ ρ₂
+
+theorem factoredCyclicTrace3_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelCyclicTrace3 F T + boundaryCorrectionCyclicTrace3 F T =
+      guardedZeroKernelCyclicTrace3 F T := by
+  unfold factoredZeroKernelCyclicTrace3 boundaryCorrectionCyclicTrace3
+    guardedZeroKernelCyclicTrace3
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  exact factoredZeroCycle3_add_boundaryCorrection_eq_guarded hpair ρ₁ ρ₂ ρ₃
+
+theorem factoredCyclicTrace4_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelCyclicTrace4 F T + boundaryCorrectionCyclicTrace4 F T =
+      guardedZeroKernelCyclicTrace4 F T := by
+  unfold factoredZeroKernelCyclicTrace4 boundaryCorrectionCyclicTrace4
+    guardedZeroKernelCyclicTrace4
+  rw [← Complex.add_re, ← Finset.sum_add_distrib]
+  apply congrArg Complex.re
+  apply Finset.sum_congr rfl
+  intro ρ₁ hρ₁
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₂ hρ₂
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₃ hρ₃
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro ρ₄ hρ₄
+  exact factoredZeroCycle4_add_boundaryCorrection_eq_guarded
+    hpair ρ₁ ρ₂ ρ₃ ρ₄
+
+/-- The quartic numerator evaluated on the enlarged guarded grid. -/
+def guardedZeroKernelQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  let u := uncenteredQuartic q
+  u.p0 * (F.blockDim T : ℝ) +
+    u.p1 * guardedZeroKernelCyclicTrace1 F T +
+    u.p2 * guardedZeroKernelCyclicTrace2 F T +
+    u.p3 * guardedZeroKernelCyclicTrace3 F T +
+    u.p4 * guardedZeroKernelCyclicTrace4 F T
+
+/-- Exact quartic correction from the retained grid to the guarded grid. -/
+def boundaryCorrectionQuarticNumerator
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
+  let u := uncenteredQuartic q
+  u.p1 * boundaryCorrectionCyclicTrace1 F T +
+    u.p2 * boundaryCorrectionCyclicTrace2 F T +
+    u.p3 * boundaryCorrectionCyclicTrace3 F T +
+    u.p4 * boundaryCorrectionCyclicTrace4 F T
+
+/-- Changing the object summed first from the retained grid to the guarded
+grid produces exactly the displayed boundary-factor correction. -/
+theorem factoredQuarticNumerator_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' +
+        PoissonKernelBridge.canonicalBoundaryPairKernel F T ρ ρ' =
+      PoissonKernelBridge.canonicalGuardedPairKernel F T ρ ρ') :
+    factoredZeroKernelQuarticNumerator q F T +
+        boundaryCorrectionQuarticNumerator q F T =
+      guardedZeroKernelQuarticNumerator q F T := by
+  unfold factoredZeroKernelQuarticNumerator
+    boundaryCorrectionQuarticNumerator guardedZeroKernelQuarticNumerator
+  rw [← factoredCyclicTrace1_add_boundaryCorrection_eq_guarded hpair,
+    ← factoredCyclicTrace2_add_boundaryCorrection_eq_guarded hpair,
+    ← factoredCyclicTrace3_add_boundaryCorrection_eq_guarded hpair,
+    ← factoredCyclicTrace4_add_boundaryCorrection_eq_guarded hpair]
+  ring
+
+/-- The exact quartic guarded-grid replacement is available at every
+sufficiently large height from the construction data itself. -/
+theorem PoissonKernelBridge.DistinguishedGuardedPoissonKernelData.eventually_factoredQuarticNumerator_add_boundaryCorrection_eq_guarded
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PoissonKernelBridge.DistinguishedGuardedPoissonKernelData F)
+    (q : Quartic) :
+    ∀ᶠ T in atTop,
+      factoredZeroKernelQuarticNumerator q F T +
+          boundaryCorrectionQuarticNumerator q F T =
+        guardedZeroKernelQuarticNumerator q F T := by
+  filter_upwards [h.eventually_blockPairKernel_add_boundary_eq_guarded]
+    with T hT
+  apply factoredQuarticNumerator_add_boundaryCorrection_eq_guarded
+  simpa only [zeroPairKernel, PoissonKernelBridge.blockPairKernel] using hT
+
+theorem factoredZeroKernelQuarticNumerator_eq_poisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
+    (hpair : ∀ ρ ρ' : ℂ, zeroPairKernel F T ρ ρ' =
+      PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ') :
+    factoredZeroKernelQuarticNumerator q F T =
+      poissonZeroKernelQuarticNumerator q F T := by
+  simp only [factoredZeroKernelQuarticNumerator,
+    poissonZeroKernelQuarticNumerator,
+    factoredZeroKernelCyclicTrace1_eq_poisson hpair,
+    factoredZeroKernelCyclicTrace2_eq_poisson hpair,
+    factoredZeroKernelCyclicTrace3_eq_poisson hpair,
+    factoredZeroKernelCyclicTrace4_eq_poisson hpair]
 
 theorem zeroKernelQuarticNumerator_eq_factored
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
@@ -972,6 +1688,67 @@ structure FactoredZeroKernelQuarticLowerBound
     ∀ᶠ T in atTop,
       x < factoredZeroKernelQuarticNumerator q F T /
         (Z.N T (2 * T) : ℝ)
+
+/-- The same one-sided terminal bound in the explicit complex-Poisson
+coordinate.  Every pair factor here is a spatial-alias sum minus the exact
+negative and upper lattice tails. -/
+structure PoissonZeroKernelQuarticLowerBound
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
+  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
+  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
+    ∀ᶠ T in atTop,
+      x < poissonZeroKernelQuarticNumerator q F T /
+        (Z.N T (2 * T) : ℝ)
+
+theorem eventually_zeroPairKernel_eq
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PoissonKernelBridge.DistinguishedPoissonKernelData F) :
+    ∀ᶠ T in atTop, ∀ ρ ρ' : ℂ,
+      zeroPairKernel F T ρ ρ' =
+        PoissonKernelBridge.poissonAliasCompletedPair F T ρ ρ' := by
+  filter_upwards [h.eventually_blockPairKernel_eq] with T hT
+  intro ρ ρ'
+  simpa only [zeroPairKernel, PoissonKernelBridge.blockPairKernel] using
+    hT ρ ρ'
+
+theorem eventually_quarticNumerator_eq
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (q : Quartic) :
+    ∀ᶠ T in atTop,
+      factoredZeroKernelQuarticNumerator q F T =
+        poissonZeroKernelQuarticNumerator q F T := by
+  filter_upwards [eventually_zeroPairKernel_eq h] with T hT
+  exact factoredZeroKernelQuarticNumerator_eq_poisson hT
+
+theorem PoissonZeroKernelQuarticLowerBound.toFactored
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : PoissonZeroKernelQuarticLowerBound q F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F) :
+    FactoredZeroKernelQuarticLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx,
+    eventually_quarticNumerator_eq hkernel q] with T hT heq
+  rw [heq]
+  exact hT
+
+theorem FactoredZeroKernelQuarticLowerBound.toPoisson
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
+    (h : FactoredZeroKernelQuarticLowerBound q F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F) :
+    PoissonZeroKernelQuarticLowerBound q F := by
+  refine ⟨h.block_dimension_pos, ?_⟩
+  intro x hx
+  filter_upwards [h.eventually_gt x hx,
+    eventually_quarticNumerator_eq hkernel q] with T hT heq
+  rw [← heq]
+  exact hT
 
 /-- All finite errors in the affine bridge.  The coefficient `3` on the
 enlarged-window edge count is exact: `2` comes from robust stability and
@@ -1614,6 +2391,33 @@ theorem eps_transfer_9506
     (95063832187565 / 100000000000000) Terminal9506.dual_feasible
     Terminal9506.cap_slope hcost strict_transfer_9506
 
+/-- R-8686 with the analytic premise stated directly in the explicit
+complex-Poisson coordinate. -/
+theorem eps_transfer_8686_of_poisson
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (hpoisson :
+      PoissonZeroKernelQuarticLowerBound Terminal8686.dual F) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) :=
+  eps_transfer_8686 hRvM hfull hzero (hpoisson.toFactored hkernel)
+
+/-- R-9506 with the sole quartic premise reduced to full spatial aliases
+minus the explicit negative and upper lattice tails. -/
+theorem eps_transfer_9506_of_poisson
+    {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (hpoisson :
+      PoissonZeroKernelQuarticLowerBound Terminal9506.dual F) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((95063832187565 / 100000000000000 : ℝ) - ε) *
+          (Z.N T (2 * T) : ℝ) ≤
+        (Z.N0s T (2 * T) : ℝ) :=
+  eps_transfer_9506 hRvM hfull hzero (hpoisson.toFactored hkernel)
+
 theorem frozen_8657_lt_8686 :
     (865674254456636 / 1000000000000000 : ℝ) <
       86855250 / 100000000 := by
@@ -1695,6 +2499,33 @@ theorem zeta_eps_transfer_9506
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
     (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hfactored)
+
+theorem zeta_eps_transfer_8686_of_poisson
+    {F : Family14999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (hpoisson :
+      PoissonZeroKernelQuarticLowerBound Terminal8686.dual F) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
+        (N0simple T (2 * T) : ℝ) := by
+  simpa only [zeta_N, zeta_N0s] using
+    (eps_transfer_8686_of_poisson paperInputs_zeta.RvM hfull hzero
+      hkernel hpoisson)
+
+theorem zeta_eps_transfer_9506_of_poisson
+    {F : Family19999 zetaZeroConfig}
+    (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
+    (hkernel : PoissonKernelBridge.DistinguishedPoissonKernelData F)
+    (hpoisson :
+      PoissonZeroKernelQuarticLowerBound Terminal9506.dual F) :
+    ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
+      ((95063832187565 / 100000000000000 : ℝ) - ε) *
+          (Ncount T (2 * T) : ℝ) ≤
+        (N0simple T (2 * T) : ℝ) := by
+  simpa only [zeta_N, zeta_N0s] using
+    (eps_transfer_9506_of_poisson paperInputs_zeta.RvM hfull hzero
+      hkernel hpoisson)
 
 /-- Concrete-zeta R-8657, obtained monotonically from R-8686. -/
 theorem zeta_eps_transfer_8657

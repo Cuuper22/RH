@@ -57,7 +57,7 @@ theorem complexGaux_int_eq_alias
         rw [← Complex.exp_add]
         congr 1
         push_cast
-        ring
+        ring_nf
       rw [hexp]
       push_cast
       ring
@@ -537,6 +537,79 @@ theorem hasSum_paperFT_mul_paperFT_shift_alias_zero_only
       hL hΛ hsupp heven hgap z z' hm
   rw [hcollapse] at hhas
   exact hhas
+
+/-- Every compactly supported complex window admits a nonnegative symmetric
+support radius.  This removes an arbitrary radius witness from downstream
+Poisson applications. -/
+theorem exists_nonneg_support_abs_bound
+    {φ : ℝ → ℂ} (hcompact : HasCompactSupport φ) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧ ∀ u, Λ < |u| → φ u = 0 := by
+  obtain ⟨r, hr⟩ := hcompact.isCompact.isBounded.subset_closedBall 0
+  refine ⟨max r 0, le_max_right _ _, ?_⟩
+  intro u hu
+  apply image_eq_zero_of_notMem_tsupport
+  intro hut
+  have hur := hr hut
+  rw [Metric.mem_closedBall, Real.dist_0_eq_abs] at hur
+  have hle : |u| ≤ max r 0 := hur.trans (le_max_left _ _)
+  exact (not_lt_of_ge hle) hu
+
+/-- Compact-support form of the fourth-order two-factor horizontal decay
+bound, with the support radius eliminated from the statement. -/
+theorem paperFT_mul_horizontal_decay_of_hasCompactSupport
+    {φ : ℝ → ℂ}
+    (hφ : ContDiff ℝ 2 φ)
+    (hcompact : HasCompactSupport φ)
+    (z z' : ℂ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ s : ℝ,
+      ‖paperFT φ (z - s) * paperFT φ (z' - s)‖ *
+          ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) ≤ C := by
+  obtain ⟨Λ, _, hsupp⟩ := exists_nonneg_support_abs_bound hcompact
+  exact paperFT_mul_horizontal_decay hφ (fun u hu => by
+    by_contra hnot
+    exact hu (hsupp u (not_le.mp hnot))) z z'
+
+/-- Compact support also supplies one fourth-order constant for every pair
+of frequencies in a fixed vertical strip. -/
+theorem exists_paperFT_mul_horizontal_decay_uniform_of_hasCompactSupport
+    {φ : ℝ → ℂ}
+    (hφ : ContDiff ℝ 2 φ)
+    (hcompact : HasCompactSupport φ)
+    (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ z z' : ℂ,
+      |z.im| ≤ B → |z'.im| ≤ B → ∀ s : ℝ,
+        ‖paperFT φ (z - s) * paperFT φ (z' - s)‖ *
+            ((1 + (z.re - s) ^ 2) * (1 + (z'.re - s) ^ 2)) ≤ C := by
+  obtain ⟨Λ, hΛ, hsuppZero⟩ := exists_nonneg_support_abs_bound hcompact
+  have hsupp : ∀ u, φ u ≠ 0 → |u| ≤ Λ := by
+    intro u hu
+    by_contra hnot
+    exact hu (hsuppZero u (not_le.mp hnot))
+  let C : ℝ := (Real.exp (B * Λ) *
+    ((∫ u, ‖φ u‖) + (∫ u, ‖deriv (deriv φ) u‖))) ^ 2
+  refine ⟨C, by dsimp only [C]; positivity, ?_⟩
+  intro z z' hz hz' s
+  exact paperFT_mul_horizontal_decay_uniform
+    hφ hsupp hΛ hB z z' hz hz' s
+
+/-- Full complex Poisson summation stated directly for a compactly supported
+window, with the support radius chosen internally. -/
+theorem hasSum_paperFT_mul_paperFT_alias_of_hasCompactSupport
+    {φ : ℝ → ℂ} {L T : ℝ}
+    (hL : 0 < L)
+    (hφ : ContDiff ℝ 2 φ)
+    (hcompact : HasCompactSupport φ)
+    (z z' : ℂ) :
+    Summable (complexPoissonAliasTerm φ L T z z') ∧
+      HasSum
+        (fun k : ℤ =>
+          paperFT φ
+              (z - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)) *
+            paperFT φ
+              (z' - (T + (k : ℝ) * (2 * Real.pi / L) : ℝ)))
+        (∑' m : ℤ, complexPoissonAliasTerm φ L T z z' m) := by
+  obtain ⟨Λ, hΛ, hsupp⟩ := exists_nonneg_support_abs_bound hcompact
+  exact hasSum_paperFT_mul_paperFT_alias hL hΛ hφ hsupp z z'
 
 end Poisson
 end Zeta23
