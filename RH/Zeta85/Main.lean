@@ -125,14 +125,14 @@ theorem rung125_cumulative : Rung125_cumulative_statement := cumulative rung125
 /-! ## 3. Rung 3 — support 143/100, at least 1893603832049143/2227707598259143 -/
 
 /-- The two-trace certificate at support `143/100`, cost `D_pc`.
-Axioms: `shiu_majorant`, `signedPair_traceGrade_lt_3_2`, and `traceTransfer_saturated`.
+Axioms: `shiu_majorant₂`, `signedPair_traceGrade_lt_3_2`, and `traceTransfer_saturated`.
 The BBLR block interface and window cost are proved: the latter is
 `RH.Zeta85.windowCost_143`, proved in `RH/Zeta85/Certificate.lean` from the three exact window
 moments of `RH/Zeta85/Window.lean`. -/
 theorem cert143 : TwoTraceCert zetaZeroConfig DPC :=
   traceTransfer_saturated lam DPC (by norm_num [lam]) (by norm_num [lam])
     windowCost_143
-    (signedPair_traceGrade_lt_3_2 bblr_poisson_blocks shiu_majorant lam
+    (signedPair_traceGrade_lt_3_2 bblr_poisson_blocks shiu_majorant₂ lam
       (by norm_num [lam]) (by norm_num [lam]))
 
 /-- **Rung 3 — the 85 % theorem, dyadic**:
@@ -152,38 +152,6 @@ theorem eightyFive : EightyFivePercent_statement := eightyFive_of_rung143 rung14
 /-- **At least 85 %, cumulative form.** -/
 theorem eightyFive_cumulative : EightyFivePercent_cumulative_statement :=
   eightyFive_cumulative_of_rung143 rung143_cumulative
-
-/-! ## 5. Closed frozen quartic headlines from the surviving contradiction
-
-Each theorem below has no explicit premise; `#print axioms` exposes the
-single remaining declaration.
--/
-
-theorem rung8657_from_shiu_contradiction : Rung8657_statement :=
-  shiu_interface_contradiction.elim
-
-theorem rung8657_cumulative_from_shiu_contradiction : Rung8657_cumulative_statement :=
-  shiu_interface_contradiction.elim
-
-theorem rung8686_from_shiu_contradiction : Rung8686_statement :=
-  shiu_interface_contradiction.elim
-
-theorem rung8686_cumulative_from_shiu_contradiction : Rung8686_cumulative_statement :=
-  shiu_interface_contradiction.elim
-
-theorem rung9383_from_shiu_contradiction : Rung9383_statement :=
-  shiu_interface_contradiction.elim
-
-theorem rung9383_cumulative_from_shiu_contradiction : Rung9383_cumulative_statement :=
-  shiu_interface_contradiction.elim
-
-/-- The frozen 95.06 dyadic target, closed with no explicit premise. -/
-theorem rung9506_from_shiu_contradiction : Rung9506_statement :=
-  shiu_interface_contradiction.elim
-
-/-- The frozen 95.06 cumulative target, closed with no explicit premise. -/
-theorem rung9506_cumulative_from_shiu_contradiction : Rung9506_cumulative_statement :=
-  shiu_interface_contradiction.elim
 
 /-! ## 6. The strict margin, in the source's own form
 

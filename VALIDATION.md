@@ -46,15 +46,18 @@ does.
 
 ```
 $ grep -rn "^axiom " --include=*.lean Zeta23/ RH/ comparator/
-RH/Zeta85/Hypotheses.lean:158  axiom shiu_majorant : …
-RH/Zeta85/Hypotheses.lean:192  axiom signedPair_traceGrade_lt_5_4 : …
-RH/Zeta85/Hypotheses.lean:241  axiom signedPair_traceGrade_lt_3_2 : …
-RH/Zeta85/Hypotheses.lean:312  axiom traceTransfer_saturated : …
+RH/Zeta85/Hypotheses.lean:186  axiom shiu_majorant₂ : …
+RH/Zeta85/Hypotheses.lean:220  axiom signedPair_traceGrade_lt_5_4 : …
+RH/Zeta85/Hypotheses.lean:269  axiom signedPair_traceGrade_lt_3_2 : …
+RH/Zeta85/Hypotheses.lean:340  axiom traceTransfer_saturated : …
 ```
 
 Four legacy declarations, all in the single file `RH/Zeta85/Hypotheses.lean`.  The former
 `windowCost_101`, `windowCost_125`, `bblr_poisson_blocks`, and `bblr_error_bound` declarations are
-now theorems proved in their respective `RH/Zeta85/Discharge/` modules.  These four declarations remain the
+now theorems proved in their respective `RH/Zeta85/Discharge/` modules.  `shiu_majorant₂` asserts
+the corrected interface `ShiuMajorant₂` (`RH/Zeta85/ShiuInterface.lean`); the frozen interface
+`ShiuMajorant` it replaces is refuted in-repo by `RH.Zeta85.not_shiuMajorant_quarter`
+(`RH/Zeta85/Discharge/ShiuNoGo.lean`) — see `AXIOMS.md` §3, Axiom 1.  These four declarations remain the
 conditional boundary, not the target standard.  (The two `axiom`
 lines in `Zeta23/FromPNTPlus/Tactic/AdditiveCombination.lean` sit inside a fenced code block in a
 docstring and are not declarations — this is the point `AUDIT.md` already records for the base
@@ -85,8 +88,16 @@ Output reproduced verbatim in `AXIOMS.md` §1.  Summary: the support-`101/100` s
 `propext`, `Classical.choice`, `Quot.sound` and two of the four research axioms,
 `{signedPair_traceGrade_lt_5_4, traceTransfer_saturated}`.  The support-`5/4`
 statements use the same two; the 85 % statements use
-`{shiu_majorant, signedPair_traceGrade_lt_3_2, traceTransfer_saturated}`.
+`{shiu_majorant₂, signedPair_traceGrade_lt_3_2, traceTransfer_saturated}`.
 Nothing else appears.
+
+Eight lines, one per comparator statement.  An intermediate revision printed sixteen: it had
+collapsed the axiom list to the single refuted `shiu_majorant` and added eight closed
+`RH.Zeta85.rung*_from_shiu_contradiction` headlines (R-8657 … R-9506) whose proofs were
+`False`-eliminations off `shiu_interface_contradiction`, so that *every* extension headline listed
+the refuted axiom as its sole custom dependency.  Those eight declarations and the contradiction
+are removed; the audit is back to the eight genuine statements above, and the per-rung dependency
+sets are once again distinct (rungs 1–2 versus rung 3 — `AXIOMS.md` §2).
 
 ## 6. Statement equality, challenge ↔ solution
 

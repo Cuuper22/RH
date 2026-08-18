@@ -38,18 +38,28 @@ declaration-nested family):
 
 ## What the consolidated line achieves over `main`
 
+(As recorded at consolidation time; the axiom-collapse items were subsequently
+reversed — see the addendum at the end of this document.)
+
 - Four of the six named analytic hypotheses of the 85% layer are **proved** and
   removed as axioms: `bblr_error_bound`, `bblr_poisson_blocks`,
-  `windowCost_101`, `windowCost_125` (and the signed-pair/trace-transfer
-  premises are discharged structurally). `RH/Zeta85/Hypotheses.lean` now
-  declares a single axiom, `shiu_majorant`.
-- Every extension rung R-679 … R-9506 compiles conditional on that single
-  axiom; the formerly uninstantiable `Family14999`/`Family19999`
-  `PrincipalCyclicBlock` premises are gone from the headline path.
-- New comparator statements `zeta85_rung_8657/8686/9383/9506` (dyadic and
-  cumulative) are registered in `comparator/config-zeta85.json`.
-- README/AXIOMS/VALIDATION were maintained by the line itself and reflect the
-  new state.
+  `windowCost_101`, `windowCost_125`. At consolidation time
+  `RH/Zeta85/Hypotheses.lean` declared a single axiom, `shiu_majorant` —
+  a state the addendum below records as unsound and reversed.
+- At consolidation time every extension rung R-679 … R-9506 compiled
+  conditional on that single axiom; the `Family14999`/`Family19999`
+  `PrincipalCyclicBlock` premises were removed from the headline path.
+  (Reversed by the addendum: the closed R-8657 … R-9506 headlines were
+  vacuous and are deleted; the quartic implications keep their four explicit
+  structure premises.)
+- Comparator statements `zeta85_rung_8657/8686/9383/9506` (dyadic and
+  cumulative) were registered in `comparator/config-zeta85.json` and are
+  de-registered again by the addendum.
+- README and AXIOMS.md were maintained by the line itself.  VALIDATION.md was
+  **not**: it kept its pre-consolidation four-axiom text (stale line numbers,
+  per-rung dependency sets contradicting the collapsed AXIOMS.md §1.1), and
+  `comparator/config-zeta85.json` kept three ex-axioms in `permitted_axioms`.
+  Both are reconciled by the addendum's rewiring.
 
 ## Branch disposition
 
@@ -119,3 +129,32 @@ from the targeted `bridge` workflow's build list until completed.
 The campaign's own final verification (2026-08-13 07:12–09:46Z, preserved in
 `rhverify/` on `zeta-lean`) had identified `agent/poisson-tail-expansion` as
 its last fully certified state; that commit is an ancestor of the carrier.
+
+## Addendum — honest-core rewiring (2026-08-18)
+
+The consolidation's final axiom collapse — down to a single axiom, as its
+commit title records — was unsound and has been reversed.  The single surviving axiom asserted the frozen interface
+`ShiuMajorant`, which this repository itself refutes:
+`RH.Zeta85.not_shiuMajorant_quarter` (`RH/Zeta85/Discharge/ShiuNoGo.lean`)
+proves `¬ ShiuMajorant (1/4)`, so `shiu_interface_contradiction : False` was
+derivable and every theorem routed through it — both signed-pair trace grades,
+`traceTransfer_saturated`, `windowCost_125`, and the eight closed
+R-8657 … R-9506 headlines — was a vacuous `False`-elimination.
+
+The honest state is restored:
+
+- `RH/Zeta85/Hypotheses.lean` declares **four** axioms — `shiu_majorant₂`
+  (the corrected interface `ShiuMajorant₂` of `RH/Zeta85/ShiuInterface.lean`:
+  majorant scale `(log P)^C`, modulus range `q ≤ P^(1−η)`, class-uniform
+  constants), `signedPair_traceGrade_lt_5_4`, `signedPair_traceGrade_lt_3_2`,
+  and `traceTransfer_saturated`.
+- `windowCost_125` is again the real proof
+  (`RH/Zeta85/Discharge/RationalWindow125Final.lean` and its rational
+  certificate chain), not a `False`-elimination.
+- The eight vacuous `*_from_shiu_contradiction` headlines are deleted; the
+  comparator topic `Zeta85` is back to its eight genuine statements, with
+  `permitted_axioms` listing exactly the four axioms above.
+- `ShiuNoGo` remains in the build graph as the proved refutation of the old
+  interface; it is consistent with the corrected axiom.
+
+See `AXIOMS.md` (intro and §§2–3) for the full record.

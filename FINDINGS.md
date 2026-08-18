@@ -173,10 +173,29 @@ justification ("fix every short factor, and the remaining smooth factor occupies
 presupposes the explicit factorization of the recombined coefficients, i.e. the finite-depth
 Heath–Brown identity, which is not formalized anywhere in this artifact or in Mathlib.
 
-**What replaced it.**  Axiom 1, `RH.Zeta85.Hypotheses.shiu_majorant`, stated over the concrete
-vocabulary `RH.Zeta85.ShiuMajorant` / `progressionSum` / `DivisorBounded` of `RH/Zeta85/Arith.lean`
+**What replaced it.**  Axiom 1, `RH.Zeta85.Hypotheses.shiu_majorant₂`, stated over the concrete
+vocabulary `RH.Zeta85.ShiuMajorant₂` (`RH/Zeta85/ShiuInterface.lean`) / `progressionSum` /
+`DivisorBounded` of `RH/Zeta85/Arith.lean`
 (so the axiom is a statement about objects a reader can inspect, not an opaque constant).  It is used
 by rung 3 only.
+
+**A finding about the first rendering itself.**  The original frozen rendering `ShiuMajorant`
+(`RH/Zeta85/Arith.lean`) is **false**, and the repository proves it:
+`RH.Zeta85.not_shiuMajorant_quarter` (`RH/Zeta85/Discharge/ShiuNoGo.lean`) refutes
+`ShiuMajorant (1/4)`.  The frozen statement quantified `T` (and its `(log T)^C` majorant scale)
+before the interval scale `P`, took the mixed modulus range `q ≤ P·T^(−η)`, and froze its constants
+per coefficient family; a `τ(3^m)`-spike isolated modulo a power of two then beats any fixed
+`(log T)^C` bound.  An intermediate revision kept that refuted statement as the sole axiom, which
+made the layer inconsistent (`False` was derivable); in that collapsed state *every* extension
+headline — all rungs, not just rung 3 — had the refuted axiom as its sole custom dependency, and
+the then-added closed R-8657 … R-9506 headlines were vacuous.  That revision has been rolled
+back, restoring the rung-3-only scope stated above.  `ShiuMajorant₂` makes three corrections
+(majorant scale `(log P)^C`; range `q ≤ P^(1−η)`; class-uniform constants quantified after the
+divisor-bound class `(Kc, k)` but before the coefficient family) and matches the shape of Shiu's
+published theorem for a fixed majorant class.  Only the first two are what the refutation
+exploits — it fixes one coefficient family and lets `P` run far past `T` — and either suffices to
+defeat it; the third is a faithfulness correction to Shiu's class-uniform constants, and it
+strengthens the statement rather than weakening it.
 
 ---
 
