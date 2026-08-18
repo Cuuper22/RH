@@ -105,6 +105,163 @@ theorem coordinateFullFrequencyLattice_eq_energySum_collective
       intro j hj
       ring
 
+
+/-- A common positive period cancels every square-root modulation
+normalization after the channels are summed.  Thus collective synthesis
+depends only on the total physical window-energy profile. -/
+theorem coordinateEnergySum_eq_fullLength_windowEnergy_collective
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : CollectiveWindowRegularity F)
+    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (ρ ρ' : ℂ) :
+    coordinateEnergySum F T ρ ρ' =
+      (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.windowEnergy T u : ℂ) *
+            Complex.exp
+              (Complex.I * (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+  unfold coordinateEnergySum
+  calc
+    (∑ j : Fin (F.channelCount T),
+      ((Real.sqrt (F.fullLength T / F.period T j) : ℂ) ^ 2) *
+        (F.period T j : ℂ) *
+        ∫ u : ℝ,
+          (F.window T j u : ℂ) * F.window T j u *
+            Complex.exp
+              (Complex.I *
+                (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
+        ∑ j : Fin (F.channelCount T),
+          (F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.window T j u : ℂ) * F.window T j u *
+                Complex.exp
+                  (Complex.I *
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+      apply Finset.sum_congr rfl
+      intro j hj
+      have hperiod : 0 < F.period T j := by
+        rw [h.period_eq T j]
+        exact h.period_pos T
+      have hquot : 0 ≤ F.fullLength T / F.period T j :=
+        div_nonneg hfull hperiod.le
+      have hreal :
+          Real.sqrt (F.fullLength T / F.period T j) ^ 2 *
+              F.period T j =
+            F.fullLength T := by
+        rw [Real.sq_sqrt hquot]
+        exact div_mul_cancel₀ _ hperiod.ne'
+      have hcomplex :=
+        congrArg (fun x : ℝ => (x : ℂ)) hreal
+      push_cast at hcomplex
+      rw [hcomplex]
+    _ = (F.fullLength T : ℂ) *
+        ∑ j : Fin (F.channelCount T),
+          ∫ u : ℝ,
+            (F.window T j u : ℂ) * F.window T j u *
+              Complex.exp
+                (Complex.I *
+                  (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+      rw [Finset.mul_sum]
+    _ = (F.fullLength T : ℂ) *
+        ∫ u : ℝ,
+          (F.windowEnergy T u : ℂ) *
+            Complex.exp
+              (Complex.I *
+                (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+      congr 1
+      calc
+        (∑ j : Fin (F.channelCount T),
+          ∫ u : ℝ,
+            (F.window T j u : ℂ) * F.window T j u *
+              Complex.exp
+                (Complex.I *
+                  (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
+            ∑ j : Fin (F.channelCount T),
+              F.complexAliasTerm T
+                (gammaOf ρ) (gammaOf ρ') j 0 := by
+          apply Finset.sum_congr rfl
+          intro j hj
+          exact (ComplexAliasBridge.complexAliasTerm_zero
+            F T j (gammaOf ρ) (gammaOf ρ')).symm
+        _ = _ :=
+          ComplexAliasBridge.sum_complexAliasTerm_zero_eq_integral_windowEnergy
+            F T (gammaOf ρ) (gammaOf ρ')
+            (fun j =>
+              ComplexAliasBridge.integrable_zeroAliasIntegrand
+                F T j (h.supportRadius T j)
+                (h.supportRadius_nonneg T j)
+                (h.smooth T j) (h.support T j)
+                (gammaOf ρ) (gammaOf ρ'))
+
+/-- Under collective cancellation, the literal energy-tail kernel is the
+normalized Fourier transform of total physical energy minus the single
+finite frequency tail. -/
+theorem literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail_collective
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : CollectiveWindowRegularity F)
+    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (ρ ρ' : ℂ) :
+    literalCoordinateEnergyTailPairKernel F T ρ ρ' =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        ((F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.windowEnergy T u : ℂ) *
+                Complex.exp
+                  (Complex.I *
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          coordinateFrequencyTail
+            (literalBlockSelection F) T ρ ρ') := by
+  unfold literalCoordinateEnergyTailPairKernel
+  rw [coordinateEnergySum_eq_fullLength_windowEnergy_collective
+    h T hfull]
+
+
+/-- If the constructed channel energy is the frozen physical profile almost
+everywhere, the collective literal kernel is exactly that profile transform
+minus the one finite-grid tail. -/
+theorem literalCoordinateEnergyTailPairKernel_eq_supportedProfile_sub_tail_collective
+    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
+    {F : QuarticGramFamily Z σ μ p v}
+    (h : CollectiveWindowRegularity F)
+    (T : ℝ) (hfull : 0 ≤ F.fullLength T)
+    (henergy :
+      ∀ᵐ u : ℝ,
+        F.windowEnergy T u =
+          F.supportedFullProfile (u / F.fullLength T))
+    (ρ ρ' : ℂ) :
+    literalCoordinateEnergyTailPairKernel F T ρ ρ' =
+      ((F.hatDenominator T)⁻¹ : ℂ) *
+        ((F.fullLength T : ℂ) *
+            ∫ u : ℝ,
+              (F.supportedFullProfile
+                  (u / F.fullLength T) : ℂ) *
+                Complex.exp
+                  (Complex.I *
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+          coordinateFrequencyTail
+            (literalBlockSelection F) T ρ ρ') := by
+  rw [
+    literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail_collective
+      h T hfull]
+  have hint :
+      (∫ u : ℝ,
+        (F.windowEnergy T u : ℂ) *
+          Complex.exp
+            (Complex.I *
+              (gammaOf ρ - gammaOf ρ') * (u : ℂ))) =
+        ∫ u : ℝ,
+          (F.supportedFullProfile
+              (u / F.fullLength T) : ℂ) *
+            Complex.exp
+              (Complex.I *
+                (gammaOf ρ - gammaOf ρ') * (u : ℂ)) := by
+    apply integral_congr_ae
+    filter_upwards [henergy] with u hu
+    rw [hu]
+  rw [hint]
+
 /-- The selected finite physical grid is the collectively evaluated energy
 minus the same one aggregate frequency tail. -/
 theorem coordinateSelectedFrequencyGrid_eq_energy_sub_tail_collective
