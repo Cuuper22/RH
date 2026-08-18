@@ -58,7 +58,7 @@ Categories (full per-branch list in the consolidation PR):
 - **Merged via this consolidation (carrier + folded, 26 branches)** — the two
   carrier lines, the three folded experiment tips, and the 18 branches whose
   tips are ancestors of the result, plus the three subsumed members of each
-  folded family. Closed as merged; tips preserved under `archive/` tags.
+  folded family. Closed as merged; tips preserved via the keep-alive ref.
 - **Superseded snapshots (20 branches)** — mid-chain PR heads whose diff
   against the carrier adds zero novel declarations (typically an 8-line tweak
   the line later rebased or rewrote). Closed unmerged.
@@ -70,8 +70,10 @@ Categories (full per-branch list in the consolidation PR):
 - **`audit/rh95-extension-20260810` (PR #1)** — an audit of a pre-campaign
   proposal, based 37 commits behind current main. Closed as historical.
 
-Every deleted branch tip is preserved as a tag `archive/<branch-name>` so no
-commit is lost; `git tag -l 'archive/*'` lists them.
+Every deleted branch tip is preserved through the keep-alive ref
+`archive/campaign-20260813`: a parent-only commit whose 108 parents are the
+exact final commits of every removed branch, with the branch-to-commit table
+in its commit message (`git log -1 archive/campaign-20260813`).
 
 ## Finishing the frontier
 
