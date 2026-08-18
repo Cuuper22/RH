@@ -17,10 +17,8 @@ This file consumes only the explicit per-support analytic structures in
 are upstream routes for proving the trace and moment structures, not logical
 substitutes for them.
 
-The finite bridge is evaluated at the actual first four spectral moments.
-Its asymptotic boundary is only the single scalar quartic score selected by
-the terminal certificate; no finite matrix is asserted to have its limiting
-top-hat moments exactly.
+The finite bridge is kept at the actual first four spectral moments.  Thus no
+finite matrix is asserted to have its limiting top-hat moments exactly.
 -/
 
 open Filter Matrix Finset Unitary
@@ -93,885 +91,12 @@ def quarticScore {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     q.p3 * F.centeredBlockMoment 3 T +
     q.p4 * F.centeredBlockMoment 4 T
 
-/-- The sum-first version of the certificate statistic.  It combines the
-block-size contribution with the four raw centered matrix traces before the
-single normalization by the dyadic zero count. -/
-def quarticTraceNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  q.p0 * (F.blockDim T : ℝ) +
-    q.p1 * rtrace ((F.block T - 1) ^ 1) +
-    q.p2 * rtrace ((F.block T - 1) ^ 2) +
-    q.p3 * rtrace ((F.block T - 1) ^ 3) +
-    q.p4 * rtrace ((F.block T - 1) ^ 4)
-
-/-- Coefficients of the same polynomial after changing variables from the
-centered eigenvalue y = x - 1 back to the raw eigenvalue x. -/
-def uncenteredQuartic (q : Quartic) : Quartic where
-  p0 := q.p0 - q.p1 + q.p2 - q.p3 + q.p4
-  p1 := q.p1 - 2 * q.p2 + 3 * q.p3 - 4 * q.p4
-  p2 := q.p2 - 3 * q.p3 + 6 * q.p4
-  p3 := q.p3 - 4 * q.p4
-  p4 := q.p4
-
-/-- The target numerator written directly in uncentered cyclic traces. -/
-def uncenteredQuarticTraceNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  let u := uncenteredQuartic q
-  u.p0 * (F.blockDim T : ℝ) +
-    u.p1 * rtrace ((F.block T) ^ 1) +
-    u.p2 * rtrace ((F.block T) ^ 2) +
-    u.p3 * rtrace ((F.block T) ^ 3) +
-    u.p4 * rtrace ((F.block T) ^ 4)
-
-/-- Finite binomial expansion: centering the matrix and shifting the
-certificate coefficients are exactly the same operation. -/
-theorem quarticTraceNumerator_eq_uncentered
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    quarticTraceNumerator q F T =
-      uncenteredQuarticTraceNumerator q F T := by
-  have hone :
-      rtrace (1 : Matrix (Fin (F.blockDim T)) (Fin (F.blockDim T)) ℂ) =
-        (F.blockDim T : ℝ) := by
-    simp [rtrace, Matrix.trace]
-  rw [quarticTraceNumerator, uncenteredQuarticTraceNumerator,
-    uncenteredQuartic]
-  rw [show (F.block T - 1) ^ 1 = F.block T ^ 1 - 1 by noncomm_ring]
-  rw [show (F.block T - 1) ^ 2 =
-      F.block T ^ 2 - (F.block T + F.block T) + 1 by noncomm_ring]
-  rw [show (F.block T - 1) ^ 3 =
-      F.block T ^ 3 -
-        (F.block T ^ 2 + F.block T ^ 2 + F.block T ^ 2) +
-        (F.block T + F.block T + F.block T) - 1 by noncomm_ring]
-  rw [show (F.block T - 1) ^ 4 =
-      F.block T ^ 4 -
-        (F.block T ^ 3 + F.block T ^ 3 + F.block T ^ 3 + F.block T ^ 3) +
-        (F.block T ^ 2 + F.block T ^ 2 + F.block T ^ 2 +
-          F.block T ^ 2 + F.block T ^ 2 + F.block T ^ 2) -
-        (F.block T + F.block T + F.block T + F.block T) + 1 by
-          noncomm_ring]
-  simp only [rtrace_add, rtrace_sub, hone]
-  ring_nf
-  ring
-
-/-- Explicit cyclic index sums for the first four raw matrix traces. -/
-def cyclicTrace1 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
-  Complex.re (∑ i : Fin d, B i i)
-
-def cyclicTrace2 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
-  Complex.re (∑ i : Fin d, ∑ j : Fin d, B i j * B j i)
-
-def cyclicTrace3 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
-  Complex.re (∑ i : Fin d, ∑ j : Fin d,
-    (∑ k : Fin d, B i k * B k j) * B j i)
-
-def cyclicTrace4 {d : ℕ} (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
-  Complex.re (∑ i : Fin d, ∑ j : Fin d,
-    (∑ k : Fin d, B i k * B k j) *
-      (∑ l : Fin d, B j l * B l i))
-
-theorem rtrace_pow_one_eq_cyclic {d : ℕ}
-    (B : Matrix (Fin d) (Fin d) ℂ) :
-    rtrace (B ^ 1) = cyclicTrace1 B := by
-  simp [cyclicTrace1, rtrace, Matrix.trace]
-
-theorem rtrace_pow_two_eq_cyclic {d : ℕ}
-    (B : Matrix (Fin d) (Fin d) ℂ) :
-    rtrace (B ^ 2) = cyclicTrace2 B := by
-  rw [show B ^ 2 = B * B by noncomm_ring]
-  simp [cyclicTrace2, rtrace, Matrix.trace, Matrix.mul_apply]
-
-theorem rtrace_pow_three_eq_cyclic {d : ℕ}
-    (B : Matrix (Fin d) (Fin d) ℂ) :
-    rtrace (B ^ 3) = cyclicTrace3 B := by
-  rw [show B ^ 3 = (B * B) * B by noncomm_ring]
-  simp [cyclicTrace3, rtrace, Matrix.trace, Matrix.mul_apply]
-
-theorem rtrace_pow_four_eq_cyclic {d : ℕ}
-    (B : Matrix (Fin d) (Fin d) ℂ) :
-    rtrace (B ^ 4) = cyclicTrace4 B := by
-  rw [show B ^ 4 = (B * B) * (B * B) by noncomm_ring]
-  simp [cyclicTrace4, rtrace, Matrix.trace, Matrix.mul_apply]
-
-/-- The uncentered target numerator with every trace power replaced by its
-explicit cyclic index sum. -/
-def cyclicQuarticTraceNumerator {d : ℕ}
-    (q : Quartic) (B : Matrix (Fin d) (Fin d) ℂ) : ℝ :=
-  let u := uncenteredQuartic q
-  u.p0 * (d : ℝ) + u.p1 * cyclicTrace1 B +
-    u.p2 * cyclicTrace2 B + u.p3 * cyclicTrace3 B +
-    u.p4 * cyclicTrace4 B
-
-theorem uncenteredQuarticTraceNumerator_eq_cyclic
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    uncenteredQuarticTraceNumerator q F T =
-      cyclicQuarticTraceNumerator q (F.block T) := by
-  simp only [uncenteredQuarticTraceNumerator, cyclicQuarticTraceNumerator,
-    rtrace_pow_one_eq_cyclic, rtrace_pow_two_eq_cyclic,
-    rtrace_pow_three_eq_cyclic, rtrace_pow_four_eq_cyclic]
-
-/-- One literal principal-block entry opened into the actual finite
-enlarged-window zero sum. -/
-def blockZeroEntry
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
-    (i j : Fin (F.blockDim T)) : ℂ :=
-  ((F.hatDenominator T)⁻¹ : ℂ) *
-    ∑ᶠ ρ ∈ Z.ZIprime T,
-      (Z.mult ρ : ℂ) *
-        F.atom T (F.blockEmbedding T i) ρ *
-        F.atom T (F.blockEmbedding T j) ρ
-
-theorem block_apply_eq_zeroEntry
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
-    (i j : Fin (F.blockDim T)) :
-    F.block T i j = blockZeroEntry F T i j := by
-  rfl
-
-/-- One summand after replacing the finite-support notation by the canonical
-finite set of enlarged-window zeros. -/
-def blockZeroSummand
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
-    (i j : Fin (F.blockDim T)) (ρ : ℂ) : ℂ :=
-  ((F.hatDenominator T)⁻¹ : ℂ) *
-    ((Z.mult ρ : ℂ) *
-      F.atom T (F.blockEmbedding T i) ρ *
-      F.atom T (F.blockEmbedding T j) ρ)
-
-theorem blockZeroEntry_eq_finsetSum
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
-    (i j : Fin (F.blockDim T)) :
-    blockZeroEntry F T i j =
-      ∑ ρ ∈ ZeroSide.ZI Z T, blockZeroSummand F T i j ρ := by
-  unfold blockZeroEntry blockZeroSummand
-  rw [finsum_mem_eq_finite_toFinset_sum _
-    (ZeroSide.ZIprime_finite Z T)]
-  rw [Finset.mul_sum]
-  rfl
-
-/-- Cyclic sums after every block entry has been replaced by its literal
-finite zero sum. -/
-def zeroCyclicTrace1
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ i : Fin (F.blockDim T), blockZeroEntry F T i i)
-
-def zeroCyclicTrace2
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-    blockZeroEntry F T i j * blockZeroEntry F T j i)
-
-def zeroCyclicTrace3
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-    (∑ k : Fin (F.blockDim T),
-      blockZeroEntry F T i k * blockZeroEntry F T k j) *
-        blockZeroEntry F T j i)
-
-def zeroCyclicTrace4
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-    (∑ k : Fin (F.blockDim T),
-      blockZeroEntry F T i k * blockZeroEntry F T k j) *
-    (∑ l : Fin (F.blockDim T),
-      blockZeroEntry F T j l * blockZeroEntry F T l i))
-
-/-- Fully expanded cyclic zero-tuple sums. -/
-def zeroTupleCyclicTrace1
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ i : Fin (F.blockDim T),
-    ∑ ρ ∈ ZeroSide.ZI Z T, blockZeroSummand F T i i ρ)
-
-def zeroTupleCyclicTrace2
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-    ∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-      blockZeroSummand F T i j ρ₁ *
-        blockZeroSummand F T j i ρ₂)
-
-def zeroTupleCyclicTrace3
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-    ∑ k : Fin (F.blockDim T),
-      ∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-        ∑ ρ₃ ∈ ZeroSide.ZI Z T,
-          (blockZeroSummand F T i k ρ₁ *
-            blockZeroSummand F T k j ρ₂) *
-              blockZeroSummand F T j i ρ₃)
-
-def zeroTupleCyclicTrace4
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-    ∑ k : Fin (F.blockDim T), ∑ l : Fin (F.blockDim T),
-      ∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-        ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
-          (blockZeroSummand F T i k ρ₁ *
-            blockZeroSummand F T k j ρ₂) *
-          (blockZeroSummand F T j l ρ₃ *
-            blockZeroSummand F T l i ρ₄))
-
-/-- Commute a finite block-index sum past one explicitly supplied zero set. -/
-private theorem sum_fintype_finset_comm
-    {ι α : Type*} [Fintype ι]
-    (s : Finset α) (f : ι → α → ℂ) :
-    (∑ i : ι, ∑ a ∈ s, f i a) =
-      ∑ a ∈ s, ∑ i : ι, f i a := by
-  rw [Finset.sum_comm]
-
-
-private theorem sum_fintypes2_finset_comm
-    {ι κ α : Type*} [Fintype ι] [Fintype κ]
-    (s : Finset α) (f : ι → κ → α → ℂ) :
-    (∑ i : ι, ∑ j : κ, ∑ a ∈ s, f i j a) =
-      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, f i j a := by
-  calc
-    (∑ i : ι, ∑ j : κ, ∑ a ∈ s, f i j a) =
-        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, f i j a := by
-      apply Finset.sum_congr rfl
-      intro i _
-      rw [sum_fintype_finset_comm]
-    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, f i j a := by
-      rw [sum_fintype_finset_comm]
-
-private theorem sum_fintypes3_finset_comm
-    {ι κ ν α : Type*} [Fintype ι] [Fintype κ] [Fintype ν]
-    (s : Finset α) (f : ι → κ → ν → α → ℂ) :
-    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ a ∈ s, f i j k a) =
-      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, f i j k a := by
-  calc
-    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ a ∈ s, f i j k a) =
-        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, ∑ k : ν, f i j k a := by
-      apply Finset.sum_congr rfl
-      intro i _
-      rw [sum_fintypes2_finset_comm]
-    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, f i j k a := by
-      rw [sum_fintype_finset_comm]
-
-private theorem sum_fintypes4_finset_comm
-    {ι κ ν ξ α : Type*}
-    [Fintype ι] [Fintype κ] [Fintype ν] [Fintype ξ]
-    (s : Finset α) (f : ι → κ → ν → ξ → α → ℂ) :
-    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-      ∑ a ∈ s, f i j k l a) =
-      ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-        f i j k l a := by
-  calc
-    (∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-        ∑ a ∈ s, f i j k l a) =
-        ∑ i : ι, ∑ a ∈ s, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-          f i j k l a := by
-      apply Finset.sum_congr rfl
-      intro i _
-      rw [sum_fintypes3_finset_comm]
-    _ = ∑ a ∈ s, ∑ i : ι, ∑ j : κ, ∑ k : ν, ∑ l : ξ,
-        f i j k l a := by
-      rw [sum_fintype_finset_comm]
-
-/-- Zero-tuple-first cyclic kernels.  Every block-index contraction now sits
-inside the contribution of one explicit ordered tuple of zeros. -/
-def zeroKernelCyclicTrace1
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T,
-    ∑ i : Fin (F.blockDim T), blockZeroSummand F T i i ρ)
-
-def zeroKernelCyclicTrace2
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-      blockZeroSummand F T i j ρ₁ *
-        blockZeroSummand F T j i ρ₂)
-
-def zeroKernelCyclicTrace3
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T,
-      ∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-        ∑ k : Fin (F.blockDim T),
-          (blockZeroSummand F T i k ρ₁ *
-            blockZeroSummand F T k j ρ₂) *
-              blockZeroSummand F T j i ρ₃)
-
-def zeroKernelCyclicTrace4
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
-      ∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-        ∑ k : Fin (F.blockDim T), ∑ l : Fin (F.blockDim T),
-          (blockZeroSummand F T i k ρ₁ *
-            blockZeroSummand F T k j ρ₂) *
-          (blockZeroSummand F T j l ρ₃ *
-            blockZeroSummand F T l i ρ₄))
-
-/-- One scalar contraction of two zero atoms over the distinguished column
-grid.  This is the pair object to which complex Poisson summation applies. -/
-def zeroPairKernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ ρ' : ℂ) : ℂ :=
-  ∑ i : Fin (F.blockDim T),
-    F.atom T (F.blockEmbedding T i) ρ *
-      F.atom T (F.blockEmbedding T i) ρ'
-
-/-- The normalization and multiplicity carried by one zero edge. -/
-def zeroEdgeWeight
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
-  ((F.hatDenominator T)⁻¹ : ℂ) * (Z.mult ρ : ℂ)
-
-/-- Factored contributions of one ordered zero tuple.  The pair kernels are
-ordered by the block indices i, j, k, l, so expanding the products recovers
-the literal cyclic contractions without another sum permutation. -/
-def factoredZeroCycle1
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
-  zeroPairKernel F T ρ ρ * zeroEdgeWeight F T ρ
-
-def factoredZeroCycle2
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ₁ ρ₂ : ℂ) : ℂ :=
-  zeroPairKernel F T ρ₁ ρ₂ *
-    (zeroPairKernel F T ρ₁ ρ₂ *
-      (zeroEdgeWeight F T ρ₁ * zeroEdgeWeight F T ρ₂))
-
-def factoredZeroCycle3
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
-    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
-  zeroPairKernel F T ρ₁ ρ₂ *
-    (zeroPairKernel F T ρ₂ ρ₃ *
-      (zeroPairKernel F T ρ₁ ρ₃ *
-        (zeroEdgeWeight F T ρ₁ *
-          (zeroEdgeWeight F T ρ₂ * zeroEdgeWeight F T ρ₃))))
-
-def factoredZeroCycle4
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
-    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
-  zeroPairKernel F T ρ₃ ρ₄ *
-    (zeroPairKernel F T ρ₁ ρ₂ *
-      (zeroPairKernel F T ρ₂ ρ₃ *
-        (zeroPairKernel F T ρ₁ ρ₄ *
-          (zeroEdgeWeight F T ρ₁ *
-            (zeroEdgeWeight F T ρ₂ *
-              (zeroEdgeWeight F T ρ₃ * zeroEdgeWeight F T ρ₄))))))
-
-theorem zeroIndexKernel1_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} {ρ : ℂ} :
-    (∑ i : Fin (F.blockDim T), blockZeroSummand F T i i ρ) =
-      factoredZeroCycle1 F T ρ := by
-  simp only [factoredZeroCycle1, zeroPairKernel, Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro i _
-  simp only [blockZeroSummand, zeroEdgeWeight]
-  ring
-
-theorem zeroIndexKernel2_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} {ρ₁ ρ₂ : ℂ} :
-    (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-      blockZeroSummand F T i j ρ₁ *
-        blockZeroSummand F T j i ρ₂) =
-      factoredZeroCycle2 F T ρ₁ ρ₂ := by
-  simp only [factoredZeroCycle2, zeroPairKernel,
-    Finset.sum_mul, Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro j _
-  simp only [blockZeroSummand, zeroEdgeWeight]
-  ring
-
-theorem zeroIndexKernel3_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} {ρ₁ ρ₂ ρ₃ : ℂ} :
-    (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-      ∑ k : Fin (F.blockDim T),
-        (blockZeroSummand F T i k ρ₁ *
-          blockZeroSummand F T k j ρ₂) *
-            blockZeroSummand F T j i ρ₃) =
-      factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ := by
-  simp only [factoredZeroCycle3, zeroPairKernel,
-    Finset.sum_mul, Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro j _
-  apply Finset.sum_congr rfl
-  intro k _
-  simp only [blockZeroSummand, zeroEdgeWeight]
-  ring
-
-theorem zeroIndexKernel4_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
-    {ρ₁ ρ₂ ρ₃ ρ₄ : ℂ} :
-    (∑ i : Fin (F.blockDim T), ∑ j : Fin (F.blockDim T),
-      ∑ k : Fin (F.blockDim T), ∑ l : Fin (F.blockDim T),
-        (blockZeroSummand F T i k ρ₁ *
-          blockZeroSummand F T k j ρ₂) *
-        (blockZeroSummand F T j l ρ₃ *
-          blockZeroSummand F T l i ρ₄)) =
-      factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
-  simp only [factoredZeroCycle4, zeroPairKernel,
-    Finset.sum_mul, Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro j _
-  apply Finset.sum_congr rfl
-  intro k _
-  apply Finset.sum_congr rfl
-  intro l _
-  simp only [blockZeroSummand, zeroEdgeWeight]
-  ring
-
-def factoredZeroKernelCyclicTrace1
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, factoredZeroCycle1 F T ρ)
-
-def factoredZeroKernelCyclicTrace2
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    factoredZeroCycle2 F T ρ₁ ρ₂)
-
-def factoredZeroKernelCyclicTrace3
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T, factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃)
-
-def factoredZeroKernelCyclicTrace4
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
-      factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
-
-theorem zeroKernelCyclicTrace1_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroKernelCyclicTrace1 F T = factoredZeroKernelCyclicTrace1 F T := by
-  unfold zeroKernelCyclicTrace1 factoredZeroKernelCyclicTrace1
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro ρ _
-  exact zeroIndexKernel1_eq_factored
-
-theorem zeroKernelCyclicTrace2_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroKernelCyclicTrace2 F T = factoredZeroKernelCyclicTrace2 F T := by
-  unfold zeroKernelCyclicTrace2 factoredZeroKernelCyclicTrace2
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  exact zeroIndexKernel2_eq_factored
-
-theorem zeroKernelCyclicTrace3_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroKernelCyclicTrace3 F T = factoredZeroKernelCyclicTrace3 F T := by
-  unfold zeroKernelCyclicTrace3 factoredZeroKernelCyclicTrace3
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  apply Finset.sum_congr rfl
-  intro ρ₃ _
-  exact zeroIndexKernel3_eq_factored
-
-theorem zeroKernelCyclicTrace4_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroKernelCyclicTrace4 F T = factoredZeroKernelCyclicTrace4 F T := by
-  unfold zeroKernelCyclicTrace4 factoredZeroKernelCyclicTrace4
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  apply Finset.sum_congr rfl
-  intro ρ₃ _
-  apply Finset.sum_congr rfl
-  intro ρ₄ _
-  exact zeroIndexKernel4_eq_factored
-
-theorem zeroTupleCyclicTrace1_eq_kernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroTupleCyclicTrace1 F T = zeroKernelCyclicTrace1 F T := by
-  unfold zeroTupleCyclicTrace1 zeroKernelCyclicTrace1
-  rw [sum_fintype_finset_comm (ZeroSide.ZI Z T)]
-
-theorem zeroTupleCyclicTrace2_eq_kernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroTupleCyclicTrace2 F T = zeroKernelCyclicTrace2 F T := by
-  unfold zeroTupleCyclicTrace2 zeroKernelCyclicTrace2
-  apply congrArg Complex.re
-  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [sum_fintypes2_finset_comm (ZeroSide.ZI Z T)]
-
-theorem zeroTupleCyclicTrace3_eq_kernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroTupleCyclicTrace3 F T = zeroKernelCyclicTrace3 F T := by
-  unfold zeroTupleCyclicTrace3 zeroKernelCyclicTrace3
-  apply congrArg Complex.re
-  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [sum_fintypes3_finset_comm (ZeroSide.ZI Z T)]
-
-theorem zeroTupleCyclicTrace4_eq_kernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroTupleCyclicTrace4 F T = zeroKernelCyclicTrace4 F T := by
-  unfold zeroTupleCyclicTrace4 zeroKernelCyclicTrace4
-  apply congrArg Complex.re
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
-  apply Finset.sum_congr rfl
-  intro ρ₃ _
-  rw [sum_fintypes4_finset_comm (ZeroSide.ZI Z T)]
-
-theorem zeroCyclicTrace1_eq_tuple
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroCyclicTrace1 F T = zeroTupleCyclicTrace1 F T := by
-  simp [zeroCyclicTrace1, zeroTupleCyclicTrace1,
-    blockZeroEntry_eq_finsetSum]
-
-theorem zeroCyclicTrace2_eq_tuple
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroCyclicTrace2 F T = zeroTupleCyclicTrace2 F T := by
-  unfold zeroCyclicTrace2 zeroTupleCyclicTrace2
-  simp only [blockZeroEntry_eq_finsetSum]
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro j _
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [Finset.mul_sum]
-
-theorem zeroCyclicTrace3_eq_tuple
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroCyclicTrace3 F T = zeroTupleCyclicTrace3 F T := by
-  unfold zeroCyclicTrace3 zeroTupleCyclicTrace3
-  simp only [blockZeroEntry_eq_finsetSum]
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro j _
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro k _
-  rw [mul_assoc]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [Finset.sum_mul]
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  simp only [mul_assoc]
-
-theorem zeroCyclicTrace4_eq_tuple
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroCyclicTrace4 F T = zeroTupleCyclicTrace4 F T := by
-  unfold zeroCyclicTrace4 zeroTupleCyclicTrace4
-  simp only [blockZeroEntry_eq_finsetSum]
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro i _
-  apply Finset.sum_congr rfl
-  intro j _
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro k _
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro l _
-  rw [mul_assoc]
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro ρ₁ _
-  rw [Finset.sum_mul]
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro ρ₂ _
-  rw [Finset.sum_mul]
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro ρ₃ _
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  rw [Finset.mul_sum]
-  simp only [mul_assoc]
-
-def zeroCyclicQuarticNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  let u := uncenteredQuartic q
-  u.p0 * (F.blockDim T : ℝ) + u.p1 * zeroCyclicTrace1 F T +
-    u.p2 * zeroCyclicTrace2 F T + u.p3 * zeroCyclicTrace3 F T +
-    u.p4 * zeroCyclicTrace4 F T
-
-theorem cyclicQuarticTraceNumerator_eq_zeroCyclic
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    cyclicQuarticTraceNumerator q (F.block T) =
-      zeroCyclicQuarticNumerator q F T := by
-  simp only [cyclicQuarticTraceNumerator, zeroCyclicQuarticNumerator,
-    cyclicTrace1, cyclicTrace2, cyclicTrace3, cyclicTrace4,
-    zeroCyclicTrace1, zeroCyclicTrace2, zeroCyclicTrace3, zeroCyclicTrace4,
-    block_apply_eq_zeroEntry]
-
-def zeroTupleQuarticNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  let u := uncenteredQuartic q
-  u.p0 * (F.blockDim T : ℝ) + u.p1 * zeroTupleCyclicTrace1 F T +
-    u.p2 * zeroTupleCyclicTrace2 F T + u.p3 * zeroTupleCyclicTrace3 F T +
-    u.p4 * zeroTupleCyclicTrace4 F T
-
-def zeroKernelQuarticNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  let u := uncenteredQuartic q
-  u.p0 * (F.blockDim T : ℝ) + u.p1 * zeroKernelCyclicTrace1 F T +
-    u.p2 * zeroKernelCyclicTrace2 F T + u.p3 * zeroKernelCyclicTrace3 F T +
-    u.p4 * zeroKernelCyclicTrace4 F T
-
-def factoredZeroKernelQuarticNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  let u := uncenteredQuartic q
-  u.p0 * (F.blockDim T : ℝ) +
-    u.p1 * factoredZeroKernelCyclicTrace1 F T +
-    u.p2 * factoredZeroKernelCyclicTrace2 F T +
-    u.p3 * factoredZeroKernelCyclicTrace3 F T +
-    u.p4 * factoredZeroKernelCyclicTrace4 F T
-
-theorem zeroKernelQuarticNumerator_eq_factored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroKernelQuarticNumerator q F T =
-      factoredZeroKernelQuarticNumerator q F T := by
-  simp only [zeroKernelQuarticNumerator,
-    factoredZeroKernelQuarticNumerator,
-    zeroKernelCyclicTrace1_eq_factored,
-    zeroKernelCyclicTrace2_eq_factored,
-    zeroKernelCyclicTrace3_eq_factored,
-    zeroKernelCyclicTrace4_eq_factored]
-
-theorem zeroTupleQuarticNumerator_eq_kernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroTupleQuarticNumerator q F T =
-      zeroKernelQuarticNumerator q F T := by
-  simp only [zeroTupleQuarticNumerator, zeroKernelQuarticNumerator,
-    zeroTupleCyclicTrace1_eq_kernel, zeroTupleCyclicTrace2_eq_kernel,
-    zeroTupleCyclicTrace3_eq_kernel, zeroTupleCyclicTrace4_eq_kernel]
-
-theorem zeroCyclicQuarticNumerator_eq_tuple
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    zeroCyclicQuarticNumerator q F T =
-      zeroTupleQuarticNumerator q F T := by
-  simp only [zeroCyclicQuarticNumerator, zeroTupleQuarticNumerator,
-    zeroCyclicTrace1_eq_tuple, zeroCyclicTrace2_eq_tuple,
-    zeroCyclicTrace3_eq_tuple, zeroCyclicTrace4_eq_tuple]
-
-/-- On a nonempty block, multiplying the normalized quartic score by the
-block size is exactly the raw trace numerator. -/
-theorem blockDim_mul_quarticScore
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    {T : ℝ} (hm : 0 < F.blockDim T) :
-    (F.blockDim T : ℝ) * quarticScore q F T =
-      quarticTraceNumerator q F T := by
-  have hm0 : (F.blockDim T : ℝ) ≠ 0 := by
-    exact_mod_cast (Nat.ne_of_gt hm)
-  simp only [quarticScore, quarticTraceNumerator,
-    QuarticGramFamily.centeredBlockMoment]
-  field_simp [hm0]
-  <;> ring
-
-/-- The weighted normalized-moment expression is therefore exactly the
-once-normalized raw trace numerator. -/
-theorem weightedQuarticScore_eq_traceNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    {T : ℝ} (hm : 0 < F.blockDim T) :
-    (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
-        quarticScore q F T =
-      quarticTraceNumerator q F T / (Z.N T (2 * T) : ℝ) := by
-  calc
-    (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
-          quarticScore q F T =
-        ((F.blockDim T : ℝ) * quarticScore q F T) /
-          (Z.N T (2 * T) : ℝ) := by ring
-    _ = quarticTraceNumerator q F T /
-          (Z.N T (2 * T) : ℝ) := by
-      rw [blockDim_mul_quarticScore hm]
-
 /-- The same quartic evaluated at the formula-(21) limiting moments. -/
 def limitQuarticScore (q : Quartic) (μ p : ℝ) : ℝ :=
   q.p0 + q.p1 * formula21Moment 1 μ p +
     q.p2 * formula21Moment 2 μ p +
     q.p3 * formula21Moment 3 μ p +
     q.p4 * formula21Moment 4 μ p
-
-/-- The target-specific analytic datum actually consumed by a quartic
-certificate: convergence of its one scalar score.  Separate convergence of
-all four moments is a sufficient construction route, not a logical
-requirement of the transfer. -/
-def QuarticScoreConvergence
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop :=
-  Tendsto (quarticScore q F) atTop
-    (nhds (limitQuarticScore q μ p))
-
-/-- The combined asymptotic datum actually consumed after the finite
-inequality is normalized.  Taking this product before the limit permits
-cancellation between the block density and normalized block moments. -/
-structure WeightedQuarticLimit
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  weighted_score : Tendsto
-    (fun T => (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
-      quarticScore q F T)
-    atTop (nhds (μ * limitQuarticScore q μ p))
-
-/-- The one-sided weighted statement used by the density argument.  It asks
-only that the certificate statistic eventually exceed every strict lower
-threshold; no upper bound or exact limit is consumed downstream. -/
-structure WeightedQuarticLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
-    ∀ᶠ T in atTop,
-      x < (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
-        quarticScore q F T
-
-/-- The analytic boundary in sum-first form: a one-sided lower bound for one
-linear combination of raw centered traces, normalized only after summation. -/
-structure QuarticTraceLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
-    ∀ᶠ T in atTop,
-      x < quarticTraceNumerator q F T / (Z.N T (2 * T) : ℝ)
-
-/-- The same one-sided boundary in the uncentered cyclic-trace coordinates
-produced directly by Gram-power expansion. -/
-structure UncenteredQuarticTraceLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
-    ∀ᶠ T in atTop,
-      x < uncenteredQuarticTraceNumerator q F T /
-        (Z.N T (2 * T) : ℝ)
-
-/-- The final matrix-algebra-free coordinate: one lower bound on a fixed
-combination of explicit cyclic entry sums. -/
-structure CyclicQuarticLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
-    ∀ᶠ T in atTop,
-      x < cyclicQuarticTraceNumerator q (F.block T) /
-        (Z.N T (2 * T) : ℝ)
-
-/-- The zero-correlation coordinate consumed by the terminal route: one
-lower bound on the explicit cyclic products of literal finite zero sums. -/
-structure ZeroCyclicQuarticLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
-    ∀ᶠ T in atTop,
-      x < zeroCyclicQuarticNumerator q F T /
-        (Z.N T (2 * T) : ℝ)
-
-/-- The fully expanded zero-tuple correlation statement. -/
-structure ZeroTupleQuarticLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
-    ∀ᶠ T in atTop,
-      x < zeroTupleQuarticNumerator q F T /
-        (Z.N T (2 * T) : ℝ)
-
-/-- The zero-tuple-first statement consumed by the terminal transfer. -/
-structure ZeroKernelQuarticLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
-    ∀ᶠ T in atTop,
-      x < zeroKernelQuarticNumerator q F T /
-        (Z.N T (2 * T) : ℝ)
-
-/-- The one-sided bound after the block-index contractions have been
-factorized into scalar zero-pair kernels. -/
-structure FactoredZeroKernelQuarticLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) : Prop where
-  block_dimension_pos : ∀ᶠ T in atTop, 0 < F.blockDim T
-  eventually_gt : ∀ x : ℝ, x < μ * limitQuarticScore q μ p →
-    ∀ᶠ T in atTop,
-      x < factoredZeroKernelQuarticNumerator q F T /
-        (Z.N T (2 * T) : ℝ)
 
 /-- All finite errors in the affine bridge.  The coefficient `3` on the
 enlarged-window edge count is exact: `2` comes from robust stability and
@@ -1059,7 +184,7 @@ theorem finite_affine_bridge_at
 private theorem blockDim_pos_eventually
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hr1a : BlockDimensionLimit F) :
+    (hr1a : PrincipalCyclicBlock F) :
     ∀ᶠ T in atTop, 0 < F.blockDim T := by
   have hratio : ∀ᶠ T in atTop,
       0 < (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) :=
@@ -1069,207 +194,13 @@ private theorem blockDim_pos_eventually
   intro hm0
   simp [hm0] at hratioT
 
-/-- Separate block-density and scalar-score limits imply the combined
-weighted limit.  This compatibility theorem keeps the earlier construction
-interfaces usable while exposing the weaker object the transfer needs. -/
-theorem weightedQuarticLimit_of_separate
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v}
-    (hr1a : BlockDimensionLimit F)
-    (hscore : QuarticScoreConvergence q F) :
-    WeightedQuarticLimit q F :=
-  ⟨blockDim_pos_eventually hr1a, hr1a.block_dimension.mul hscore⟩
-
-/-- Exact weighted convergence supplies the weaker one-sided datum. -/
-theorem WeightedQuarticLimit.toLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : WeightedQuarticLimit q F) :
-    WeightedQuarticLowerBound q F :=
-  ⟨h.block_dimension_pos, fun x hx =>
-    h.weighted_score.eventually (Ioi_mem_nhds hx)⟩
-
-/-- The normalized-moment and raw-trace lower-bound interfaces are
-equivalent once eventual block nonemptiness is recorded. -/
-theorem WeightedQuarticLowerBound.toTraceLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : WeightedQuarticLowerBound q F) :
-    QuarticTraceLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx, h.block_dimension_pos]
-      with T hT hm
-  rw [weightedQuarticScore_eq_traceNumerator hm] at hT
-  exact hT
-
-theorem QuarticTraceLowerBound.toWeightedLowerBound
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : QuarticTraceLowerBound q F) :
-    WeightedQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx, h.block_dimension_pos]
-      with T hT hm
-  rw [weightedQuarticScore_eq_traceNumerator hm]
-  exact hT
-
-/-- Centered and uncentered raw-trace formulations are equivalent through
-the finite binomial theorem above. -/
-theorem QuarticTraceLowerBound.toUncentered
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : QuarticTraceLowerBound q F) :
-    UncenteredQuarticTraceLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [quarticTraceNumerator_eq_uncentered] at hT
-  exact hT
-
-theorem UncenteredQuarticTraceLowerBound.toCentered
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : UncenteredQuarticTraceLowerBound q F) :
-    QuarticTraceLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [quarticTraceNumerator_eq_uncentered]
-  exact hT
-
-theorem UncenteredQuarticTraceLowerBound.toCyclic
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : UncenteredQuarticTraceLowerBound q F) :
-    CyclicQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [uncenteredQuarticTraceNumerator_eq_cyclic] at hT
-  exact hT
-
-theorem CyclicQuarticLowerBound.toUncentered
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : CyclicQuarticLowerBound q F) :
-    UncenteredQuarticTraceLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [uncenteredQuarticTraceNumerator_eq_cyclic]
-  exact hT
-
-theorem CyclicQuarticLowerBound.toZeroCyclic
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : CyclicQuarticLowerBound q F) :
-    ZeroCyclicQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [cyclicQuarticTraceNumerator_eq_zeroCyclic] at hT
-  exact hT
-
-theorem ZeroCyclicQuarticLowerBound.toCyclic
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : ZeroCyclicQuarticLowerBound q F) :
-    CyclicQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [cyclicQuarticTraceNumerator_eq_zeroCyclic]
-  exact hT
-
-theorem ZeroCyclicQuarticLowerBound.toTuple
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : ZeroCyclicQuarticLowerBound q F) :
-    ZeroTupleQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [zeroCyclicQuarticNumerator_eq_tuple] at hT
-  exact hT
-
-theorem ZeroTupleQuarticLowerBound.toZeroCyclic
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : ZeroTupleQuarticLowerBound q F) :
-    ZeroCyclicQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [zeroCyclicQuarticNumerator_eq_tuple]
-  exact hT
-
-theorem ZeroTupleQuarticLowerBound.toKernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : ZeroTupleQuarticLowerBound q F) :
-    ZeroKernelQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [zeroTupleQuarticNumerator_eq_kernel] at hT
-  exact hT
-
-theorem ZeroKernelQuarticLowerBound.toTuple
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : ZeroKernelQuarticLowerBound q F) :
-    ZeroTupleQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [zeroTupleQuarticNumerator_eq_kernel]
-  exact hT
-
-theorem ZeroKernelQuarticLowerBound.toZeroCyclic
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : ZeroKernelQuarticLowerBound q F) :
-    ZeroCyclicQuarticLowerBound q F :=
-  h.toTuple.toZeroCyclic
-
-theorem ZeroKernelQuarticLowerBound.toFactored
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : ZeroKernelQuarticLowerBound q F) :
-    FactoredZeroKernelQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [zeroKernelQuarticNumerator_eq_factored] at hT
-  exact hT
-
-theorem FactoredZeroKernelQuarticLowerBound.toKernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : FactoredZeroKernelQuarticLowerBound q F) :
-    ZeroKernelQuarticLowerBound q F := by
-  refine ⟨h.block_dimension_pos, ?_⟩
-  intro x hx
-  filter_upwards [h.eventually_gt x hx] with T hT
-  rw [zeroKernelQuarticNumerator_eq_factored]
-  exact hT
-
-theorem FactoredZeroKernelQuarticLowerBound.toZeroCyclic
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    (h : FactoredZeroKernelQuarticLowerBound q F) :
-    ZeroCyclicQuarticLowerBound q F :=
-  h.toKernel.toZeroCyclic
-
 /-- Eventual form of the finite affine bridge, obtained directly from the
 proved robust stability inequality. -/
 theorem finite_affine_bridge
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hblock : ∀ᶠ T in atTop, 0 < F.blockDim T)
+    (hr1a : PrincipalCyclicBlock F)
     (q : Quartic) (cap Dbar : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 ≤ 1) (hcost : profileSaturatedCost σ v ≤ Dbar) :
     ∀ᶠ T in atTop,
@@ -1277,7 +208,7 @@ theorem finite_affine_bridge
           (2 - Dbar - cap / 2) * (Z.N T (2 * T) : ℝ) ≤
         (1 - cap / 2) * (Z.N0s T (2 * T) : ℝ) + transferError F T := by
   filter_upwards [robustBlockTailBound_eventually hfull hzero,
-    hblock, eventually_ge_atTop (0 : ℝ)]
+    blockDim_pos_eventually hr1a, eventually_ge_atTop (0 : ℝ)]
       with T htail hm hT
   exact finite_affine_bridge_at hzero q cap Dbar hdual hcap hcost T hT hm htail
 
@@ -1286,7 +217,7 @@ theorem finite_affine_bridge
 theorem quarticScore_tendsto
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hmom : BlockMomentConvergence F) (q : Quartic) :
+    (hmom : BlockMomentLimits F) (q : Quartic) :
     Tendsto (quarticScore q F) atTop (nhds (limitQuarticScore q μ p)) := by
   change Tendsto
     (fun T => q.p0 + q.p1 * F.centeredBlockMoment 1 T +
@@ -1305,16 +236,6 @@ theorem quarticScore_tendsto
       (tendsto_const_nhds.mul h2)).add
       (tendsto_const_nhds.mul h3)).add
       (tendsto_const_nhds.mul h4))
-
-/-- Four separate moment limits imply the one target-specific scalar limit.
-This keeps the stronger formula-(21) route available without forcing every
-future construction to prove unused coordinates. -/
-theorem quarticScoreConvergence_of_moments
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v}
-    (hmom : BlockMomentConvergence F) (q : Quartic) :
-    QuarticScoreConvergence q F :=
-  quarticScore_tendsto hmom q
 
 private theorem edgeCount_small
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) :
@@ -1361,13 +282,12 @@ theorem normalizedTransfer_tendsto
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
-    (hzero : StableZeroSide F)
-    (q : Quartic) (hweighted : WeightedQuarticLimit q F)
-    (cap Dbar : ℝ) :
+    (hzero : StableZeroSide F) (hr1a : PrincipalCyclicBlock F)
+    (hmom : BlockMomentLimits F) (q : Quartic) (cap Dbar : ℝ) :
     Tendsto (normalizedTransfer q cap Dbar F) atTop
       (nhds ((μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2) /
         (1 - cap / 2))) := by
-  have hproduct := hweighted.weighted_score
+  have hproduct := hr1a.block_dimension.mul (quarticScore_tendsto hmom q)
   have herror := (transferError_small hRvM hfull hzero).tendsto_div_nhds_zero
   have hconstant : Tendsto (fun _ : ℝ => 2 - Dbar - cap / 2) atTop
       (nhds (2 - Dbar - cap / 2)) := tendsto_const_nhds
@@ -1397,9 +317,9 @@ theorem asymptotic_eps_transfer
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
     (hRvM : RiemannVonMangoldt Z) (hfull : FullTraceLimits F)
-    (hzero : StableZeroSide F)
-    (q : Quartic) (hfactored : FactoredZeroKernelQuarticLowerBound q F)
-    (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
+    (hzero : StableZeroSide F) (hr1a : PrincipalCyclicBlock F)
+    (hmom : BlockMomentLimits F)
+    (q : Quartic) (cap Dbar target : ℝ) (hdual : DualFeasible q cap)
     (hcap : cap / 2 < 1) (hcost : profileSaturatedCost σ v ≤ Dbar)
     (hstrict : target <
       (μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2) /
@@ -1407,40 +327,11 @@ theorem asymptotic_eps_transfer
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       (target - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
-  have hzeroCyclic := hfactored.toZeroCyclic
-  have hcyclic := hzeroCyclic.toCyclic
-  have huncentered := hcyclic.toUncentered
-  have htrace := huncentered.toCentered
-  have hweighted := htrace.toWeightedLowerBound
   have hden : 0 < 1 - cap / 2 := sub_pos.mpr hcap
-  have hstrict' :
-      target * (1 - cap / 2) <
-        μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2 :=
-    (lt_div_iff₀ hden).mp hstrict
-  let δ : ℝ :=
-    (μ * limitQuarticScore q μ p + 2 - Dbar - cap / 2 -
-      target * (1 - cap / 2)) / 3
-  have hδ : 0 < δ := by
-    dsimp only [δ]
-    linarith
-  have hscore : ∀ᶠ T in atTop,
-      μ * limitQuarticScore q μ p - δ <
-        (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ) *
-          quarticScore q F T :=
-    hweighted.eventually_gt _ (by linarith)
-  have herror0 :=
-    (transferError_small hRvM hfull hzero).tendsto_div_nhds_zero
-  have herror : ∀ᶠ T in atTop,
-      transferError F T / (Z.N T (2 * T) : ℝ) < δ :=
-    herror0.eventually (Iio_mem_nhds hδ)
-  have hlower : ∀ᶠ T in atTop, target < normalizedTransfer q cap Dbar F T := by
-    filter_upwards [hscore, herror] with T hscoreT herrorT
-    rw [normalizedTransfer]
-    apply (lt_div_iff₀ hden).2
-    dsimp only [δ] at hscoreT herrorT
-    linarith
-  have hfinite := finite_affine_bridge hfull hzero
-    hweighted.block_dimension_pos q cap Dbar hdual
+  have hlower : ∀ᶠ T in atTop, target < normalizedTransfer q cap Dbar F T :=
+    (normalizedTransfer_tendsto hRvM hfull hzero hr1a hmom q cap Dbar).eventually
+      (Ioi_mem_nhds hstrict)
+  have hfinite := finite_affine_bridge hfull hzero hr1a q cap Dbar hdual
     hcap.le hcost
   have hNpos := (Assembly.tendsto_N_atTop Z hRvM).eventually_gt_atTop 0
   have htarget : ∀ᶠ T in atTop,
@@ -1575,12 +466,12 @@ theorem strict_transfer_9506 :
   rw [hid]
   exact Terminal9506.density_gt_frozen
 
-/-- Support `14999/10000`: the three explicit analytic structures imply the
+/-- Support `14999/10000`: the four explicit analytic structures imply the
 frozen R-8686 epsilon form. -/
 theorem eps_transfer_8686
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hfactored : FactoredZeroKernelQuarticLowerBound Terminal8686.dual F) :
+    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
@@ -1589,17 +480,17 @@ theorem eps_transfer_8686
         Terminal8686.costUpper := by
     rw [profileSaturatedCost_v8686]
     exact QuarticWindowWitnesses.D8686_lt.le
-  exact asymptotic_eps_transfer hRvM hfull hzero
-    Terminal8686.dual hfactored Terminal8686.cap Terminal8686.costUpper
+  exact asymptotic_eps_transfer hRvM hfull hzero hr1a hmom
+    Terminal8686.dual Terminal8686.cap Terminal8686.costUpper
     (86855250 / 100000000) Terminal8686.dual_feasible
     Terminal8686.cap_slope hcost strict_transfer_8686
 
-/-- Support `19999/10000`: the three explicit analytic structures imply the
+/-- Support `19999/10000`: the four explicit analytic structures imply the
 frozen R-9506 epsilon form. -/
 theorem eps_transfer_9506
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hfactored : FactoredZeroKernelQuarticLowerBound Terminal9506.dual F) :
+    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
@@ -1609,8 +500,8 @@ theorem eps_transfer_9506
         Terminal9506.costUpper := by
     rw [profileSaturatedCost_v9506]
     exact QuarticWindowWitnesses.D9506_lt.le
-  exact asymptotic_eps_transfer hRvM hfull hzero
-    Terminal9506.dual hfactored Terminal9506.cap Terminal9506.costUpper
+  exact asymptotic_eps_transfer hRvM hfull hzero hr1a hmom
+    Terminal9506.dual Terminal9506.cap Terminal9506.costUpper
     (95063832187565 / 100000000000000) Terminal9506.dual_feasible
     Terminal9506.cap_slope hcost strict_transfer_9506
 
@@ -1629,13 +520,13 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_8657
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family14999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hfactored : FactoredZeroKernelQuarticLowerBound Terminal8686.dual F) :
+    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   intro ε hε
-  obtain ⟨T₀, hT₀⟩ := eps_transfer_8686 hRvM hfull hzero hfactored ε hε
+  obtain ⟨T₀, hT₀⟩ := eps_transfer_8686 hRvM hfull hzero hr1a hmom ε hε
   refine ⟨T₀, ?_⟩
   intro T hT
   have hstrong := hT₀ T hT
@@ -1647,13 +538,13 @@ frozen transfer, with no additional analytic input. -/
 theorem eps_transfer_9383
     {Z : ZeroConfig} (hRvM : RiemannVonMangoldt Z) {F : Family19999 Z}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hfactored : FactoredZeroKernelQuarticLowerBound Terminal9506.dual F) :
+    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Z.N T (2 * T) : ℝ) ≤
         (Z.N0s T (2 * T) : ℝ) := by
   intro ε hε
-  obtain ⟨T₀, hT₀⟩ := eps_transfer_9506 hRvM hfull hzero hfactored ε hε
+  obtain ⟨T₀, hT₀⟩ := eps_transfer_9506 hRvM hfull hzero hr1a hmom ε hε
   refine ⟨T₀, ?_⟩
   intro T hT
   have hstrong := hT₀ T hT
@@ -1676,488 +567,49 @@ structures remain explicit. -/
 theorem zeta_eps_transfer_8686
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hfactored : FactoredZeroKernelQuarticLowerBound Terminal8686.dual F) :
+    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((86855250 / 100000000 : ℝ) - ε) * (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero hfactored)
+    (eps_transfer_8686 paperInputs_zeta.RvM hfull hzero hr1a hmom)
 
-/-- Concrete-zeta R-9506 epsilon form, conditional only on the three explicit
+/-- Concrete-zeta R-9506 epsilon form, conditional only on the four explicit
 per-support structures. -/
 theorem zeta_eps_transfer_9506
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hfactored : FactoredZeroKernelQuarticLowerBound Terminal9506.dual F) :
+    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((95063832187565 / 100000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hfactored)
+    (eps_transfer_9506 paperInputs_zeta.RvM hfull hzero hr1a hmom)
 
 /-- Concrete-zeta R-8657, obtained monotonically from R-8686. -/
 theorem zeta_eps_transfer_8657
     {F : Family14999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hfactored : FactoredZeroKernelQuarticLowerBound Terminal8686.dual F) :
+    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((865674254456636 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero hfactored)
+    (eps_transfer_8657 paperInputs_zeta.RvM hfull hzero hr1a hmom)
 
 /-- Concrete-zeta R-9383, obtained monotonically from R-9506. -/
 theorem zeta_eps_transfer_9383
     {F : Family19999 zetaZeroConfig}
     (hfull : FullTraceLimits F) (hzero : StableZeroSide F)
-    (hfactored : FactoredZeroKernelQuarticLowerBound Terminal9506.dual F) :
+    (hr1a : PrincipalCyclicBlock F) (hmom : BlockMomentLimits F) :
     ∀ ε : ℝ, 0 < ε → ∃ T₀ : ℝ, ∀ T ≥ T₀,
       ((938313327050949 / 1000000000000000 : ℝ) - ε) *
           (Ncount T (2 * T) : ℝ) ≤
         (N0simple T (2 * T) : ℝ) := by
   simpa only [zeta_N, zeta_N0s] using
-    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero hfactored)
-
-
-/-! ## Normalize each pair contraction before forming zero cycles -/
-
-/-- Hat-normalized scalar contraction of one ordered zero pair. -/
-def normalizedZeroPairKernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
-    (ρ ρ' : ℂ) : ℂ :=
-  ((F.hatDenominator T)⁻¹ : ℂ) * zeroPairKernel F T ρ ρ'
-
-/-- The factored cycles with every hat normalization absorbed into its pair
-kernel before the cycle products are formed. -/
-def normalizedFactoredZeroCycle1
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) (ρ : ℂ) : ℂ :=
-  normalizedZeroPairKernel F T ρ ρ * (Z.mult ρ : ℂ)
-
-def normalizedFactoredZeroCycle2
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
-    (ρ₁ ρ₂ : ℂ) : ℂ :=
-  normalizedZeroPairKernel F T ρ₁ ρ₂ *
-    (normalizedZeroPairKernel F T ρ₁ ρ₂ *
-      ((Z.mult ρ₁ : ℂ) * (Z.mult ρ₂ : ℂ)))
-
-def normalizedFactoredZeroCycle3
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
-    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
-  normalizedZeroPairKernel F T ρ₁ ρ₂ *
-    (normalizedZeroPairKernel F T ρ₂ ρ₃ *
-      (normalizedZeroPairKernel F T ρ₁ ρ₃ *
-        ((Z.mult ρ₁ : ℂ) *
-          ((Z.mult ρ₂ : ℂ) * (Z.mult ρ₃ : ℂ)))))
-
-def normalizedFactoredZeroCycle4
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ)
-    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
-  normalizedZeroPairKernel F T ρ₃ ρ₄ *
-    (normalizedZeroPairKernel F T ρ₁ ρ₂ *
-      (normalizedZeroPairKernel F T ρ₂ ρ₃ *
-        (normalizedZeroPairKernel F T ρ₁ ρ₄ *
-          ((Z.mult ρ₁ : ℂ) *
-            ((Z.mult ρ₂ : ℂ) *
-              ((Z.mult ρ₃ : ℂ) * (Z.mult ρ₄ : ℂ)))))))
-
-theorem factoredZeroCycle1_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} {ρ : ℂ} :
-    factoredZeroCycle1 F T ρ =
-      normalizedFactoredZeroCycle1 F T ρ := by
-  simp only [factoredZeroCycle1, normalizedFactoredZeroCycle1,
-    normalizedZeroPairKernel, zeroEdgeWeight]
-  ring
-
-theorem factoredZeroCycle2_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} {ρ₁ ρ₂ : ℂ} :
-    factoredZeroCycle2 F T ρ₁ ρ₂ =
-      normalizedFactoredZeroCycle2 F T ρ₁ ρ₂ := by
-  simp only [factoredZeroCycle2, normalizedFactoredZeroCycle2,
-    normalizedZeroPairKernel, zeroEdgeWeight]
-  ring
-
-theorem factoredZeroCycle3_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
-    {ρ₁ ρ₂ ρ₃ : ℂ} :
-    factoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ =
-      normalizedFactoredZeroCycle3 F T ρ₁ ρ₂ ρ₃ := by
-  simp only [factoredZeroCycle3, normalizedFactoredZeroCycle3,
-    normalizedZeroPairKernel, zeroEdgeWeight]
-  ring
-
-theorem factoredZeroCycle4_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ}
-    {ρ₁ ρ₂ ρ₃ ρ₄ : ℂ} :
-    factoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ =
-      normalizedFactoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄ := by
-  simp only [factoredZeroCycle4, normalizedFactoredZeroCycle4,
-    normalizedZeroPairKernel, zeroEdgeWeight]
-  ring
-
-def normalizedFactoredZeroKernelCyclicTrace1
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T,
-    normalizedFactoredZeroCycle1 F T ρ)
-
-def normalizedFactoredZeroKernelCyclicTrace2
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    normalizedFactoredZeroCycle2 F T ρ₁ ρ₂)
-
-def normalizedFactoredZeroKernelCyclicTrace3
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T,
-      normalizedFactoredZeroCycle3 F T ρ₁ ρ₂ ρ₃)
-
-def normalizedFactoredZeroKernelCyclicTrace4
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
-      normalizedFactoredZeroCycle4 F T ρ₁ ρ₂ ρ₃ ρ₄)
-
-theorem factoredZeroKernelCyclicTrace1_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    factoredZeroKernelCyclicTrace1 F T =
-      normalizedFactoredZeroKernelCyclicTrace1 F T := by
-  simp only [factoredZeroKernelCyclicTrace1,
-    normalizedFactoredZeroKernelCyclicTrace1,
-    factoredZeroCycle1_eq_normalized]
-
-theorem factoredZeroKernelCyclicTrace2_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    factoredZeroKernelCyclicTrace2 F T =
-      normalizedFactoredZeroKernelCyclicTrace2 F T := by
-  simp only [factoredZeroKernelCyclicTrace2,
-    normalizedFactoredZeroKernelCyclicTrace2,
-    factoredZeroCycle2_eq_normalized]
-
-theorem factoredZeroKernelCyclicTrace3_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    factoredZeroKernelCyclicTrace3 F T =
-      normalizedFactoredZeroKernelCyclicTrace3 F T := by
-  simp only [factoredZeroKernelCyclicTrace3,
-    normalizedFactoredZeroKernelCyclicTrace3,
-    factoredZeroCycle3_eq_normalized]
-
-theorem factoredZeroKernelCyclicTrace4_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    factoredZeroKernelCyclicTrace4 F T =
-      normalizedFactoredZeroKernelCyclicTrace4 F T := by
-  simp only [factoredZeroKernelCyclicTrace4,
-    normalizedFactoredZeroKernelCyclicTrace4,
-    factoredZeroCycle4_eq_normalized]
-
-def normalizedFactoredZeroKernelQuarticNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v) (T : ℝ) : ℝ :=
-  let u := uncenteredQuartic q
-  u.p0 * (F.blockDim T : ℝ) +
-    u.p1 * normalizedFactoredZeroKernelCyclicTrace1 F T +
-    u.p2 * normalizedFactoredZeroKernelCyclicTrace2 F T +
-    u.p3 * normalizedFactoredZeroKernelCyclicTrace3 F T +
-    u.p4 * normalizedFactoredZeroKernelCyclicTrace4 F T
-
-theorem factoredZeroKernelQuarticNumerator_eq_normalized
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    factoredZeroKernelQuarticNumerator q F T =
-      normalizedFactoredZeroKernelQuarticNumerator q F T := by
-  simp only [factoredZeroKernelQuarticNumerator,
-    normalizedFactoredZeroKernelQuarticNumerator,
-    factoredZeroKernelCyclicTrace1_eq_normalized,
-    factoredZeroKernelCyclicTrace2_eq_normalized,
-    factoredZeroKernelCyclicTrace3_eq_normalized,
-    factoredZeroKernelCyclicTrace4_eq_normalized]
-
-
-/-! ## One generic pair kernel, summed only after substitution -/
-
-/-- Ordered one-, two-, three-, and four-cycles generated by an arbitrary
-scalar pair kernel.  This lets the Poisson main-minus-tail identity be
-substituted once, before any zero-tuple summation. -/
-def pairKernelCycle1
-    {Z : ZeroConfig} (K : ℂ → ℂ → ℂ) (ρ : ℂ) : ℂ :=
-  K ρ ρ * (Z.mult ρ : ℂ)
-
-def pairKernelCycle2
-    {Z : ZeroConfig} (K : ℂ → ℂ → ℂ) (ρ₁ ρ₂ : ℂ) : ℂ :=
-  K ρ₁ ρ₂ * (K ρ₁ ρ₂ *
-    ((Z.mult ρ₁ : ℂ) * (Z.mult ρ₂ : ℂ)))
-
-def pairKernelCycle3
-    {Z : ZeroConfig} (K : ℂ → ℂ → ℂ)
-    (ρ₁ ρ₂ ρ₃ : ℂ) : ℂ :=
-  K ρ₁ ρ₂ * (K ρ₂ ρ₃ * (K ρ₁ ρ₃ *
-    ((Z.mult ρ₁ : ℂ) *
-      ((Z.mult ρ₂ : ℂ) * (Z.mult ρ₃ : ℂ)))))
-
-def pairKernelCycle4
-    {Z : ZeroConfig} (K : ℂ → ℂ → ℂ)
-    (ρ₁ ρ₂ ρ₃ ρ₄ : ℂ) : ℂ :=
-  K ρ₃ ρ₄ * (K ρ₁ ρ₂ * (K ρ₂ ρ₃ * (K ρ₁ ρ₄ *
-    ((Z.mult ρ₁ : ℂ) * ((Z.mult ρ₂ : ℂ) *
-      ((Z.mult ρ₃ : ℂ) * (Z.mult ρ₄ : ℂ)))))))
-
-def pairKernelCyclicTrace1
-    (Z : ZeroConfig) (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
-  Complex.re (∑ ρ ∈ ZeroSide.ZI Z T, pairKernelCycle1 (Z := Z) K ρ)
-
-def pairKernelCyclicTrace2
-    (Z : ZeroConfig) (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    pairKernelCycle2 (Z := Z) K ρ₁ ρ₂)
-
-def pairKernelCyclicTrace3
-    (Z : ZeroConfig) (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T, pairKernelCycle3 (Z := Z) K ρ₁ ρ₂ ρ₃)
-
-def pairKernelCyclicTrace4
-    (Z : ZeroConfig) (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
-  Complex.re (∑ ρ₁ ∈ ZeroSide.ZI Z T, ∑ ρ₂ ∈ ZeroSide.ZI Z T,
-    ∑ ρ₃ ∈ ZeroSide.ZI Z T, ∑ ρ₄ ∈ ZeroSide.ZI Z T,
-      pairKernelCycle4 (Z := Z) K ρ₁ ρ₂ ρ₃ ρ₄)
-
-/-- The target-specific uncentered quartic numerator generated from one
-arbitrary scalar pair kernel. -/
-def pairKernelQuarticNumerator
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (q : Quartic) (F : QuarticGramFamily Z σ μ p v)
-    (T : ℝ) (K : ℂ → ℂ → ℂ) : ℝ :=
-  let u := uncenteredQuartic q
-  u.p0 * (F.blockDim T : ℝ) +
-    u.p1 * pairKernelCyclicTrace1 Z T K +
-    u.p2 * pairKernelCyclicTrace2 Z T K +
-    u.p3 * pairKernelCyclicTrace3 Z T K +
-    u.p4 * pairKernelCyclicTrace4 Z T K
-
-/-- The normalized factored numerator is definitionally the generic
-pair-kernel numerator evaluated after hat normalization. -/
-theorem normalizedFactoredZeroKernelQuarticNumerator_eq_pairKernel
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v} {T : ℝ} :
-    normalizedFactoredZeroKernelQuarticNumerator q F T =
-      pairKernelQuarticNumerator q F T
-        (normalizedZeroPairKernel F T) := by
-  rfl
-
-
-/-- Pointwise equality on the actual finite enlarged-window zero set is
-enough to replace a pair kernel after all cyclic contractions and the entire
-target-specific quartic combination have been formed. -/
-theorem pairKernelCyclicTrace1_congr
-    {Z : ZeroConfig} {T : ℝ} {K K' : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      K ρ ρ' = K' ρ ρ') :
-    pairKernelCyclicTrace1 Z T K =
-      pairKernelCyclicTrace1 Z T K' := by
-  unfold pairKernelCyclicTrace1
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro ρ hρ
-  simp only [pairKernelCycle1]
-  rw [hK ρ hρ ρ hρ]
-
-theorem pairKernelCyclicTrace2_congr
-    {Z : ZeroConfig} {T : ℝ} {K K' : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      K ρ ρ' = K' ρ ρ') :
-    pairKernelCyclicTrace2 Z T K =
-      pairKernelCyclicTrace2 Z T K' := by
-  unfold pairKernelCyclicTrace2
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro ρ₁ hρ₁
-  apply Finset.sum_congr rfl
-  intro ρ₂ hρ₂
-  simp only [pairKernelCycle2]
-  rw [hK ρ₁ hρ₁ ρ₂ hρ₂]
-
-theorem pairKernelCyclicTrace3_congr
-    {Z : ZeroConfig} {T : ℝ} {K K' : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      K ρ ρ' = K' ρ ρ') :
-    pairKernelCyclicTrace3 Z T K =
-      pairKernelCyclicTrace3 Z T K' := by
-  unfold pairKernelCyclicTrace3
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro ρ₁ hρ₁
-  apply Finset.sum_congr rfl
-  intro ρ₂ hρ₂
-  apply Finset.sum_congr rfl
-  intro ρ₃ hρ₃
-  simp only [pairKernelCycle3]
-  rw [hK ρ₁ hρ₁ ρ₃ hρ₃, hK ρ₂ hρ₂ ρ₃ hρ₃,
-    hK ρ₁ hρ₁ ρ₂ hρ₂]
-
-theorem pairKernelCyclicTrace4_congr
-    {Z : ZeroConfig} {T : ℝ} {K K' : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      K ρ ρ' = K' ρ ρ') :
-    pairKernelCyclicTrace4 Z T K =
-      pairKernelCyclicTrace4 Z T K' := by
-  unfold pairKernelCyclicTrace4
-  apply congrArg Complex.re
-  apply Finset.sum_congr rfl
-  intro ρ₁ hρ₁
-  apply Finset.sum_congr rfl
-  intro ρ₂ hρ₂
-  apply Finset.sum_congr rfl
-  intro ρ₃ hρ₃
-  apply Finset.sum_congr rfl
-  intro ρ₄ hρ₄
-  simp only [pairKernelCycle4]
-  rw [hK ρ₁ hρ₁ ρ₄ hρ₄, hK ρ₂ hρ₂ ρ₃ hρ₃,
-    hK ρ₁ hρ₁ ρ₂ hρ₂, hK ρ₃ hρ₃ ρ₄ hρ₄]
-
-theorem pairKernelQuarticNumerator_congr
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    {T : ℝ} {K K' : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      K ρ ρ' = K' ρ ρ') :
-    pairKernelQuarticNumerator q F T K =
-      pairKernelQuarticNumerator q F T K' := by
-  unfold pairKernelQuarticNumerator
-  rw [pairKernelCyclicTrace1_congr hK,
-    pairKernelCyclicTrace2_congr hK,
-    pairKernelCyclicTrace3_congr hK,
-    pairKernelCyclicTrace4_congr hK]
-
-/-! ## Finite quartic contractions preserve pair-kernel convergence -/
-
-/-- The one-cycle trace is continuous under pointwise convergence of the pair
-kernel on the actual finite zero sample. -/
-theorem tendsto_pairKernelCyclicTrace1
-    {α : Type*} {l : Filter α}
-    {Z : ZeroConfig} {T : ℝ}
-    {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
-    Tendsto
-      (fun n => pairKernelCyclicTrace1 Z T (K n)) l
-      (nhds (pairKernelCyclicTrace1 Z T K₀)) := by
-  unfold pairKernelCyclicTrace1 pairKernelCycle1
-  apply (Complex.continuous_re.tendsto _).comp
-  apply tendsto_finsetSum
-  intro ρ hρ
-  exact (hK ρ hρ ρ hρ).mul tendsto_const_nhds
-
-/-- The two-cycle trace is continuous under pointwise convergence on the
-finite zero sample. -/
-theorem tendsto_pairKernelCyclicTrace2
-    {α : Type*} {l : Filter α}
-    {Z : ZeroConfig} {T : ℝ}
-    {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
-    Tendsto
-      (fun n => pairKernelCyclicTrace2 Z T (K n)) l
-      (nhds (pairKernelCyclicTrace2 Z T K₀)) := by
-  unfold pairKernelCyclicTrace2 pairKernelCycle2
-  apply (Complex.continuous_re.tendsto _).comp
-  apply tendsto_finsetSum
-  intro ρ₁ hρ₁
-  apply tendsto_finsetSum
-  intro ρ₂ hρ₂
-  exact
-    (hK ρ₁ hρ₁ ρ₂ hρ₂).mul
-      ((hK ρ₁ hρ₁ ρ₂ hρ₂).mul tendsto_const_nhds)
-
-/-- The three-cycle trace is continuous under pointwise convergence on the
-finite zero sample. -/
-theorem tendsto_pairKernelCyclicTrace3
-    {α : Type*} {l : Filter α}
-    {Z : ZeroConfig} {T : ℝ}
-    {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
-    Tendsto
-      (fun n => pairKernelCyclicTrace3 Z T (K n)) l
-      (nhds (pairKernelCyclicTrace3 Z T K₀)) := by
-  unfold pairKernelCyclicTrace3 pairKernelCycle3
-  apply (Complex.continuous_re.tendsto _).comp
-  apply tendsto_finsetSum
-  intro ρ₁ hρ₁
-  apply tendsto_finsetSum
-  intro ρ₂ hρ₂
-  apply tendsto_finsetSum
-  intro ρ₃ hρ₃
-  exact
-    (hK ρ₁ hρ₁ ρ₂ hρ₂).mul
-      ((hK ρ₂ hρ₂ ρ₃ hρ₃).mul
-        ((hK ρ₁ hρ₁ ρ₃ hρ₃).mul tendsto_const_nhds))
-
-/-- The four-cycle trace is continuous under pointwise convergence on the
-finite zero sample. -/
-theorem tendsto_pairKernelCyclicTrace4
-    {α : Type*} {l : Filter α}
-    {Z : ZeroConfig} {T : ℝ}
-    {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
-    Tendsto
-      (fun n => pairKernelCyclicTrace4 Z T (K n)) l
-      (nhds (pairKernelCyclicTrace4 Z T K₀)) := by
-  unfold pairKernelCyclicTrace4 pairKernelCycle4
-  apply (Complex.continuous_re.tendsto _).comp
-  apply tendsto_finsetSum
-  intro ρ₁ hρ₁
-  apply tendsto_finsetSum
-  intro ρ₂ hρ₂
-  apply tendsto_finsetSum
-  intro ρ₃ hρ₃
-  apply tendsto_finsetSum
-  intro ρ₄ hρ₄
-  exact
-    (hK ρ₃ hρ₃ ρ₄ hρ₄).mul
-      ((hK ρ₁ hρ₁ ρ₂ hρ₂).mul
-        ((hK ρ₂ hρ₂ ρ₃ hρ₃).mul
-          ((hK ρ₁ hρ₁ ρ₄ hρ₄).mul tendsto_const_nhds)))
-
-/-- The complete target-specific quartic numerator is continuous under
-pointwise pair-kernel convergence on the finite enlarged-window zero set. -/
-theorem tendsto_pairKernelQuarticNumerator
-    {α : Type*} {l : Filter α}
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {q : Quartic} {F : QuarticGramFamily Z σ μ p v}
-    {T : ℝ} {K : α → ℂ → ℂ → ℂ} {K₀ : ℂ → ℂ → ℂ}
-    (hK : ∀ ρ ∈ ZeroSide.ZI Z T, ∀ ρ' ∈ ZeroSide.ZI Z T,
-      Tendsto (fun n => K n ρ ρ') l (nhds (K₀ ρ ρ'))) :
-    Tendsto
-      (fun n => pairKernelQuarticNumerator q F T (K n)) l
-      (nhds (pairKernelQuarticNumerator q F T K₀)) := by
-  have h1 := tendsto_pairKernelCyclicTrace1 hK
-  have h2 := tendsto_pairKernelCyclicTrace2 hK
-  have h3 := tendsto_pairKernelCyclicTrace3 hK
-  have h4 := tendsto_pairKernelCyclicTrace4 hK
-  unfold pairKernelQuarticNumerator
-  exact
-    ((((tendsto_const_nhds.add (tendsto_const_nhds.mul h1)).add
-      (tendsto_const_nhds.mul h2)).add
-      (tendsto_const_nhds.mul h3)).add
-      (tendsto_const_nhds.mul h4))
+    (eps_transfer_9383 paperInputs_zeta.RvM hfull hzero hr1a hmom)
 
 end QuarticTransfer
 end Zeta85

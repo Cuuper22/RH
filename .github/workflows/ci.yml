@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: lean-ci-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: lean-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -27,14 +27,6 @@ jobs:
           test: false
           lint: false
           use-mathlib-cache: false
-
-      - name: Restore Lean project build cache
-        uses: actions/cache@v4
-        with:
-          path: .lake/build
-          key: rh-lean-project-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            rh-lean-project-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
 
       - name: Fetch Mathlib cache
         run: lake exe cache get

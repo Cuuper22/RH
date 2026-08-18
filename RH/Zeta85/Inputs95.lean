@@ -361,18 +361,6 @@ structure StableZeroSide {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
   p_trace_small : F.pTraceError =o[atTop]
     fun T => (Z.N T (2 * T) : ℝ)
 
-/-- The only construction data consumed by the quartic transfer: positive
-block density and convergence of the literal block dimension.  This interface
-is separated from `PrincipalCyclicBlock`, whose physical-window allocation
-fields are not used by the transfer and are inconsistent for the frozen
-families. -/
-structure BlockDimensionLimit {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
-  bandwidth_pos : 0 < μ
-  block_dimension : Tendsto
-    (fun T => (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ))
-      atTop (nhds μ)
-
 /-- The literal principal block is Hermitian by the actual `A=P+Q`
 decomposition.  This is derived data, not a field of either input structure. -/
 theorem StableZeroSide.block_isHermitian
@@ -510,14 +498,6 @@ structure PrincipalCyclicBlock {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ
     (fun T => (F.blockDim T : ℝ) / (Z.N T (2 * T) : ℝ))
       atTop (nhds μ)
 
-/-- The full physical construction implies the minimal dimension interface
-used by the transfer. -/
-theorem PrincipalCyclicBlock.toBlockDimensionLimit
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} (h : PrincipalCyclicBlock F) :
-    BlockDimensionLimit F :=
-  ⟨h.bandwidth_pos, h.block_dimension⟩
-
 /-- Formula-(21) target for a centered block moment. -/
 def formula21Moment (k : ℕ) (μ p : ℝ) : ℝ :=
   match k with
@@ -527,15 +507,6 @@ def formula21Moment (k : ℕ) (μ p : ℝ) : ℝ :=
   | 3 => TopHatMoments.formula21M3Integral μ p
   | 4 => TopHatMoments.formula21M4Integral μ p
   | _ => 0
-
-/-- The only moment data consumed by the quartic transfer.  The complex
-Poisson and alias fields of `BlockMomentLimits` belong to one proposed
-construction route, not to the transfer theorem itself. -/
-structure BlockMomentConvergence {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
-  moments : ∀ k : ℕ, 1 ≤ k → k ≤ 4 →
-    Tendsto (F.centeredBlockMoment k) atTop
-      (nhds (formula21Moment k μ p))
 
 /-- **R1b, the sole actual-block-to-formula-(21) linkage.**
 
@@ -561,14 +532,6 @@ structure BlockMomentLimits {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
   moments : ∀ k : ℕ, 1 ≤ k → k ≤ 4 →
     Tendsto (F.centeredBlockMoment k) atTop
       (nhds (formula21Moment k μ p))
-
-/-- The full R1b route implies the minimal moment interface used by the
-transfer. -/
-theorem BlockMomentLimits.toBlockMomentConvergence
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v} (h : BlockMomentLimits F) :
-    BlockMomentConvergence F :=
-  ⟨h.moments⟩
 
 /-! ## Explicit bundle -/
 

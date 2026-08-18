@@ -5,11 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 -/
 
 import RH.Zeta85.Discharge.RSPairIntegrals
-import RH.Zeta85.Discharge.QuarticTransfer
-import Zeta23.Poisson.ComplexDecay
-import Zeta23.Poisson.Complex
-import Zeta23.Poisson.ComplexAlias
-import RH.Zeta85.Discharge.ComplexAliasBridge
 
 /-!
 # Actual-block centering bridge for the Rudnick--Sarnak route
@@ -97,10 +92,10 @@ theorem centeredBlockMoment_eq_centeredTransform
 /-- The uncentered formula-(27) limits imply all centered formula-(21)
 limits.  This is the formal finite-sum/Tendsto step; no RS, Poisson, height,
 or finite-grid estimate is hidden in the proof. -/
-theorem centered_moment_limits_of_fillBounds
+theorem centered_moment_limits
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
     {F : QuarticGramFamily Z σ μ p v}
-    (hp : 0 < p) (hp1 : p ≤ 1) (hraw : UncenteredRSBlockLimits F) :
+    (hr1a : PrincipalCyclicBlock F) (hraw : UncenteredRSBlockLimits F) :
     ∀ k : ℕ, 1 ≤ k → k ≤ 4 →
       Tendsto (F.centeredBlockMoment k) atTop
         (nhds (formula21Moment k μ p)) := by
@@ -122,36 +117,8 @@ theorem centered_moment_limits_of_fillBounds
     exact (hraw.moments a
       (le_trans (Nat.le_of_lt_succ (Finset.mem_range.mp ha)) hk4)).const_mul _
   rw [topHat_centeredContraction_eq_formula21
-    hp hp1 k hk1 hk4] at hlim
+    hr1a.fill_pos hr1a.fill_le_one k hk1 hk4] at hlim
   exact hlim
-
-/-- Compatibility wrapper for the older physical-window interface. -/
-theorem centered_moment_limits
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v}
-    (hr1a : PrincipalCyclicBlock F) (hraw : UncenteredRSBlockLimits F) :
-    ∀ k : ℕ, 1 ≤ k → k ≤ 4 →
-      Tendsto (F.centeredBlockMoment k) atTop
-        (nhds (formula21Moment k μ p)) :=
-  centered_moment_limits_of_fillBounds
-    hr1a.fill_pos hr1a.fill_le_one hraw
-
-/-- The minimal RS route to the sum-first terminal premise.  It uses only
-the literal block-density limit, the scalar fill bounds, and the uncentered
-actual-block moment limits; no alias or physical-window fields enter. -/
-theorem quarticTraceLowerBound_of_uncenteredRS
-    {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    {F : QuarticGramFamily Z σ μ p v}
-    (hp : 0 < p) (hp1 : p ≤ 1)
-    (hdim : BlockDimensionLimit F) (hraw : UncenteredRSBlockLimits F)
-    (q : Quartic) :
-    QuarticTransfer.FactoredZeroKernelQuarticLowerBound q F := by
-  have hmom : BlockMomentConvergence F :=
-    ⟨centered_moment_limits_of_fillBounds hp hp1 hraw⟩
-  have hscore : QuarticTransfer.QuarticScoreConvergence q F :=
-    QuarticTransfer.quarticScoreConvergence_of_moments hmom q
-  exact
-    (QuarticTransfer.weightedQuarticLimit_of_separate hdim hscore).toLowerBound.toTraceLowerBound.toUncentered.toCyclic.toZeroCyclic.toTuple.toKernel.toFactored
 
 /-- Constructor for the existing R1b interface from the exact uncentered
 actual-block limit plus the two independent complex-Poisson clauses. -/
