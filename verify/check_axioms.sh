@@ -107,6 +107,8 @@ for audit in \
   comparator/PrintAxioms/RSPairIntegrals.lean \
   comparator/PrintAxioms/RSReduction.lean \
   comparator/PrintAxioms/RSBlockMomentBridge.lean \
+  comparator/PrintAxioms/ShiuMajorantQuarter.lean \
+  comparator/PrintAxioms/ShiuNoGo.lean \
   comparator/PrintAxioms/TopHatMoments.lean \
   comparator/PrintAxioms/TrimmedMoment.lean
 do

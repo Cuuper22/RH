@@ -37,6 +37,22 @@ has implied constants depending only on the majorant class.  Stated plainly, D3 
 graph as the proved refutation of the *old* interface; it is consistent with (and independent of)
 the corrected axiom.
 
+**How much of `shiu_majorant₂` is now proved.**  `RH/Zeta85/Shiu/MajorantQuarter.lean` proves
+`ShiuMajorant₂ η` outright for **every `η ≥ 1/4`** (`shiuMajorant₂_of_quarter_le`), unconditionally
+and with explicit constants, via the Landreau/Lay route of `RH/Zeta85/Shiu/`.  Its axiom output is
+gated by `comparator/PrintAxioms/ShiuMajorantQuarter.lean`, which `verify/check_axioms.sh` checks
+on every push, so the result cannot silently acquire a dependency.  `ShiuMajorant₂` is *antitone*
+in `η` — a smaller `η` admits a wider band of moduli
+`q ≤ P^{1−η}` and is a stronger statement — so this does **not** discharge the axiom, which is
+asserted for all `η ∈ (0, 1/2)`: the interval `η ∈ (0, 1/4)`, i.e. moduli beyond `P^{3/4}`,
+remains assumed.  What is now proved covers the exponent the 85 % run exercises
+(`η′ = 43/93 ≈ 0.462`; `shiuMajorant₂_run_exponent`).  Whether the layer's use of the axiom can be
+narrowed to that instance — which would remove the axiom entirely — is a question about
+`signedPair_traceGrade_lt_3_2`'s intended hypothesis, not about the mathematics above, and is
+deliberately left open here.  Note also that a true majorant is necessary but not sufficient for
+rung 3: see `Discharge/LogBudget.lean` (`verdict_all`, which needs `C < 2` where this route gives
+`C = 2^{7k}`) and `Discharge/ActualScaleBBLR.lean`.
+
 ---
 
 ## Phase 0b source-intake status
