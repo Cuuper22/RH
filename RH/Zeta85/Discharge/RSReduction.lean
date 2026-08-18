@@ -911,12 +911,6 @@ theorem normalCutoffSymbol_eq_of_sum_eq_zero {k : ℕ}
     normalCutoffSymbol chi Phi xi = Phi xi := by
   simp [normalCutoffSymbol, hxi, hchi]
 
-/-- The canonical gauge lift lands exactly on the zero-sum hyperplane. -/
-theorem rsZeroSumLift_sum {n : ℕ} (xi : Fin n -> ℝ) :
-    ∑ j : Fin (n + 1), rsZeroSumLift xi j = 0 := by
-  rw [Fin.sum_univ_castSucc]
-  simp [rsZeroSumLift]
-
 /-- Normal cutoff does not change the gauge-fixed Fourier test. -/
 theorem rsGaugeTest_normalCutoffSymbol {n : ℕ}
     (chi : ℝ -> ℂ) (Phi : (Fin (n + 1) -> ℝ) -> ℂ)
