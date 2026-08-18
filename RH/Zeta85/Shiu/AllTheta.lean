@@ -4,24 +4,26 @@ Released under Apache 2.0 license as described in the file LICENSE.
 SPDX-License-Identifier: Apache-2.0
 -/
 /-
-RH/Zeta85/Shiu/AllTheta.lean — Route 2 assembly: an ALL-θ short-interval bound for the fourth
-moment of the divisor function, conditional on a single named Landreau-type hypothesis.
+RH/Zeta85/Shiu/AllTheta.lean — Route 2 assembly: a short-interval bound for the fourth moment of
+the divisor function valid for every `θ > 1/4` — hence uniformly across the whole classical range
+`1/2 < θ < 1`, with no wall inside it — conditional on a single named Landreau-type hypothesis.
 
 **Main theorem** (`allTheta_tau_pow_four_short_interval`).  Assume the Landreau-type small-divisor
 inequality `hL` with constants `(A, B)`:
 
     τ(n)^4 ≤ A · ∑_{d ∣ n, d^4 ≤ n} τ(d)^B        (τ = `ArithmeticFunction.sigma 0`).
 
-Then for every fixed `θ` with `1/4 < θ` (in particular for the whole classical range
-`1/2 < θ < 1`, with *no* θ-wall), every `x ≥ allTheta_x₀ θ` and every interval length `y` with
-`x^θ ≤ y ≤ x`:
+Then for every fixed `θ` with `1/4 < θ` (in particular for every `θ` in the classical range
+`1/2 < θ < 1`, with no restriction inside it), every `x ≥ allTheta_x₀ θ` and every interval
+length `y` with `x^θ ≤ y ≤ x`:
 
     ∑_{x < n ≤ x+y} τ(n)^4 ≤ A · 2^(2^B + 1) · y · (1 + log x)^(2^B).
 
 All constants are explicit: `E = 2^B`, `C = A · 2^(2^B + 1)` (independent of θ), and the
 threshold is `allTheta_x₀ θ = max 2 ⌈2^(1/(θ − 1/4))⌉₊`, which is exactly what makes
-`(2x)^(1/4) ≤ x^θ` hold (from `x^(θ − 1/4) ≥ 2`).  The exponent `E = 2^B` is *not* sharp; the
-point of this unit is the absence of any restriction `θ > θ₀ > 1/4`.
+`(2x)^(1/4) ≤ x^θ` hold (from `x^(θ − 1/4) ≥ 2`); at `θ = 1/2` it evaluates to `16`.  The
+exponent `E = 2^B` is *not* sharp — with U8's `B = 28` it is astronomically larger than the
+sharp `15` — the point of this unit being uniformity in `θ` above `1/4`, not the log-power.
 
 **Method** (interchange / small-divisor method for short-interval divisor moments).  Insert `hL`
 pointwise and swap the double sum over pairs `(n, d)`: every divisor `d` that survives the filter
@@ -33,8 +35,9 @@ The multiples count is `(x+y)/d − x/d ≤ y/d + 1`; the `y/d` part is controll
 bound `∑_{d ≤ N} τ(d)^B/d ≤ (1 + log N)^(2^B)` (proved below by induction on `B` via the
 hyperbola reindexing `∑_{m ≤ N} ∑_{de = m} = ∑_{d ≤ N} ∑_{e ≤ N/d}`, submultiplicativity of τ,
 and the harmonic-sum bound `∑_{e ≤ L} 1/e ≤ 1 + log L`), while the `+1` part is absorbed since
-`D ≤ (2x)^(1/4) ≤ x^θ ≤ y` — this is the only place θ and `x₀(θ)` enter, and it is where the
-classical θ-wall disappears.
+`D ≤ (2x)^(1/4) ≤ x^θ ≤ y` — the only place `θ > 1/4` is used, and the step that would otherwise
+force a θ-restriction.  (`x₀(θ)` is used once more, through its `max 2` branch, to keep
+`log x ≥ 0` in the final collection of constants.)
 
 **Conditionality.**  The ONLY named hypothesis is `hL` (Landreau's inequality with small
 divisors `d^4 ≤ n`); it is realizable with explicit constants `(A, B) = (4096, 28)` by the
@@ -44,20 +47,27 @@ constants — and units never import each other, so it enters here as a hypothes
 coordinator wires the two.  Everything downstream of `hL` in this file is unconditional Lean:
 no axioms beyond `propext`, `Classical.choice`, `Quot.sound`.
 
+**Note for the merge.**  The supporting lemmas below are `private` because sibling units prove
+the same facts on their own branches — the multiples count in `Shiu/ShortInterval.lean` (U11),
+the hyperbola reindexing and the `∑ τ(d)^B/d` ladder in `Shiu/TauSummatory.lean` (U6).  Units
+never import each other, so they are restated here rather than shared; keeping them `private`
+avoids colliding public names when the branches land.  Deduplicating them against the sibling
+files is a coordinator-level follow-up, as is reaching this module from a build target (nothing
+imports `RH.Zeta85.Shiu.AllTheta` yet, so CI does not type-check it on this branch).
+
 References:
 * B. Landreau, *Majorations de fonctions arithmétiques en moyenne sur des ensembles de faible
   densité*, Sém. Théorie des Nombres de Bordeaux (1989) — the small-divisor inequality.
 * A. Lay, arXiv:1711.05924 — short-interval divisor moments via the small-divisor method.
-* P. Shiu, *A Brun–Titchmarsh theorem for multiplicative functions* — the classical θ-restricted
-  route this unit replaces.
+* P. Shiu, *A Brun–Titchmarsh theorem for multiplicative functions* — the classical route, whose
+  short-interval bound is sharp in the log-power where the present one is not; this unit is an
+  independent, elementary derivation, not a strengthening of it.
 -/
-import Mathlib.NumberTheory.ArithmeticFunction.Misc
-import Mathlib.NumberTheory.Harmonic.Bounds
-import Mathlib.Data.Finset.NatDivisors
-import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
-
-open Finset
+import Mathlib.NumberTheory.ArithmeticFunction.Misc        -- `sigma`, `sigma_zero_apply`
+import Mathlib.NumberTheory.Harmonic.Bounds                -- `harmonic_le_one_add_log`
+import Mathlib.Data.Finset.NatDivisors                     -- `Nat.divisors_mul`
+import Mathlib.Data.Nat.Factorization.Basic                -- `Nat.Ioc_filter_dvd_card_eq_div`
+import Mathlib.Analysis.SpecialFunctions.Pow.Real          -- `Real.rpow` algebra
 
 noncomputable section
 
@@ -279,11 +289,14 @@ private lemma allTheta_sum_tau_pow_div_le : ∀ B N : ℕ,
 /-! ## The threshold `x₀(θ)` and the divisor cutoff `D ≤ y` -/
 
 /-- Explicit threshold `x₀(θ) = max 2 ⌈2^(1/(θ − 1/4))⌉₊`: for `x ≥ x₀(θ)` one has
-`x^(θ − 1/4) ≥ 2`, hence `(2x)^(1/4) ≤ x^θ`.  For `θ ≥ 1/2` this is at most `⌈4⌉₊ = 4`. -/
-noncomputable def allTheta_x₀ (θ : ℝ) : ℕ := max 2 ⌈(2 : ℝ) ^ (θ - 1 / 4)⁻¹⌉₊
+`x^(θ − 1/4) ≥ 2`, hence `(2x)^(1/4) ≤ x^θ`.  The exponent is `(θ − 1/4)⁻¹`, so the threshold
+grows as `θ ↓ 1/4`; at `θ = 1/2` it is `max 2 ⌈2^4⌉₊ = 16`, and it decreases in `θ` thereafter.
+The `max 2` branch additionally guarantees `x ≥ 2`, used downstream to keep `log x ≥ 0`. -/
+def allTheta_x₀ (θ : ℝ) : ℕ := max 2 ⌈(2 : ℝ) ^ (θ - 1 / 4)⁻¹⌉₊
 
 /-- The divisor cutoff `D = ⌊√⌊√(2x)⌋⌋` satisfies `D ≤ (2x)^(1/4) ≤ x^θ ≤ y`: the small
-divisors fit inside the interval length.  This is the only use of `θ > 1/4` and `x ≥ x₀(θ)`. -/
+divisors fit inside the interval length.  This is the only use of `θ > 1/4`; `x ≥ x₀(θ)` is used
+here through its ceiling branch and once more downstream through its `max 2` branch. -/
 private lemma allTheta_sqrt_sqrt_le (θ : ℝ) (hθ : 1 / 4 < θ) (x y : ℕ)
     (hx : allTheta_x₀ θ ≤ x) (hy : (x : ℝ) ^ θ ≤ (y : ℝ)) :
     ((Nat.sqrt (Nat.sqrt (2 * x)) : ℕ) : ℝ) ≤ y := by
@@ -301,7 +314,7 @@ private lemma allTheta_sqrt_sqrt_le (θ : ℝ) (hθ : 1 / 4 < θ) (x y : ℕ)
       Real.rpow_le_rpow (Real.rpow_nonneg (by norm_num) _) hxc hs.le
     rwa [← Real.rpow_mul (by norm_num : (0 : ℝ) ≤ 2), inv_mul_cancel₀ hs.ne',
       Real.rpow_one] at h1
-  set D := Nat.sqrt (Nat.sqrt (2 * x)) with hD
+  set D := Nat.sqrt (Nat.sqrt (2 * x))
   have hD4 : D ^ 4 ≤ 2 * x := by
     have h1 : D * D ≤ Nat.sqrt (2 * x) := Nat.sqrt_le _
     have h2 : Nat.sqrt (2 * x) * Nat.sqrt (2 * x) ≤ 2 * x := Nat.sqrt_le _
@@ -415,7 +428,7 @@ theorem allTheta_tau_pow_four_short_interval
     refine Finset.sum_congr rfl fun d _ => ?_
     rw [Finset.sum_const, nsmul_eq_mul]
   -- The weighted summatory quantity.
-  set S : ℝ := ∑ d ∈ Finset.Icc 1 D, ((d.divisors.card : ℕ) : ℝ) ^ B / d with hSdef
+  set S : ℝ := ∑ d ∈ Finset.Icc 1 D, ((d.divisors.card : ℕ) : ℝ) ^ B / d
   have hS0 : 0 ≤ S := Finset.sum_nonneg fun d _ => by positivity
   -- Step 3: multiples count `≤ y/d + 1`, and `τ(d)^B ≤ D · τ(d)^B/d` for the `+1` part.
   have step3 : ∑ d ∈ Finset.Icc 1 D,
@@ -479,14 +492,13 @@ theorem allTheta_tau_pow_four_short_interval
         rw [pow_succ]
         ring
 
-#print axioms allTheta_card_multiples
-#print axioms allTheta_hyperbola
-#print axioms allTheta_sum_tau_pow_div_le
-#print axioms allTheta_sqrt_sqrt_le
-#print axioms allTheta_tau_pow_four_short_interval
-
 end Shiu
 end Zeta85
 end RH
 
 end
+
+-- Axiom audit.  Dependence on axioms is transitive, so this single check also certifies every
+-- `private` lemma above; printing the public name keeps the output stable under renaming or
+-- reordering of the private declarations.
+#print axioms RH.Zeta85.Shiu.allTheta_tau_pow_four_short_interval
