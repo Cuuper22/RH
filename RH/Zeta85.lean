@@ -12,7 +12,12 @@ Import graph:
   Certificate  — Phase A2/A3: c_pc, the count lemma, `SaturatedWindowCost`, `windowCost_143`
   Transfer     — the two-trace certificate interface and its (proved) conversion to the ε-form
   Statement    — Phase B1: the three rungs and the 85 % corollary, as Props
-  Arith        — the arithmetic vocabulary of the hypotheses layer (definitions only)
+  Arith        — the arithmetic vocabulary of the hypotheses layer (definitions only); its
+                 `ShiuMajorant` is the REFUTED frozen interface, kept as the no-go's subject
+  ShiuInterface— `ShiuMajorant₂`, the corrected progression-majorant interface (the axiom's type)
+  Shiu/*       — the unconditional mathematics built toward it, rooted at `RH/Zeta85/Shiu.lean`
+                 and compiled by the bridge job of `.github/workflows/lean-targeted.yml`; not in
+                 this closure, so the axiom gate keeps checking exactly the headline cone
   Discharge/*  — what could be proved of Phase C: the signed-shift lemma (C1), the exponent
                  bookkeeping, the logarithmic-power audit (C7)
   Hypotheses   — the four axioms, with provenance (THE ONLY FILE IN `RH/` DECLARING AN AXIOM)

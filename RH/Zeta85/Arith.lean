@@ -202,8 +202,20 @@ def SignedPairTraceGrade (σ : ℝ) : Prop :=
 def progressionSum (c : ℕ → ℝ) (P : ℝ) (q r : ℕ) : ℝ :=
   ∑ p ∈ (Finset.Icc 1 ⌈2 * P⌉₊).filter (fun p => p % q = r % q), |c p|
 
-/-- The Shiu-type majorant of `docs/run/12` (14):
-`Σ_{p ≍ P, p ≡ r (q), (r,q)=1} |c_p| ≪ (P/φ(q))·(log T)^C`, uniformly for `q ≤ P·T^{−η+o(1)}`. -/
+/-- **REFUTED — superseded by `ShiuMajorant₂` in `RH/Zeta85/ShiuInterface.lean`.**
+
+This is the frozen rendering of the Shiu-type majorant of `docs/run/12` (14):
+`Σ_{p ≍ P, p ≡ r (q), (r,q)=1} |c_p| ≪ (P/φ(q))·(log T)^C`, uniformly for `q ≤ P·T^{−η+o(1)}`.
+
+It is FALSE: `RH.Zeta85.not_shiuMajorant_quarter` (`RH/Zeta85/Discharge/ShiuNoGo.lean`) proves
+`¬ ShiuMajorant (1/4)`.  The statement fixes `T`, and with it the `(log T)^C` scale of its
+right-hand side, before quantifying the interval scale `P`, so taking `P = q·T` with a `τ(3^m)`
+spike isolated modulo a power of two keeps the right-hand side constant while the left grows.
+
+The definition is retained only so that the refutation continues to have a subject.  Nothing in
+the axiom layer refers to it: `RH/Zeta85/Hypotheses.lean` assumes `ShiuMajorant₂`, whose majorant
+is `(log P)^C` and whose modulus range is `q ≤ P^{1−η}`.  See `AXIOMS.md` and
+`docs/research/shiu_routes_20260818.md` for the defect analysis. -/
 def ShiuMajorant (η : ℝ) : Prop :=
   ∀ (c : ℕ → ℝ) (Kc : ℝ) (k : ℕ), DivisorBounded c Kc k →
     ∃ C K T₁ : ℝ, ∀ T ≥ T₁, ∀ P : ℝ, 1 ≤ P → ∀ q r : ℕ, 0 < q → Nat.Coprime r q →
