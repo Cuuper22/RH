@@ -62,7 +62,8 @@ theorem coordinateCompression_isometry
     simp
   · have he : S.embedding T a ≠ S.embedding T b :=
       fun h => hab ((S.embedding T).injective h)
-    simp [he, hab]
+    have hba : ¬b = a := fun h => hab h.symm
+    simp [he, hab, hba]
 
 /-- Every coordinate selection is an isometric compression. -/
 def coordinateData
@@ -184,7 +185,7 @@ def coordinateFrequencyTail
 /-- Regularity required to evaluate every complete physical-channel lattice. -/
 structure PhysicalWindowRegularity
     {Z : ZeroConfig} {σ μ p : ℝ} {v : ℝ → ℝ}
-    (F : QuarticGramFamily Z σ μ p v) : Prop where
+    (F : QuarticGramFamily Z σ μ p v) where
   supportRadius :
     ∀ T : ℝ, Fin (F.channelCount T) → ℝ
   period_pos :
@@ -388,7 +389,7 @@ theorem LiteralEnergyTailQuarticLowerBound.toMixed
     {F : QuarticGramFamily Z σ μ p v}
     {q : TrimmedMoment.Quartic}
     (hreg : PhysicalWindowRegularity F)
-    (h : LiteralEnergyTailQuarticLowerBound q) :
+    (h : LiteralEnergyTailQuarticLowerBound (F := F) q) :
     IsometricKernel.MixedPairKernelQuarticLowerBound q
       (coordinateRealData (literalBlockSelection F)) := by
   refine ⟨h.block_dimension_pos, ?_⟩
@@ -411,7 +412,7 @@ theorem LiteralEnergyTailQuarticLowerBound.toIsometric
     {F : QuarticGramFamily Z σ μ p v}
     {q : TrimmedMoment.Quartic}
     (hreg : PhysicalWindowRegularity F)
-    (h : LiteralEnergyTailQuarticLowerBound q) :
+    (h : LiteralEnergyTailQuarticLowerBound (F := F) q) :
     IsometricBlock.WeightedQuarticLowerBound q
       (coordinateData (literalBlockSelection F)) :=
   (h.toMixed hreg).toIsometric
@@ -515,11 +516,11 @@ theorem literalCoordinateEnergyTailPairKernel_eq_windowEnergy_sub_tail
     literalCoordinateEnergyTailPairKernel F T ρ ρ' =
       ((F.hatDenominator T)⁻¹ : ℂ) *
         ((@QuarticGramFamily.fullLength σ T : ℂ) *
-            ∫ u : ℝ,
+            (∫ u : ℝ,
               (F.windowEnergy T u : ℂ) *
                 Complex.exp
                   (Complex.I *
-                    (gammaOf ρ - gammaOf ρ') * (u : ℂ)) -
+                    (gammaOf ρ - gammaOf ρ') * (u : ℂ))) -
           coordinateFrequencyTail
             (literalBlockSelection F) T ρ ρ') := by
   unfold literalCoordinateEnergyTailPairKernel

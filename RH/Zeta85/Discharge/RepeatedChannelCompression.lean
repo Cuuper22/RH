@@ -41,7 +41,7 @@ theorem isometry
     {ι κ : Type*} [Fintype ι] [DecidableEq ι]
     [Fintype κ] [DecidableEq κ]
     (C : Data ι) (r : ι) :
-    (matrix C r)ᴴ * matrix C r = 1 := by
+    (matrix (κ := κ) C r)ᴴ * matrix (κ := κ) C r = 1 := by
   classical
   ext a b
   by_cases hab : a = b

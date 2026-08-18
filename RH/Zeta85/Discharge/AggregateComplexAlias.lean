@@ -91,8 +91,13 @@ theorem virtualAliasSum_eq_zero_add_nonzero
         ComplexAliasBridge.virtualComplexAliasTerm T L f z z' m) :=
     (summable_mul_left_iff hL0).1 hscaled
   unfold ComplexAliasBridge.virtualAliasSum
-  simpa using
-    (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
+  have h := (hsum.sum_add_tsum_subtype_compl ({0} : Finset ℤ)).symm
+  simp only [Finset.sum_singleton] at h
+  refine h.trans ?_
+  refine congrArg (ComplexAliasBridge.virtualComplexAliasTerm T L f z z' 0 + ·) ?_
+  exact (Equiv.subtypeEquivRight (fun m => by simp)).tsum_eq
+    (fun m : {m : ℤ // m ≠ 0} =>
+      ComplexAliasBridge.virtualComplexAliasTerm T L f z z' (m : ℤ))
 
 /-- Poisson summation is linear across the finite channel family. -/
 theorem aggregateVirtualFrequencyPairSum_eq_period_mul_aliasSum
@@ -218,7 +223,7 @@ theorem aggregateVirtualNormalizedFrequencyPairSum_eq_energyIntegral
     exact_mod_cast hL.ne'
   rw [aggregateVirtualFrequencyPairSum_eq_energyIntegral
     T L Λ f hL hΛ hsmooth hsupp heven hcancel z z']
-  rw [mul_assoc, div_mul_cancel₀ _ hL0]
+  rw [← mul_assoc, div_mul_cancel₀ _ hL0]
 
 /-! ## Constructors for collective cancellation -/
 
@@ -288,7 +293,7 @@ theorem aggregateAliasCancellation_of_termwise
         funext m
         exact hterm z z' m
       rw [hzero]
-      simp
+      exact tsum_zero
 
 /-- It is enough to cancel the summed shifted overlap integrals.  The
 translation-dependent exponential is common to every channel and factors
@@ -382,6 +387,7 @@ theorem aggregateAliasCancellation_of_pointwiseOverlap
           (hpoint m hm u)
         push_cast at hp
         rw [hp, zero_mul]
+        simp
       rw [hfun]
       simp
 
