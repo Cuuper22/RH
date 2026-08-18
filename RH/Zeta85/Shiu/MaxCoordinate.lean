@@ -16,9 +16,13 @@ manipulating tuple sets — and re-grouping the resulting double count so that t
 `K · ∑_{m ≤ M} (ζ^{K−1}) m · #{multiples of m in (x, x+y]}`, which the divisor-power summatory
 ladder bounds by `O(y (1 + log x)^{K−1})` as soon as `y ⪆ x^{1−1/K}`.
 
-Main result:
-* `maxCoord_tau_sq_short_interval` : for `x ≥ 16` and `x^{3/4} ≤ y ≤ x`,
-  `∑_{x < n ≤ x+y} τ(n)² ≤ 400 · y · (1 + log x)³`.
+Main results:
+* `maxCoord_tau_sq_short_interval` : for `x ≥ 1` and `x^{3/4} ≤ y ≤ x`,
+  `∑_{x < n ≤ x+y} τ(n)² ≤ 400 · y · (1 + log x)³`;
+* `maxCoord_tau_fourth_short_interval` : for `x ≥ 1` and `x^{15/16} ≤ y ≤ x`,
+  `∑_{x < n ≤ x+y} τ(n)⁴ ≤ 2097152 · y · (1 + log x)^15`.
+
+Both log exponents are sharp (`2^j − 1` for `τ^j`).
 
 Everything is self-contained over Mathlib: the campaign's units never import each other, so the
 τ-power pointwise calculus and the `(ζ^k)` summatory ladder are restated and proved locally as
@@ -450,101 +454,142 @@ private lemma count_multiples_le (x y m : ℕ) (hm : 0 < m) :
     field_simp
     ring
   linarith
+/-! ## The ℕ-level max-coordinate bound over a short interval -/
 
-/-! ## Assembly -/
+/-- **Max-coordinate split, summed over `(x, x+y]`.**  Any `F` dominated pointwise by `ζ^{k+1}`
+has short-interval sum at most `(k+1) · ∑_{m ≤ (x+y)/t} (ζ^k) m · #{multiples of m in (x, x+y]}`,
+provided the threshold satisfies `t^{k+1} ≤ x`. -/
+private lemma maxCoord_split_sum {t x y M k : ℕ} (ht0 : 0 < t) (htk : t ^ (k + 1) ≤ x)
+    (hM : M = (x + y) / t) (F : ℕ → ℕ) (hF : ∀ n : ℕ, n ≠ 0 → F n ≤ (ζ ^ (k + 1)) n) :
+    ∑ n ∈ Finset.Ioc x (x + y), F n
+      ≤ (k + 1) * ∑ m ∈ Finset.Ioc 0 M, (ζ ^ k) m * ((x + y) / m - x / m) := by
+  have h1 : ∑ n ∈ Finset.Ioc x (x + y), F n
+      ≤ ∑ n ∈ Finset.Ioc x (x + y),
+          (k + 1) * ∑ p ∈ n.divisorsAntidiagonal, (if t ≤ p.1 then (ζ ^ k) p.2 else 0) := by
+    refine Finset.sum_le_sum fun n hn => ?_
+    obtain ⟨hn1, -⟩ := Finset.mem_Ioc.mp hn
+    have hn0 : n ≠ 0 := by omega
+    refine le_trans (hF n hn0) ?_
+    have h := zetaPow_le_maxCoord t k n hn0 (by omega)
+    rwa [bigIndicator_mul_apply t k hn0] at h
+  refine le_trans h1 ?_
+  rw [← Finset.mul_sum, hM]
+  exact Nat.mul_le_mul_left _ (sum_interval_maxCoord t x y ht0 (fun m => (ζ ^ k) m))
 
-/-- The reduction step: max-coordinate split at `t`, re-grouped and fed to the ladder. -/
-private lemma maxCoord_tau_sq_reduction {t x y M : ℕ} (ht0 : 0 < t) (ht4 : t ^ 4 ≤ x)
-    (hx : 16 ≤ x) (hM : M = (x + y) / t) :
-    ∑ n ∈ Finset.Ioc x (x + y), ((σ 0 n : ℕ) : ℝ) ^ 2
-      ≤ 4 * ((y : ℝ) * (1 + Real.log M) ^ 3 + (M : ℝ) * (1 + Real.log M) ^ 2) := by
-  have hNat : ∑ n ∈ Finset.Ioc x (x + y), σ 0 n ^ 2
-      ≤ 4 * ∑ m ∈ Finset.Ioc 0 M, (ζ ^ 3) m * ((x + y) / m - x / m) := by
-    have h1 : ∑ n ∈ Finset.Ioc x (x + y), σ 0 n ^ 2
-        ≤ ∑ n ∈ Finset.Ioc x (x + y),
-            4 * ∑ p ∈ n.divisorsAntidiagonal, (if t ≤ p.1 then (ζ ^ 3) p.2 else 0) := by
-      refine Finset.sum_le_sum fun n hn => ?_
-      obtain ⟨hn1, -⟩ := Finset.mem_Ioc.mp hn
-      have hn0 : n ≠ 0 := by omega
-      refine le_trans (tau_sq_le_zetaPow_four hn0) ?_
-      have h := zetaPow_le_maxCoord t 3 n hn0 (by
-        have : t ^ (3 + 1) = t ^ 4 := by norm_num
-        omega)
-      rw [bigIndicator_mul_apply t 3 hn0] at h
-      simpa using h
-    refine le_trans h1 ?_
-    rw [← Finset.mul_sum]
-    have h2 := sum_interval_maxCoord t x y ht0 (fun m => (ζ ^ 3) m)
-    rw [hM]
-    exact Nat.mul_le_mul_left 4 h2
-  have hcast : ∑ n ∈ Finset.Ioc x (x + y), ((σ 0 n : ℕ) : ℝ) ^ 2
-      ≤ 4 * ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ) := by
-    have := (Nat.cast_le (α := ℝ)).mpr hNat
-    push_cast at this
-    exact this
-  refine le_trans hcast ?_
-  have hbound : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ)
-      ≤ (y : ℝ) * (1 + Real.log M) ^ 3 + (M : ℝ) * (1 + Real.log M) ^ 2 := by
-    have hstep : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ)
-        ≤ ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) * ((y : ℝ) / m + 1) := by
-      refine Finset.sum_le_sum fun m hm => ?_
-      have hm0 : 0 < m := (Finset.mem_Ioc.mp hm).1
-      exact mul_le_mul_of_nonneg_left (count_multiples_le x y m hm0) (by positivity)
-    refine le_trans hstep ?_
-    have hsplit : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) * ((y : ℝ) / m + 1)
-        = (y : ℝ) * (∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) / m)
-          + ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) := by
-      rw [Finset.mul_sum, ← Finset.sum_add_distrib]
-      refine Finset.sum_congr rfl fun m _ => ?_
-      ring
-    rw [hsplit]
-    have hy0 : (0 : ℝ) ≤ (y : ℝ) := by positivity
-    have hlad1 : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) / m ≤ (1 + Real.log M) ^ 3 :=
-      zetaPow_ladder_div 3 M
-    have hlad2 : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) ≤ (M : ℝ) * (1 + Real.log M) ^ 2 :=
-      zetaPow_ladder_sum 2 M
-    have := mul_le_mul_of_nonneg_left hlad1 hy0
-    linarith
+/-! ## The ℝ-level ladder bound -/
+
+/-- Feeding the re-grouped double count to the summatory ladder: the `y/m` part contributes
+`y (1 + log M)^{k+1}` and the `+1` part contributes `M (1 + log M)^k`. -/
+private lemma maxCoord_ladder_bound (x y M k : ℕ) :
+    ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ (k + 1)) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ)
+      ≤ (y : ℝ) * (1 + Real.log M) ^ (k + 1) + (M : ℝ) * (1 + Real.log M) ^ k := by
+  have hstep : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ (k + 1)) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ)
+      ≤ ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ (k + 1)) m : ℝ) * ((y : ℝ) / m + 1) := by
+    refine Finset.sum_le_sum fun m hm => ?_
+    have hm0 : 0 < m := (Finset.mem_Ioc.mp hm).1
+    exact mul_le_mul_of_nonneg_left (count_multiples_le x y m hm0) (by positivity)
+  refine le_trans hstep ?_
+  have hsplit : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ (k + 1)) m : ℝ) * ((y : ℝ) / m + 1)
+      = (y : ℝ) * (∑ m ∈ Finset.Ioc 0 M, ((ζ ^ (k + 1)) m : ℝ) / m)
+        + ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ (k + 1)) m : ℝ) := by
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun m _ => ?_
+    ring
+  rw [hsplit]
+  have hy0 : (0 : ℝ) ≤ (y : ℝ) := by positivity
+  have hlad1 : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ (k + 1)) m : ℝ) / m ≤ (1 + Real.log M) ^ (k + 1) :=
+    zetaPow_ladder_div (k + 1) M
+  have hlad2 : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ (k + 1)) m : ℝ) ≤ (M : ℝ) * (1 + Real.log M) ^ k :=
+    zetaPow_ladder_sum k M
+  have := mul_le_mul_of_nonneg_left hlad1 hy0
   linarith
+
+/-! ## The root threshold and the shape of the outer range -/
+
+/-- A `2^r`-th root threshold: an integer `t ≥ 1` with `t^{2^r} ≤ x < (t+1)^{2^r}`, obtained by
+iterating `Nat.sqrt` (`r` times). -/
+private lemma exists_root_threshold {x : ℕ} (hx : 0 < x) (r : ℕ) :
+    ∃ t : ℕ, 0 < t ∧ t ^ 2 ^ r ≤ x ∧ x + 1 ≤ (t + 1) ^ 2 ^ r := by
+  induction r with
+  | zero => exact ⟨x, hx, by simp, by simp⟩
+  | succ r ih =>
+    obtain ⟨u, hu0, hu1, hu2⟩ := ih
+    have hs1 : Nat.sqrt u * Nat.sqrt u ≤ u := Nat.sqrt_le u
+    have hs2 : u < (Nat.sqrt u + 1) * (Nat.sqrt u + 1) := Nat.lt_succ_sqrt u
+    have hs0 : 0 < Nat.sqrt u := by
+      rcases Nat.eq_zero_or_pos (Nat.sqrt u) with h | h
+      · rw [h] at hs2
+        omega
+      · exact h
+    have hexp : (2 : ℕ) ^ (r + 1) = 2 * 2 ^ r := by
+      rw [pow_succ]
+      ring
+    refine ⟨Nat.sqrt u, hs0, ?_, ?_⟩
+    · calc Nat.sqrt u ^ 2 ^ (r + 1) = Nat.sqrt u ^ (2 * 2 ^ r) := by rw [hexp]
+        _ = (Nat.sqrt u ^ 2) ^ 2 ^ r := by rw [pow_mul]
+        _ ≤ u ^ 2 ^ r := Nat.pow_le_pow_left (by nlinarith) _
+        _ ≤ x := hu1
+    · calc x + 1 ≤ (u + 1) ^ 2 ^ r := hu2
+        _ ≤ ((Nat.sqrt u + 1) ^ 2) ^ 2 ^ r := Nat.pow_le_pow_left (by nlinarith) _
+        _ = (Nat.sqrt u + 1) ^ 2 ^ (r + 1) := by rw [hexp, pow_mul]
+
+/-- The two facts the assembly needs about the outer range `M = (x+y)/t`: it is `≤ 4y`, and its
+logarithm is within a factor `2` of `1 + log x`. -/
+private lemma maxCoord_setup {x y t M : ℕ} (hx : 0 < x) (hyx : y ≤ x) (ht0 : 0 < t)
+    (hM : M = (x + y) / t) (hkey : 2 * x ≤ 4 * y * t) :
+    (M : ℝ) ≤ 4 * (y : ℝ) ∧ 1 + Real.log M ≤ 2 * (1 + Real.log x) := by
+  have hx0R : (0 : ℝ) < (x : ℝ) := by exact_mod_cast hx
+  have htR : (0 : ℝ) < (t : ℝ) := by exact_mod_cast ht0
+  constructor
+  · have hkeyR : 2 * (x : ℝ) ≤ 4 * (y : ℝ) * (t : ℝ) := by exact_mod_cast hkey
+    have hMle : (M : ℝ) ≤ ((x : ℝ) + (y : ℝ)) / (t : ℝ) := by
+      have h := (Nat.cast_div_le (α := ℝ) (m := x + y) (n := t))
+      push_cast at h
+      rw [hM]
+      exact h
+    have hxy : ((x : ℝ) + (y : ℝ)) / (t : ℝ) ≤ 4 * (y : ℝ) := by
+      rw [div_le_iff₀ htR]
+      have hyxR : (y : ℝ) ≤ (x : ℝ) := by exact_mod_cast hyx
+      linarith
+    linarith
+  · have hMx : M ≤ 2 * x := by
+      have h1 : M ≤ x + y := by
+        rw [hM]
+        exact Nat.div_le_self _ _
+      omega
+    have h1 : Real.log M ≤ Real.log ((2 * x : ℕ) : ℝ) := log_natCast_le_log_natCast hMx
+    have h2 : Real.log ((2 * x : ℕ) : ℝ) = Real.log 2 + Real.log x := by
+      push_cast
+      rw [Real.log_mul (by norm_num) (ne_of_gt hx0R)]
+    have h3 : Real.log 2 ≤ 1 := by
+      have h := Real.log_le_sub_one_of_pos (x := (2 : ℝ)) (by norm_num)
+      linarith
+    have hlogx : (0 : ℝ) ≤ Real.log x := Real.log_natCast_nonneg x
+    linarith
+
+/-! ## Assembly: the `τ²` short-interval bound -/
 
 /-- **Shiu-type short-interval bound for `τ²`, sharp log exponent `3 = 2² − 1`.**
 
-For `x ≥ 16` and `x^{3/4} ≤ y ≤ x`,
+For `x ≥ 1` and `x^{3/4} ≤ y ≤ x`,
 `∑_{x < n ≤ x+y} τ(n)² ≤ 400 · y · (1 + log x)³`.
 
 Max-coordinate / divisor-splitting argument, classical (cf. proofs of Shiu-type theorems for `τ^k`
 in short intervals); the log exponent `3` is sharp. -/
-theorem maxCoord_tau_sq_short_interval {x y : ℕ} (hx : 16 ≤ x)
+theorem maxCoord_tau_sq_short_interval {x y : ℕ} (hx : 0 < x)
     (hy : (x : ℝ) ^ (3 / 4 : ℝ) ≤ (y : ℝ)) (hyx : y ≤ x) :
     ∑ n ∈ Finset.Ioc x (x + y), ((σ 0 n : ℕ) : ℝ) ^ 2
       ≤ 400 * (y : ℝ) * (1 + Real.log x) ^ 3 := by
+  have hx0R : (0 : ℝ) < (x : ℝ) := by exact_mod_cast hx
+  have hy0R : (0 : ℝ) ≤ (y : ℝ) := by positivity
   -- the fourth-root threshold `t`
-  set s := Nat.sqrt x with hs_def
-  set t := Nat.sqrt s with ht_def
-  have hs1 : s * s ≤ x := Nat.sqrt_le x
-  have hs2 : x < (s + 1) * (s + 1) := Nat.lt_succ_sqrt x
-  have ht1 : t * t ≤ s := Nat.sqrt_le s
-  have ht2 : s < (t + 1) * (t + 1) := Nat.lt_succ_sqrt s
-  have hs4 : 4 ≤ s := by nlinarith
-  have htge : 2 ≤ t := by nlinarith
-  have ht0 : 0 < t := by omega
-  have ht4 : t ^ 4 ≤ x := by nlinarith
+  obtain ⟨t, ht0, htA, htB⟩ := exists_root_threshold hx 2
+  norm_num at htA htB
   have htbig : x < 16 * t ^ 4 := by
-    have h1 : s + 1 ≤ (t + 1) * (t + 1) := ht2
-    have h2 : (s + 1) * (s + 1) ≤ ((t + 1) * (t + 1)) * ((t + 1) * (t + 1)) :=
-      Nat.mul_le_mul h1 h1
     have h3 : t + 1 ≤ 2 * t := by omega
-    have h4 : ((t + 1) * (t + 1)) * ((t + 1) * (t + 1)) ≤ (2 * t) ^ 4 := by
-      calc ((t + 1) * (t + 1)) * ((t + 1) * (t + 1)) = (t + 1) ^ 4 := by ring
-        _ ≤ (2 * t) ^ 4 := Nat.pow_le_pow_left h3 4
+    have h4 : (t + 1) ^ 4 ≤ (2 * t) ^ 4 := Nat.pow_le_pow_left h3 4
     have h5 : (2 * t) ^ 4 = 16 * t ^ 4 := by ring
     omega
-  -- the outer range `M`
-  set M := (x + y) / t with hM_def
-  have hx0 : 0 < x := by omega
-  have hx0R : (0 : ℝ) < (x : ℝ) := by exact_mod_cast hx0
-  have hy0R : (0 : ℝ) ≤ (y : ℝ) := by positivity
-  have htR : (0 : ℝ) < (t : ℝ) := by exact_mod_cast ht0
   -- `y⁴ ≥ x³`, from the hypothesis `y ≥ x^{3/4}`
   have hxy4 : x ^ 3 ≤ y ^ 4 := by
     have h34 : ((x : ℝ) ^ (3 / 4 : ℝ)) ^ (4 : ℕ) = (x : ℝ) ^ (3 : ℕ) := by
@@ -554,66 +599,202 @@ theorem maxCoord_tau_sq_short_interval {x y : ℕ} (hx : 16 ≤ x)
       rw [← h34]
       exact pow_le_pow_left₀ (by positivity) hy 4
     exact_mod_cast hR
-  -- `M ≤ 4y`
-  have hMy : (M : ℝ) ≤ 4 * (y : ℝ) := by
-    have hkey : 2 * x ≤ 4 * y * t := by
-      have hpow : (2 * x) ^ 4 ≤ (4 * y * t) ^ 4 := by
-        calc (2 * x) ^ 4 = 16 * (x ^ 3 * x) := by ring
-          _ ≤ 16 * (y ^ 4 * (16 * t ^ 4)) := by
-              exact Nat.mul_le_mul_left 16
-                (Nat.mul_le_mul hxy4 (le_of_lt htbig))
-          _ = (4 * y * t) ^ 4 := by ring
-      exact (Nat.pow_le_pow_iff_left (by norm_num)).mp hpow
-    have hkeyR : 2 * (x : ℝ) ≤ 4 * (y : ℝ) * (t : ℝ) := by exact_mod_cast hkey
-    have hMle : (M : ℝ) ≤ ((x : ℝ) + (y : ℝ)) / (t : ℝ) := by
-      have h := (Nat.cast_div_le (α := ℝ) (m := x + y) (n := t))
-      push_cast at h
-      rw [hM_def]
-      exact h
-    have hxy : ((x : ℝ) + (y : ℝ)) / (t : ℝ) ≤ 4 * (y : ℝ) := by
-      rw [div_le_iff₀ htR]
-      have hyxR : (y : ℝ) ≤ (x : ℝ) := by exact_mod_cast hyx
-      linarith
-    linarith
-  -- `1 + log M ≤ 2 (1 + log x)`
-  have hMx : M ≤ 2 * x := by
-    have h1 : M ≤ x + y := by
-      rw [hM_def]
-      exact Nat.div_le_self _ _
-    omega
+  have hkey : 2 * x ≤ 4 * y * t := by
+    have hpow : (2 * x) ^ 4 ≤ (4 * y * t) ^ 4 := by
+      calc (2 * x) ^ 4 = 16 * (x ^ 3 * x) := by ring
+        _ ≤ 16 * (y ^ 4 * (16 * t ^ 4)) :=
+            Nat.mul_le_mul_left 16 (Nat.mul_le_mul hxy4 (le_of_lt htbig))
+        _ = (4 * y * t) ^ 4 := by ring
+    exact (Nat.pow_le_pow_iff_left (by norm_num)).mp hpow
+  set M := (x + y) / t with hM_def
+  obtain ⟨hMy, hlogMx⟩ := maxCoord_setup hx hyx ht0 hM_def hkey
+  -- the split, cast to `ℝ`, and the ladder
+  have hNat : ∑ n ∈ Finset.Ioc x (x + y), σ 0 n ^ 2
+      ≤ 4 * ∑ m ∈ Finset.Ioc 0 M, (ζ ^ 3) m * ((x + y) / m - x / m) := by
+    have h := maxCoord_split_sum (k := 3) (t := t) (M := M) ht0 (by simpa using htA) hM_def
+      (fun n => σ 0 n ^ 2) (fun n hn => by simpa using tau_sq_le_zetaPow_four hn)
+    simpa using h
+  have hcast : ∑ n ∈ Finset.Ioc x (x + y), ((σ 0 n : ℕ) : ℝ) ^ 2
+      ≤ 4 * ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ) := by
+    have h := (Nat.cast_le (α := ℝ)).mpr hNat
+    push_cast at h
+    exact h
+  have hlad : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 3) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ)
+      ≤ (y : ℝ) * (1 + Real.log M) ^ 3 + (M : ℝ) * (1 + Real.log M) ^ 2 := by
+    simpa using maxCoord_ladder_bound x y M 2
+  -- numerics
   have hlogx : (0 : ℝ) ≤ Real.log x := Real.log_natCast_nonneg x
   have hlogM : (0 : ℝ) ≤ Real.log M := Real.log_natCast_nonneg M
-  have hlogMx : 1 + Real.log M ≤ 2 * (1 + Real.log x) := by
-    have h1 : Real.log M ≤ Real.log ((2 * x : ℕ) : ℝ) := log_natCast_le_log_natCast hMx
-    have h2 : Real.log ((2 * x : ℕ) : ℝ) = Real.log 2 + Real.log x := by
-      push_cast
-      rw [Real.log_mul (by norm_num) (ne_of_gt hx0R)]
-    have h3 : Real.log 2 ≤ 1 := by
-      have := Real.log_le_sub_one_of_pos (x := (2 : ℝ)) (by norm_num)
-      linarith
-    linarith
-  -- assemble
-  refine le_trans (maxCoord_tau_sq_reduction ht0 ht4 hx hM_def) ?_
   have hL0 : (0 : ℝ) ≤ 1 + Real.log M := by linarith
-  have hL1 : (1 : ℝ) ≤ 1 + Real.log M := by linarith
-  have hcube : (1 + Real.log M) ^ 3 ≤ 8 * (1 + Real.log x) ^ 3 := by
+  have hLx1 : (1 : ℝ) ≤ 1 + Real.log x := by linarith
+  have h3 : (1 + Real.log M) ^ 3 ≤ 8 * (1 + Real.log x) ^ 3 := by
     calc (1 + Real.log M) ^ 3 ≤ (2 * (1 + Real.log x)) ^ 3 := pow_le_pow_left₀ hL0 hlogMx 3
       _ = 8 * (1 + Real.log x) ^ 3 := by ring
-  have hsq : (1 + Real.log M) ^ 2 ≤ (1 + Real.log M) ^ 3 :=
-    pow_le_pow_right₀ hL1 (by norm_num)
-  have hcube0 : (0 : ℝ) ≤ (1 + Real.log M) ^ 3 := by positivity
-  have hlx0 : (0 : ℝ) ≤ (1 + Real.log x) ^ 3 := by positivity
-  calc 4 * ((y : ℝ) * (1 + Real.log M) ^ 3 + (M : ℝ) * (1 + Real.log M) ^ 2)
-      ≤ 4 * ((y : ℝ) * (1 + Real.log M) ^ 3 + (4 * (y : ℝ)) * (1 + Real.log M) ^ 3) := by
-        have hM0 : (0 : ℝ) ≤ (M : ℝ) := by positivity
-        nlinarith
-    _ = 20 * ((y : ℝ) * (1 + Real.log M) ^ 3) := by ring
-    _ ≤ 20 * ((y : ℝ) * (8 * (1 + Real.log x) ^ 3)) := by nlinarith
-    _ = 160 * (y : ℝ) * (1 + Real.log x) ^ 3 := by ring
-    _ ≤ 400 * (y : ℝ) * (1 + Real.log x) ^ 3 := by nlinarith
+  have h2 : (1 + Real.log M) ^ 2 ≤ 4 * (1 + Real.log x) ^ 3 := by
+    have e2 : (1 + Real.log x) ^ 2 ≤ (1 + Real.log x) ^ 3 :=
+      pow_le_pow_right₀ hLx1 (by norm_num)
+    calc (1 + Real.log M) ^ 2 ≤ (2 * (1 + Real.log x)) ^ 2 := pow_le_pow_left₀ hL0 hlogMx 2
+      _ = 4 * (1 + Real.log x) ^ 2 := by ring
+      _ ≤ 4 * (1 + Real.log x) ^ 3 := by linarith
+  have t1 : (y : ℝ) * (1 + Real.log M) ^ 3 ≤ (y : ℝ) * (8 * (1 + Real.log x) ^ 3) :=
+    mul_le_mul_of_nonneg_left h3 hy0R
+  have t2 : (M : ℝ) * (1 + Real.log M) ^ 2 ≤ (4 * (y : ℝ)) * (4 * (1 + Real.log x) ^ 3) := by
+    calc (M : ℝ) * (1 + Real.log M) ^ 2 ≤ (4 * (y : ℝ)) * (1 + Real.log M) ^ 2 :=
+          mul_le_mul_of_nonneg_right hMy (by positivity)
+      _ ≤ (4 * (y : ℝ)) * (4 * (1 + Real.log x) ^ 3) :=
+          mul_le_mul_of_nonneg_left h2 (by linarith)
+  have hnn : (0 : ℝ) ≤ (y : ℝ) * (1 + Real.log x) ^ 3 :=
+    mul_nonneg hy0R (pow_nonneg (by linarith) 3)
+  refine le_trans hcast ?_
+  linarith
+
+/-! ## The `τ⁴` chain: sixteen coordinates -/
+
+/-- The arithmetic core of the τ⁴ ratio induction, stated for plain variables (`a = C(m+3,3)`,
+`b = C(m+4,3)`, `c = C(m+15,15)`, `d = C(m+16,15)`) so that the ring normalization never sees a
+`Nat.choose` term: cross-multiplying by `(m+1)²` reduces the step to `(m+4)² ≤ (m+16)(m+1)`, i.e.
+`0 ≤ 9m`. -/
+private lemma ratio_step {a b c d m : ℕ} (ih : a ^ 2 ≤ c)
+    (hA : a * (m + 4) = b * (m + 1)) (hB : c * (m + 16) = d * (m + 1)) :
+    b ^ 2 ≤ d := by
+  have hstep : b ^ 2 * (m + 1) ^ 2 ≤ d * (m + 1) ^ 2 :=
+    calc b ^ 2 * (m + 1) ^ 2 = (b * (m + 1)) ^ 2 := by ring
+      _ = (a * (m + 4)) ^ 2 := by rw [hA]
+      _ = a ^ 2 * (m + 4) ^ 2 := by ring
+      _ ≤ c * (m + 4) ^ 2 := Nat.mul_le_mul_right _ ih
+      _ ≤ c * ((m + 16) * (m + 1)) := by
+          refine Nat.mul_le_mul_left _ ?_
+          nlinarith
+      _ = c * (m + 16) * (m + 1) := by ring
+      _ = d * (m + 1) * (m + 1) := by rw [hB]
+      _ = d * (m + 1) ^ 2 := by ring
+  exact Nat.le_of_mul_le_mul_right hstep (by positivity)
+
+/-- `C(m+3,3)² ≤ C(m+15,15)`: the τ⁴ prime-power comparison, by the ratio induction of
+`ratio_step`. -/
+private lemma choose_three_sq_le_choose_fifteen (m : ℕ) :
+    ((m + 3).choose 3) ^ 2 ≤ (m + 15).choose 15 := by
+  induction m with
+  | zero => simp [Nat.choose_self]
+  | succ m ih =>
+    have hA : (m + 3).choose 3 * (m + 4) = (m + 4).choose 3 * (m + 1) := by
+      have h := Nat.choose_mul_succ_eq (m + 3) 3
+      have e1 : m + 3 + 1 = m + 4 := by omega
+      have e2 : m + 3 + 1 - 3 = m + 1 := by omega
+      rw [e1, e2] at h
+      exact h
+    have hB : (m + 15).choose 15 * (m + 16) = (m + 16).choose 15 * (m + 1) := by
+      have h := Nat.choose_mul_succ_eq (m + 15) 15
+      have e1 : m + 15 + 1 = m + 16 := by omega
+      have e2 : m + 15 + 1 - 15 = m + 1 := by omega
+      rw [e1, e2] at h
+      exact h
+    have e3 : m + 1 + 3 = m + 4 := by omega
+    have e15 : m + 1 + 15 = m + 16 := by omega
+    rw [e3, e15]
+    exact ratio_step ih hA hB
+
+/-- Pointwise: `τ(n)⁴ ≤ (ζ^16) n` for `n ≠ 0`.  Both sides are multiplicative; on prime powers this
+is `(m+1)⁴ ≤ C(m+3,3)² ≤ C(m+15,15)`. -/
+private lemma tau_fourth_le_zetaPow_sixteen {n : ℕ} (hn : n ≠ 0) : σ 0 n ^ 4 ≤ (ζ ^ 16) n := by
+  rw [isMultiplicative_sigma.multiplicative_factorization _ hn,
+    (isMultiplicative_zeta.pow (k := 16)).multiplicative_factorization _ hn]
+  rw [Finsupp.prod, Finsupp.prod, ← Finset.prod_pow]
+  refine Finset.prod_le_prod' fun q hq => ?_
+  have hq' : q.Prime := Nat.prime_of_mem_primeFactors (by
+    rwa [Nat.support_factorization] at hq)
+  rw [sigma_zero_apply_prime_pow hq']
+  have h16 : (ζ ^ 16) (q ^ n.factorization q) = (n.factorization q + 15).choose 15 :=
+    zetaPow_apply_prime_pow 15 hq' _
+  rw [h16]
+  calc (n.factorization q + 1) ^ 4 = ((n.factorization q + 1) ^ 2) ^ 2 := by ring
+    _ ≤ ((n.factorization q + 3).choose 3) ^ 2 :=
+        Nat.pow_le_pow_left (succ_sq_le_choose _) 2
+    _ ≤ (n.factorization q + 15).choose 15 := choose_three_sq_le_choose_fifteen _
+
+/-- **Shiu-type short-interval bound for `τ⁴`, sharp log exponent `15 = 2⁴ − 1`.**
+
+For `x ≥ 1` and `x^{15/16} ≤ y ≤ x`,
+`∑_{x < n ≤ x+y} τ(n)⁴ ≤ 2097152 · y · (1 + log x)^15`.
+
+Same max-coordinate / divisor-splitting argument as `maxCoord_tau_sq_short_interval`, now split at
+sixteen coordinates; the log exponent `15` is sharp. -/
+theorem maxCoord_tau_fourth_short_interval {x y : ℕ} (hx : 0 < x)
+    (hy : (x : ℝ) ^ (15 / 16 : ℝ) ≤ (y : ℝ)) (hyx : y ≤ x) :
+    ∑ n ∈ Finset.Ioc x (x + y), ((σ 0 n : ℕ) : ℝ) ^ 4
+      ≤ 2097152 * (y : ℝ) * (1 + Real.log x) ^ 15 := by
+  have hx0R : (0 : ℝ) < (x : ℝ) := by exact_mod_cast hx
+  have hy0R : (0 : ℝ) ≤ (y : ℝ) := by positivity
+  -- the sixteenth-root threshold `t`
+  obtain ⟨t, ht0, htA, htB⟩ := exists_root_threshold hx 4
+  norm_num at htA htB
+  have htbig : x < 65536 * t ^ 16 := by
+    have h3 : t + 1 ≤ 2 * t := by omega
+    have h4 : (t + 1) ^ 16 ≤ (2 * t) ^ 16 := Nat.pow_le_pow_left h3 16
+    have h5 : (2 * t) ^ 16 = 65536 * t ^ 16 := by ring
+    omega
+  -- `y^16 ≥ x^15`, from the hypothesis `y ≥ x^{15/16}`
+  have hxy16 : x ^ 15 ≤ y ^ 16 := by
+    have h34 : ((x : ℝ) ^ (15 / 16 : ℝ)) ^ (16 : ℕ) = (x : ℝ) ^ (15 : ℕ) := by
+      rw [← Real.rpow_natCast ((x : ℝ) ^ (15 / 16 : ℝ)) 16, ← Real.rpow_mul hx0R.le]
+      norm_num
+    have hR : (x : ℝ) ^ (15 : ℕ) ≤ (y : ℝ) ^ (16 : ℕ) := by
+      rw [← h34]
+      exact pow_le_pow_left₀ (by positivity) hy 16
+    exact_mod_cast hR
+  have hkey : 2 * x ≤ 4 * y * t := by
+    have hpow : (2 * x) ^ 16 ≤ (4 * y * t) ^ 16 := by
+      calc (2 * x) ^ 16 = 65536 * (x ^ 15 * x) := by ring
+        _ ≤ 65536 * (y ^ 16 * (65536 * t ^ 16)) :=
+            Nat.mul_le_mul_left 65536 (Nat.mul_le_mul hxy16 (le_of_lt htbig))
+        _ = (4 * y * t) ^ 16 := by ring
+    exact (Nat.pow_le_pow_iff_left (by norm_num)).mp hpow
+  set M := (x + y) / t with hM_def
+  obtain ⟨hMy, hlogMx⟩ := maxCoord_setup hx hyx ht0 hM_def hkey
+  -- the split, cast to `ℝ`, and the ladder
+  have hNat : ∑ n ∈ Finset.Ioc x (x + y), σ 0 n ^ 4
+      ≤ 16 * ∑ m ∈ Finset.Ioc 0 M, (ζ ^ 15) m * ((x + y) / m - x / m) := by
+    have h := maxCoord_split_sum (k := 15) (t := t) (M := M) ht0 (by simpa using htA) hM_def
+      (fun n => σ 0 n ^ 4) (fun n hn => by simpa using tau_fourth_le_zetaPow_sixteen hn)
+    simpa using h
+  have hcast : ∑ n ∈ Finset.Ioc x (x + y), ((σ 0 n : ℕ) : ℝ) ^ 4
+      ≤ 16 * ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 15) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ) := by
+    have h := (Nat.cast_le (α := ℝ)).mpr hNat
+    push_cast at h
+    exact h
+  have hlad : ∑ m ∈ Finset.Ioc 0 M, ((ζ ^ 15) m : ℝ) * (((x + y) / m - x / m : ℕ) : ℝ)
+      ≤ (y : ℝ) * (1 + Real.log M) ^ 15 + (M : ℝ) * (1 + Real.log M) ^ 14 := by
+    simpa using maxCoord_ladder_bound x y M 14
+  -- numerics
+  have hlogx : (0 : ℝ) ≤ Real.log x := Real.log_natCast_nonneg x
+  have hlogM : (0 : ℝ) ≤ Real.log M := Real.log_natCast_nonneg M
+  have hL0 : (0 : ℝ) ≤ 1 + Real.log M := by linarith
+  have hLx1 : (1 : ℝ) ≤ 1 + Real.log x := by linarith
+  have h15 : (1 + Real.log M) ^ 15 ≤ 32768 * (1 + Real.log x) ^ 15 := by
+    calc (1 + Real.log M) ^ 15 ≤ (2 * (1 + Real.log x)) ^ 15 := pow_le_pow_left₀ hL0 hlogMx 15
+      _ = 32768 * (1 + Real.log x) ^ 15 := by ring
+  have h14 : (1 + Real.log M) ^ 14 ≤ 16384 * (1 + Real.log x) ^ 15 := by
+    have e2 : (1 + Real.log x) ^ 14 ≤ (1 + Real.log x) ^ 15 :=
+      pow_le_pow_right₀ hLx1 (by norm_num)
+    calc (1 + Real.log M) ^ 14 ≤ (2 * (1 + Real.log x)) ^ 14 := pow_le_pow_left₀ hL0 hlogMx 14
+      _ = 16384 * (1 + Real.log x) ^ 14 := by ring
+      _ ≤ 16384 * (1 + Real.log x) ^ 15 := by linarith
+  have t1 : (y : ℝ) * (1 + Real.log M) ^ 15 ≤ (y : ℝ) * (32768 * (1 + Real.log x) ^ 15) :=
+    mul_le_mul_of_nonneg_left h15 hy0R
+  have t2 : (M : ℝ) * (1 + Real.log M) ^ 14
+      ≤ (4 * (y : ℝ)) * (16384 * (1 + Real.log x) ^ 15) := by
+    calc (M : ℝ) * (1 + Real.log M) ^ 14 ≤ (4 * (y : ℝ)) * (1 + Real.log M) ^ 14 :=
+          mul_le_mul_of_nonneg_right hMy (by positivity)
+      _ ≤ (4 * (y : ℝ)) * (16384 * (1 + Real.log x) ^ 15) :=
+          mul_le_mul_of_nonneg_left h14 (by linarith)
+  have hnn : (0 : ℝ) ≤ (y : ℝ) * (1 + Real.log x) ^ 15 :=
+    mul_nonneg hy0R (pow_nonneg (by linarith) 15)
+  refine le_trans hcast ?_
+  linarith
 
 end Shiu
 end Zeta85
 end RH
 
 #print axioms RH.Zeta85.Shiu.maxCoord_tau_sq_short_interval
+#print axioms RH.Zeta85.Shiu.maxCoord_tau_fourth_short_interval
