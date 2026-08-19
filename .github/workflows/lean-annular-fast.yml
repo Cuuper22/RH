@@ -1,0 +1,56 @@
+name: Lean Annular Fast
+
+on:
+  push:
+    branches:
+      - attack/smooth-radial-shell
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  annular:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+
+      - name: Restore project cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .lake/packages
+            .lake/build
+          key: rh-annular-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            rh-annular-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            rh-lean-project-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      - run: lake exe cache get
+
+      - name: Apply exact repairs
+        run: |
+          python verify/repair_smooth_radial_shell.py
+          python verify/repair_smooth_radial_shell_round2.py
+          python verify/repair_smooth_radial_shell_round3.py
+          python verify/repair_smooth_radial_shell_round4.py
+          python verify/repair_smooth_radial_shell_round5.py
+          python verify/repair_smooth_radial_shell_round6.py
+          python verify/repair_annular_energy_bridge.py
+
+      - name: Compile shell
+        run: timeout 90s lake build RH.Zeta85.Discharge.SmoothRadialShell
+
+      - name: Compile scalar cancellation
+        run: timeout 90s lake build RH.Zeta85.Discharge.AnnularEnergyBridge
+
+      - name: Compile joint stage selector
+        run: timeout 90s lake build RH.Zeta85.Discharge.AnnularEnergyStage
