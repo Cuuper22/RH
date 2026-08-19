@@ -68,7 +68,8 @@ theorem exists_realHeight_slow_selector
       tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
     simpa only [eps] using tendsto_const_nhds.div_atTop hden
   have heps_selected : Tendsto (fun T => eps (s T)) atTop (𝓝 0) := by
-    simpa only [Function.comp_apply] using heps_zero.comp hs
+    change Tendsto (eps ∘ s) atTop (𝓝 0)
+    exact heps_zero.comp hs
   have hdist_le : ∀ᶠ T : ℝ in atTop,
       dist (a (s T)) (f (s T) T) ≤ eps (s T) := by
     filter_upwards [hclose] with T hT
