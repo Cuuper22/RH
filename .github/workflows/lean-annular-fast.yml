@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - attack/smooth-radial-shell
+  pull_request:
   workflow_dispatch:
 
 permissions:
