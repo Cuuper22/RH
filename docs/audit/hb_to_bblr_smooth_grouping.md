@@ -1,3 +1,5 @@
+> **Canonical reference**: [FINDINGS.md](../../FINDINGS.md) (BBLR error correction). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # K=4 smooth Heath--Brown to BBLR grouping audit
 
 Status: **the fixed-scale literal-slot construction is impossible; the

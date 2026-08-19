@@ -1,3 +1,5 @@
+> **Canonical reference**: [FINDINGS.md](../../FINDINGS.md) (Heath-Brown coefficients). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Exact depth-four Heath--Brown coefficient layer
 
 Status: **the sharp-cutoff algebraic layer is proved; it is not identified

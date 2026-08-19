@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axioms 2–4: trace transfer). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Rudnick--Sarnak pair-integral bridge
 
 ## Scope

@@ -1,3 +1,7 @@
+> **Note**: This file is part of the 100% research program whose terminal result
+> was [withdrawn](FINAL_100_RESULT.md). See [NARRATIVE_100.md](../NARRATIVE_100.md)
+> for context.
+
 # Hybrid 100, cycle 3: signed kernel contrast, one-block kill, and a positive-definite two-profile block
 
 ## Terminal outcome

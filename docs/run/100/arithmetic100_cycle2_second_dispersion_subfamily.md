@@ -1,3 +1,7 @@
+> **Note**: This file is part of the 100% research program whose terminal result
+> was [withdrawn](FINAL_100_RESULT.md). See [NARRATIVE_100.md](../NARRATIVE_100.md)
+> for context.
+
 # Zeta-100 arithmetic, cycle 2: Type-III Poisson and the first off-diagonal stratum
 
 ## 0. Terminal output

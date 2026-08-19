@@ -1,3 +1,5 @@
+> This file is the **canonical reference** for the R1a allocation obstruction topic. See [GUIDE.md](../../GUIDE.md) topic index.
+
 # R1a audit: allocation-capacity no-go at the current interface
 
 ## Verdict

@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axioms 2–4: trace transfer and signed pairs). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Published-theorem audit for the signed SQ4 Gauss-product survivor
 
 Status: **no published theorem was found in the audited classes whose

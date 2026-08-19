@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axiom 1: Shiu majorant). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Pre-majorant one-shot DI/Kuznetsov audit
 
 Status: **finished and killed for the direct Drappeau one-shot class defined

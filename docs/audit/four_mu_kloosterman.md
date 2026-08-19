@@ -1,3 +1,5 @@
+> This file is the **canonical reference** for the Kloosterman / four-mu topic. See [GUIDE.md](../../GUIDE.md) topic index.
+
 # Four-Möbius-slot Kloosterman route
 
 Status: **among the audited published theorem families, no directly

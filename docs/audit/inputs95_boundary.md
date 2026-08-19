@@ -1,3 +1,5 @@
+> **Canonical reference**: [FINDINGS.md](../../FINDINGS.md) (95% boundary inputs). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Phase-C `Inputs95` boundary
 
 Status: **interface and conditional transfer proved; the current R1a premise

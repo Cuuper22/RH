@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axiom 1: Shiu majorant). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # `eta > 1/2` superposition support audit
 
 Status: **the finite support model cannot be represented by a pointwise

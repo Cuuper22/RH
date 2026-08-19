@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axioms 2–4: trace transfer and signed pairs). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # CRT and conductor strata for the SQ4 Gauss product
 
 Status: **exact finite CRT, gcd, conductor-support, and imprimitive

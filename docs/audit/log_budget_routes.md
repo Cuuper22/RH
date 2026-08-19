@@ -1,3 +1,5 @@
+> This file is the **canonical reference** for the log-budget routes topic. See [GUIDE.md](../../GUIDE.md) topic index.
+
 # Cycle-5 logarithmic budget: ordered route audit
 
 ## Outcome

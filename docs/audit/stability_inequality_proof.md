@@ -1,3 +1,5 @@
+> **Canonical reference**: [FINDINGS.md](../../FINDINGS.md) (stability inequality). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Stability inequality proof (verified)
 
 ## Statement

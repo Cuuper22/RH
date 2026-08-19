@@ -1,3 +1,7 @@
+> **Note**: This file is part of the 100% research program whose terminal result
+> was [withdrawn](FINAL_100_RESULT.md). See [NARRATIVE_100.md](../NARRATIVE_100.md)
+> for context.
+
 # Zeta-100 arithmetic, cycle 6: Kuznetsov mismatch and the second \(y\)-Poisson
 
 ## 0. Terminal output

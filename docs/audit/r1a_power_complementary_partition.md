@@ -1,3 +1,5 @@
+> **Canonical reference**: [r1a_allocation_nogo.md](r1a_allocation_nogo.md) (R1a allocation obstruction). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # R1a audit: power-complementary nesting
 
 ## Verdict

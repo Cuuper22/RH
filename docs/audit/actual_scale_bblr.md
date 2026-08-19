@@ -1,3 +1,5 @@
+> **Canonical reference**: [FINDINGS.md](../../FINDINGS.md) (BBLR error correction). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Actual-scale BBLR exponent audit
 
 Status: **both the Proposition 3.1 black-box class and the run-12

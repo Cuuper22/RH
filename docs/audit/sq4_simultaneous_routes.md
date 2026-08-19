@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axioms 2–4: trace transfer and signed pairs). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Simultaneous SQ4 route audit
 
 Status: **no proof of `(SQ4-HB)` is obtained.  Six concrete method classes

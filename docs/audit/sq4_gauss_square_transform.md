@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axioms 2–4: trace transfer and signed pairs). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Finite Gauss-square transform for the SQ4 survivor
 
 Status: **the finite multiplicative transform and its Dirichlet-character

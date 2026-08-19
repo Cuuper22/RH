@@ -1,3 +1,5 @@
+> **Canonical reference**: [FINDINGS.md](../../FINDINGS.md) (BBLR error correction). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # BBLR gcd allocation and the cycle-5 coefficient map
 
 Status: **the gcd allocation, its multiplicity, and the generic finite-kernel

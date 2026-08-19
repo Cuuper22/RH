@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axioms 2–4: trace transfer and signed pairs). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Correlated four-Möbius moment for the SQ4 nonzero family
 
 Status: **no proof of (SQ4-HB) is obtained.  There is an exact

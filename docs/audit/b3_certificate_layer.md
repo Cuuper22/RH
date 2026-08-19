@@ -1,3 +1,5 @@
+> **Canonical reference**: [FINDINGS.md](../../FINDINGS.md) (certificate arithmetic). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # B-3 certificate layer: exact finite algebra, rational windows, and the frozen R-9383 endpoint
 
 ## Scope

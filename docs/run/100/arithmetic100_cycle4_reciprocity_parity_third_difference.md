@@ -1,3 +1,7 @@
+> **Note**: This file is part of the 100% research program whose terminal result
+> was [withdrawn](FINAL_100_RESULT.md). See [NARRATIVE_100.md](../NARRATIVE_100.md)
+> for context.
+
 # Zeta-100 arithmetic, cycle 4: exact zero-mode recombination and the reciprocity sign obstruction
 
 ## 0. Terminal output

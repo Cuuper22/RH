@@ -1,3 +1,5 @@
+> **Canonical reference**: [AXIOMS.md](../../AXIOMS.md) (Axiom 1: Shiu majorant). See also [GUIDE.md](../../GUIDE.md) topic index.
+
 # Audit of the claimed `eta > 1/2` terminal factorization
 
 ## Verdict

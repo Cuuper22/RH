@@ -23,8 +23,11 @@ The Drive folder also contains loose copies of earlier files.  File 20 differs
 between sources only by one trailing blank line; committed Markdown files are
 normalized to one terminal newline.  Files
 `14_hybrid95_cycle1_three_translate_increment.md` and `hybrid95_cycle1.md`
-are byte-identical.  Likewise `100/hybrid100_cycle1.md` and
-`100/hybrid100_cycle1_95p67290.md` are byte-identical.
+were byte-identical; the duplicate `hybrid95_cycle1.md` has been removed.
+Likewise `100/hybrid100_cycle1.md` and `100/hybrid100_cycle1_95p67290.md`
+were byte-identical; the duplicate `100/hybrid100_cycle1_95p67290.md` has
+been removed.  `100/sixth_block_search.py` has been moved to
+`../../verify/sixth_block_search.py` alongside the other verification scripts.
 
 ## Terminal-batch gate
 
@@ -84,7 +87,7 @@ Presence is an inventory fact, not validation of the mathematical claims.
 | `22_hybrid95_cycle2_selector_quartic_handoff.md` | 10620 | `776e0b518a31cc2d76ae76c6017198363e4bdad9efdb01c255ca558a602daf32` | Kills weighted all-k three-window methods and derives a selector-quartic sufficient identity. |
 | `23_arithmetic95_cycle4_divisor_switch_checkpoint.md` | 7001 | `17a0a03a1777dcdaa1b4251e52a25051406bb5e1a4d7751ba866c596fbbd1a08` | Superseded checkpoint showing nonzero winding retains a long conductor. |
 | `24_TERMINAL_certificate95_cycle2_95p063832.md` | 13126 | `37018e36b8a96b497bba9699bab5fb2179f9357da5dea054e68b4703de679af1` | Gives the claimed nonflat R-9506/R-8686 certificates, blocked by construction and arithmetic gaps. |
-| `hybrid95_cycle1.md` | 11855 | `a34e4c5e859c130a3841624b05f546da9ca27153d6a9a3c14d1b9384f22fd8c9` | Byte-identical duplicate of file 14 retained for source fidelity. |
+| ~~`hybrid95_cycle1.md`~~ | 11855 | `a34e4c5e859c130a3841624b05f546da9ca27153d6a9a3c14d1b9384f22fd8c9` | **Removed** — byte-identical duplicate of file 14. |
 
 ## 100% loose-file batch
 
@@ -107,7 +110,7 @@ Presence is an inventory fact, not validation of the mathematical claims.
 | `100/certificate100_cycle4_cubic_96p518798.md` | 10294 | `f81dd5702c8b56adf4677758df729000350c88c588319c80f8ffb9634446cb6a` | Pushes the cubic block toward width 2/3 and states its pointwise cone. |
 | `100/certificate100_cycle5.md` | 7268 | `10055f7bf50a6b24e32078ab85b150f8810fdccae311c3064781a50d681edbe6` | Claims density one from the same inconsistent moment/stability package. |
 | `100/hybrid100_cycle1.md` | 9639 | `0cea8bcd22d3f4f8777b1e953a74bbb84c0703d4eca25af6e8955a40a9469901` | Uses a cap-following mixed fourth trace to claim a 95.67% checkpoint. |
-| `100/hybrid100_cycle1_95p67290.md` | 9639 | `0cea8bcd22d3f4f8777b1e953a74bbb84c0703d4eca25af6e8955a40a9469901` | Byte-identical duplicate of `hybrid100_cycle1.md`. |
+| ~~`100/hybrid100_cycle1_95p67290.md`~~ | 9639 | `0cea8bcd22d3f4f8777b1e953a74bbb84c0703d4eca25af6e8955a40a9469901` | **Removed** — byte-identical duplicate of `hybrid100_cycle1.md`. |
 | `100/hybrid100_cycle2.md` | 17146 | `1827e1d32582dfa002fc8402d8b32474bd88f32c8911a63e3c2a2e7bc3d226af` | Derives a deletion-stable tail formula and kills scalar/random selectors. |
 | `100/hybrid100_cycle3.md` | 13755 | `7478d2d6bdc408703a9e60ae691efcadc8486e4a4811f2e94ed4276123da754c` | Kills a one-block current class and evaluates a two-profile counterexample. |
 | `100/hybrid100_cycle4.md` | 17816 | `870cfdd41439ec530ba9eb2d6e3d6af5fc1cf0ffe87706d2914685a671a12001` | Proves the stability algebra but supplies the inconsistent wide-block premise. |
@@ -117,4 +120,4 @@ Presence is an inventory fact, not validation of the mathematical claims.
 | `100/root100_cycle4_96p250173600.md` | 3039 | `9bcdadd1a73f612f89d5f4dacdf833100f04a348cb430e429a53c8d5670305ea` | Tightens pair support to 1.999999 for a claimed 96.25%. |
 | `100/root100_cycle5_cubic_96p517625.md` | 3017 | `25a3275a2b1d5a7dca5c4b9833b2e1978eac9601520edad049b5f9bc42c60c82` | Retunes the wide cubic dual without changing its analytic inputs. |
 | `100/sixth_block_cycle2_method_kill.md` | 5946 | `43735ccaf02d08667063f62e1a4f8c8dfe4d0f47c903ab17a845cad47c30ff08` | Enumerates degree-six contractions and shows the block misses R-9506. |
-| `100/sixth_block_search.py` | 4959 | `d72ec365d673c14e3357adf4055e5fb0a52ccd6893de62370d5292d44d2ccda0` | Deterministic quadrature/search program for the sixth-block moments. |
+| ~~`100/sixth_block_search.py`~~ | 4959 | `d72ec365d673c14e3357adf4055e5fb0a52ccd6893de62370d5292d44d2ccda0` | **Moved** to `../../verify/sixth_block_search.py`. |
