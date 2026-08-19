@@ -46,6 +46,7 @@ jobs:
           python verify/repair_smooth_radial_shell_round5.py
           python verify/repair_smooth_radial_shell_round6.py
           python verify/repair_annular_energy_bridge.py
+          python verify/repair_annular_energy_bridge_round2.py
 
       - name: Compile shell
         run: timeout 600s lake build RH.Zeta85.Discharge.SmoothRadialShell
