@@ -65,7 +65,8 @@ theorem distinguishedLatticeFeature_reflect
     PoissonKernelBridge.distinguishedLatticeFeature F T k
         ⟨reflect (ρ : ℂ),
           Zeta23.ZeroSide.reflect_mem_ZI Z T ρ.2⟩ =
-      star (PoissonKernelBridge.distinguishedLatticeFeature F T k ρ) := by
+      (starRingEnd ℂ)
+        (PoissonKernelBridge.distinguishedLatticeFeature F T k ρ) := by
   unfold PoissonKernelBridge.distinguishedLatticeFeature
   rw [Zeta23.ZeroSide.gammaOf_reflect]
   have harg :
@@ -156,7 +157,7 @@ theorem guardedGridBlock_eq_P_add_Q
       guardedGridP F T w c hadm + guardedGridQ F T w c hadm := by
   symm
   exact (guardedGridData F T w c hadm).blockP_add_blockQ
-    (guardedGridPairReps F T w c hadm) (F.hatDenominator T)
+    (F.hatDenominator T)
 
 /-- The on-line part is positive semidefinite. -/
 theorem guardedGridP_posSemidef
@@ -193,7 +194,7 @@ theorem guardedGridQ_isHermitian
       (F.period T (F.distinguished T)) w c) :
     (guardedGridQ F T w c hadm).IsHermitian := by
   exact (guardedGridData F T w c hadm).blockQ_isHermitian
-    (guardedGridPairReps F T w c hadm) (F.hatDenominator T)
+    (F.hatDenominator T)
 
 /-- The positive inertia of the pair part is bounded by the number of
 reflected off-line pairs. -/
@@ -205,7 +206,7 @@ theorem posIndex_guardedGridQ_le
     (hhat : 0 < F.hatDenominator T) :
     posIndex (guardedGridQ_isHermitian hadm) ≤ Z.p T := by
   change posIndex ((guardedGridData F T w c hadm).blockQ_isHermitian
-    (guardedGridPairReps F T w c hadm) (F.hatDenominator T)) ≤ Z.p T
+    (F.hatDenominator T)) ≤ Z.p T
   rw [Zeta23.ZeroSide.p_eq_mk Z T (guardedGridVector F T)
       (guardedGridVector_reflect hadm)]
   exact (guardedGridData F T w c hadm).posIndex_blockQ_le
