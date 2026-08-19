@@ -1,4 +1,4 @@
-import RH.Zeta85.Discharge.RSQuarticRemoteCorrection
+import RH.Zeta85.Discharge.RSLowDegreeRemoteCorrectionThree
 
 /-!
 # The guarded modulation grid as the zero-side block
