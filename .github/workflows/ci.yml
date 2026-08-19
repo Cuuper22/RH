@@ -40,7 +40,9 @@ jobs:
         run: lake exe cache get
 
       - name: Apply the smooth annular compiler repair
-        run: python verify/repair_smooth_radial_shell.py
+        run: |
+          python verify/repair_smooth_radial_shell.py
+          python verify/repair_smooth_radial_shell_round2.py
 
       - name: Build base and extension headlines
         run: >-
