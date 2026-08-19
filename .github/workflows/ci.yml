@@ -43,11 +43,14 @@ jobs:
         run: |
           python verify/repair_smooth_radial_shell.py
           python verify/repair_smooth_radial_shell_round2.py
+          python verify/repair_smooth_radial_shell_round3.py
+
+      - name: Compile the annular construction
+        run: lake build RH.Zeta85.Discharge.SmoothRadialShell
 
       - name: Build base and extension headlines
         run: >-
           lake build Zeta23 RH.Zeta85.Main RH.Zeta85.Shiu
-          RH.Zeta85.Discharge.SmoothRadialShell
           Solution Solution.Multiplicity Solution.XiPrime Solution.Zeta85
 
       - name: Check headline axiom output
