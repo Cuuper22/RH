@@ -49,10 +49,8 @@ theorem exists_realHeight_slow_selector
     refine Filter.tendsto_atTop.2 ?_
     intro q
     filter_upwards [eventually_ge_atTop (C q)] with T hT
-    have hT_nonneg : 0 ≤ T := by
-      exact (Nat.cast_nonneg q).trans ((hC_large q).trans hT)
     have hq_floor : q ≤ Nat.floor T :=
-      (Nat.le_floor hT_nonneg).2 ((hC_large q).trans hT)
+      Nat.le_floor ((hC_large q).trans hT)
     simpa only [s] using
       (Nat.le_findGreatest (P := fun r => C r ≤ T) hq_floor hT)
   have hselected : ∀ᶠ T : ℝ in atTop, C (s T) ≤ T := by
@@ -69,12 +67,17 @@ theorem exists_realHeight_slow_selector
     have hden : Tendsto (fun q : ℕ => (q : ℝ) + 1) atTop atTop :=
       tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
     simpa only [eps] using tendsto_const_nhds.div_atTop hden
+  have heps_selected : Tendsto (fun T => eps (s T)) atTop (𝓝 0) := by
+    simpa only [Function.comp_apply] using heps_zero.comp hs
+  have hdist_le : ∀ᶠ T : ℝ in atTop,
+      dist (a (s T)) (f (s T) T) ≤ eps (s T) := by
+    filter_upwards [hclose] with T hT
+    simpa only [dist_comm] using hT.le
   have hdist : Tendsto
       (fun T => dist (a (s T)) (f (s T) T)) atTop (𝓝 0) := by
-    apply squeeze_zero'
+    exact squeeze_zero'
       (Eventually.of_forall fun _ => dist_nonneg)
-      (hclose.mono fun T hT => by simpa only [dist_comm] using hT.le)
-      (heps_zero.comp hs)
+      hdist_le heps_selected
   refine ⟨s, hs, ?_⟩
   exact (ha.comp hs).congr_dist hdist
 
