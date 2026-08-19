@@ -45,6 +45,7 @@ jobs:
           python verify/repair_smooth_radial_shell_round2.py
           python verify/repair_smooth_radial_shell_round3.py
           python verify/repair_smooth_radial_shell_round4.py
+          python verify/repair_smooth_radial_shell_round5.py
 
       - name: Compile the annular construction and exact energy handoff
         run: >-
