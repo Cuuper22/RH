@@ -39,7 +39,7 @@ jobs:
       - name: Fetch Mathlib cache
         run: lake exe cache get
 
-      - name: Compile shell and collective route
+      - name: Compile shell, collective, and real-height routes
         run: >-
           lake build
           RH.Zeta85.Discharge.RadialShellAlias
@@ -47,6 +47,7 @@ jobs:
           RH.Zeta85.Discharge.AggregateSynthesisBridge
           RH.Zeta85.Discharge.LiteralEnergyTailEquivalence
           RH.Zeta85.Discharge.CollectiveEnergyTailRoute
+          RH.Zeta85.Discharge.RSRealHeightDiagonal
           RH.Zeta85.QuarticMain
 
       - name: Compile the Shiu campaign
