@@ -97,7 +97,7 @@ end AggregateCoordinateFrame
 regularity, block density, and the four literal centered-moment limits.  The
 impossible fixed principal-channel allocation is absent. -/
 theorem rung9506_literal_of_moments
-    {F : Family19999 zetaZeroConfig}
+    {F : Family19999 Zeta23.zetaZeroConfig}
     (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F)
     (hreg : AggregateCoordinateFrame.PhysicalWindowRegularity F)
@@ -110,7 +110,7 @@ theorem rung9506_literal_of_moments
 
 /-- Cumulative frozen R-9506 through the same allocation-free moment route. -/
 theorem rung9506_cumulative_literal_of_moments
-    {F : Family19999 zetaZeroConfig}
+    {F : Family19999 Zeta23.zetaZeroConfig}
     (hfull : FullTraceLimits F)
     (hzero : StableZeroSide F)
     (hreg : AggregateCoordinateFrame.PhysicalWindowRegularity F)
