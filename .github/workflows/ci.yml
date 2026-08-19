@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: lean-ci-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: lean-ci-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -28,16 +28,39 @@ jobs:
           lint: false
           use-mathlib-cache: false
 
-      - name: Restore Lean project build cache
+      - name: Restore Lean project and dependency cache
         uses: actions/cache@v4
         with:
-          path: .lake/build
+          path: |
+            .lake/packages
+            .lake/build
           key: rh-lean-project-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             rh-lean-project-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+          save-always: true
 
       - name: Fetch Mathlib cache
         run: lake exe cache get
+
+      - name: Apply the annular compiler repairs
+        run: |
+          python verify/repair_smooth_radial_shell.py
+          python verify/repair_smooth_radial_shell_round2.py
+          python verify/repair_smooth_radial_shell_round3.py
+          python verify/repair_smooth_radial_shell_round4.py
+          python verify/repair_smooth_radial_shell_round5.py
+          python verify/repair_smooth_radial_shell_round6.py
+          python verify/repair_annular_energy_bridge.py
+          python verify/repair_annular_energy_bridge_round2.py
+
+      - name: Compile the explicit smooth annular shell
+        run: timeout 120s lake build RH.Zeta85.Discharge.SmoothRadialShell
+
+      - name: Compile aggregate scalar cancellation
+        run: timeout 120s lake build RH.Zeta85.Discharge.AnnularEnergyBridge
+
+      - name: Compile post-contraction stage selection
+        run: timeout 120s lake build RH.Zeta85.Discharge.AnnularEnergyStage
 
       - name: Build base and extension headlines
         run: >-
