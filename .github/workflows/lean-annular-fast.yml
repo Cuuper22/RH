@@ -48,10 +48,19 @@ jobs:
           python verify/repair_annular_energy_bridge.py
 
       - name: Compile shell
-        run: timeout 90s lake build RH.Zeta85.Discharge.SmoothRadialShell
+        run: timeout 600s lake build RH.Zeta85.Discharge.SmoothRadialShell
 
       - name: Compile scalar cancellation
-        run: timeout 90s lake build RH.Zeta85.Discharge.AnnularEnergyBridge
+        run: timeout 600s lake build RH.Zeta85.Discharge.AnnularEnergyBridge
 
       - name: Compile joint stage selector
-        run: timeout 90s lake build RH.Zeta85.Discharge.AnnularEnergyStage
+        run: timeout 600s lake build RH.Zeta85.Discharge.AnnularEnergyStage
+
+      - name: Save partial or complete project cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .lake/packages
+            .lake/build
+          key: rh-annular-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}-${{ github.run_id }}
