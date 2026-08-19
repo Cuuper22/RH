@@ -198,7 +198,6 @@ theorem full_sub_guarded_trace2_div_core_tendsto_zero_log
         (remoteLatticePairScaleTwelve F T * g *
           (Z.N T (2 * T) : ℝ)) := by
       field_simp [hNpos.ne']
-      ring
     _ ≤ (4 * C) *
         (((Z.N T (2 * T) : ℝ) ^ 3 *
           remoteLatticePairScaleTwelve F T) * g ^ 3) := by gcongr
