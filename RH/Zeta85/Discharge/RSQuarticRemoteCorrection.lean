@@ -15,7 +15,7 @@ noncomputable section
 
 namespace RH.Zeta85.RSPoissonCyclicBridge
 
-open Zeta23
+open Zeta23 TrimmedMoment
 
 /-- The target quartic evaluated on the completed full-lattice cyclic traces. -/
 def fullLatticeZeroKernelQuarticNumerator
@@ -50,7 +50,7 @@ theorem full_sub_guarded_quartic_div_core_tendsto_zero_log
           (Z.N T (2 * T) : ℝ)) atTop (nhds 0) := by
   let u := QuarticTransfer.uncenteredQuartic q
   have h1 := full_sub_guarded_trace1_div_core_tendsto_zero_log
-    hdata hguard htail hRvM w c hadm hhat hmass
+    hdata hguard htail hRvM hhat hmass
   have h2 := full_sub_guarded_trace2_div_core_tendsto_zero_log
     hdata hguard htail hRvM w c hadm hhat hmass
   have h3 := full_sub_guarded_trace3_div_core_tendsto_zero_log
