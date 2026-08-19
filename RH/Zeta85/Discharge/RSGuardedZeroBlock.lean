@@ -8,8 +8,8 @@ entire contiguous guarded lattice the finite feature family.  The abstract
 zero-side decomposition then applies to that enlarged block exactly.
 -/
 
-open MeasureTheory Set Filter Matrix
-open scoped BigOperators Matrix.Norms.Frobenius
+open MeasureTheory Set Filter Matrix RHLinalg
+open scoped BigOperators Matrix.Norms.Frobenius ComplexOrder
 
 noncomputable section
 
@@ -63,7 +63,7 @@ theorem distinguishedLatticeFeature_reflect
       (F.period T (F.distinguished T)) w c)
     (k : ℤ) (ρ : Zeta23.ZeroSide.ZI Z T) :
     PoissonKernelBridge.distinguishedLatticeFeature F T k
-        ⟨Zeta23.ZeroSide.reflect ρ,
+        ⟨reflect (ρ : ℂ),
           Zeta23.ZeroSide.reflect_mem_ZI Z T ρ.2⟩ =
       star (PoissonKernelBridge.distinguishedLatticeFeature F T k ρ) := by
   unfold PoissonKernelBridge.distinguishedLatticeFeature
@@ -88,7 +88,7 @@ theorem guardedGridVector_reflect
       (F.period T (F.distinguished T)) w c) :
     ∀ ρ : Zeta23.ZeroSide.ZI Z T,
       guardedGridVector F T
-          ⟨Zeta23.ZeroSide.reflect ρ,
+          ⟨reflect (ρ : ℂ),
             Zeta23.ZeroSide.reflect_mem_ZI Z T ρ.2⟩ =
         star (guardedGridVector F T ρ) := by
   intro ρ
@@ -154,8 +154,9 @@ theorem guardedGridBlock_eq_P_add_Q
       (F.period T (F.distinguished T)) w c) :
     guardedGridBlock F T w c hadm =
       guardedGridP F T w c hadm + guardedGridQ F T w c hadm := by
-  rw [guardedGridBlock, guardedGridP, guardedGridQ,
-    Zeta23.ZeroSide.ZeroBlockData.blockP_add_blockQ]
+  symm
+  exact (guardedGridData F T w c hadm).blockP_add_blockQ
+    (guardedGridPairReps F T w c hadm) (F.hatDenominator T)
 
 /-- The on-line part is positive semidefinite. -/
 theorem guardedGridP_posSemidef
@@ -164,8 +165,8 @@ theorem guardedGridP_posSemidef
     (hadm : AdmWindow (F.window T (F.distinguished T))
       (F.period T (F.distinguished T)) w c)
     (hhat : 0 < F.hatDenominator T) :
-    (guardedGridP F T w c hadm).PosSemidef :=
-  Zeta23.ZeroSide.ZeroBlockData.blockP_posSemidef _ hhat
+    (guardedGridP F T w c hadm).PosSemidef := by
+  exact (guardedGridData F T w c hadm).blockP_posSemidef hhat
 
 /-- Rank of the positive part is bounded by the simple and multiple on-line
 zero counts, exactly as in the original block. -/
@@ -176,11 +177,13 @@ theorem rank_guardedGridP_le
       (F.period T (F.distinguished T)) w c)
     (hhat : 0 < F.hatDenominator T) :
     (guardedGridP F T w c hadm).rank ≤ Z.s1 T + Z.s2 T := by
+  change ((guardedGridData F T w c hadm).blockP
+    (F.hatDenominator T)).rank ≤ Z.s1 T + Z.s2 T
   rw [Zeta23.ZeroSide.s1_eq_mk Z T (guardedGridVector F T)
       (guardedGridVector_reflect hadm),
     Zeta23.ZeroSide.s2_eq_mk Z T (guardedGridVector F T)
       (guardedGridVector_reflect hadm)]
-  exact Zeta23.ZeroSide.ZeroBlockData.rank_blockP_le _ hhat
+  exact (guardedGridData F T w c hadm).rank_blockP_le hhat
 
 /-- The pair part is Hermitian. -/
 theorem guardedGridQ_isHermitian
@@ -188,8 +191,9 @@ theorem guardedGridQ_isHermitian
     {F : QuarticGramFamily Z σ μ p v} {T w c : ℝ}
     (hadm : AdmWindow (F.window T (F.distinguished T))
       (F.period T (F.distinguished T)) w c) :
-    (guardedGridQ F T w c hadm).IsHermitian :=
-  Zeta23.ZeroSide.ZeroBlockData.blockQ_isHermitian _ _
+    (guardedGridQ F T w c hadm).IsHermitian := by
+  exact (guardedGridData F T w c hadm).blockQ_isHermitian
+    (guardedGridPairReps F T w c hadm) (F.hatDenominator T)
 
 /-- The positive inertia of the pair part is bounded by the number of
 reflected off-line pairs. -/
@@ -200,9 +204,11 @@ theorem posIndex_guardedGridQ_le
       (F.period T (F.distinguished T)) w c)
     (hhat : 0 < F.hatDenominator T) :
     posIndex (guardedGridQ_isHermitian hadm) ≤ Z.p T := by
+  change posIndex ((guardedGridData F T w c hadm).blockQ_isHermitian
+    (guardedGridPairReps F T w c hadm) (F.hatDenominator T)) ≤ Z.p T
   rw [Zeta23.ZeroSide.p_eq_mk Z T (guardedGridVector F T)
       (guardedGridVector_reflect hadm)]
-  exact Zeta23.ZeroSide.ZeroBlockData.posIndex_blockQ_le _
+  exact (guardedGridData F T w c hadm).posIndex_blockQ_le
     (guardedGridPairReps F T w c hadm) hhat
 
 end RH.Zeta85.RSPoissonCyclicBridge
