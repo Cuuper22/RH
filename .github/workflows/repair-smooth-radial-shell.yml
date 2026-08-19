@@ -1,0 +1,65 @@
+name: Repair Smooth Radial Shell
+
+on:
+  push:
+    branches:
+      - attack/smooth-radial-shell
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repair-smooth-radial-shell
+  cancel-in-progress: true
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out attack branch
+        uses: actions/checkout@v4
+        with:
+          ref: attack/smooth-radial-shell
+          fetch-depth: 0
+
+      - name: Install pinned Lean toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+
+      - name: Restore Lean project build cache
+        uses: actions/cache@v4
+        with:
+          path: .lake/build
+          key: rh-smooth-shell-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            rh-smooth-shell-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            rh-lean-project-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+
+      - name: Apply exact compiler repairs
+        run: python verify/repair_smooth_radial_shell.py
+
+      - name: Compile repaired annular construction
+        run: lake build RH.Zeta85.Discharge.SmoothRadialShell
+
+      - name: Persist compiler-accepted Lean source
+        shell: bash
+        run: |
+          git diff --check
+          if git diff --quiet -- RH/Zeta85/Discharge/SmoothRadialShell.lean; then
+            echo "Lean source was already repaired."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add RH/Zeta85/Discharge/SmoothRadialShell.lean
+          git commit -m "Repair smooth radial-shell construction"
+          git push origin HEAD:attack/smooth-radial-shell
