@@ -1,4 +1,4 @@
-import RH.Zeta85.Discharge.RSLowDegreeRemoteCorrectionThree
+import RH.Zeta85.Discharge.RSGuardedZeroBlock
 
 /-!
 # Target-specific completed/guarded remote correction
