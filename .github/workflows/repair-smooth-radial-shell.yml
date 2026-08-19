@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   repair:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Check out attack branch
@@ -44,22 +45,40 @@ jobs:
       - name: Fetch Mathlib cache
         run: lake exe cache get
 
-      - name: Apply exact compiler repairs
-        run: python verify/repair_smooth_radial_shell.py
-
-      - name: Compile repaired annular construction
-        run: lake build RH.Zeta85.Discharge.SmoothRadialShell
-
-      - name: Persist compiler-accepted Lean source
+      - name: Apply repairs and compile the annular construction
+        id: compile
         shell: bash
         run: |
-          git diff --check
-          if git diff --quiet -- RH/Zeta85/Discharge/SmoothRadialShell.lean; then
-            echo "Lean source was already repaired."
-            exit 0
-          fi
+          set +e
+          mkdir -p verify
+          {
+            python verify/repair_smooth_radial_shell.py || exit $?
+            lake build RH.Zeta85.Discharge.SmoothRadialShell
+          } 2>&1 | tee verify/smooth-radial-shell-ci.log
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Persist the compiler verdict
+        shell: bash
+        run: |
+          status='${{ steps.compile.outputs.status }}'
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add RH/Zeta85/Discharge/SmoothRadialShell.lean
-          git commit -m "Repair smooth radial-shell construction"
-          git push origin HEAD:attack/smooth-radial-shell
+
+          if [ "$status" = "0" ]; then
+            rm -f verify/smooth-radial-shell-ci.log
+            git add RH/Zeta85/Discharge/SmoothRadialShell.lean verify/smooth-radial-shell-ci.log
+            message="Repair smooth radial-shell construction"
+          else
+            git add verify/smooth-radial-shell-ci.log
+            message="Capture remaining smooth radial-shell compiler blockers"
+          fi
+
+          if ! git diff --cached --quiet; then
+            git diff --cached --check
+            git commit -m "$message"
+            git push origin HEAD:attack/smooth-radial-shell
+          fi
+
+          exit "$status"
