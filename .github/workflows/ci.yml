@@ -48,6 +48,7 @@ jobs:
           RH.Zeta85.Discharge.CollectiveEnergyTailRoute
           RH.Zeta85.Discharge.RSRealHeightDiagonal
           RH.Zeta85.Discharge.RSRealHeightFourStage
+          RH.Zeta85.Discharge.RSRealHeightFiniteSplit
           Solution Solution.Multiplicity Solution.XiPrime Solution.Zeta85
 
       - name: Check headline axiom output
