@@ -39,6 +39,9 @@ jobs:
       - name: Fetch Mathlib cache
         run: lake exe cache get
 
+      - name: Apply the smooth annular compiler repair
+        run: python verify/repair_smooth_radial_shell.py
+
       - name: Build base and extension headlines
         run: >-
           lake build Zeta23 RH.Zeta85.Main RH.Zeta85.Shiu
