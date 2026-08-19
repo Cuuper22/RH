@@ -42,6 +42,7 @@ jobs:
       - name: Build base and extension headlines
         run: >-
           lake build Zeta23 RH.Zeta85.Main RH.Zeta85.Shiu
+          RH.Zeta85.Discharge.SmoothRadialShell
           Solution Solution.Multiplicity Solution.XiPrime Solution.Zeta85
 
       - name: Check headline axiom output
