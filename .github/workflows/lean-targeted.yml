@@ -30,7 +30,9 @@ jobs:
       - name: Restore Lean project build cache
         uses: actions/cache@v4
         with:
-          path: .lake/build
+          path: |
+            .lake/build
+            .lake/packages
           key: rh-lean-targeted-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             rh-lean-targeted-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
@@ -39,12 +41,17 @@ jobs:
       - name: Fetch Mathlib cache
         run: lake exe cache get
 
-      - name: Compile shell and collective route
+      - name: Compile shell, collective, and real-height routes
         run: >-
           lake build
           RH.Zeta85.Discharge.RadialShellAlias
           RH.Zeta85.Discharge.RadialShellFamily
           RH.Zeta85.Discharge.AggregateSynthesisBridge
+          RH.Zeta85.Discharge.LiteralEnergyTailEquivalence
+          RH.Zeta85.Discharge.CollectiveEnergyTailRoute
+          RH.Zeta85.Discharge.RSRealHeightDiagonal
+          RH.Zeta85.Discharge.RSRealHeightFourStage
+          RH.Zeta85.Discharge.RSRealHeightFiniteSplit
           RH.Zeta85.QuarticMain
 
       - name: Compile the Shiu campaign
