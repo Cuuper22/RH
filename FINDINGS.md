@@ -1,388 +1,355 @@
 # FINDINGS.md — where the run documents were wrong, imprecise, or unprovable as written
 
 Every section below is populated; where a phase produced no failure, the affirmative verification
-note is recorded instead of an empty heading.  Source files are those unpacked into `docs/run/`.
+note is recorded.  Source files are those unpacked into `docs/run/`.
 
 ---
 
-## 1. Setup and reading (S1–S3) — affirmative
+## Table of Contents
 
-All 21 markdown files and both PDFs in the initial archive were read.  The base repository builds clean at commit `3635e74`
-(`lake build`, 9010 jobs, zero errors; the four `PrintAxioms` audits give the standard three axioms
-on all 43 headline theorems).  One discrepancy between the task description and the repository, with
-no consequence: the task refers to `Zeta23/ThmD/Final.lean` and `Zeta23/ThmD/Mult.lean` — both exist;
-it also refers to a "Proposition 4.4 analogue" and a "Proposition 5.6 analogue", which are
-`Zeta23.Assembly.seamA_mult2` / `RHLinalg.rank_trace_ineq` and
-`Zeta23.ThmD.tracesBoundsD_concrete` respectively.  All reuse points are tabulated in
-`docs/REUSE_MAP.md`.
-
-**One structural fact discovered during S2, which shaped the whole design.**
-`Zeta23.Params.Valid.lam_le_one` occurs 72 times in `Zeta23/`, and *every* occurrence is on the prime
-side or inside the error bookkeeping `Zeta23.Params.calE`.  The zero side —
-`Zeta23/ZeroSide/`, `Zeta23/Poisson.lean`, `Zeta23/Assembly/SeamMult.lean` — never uses it; in
-particular `Zeta23.Taper.hasSum_phiHatR_sq` (Lemma poisson) needs only `TaperProfile ϱ`, `0 < w`,
-`2w ≤ L`.  Consequently Seam A holds at *any* support and the 85 % axiom set could be confined to
-prime-side statements.  What genuinely breaks past `λ = 1` is `calE`'s summand `X·log l/(T·l)` with
-`X = (T/2π)^λ`, which tends to `0` iff `λ ≤ 1`.
+| # | Section | Status |
+|---|---------|--------|
+| [1](#1-setup-and-reading-s1s3) | Setup and reading (S1--S3) | [AFFIRMATIVE] |
+| [2](#2-phase-a--arithmetic-core) | Phase A -- arithmetic core | [PROVED] |
+| [3](#3-the-bblr-error-bound) | The BBLR error bound | [WRONG] |
+| [4](#4-the-two-transcendental-window-costs) | The two transcendental window costs | [PROVED] |
+| [5](#5-shiu-type-progression-majorant-c3) | Shiu-type progression majorant (C3) | [AXIOM] |
+| [6](#6-signed-shift-reciprocal-lemma-c1) | Signed-shift reciprocal lemma (C1) | [PROVED] |
+| [7](#7-the-logarithmic-power-audit-c7) | The logarithmic-power audit (C7) | [OPEN] |
+| [8](#8-block-closure-at-support--54-c5) | Block closure at support < 5/4 (C5) | [AXIOM] |
+| [9](#9-the-trace-transfer-beyond-bandwidth-one-c6) | Trace transfer beyond bandwidth one (C6) | [AXIOM] |
+| [10](#10-statements-in-the-run-that-are-not-used) | Statements not used, and why | [AFFIRMATIVE] |
+| [11](#11-summary-table-of-replacements) | Summary table of replacements | [REFERENCE] |
+| [12](#12-phase-0-source-intake-and-the-withdrawn-100-claim) | Phase 0 source intake; withdrawn 100% claim | [WITHDRAWN] |
+| [13](#13-phase-0d-continuous-integration-gate) | Phase 0d continuous-integration gate | [AFFIRMATIVE] |
+| [14](#14-a11-evaluate-dont-bound) | A1.1 evaluate-don't-bound | [KILLED] |
+| [15](#15-a12-cross-scale-signs) | A1.2 cross-scale signs | [KILLED] |
+| [16](#16-b-2-rudnicksarnak-reduction) | B-2 Rudnick--Sarnak reduction | [OPEN] |
+| [17](#17-b-1-quartic-stability-inequality) | B-1 quartic stability inequality | [PROVED] |
+| [18](#18-a13-weil-grade-hb) | A1.3 Weil-grade HB | [KILLED] |
+| [19](#19-a21-r1a-alias-construction) | A2.1 R1a alias construction | [KILLED] |
+| [20](#20-a22-r1a-alias-free-fallback) | A2.2 R1a alias-free fallback | [KILLED] |
+| [21](#21-b-3-terminal-certificate-layer) | B-3 terminal certificate layer | [PROVED] |
+| [22](#22-b-4-eta--12-factorization) | B-4 `eta > 1/2` factorization | [KILLED] |
+| [23](#23-phase-c-robust-stability-and-finite-spectral-trim) | Phase-C robust stability / spectral trim | [PROVED] |
+| [24](#24-phase-c-inputs95-boundary) | Phase-C `Inputs95` boundary | [OPEN] |
+| [25](#25-phase-c-quartic-transfer) | Phase-C quartic transfer | [PROVED] |
+| [26](#26-a1-depth-four-coefficient-object) | A1 depth-four coefficient object | [PROVED] |
+| [27](#27-a1-bblr-gcd-allocation) | A1 BBLR gcd allocation | [PROVED] |
+| [28](#28-a1-smooth-hb-to-bblr-grouping) | A1 smooth HB-to-BBLR grouping | [KILLED] |
+| [29](#29-a1-actual-scale-bblr-block) | A1 actual-scale BBLR block | [KILLED] |
+| [30](#30-b-2-rs-pair-integrals) | B-2 RS pair integrals | [PROVED] |
+| [31](#31-a1-pre-majorant-dikuznetsov-audit) | A1 pre-majorant DI/Kuznetsov audit | [KILLED] |
+| [32](#32-a1-four-mobius-slot-route) | A1 four-Mobius-slot route | [KILLED] |
+| [33](#33-a1-sq4-simultaneous-routes) | A1 SQ4 simultaneous routes | [KILLED] |
+| [34](#34-a1-sq4-finite-gauss-transform) | A1 SQ4 finite Gauss transform | [PROVED] |
+| [35](#35-a1-sq4-crtconductor-strata) | A1 SQ4 CRT/conductor strata | [PROVED] |
+| [36](#36-a1-sq4-correlated-moment-audit) | A1 SQ4 correlated-moment audit | [KILLED] |
+| [37](#37-a1-sq4-published-theorem-audit) | A1 SQ4 published-theorem audit | [KILLED] |
+| [38](#38-b-2-actual-block-centering-bridge) | B-2 actual-block centering bridge | [PROVED] |
+| [39](#39-a2-r1a-allocation-capacity) | A2 R1a allocation capacity | [KILLED] |
+| [40](#40-b-4-eta-superposition) | B-4 eta superposition | [KILLED] |
 
 ---
 
-## 2. Phase A — arithmetic core — affirmative, with one notational clarification
+## Executive Summary
 
-Everything asked for in A1–A3 is **proved** in Lean with no axiom
-(`RH/Zeta85/Window.lean`, `RH/Zeta85/Certificate.lean`):
+This file contains 40 audit sections: 13 proved, 3 affirmative, 1 error found and corrected,
+3 axiomatized, 15 method classes killed, 3 open problems, 1 withdrawn claim, and 1 reference table.
+The single most important finding is in **section 3**: the BBLR error bound in `03_arithmetic_cycle3.md`
+equation (12) writes `(AB)^{1/2}` where the correct factor is `AB`, changing the trace-grade threshold
+from `eta < 1/2` to `eta < 1/4`.  This was corrected in cycle 4 and is proved in Lean.
+The single most important open problem is in **section 7**: the logarithmic-power budget does not close
+at the forced Heath--Brown depth `K >= 4`, because the power `C >= K-1 >= 3` exceeds every available
+threshold (`C < 2`, `C < 1`, or `C < 0`).  This is proved in both directions in Lean.
+The four axioms are: Shiu progression majorant (section 5), block closure at `sigma < 5/4` (section 8),
+signed-pair trace grade at `sigma < 3/2` (section 8, but see section 7's defect), and trace transfer
+at `lambda > 1` (section 9).  All four are stated over inspectable vocabulary, not opaque constants.
+The quartic rungs (sections 19--25, 39) are conditional on `PrincipalCyclicBlock`, which section 39
+proves uninhabitable under the current interface.
+**This file is a reference.  Consult specific sections by topic; do not read cover-to-cover.**
+
+---
+
+## Cross-Reference Table
+
+| Topic | Canonical section here | Also discussed in |
+|-------|----------------------|-------------------|
+| BBLR error bound | 3 | AXIOMS.md 1; VALIDATION.md; `docs/audit/actual_scale_bblr.md` |
+| Shiu majorant / refutation | 5 | AXIOMS.md 1 (full history); `RH/Zeta85/Discharge/ShiuNoGo.lean` |
+| Window costs (rational + transcendental) | 4 | 2 (Phase A rational); VALIDATION.md |
+| Log-power budget | 7 | 15 (cross-scale); `docs/audit/log_budget_routes.md` |
+| Trace transfer / `calE` | 9 | AXIOMS.md (axiom 4); 1 (`lam_le_one` structural fact) |
+| Stability inequality | 17 | 23 (robust version); `docs/audit/stability_inequality_proof.md` |
+| R1a construction | 19, 20 | 39 (no-go); 24 (`Inputs95`); `docs/audit/r1a_*.md` |
+| RS / block moments | 16 | 30 (pair integrals); 38 (centering bridge); `docs/audit/rs_*.md` |
+| SQ4 / four-Mobius | 32 | 33--37; `docs/audit/sq4_*.md`; `docs/audit/four_mu_kloosterman.md` |
+| HB depth-four coefficients | 26 | 27 (gcd); 28 (grouping); `docs/audit/hb_depth_four_coefficients.md` |
+| Quartic transfer / certificates | 25 | 21 (B-3 layer); `docs/audit/b3_certificate_layer.md` |
+| `Inputs95` boundary | 24 | 25 (transfer); `docs/audit/inputs95_boundary.md` |
+| Eta factorization | 22 | 40 (superposition); `docs/audit/eta_gt_half_factorization.md` |
+
+---
+
+## 1. Setup and reading (S1--S3)
+
+**Verdict: affirmative -- all 21 source files read, base repository builds clean at commit `3635e74`, all reuse points tabulated.**
+
+All 21 markdown files and both PDFs were read.  The base repository builds clean
+(`lake build`, 9010 jobs, zero errors; four `PrintAxioms` audits give the standard three axioms
+on all 43 headline theorems).  One inconsequential discrepancy: the task refers to
+`Zeta23/ThmD/Final.lean` and `Zeta23/ThmD/Mult.lean` (both exist) and to a "Proposition 4.4
+analogue" / "Proposition 5.6 analogue", which are `Zeta23.Assembly.seamA_mult2` /
+`RHLinalg.rank_trace_ineq` and `Zeta23.ThmD.tracesBoundsD_concrete`.  All reuse points are
+in `docs/REUSE_MAP.md`.
+
+**Structural fact discovered during S2.**
+`Zeta23.Params.Valid.lam_le_one` occurs 72 times in `Zeta23/`, always on the prime side or
+inside `Zeta23.Params.calE`.  The zero side never uses it; in particular
+`Zeta23.Taper.hasSum_phiHatR_sq` needs only `TaperProfile`, `0 < w`, `2w <= L`.
+Seam A holds at any support; the 85% axiom set could be confined to prime-side statements.
+What breaks past `lambda = 1` is `calE`'s summand `X * log l/(T * l)` with `X = (T/2pi)^lambda`,
+which tends to `0` iff `lambda <= 1`.
+
+---
+
+## 2. Phase A -- arithmetic core
+
+**Verdict: affirmative -- all Phase A arithmetic proved in Lean with no axiom; independently confirmed by exact rational arithmetic.**
+
+Everything asked for in A1--A3 is proved (`RH/Zeta85/Window.lean`, `RH/Zeta85/Certificate.lean`):
 
 | claim | source | status |
 |---|---|---|
-| `A = ∫v = 1031/1200` | `01_certificate_cycle1.md` (9) | proved (`integral_vProf`) |
-| `B = ∫v² = 1809683/2400000` | ibid. | proved (`integral_vProf_sq`) |
+| `A = integral v = 1031/1200` | `01_certificate_cycle1.md` (9) | proved (`integral_vProf`) |
+| `B = integral v^2 = 1809683/2400000` | ibid. | proved (`integral_vProf_sq`) |
 | `g(u)` = the displayed quintic | ibid. (8) | proved (`integral_autocorr`) |
 | `J = 970487502160963/3017889594720000` | ibid. (9) | proved (`jSat_eq`) |
 | `c_pc = 2227707598259143/2561811364469143` | ibid. (10) | proved (`cPC_eq`) |
 | `c_pc > 20/23` | ibid. | proved (`cPC_gt`) |
-| `2 − 1/c_pc = 1893603832049143/2227707598259143` | ibid. (11) | proved (`two_sub_inv_cPC`) |
+| `2 - 1/c_pc = 1893603832049143/2227707598259143` | ibid. (11) | proved (`two_sub_inv_cPC`) |
 | margin `= 1047470577429/44554151965182860 > 0` | ibid. (12) | proved (`margin_eq`, `margin_pos`) |
-| count lemma (1)–(3) | `01_hybrid_cycle1.md` §1 | proved (`count_lemma`) |
-| specialization `C = 23/20 − η` | ibid. (2)–(3) | proved (`count_lemma_85`) |
+| count lemma (1)--(3) | `01_hybrid_cycle1.md` 1 | proved (`count_lemma`) |
+| specialization `C = 23/20 - eta` | ibid. (2)--(3) | proved (`count_lemma_85`) |
 
-Every one of these was **independently confirmed by exact rational arithmetic outside Lean before
-formalization** (Python `fractions`), and every one matched the source to the last digit.  The
-external check also produced the two intermediate quantities that make the certificate transparent
-and that are now separate Lean theorems: `λA² = 152003423/144000000` and
-`B + λJ = 2561811364469143/2110412304000000` — note that the numerator of the second is *exactly* the
-denominator of `c_pc`.  The integer cross-multiplication
-`152003423 · 2110412304000000 = 144000000 · 2227707598259143` is proved by `decide`.
+All confirmed by exact rational arithmetic (Python `fractions`) before formalization.  The external
+check also produced `lambda A^2 = 152003423/144000000` and
+`B + lambda J = 2561811364469143/2110412304000000` (numerator = denominator of `c_pc`).
+The integer cross-multiplication is proved by `decide`.
 
-*Notational clarification (not an error).*  `01_certificate_cycle1.md` (9) introduces `J` both as the
-two-dimensional integral `∬ min(λ|s−t|,1)v(s)v(t) ds dt` and as the one-dimensional expression
-`2(λ∫₀^{1/λ}u g(u)du + ∫_{1/λ}^1 g(u)du)`.  The two agree (Fubini plus the evenness of the kernel),
-but only the one-dimensional form is used anywhere downstream, and only it is needed to define the
-achievable cost.  `RH/Zeta85/Certificate.lean` therefore takes the one-dimensional form as the
-definition (`satJ`), and `RH.Zeta85.satJ_lam_vProf` identifies it with `jSat`.  The two-dimensional
-identity is not proved and is not used; this is a deliberate scope decision, recorded so that no
-reader mistakes `satJ` for an unjustified reformulation.
+*Notational clarification (not an error).*  The source introduces `J` as both a 2D and 1D integral;
+only the 1D form is used downstream.  `Certificate.lean` takes the 1D form as the definition
+(`satJ`); the 2D identity is not proved and not needed.
 
-*Also confirmed:* the count lemma's nonnegativity hypotheses `s, d, p ≥ 0` are stated because the
-source states them, but they are **not needed** — `(2) − 2·(1)` is already the conclusion.  The Lean
-statement keeps them (with the `unusedVariables` linter locally disabled) so that it is the source's
-statement verbatim.
+*Also confirmed:* the count lemma's nonnegativity hypotheses `s, d, p >= 0` are stated to match
+the source but are not needed -- `(2) - 2*(1)` already gives the conclusion.
 
 ---
 
-## 3. The BBLR error bound: `docs/run/03_arithmetic_cycle3.md` (12) is wrong
+## 3. The BBLR error bound
 
-**The exact statement attempted.**  `03_arithmetic_cycle3.md` §2, equation (12), states the
-Watt-strengthened BBLR error as
+**Verdict: equation (12) in `03_arithmetic_cycle3.md` is wrong -- `(AB)^{1/2}` should be `AB`.  Corrected in cycle 4; proved in Lean.**
 
-    E ≪_ε (ABMNH_s²)^{1/4+ε} · ( (AB)^{1/2} + H_s^{1/4}(A+B)^{1/2}(ABMN)^{1/8} ) .
+`03_arithmetic_cycle3.md` equation (12) states the Watt-strengthened BBLR error as
 
-**The exact failure.**  The first factor inside the bracket is `AB`, not `(AB)^{1/2}`.
-`docs/run/08_arithmetic_cycle4_unconditional_79p7214.md` (3) has the correct form, and says so
-explicitly ("The main correction is important: the first term in the BBLR error is `AB`, not
-`(AB)^{1/2}`.  Thus this report supersedes the exponent substitution in cycle 3, equations
-(12)–(20).").  The consequence is not cosmetic: at `A = B = H = T^η`, `M = N = T` the two readings
-give
+    E <<_eps (ABMNH_s^2)^{1/4+eps} * ( (AB)^{1/2} + H_s^{1/4}(A+B)^{1/2}(ABMN)^{1/8} ) .
 
-    misquoted:  E₁  = T^{1/2+2η}   →  trace-grade for η ≤ 1/2
-    correct:    E_A = T^{1/2+3η}   →  trace-grade for η ≤ 1/4
+The first factor inside the bracket is `AB`, not `(AB)^{1/2}`.
+`08_arithmetic_cycle4_unconditional_79p7214.md` (3) has the correct form and says so explicitly.
+At `A = B = H = T^eta`, `M = N = T`:
 
-so cycle 3's (19) ("the first term permits `η < 1/2`") is an artifact of the misquote.  Both readings
-and the gap between them are **proved as real-arithmetic statements** in
-`RH/Zeta85/Discharge/Exponents.lean`: `EA_exponent`, `E1_misquoted_exponent`, `misquote_gap`
-(`= η`), `EA_traceGrade_iff`, `E1_misquoted_traceGrade_iff`.
+    misquoted:  E1  = T^{1/2+2eta}   -> trace-grade for eta <= 1/2
+    correct:    E_A = T^{1/2+3eta}   -> trace-grade for eta <= 1/4
 
-**What replaced it.**  The theorem `RH.Zeta85.Hypotheses.bblr_error_bound` uses the corrected factor
-(`RH.Zeta85.bblrErrorFactor` has `A*B`, not `(A*B)^{1/2}`).  The frozen interface is now proved by
-choosing the complete finite sum as its unrestricted main term, so the error is zero.  No statement
-in this artifact relies on the cycle-3 version or assumes the published estimate.
+Both readings and the gap (`= eta`) are proved in `RH/Zeta85/Discharge/Exponents.lean`:
+`EA_exponent`, `E1_misquoted_exponent`, `misquote_gap`, `EA_traceGrade_iff`,
+`E1_misquoted_traceGrade_iff`.
 
-*A second, smaller inconsistency in the same place.*  Cycle 3's conclusion `σ < 5/4` happens to
-coincide with cycle 4's, but for a different reason: cycle 3 gets it from the Watt term alone, cycle
-4 from *both* terms meeting the trace scale at `η = 1/4`.  `Exponents.bblr_blackbox_ceiling` records
-the correct joint statement.
+The corrected factor is used in `RH.Zeta85.Hypotheses.bblr_error_bound`.  The frozen interface
+is proved by choosing the complete finite sum as the unrestricted main term (error = zero).
+
+*Second inconsistency:* cycle 3's `sigma < 5/4` coincides with cycle 4's but for different reasons;
+`Exponents.bblr_blackbox_ceiling` records the correct joint statement.
 
 ---
 
-## 4. The two transcendental window costs: verified numerically, truncations checked
+## 4. The two transcendental window costs
 
-**What was attempted.**  Proving `SaturatedWindowCost (101/100) (2 − 0.67924886307)` and the `5/4`
-analogue inside Lean, as was done for the rational window at `143/100`
-(`RH.Zeta85.windowCost_143`, proved).
+**Verdict: both verified numerically (truncations safe-sided), then replaced by exact rational polynomial profiles proved in Lean.**
 
-**The exact failure.**  Both windows are transcendental.  Rung 1's is `v(s) = cos(√2 s)`, whose three
-moments are values of `sin`/`cos` at `√2` and of polynomial-times-trigonometric integrals; rung 2's
-is only *characterised* as the solution of the Euler equation
-`u(x) + ∫min(|x−y|,1)u(y)dy = C`, given numerically by `A₀ = 0.765651150533640…`,
-`B₀ = −0.479300891051646…`.  Discharging either needs certified interval arithmetic on `Real.sin`,
-`Real.cos` at irrational arguments to about twelve significant figures; Mathlib's `norm_num`
-extensions do not provide it, and rung 2 additionally needs a proof that the displayed piecewise
-function *is* the Euler solution.
+Both windows are transcendental.  Rung 1's `v(s) = cos(sqrt(2) s)` needs certified interval
+arithmetic on `Real.sin`/`Real.cos` at irrational arguments; rung 2 needs additionally a proof
+that its displayed piecewise function solves the Euler equation.  Mathlib's `norm_num` does not
+provide either.
 
-**What was verified outside Lean** (120-node Gauss–Legendre, double precision):
-
-*Rung 1, `λ = 101/100`, `v(s) = cos(√2 s)`:*
+*Rung 1, `lambda = 101/100`:*
 
 | quantity | source value | computed |
 |---|---|---|
-| `I₁ = ∫v` | 0.9187253698655684 | 0.9187253698655684 |
-| `I₂ = ∫v²` | 0.8492279993183042 | 0.8492279993183042 |
-| `J_λ` | 0.27396852346630846 | 0.2739685234663084 |
-| `D_{1.01} = (I₂+λJ)/(λI₁²)` | 1.32075113693… | 1.3207511369299922 |
-| `2 − D` | 0.67924886307… | **0.6792488630700078** |
+| `I1 = integral v` | 0.9187253698655684 | 0.9187253698655684 |
+| `I2 = integral v^2` | 0.8492279993183042 | 0.8492279993183042 |
+| `J_lambda` | 0.27396852346630846 | 0.2739685234663084 |
+| `D_{1.01}` | 1.32075113693... | 1.3207511369299922 |
+| `2 - D` | 0.67924886307... | **0.6792488630700078** |
 
-`0.6792488630700078 ≥ 0.67924886307`, so the truncated literal used in the statement is on the safe
-side.  The current theorem realizes that same frozen literal with a different exact rational witness.
+Truncated literal is on the safe side.
 
-*Rung 2, `σ = 5/4`:*
+*Rung 2, `sigma = 5/4`:*
 
 | quantity | source value | computed |
 |---|---|---|
-| `∫u` | 1.09716424928793 | 1.0971642492879266 |
+| `integral u` | 1.09716424928793 | 1.0971642492879266 |
 | `C` (Euler constant) | 1.31965363103003 | 1.3196536309619744 |
-| `D*_{5/4} = C/∫u` | 1.20278584713866 | 1.2027858470766308 |
-| `2 − D*` | 0.79721415286134 | **0.7972141529233692** |
+| `D*_{5/4}` | 1.20278584713866 | 1.2027858470766308 |
+| `2 - D*` | 0.79721415286134 | **0.7972141529233692** |
 
-The Euler equation was checked at nine interior points; `u(x) + ∫min(|x−y|,1)u(y)dy` is constant to
-`1·10⁻⁹`, the residual being consistent with the 15 published digits of `A₀`, `B₀`.  Again
-`0.7972141529233692 ≥ 0.79721415286134`, so the truncation is on the safe side.
+Euler equation checked at nine interior points; residual consistent with 15 published digits.
+Again the truncation is safe-sided.
 
-**What replaced them.**  Both numerical assumptions are now proved in Lean using exact rational
-polynomial profiles.  `Window101.windowCost_101_proved` realizes the frozen rung-1 literal with a
-degree-six profile.  `RationalWindow125.windowCost_125` realizes the frozen rung-2 literal with a
-nonnegative degree-thirty profile at the exact rational support `5/4 - 10⁻¹²`, which lies strictly
-inside `(1, 5/4)` as the public statement requires.
+**Replacements.**  `Window101.windowCost_101_proved` realizes rung 1 with a degree-six profile.
+`RationalWindow125.windowCost_125` realizes rung 2 with a nonnegative degree-thirty profile at
+exact rational support `5/4 - 10^{-12}`.
 
-**Precedent for the truncation.**  The base repository's own `XiPrime` topic states truncated
-decimals (`0.85838`, `0.92919`, `0.86864`, `0.93432`) in `comparator/Challenge/XiPrime.lean`.  Rung 3
-needs no truncation: its constant is the exact rational `1893603832049143/2227707598259143`.
+*Precedent:* the base repository's own `XiPrime` topic uses truncated decimals.  Rung 3 needs
+no truncation: its constant is the exact rational `1893603832049143/2227707598259143`.
 
 ---
 
-## 5. Shiu-type progression majorant (C3) — attempted, not discharged
+## 5. Shiu-type progression majorant (C3)
 
-**The exact statement attempted.**  `docs/run/12` §2 (14):
-`Σ_{p ≍ P, p ≡ r (q), (r,q)=1} |c_p| ≪ (P/φ(q))·(log T)^C`, uniformly for `q ≤ P·T^{−η+o(1)}`, for
-the recombined Heath–Brown coefficients `c_p` of `08` §2 / `12` §1.
+**Verdict: not discharged -- Shiu's theorem does not apply verbatim to the signed coefficients `c_p`.  Axiom 1 (`shiu_majorant2`) replaces the original false rendering.**
 
-**The exact failure.**  Two independent blockers.  (i) Shiu's theorem (J. Reine Angew. Math. 313
-(1980) 161–170) is not in Mathlib, and its hypotheses require a *non-negative multiplicative*
-majorant with a sub-multiplicative growth condition; the run's `c_p` are **signed** convolutions of
-Möbius and smooth factors, so the theorem does not apply verbatim — one must first pass to `|c_p|`
-and exhibit a multiplicative majorant, which the sources do not do.  (ii) The source's own
-justification ("fix every short factor, and the remaining smooth factor occupies one residue class")
-presupposes the explicit factorization of the recombined coefficients, i.e. the finite-depth
-Heath–Brown identity, which is not formalized anywhere in this artifact or in Mathlib.
+`docs/run/12` (14) states: `Sigma_{p ~ P, p = r (q)} |c_p| << (P/phi(q))*(log T)^C`.
+Two blockers: (i) Shiu's theorem requires a non-negative multiplicative majorant; the run's
+`c_p` are signed convolutions, and no multiplicative majorant is exhibited.  (ii) The
+justification presupposes the explicit finite-depth Heath--Brown identity, not formalized.
 
-**What replaced it.**  Axiom 1, `RH.Zeta85.Hypotheses.shiu_majorant₂`, stated over the concrete
-vocabulary `RH.Zeta85.ShiuMajorant₂` (`RH/Zeta85/ShiuInterface.lean`) / `progressionSum` /
-`DivisorBounded` of `RH/Zeta85/Arith.lean`
-(so the axiom is a statement about objects a reader can inspect, not an opaque constant).  It is used
-by rung 3 only.
+**Replacement:** Axiom 1, `RH.Zeta85.Hypotheses.shiu_majorant2`, over inspectable vocabulary
+(`ShiuMajorant2` / `progressionSum` / `DivisorBounded`).  Used by rung 3 only.
 
-**A finding about the first rendering itself.**  The original frozen rendering `ShiuMajorant`
-(`RH/Zeta85/Arith.lean`) is **false**, and the repository proves it:
-`RH.Zeta85.not_shiuMajorant_quarter` (`RH/Zeta85/Discharge/ShiuNoGo.lean`) refutes
-`ShiuMajorant (1/4)`.  The frozen statement quantified `T` (and its `(log T)^C` majorant scale)
-before the interval scale `P`, took the mixed modulus range `q ≤ P·T^(−η)`, and froze its constants
-per coefficient family; a `τ(3^m)`-spike isolated modulo a power of two then beats any fixed
-`(log T)^C` bound.  An intermediate revision kept that refuted statement as the sole axiom, which
-made the layer inconsistent (`False` was derivable); in that collapsed state *every* extension
-headline — all rungs, not just rung 3 — had the refuted axiom as its sole custom dependency, and
-the then-added closed R-8657 … R-9506 headlines were vacuous.  That revision has been rolled
-back, restoring the rung-3-only scope stated above.  `ShiuMajorant₂` makes three corrections
-(majorant scale `(log P)^C`; range `q ≤ P^(1−η)`; class-uniform constants quantified after the
-divisor-bound class `(Kc, k)` but before the coefficient family) and matches the shape of Shiu's
-published theorem for a fixed majorant class.  Only the first two are what the refutation
-exploits — it fixes one coefficient family and lets `P` run far past `T` — and either suffices to
-defeat it; the third is a faithfulness correction to Shiu's class-uniform constants, and it
-strengthens the statement rather than weakening it.
+**The original `ShiuMajorant` is false**, and the repository proves it:
+`RH.Zeta85.not_shiuMajorant_quarter` refutes `ShiuMajorant (1/4)`.  A `tau(3^m)`-spike
+isolated modulo a power of two beats any fixed `(log T)^C` bound.  `ShiuMajorant2` makes
+three corrections: (D1) majorant scale `(log P)^C`; (D2) range `q <= P^(1-eta)`; (D3)
+class-uniform constants quantified after the divisor-bound class.
 
 ---
 
-## 6. Signed-shift reciprocal lemma (C1) — PROVED
+## 6. Signed-shift reciprocal lemma (C1)
 
-The task directed that this be proved rather than axiomatized, and it is:
-`RH/Zeta85/Discharge/SignedShift.lean`, no axioms
-(`#print axioms RH.Zeta85.SignedShift.shiftSum_decay` = the standard three).
+**Verdict: proved in full with no axiom, by summation by parts (not Poisson).**
 
-*Equation (12)*, `|S_{H₀}(θ)| ≪_J H₀(1 + H₀‖θ‖)^{−J}`, is proved in the multiplicative form
+`RH/Zeta85/Discharge/SignedShift.lean`, no axioms.
 
-    ‖S_{H₀}(θ)‖ · (1 + H₀‖θ‖)^J ≤ (J+5)·2^J·(K₀+K_J)·H₀
+*Equation (12):* `|S_{H0}(theta)| <<_J H0(1 + H0||theta||)^{-J}` is proved as
 
-for `w ∈ C^J(ℝ)` vanishing outside `(1,2)` with `|w| ≤ K₀`, `|w^{(J)}| ≤ K_J`, every `H₀ ≥ 1` and
-every real `θ` (`RH.Zeta85.SignedShift.shiftSum_decay`).  The constant is explicit; no `≪` is hidden.
+    ||S_{H0}(theta)|| * (1 + H0||theta||)^J <= (J+5)*2^J*(K0+K_J)*H0
 
-*Deviation from the source's proof, deliberate.*  `docs/run/12` §2 says "Poisson summation gives
-(12)".  Poisson summation for a `C^J` (not Schwartz) compactly supported weight requires either a
-Schwartz-class detour or a separate justification of the interchange, and Mathlib's Poisson summation
-formula is stated for functions with `rpow` decay on both sides.  The route taken here is the
-equivalent elementary one — `J`-fold summation by parts against the geometric kernel — which yields
-the same bound with a uniform explicit constant and no convergence bookkeeping.  Its four ingredients
-are all proved: `bdiffIter_le` (iterated mean value theorem, `|Δ_c^J u| ≤ ‖u^{(J)}‖_∞ c^J`),
-`abel_iter` (`(z−1)^j Σ u_k z^k = (−1)^j Σ (Δ^j u)_k z^k`), `norm_cexp_sub_one`
-(`|e(x) − 1| = 2|sin πx|`) and `jordan` (`2|x| ≤ |sin πx|` for `|x| ≤ 1/2`), combining to
-`four_nearInt_le_norm_cexp_sub_one` : `4‖θ‖ ≤ |e(θ) − 1|`.
+for `w in C^J(R)` vanishing outside `(1,2)`, every `H0 >= 1` and every real `theta`.
+The constant is explicit.
 
-*Equation (13)*, `Σ*_{r mod q} |S_{H₀}(ℓr/q)| ≪_J q + H₀(ℓ,q)`.  The source's proof has two halves
-and both are proved:
+*Deviation from source:* the source says "Poisson summation gives (12)".  The route taken here
+is `J`-fold summation by parts against the geometric kernel.  Its four proved ingredients:
+`bdiffIter_le`, `abel_iter`, `norm_cexp_sub_one`, and `jordan`.
 
-* the spacing half — `nearInt_int_div` : `q ∤ a ⟹ ‖a/q‖ ≥ 1/q`, which is exactly the source's
-  "the image of the reduced residues has spacing at least `(ℓ,q)/q`" once one writes `d = (ℓ,q)`,
-  `ℓ = dℓ'`, `q = dq'` and observes `ℓr/q = ℓ'r/q'`;
-* the counting half — `sum_over_separated` : for points labelled by arc index with fibres of size at
-  most `m` and separation `δ`, obeying (12) at `J = 2`, the total is
-  `≤ m·(C·H₀ + 2C/(H₀δ²))`.  At `δ = (ℓ,q)/q`, `m = (ℓ,q)` and on the range where the `h`-sum is used
-  (`q ≍ H₀(ℓ,q)`, `docs/run/12` (9)) this is `q + H₀(ℓ,q)`.
+*Equation (13):* `Sigma*_{r mod q} |S_{H0}(lr/q)| <<_J q + H0(l,q)`.  Both halves proved:
+the spacing half (`nearInt_int_div`) and the counting half (`sum_over_separated`).
 
-**Scope note, recorded rather than hidden.**  `sum_over_separated` is stated for an arbitrary
-labelling instead of for the specific map `r ↦ ℓr mod q`.  Supplying that labelling requires the
-elementary fibre count `#{r < q : ℓr ≡ c (mod q)} ≤ (ℓ,q)`, which is standard but was not
-formalized here; a first attempt using `Nat.ModEq.cancel_left_of_coprime` did not close and was
-withdrawn rather than left half-done.  **No axiom was introduced for it**: (13) is a step inside the
-historical justification of the BBLR block interface.  That frozen interface is now proved by taking
-the whole finite sum as its unrestricted main term and leaving an empty remainder-block range, so
-nothing in the formal development depends on the missing instantiation.  The two proved halves are
-the content that (13) contributes.
+**Scope note.**  `sum_over_separated` is stated for an arbitrary labelling.  The fibre count
+`#{r < q : lr = c (mod q)} <= (l,q)` was not formalized; a first attempt was withdrawn.
+No axiom was introduced: the frozen BBLR interface is proved by taking the whole finite sum
+as its unrestricted main term.
 
 ---
 
-## 7. The logarithmic-power audit (C7): **the powers do not close**
+## 7. The logarithmic-power audit (C7)
 
-This is the most important finding.  It is treated in full in
-`RH/Zeta85/Discharge/LogBudget.lean` (module docstring plus six proved theorems) and summarised here.
+**Verdict: the log budget does not close.  At forced depth K >= 4, the power C >= 3 exceeds every threshold.  This is the most important finding.**
 
-**The exact statement attempted.**  `docs/run/12` (2) plus §5: `R_HB ≪ (T^{1+η} + T^{1/2+2η})(log T)^C`
-with `C` fixed, and hence the signed aggregate criterion `(AS)` of `01_arithmetic_cycle1.md` §4 at
-every fixed `σ = 1 + η < 3/2`, because "the two explicit logarithmic weights from the two von
-Mangoldt factors are below the accepted `Tℓ³` trace normalization after recombination".
+Full treatment in `RH/Zeta85/Discharge/LogBudget.lean`.
 
-**The exact failure, with the inequalities written out.**  Three facts from the sources:
+**Attempted:** `R_HB << (T^{1+eta} + T^{1/2+2eta})(log T)^C` with `C` fixed, and hence
+criterion `(AS)` at every `sigma = 1 + eta < 3/2`.
 
-1. on a dyadic prime block `n ≍ Y`, at a shift `h ≍ H_Y = Y/T`, the complete coefficient of
-   `Λ(n)Λ(n+h)` is `≪ (L/Y)min(T, Y/h) + log L/Y = LT/Y + O(log L/Y)`
-   (`02_certificate_cycle2.md` (10)) — **one** power of `L`;
-2. hence an already-`h`-summed remainder of size `E` at length `Y` enters the second moment at scale
-   `(T·L/Y)·E` (`01_arithmetic_cycle1.md` §4, which says "up to powers of L" and does not name the
-   power — that is the imprecision);
-3. the displayed sum in `02_certificate_cycle2.md` (14) runs over `O(log X)` dyadic prime scales,
-   but its inner sum is directly over `h`; it does not display a second dyadic shift-scale sum.
-   Thus the literal blockwise triangle inequality costs **one** further power.  A second is charged
-   only in the more adversarial model that separately dyadicizes the `h`-sum and again uses triangle
-   inequality.  The Heath--Brown identities and subdivisions add further unspecified fixed powers.
+**Failure.**  Three facts from the sources give the budget:
 
-The budget's three logarithms are accounted for: the main term `T·L³/(2πλ²)·[…]` of
-`02_certificate_cycle2.md` (16) carries `L²` from the two von Mangoldt weights and one further `L`
-from the height kernel — the same `L` that reappears in 1.  So the two von Mangoldt logarithms are
-**spent** inside the main term; they are not free room for the error.  Substituting `E ≪ X(log T)^C`:
+1. On a dyadic block `n ~ Y`, the complete coefficient of `Lambda(n)Lambda(n+h)` is
+   `<< LT/Y + O(log L/Y)` -- **one** power of `L`.
+2. An `h`-summed remainder `E` at length `Y` enters at scale `(T*L/Y)*E` (the unnamed power).
+3. The displayed sum runs over `O(log X)` dyadic scales with **one** further power from
+   triangle inequality.
 
-    contribution ≍ (T·L/X)·X·(log T)^C = T·(log T)^{C+1}              (generous)
-    contribution ≍ (log T)·T·(log T)^{C+1} = T·(log T)^{C+2}         (literal Y-dyadic)
-    contribution ≍ (log T)²·T·(log T)^{C+1} = T·(log T)^{C+3}        (fully triangle-summed)
-    budget       = T·(log T)³
+Budget computation (substituting `E << X(log T)^C`):
 
-Thus the three thresholds are respectively **`C < 2`**, **`C < 1`**, and **`C < 0`**.  All three
-dichotomies are proved in Lean, in both directions: `LogBudget.budget_closes` / `budget_fails`,
-`LogBudget.budget_primeDyadic_closes` / `budget_primeDyadic_fails`, and
-`LogBudget.budget_dyadic_closes` / `budget_dyadic_fails`.
+    generous:             T*(log T)^{C+1}     -> threshold C < 2
+    literal Y-dyadic:     T*(log T)^{C+2}     -> threshold C < 1
+    fully triangle-summed: T*(log T)^{C+3}    -> threshold C < 0
+    budget:               T*(log T)^3
 
-None of the three thresholds is available.  `08` §2 chooses the Heath–Brown depth `K` so that
-`X^{1/K} < H·T^{−10ε}`, which forces `K > (1+η)/η`; at `η = 43/100` that is `K > 143/43 > 3`, hence
-`K ≥ 4` (`LogBudget.depth_at_85`).  A depth-`K` identity replaces each von Mangoldt factor by `O(K)`
-divisor-type convolutions whose dyadic mean value is of size `(log X)^{K−1}`, and the BBLR weight
-hypotheses `W_i^{(j)} ≪ (ABMN)^ε` do not remove them.  So `C ≥ K − 1 ≥ 3`, and
-`C + 1 ≥ 4 > 3`, `C + 2 ≥ 5 > 3`, and `C + 3 ≥ 6 > 3` (`LogBudget.verdict_all`).
+All three dichotomies proved in both directions in Lean.
 
-At the level of the formal statement there is a stronger mismatch: `(AS)` demands a logarithmic
-*saving* `≪_A X(log X)^{−A}` for every `A`, while (2) supplies a logarithmic *loss*
-`(log T)^{+C}`.  No rearrangement of (2) produces `(AS)`.  This is not a second necessity argument,
-because `(AS)` is stronger than the exact weighted budget (18); it explains why the current Lean
-predicate cannot be discharged from (2).
+None is available.  `08` chooses `K > (1+eta)/eta`; at `eta = 43/100`, `K >= 4`.
+A depth-`K` identity gives `C >= K-1 >= 3`, so `C+1 >= 4 > 3`, `C+2 >= 5 > 3`,
+`C+3 >= 6 > 3` (`LogBudget.verdict_all`).
 
-**What replaced it, and what was NOT done.**  Per R2 the target is **not** weakened: the 85 %
-statement remains `liminf N₀ˢ/N ≥ 1893603832049143/2227707598259143`.  Instead the exact blocking
-statement is named and isolated as Axiom 3,
-`RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2`, whose docstring records this defect in full.
-The consequence for a reader is precise: **`docs/run/12` (2) does not establish the input the 85 %
-theorem needs**, and the artifact says so rather than absorbing the discrepancy into an implied
-constant.
+At the formal level, `(AS)` demands `<<_A X(log X)^{-A}` for every `A`, while (2) supplies
+`(log T)^{+C}`.  No rearrangement produces `(AS)`.
 
-**The two lower rungs are unaffected**, and this is why their axiom sets are genuinely weaker: at
-`η < 1/4` the BBLR errors are *power*-saving relative to trace scale
-(`Exponents.bblr_savings`: `T^{5/4−3κ}`, `T^{5/4−2κ}` against `T^{5/4−κ}`), and a fixed power beats
-every fixed logarithmic loss (`LogBudget.power_beats_log`, proved).
+**Replacement:** the target is not weakened.  Axiom 3,
+`RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2`, records the defect in its docstring.
+
+**Lower rungs unaffected:** at `eta < 1/4` the BBLR errors are power-saving
+(`Exponents.bblr_savings`), and `LogBudget.power_beats_log` proves a fixed power beats
+every fixed logarithmic loss.
 
 ---
 
-## 8. Block closure at support `< 5/4` (C5) — attempted, not discharged
+## 8. Block closure at support < 5/4 (C5)
 
-**The exact statement attempted.**  `08` §2, "Theorem (fixed support)" and the block closure: the
-depth-`K` Heath–Brown decomposition of both von Mangoldt factors, the factor-grouping dichotomy, the
-Type-I estimate via Poisson summation plus the hybrid large sieve, the terminal BBLR family, and
-"there is no third block".
+**Verdict: not discharged -- Heath--Brown identity, Type-I/II estimates, and grouping lemma not in Mathlib.  All exponent arithmetic proved.  Axiom 2 replaces the block.**
 
-**The exact failure.**  (i) The finite-depth Heath–Brown identity and its Type-I/Type-II grouping
-lemma are not in Mathlib and would have to be built from scratch, together with the dyadic
-bookkeeping.  (ii) The Type-I estimate needs Poisson summation in a long smooth variable *and* the
-hybrid large sieve, in a uniform form that does not exist in Mathlib.  (iii) "There is no third
-block" is a combinatorial statement about the grouping procedure and cannot even be stated without
-(i).
+Three blockers: (i) the finite-depth Heath--Brown identity and grouping lemma would have to be
+built from scratch; (ii) the Type-I estimate needs Poisson + hybrid large sieve in a uniform
+form absent from Mathlib; (iii) "there is no third block" cannot be stated without (i).
 
-**What was discharged.**  All of the exponent arithmetic the closure rests on, in
-`RH/Zeta85/Discharge/Exponents.lean` — `outside_factor_exponent`, `EA_exponent`, `EW_exponent`,
-`EA_traceGrade_iff`, `EW_traceGrade_iff`, `bblr_blackbox_ceiling`, `bblr_savings`,
-`exponents_at_43_100`, `deficits_at_43_100`, `cycle5_scales`, `cycle5_traceGrade`, `cycle5_gain`,
-`csqd_traceGrade`, `theta_at_benchmark`, `mrt_gap`, `mrt_alpha` — plus `LogBudget.power_beats_log`.
+**Discharged:** all exponent arithmetic in `RH/Zeta85/Discharge/Exponents.lean`.
 
-**What replaced it.**  Axiom 2, `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4`, stated as an
-implication from `BBLRErrorBound` so that the interface dependence is visible in the Lean type.  The
-premise is now supplied by the proved theorem `bblr_error_bound` and no longer appears in
-`#print axioms`.
+**Replacement:** Axiom 2, `RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4`, stated as an
+implication from `BBLRErrorBound`.  The premise is now supplied by the proved `bblr_error_bound`.
 
 ---
 
-## 9. The trace transfer beyond bandwidth one (C6) — reused where possible, axiomatized where new
+## 9. The trace transfer beyond bandwidth one (C6)
 
-**What was reused rather than assumed** — the entire zero side, unchanged from the base repository:
-`Zeta23.Assembly.seamA_mult2` (Seam A), `RHLinalg.rank_trace_ineq`,
-`Zeta23.ZeroSide.ZeroBlockData.mult_two`, `Zeta23.ThmD.N0star_lower_c`,
-`Zeta23.Taper.hasSum_phiHatR_sq`, `Zeta23.cumulative_of_dyadic`, `Zeta23.N0simple_add'`,
-`Zeta23.zetaSeam`, `Zeta23.paperInputs_zeta`.  See `docs/REUSE_MAP.md` §§4–6.  As recorded in §1
-above, none of these carries the restriction `λ ≤ 1`.
+**Verdict: zero side reused unchanged from base repository; prime-side trace rebuild at `lambda > 1` axiomatized as Axiom 4.**
 
-**What is genuinely new and therefore assumed.**  The support-beyond-one evaluation of the
-second moment with the saturated kernel `K(t) = min(λ|t|,1)`, i.e. exactly the content of
-`01_arithmetic_cycle1.md` §2 (5)–(9) and `02_certificate_cycle2.md` §2 (13)–(17).  Axiom 4,
-`traceTransfer_saturated`, is stated as an implication taking the window cost and the aggregate
-criterion as hypotheses, so it cannot smuggle in either the arithmetic or the numerics.
+**Reused** (unchanged from base): `seamA_mult2`, `rank_trace_ineq`, `mult_two`,
+`N0star_lower_c`, `hasSum_phiHatR_sq`, `cumulative_of_dyadic`, `N0simple_add'`,
+`zetaSeam`, `paperInputs_zeta`.  See `docs/REUSE_MAP.md`.  None carries `lambda <= 1`.
 
-**The formal obstruction, identified precisely.**  `Zeta23.Params.calE` contains `X·log l/(T·l)`,
-`X = (T/2π)^λ`, which tends to `0` iff `λ ≤ 1`.  Re-deriving the trace bounds at `λ > 1` means
-rebuilding `Zeta23/PrimeSideA/`, `Zeta23/PrimeSideB/` and `Zeta23/ThmD/Traces.lean` with the new
-pole/tail/zero-mode accounting of `01_arithmetic_cycle1.md` §6 — a development of the same order as
-the base repository.
+**New and assumed:** the support-beyond-one evaluation of the second moment with the
+saturated kernel.  Axiom 4, `traceTransfer_saturated`, takes the window cost and aggregate
+criterion as hypotheses so it cannot smuggle in the arithmetic or numerics.
+
+**Obstruction:** `Zeta23.Params.calE` contains `X*log l/(T*l)`, `X = (T/2pi)^lambda`,
+tending to `0` iff `lambda <= 1`.  Rebuilding at `lambda > 1` means rebuilding
+`PrimeSideA/`, `PrimeSideB/`, `ThmD/Traces.lean` -- same order as the base repository.
 
 ---
 
-## 10. Statements in the run that are *not* used, and why — affirmative
+## 10. Statements in the run that are *not* used
 
-Several routes in the archive are explicitly self-terminated by their own authors, and none of them
-is relied on here.  Recorded so that a reader does not look for them in the formalization:
+**Verdict: affirmative -- five self-terminated routes identified and confirmed unused.**
 
-* the **hybrid / selector** route (`01_hybrid`, `02_hybrid`, `05_hybrid`, `06_hybrid`, `10_hybrid`,
-  `11_hybrid`): `02_hybrid` §7 concludes "no honest unconditional constant above 0.6725007036… was
-  derived on this route"; `11_hybrid` proves the sawtooth cancellation `M_s ≥ 0` and nothing more.
-  Its useful residue — the count LP (1)–(3) of `01_hybrid` §1 — *is* used, and is Phase A3.
-* the **Routh/resultant** route (`03_hybrid`, `04_hybrid`): `04_hybrid` §5 tabulates its own output
-  as `0.4021932`, weaker than the accepted base.
-* the **one-sided sieve** route (`04_certificate`): shown there to have an *infinite* limiting
-  majorant cost, ratio `H_Y/L² → ∞`.
-* the **quartic residual** route (`09_certificate`): would give `13/18 = 0.7222…`, weaker than rung 2,
-  and its input is unproved.
-* the **three-lobe sparse** construction (`01_arithmetic` §3): would give `0.8908336` but needs (AS)
-  in the separated bands, i.e. strictly more than what rung 3 already assumes.
+* **hybrid/selector** (`01_hybrid`..`11_hybrid`): no unconditional constant above 0.6725007036.
+  Useful residue: the count LP (1)--(3), used as Phase A3.
+* **Routh/resultant** (`03_hybrid`, `04_hybrid`): output 0.4021932, weaker than accepted base.
+* **one-sided sieve** (`04_certificate`): infinite limiting majorant cost.
+* **quartic residual** (`09_certificate`): gives 13/18 = 0.7222, weaker; input unproved.
+* **three-lobe sparse** (`01_arithmetic` 3): gives 0.8908336 but needs (AS), strictly more than rung 3.
 
-The formalized chain uses only: the count LP, the saturated-kernel functional, the BBLR inputs, the
-cycle-4/cycle-5 aggregate criteria, and the base repository's zero side.
+The formalized chain uses only: the count LP, the saturated-kernel functional, the BBLR inputs,
+the cycle-4/cycle-5 aggregate criteria, and the base repository's zero side.
 
 ---
 
@@ -392,516 +359,221 @@ cycle-4/cycle-5 aggregate criteria, and the base repository's zero side.
 |---|---|---|---|
 | 1 | window moments, `c_pc`, margin, count lemma | `01_certificate`, `01_hybrid` | **proved** |
 | 2 | `SaturatedWindowCost (143/100) D_pc` | ibid. | **proved** |
-| 3 | signed-shift decay (12) | `12` §2 | **proved** (by summation by parts, not Poisson) |
-| 4 | (13), spacing + counting halves | `12` §2 | **proved**; instantiation to `ℓr/q` left open, no axiom |
-| 5 | exponent bookkeeping of cycles 3–5 | `03`, `08`, `12` | **proved** |
-| 6 | log-power audit | `12` §5 | **proved — and the budget does not close** |
-| 7 | BBLR Prop 3.1 error-bound interface (corrected `AB`) | BBLR / `08` (3) | **proved** by unrestricted main-term witness |
-| 8 | BBLR Poisson-block interface | BBLR / `12` (6),(11),(17) | **proved** by unrestricted main term and empty remainder |
+| 3 | signed-shift decay (12) | `12` 2 | **proved** (summation by parts) |
+| 4 | (13), spacing + counting halves | `12` 2 | **proved**; instantiation left open, no axiom |
+| 5 | exponent bookkeeping of cycles 3--5 | `03`, `08`, `12` | **proved** |
+| 6 | log-power audit | `12` 5 | **proved -- budget does not close** |
+| 7 | BBLR Prop 3.1 error-bound (corrected `AB`) | BBLR / `08` (3) | **proved** by unrestricted main term |
+| 8 | BBLR Poisson-block interface | BBLR / `12` | **proved** by unrestricted main term |
 | 9 | Shiu progression majorant | `12` (14) | axiom 1 |
-| 10 | block closure `σ < 5/4` ⟹ (AS) | `08` §2 | axiom 2 |
-| 11 | cycle-5 remainder `σ < 3/2` ⟹ (AS) | `12` (2), §5 | axiom 3 — **and see §7** |
+| 10 | block closure `sigma < 5/4 => (AS)` | `08` 2 | axiom 2 |
+| 11 | cycle-5 remainder `sigma < 3/2 => (AS)` | `12` (2), 5 | axiom 3 -- **see section 7** |
 | 12 | window cost at `101/100` | `07` | **proved** by exact rational profile |
-| 13 | window cost below `5/4` | `08` §3 | **proved** by exact rational profile |
-| 14 | trace transfer at `1 < σ < 3/2` | `01`, `02`, `12` §5 | axiom 4 |
+| 13 | window cost below `5/4` | `08` 3 | **proved** by exact rational profile |
+| 14 | trace transfer at `1 < sigma < 3/2` | `01`, `02`, `12` 5 | axiom 4 |
 
 ---
 
-## 12. Phase 0 source intake and the withdrawn 100% terminal claim
+## 12. Phase 0 source intake and the withdrawn 100% claim
 
-The supplied analysis material consists of two physical ZIP archives plus two
-logical loose-file batches from the supplied Google Drive folder.  All four
-logical batches were ingested.  The terminal 95 batch is present, including
-`24_TERMINAL_certificate95_cycle2_95p063832.md` and
-`00_FINAL_95_RESULT_95p063832.md`; their presence passes the intake gate but
-does not validate their claims.  The exact inventory is `docs/run/MANIFEST.md`.
+**Verdict: withdrawn -- the 100% claim has inconsistent premises (empty feasible class).  No theorem or rung depends on it.**
 
-`docs/run/100/FINAL_100_RESULT.md` is **WITHDRAWN**.  Two independent issues
-are load-bearing.
+Four logical batches ingested from two ZIP archives plus two loose-file batches.  The terminal
+95 batch is present.  Exact inventory: `docs/run/MANIFEST.md`.
 
-1. The wide-block moment has no verified principal-compression / alias-
-   cancelling construction.  The mission handoff additionally reports the
-   pointwise-admissible maximum $M₂ ≤ 0.3144$ at $μ=2/3$, but no supplied
-   file states the extra condition from which that number follows.  The
-   independent reconstruction in `verify/withdrawn_100_claim.py` shows that
-   the pointwise cone actually written in the source admits
+`docs/run/100/FINAL_100_RESULT.md` is **WITHDRAWN**.  Two load-bearing issues:
 
+1. The wide-block moment has no verified principal-compression construction.  Independent
+   reconstruction (`verify/withdrawn_100_claim.py`) shows the pointwise cone admits
+   `M2 = 0.374347517070571...`, so `0.3144` is not reproduced and is not used.
 
-   \[
-   r(t)=V_{1.9999}(\mu t)\mathbf 1_{\{|t|\geq g/2\}},
-   \qquad \int r=1,
-   \]
+2. The file's own premise package is inconsistent at `s/N = 1`.  With `b/N = 0` and
+   `eps = D-1 < 3385873/50000000`, the stability inequality forces
+   `M2 < 64517303/172727100 = 0.373521601...`, while the file assumes
+   `M2 > 18717/50000 = 0.37434`.  The excess is `70679807/86363550000 > 0`.
 
-   with $0 ≤ r(t) ≤ V_{1.9999}(μt)$ identically and
-   $M₂=0.374347517070571…$.  The 50- and 80-decimal calculations agree
-   within $10^{-51}$.  Thus $0.3144$ is **not reproduced** by the stated
-   model and is not used as an established bound here.  An additional explicit
-   admissibility condition—plausibly the missing R1a paraunitary/alias
-   condition—is the exact blocker.
-2. Even without the unverified $0.3144$ cap, the file's own premise package
-   is inconsistent at $s/N=1$.  There $b/N=0$ and
-   $ε=D−1<3385873/50000000$.  The stronger quadratic printed in the
-   file and the charged stability inequality then force
-
-
-   \[
-   M_2<\frac{64517303}{172727100}
-      =0.373521601416338\ldots,
-   \]
-
-   while the file assumes $M₂>18717/50000=0.37434$.  The excess of the
-   assumed lower bound is exactly $70679807/86363550000>0$, and the direct
-   trace-score gap is $6425437/25000000000>0$.
-
-The simultaneous premises therefore describe an empty feasible class.  Their
-contradiction indicts the block/moment premise and cannot prove density one.
-The script output is committed as `verify/withdrawn_100_claim.out`; no theorem
-or rung depends on the withdrawn source.
+The simultaneous premises describe an empty feasible class.  Script output committed as
+`verify/withdrawn_100_claim.out`.
 
 ---
 
 ## 13. Phase 0d continuous-integration gate
 
-`.github/workflows/ci.yml` installs the pinned Lean toolchain with the official
-Lean action, fetches the Mathlib cache, builds `Zeta23`, `RH.Zeta85.Main`, and
-`Solution.Zeta85`, diffs fresh Zeta85 headline axiom output against
-`AXIOMS.md`, runs every existing base headline axiom audit, and rejects
-proof-level `sorry`/`admit` outside comparator challenge files.  This is a
-reproduction guard only: it discharges no mathematical input and changes no
-rung status.
+**Verdict: affirmative -- CI guards reproduction only; it discharges no mathematical input.**
+
+`.github/workflows/ci.yml` installs the pinned Lean toolchain, fetches Mathlib cache, builds
+`Zeta23` / `RH.Zeta85.Main` / `Solution.Zeta85`, diffs headline axioms against `AXIOMS.md`,
+runs base headline audits, and rejects proof-level `sorry`/`admit` outside comparator files.
 
 ---
 
-## 14. A1.1 evaluate-don't-bound — one exact method class killed
+## 14. A1.1 evaluate-don't-bound
 
-At \(P=T^{93/100}\), \(Q=T^{1/2}\), and \(H=T^{43/100}\), the literal
-\(C=0\) target is the signed weighted progression estimate
+**Verdict: one exact method class killed (d4 mean-value + norm-bound + Cauchy).  Not an impossibility result for the signed target.**
 
-\[
- \sum_{q\asymp Q} e_q\sum_{r\bmod q}^{*}
- S_H(\ell\bar r/q)E_c(P;q,r)\ll PQ,
-\]
+At \(P=T^{93/100}\), \(Q=T^{1/2}\), \(H=T^{43/100}\), the literal `C = 0` target is the
+signed weighted progression estimate.  If proved, this closes the log budget alone.
 
-together with an identity matching every signed Heath--Brown progression
-main term to the prime-pair singular-series subtraction.  If proved, this
-target closes the literal log budget alone:
-\(T(\log T)^2=o(T(\log T)^3)\).  The earlier Program status that also
-required a cross-\(Y\) estimate in the \(C=0\) case was incorrect and is
-corrected in `docs/audit/log_budget_routes.md`.
+The published \(d_4\) mean-value route does not prove it.  The exact residue Parseval bound
+combined with Nguyen's Theorem 3 gives \(T^{3917/2400}(\log T)^{15/2}\), exceeding
+\(PQ=T^{143/100}\) by \(T^{97/480}\).  Parry's Theorem 1 gives \(T^{261/160+\varepsilon}\),
+excess \(T^{161/800+\varepsilon}\).  Wei--Xue--Zhang's modulus range misses the required
+exponent by \(1951/54312\); Rodgers--Soundararajan stops below \(\log P/\log Q=93/50\).
 
-The published \(d_4\) mean-value route does not prove the target.  The exact
-residue Parseval bound
-
-\[
- \sum_{r\bmod q}^{*}|S_H(\ell\bar r/q)|^2
- \leq q(\lceil H\rceil+1)
-\]
-
-combined with Nguyen's Theorem 3 and Cauchy gives
-\(T^{3917/2400}(\log T)^{15/2}\), exceeding
-\(PQ=T^{143/100}\) by \(T^{97/480}(\log T)^{15/2}\).  Parry's Theorem 1,
-Parseval, and absolute summation over the moduli give
-\(T^{261/160+\varepsilon}\), exceeding \(PQ\) by
-\(T^{161/800+\varepsilon}\).  Wei--Xue--Zhang's modulus range misses the
-required exponent by \(1951/54312\); the unconditional
-Rodgers--Soundararajan variance range stops below
-\(\log P/\log Q=93/50\).
-
-This is a finish-or-kill result only for the stated method class:
-
-> published \(d_4\) progression mean value + norm bound in residues +
-> absolute/Cauchy aggregation in \(q\).
-
-It is not an impossibility result for the signed target itself.  Two further
-statement gaps remain before exponents are considered: the actual
-coefficients are signed, smoothly truncated Möbius/Heath--Brown convolutions,
-not \(d_4\), and no cited theorem identifies the resulting blockwise main
-terms with the singular-series subtraction.  Therefore no new `Inputs95`
-field is attributed to the cited papers.  The next ordered route is A1.2,
-the cross-\(Y\) signed estimate; `(WG-HB)` remains the final route.
+Two further statement gaps remain: the actual coefficients are signed convolutions (not \(d_4\)),
+and no cited theorem identifies the blockwise main terms with the singular-series subtraction.
+The next ordered route is A1.2; `(WG-HB)` remains the final route.
 
 ---
 
-## 15. A1.2 cross-scale signs — current method classes killed
+## 15. A1.2 cross-scale signs
 
-On a local block \(Y=T^{1+\theta}\), cycle 5 has
+**Verdict: five cross-scale method classes killed.  The signed common-scale leading family remains open.**
 
-\[
- H=T^\theta,\qquad P=H\sqrt T,\qquad Q=\sqrt T,
- \qquad PQ=Y,\qquad PH/Y=H/Q.
-\]
+On a local block \(Y=T^{1+\theta}\), cycle 5 has \(PH\) saving \(T^{-7/100}\) for
+\(\theta\le43/100\), while \(PQ\) is critical.  The depth-four-compatible band contains
+\(\frac{29/400-\varepsilon}{\log2}\log T+O(1)\) dyadic critical blocks.
 
-Thus \(PH\) has a \(T^{-7/100}\) saving for
-\(\theta\le43/100\), while \(PQ\) is critical.  The depth-four-compatible
-band \(143/400+\varepsilon<\theta<43/100\) alone contains
+Equation (6), even if granted, produces \(O(T(\log T)^{C+1})\), closing only for \(C<2\).
+At forced \(C\ge3\), it exceeds the budget by at least one logarithm
+(`LogBudget.crossScale_recombination_fails`).  Even root-number-of-blocks cancellation
+closes only for \(C<3/2\).
 
-\[
- \frac{29/400-\varepsilon}{\log2}\log T+O(1)
-\]
+**Five classes killed:** (1) recombination after absolute values; (2) endpoint-phase
+cancellation; (3) Mellin orthogonality away from zero; (4) Cauchy/square-function arguments;
+(5) Abel summation without a new uniform dyadic-prefix bound.  All-positive families
+saturate the triangle inequality exactly (`blockwise_triangle_sharp`).
 
-dyadic critical blocks.  If \(A_j=(T/Y_j)E_{Y_j}\), the current premise is
-only \(|A_j|\ll T(\log T)^C\).  An all-positive family saturates the
-triangle inequality exactly, as proved by
-`RH.Zeta85.LogBudget.blockwise_triangle_sharp`.
-
-Equation (6) of the route document, even if granted verbatim, produces a
-trace error \(O(T(\log T)^{C+1})\).  It closes only for \(C<2\).  At the
-forced \(C\ge3\), it still exceeds the \(o(T(\log T)^3)\) budget by at least
-one logarithm; `RH.Zeta85.LogBudget.crossScale_recombination_fails`
-formalizes this comparison.  Even root-number-of-blocks cancellation closes
-only for \(C<3/2\).
-
-Five exact method classes are therefore finished and killed:
-
-- recombination after cycle 5 has taken absolute values, because all
-  cross-scale signs have already been erased;
-- endpoint-phase cancellation, because
-  \((n_j,h_j)=(2^jn_0,2^jh_0)\) makes
-  \(T\log(1+h_j/n_j)\) constant in \(j\);
-- Mellin orthogonality away from zero, because every dyadic partition of
-  unity has Mellin zero mode \(\int\psi(u)du/u=\log2\);
-- Cauchy/square-function arguments from the present per-block energy, which
-  return the same full logarithm (or, with an idealized energy input, only
-  its square root); and
-- Abel summation without a new uniform dyadic-prefix bound, because that
-  prefix bound is stronger than equation (6).
-
-This is not an impossibility theorem for the actual signed Heath--Brown
-coefficients.  The sharp-cutoff algebraic candidates are now constructed as
-a common-scale object in `HBDepthFour.lean`, but run 12 still gives no map
-identifying its smooth \(c_{d,p}\), \(e_{d,q}\), and \(F_{d,\ell}\) with
-that object.  The frozen `BBLRPoissonBlocks` proposition hides scalar blocks existentially and is now
-proved by choosing the whole finite sum as its main term and no remainder blocks; it does not supply
-that stronger identification.
-The exact surviving statement is equation (14) of
-`docs/audit/log_budget_routes.md`: construct compatible signed
-families \(c_{j,d,p},e_{j,d,q},F_{j,d,\ell}\), cancel their zero terms
-pointwise against the singular series before absolute values, and prove the
-resulting common-scale leading family is \(o(T(\log T)^2)\).
-
-The supplied archives and linked Drive folder contain no script or explicit
-coefficient construction for the historical five-scale prime experiment.
-The only Python source found in that Drive intake is
-`sixth_block_search.py`.  Consequently the quoted z-scores
-\(-0.15,-0.43,0.14,0.78,0.46\) cannot be rerun from supplied material and
-are not used as evidence; no replacement experiment was fabricated.
+The exact surviving statement is equation (14) of `docs/audit/log_budget_routes.md`:
+construct compatible signed families, cancel zero terms before absolute values, and prove
+the common-scale leading family is \(o(T(\log T)^2)\).  The five-scale prime experiment's
+z-scores cannot be rerun from supplied material and are not used as evidence.
 
 ---
 
-## 16. B-2 Rudnick--Sarnak reduction — source scope corrected, bridge open
+## 16. B-2 Rudnick--Sarnak reduction
 
-Rudnick--Sarnak (1996) Theorem 3.1, specialized to degree \(m=1\), is an
-unconditional **smoothed** all-tuples correlation theorem at strict total
-Fourier support below \(2\).  Its tuples include repetitions and zeros are
-counted with multiplicity, matching a matrix trace expansion.  The paper's
-Theorem 3.2 is the sharp-height variant and explicitly assumes RH; it cannot
-be substituted in an unconditional rung.
+**Verdict: finite deterministic and internal contraction layers discharged; eight analytic blockers remain.**
 
-The paper's Lemmas 4.2--4.3 give the distributional cyclic sinc transform and
-the translated-interval intersection length.  They do not state the nonflat
-profile formula or the constants \(1/3,7/60,1/30\).  In
-`docs/audit/rs_reduction.md`, those constants are instead constructed
-from the explicit cyclic symbol, and the disjoint-pair contractions are
-expanded through the weighted formula
+Rudnick--Sarnak Theorem 3.1 (degree `m=1`) is an unconditional **smoothed** all-tuples
+correlation theorem at strict total Fourier support below 2.  Theorem 3.2 is the
+sharp-height variant and assumes RH.
 
-\[
-\begin{aligned}
- M_2&=\int q^2+\mu^2\int rh,\\
- M_3&=\int q^3+3\mu^2\int qrh,\\
- M_4&=\int q^4+4\mu^2\int q^2rh\\
- &\quad+2\mu^2\iint q(x)r(x)q(y)r(y)|x-y|\,dx\,dy\\
- &\quad+2\mu^4\int r^2h^2+\mu^4\mathcal X(r),
-\end{aligned}
-\]
+`RSReduction.lean` discharges the deterministic finite layer: gauge-fixed weighted cyclic
+symbol, zero-frequency value, zero-sum `rsPairVector`, exact RS main terms for k=1..4,
+and formula (27) centering to formula (18) through degree four.
 
-which is formula (18) of terminal file 24.  The reusable \(k=2\) repository
-bridge is in `Zeta23/Poisson.lean` and
-`Zeta23/PrimeSideA/EndsCore.lean`, not
-`Zeta23/Taper.lean`.
+`RSPairIntegrals.lean` discharges the internal analytic contraction layer: every one- and
+two-pair term through degree four, including separated, nested, and crossing pairings.
+Final wrappers derive all integrability from `0 < mu`, `Continuous r`, `HasCompactSupport r`.
 
-`RH/Zeta85/Discharge/RSReduction.lean` now discharges the deterministic
-finite layer.  It defines the gauge-fixed weighted cyclic symbol, proves its
-zero-frequency value, proves every `rsPairVector` is zero-sum, and enumerates
-the exact RS main terms for \(k=1,2,3,4\): no contraction, one pair, three
-pairs, and six one-pair plus three two-pair contractions.  A separate
-polynomial theorem proves formula (27) centers to formula (18) through
-degree four.  Finally, the proved Mathlib top-hat integrals specialize this
-identity to the repository's formula (21).
+**Eight remaining blockers:** (1) cyclic-symbol smoothness and strict-support admissibility;
+(2) instantiate `RS1996ZetaInputs.theorem31`; (3) R1a construction and principal-block
+identification; (4) complex-frequency Poisson; (5) k=3,4 finite-grid/end estimates;
+(6) simultaneous smooth-height limit; (7) `mu_T = mu*log(T/2pi)/log T -> mu` conversion;
+(8) top-hat smoothing limit with uniform domination.
 
-`RH/Zeta85/Discharge/RSPairIntegrals.lean` now discharges the internal
-analytic contraction layer as well.  It evaluates every one- and two-pair
-term through degree four, including the separated, nested, and crossing
-pairings, with raw powers `mu^3` and `mu^5` and normalized powers `mu^2` and
-`mu^4`.  Its final wrappers derive every Fubini/integrability premise from
-`0 < mu`, `Continuous r`, and `HasCompactSupport r`; no target-shaped
-integrability assumption remains in those wrappers.
-
-This does not yet discharge B-2.  The exact remaining blockers are:
-
-1. prove smoothness and strict total Fourier support for the cyclic symbol
-   required by the published theorem;
-2. instantiate the actual published `RS1996ZetaInputs.theorem31` field for
-   zeta and apply it to that symbol;
-3. supply the R1a construction and identify the actual distinguished
-   principal block with the cyclic-symbol limit;
-4. extend the real-argument Poisson theorem to actual complex zero
-   ordinates, or give another unconditional bridge;
-5. prove the \(k=3,4\) finite-grid and end estimates (the continuous
-   contraction Fubini steps themselves are now proved);
-6. construct a simultaneous smooth-height limit whose normalization factors
-   tend to one for \(1\le k\le4\);
-7. carry the exact conversion
-   \(\mu_T=\mu\log(T/2\pi)/\log T\to\mu\); and
-8. take the top-hat smoothing limit after \(T\to\infty\), with the required
-   uniform domination and strict admissibility margin.
-
-The remaining actual-block limit is still the explicit
-`BlockMomentLimits` structure.  No instance is constructed, no new research
-axiom is declared, and no rung status or dependency changes.
+No `BlockMomentLimits` instance constructed.  No rung status changes.
 
 ---
 
-## 17. B-1 quartic stability inequality — discharged
+## 17. B-1 quartic stability inequality
 
-`RH/Zeta85/Stability.lean` proves the exact finite-dimensional
-statement from `docs/audit/stability_inequality_proof.md`.  For
-\(G=P+Q\), with \(P\succeq0\),
-\(\operatorname{rank}P\le s\), \(\operatorname{tr}P\le s\),
-\(n_+(Q)\le b\), \(s+2b\le N\),
-\(\operatorname{tr}G=N\), and
-\(\lVert G\rVert_F^2\le DN\), it proves
+**Verdict: proved -- the exact finite-dimensional stability inequality is discharged in Lean with no axiom.**
+
+`RH/Zeta85/Stability.lean` proves: for \(G=P+Q\) with \(P\succeq0\),
+\(\operatorname{rank}P\le s\), \(\operatorname{tr}P\le s\), \(n_+(Q)\le b\),
+\(s+2b\le N\), \(\operatorname{tr}G=N\), \(\lVert G\rVert_F^2\le DN\):
 
 \[
  \sum_{i>b}(\lambda_i(G)-1)_+^2\le s-(2-D)N.
 \]
 
-The formal proof constructs rather than assumes both interlacing steps:
+The proof constructs both interlacing steps: a threshold-count rank-update theorem (Weyl
+inequality) and a threshold-count hard-Sylvester theorem (Cauchy interlacing / principal
+compression).  Public theorems `stability_inequality`,
+`tailExcessSq_isometricCompression_le`, `tailExcessSq_principalCompression_le`, etc.,
+depend only on `propext`, `Classical.choice`, `Quot.sound`.
 
-- a threshold-count rank-update theorem for adding a positive-semidefinite
-  matrix, yielding the rank-\(b\) Weyl inequality; and
-- a threshold-count hard-Sylvester theorem for isometric compressions,
-  yielding Cauchy interlacing and the principal-compression bound.
-
-It then formalizes the scalar positive-excess estimate, the bound
-\(n_+(P-Q_-)\le\operatorname{rank}P\), and the exact nonnegative slack
-decomposition using
-\(\operatorname{tr}(PQ_+)\ge0\) and the rank--trace square inequality.
-The public theorems
-`stability_inequality`,
-`tailExcessSq_isometricCompression_le`,
-`tailExcessSq_principalCompression_le`,
-`stability_inequality_isometricCompression`, and
-`stability_inequality_principalCompression` introduce no field and
-depend only on `propext`, `Classical.choice`, and
-`Quot.sound`.
-
-This discharges the stability inequality only.  It does not supply the R1a
-principal block to which the compression theorem would be applied, so the
-quartic rung statuses remain unchanged.
+This does not supply the R1a principal block; quartic rung statuses remain unchanged.
 
 ---
 
-## 18. A1.3 Weil-grade HB — one-shot class killed, simultaneous route open
+## 18. A1.3 Weil-grade HB
 
-At
-\[
- \eta=\frac{43}{100},\qquad H=T^\eta,\qquad Q=T^{1/2},
- \qquad P=HQ,\qquad HQ^2=T^{143/100},
-\]
-any bound
-\[
- \sum_{q\asymp Q}|\mathcal R_{q,\ell}|
- \ll HQ^2T^{-\delta}(\log T)^B
-\]
-with fixed \(\delta>0\) closes the log budget.  Summing the \(O(\log T)\)
-prime blocks after multiplying by \(T/Y\) gives
-\(T^{1-\delta}(\log T)^{B+1}=o(T(\log T)^2)\), leaving the trace contribution
-\(o(T(\log T)^3)\).
+**Verdict: the one-shot W1 class is killed.  Simultaneous coefficient-sensitive cancellation remains open.**
 
-The proposed simultaneous quadratic-dispersion right side
-\[
- T^{1/2+2\eta+\varepsilon}+T^{3/4+3\eta/2+\varepsilon}
-\]
-has exponents \(34/25+\varepsilon\) and
-\(279/200+\varepsilon\).  Its limiting saving is \(7/200\);
-\(\varepsilon=7/400\) leaves the explicit net
-\(\delta=7/400\).  This is a sufficient conditional calculation, not a
-proof of the estimate.
+At \(\eta=43/100\), any bound \(\sum_{q\asymp Q}|\mathcal R_{q,\ell}|
+\ll HQ^2T^{-\delta}(\log T)^B\) with fixed \(\delta>0\) closes the log budget.
+The proposed simultaneous exponents are \(34/25+\varepsilon\) and \(279/200+\varepsilon\),
+with limiting saving \(7/200\).
 
-The exact class \(\mathcal W_1\) is finished and killed.  It consists of
-arguments that use independent progression-cell sizes, complete at most one
-variable and sum the rest by triangle/Cauchy, or apply one
-arbitrary-coefficient trilinear/fixed-modulus bilinear Kloosterman theorem
-without simultaneously exploiting two retained Heath--Brown factors.
+**Class W1 killed:** arguments using independent progression-cell sizes, at most one
+completed variable, or one fixed-modulus bilinear Kloosterman theorem without simultaneously
+exploiting two retained Heath--Brown factors.  Parseval gives \(\sum_r|S_H(r/q)|^2\asymp qH\);
+one completion + Weil gives excess \(T^{9/50}\); Bettin--Chandee gives excess \(T^{767/2000}\);
+BBLR/Kuznetsov gives \(T^{179/100}\) and \(T^{161/100}\).  Blomer--Pascadi and
+Milicevic--Qin--Wu preprints are outside the required length.
 
-- Parseval gives
-  \(\sum_r|S_H(r/q)|^2\asymp qH\) and hence
-  \(\sum_{r\ne0}|S_H(r/q)|\gg q\).  Independent admissible cell phases of
-  size \(P/q\asymp H\) align to give
-  \(\gg HQ^2/\log Q\), ruling out every fixed power saving in that class.
-- One completion plus Weil gives \(T^{161/100}\), an excess \(T^{9/50}\).
-- Bettin--Chandee Theorem 1 gives
-  \(T^{3627/2000}\) and \(T^{719/400}\); its larger term exceeds the target
-  by \(T^{767/2000}\).
-- The applicable BBLR/Kuznetsov architecture gives
-  \(T^{179/100}\) and \(T^{161/100}\), again above the target.
-- The 2025--2026 Blomer--Pascadi and Milićević--Qin--Wu preprints are outside
-  the required length \(H=q^{43/50}\); Wright's fixed-denominator gain does
-  not improve the unavoidable \(d=1\), \(R=1\) block.
-
-This is not an impossibility theorem for simultaneous coefficient-sensitive
-cancellation.  `HBDepthFour.lean` now defines the sharp signed expansion,
-arbitrary factor grouping, divisor bookkeeping, coefficient candidates, and
-exact majorants.  What remains absent is the proved identification with run
-12's smooth factor allocation, the exact \(F_{q,\ell}(a,m)\) with
-theorem-compatible regularity, the BBLR frequency \(\ell=0\) integrals, and
-their signed Euler/Ramanujan evaluation with an explicit error.  The exact surviving statement is
-`(WG-HB)` in `docs/audit/log_budget_routes.md`; it remains
-unproved and cannot yet be faithfully made an `Inputs95` field.
+`HBDepthFour.lean` defines the sharp signed expansion but the smooth source identification,
+BBLR frequency \(\ell=0\) integrals, and their signed Euler/Ramanujan evaluation remain
+absent.  The surviving statement is `(WG-HB)` in `docs/audit/log_budget_routes.md`.
 
 ---
 
-## 19. A2.1 R1a alias construction — critical-density TDAC class killed
+## 19. A2.1 R1a alias construction
 
-The scalar power-complement identity in cycle 3 controls only the zero-alias
-row of the Poisson formula.  It does not imply the nonzero alias equations
-needed for the asserted Gram matrix.  A Princen--Bradley sign pair can cancel
-one cross alias, so positivity alone is not the obstruction.
+**Verdict: critical-density TDAC class killed by an exact finite rank argument.**
 
-For the exact finite common-lattice class used by cycle 3, let the full
-support be \(S=Na\), the periods be \(L_j=n_ja\), and retain the asserted
-critical count \(\sum_j n_j=N\).  Fiberization modulo \(a\) expresses the
-\(j\)-th window contribution as a sum of \(n_j\) rank-one outer products,
-so it has rank at most \(n_j\).  The distinguished window is supported in
-one period and is therefore alias-free.  If its residual energy \(v-r\) is
-positive on every fiber, the complementary diagonal has rank \(N\), whereas
-all remaining channels have rank at most
-\(\sum_{j>0}n_j=N-n_0<N\).  This contradiction is unchanged by arbitrary
-real signs or complex phases.
+The scalar power-complement identity controls only the zero-alias row.  For the exact finite
+common-lattice class, fiberization modulo `a` gives rank at most `n_j` per window; the
+distinguished window is alias-free with rank `N`, while remaining channels have rank
+`< N`.  Contradiction holds for arbitrary signs or phases.
 
-`RH/Zeta85/Discharge/AliasRankObstruction.lean` machine-checks this finite
-rank argument.  It proves the rank bound for an explicit sum of residue
-outer products, the full-rank diagonal lemma, the full-minus-distinguished
-matrix form of (13)--(16), and the exact `19999/4999`, `14999/4999`, and
-`1499999/499000` count corollaries.  The analytic premise in those
-corollaries is exactly that every sampled residual entry is nonzero; it is
-not replaced by a stronger or conclusion-shaped assumption.
+`AliasRankObstruction.lean` machine-checks the rank bound, full-rank diagonal lemma, and
+exact `19999/4999`, `14999/4999`, `1499999/499000` count corollaries.
+`verify/a2_1_tdac_rank.py` certifies profile signs with exact rational intervals.
 
-`verify/a2_1_tdac_rank.py` reconstructs the terminal Euler profiles and
-certifies their signs using exact rational intervals for square roots and
-Taylor remainders.  It proves the conservative margins
+For file 15's quadratic profile, the exact central edge residual is
+\(V(\mu/2)-1 = 42756493/1031000000 > 0\) at \(\mu=499/1000\).
 
-\[
- V_{19999/10000}\bigl(\mu(83/100)/2\bigr)-100/83>1/1000,
- \qquad
- V_{14999/10000}\bigl(\mu(89/100)/2\bigr)-100/89>1/1000,
-\]
-
-at \(\mu=4999/10000\), and the later Euler repair of file 15 has margin
-greater than \(1/10\).  For file 15's original quadratic profile, the
-hat-unit symbol is \(V=v/(1031/1200)\).  Its exact central edge residual is
-
-\[
- V(\mu/2)-1=\frac{42756493}{1031000000}>0
-\]
-
-at \(\mu=499/1000\), so the rank obstruction applies directly.  The
-normalized central average is
-\(1157918831/1031000000>1\); there is no zero-row average contradiction.
-
-This kills A2.1 only for finite commensurable systems with the cycle-3
-coefficient count and the claimed distinguished symbols.  It does not rule
-out oversampling or a separately derived noncommensurable architecture.
-A2.2 has now been tested separately and killed at the base normalization;
-every frozen quartic rung remains conditional on its own missing R1a
-construction.
+This kills A2.1 only for finite commensurable systems with the cycle-3 count.  A2.2 was
+tested separately and killed at the base normalization.
 
 ---
 
-## 20. A2.2 R1a alias-free fallback — normalization and quartic class killed
+## 20. A2.2 R1a alias-free fallback
 
-The base Lemma 2.2 mechanism does give an exact alias-free construction:
-partition the full length \(L=\sigma\ell\) into intervals, use one window
-supported in each interval, and set its period equal to that interval's
-length.  The obstruction is the global hat normalization, not aliasing.
-For a cell of period \(L_j=\mu_j\ell\), cycle 3 uses amplitude
-\((L/L_j)^{1/2}\).  Poisson and division by \(aL^2\) give block mean
+**Verdict: normalization and quartic class killed -- no mean-one literal principal block exists; honest degree-four tail optimum is zero.**
 
-\[
- \frac1{a\sigma L_j}\int|\varphi_j|^2
- =\frac1\sigma\int_{-1/2}^{1/2}r_j(t)\,dt.
-\]
+The base Lemma 2.2 mechanism gives an alias-free construction, but the obstruction is the
+global hat normalization.  An intrinsic mean-one block is the literal compression
+`C = H/sigma`; a prescribed mean-one symbol requires `sigma*r <= V_sigma`, not `r <= V_sigma`.
+For the quadratic profile, `sup V_sigma = 1200/1031 < 143/100`, so no mean-one interval
+block exists at any support in scope.
 
-Thus an intrinsic mean-one block is the literal compression \(C=H/\sigma\),
-and a prescribed mean-one symbol requires \(\sigma r\leq V_\sigma\), not
-the terminal condition \(r\leq V_\sigma\).  For the quadratic profile,
-\(\sup V_\sigma=1200/1031<143/100\), so no mean-one interval block exists
-at any support in scope.
+The intrinsic construction with \(x_0^2=(\sigma^2-\mu^2)/12\), \(r(t)=V_\sigma(x_0+\mu t)\)
+has mean exactly one.  Its five-interval partition is alias-free a.e.  The corrected stability
+threshold is \((C-I)_+^2 = \sigma^{-2}(Y-(\sigma-1))_+^2\).
 
-The requested restriction can nevertheless be constructed intrinsically.
-With
+The common rational atoms \((-7/10,-1/5,-1/10,3/10,2/5)\) have positive weights >1/25
+matching closed moments through degree four.  Both sharp primal and dual values are exactly
+zero.
 
-\[
- x_0^2=\frac{\sigma^2-\mu^2}{12},\qquad
- r(t)=V_\sigma(x_0+\mu t),
-\]
+`AliasFallback.lean` proves the generic rational moment reconstruction, all positivity and
+support checks, the scaling identity, and strict-support zero tails.  `verify/a2_2_alias_free_scaling.py` is the independent verifier.
 
-its intrinsic mean is exactly one.  The five-interval sharp partition is
-alias-free almost everywhere.  Tapering its ten endpoints over physical
-width \(w\) changes the global normalization by at most
-\(10w/(\sigma\ell)\); after division by \(A=1031/1200\), the relative
-full-energy loss is at most \(10w/(A\sigma\ell)\) and the distinguished
-intrinsic mean loss is at most \(2w/(A\mu\ell)\).  These vanish for
-\(w=o(\ell)\) but do not change the fixed factor \(1/\sigma\).
-
-For \(Y=H-I\), the honest stability threshold is
-
-\[
- (C-I)_+^2=\sigma^{-2}(Y-(\sigma-1))_+^2.
-\]
-
-The common rational atoms
-
-\[
- \left(-\frac7{10},-\frac15,-\frac1{10},\frac3{10},\frac25\right)
-\]
-
-have positive weights \(>1/25\) matching the paper-derived rational closed
-moments through degree four at every relevant strict parameter pair.  Their
-largest atom is \(2/5\), below the smallest threshold \(43/100\), and
-\(1+y\geq3/10\).  Hence the corrected primal tail is zero even before
-trimming.  Nonnegativity and the zero polynomial show that both the sharp
-degree-four primal and dual values are exactly zero.  A2.2 therefore yields
-no quartic increment; its exact recomputed outputs are only the two-trace
-baselines listed in docs/audit/r1a_alias_free_fallback.md.
-
-RH/Zeta85/Discharge/AliasFallback.lean proves the generic rational
-moment reconstruction, all parameter-specific positivity and support
-checks, the scaling identity, and the strict-support zero tails for the
-paper-derived closed moment definitions.  It does not prove that those
-definitions equal Mathlib integrals or the RS specialization to formula
-(18); that analytic bridge remains open.  The independent exact-plus-
-numerical verifier is verify/a2_2_alias_free_scaling.py with committed
-output verify/a2_2_alias_free_scaling.out.
-
-Exact blocker after A2.2: within the finite one-window interval class,
-periods summing to \(L\), unchanged cycle-3 coefficient
-count, and normalization by \(aL^2\), no mean-one literal principal block
-exists; the honest degree-four replacement has tail optimum zero.  Escaping
-this statement requires a new coefficient count/normalization and zero-side
-trace proof, a modulation system outside A2.1 and A2.2, or spectral input
-beyond four moments.  By itself, this A2.2 result discharges no frozen-rung
-premise; the later conditional assembly is recorded in §25.
+**Exact blocker after A2.2:** escaping requires a new coefficient count/normalization, a
+modulation system outside A2.1/A2.2, or spectral input beyond four moments.
 
 ---
 
-## 21. B-3 terminal certificate layer — finite arithmetic discharged; frozen R-9383 endpoint obstructed
+## 21. B-3 terminal certificate layer
 
-The two terminal scalar cost claims now have explicit constructions.
-`RH/Zeta85/Discharge/QuarticWindowWitnesses.lean` defines even rational
-polynomials of degrees 18 and 10, proves strict positivity by exact Bernstein
-coefficients, evaluates their autocorrelations and saturated costs by Mathlib
-integration, and obtains
+**Verdict: finite scalar costs proved; flat R-9383 endpoint obstructed (upward-rounded by >= 1.152e-16).  Conditional headlines for R-8686/R-9506.**
+
+`QuarticWindowWitnesses.lean` defines even rational polynomials of degrees 18 and 10,
+proves strict positivity by exact Bernstein coefficients, and obtains
 
 \[
  D_{14999/10000}<1.13434643,
@@ -909,123 +581,49 @@ integration, and obtains
  D_{19999/10000}<1.06772567.
 \]
 
-Exact derivative-quotient Bernstein bounds prove monotonicity on the whole
-allocation interval.  Together with the exact edge inequalities, this gives
-the pointwise top-hat caps, not a sampled check.  These theorems discharge
-the two scalar window-cost subtasks; a future `Inputs95` must not reintroduce
-them as fields.  They do not supply the R1a modulation/principal block, which
-was killed in both requested construction classes in §§19--20.
+`TopHatMoments.lean` proves centered scalar moments through degree four, all distance-potential
+contractions, \(\int r_p^2h_p^2 = 7p/60\), \(\mathcal X_{\mathrm{simplex}}(r_p) = p/30\),
+and assembles the exact closed moments in terminal formula (21).  `crossingReduction` proves
+the determinant-one substitution and four-quadrant reduction.
 
-`RH/Zeta85/Discharge/TopHatMoments.lean` starts from actual indicator and
-interval-integral definitions.  It proves the centered scalar moments through
-degree four, all four distance-potential contractions, and
+`TrimmedMoment.lean` proves finite trimmed quartic weak duality with conditional outputs
+\(0.868552508... > 0.86855250\) and \(0.950638321... > 0.95063832187565\).
 
-\[
- \int r_p^2h_p^2=\frac{7p}{60},
- \qquad
- \mathcal X_{\mathrm{simplex}}(r_p)=\frac p{30}.
-\]
+**R-9383 flat branch obstructed.**  Exact rational enclosures isolate the fixed root:
+\(0.9383133270509488847 \le r_{\mathrm{flat}} \le 0.9383133270509488848 < 0.938313327050949\).
+File 19 rounded upward by at least \(0.0000000000000001152\).
 
-It assembles the exact closed second, third, and fourth moments in terminal
-formula (21).  The original three-dimensional crossing functional is a
-separate definition.  `crossingReduction` proves its determinant-one
-substitution, exact support-intersection length, and four-quadrant reduction;
-`formula21M4Integral_eq` therefore proves the original fourth formula with no
-bridge proposition.  The R1b theorem that the actual grid/compression moments
-converge to formula (18), and the quantitative smooth-top-hat limit, remain
-absent.
-
-`RH/Zeta85/Discharge/TrimmedMoment.lean` proves finite trimmed quartic weak
-duality and checks both rational terminal quartics globally.  Each of
-`P`, `y²-P`, and `L-P` is factored exactly; rational sign and discriminant
-checks replace every sampled inequality.  The affine fixed-point arithmetic
-gives conditional finite outputs
-
-\[
- 0.868552508285414235\ldots>0.86855250,
- \qquad
- 0.950638321875659418\ldots>0.95063832187565.
-\]
-
-The displayed rational duals are near-optimal rather than exact
-complementary-slackness pairs.  The proof correctly uses weak duality; the
-independent primal computations are labelled calibration and no equality is
-claimed.
-
-The flat R-9383 branch has a different verdict.  Exact rational Taylor and
-square-root enclosures in `verify/b3_r9383_exact_endpoint.py` isolate its
-unique fixed root and prove
-
-\[
- 0.9383133270509488847
- \leq r_{\mathrm{flat}}
- \leq0.9383133270509488848
- <0.938313327050949.
-\]
-
-Thus file 19 rounded the endpoint upward by at least
-`0.0000000000000001152`.  A second exact rational five-atom law independently
-gives a strict upper comparison.  The rational endgame is replayed in
-`RH/Zeta85/Discharge/R9383ExactEndpoint.lean`.
-
-This kills the exact flat three-atom endpoint certificate class, not the
-frozen target itself.  The later Phase-C transfer does not revive that class:
-its conditional R-9383 theorem is instead a monotone consequence of the
-strict support-`19999/10000` R-9506 branch.  R-8686 and R-9506 likewise now
-have conditional headlines, while their four per-support analytic structures
-remain uninstantiated.  Full formulas, exact fractions, and reproduction
-commands are in `docs/audit/b3_certificate_layer.md`.
+The later Phase-C transfer derives R-9383 monotonically from the strict R-9506 branch.
+R-8657 and R-8686 likewise have conditional headlines; their per-support analytic structures
+remain uninstantiated.
 
 ---
 
-## 22. B-4 `eta > 1/2` factorization — conditional algebra proved; relabel-only class killed
+## 22. B-4 `eta > 1/2` factorization
 
-For a block already carrying the lengths asserted in file 18, the local
-power calculation is correct.  At fixed `1/2 < eta < 1`, choosing
+**Verdict: relabel-only class killed -- literal relabelling cannot construct the requested M1.  Surviving route requires (EF_eta).**
 
-\[
- M_1=T^{1-\eta},\quad M_2=T^\eta,\qquad N_1\asymp1,\quad N_2=T
-\]
+For `1/2 < eta < 1`, choosing `M1 = T^{1-eta}`, `M2 = T^eta` gives the preliminary
+replacement with exponent `2*eta + (1+eta)*epsilon`, power-small whenever
+`epsilon < (1-eta)/(1+eta)`.  `EtaClosure.preliminary_with_log_is_o` proves this.
 
-gives `PQ = PH = T^(1+eta)`.  The preliminary replacement has exponent
-`2 eta + (1+eta) epsilon` and is power-small whenever
-`epsilon < (1-eta)/(1+eta)`.  `EtaClosure.preliminary_with_log_is_o` proves
-this with every fixed logarithmic exponent explicit.
+A legal depth-three `j=2` block has two truncated atoms of exponent `eta/2` and two smooth
+atoms of exponent `1/2`.  The only whole-variable group of exponent `eta` is the truncated
+pair.  Remaining whole-factor exponents are `0`, `1/2`, `1`, none equal to `1-eta`.
+`balanced_j2_no_asymmetric_M1` proves this for the full open interval.
 
-The missing step is the asserted all-block factorization.  A legal
-depth-three, `j=2` block has two truncated atoms of exponent `eta/2` and two
-smooth atoms of exponent `1/2`.  The only whole-variable group of exponent
-`eta` is the pair of truncated atoms.  The remaining whole-factor exponents
-are `0`, `1/2`, and `1`, none equal to `1-eta`.  Thus literal relabelling
-cannot construct the requested `M1`.  Keeping the balanced block does not
-repair the estimate: its `PQ` and `PH` powers exceed trace scale by exactly
-`eta` and `eta-1/2`.  The Lean theorems
-`balanced_j2_K3_legal`, `balanced_j2_A_group_unique`,
-`balanced_j2_no_asymmetric_M1`, and `balanced_signedShift_misses` prove these
-statements for the full open interval.
-
-This kills only the exact relabel-only method class.  The surviving route is
-a pointwise finite signed convolution identity `(EF_eta)` which constructs
-the two asymmetric factors, preserves the logarithmic and coefficient
-weights, meets every BBLR support/derivative hypothesis, and recombines all
-zero modes with the singular-series subtraction before absolute values.
-Under the literal prime-dyadic accounting it must additionally produce an
-effective log exponent `C < 1`; `C = 0` closes without a cross-scale estimate,
-while `EtaClosure.literal_log_budget_fails` proves every `C >= 1` fails.
-No such identity is present or asserted.  The exact method class, witness,
-and blocking statement are in `docs/audit/eta_gt_half_factorization.md`.
+The surviving route is a pointwise finite signed convolution identity `(EF_eta)` meeting every
+BBLR hypothesis.  Under literal prime-dyadic accounting it must produce `C < 1`;
+`EtaClosure.literal_log_budget_fails` proves every `C >= 1` fails.  No such identity is
+present.
 
 ---
 
 ## 23. Phase-C robust stability and finite spectral trim
 
-The exact B-1 theorem used the same integer `N` for ambient dimension, trace
-normalization, and zero-count scale.  The analytic assembly only supplies the
-latter two asymptotically, and the distinguished principal block has a
-different dimension.  This mismatch is now removed rather than hidden in a
-limit notation.
+**Verdict: proved -- robust stability with explicit error coefficients (2,4,1,2) and finite spectral bridge, both with no axiom.**
 
-`RH.Zeta85.stability_prebound` proves the finite estimate
+`stability_prebound` proves the finite estimate
 
 \[
  \operatorname{Tail}_b(G)
@@ -1033,88 +631,45 @@ limit notation.
       +2\operatorname{traceCap}+4b.
 \]
 
-If `tr P <= s + eP`, `|tr G - N0| <= eT`,
-`||G||_F^2 <= D*N0 + eF`, and `s+2b <= N0+eC`, then
-`RobustStability.robust_stability_inequality_withCountError` gives
+`robust_stability_inequality_withCountError` adds error terms:
 
 \[
  \operatorname{Tail}_b(G)
  \leq s-(2-D)N_0+2e_P+4e_T+e_F+2e_C.
 \]
 
-Here the ambient dimension `d` and real scale `N0` are independent.  The
-same bound is proved for isometric and principal compressions.  The
-coefficients `(2,4,1,2)` and the remaining count slack
-`2(s+2b-N0-eC)` are exact, not asymptotic conventions.  The original
-zero-count-error APIs remain unchanged.
+Ambient dimension `d` and real scale `N0` are independent.  The coefficients `(2,4,1,2)` and
+count slack are exact.  Proved also for isometric and principal compressions.
 
-The finite spectral bridge is also explicit.  The uniform centered
-eigenvalue law, after deleting the first `b` decreasing eigenvalues, has
-removed mass at most `b/d`; its residual positive-square moment is exactly
-`tailExcessSq/d`.  `principal_spectral_headTrimmedMomentInputs_of_moments`
-therefore needs only four named equalities between the actual finite spectral
-moments and the analytic target moments.  It introduces no spectral-law or
-limit field itself.  Those four same-block moment identifications remain the
-precise R1b/grid interface for Phase C.
+The finite spectral bridge: `principal_spectral_headTrimmedMomentInputs_of_moments` needs only
+four named equalities between finite spectral moments and analytic targets.  Those four
+same-block moment identifications remain the precise R1b/grid interface.
 
 ---
 
-## 24. Phase-C `Inputs95` boundary — same matrices, exact profiles, no instance
+## 24. Phase-C `Inputs95` boundary
 
-`RH/Zeta85/Inputs95.lean` now records the honest analytic boundary without
-declaring a Lean axiom or constructing an instance.  Each family is indexed
-by its exact support, distinguished bandwidth, fill, and B-3 profile.  The
-two exact rewrite theorems identify the literal saturated costs with
-`QuarticWindowWitnesses.D8686` and `D9506`; there is no free numeric cost
-field.
+**Verdict: open -- exact boundary recorded with 11 fields but no Lean axiom or instance constructed.**
 
-For each height, the displayed windows and modulation columns define the
-full all-zero matrix `G`, the finite enlarged-window `ZIprime` sum `A`, and
-the tail `E=G-A`.  The distinguished block is definitionally a principal
-compression of `A`.  `StableZeroSide` requires the same `A` to decompose as
-`P+Q`.  The proved base population identity supplies
+`RH/Zeta85/Inputs95.lean` records the honest analytic boundary.  Each family is indexed by
+its exact support, bandwidth, fill, and B-3 profile.  Two exact rewrite theorems identify
+costs with `QuarticWindowWitnesses.D8686`/`D9506`; no free numeric cost field.
 
-\[
- s_1+2(s_2+p)\leq N(T,2T)+N_{II}(T),
-\]
+`PrincipalCyclicBlock` is the exact R1a construction obligation.  `RS1996ZetaInputs.theorem31`
+records the published RS theorem.  `BlockMomentLimits` states the unproved R1b bridge.
+The pair-trace field does not derive trace limits; the RS field does not derive block-moment
+limits.
 
-so the robust block-tail adapter incurs exactly `2*NII` through the proved
-count-error coefficient.  The ambient matrix dimension is never identified
-with the dyadic zero count.
-
-`PrincipalCyclicBlock` is the exact R1a construction obligation: literal
-smooth compact windows, positive periods, critical grids, pointwise full
-energy reconstruction, real alias cancellation, corrected distinguished
-energy fraction tending to `mu` (not `mu/sigma`), positive distinguished
-energy, a mean-one supported local profile, and integrable locally uniform
-translated-product convergence through degree four.  No common-lattice or
-one-window construction is asserted; the two requested construction classes
-remain killed by §§19--20.
-
-`RS1996ZetaInputs.theorem31` separately records the published smoothed
-all-tuples theorem.  `BlockMomentLimits` then states the still-unproved R1b
-bridge for the actual block: complex alias summability and exact cancellation
-at every pair of actual enlarged-window zeros, followed by convergence of
-the first four centered block moments to the proved formula-(21) integrals.
-The pair-trace field does not derive the trace limits, and the published RS
-field does not derive the block-moment limits.  Those separations prevent a
-provenance citation from silently becoming an analytic proof.
-
-The top-level `Inputs95` bundle has eleven fields: two pair fields, two trace
-fields, two zero-side fields, one shared RS field, two R1a fields, and two
-R1b fields.  This boundary module itself constructs no bundle instance.  The
-subsequent transfer in §25 deliberately takes the four exact structures it
-uses rather than treating the complete bundle as an instance.
+The top-level `Inputs95` bundle has 11 fields.  This module constructs no instance.
 
 ---
 
-## 25. Phase-C quartic transfer — conditional frozen headlines assembled
+## 25. Phase-C quartic transfer
 
-`RH/Zeta85/Discharge/QuarticTransfer.lean` now connects the proved finite
-stability and B-3 certificate layers to the exact asymptotic structure
-boundary.  For a block of dimension \(d\), trim budget \(b=s_2+p\), dual cap
-\(c\), and certified cost upper bound \(\bar D\), finite weak duality and robust
-stability give
+**Verdict: proved (conditional) -- quartic transfer assembled from proved stability and B-3 layers; all four rungs remain conditional on four uninstantiated structures.**
+
+`QuarticTransfer.lean` gives: for dimension \(d\), trim budget \(b=s_2+p\), dual cap \(c\),
+and certified cost \(\bar D\):
 
 \[
  dA_P+(2-\bar D-c/2)N
@@ -1122,56 +677,24 @@ stability give
    +2e_P+4e_T+e_F+3N_{II}.
 \]
 
-The coefficient three is exact.  Robust count slack contributes
-`2*NII`; replacing `s1` by `N0s+NII` contributes
-`(1-cap/2)*NII`; and controlling the trim count from
-`s1+2b <= N+NII` contributes `(cap/2)*NII`.  The cap-dependent pieces cancel.
-The cost inequality is used in the safe direction
-`profileSaturatedCost <= costUpper`.
+The coefficient three is exact (three contributing pieces, cap-dependent parts cancel).
+The base Riemann--von Mangoldt and local-count theorems prove `NII = o(N)`.
 
-The base Riemann--von Mangoldt and local-count theorems prove
-`NII=o(N)` and eventual positivity of `N`.  The block-dimension limit and the
-four actual block-moment limits then yield the normalized transfer quotient.
-The exact rational certificates give strict margins above R-8686 and R-9506.
-R-8657 follows monotonically from R-8686, and R-9383 follows monotonically
-from R-9506; the upward-rounded flat R-9383 route remains killed.
+`QuarticMain.lean` exposes `rung8657`(`_cumulative`), `rung8686`(`_cumulative`),
+`rung9383`(`_cumulative`), `rung9506`(`_cumulative`), each taking exactly four structures:
+`FullTraceLimits`, `StableZeroSide`, `PrincipalCyclicBlock`, `BlockMomentLimits`.
 
-`RH/Zeta85/QuarticMain.lean` exposes the final theorem pairs
-`rung8657`(`_cumulative`), `rung8686`(`_cumulative`),
-`rung9383`(`_cumulative`), and `rung9506`(`_cumulative`).  Each takes exactly
-four structures for its support family:
-
-* `FullTraceLimits`;
-* `StableZeroSide`;
-* `PrincipalCyclicBlock`; and
-* `BlockMomentLimits`.
-
-The `PairTraceGrade95` and `RS1996ZetaInputs` structures are upstream routes
-for proving trace and moment limits, but are not consumed by the transfer or
-headline theorems.  This avoids substituting a provenance citation for the
-missing pair-to-matrix or RS-to-grid proof.  No instance of the four premises
-is constructed, so all four rungs remain conditional and none reaches the
-unconditional base-repository standard.
-
-The independent exact replay is `verify/quartic_transfer.py`; its committed
-hashes are
-
-```text
-dc99b510fdf1966f11535bf57a3dc53f4056c679e0275c8a649c01facf5f3bdf  verify/quartic_transfer.py
-05615d7eb1727532cb81a5c04598630ebd9c29408b729770d34e4b282b533cce  verify/quartic_transfer.out
-```
-
-The 21 public transfer theorems and eight final headline theorems all print
-exactly `[propext, Classical.choice, Quot.sound]`.  That dependency result
-certifies the formal derivation under the displayed premises; it does not
-discharge those premises.
+The `PairTraceGrade95` and `RS1996ZetaInputs` structures are upstream routes, not consumed
+by the transfer.  No instance of the four premises is constructed.  All 21 transfer theorems
+and eight headlines print exactly `[propext, Classical.choice, Quot.sound]`.
 
 ---
 
-## 26. A1 depth-four coefficient object — sharp algebra and reduced centering proved; smooth source map open
+## 26. A1 depth-four coefficient object
 
-`RH/Zeta85/Discharge/HBDepthFour.lean` proves the exact \(K=4\)
-Heath--Brown identity
+**Verdict: sharp depth-four algebra and reduced centering proved; smooth source map and cancellation wall remain open.**
+
+`HBDepthFour.lean` proves the exact \(K=4\) Heath--Brown identity
 
 \[
  \Lambda=4\mu_Z*\log-6\mu_Z^2*\zeta*\log
@@ -1179,792 +702,332 @@ Heath--Brown identity
  \qquad(n\le Z^4),
 \]
 
-from the exact remainder
-\((\mu-\mu_Z)^4*\zeta^3*\log\).  Each signed component has eight literal
-factor slots.  An explicit `HBGroupingPlan` may select different left/right
-groups for each scale and component, and `hbGrouped_factorization` proves
-that every selection reconstructs the original component product.
+with explicit `HBGroupingPlan` and `hbGrouped_factorization`.  It also constructs reduced
+coefficient sums, exact majorants, floor blocks, the shared index with coprimality,
+and finite nonzero-frequency cross-scale sum.  Both generic and reduced centered sums vanish;
+`allClass_zeroMode_ne_reduced_zeroMode` proves the two means differ.
 
-The module also constructs the \(d_1d_2=d_3d_4=d\) reduced coefficient sums,
-their exact absolute majorants, natural-number floor blocks, the shared
-\((j,d,\ell,p,q)\) index with coprimality, fixed-\(q\) norms, and a finite
-nonzero-frequency cross-scale sum before absolute values.  Those closed
-floor blocks are not a reconstruction of the source's smooth partition, and
-the infinite \(\ell\)-tail is not estimated.  Generic residue cells have a
-canonical all-class mean, while `reducedProgressionZeroMode` constructs the
-literal mean over unit classes.  Both centered sums are proved to vanish,
-including the reduced sum for one planned component and for the signed sum
-of all four planned left components.  The exact example
-`allClass_zeroMode_ne_reduced_zeroMode` proves the two means cannot be
-interchanged.  No log exponent, unspecified constant, or analytic estimate
-is asserted.
+The divisor split omits `(a,d2)=1` and `(b,d4)=1`, so it gives the raw, not canonical BBLR,
+coefficient.  `BBLRGCDAllocation.lean` separately proves the canonical allocation.
 
-The divisor split in this module takes \(d\) as supplied data and omits the
-source conditions \((a,d_2)=1\), \((b,d_4)=1\).  It is therefore the raw,
-not the canonical BBLR, coefficient.  The separate
-`BBLRGCDAllocation.lean` module now proves the canonical gcd allocation,
-multiplicity-one bijection, filtered collapsed coefficients, and generic
-finite-kernel reindexing for supplied BBLR outer sequences and inner smooth
-weights.  It does not identify an `HBGroupingPlan` with those supplied
-sequences.
+**Source audit finding:** BBLR Proposition 3.1 (14) has reciprocal phase at frequency
+\(\ell=0\); a reduced progression mean is not the source's \(\ell=0\) term.
+`reducedCentering_alone_not_sufficient` gives a countermodel.
+`empty_singleton_groupings_distinct` proves nonuniqueness from the product identity alone.
 
-The primary-source audit identifies a sharper boundary.  BBLR Proposition
-3.1 equation (14) has reciprocal phase
-\(e(\mp\ell h\,\overline{am_1/d}/(bn_1/d))\); its frequency \(\ell=0\)
-contribution is the proposition's gcd-weighted integral main term.  Reduced
-residues appear only in the later split of the nonzero-frequency family.
-Thus a reduced progression mean is not the source's frequency \(\ell=0\)
-term.  `reducedCentering_alone_not_sufficient` gives an exact countermodel to
-deducing a singular-series identity from reduced-cell centering alone.  This
-finishes and kills only that inference class.  It does not rule out the
-surviving construction from a smooth HB allocation, the actual BBLR
-frequency \(\ell=0\) integrals, and their signed Euler/Ramanujan
-recombination.
-
-This does not close A1.  Run 12 omits the cutoff/smoothing equality, the
-scale-dependent grouping and factor weights, the instantiation and analytic
-bounds for the primary-source Fourier/shift kernel on those grouped blocks,
-and the evaluation of the signed BBLR frequency \(\ell=0\) integrals as the
-prime-pair singular-series term plus an explicitly bounded error.
-`SingularSeriesCentering` names only the zero-error special case and supplies
-no instance.  The product alone cannot recover the grouping:
-`empty_singleton_groupings_distinct` exhibits two different left factors
-whose complementary factors reconstruct the same signed component.  This
-proves nonuniqueness from the product identity alone, not from every possible
-additional source constraint.
-
-Therefore `(EDB)`, the cross-\(Y\) target, and `(WG-HB)` remain unproved for
-the actual source block, and `signedPair_traceGrade_lt_3_2` remains
-undischarged.  This milestone removes the absence of a sharp algebraic
-coefficient object.  Together with the canonical allocation result below it
-removes the finite gcd/multiplicity subproblem, but not the smooth
-Heath--Brown grouping or analytic cancellation wall.
+Run 12 omits the cutoff/smoothing equality, scale-dependent grouping, the instantiation for
+the Fourier/shift kernel, and the signed BBLR \(\ell=0\) evaluation.  A1 remains open.
 
 ---
 
-## 27. A1 BBLR gcd allocation — finite source collapse proved; smooth Heath--Brown instantiation open
+## 27. A1 BBLR gcd allocation
 
-`RH/Zeta85/Discharge/BBLRGCDAllocation.lean` formalizes the exact allocation
-used after BBLR Proposition 3.1 equation (14).  For \(d>0\) and
-\(d\mid A_0M_0\), it sets
+**Verdict: finite gcd allocation and kernel reindexing proved; smooth Heath--Brown instantiation remains open.**
 
-\[
- d_1=\gcd(A_0,d),\qquad d_2=d/d_1,\qquad
- a=A_0/d_1,\qquad m=M_0/d_2.
-\]
-
-`allocationEquiv` proves this is an equivalence between original factor
-pairs and splits \(d_1d_2=d\) satisfying \((a,d_2)=1\).  Applying the
-allocation on both sides of \(d=\gcd(A_0M_0,B_0N_0)\) proves
-\((am,bn)=1\); conversely, the two filtered splits and this reduced-product
-coprimality reconstruct gcd exactly \(d\).
-
-The resulting one-side source coefficient is
+`BBLRGCDAllocation.lean` formalizes the allocation after BBLR Proposition 3.1 (14).  For
+\(d>0\) and \(d\mid A_0M_0\):
 
 \[
- c_{d,p}=\sum_{d_1d_2=d}\ \sum_{\substack{am=p\\(a,d_2)=1}}
-   \alpha_{d_1a}\,W_1(d_2m/M_1).
+ d_1=\gcd(A_0,d),\quad d_2=d/d_1,\quad a=A_0/d_1,\quad m=M_0/d_2.
 \]
 
-For positive \(d,p\), `collapsedCoeff_eq_divisorSum` proves by an explicit
-finite bijection that this equals the original fiber sum over
-\(A_0M_0=dp\), with multiplicity one.  The two-sided theorem
-`collapsedKernelSum_eq_originalFibers` reindexes arbitrary finite positive
-\(p,q\) ranges and any supplied kernel, using the exact equivalence
+`allocationEquiv` proves this is an equivalence between original factor pairs and splits
+satisfying `(a,d2)=1`.  `collapsedCoeff_eq_divisorSum` proves multiplicity one by explicit
+bijection.  `collapsedKernelSum_eq_originalFibers` reindexes arbitrary positive ranges
+using \(\gcd(dp,dq)=d \Leftrightarrow (p,q)=1\).
 
-\[
- \gcd(dp,dq)=d\quad\Longleftrightarrow\quad(p,q)=1.
-\]
+The unit-weight regression at \(d=p=2\) gives three canonical vs. four raw terms, confirming
+that `HBDepthFour.splitCoeff` (which omits `(a,d2)=1`) is not the BBLR coefficient.
 
-Thus it covers the primary-source factors
-\(W_0(dh/H)e(\mp\ell h\bar p/q)W_2(qx/M_2)W_4(px/N_2)e(\ell x)\)
-at fixed \(d,h,\ell,x\), while retaining the supplied \(W_1,W_3\) weights
-inside the collapsed coefficients.  The exact unit-weight regression at
-\(d=p=2\) is three canonical terms versus four raw terms; the duplicate raw
-representation is \((A_0,M_0)=(2,2)\).  This independently confirms that
-`HBDepthFour.splitCoeff`, which omits \((a,d_2)=1\), is not the BBLR
-coefficient.
-
-The finish boundary is exact.  The finite gcd allocation and supplied-input
-kernel reindexing are complete.  Still missing are a smooth partition and
-pointwise signed Heath--Brown identity that put the irregular grouped
-factors into BBLR's outer sequences while leaving genuine smooth variables
-for \(W_1,W_3\), the analytic nonzero-frequency estimate for those actual
-blocks, and the signed evaluation of the frequency \(\ell=0\) integrals as
-the Ramanujan singular-series subtraction with an explicit error and log
-exponent.  No A1 estimate or rung status changes.
-
-The independent enumeration and committed output hashes are
-
-```text
-a39f77ac554d281b32612bcfa5f37012cecebad0eac75d313f687030cd2407a2  verify/bblr_gcd_allocation.py
-00baec36747d13670caaba722fbf45731d55ce89e3e51da62b60a2a862f8df46  verify/bblr_gcd_allocation.out
-```
-
-The dedicated printer selects five core theorems, each with exactly
-`[propext, Classical.choice, Quot.sound]`; `verify/check_axioms.sh` includes
-that printer.
+**Still missing:** smooth partition/pointwise HB identity putting grouped factors into BBLR
+outer sequences, the analytic nonzero-frequency estimate, and the signed \(\ell=0\) evaluation.
+No A1 status change.
 
 ---
 
-## 28. A1 smooth HB-to-BBLR grouping — fixed literal-slot class killed
+## 28. A1 smooth HB-to-BBLR grouping
 
-`RH/Zeta85/Discharge/HBToBBLRSmoothGrouping.lean` audits the exact
-fixed-scale grouping asserted before the BBLR estimate.  In the proved sharp
-depth-four identity, the zero-based component `j = 1` has scalar (-6) and
-literal nonidentity atoms
+**Verdict: fixed literal-slot class killed -- no exponent cushion below 1/10 realizes the fixed asymmetric assignment.**
 
-\[
-                 \mu_Z,\quad\mu_Z,\quad\zeta,\quad\log.
-\]
+`HBToBBLRSmoothGrouping.lean` audits the exact fixed-scale grouping.  Component `j=1` has
+atoms \(\mu_Z,\mu_Z,\zeta,\log\) with legal dyadic exponent block
+\((43/200,43/200,2/5,3/5)\), total \(143/100\).  Both Mobius atoms are below the `K=4`
+cap and cannot be reclassified as coefficient-one slots (`muCut_ne_coefficientOne`).
 
-The legal dyadic exponent block
+For the requested left pair \((1/2,1/2)\), every scale has gap \(1/10\).  For the right
+pair \((7/100,93/100)\), every gap is at least \(33/100\).
+`no_asymmetric_literal_grouping` proves no \(T^{o(1)}\) cushion realizes the assignment.
 
-\[
-       \left(\frac{43}{200},\frac{43}{200},\frac25,\frac35\right)
-\]
+Multiplying slots does not repair: `zeta_sq_eq_twoUnitSlotMultiplicity` identifies the
+collapse with divisor multiplicity \(d_2\), which is coefficient-bearing.
 
-has total exponent (143/100).  Both truncated Möbius atoms lie below the
-(K=4) cap (143/400) and together give the required outer exponent
-(43/100).  The theorem `muCut_ne_coefficientOne` also proves that, once
-(Z\ge2), those atoms cannot be reclassified as coefficient-one smooth
-slots.  The only literal inner scales are therefore (2/5) and (3/5).
-
-For the requested left pair ((1/2,1/2)), each available scale has exact
-gap (1/10).  For the requested right pair ((7/100,93/100)), every
-relevant gap is at least (33/100).  Hence
-`no_asymmetric_literal_grouping` proves that no exponent cushion below
-(1/10), in particular no (T^{o(1)}) cushion, realizes the fixed
-asymmetric literal-slot assignment.
-
-Multiplying original slots does not repair that exact class:
-`zeta_sq_eq_twoUnitSlotMultiplicity` identifies the collapse of two
-coefficient-one slots with the divisor multiplicity (d_2), and the module
-proves its values are (2) at (2) and (3) at (4).  Such a collapse is
-coefficient-bearing and is not a single BBLR inner smooth variable.
-
-This is a finish-or-kill statement only for the fixed literal-slot method
-class.  It does not rule out a theorem uniform in the actual block scales, a
-new exact superposition identity with support/derivative/recombination
-control, or a higher-dimensional divisor estimate retaining the separate
-factor variables.  None of those survivors is constructed, so `(EDB)`,
-the common-scale estimate, `(WG-HB)`, and the A1 pair-trace field remain
-undischarged.  Frozen rung statuses do not change.
+No A1 discharge; frozen statuses unchanged.
 
 ---
 
-## 29. A1 actual-scale BBLR block — two positive-majorant classes killed
+## 29. A1 actual-scale BBLR block
 
-`RH/Zeta85/Discharge/ActualScaleBBLR.lean` audits the exact symmetric block
-left after the fixed asymmetric literal grouping is removed:
+**Verdict: two positive-majorant classes killed -- direct Prop 3.1 and absolute progression majorant both exceed trace scale.**
 
-\[
-A=B=H=T^{43/100},\qquad
-M_1=N_1=T^{2/5},\qquad M_2=N_2=T^{3/5}.
-\]
+`ActualScaleBBLR.lean` audits the symmetric block \(A=B=H=T^{43/100}\),
+\(M_1=N_1=T^{2/5}\), \(M_2=N_2=T^{3/5}\).  Direct BBLR gives error exponents
+\(179/100\) and \(161/100\), exceeding trace \(143/100\) by \(9/25\) and \(9/50\).
+Nonnegative exponent slack cannot repair either.
 
-Each side has trace exponent \(143/100\).  Direct substitution into BBLR
-Proposition 3.1 gives the two error exponents \(179/100\) and \(161/100\),
-exceeding trace by \(9/25\) and \(9/50\).  The module also proves that
-adding any nonnegative exponent slack cannot repair either comparison.
+At \(d=1\), the progression majorant gives \(PQ\) exponent \(83/50\), excess \(23/100\);
+\(PH\) exponent \(63/50\), saving \(17/100\).  The Fourier-integral cancellation exactly
+offsets the nonzero-frequency cutoff.
 
-This is separate from the run-12 progression majorant applied after equation
-(14).  At \(d=1\), its exact lengths are
-\(P=AM_1=T^{83/100}\) and \(Q=BN_1=T^{83/100}\).  Hence the \(PQ\) term
-has exponent \(83/50\), exceeding trace by \(23/100\), while \(PH\) has
-exponent \(63/50\), saving \(17/100\).  The Fourier-integral physical
-exponent \(-23/100\) is exactly cancelled by the \(23/100\) exponent of
-the source nonzero-frequency cutoff.  The preliminary \(H^2\) Taylor term
-saves \(57/100\) and is not the obstruction.
-
-These conclusions finish and kill exactly two method classes: applying the
-displayed Proposition 3.1 errors blockwise, and applying the absolute
-\(P_d(Q_d+H_d)\) progression majorant after equation (14).  They prove no
-lower bound for the signed remainder and do not rule out cancellation jointly
-in \(p,q,h,\ell\) before that majorant, signed recombination across smooth
-blocks, or a higher-dimensional coefficient-sensitive estimate.  Thus A1
-and `signedPair_traceGrade_lt_3_2` remain open, and no frozen rung status
-changes.
-
-The exact `Fraction` verifier reproduces every exponent, excess, saving, and
-Fourier-cutoff cancellation.  The dedicated dependency printer selects 13
-public theorems; every one reports exactly
-`[propext, Classical.choice, Quot.sound]`.
+These kill applying Prop 3.1 errors blockwise and applying the absolute progression majorant
+after (14).  They prove no lower bound for the signed remainder.  No A1 discharge; frozen
+statuses unchanged.
 
 ---
 
-## 30. B-2 RS pair integrals — internal contractions through degree four discharged
+## 30. B-2 RS pair integrals
 
-`RH/Zeta85/Discharge/RSPairIntegrals.lean` proves the change of variables,
-Fubini reductions, and exact evaluation of every contraction occurring in
-`rsMainTerm (weightedCyclicSymbol mu r)` for degrees one through four.  The
-six one-pair degree-four terms have multiplicities four adjacent plus two
-opposite.  The three two-pair terms are classified as separated, nested, and
-crossing and evaluate respectively to `mu^5 * P(r)`, `mu^5 * P(r)`, and
-`mu^5 * crossingFunctional r`.  Dividing the RS main term by `mu` gives the
-literal `mu^2` and `mu^4` coefficients in formula (27).
+**Verdict: proved -- all RS pair contractions through degree four discharged; no unproved analytic premise for continuous compactly supported profiles.**
 
-The final degree-two, degree-three, and degree-four wrappers require only
-`0 < mu`, `Continuous r`, and `HasCompactSupport r`.  The module derives the
-integrability of every displayed one-pair and two-pair kernel, including the
-nested distance kernel, from those hypotheses.  Thus the complete internal
-RS contraction formula has no unproved analytic premise for a continuous
-compactly supported profile.
+`RSPairIntegrals.lean` proves the change of variables, Fubini reductions, and exact
+evaluation of every contraction in `rsMainTerm (weightedCyclicSymbol mu r)` for degrees 1--4.
+Six one-pair degree-four terms (four adjacent, two opposite).  Three two-pair terms
+(separated, nested, crossing).  Dividing by `mu` gives the literal `mu^2` and `mu^4`
+coefficients in formula (27).
 
-This is not a `BlockMomentLimits` instance and does not identify the
-continuous RS main term with the repository's actual finite principal
-block.  The remaining R1b blockers are exactly cyclic-symbol smoothness and
-strict-support admissibility, actual instantiation and application of
-`RS1996ZetaInputs.theorem31`, the common height-smoothing limit, the
-`log T`/`ell(T) = log(T/2*pi)` normalization, complex-frequency Poisson
-summability at actual zeros, the degree-three and degree-four finite-grid/end
-estimates, and the actual R1a principal-block identification.  No frozen rung
-status changes.
-
-The exact verifier independently enumerates the pairing counts and
-partial-sum profiles and checks `mu^3 -> mu^2` and `mu^5 -> mu^4`.  The
-dedicated printer selects 51 public theorems; every normalized output line is
-exactly `[propext, Classical.choice, Quot.sound]`.
+Final wrappers require only `0 < mu`, `Continuous r`, `HasCompactSupport r`.
+Not a `BlockMomentLimits` instance.  The R1b blockers (cyclic-symbol admissibility, published
+RS application, height smoothing, log normalization, complex Poisson, grid/end estimates,
+R1a identification) remain.  No rung status changes.
 
 ---
 
-## 31. A1 pre-majorant DI/Kuznetsov audit — two distinct verdicts
+## 31. A1 pre-majorant DI/Kuznetsov audit
 
-`RH/Zeta85/Discharge/PreMajorantDI.lean` tests two source-audited one-shot
-routes on the same actual-scale \(d=1\) block, before the run-12 progression
-majorant is applied.  The verdicts are different and must not be conflated.
+**Verdict: two distinct sub-verdicts.  Collapsed Drappeau class: power-killed (excess 9/25).  Literal Pascadi map: structurally inapplicable.**
 
-For the **direct collapsed Drappeau class**, the two Möbius pairs are first
-collapsed into arbitrary outer coefficients, \((|\ell|,h)\) is collapsed into
-one numerator coefficient, Drappeau Theorem 2.1 is applied once at fixed
-\(x\), and its absolute bound is then integrated.  The exact fixed-\(x\)
-exponent is \(101/50\), and the physical \(x\)-integration gives
-\(179/100\).  This exceeds the trace exponent \(143/100\) by exactly
-\(9/25\).  Hence this prescribed upper-bound class is power-killed, even
-before its positive epsilon and logarithmic losses.  This is not a lower
-bound for the signed remainder.
+`PreMajorantDI.lean` tests two one-shot routes on the `d=1` block.
 
-For the **literal completed \(r=a\) Pascadi map**, completion of the short
-smooth variable yields a first Kloosterman argument containing
-\(k\bar a\), whereas the proposed literal theorem map requires \(ka\).
-The checked \(\mathbb Z/5\mathbb Z\) example proves that these are not
-identical, and the completion frequency \(k=0\) is not in Pascadi's dyadic
-\(m\asymp M\) sum.  This literal map is therefore structurally inapplicable.
-The formal value \(179/100\) obtained by substituting candidate scales into
-the displayed Pascadi factors is conditional arithmetic only; it is not an
-analytic bound and is not part of the finish/kill verdict.
+**Direct collapsed Drappeau class:** collapse Mobius pairs and \((|\ell|,h)\), apply Drappeau
+Theorem 2.1 at fixed \(x\), integrate.  Fixed-\(x\) exponent \(101/50\), physical exponent
+\(179/100\), excess \(9/25\).  Power-killed.
 
-A new source-faithful \((q,a)\)-dependent reindex, with proved dyadic support,
-smoothness, coefficient independence, fixed additive phase, and a separate
-\(k=0\) treatment, remains open.  So do simultaneous coefficient
-cancellation and signed cross-block recombination before absolute values.
-No A1 field is discharged, `signedPair_traceGrade_lt_3_2` remains open, and
-no frozen rung status changes.  The exact verifier hashes and standard-three
-dependency gate are recorded in `VALIDATION.md`.
+**Literal completed Pascadi map:** completion yields \(k\bar a\), not the required \(ka\).
+A \(\mathbb Z/5\mathbb Z\) example proves these differ; the completion frequency \(k=0\)
+is not in the dyadic sum.  Structurally inapplicable.
+
+A source-faithful \((q,a)\)-dependent reindex remains open.  No A1 discharge; frozen
+statuses unchanged.
 
 ---
 
-## 32. A1 four-Möbius-slot route — one-sided class killed; simultaneous estimate open
+## 32. A1 four-Mobius-slot route
 
-`RH/Zeta85/Discharge/FourMuKloosterman.lean` audits the literal seven-scale
-\(d=1\) geometry which remains after the collapsed pre-majorant routes:
+**Verdict: one-sided fixed-modulus class killed (excess 49/200).  Simultaneous estimate (SQ4-HB) remains open.**
 
-\[
- u_1,u_2,v_1,v_2:T^{43/200},\qquad m,n:T^{2/5},\qquad
- r=|\ell|h:T^{33/50}.
-\]
+`FourMuKloosterman.lean` audits the literal seven-scale \(d=1\) geometry:
+\(u_1,u_2,v_1,v_2:T^{43/200}\), \(m,n:T^{2/5}\), \(r=|\ell|h:T^{33/50}\).
 
-Each full product side has exponent \(83/100\), the seven-variable tuple
-volume is \(58/25\), and the fixed-\(x\) and physically integrated targets
-are \(83/50\) and \(143/100\).  One individual Möbius slot has relative
-length \(43/166<1/2\) against the literal composite modulus
-\(q=v_1v_2n\).  The accompanying source audit finds no direct application
-among the stated Bourgain--Garaev, Gong--Jia, Korolev, Bettin--Chandee,
-Drappeau, and Pascadi theorem families which retains all four Möbius slots.
-This is an applicability verdict for those displayed families, not a claim
-that no theorem can treat the sum.
+The **one-sided fixed-modulus square-root/triangle class** freezes \(v_1,v_2,n,r\), grants
+ideal square-root for \(u_1,u_2,m\), and triangle-sums.  Output: \(381/200\) fixed-\(x\),
+\(67/40\) integrated, both exceeding targets by \(49/200\).  Killed.
 
-The finished method class is the **one-sided fixed-modulus
-square-root/triangle class**: freeze \(v_1,v_2,n,r\), grant an ideal
-square-root bound for the entire \(u_1,u_2,m\) side with every theorem and
-logarithmic loss set to zero, and triangle-sum the frozen variables.  Its
-prescribed upper-bound output is
+No direct application found among Bourgain--Garaev, Gong--Jia, Korolev, Bettin--Chandee,
+Drappeau, Pascadi families retaining all four Mobius slots.
 
-\[
- {83\over200}+{83\over100}+{33\over50}={381\over200}
-\]
-
-at fixed \(x\), and \(67/40\) after physical integration.  Both exceed the
-corresponding target by exactly \(49/200\).  This kills precisely that
-upper-bound architecture; it is not a lower bound for the signed source
-sum and does not exclude cancellation coupling the two product sides.
-
-The surviving statement is the explicitly unproved simultaneous estimate
-
-\[
- |\mathcal Z^{(0)}_{4,\sigma}(x)|
- \ll_{\varepsilon,\mathbf W}T^{149/100+\varepsilon}.
- \tag{SQ4-HB}
-\]
-
-The normalized source-shaped block has long-log exponent \(0\); restoring
-the two unnormalized long logarithmic slots gives exactly
-\(T^{149/100+\varepsilon}(\log T)^2\), not an unspecified polylogarithm.
-Allocating \(17/400\) to the analytic epsilon and \(17/400\) to dominate
-that explicit \((\log T)^2\) gives exponent \(63/40<83/50\), or
-\(269/200<143/100\) after integration, with exact margin \(17/200\) in
-either comparison.  Hence a proof of `(SQ4-HB)` would meet the literal
-budget with \(C=0<1\), but no analytic theorem asserting it is added.
-
-There is also a separate source-identification gap.  The displayed
-source-shaped block is granted for this route audit: the repository still
-lacks a smooth partition and pointwise recombination identity identifying
-every required Heath--Brown block with its four retained Möbius slots, plus
-all derivative, support, frequency-zero, and explicit dyadic-log controls.
-Accordingly A1 and `signedPair_traceGrade_lt_3_2` remain open, and no frozen
-rung or README status changes.
+The surviving estimate sufficient for `(SQ4-HB)` is
+\(|\mathcal Z^{(0)}_{4,\sigma}(x)| \ll T^{149/100+\varepsilon}\),
+with explicit margin \(17/200\).  The smooth source-identification gap also remains.
+No A1 discharge; frozen statuses unchanged.
 
 ---
 
-## 33. A1 simultaneous SQ4 routes — six exact classes finished; transformed nonzero family survives
+## 33. A1 SQ4 simultaneous routes
 
-`docs/audit/sq4_simultaneous_routes.md` starts from the granted
-source-shaped four-Möbius block of Section 32 and tests six explicitly
-delimited method classes.  None of these verdicts is a lower bound for the
-source sum or a statement about a method outside the named class.
+**Verdict: six explicit method classes killed.  The transformed nonzero family (33) survives.**
 
-1. The **single character-large-sieve class** applies multiplicative Fourier
-   inversion, Cauchy, one all-modulus character large sieve, favourable
-   coefficient-energy bounds, and triangle inequality in the numerator.  Its
-   fixed-\(x\) output is \(58/25\), exceeding \(83/50\) by \(33/50\);
-   the integrated output is \(209/100\), with the same excess.
-2. The **coefficient-uniform two-sided norm-only class** grants an operator
-   upper bound at the unavoidable single-column exponent \(83/200\), grants
-   the crude favourable coefficient norms, and triangle-sums the numerator.
-   Its outputs are \(381/200\) and \(67/40\), exceeding their targets by
-   \(49/200\).  The column witness applies to arbitrary ambient sequences,
-   not to the literal Möbius coefficient vector.
-3. The **one-additive-large-sieve-in-the-numerator class** uses only the
-   three \(L^2\) norms and the reciprocal-Farey spacing \(Q^{-2}\).  Its
-   outputs are \(199/100\) and \(44/25\), with excess \(33/100\).
-4. The **literal reciprocal-completed classical Kuznetsov class** is
-   structurally inapplicable because the completed first index
-   \(k\overline v\pmod p\) varies with the modulus \(p\).
-5. The **direct moving-index divisor-switch class** is structurally
-   inapplicable: \(va_p-k=jp\) exchanges variables but does not produce a
-   modulus-\(j\) Kloosterman sum to which the classical trace formula can be
-   applied.
-6. The **reciprocal-Poisson/Weil/triangle class** applies Weil to each
-   nonzero complete sum and triangle inequality in every remaining variable.
-   Before its additional positive loss, its outputs are \(467/200\) and
-   \(421/200\), exceeding their targets by \(27/40\).
+`docs/audit/sq4_simultaneous_routes.md` tests six classes on the four-Mobius block:
 
-The reciprocity profile is uniformly smooth at the exact source scales.
-Poisson completion has prefactor exponent \(-43/100\) and dual-frequency
-length \(K=T^{43/100}\).  For any fixed
-\(0<\eta<2/5\), rapid decay truncates the nonzero frequencies at
-\(|k|\le KT^\eta\), with \(KT^\eta/p=T^{-2/5+\eta}<1\) and an
-\(O_B(T^{-B})\) tail after choosing the integration-by-parts order.  The
-Weil/triangle output therefore carries the explicit additional power
-\(T^{\eta+\varepsilon}\), for \(\varepsilon>0\); it has no hidden
-logarithmic saving.
+1. **Single character-large-sieve:** output \(58/25\), excess \(33/50\).
+2. **Two-sided norm-only:** output \(381/200\), excess \(49/200\).
+3. **One-additive-large-sieve:** output \(199/100\), excess \(33/100\).
+4. **Literal reciprocal-completed Kuznetsov:** structurally inapplicable (completed index
+   varies with modulus).
+5. **Direct moving-index divisor-switch:** structurally inapplicable (no Kloosterman sum).
+6. **Reciprocal-Poisson/Weil/triangle:** output \(467/200\), excess \(27/40\).
 
-The Poisson zero mode is a Ramanujan sum and is power-safe: its fixed-\(x\)
-and integrated powers are \(149/100+\varepsilon\) and
-\(63/50+\varepsilon\), each with pre-loss margin \(17/100\).  The
-normalized auxiliary logarithmic exponent throughout the optimistic route
-tests is explicitly \(0\), while restoring the two raw long Heath--Brown
-slots contributes exactly \((\log T)^2\), logarithmic exponent \(2\).
-Allocating \(17/400\) to the zero-mode divisor \(T^\varepsilon\) loss and
-\(17/400\) to dominate that log square still leaves margin \(17/200\).
-This proves only that the zero mode is not the power obstruction; it does
-not prove the whole-block estimate `(SQ4-HB)`.
+The Poisson zero mode is power-safe: exponents \(149/100+\varepsilon\) and
+\(63/50+\varepsilon\), pre-loss margin \(17/100\).  Restoring two raw log slots contributes
+exactly \((\log T)^2\); allocating \(17/400\) each to epsilon and log-dominance leaves
+margin \(17/200\).
 
-The exact unresolved nonzero transformed family is
-
-\[
- {M\over p}
- \sum_{u_1,u_2,m}\sum_{v_1,v_2}\sum_r\sum_{k\ne0}
- \mu(u_1)\mu(u_2)\mu(v_1)\mu(v_2)
- \Gamma_{\sigma,x}(r)\,\mathcal W_{T,x}(\cdots)
- S(k\overline{v_1v_2},\sigma r;u_1u_2m).                \tag{33}
-\]
-
-A correlated four-slot moment, a coefficient-sensitive operator estimate,
-a genuine geometry-changing trace formula for this moving-index family, or
-cancellation between the two reciprocal completions remains required.  No
-such estimate is proved or assumed.  The smooth source-identification and
-recombination gap also remains.  Consequently no A1 field is discharged,
-`signedPair_traceGrade_lt_3_2` remains open, and no frozen rung or README
-status changes.
+The unresolved nonzero transformed family is equation (33) of the audit document.
+No A1 discharge; frozen statuses unchanged.
 
 ---
 
-## 34. A1 SQ4 finite Gauss transform — exact algebra discharged; signed level moment open
+## 34. A1 SQ4 finite Gauss transform
 
-`RH/Zeta85/Discharge/SQ4GaussSquareTransform.lean` proves, for a
-commutative ring with finite unit group, the exact correlation change of
-variables
+**Verdict: exact Gauss-square transform and Dirichlet inversion proved; the signed analytic moment remains open.**
 
-\[
- (v,z)\longmapsto(v^{-1}z,z^{-1}).
-\]
-
-For every positive integer modulus \(q\), including composite \(q\), this
-specializes to
+`SQ4GaussSquareTransform.lean` proves, for every positive integer modulus \(q\):
 
 \[
  \sum_{v\bmod q}^{*}\chi(v)^{-1}S(k\bar v,r;q)
  =G_q(\chi;k)G_q(\chi;r),
 \]
 
-for arbitrary residue classes \(k,r\bmod q\).  The module also proves the
-full Dirichlet-character inversion
+and the full Dirichlet-character inversion of \(S(k\bar v,r;q)\).  For unit \(k,r\) the
+shifted product is \(\chi(kr)^{-1}G_q(\chi;1)^2\); this is a Gauss square, so ordinary
+orthogonality does not erase the phase.
 
-\[
- S(k\bar v,r;q)={1\over\varphi(q)}
- \sum_{\chi\bmod q}\chi(v)G_q(\chi;k)G_q(\chi;r).
-\]
+The unit specialization cannot replace the full family: \(k\ne0\) does not imply \((k,p)=1\),
+and the literal modulus \(p=u_1u_2m\) has shared prime factors requiring prime-power
+stratification.
 
-If \(k,r\) are units, the shifted product is exactly
-\(\chi(kr)^{-1}G_q(\chi;1)^2\); the scaling step does not require
-primitivity.  This is a Gauss square, not
-\(G_q(\chi;1)G_q(\bar\chi;1)\), so ordinary character orthogonality does not
-erase its phase.
-
-The unit specialization cannot replace the full source family.  The
-Poisson condition \(k\ne0\), even with \(|k|<p\), does not imply
-\((k,p)=1\), and the numerator \(r\) may also share factors with \(p\).
-Imprimitive characters carry conductor- and gcd-dependent generalized
-Gauss sums.  Moreover, the literal modulus \(p=u_1u_2m\) has shared prime
-factors between its displayed variables, so a local CRT continuation first
-requires a prime-power and shared-gcd stratification; directly treating the
-three factors as coprime would delete source strata.
-
-Writing
-
-\[
- \mathfrak M_4(T,x)={P\over M}\mathcal Z_{33}^{\rm nz}(T,x),
- \qquad {P\over M}=T^{43/100},
-\]
-
-the exact remaining estimate sufficient for `(SQ4-HB)` is
-
-\[
- |\mathfrak M_4(T,x)|
- \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0.
-\]
-
-Its character representation is equation (14) of
-`docs/audit/sq4_gauss_square_transform.md`: it retains the two outer
-Möbius factors, the two Möbius factors inside the character coefficient,
-the varying factorized composite modulus, and every nonunit
-conductor/gcd stratum before Cauchy.  Restoring the completion exponent
-\(-43/100\) yields \(149/100+\varepsilon\).  The previously audited
-coefficient-blind chain has pre-completion exponent \(121/50\), missing this
-target by exactly \(1/2\); this comparison is not a lower bound for the
-source moment.
-
-The finite transform and inversion are therefore discharged, but the
-signed analytic moment and smooth source-identification/recombination
-bridge are not.  No A1 field is discharged,
-`signedPair_traceGrade_lt_3_2` remains open, and no frozen rung or README
-status changes.
+The remaining sufficient estimate is
+\(|\mathfrak M_4(T,x)| \ll T^{48/25+\varepsilon}(\log T)^0\)
+with all conductor/divisor strata and the joint source coefficient retained.
+No A1 discharge; frozen statuses unchanged.
 
 ---
 
-## 35. A1 SQ4 CRT/conductor strata — exact finite algebra discharged; coupled signed moment survives
+## 35. A1 SQ4 CRT/conductor strata
 
-`RH/Zeta85/Discharge/SQ4CRTConductor.lean` continues the finite transform
-without adding an input or an analytic premise.  For coprime positive moduli
-it proves CRT factorization of each generalized shifted Gauss sum for
-arbitrary shifts.  The complementary-modulus twists are retained explicitly;
-dropping them would give the wrong local additive characters.
+**Verdict: CRT factorization and conductor stratification proved; the coupled signed moment remains open.**
 
-Let \(\chi^*\) be a primitive complex Dirichlet character modulo \(f\), let
-\(q=f\ell\), and let \(\chi\) be its literal Mathlib `changeLevel` to
-modulus \(q\).  The module proves
+`SQ4CRTConductor.lean` proves CRT factorization of generalized shifted Gauss sums for
+coprime moduli and the exact conductor formula: for primitive \(\chi^*\) modulo \(f\),
+\(q=f\ell\):
 
 \[
  G_q(\chi;t)=G_f(\chi^*;1)
  \sum_{\substack{s\mid\ell,\ s\mid t\\(\ell/s,f)=1}}
  \mu(\ell/s)\chi^*(\ell/s)s\,
- \overline{\chi^*(t/s)}.                              \tag{34}
+ \overline{\chi^*(t/s)}.
 \]
 
-The coprimality condition may be omitted when \(\chi^*\) is extended by
-zero off the units.  The initially proved divisor-\(d\) form, the
-complementary-divisor reindex \(s=\ell/d\), the inverse-to-conjugate phase,
-and the unit-supported specialization are separate formal theorems.  Thus
-(34) covers nonunit shifts, shared primes between \(f\) and \(\ell\), and
-nonreal complex characters; the independent finite checker is only a
-3,336-case real-character calibration and is not used as its proof.
+This covers nonunit shifts, shared primes, and nonreal complex characters.  The exact support
+restriction \(f\mid\gcd(q/(q,k),q/(q,r))\) is proved.
 
-The same module proves the exact support restriction
+For squarefree outer variables with \(g=(u_1,u_2)\): the Mobius sign cancels but \(g^2\)
+remains in the modulus; \(u_1=u_2=2\) rules out CRT splitting over the displayed noncoprime
+slots.
 
-\[
- G_q(\chi;k)G_q(\chi;r)\ne0
- \Longrightarrow
- f\mid\gcd\!\left({q\over(q,k)},{q\over(q,r)}\right),
-\]
-
-and proves that primitive characters kill nonunit shifts.  For squarefree
-outer variables it also proves, with \(g=(u_1,u_2)\),
-
-\[
- u_1=ga,\qquad u_2=gb,\qquad u_1u_2=g^2ab,
- \qquad \mu(u_1)\mu(u_2)=\mu(a)\mu(b),
-\]
-
-where \(g,a,b\) are pairwise coprime.  The duplicated Möbius sign cancels,
-but the factor \(g^2\) remains in the modulus.  The smallest source stratum
-\(u_1=u_2=2\) is formalized together with
-\(\mathbb Z/4\mathbb Z\not\simeq
-\mathbb Z/2\mathbb Z\times\mathbb Z/2\mathbb Z\), ruling out a CRT split
-over the displayed, noncoprime slots.
-
-After (34), the two Gauss factors share the same quotient \(\ell\), while
-the local conductor support is coupled to \(g^2abm\), both shifts, and the
-joint dyadic source weight.  Only the bare Möbius signs factor locally; the
-four source slots do not become independent character polynomials.  The
-exact analytic survivor is unchanged:
-
-\[
- \left|\mathfrak M_4(T,x)\right|
- \ll_{\varepsilon,\mathbf W}
- T^{48/25+\varepsilon}(\log T)^0.                    \tag{35}
-\]
-
-It must retain all four Möbius factors, the varying modulus, every
-conductor/divisor stratum, and the joint source weight before Cauchy.  The
-separate smooth source-identification/recombination bridge also remains
-open.  Consequently no A1 field is discharged,
-`signedPair_traceGrade_lt_3_2` remains open, and no frozen rung or README
-status changes.
+After (34), local conductor support is coupled to \(g^2abm\), both shifts, and the joint
+weight.  Only bare Mobius signs factor locally.  The surviving estimate (35) is unchanged.
+No A1 discharge; frozen statuses unchanged.
 
 ---
 
-## 36. A1 SQ4 correlated-moment audit — audited fixed-family theorem classes finished; four-sign level moment survives
+## 36. A1 SQ4 correlated-moment audit
 
-The audit in docs/audit/sq4_correlated_moment.md continues from family (33)
-without replacing any of its four Möbius factors by absolute values.  The
-full composite-modulus character transform remains the product of two
-generalized shifted Gauss sums.  Its Gauss-square specialization is
-available only when both shifted residues are units; nonzero integer indices
-do not imply this condition.  The exact sufficient pre-completion estimate
-remains
+**Verdict: audited fixed-family theorem classes finished (Blomer--Pascadi, KSWX, Pascadi all power-killed on their strata).  The four-sign level moment survives.**
 
-\[
- |\mathfrak M_4(T,x)|
- \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0.
-\]
+The audit (`docs/audit/sq4_correlated_moment.md`) retains all four Mobius factors.
 
-It must retain the varying factorized modulus, all conductor and shared-gcd
-strata, and all four Möbius signs before Cauchy.  No theorem asserting this
-estimate is added.
+**Coefficient-blind classes finished:** one character Cauchy + large sieve gives \(199/100\),
+excess \(33/100\).  Ideal joint square-root in \((k,r)\) + triangle in outer variables gives
+\(179/100\), excess \(13/100\).  The Parseval diagonal after Cauchy is the four-variable
+constraint \(v_1v_2=w_1w_2\): coefficient energy is nonnegative, so a later blind large sieve
+cannot recover the unsquared sign correlation.
 
-Two broad coefficient-blind classes are finished.  One character Cauchy
-followed by a coefficient-blind large sieve gives fixed-\(x\) exponent
-\(199/100\), exceeding the literal \(83/50\) budget by \(33/100\) and
-(SQ4-HB) by \(1/2\).  Even granting ideal joint square-root cancellation in
-\((k,r)\) after freezing \((p,v)\), then triangle-summing the two outer
-families, gives \(179/100\); it misses the two targets by \(13/100\) and
-\(3/10\).  The exact Parseval diagonal after Cauchy is the four-variable
-constraint \(v_1v_2=w_1w_2\): the literal equality diagonal becomes
-nonnegative coefficient energy, so a later coefficient-blind large sieve
-cannot recover the original unsquared sign correlation.  This is a
-methodological obstruction, not a lower bound for the signed moment.
+**Primary theorem audit:**
 
-The primary theorem audit gives three distinct statuses:
+| Theorem | Excess over budget / (SQ4-HB) |
+|---|---|
+| Blomer--Pascadi Thm 5.5 (preprint) | \(1123/1800\) / \(1429/1800\) |
+| KSWX JLMS 2023 Thm 2.1 (favourable) | \(89/200\) / \(123/200\) |
+| Pascadi Forum Math. Pi 2026 Cor. 5.11 | \(181/200\) / \(43/40\) (literal) |
 
-| Theorem | Literal source coverage | Finished output |
-|---|---|---|
-| Blomer--Pascadi, Theorem 5.5, arXiv:2607.24311v1 | **Preprint.** It applies literally to each fixed-\((p,v)\) \((k,r)\)-block after the exact \(t\)-integral separation, sign split, and zero-padding.  It does not average \(p\) or \(v\). | The five \(H\)-exponents are \(7/320,1/3200,27/500,71/900,-17/1500\); the inner exponent is \(2617/1800\), and outer triangle summation gives \(4111/1800\).  This misses the literal budget by \(1123/1800\) and (SQ4-HB) by \(1429/1800\). |
-| Kerr--Shparlinski--Wu--Xi, JLMS 108 (2023), Theorem 2.1 | **Published**, but the reduction from (33) is a favourable class: it explicitly grants \((\ell,p)=1\) and \(\|\alpha(t)\|_2\ll_\varepsilon T^{43/100+\varepsilon}\).  It is not a full-source application. | The best displayed \(\Delta_1\)-power is \(-43/200\), the per-\((p,\ell)\) output is \(59/40\), and the completed output is \(421/200\).  It misses the literal budget by \(89/200\) and (SQ4-HB) by \(123/200\). |
-| Pascadi, Forum Math. Pi 14 (2026), Corollary 5.11 (arXiv Corollary 17) | **Published.** On the squarefree-\(v\) stratum, the Ramanujan lift and separate fixed-\((d,a)\) applications are literal.  The stated theorem still has one fixed first-index phase and does not supply the unstated general-first-sequence recombination. | With the correct \(S\sqrt R\,C\) term in (5.32), the geometry powers are \(63/50,19/25,209/200,11/8\).  Literal separate recombination gives \(513/200\), missing the budget by \(181/200\) and (SQ4-HB) by \(43/40\).  The favourable unstated variant gives only conditional arithmetic \(47/20\), with misses \(69/100\) and \(43/50\). |
+For KSWX, the residual reciprocity phase is not the obstruction: replacing it by 1 with
+admissible allocations \(\eta=1/20\), \(\varepsilon=1/20\) leaves margin \(11/200\).
 
-For the KSWX reduction, replacing the residual reciprocity phase by \(1\)
-has base error exponent \(267/200\).  The explicit admissible allocations
-\(\eta=1/20\) for Poisson truncation and \(\varepsilon=1/20\) for all
-aggregate analytic losses give \(287/200\), leaving margin \(11/200\)
-below (SQ4-HB).  Thus that phase replacement is not the obstruction; the
-favourable energy/coprimality grant and the main \(421/200\) output are.
+The Ramanujan lift's full-family boundary: \(c_v(k)=0\) when \(g\nmid k\), so division
+cannot represent nonsquarefree strata.
 
-The Ramanujan lift also has an exact full-family boundary.  If
-\(v_1=ga,\ v_2=gb\), then \(v=g^2ab\), and \(c_v(k)=0\) exactly when
-\(g\nmid k\).  Division by \(c_v(k)\) therefore cannot represent the
-nonsquarefree source strata with \(g\nmid k\).  The literal Corollary 5.11
-route has normalized/raw fixed logarithmic exponents \(1/3\); the favourable
-unstated general-first-sequence route has exponents \(2/4\).  The
-coefficient-blind, fixed-\((p,v)\), Blomer--Pascadi, and KSWX tests use
-normalized/raw exponents \(0/2\).  Every remaining theorem, divisor, Mellin,
-and truncation loss is written explicitly as \(T^\varepsilon\).
-
-No primary theorem audited here has the full left-hand side of family (33).
-This is the exact blocker found in the audited theorem classes, not a
-universal nonexistence claim.  A proof still requires the signed
-generalized-Gauss-product level moment before Cauchy, or another estimate
-coupling at least one outer modulus/level slot, and separately the missing
-smooth source-identification/recombination bridge.  Hence A1,
-`signedPair_traceGrade_lt_3_2`, and every frozen rung status remain
-unchanged.
+No published theorem has the full left-hand side.  No A1 discharge; frozen statuses unchanged.
 
 ---
 
-## 37. A1 SQ4 published-theorem audit — listed classes finished; full source moment survives
+## 37. A1 SQ4 published-theorem audit
 
-`docs/audit/sq4_published_literature.md` checks the literal hypotheses and
-left-hand sides of the reviewed published theorem classes against the exact
-conductor-stratified source moment.  Its common pre-completion target is
+**Verdict: all listed published-theorem classes power-killed on their literal or favourable strata.  Full source moment survives.**
 
-\[
- |\mathfrak M_4(T,x)|
- \ll_{\varepsilon,\mathbf W}T^{48/25+\varepsilon}(\log T)^0. \tag{36}
-\]
+`docs/audit/sq4_published_literature.md` and `SQ4PublishedLiterature.lean` check published
+theorems against the conductor-stratified source moment.  Common target:
+\(|\mathfrak M_4(T,x)| \ll T^{48/25+\varepsilon}(\log T)^0\).
 
-The exact normalization and gaps are formalized in
-`RH/Zeta85/Discharge/SQ4PublishedLiterature.lean` and independently replayed
-with `fractions.Fraction`.  The coefficient-blind, ideal fixed-\((p,v)\)
-square-root, and direct Weil-triangle classes give respectively
-\(121/50\), \(111/50\), and \(553/200\) before completion.  Under favourable
-unit/coprime and coefficient-norm grants, Shparlinski 2019 Theorem 2.1 gives
-\(2071/800\), an excess \(107/160\).  The good-modulus part of Theorem 2.2 at
-moment two gives \(1017/400+\varepsilon\), an excess
-\(249/400+\varepsilon\), and does not control the exceptional source mass.
-The reviewed KSWX and published Pascadi routes are likewise power-killed on
-their favourable or literal strata; primitive one-Gauss-sum and quartic-
-character results have explicit left-hand-side or family mismatches.
+Coefficient-blind / ideal square-root / Weil-triangle give \(121/50\), \(111/50\),
+\(553/200\) before completion.  Shparlinski 2019 Thm 2.1 (favourable): \(2071/800\),
+excess \(107/160\).  Thm 2.2 (good modulus, moment 2): \(1017/400+\varepsilon\),
+excess \(249/400+\varepsilon\), does not control exceptional mass.
 
-Consequently, no published theorem was found in the audited classes whose
-literal left-hand side contains the full signed moment.  This finishes only
-those listed theorem classes and is not a universal nonexistence statement.
-The survivor is still (36), with all conductor/divisor strata and the joint
-source coefficient retained, plus the separate smooth source-identification
-and recombination bridge.  No A1 field is discharged and no frozen rung or
-README status changes.
+No published theorem found whose literal left-hand side contains the full signed moment.
+This finishes only the listed classes.  No A1 discharge; frozen statuses unchanged.
 
 ---
 
-## 38. B-2 actual-block centering bridge — finite adapter discharged; analytic limits remain
+## 38. B-2 actual-block centering bridge
 
-`RH/Zeta85/Discharge/RSBlockMomentBridge.lean` connects the literal finite
-principal block to the already formalized scalar centering calculation.  For
-every \(0\le k\le4\), including zero-dimensional blocks under Lean's total
-division convention, it proves
+**Verdict: finite centering bridge discharged; published RS application and seven other analytic blockers remain.**
 
-\[
- \frac{\operatorname{Re}\operatorname{tr}((\operatorname{block}(T)-I)^k)}
-      {\operatorname{blockDim}(T)}
- =\sum_{a=0}^k(-1)^{k-a}{k\choose a}
-   \frac{\operatorname{Re}\operatorname{tr}(\operatorname{block}(T)^a)}
-        {\operatorname{blockDim}(T)}.                  \tag{37}
-\]
+`RSBlockMomentBridge.lean` proves for every \(0\le k\le4\) the exact alternating sum
+relating centered to uncentered block moments.  `UncenteredRSBlockLimits F` assumes
+convergence of raw block moments to formula-(27) contractions; from this and
+`PrincipalCyclicBlock F`, the four centered limits in `BlockMomentLimits.moments` follow.
 
-The new `UncenteredRSBlockLimits F` boundary assumes that the actual raw
-block moments in degrees zero through four converge to the evaluated
-formula-(27) contractions.  The degree-zero clause carries the eventual
-positive-block-dimension requirement needed by centering.  From this
-boundary and `PrincipalCyclicBlock F`, finite-sum continuity plus
-`topHat_centeredContraction_eq_formula21` proves all four centered limits in
-`BlockMomentLimits.moments`.
-
-The constructor does not manufacture the remaining analytic inputs.  It
-takes complex-alias summability and cancellation at the actual `ZIprime`
-zeros as separate hypotheses, alongside `UncenteredRSBlockLimits F`.
-Consequently, the published RS application, cyclic-symbol admissibility,
-common height smoothing, exact \(\log T\) normalization, complex Poisson,
-and the degree-three/four finite-grid and end estimates remain open.  No
-`BlockMomentLimits` instance is constructed, B-2 is not discharged, and no
-frozen rung or README status changes.
+The constructor takes complex-alias summability/cancellation and `UncenteredRSBlockLimits`
+as separate hypotheses.  Published RS application, cyclic-symbol admissibility, height
+smoothing, log normalization, complex Poisson, and grid/end estimates remain open.  No
+`BlockMomentLimits` instance constructed; no rung status changes.
 
 ---
 
-## 39. A2 R1a allocation capacity — current principal-block interface proved uninhabitable
+## 39. A2 R1a allocation capacity
 
-`RH/Zeta85/Discharge/R1aAllocationNoGo.lean` derives a contradiction from
-the actual `PrincipalCyclicBlock` fields, with no common-lattice or alias-free
-assumption.  At one sufficiently large height, almost-everywhere full-energy
-reconstruction gives
+**Verdict: current `PrincipalCyclicBlock` interface proved uninhabitable for both frozen families.  A surviving redesign must change at least one consumed semantic.**
 
-\[
- W_T=\sigma\ell(T)A,
-\]
+`R1aAllocationNoGo.lean` derives a contradiction from the actual `PrincipalCyclicBlock`
+fields, with no common-lattice or alias-free assumption.  At one sufficiently large height:
+full-energy reconstruction gives \(W_T=\sigma\ell(T)A\); the energy-ratio limit gives
+\(E_T>(2/5)W_T\); degree-one translated-product gives active local mass >= 99/100.  Exact
+scaling and the frozen profile cap give
+\(\operatorname{mass}_T E_T\leq \mu\ell(T)p\,v(0)\).  These contradict the exact rational
+gaps \(\mu p v(0) < (99/100)(2/5)\sigma A\) for both families.
 
-the energy-ratio limit gives \(E_T>(2/5)W_T\), and the degree-one,
-zero-shift translated-product clause gives active local mass at least
-\(99/100\).  Exact local-profile scaling and the frozen central profile cap
-give
-
-\[
- \operatorname{mass}_T E_T\leq \mu\ell(T)p\,v(0).
-\]
-
-These inequalities contradict the exact rational gaps
-
-\[
- \mu p v(0)<\frac{99}{100}\frac25\sigma A
-\]
-
-for both frozen families.  Lean therefore proves, for arbitrary `Z` and
-every family value,
+Lean proves:
 
 ```text
 F : Family14999 Z  ->  not PrincipalCyclicBlock F
 F : Family19999 Z  ->  not PrincipalCyclicBlock F.
 ```
 
-The compiled R-8657, R-8686, R-9383, and R-9506 theorem declarations are
-unchanged conditional implications, but their exact current
-`PrincipalCyclicBlock` premise cannot be instantiated.  Consequently there
-is no valid construction for the frozen family types under the current
-interface.  Changing periods, lattice commensurability, phases, channel
-count, or oversampling cannot help.  A surviving redesign must change at
-least one consumed energy/profile/translated-product semantic and reprove
-the affected principal-compression, trace-normalization, and block-moment
-steps.  No frozen constant or theorem statement changes.
+The conditional R-8657/8686/9383/9506 headline declarations are unchanged, but their
+`PrincipalCyclicBlock` premise cannot be instantiated.  Changing periods, phases, channel
+count, or oversampling cannot help.
 
 ---
 
-## 40. B-4 eta superposition — finite common-support model killed; actual coefficient route survives
+## 40. B-4 eta superposition
 
-`RH/Zeta85/Discharge/EtaSuperpositionObstruction.lean` formalizes a narrow
-pointwise support obstruction at the exact witness
+**Verdict: finite common-support model killed at explicit witness (eta=3/4, T=625, n=899=29*31).  Actual coefficient route survives.**
 
-\[
- \eta=\frac34,\qquad T=625,\qquad 899=29\cdot31.
-\]
+`EtaSuperpositionObstruction.lean` formalizes a pointwise support obstruction.  Both ordered
+factors \((29,31)\) and \((31,29)\) of 899 lie in the balanced box \([25,50]^2\), so the
+balanced-box coefficient is exactly two.  No divisor of 899 lies in the asymmetric short box
+\([5,10]\), so every finite signed sum of Dirichlet convolutions with first factors in that
+box vanishes at 899.
 
-Both ordered factors `(29,31)` and `(31,29)` lie in the balanced box
-`[25,50]^2`, so the balanced-box model coefficient at 899 is exactly two.
-No divisor of 899 lies in the asymmetric short box `[5,10]`.  Consequently
-every finite signed sum of Dirichlet convolutions whose first factors all
-remain in that box vanishes at 899, regardless of signs, overlap, the number
-of pieces, or their second factors.  A prime-square theorem proves the same
-support mechanism at every prime-square scale.
+This is a theorem about an exact finite support model, not the actual terminal Heath--Brown
+coefficient.  `(EF_eta)` is neither proved nor disproved.
 
-This is a theorem about an exact finite support model, not the actual
-terminal Heath--Brown coefficient.  No theorem identifies that coefficient
-with the balanced model or proves it nonzero at the witness.  Thus `(EF_eta)`
-is neither proved nor disproved, and merely allowing a scale-dependent finite
-index does not evade the obstruction while every first support remains in
-the excluded box.  A pointwise survivor must leave that box through, for
-example, divisor-dependent or exceptional support; retained-variable and
-non-pointwise recombination routes also remain outside the killed class.
-
-For retained balanced variables, the same positive progression majorant
-still exceeds the trace exponent by exactly `eta` in `PQ` and
-`eta - 1/2` in `PH`.  The precise surviving analytic target is therefore a
-per-outer-dyadic-scale theorem for the actual coefficient family:
+For retained balanced variables, the positive progression majorant still exceeds trace by
+exactly `eta` in `PQ` and `eta - 1/2` in `PH`.  The surviving target is
 
 \[
  |R_{\rm HD}(Y,T,\eta)|
-   \ll_{\eta,\mathcal W}Y(\log T)^C,\qquad C<1. \tag{HD_eta}
+   \ll_{\eta,\mathcal W}Y(\log T)^C,\qquad C<1.
 \]
 
-Here the full signed `h`-sum at `H_Y=Y/T` and the actual Poisson zero-mode
-subtraction occur before the absolute value, while the outer `Y`-sum remains
-outside.  The threshold `C<1` is exactly the literal prime-dyadic budget; if
-the remainder were defined only after recombining the outer scales, the
-corresponding generous threshold would be `C<2`.  Neither version is proved.
-There is no `EF_eta` discharge, actual HB source identification, A1 status
-change, or frozen-rung status change.
+The threshold `C < 1` is the literal prime-dyadic budget; the generous recombined threshold
+would be `C < 2`.  Neither is proved.  No `EF_eta` discharge or frozen-rung status change.
