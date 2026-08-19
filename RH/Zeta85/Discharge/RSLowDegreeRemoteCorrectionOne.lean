@@ -39,7 +39,9 @@ theorem abs_rtrace_balancedKernelMatrix_le
         ‖s i * K i i * s i‖ = ‖s i‖ ^ 2 * ‖K i i‖ := by
           simp only [norm_mul]
           ring
-        _ ≤ ‖s i‖ ^ 2 * C := by gcongr
+        _ ≤ ‖s i‖ ^ 2 * C := by
+          gcongr
+          exact hK i
         _ = C * ‖s i‖ ^ 2 := by ring
     _ = C * ∑ i : ι, ‖s i‖ ^ 2 := by
       rw [Finset.mul_sum]
@@ -51,13 +53,32 @@ theorem full_sub_guarded_trace_one_eq_balanced_remote_rtrace
     fullLatticeZeroKernelCyclicTrace1 F T -
         QuarticTransfer.guardedZeroKernelCyclicTrace1 F T =
       RHLinalg.rtrace (balancedRemoteLatticeZeroMatrix F T) := by
-  have h := congrArg (fun A => RHLinalg.rtrace (A ^ 1))
+  have h := congrArg RHLinalg.rtrace
     (balancedGuarded_add_remote_eq_full F T)
-  simp only [pow_one, RHLinalg.rtrace_add] at h
-  rw [rtrace_balancedFull_pow_one_eq_full F T hhat,
-    rtrace_balancedGuarded_pow_one_eq_guarded F T hhat,
-    rtrace_fullLatticeZeroMatrix_pow_one_eq_fullTrace,
-    rtrace_guardedLatticeZeroMatrix_pow_one_eq_guardedTrace] at h
+  rw [RHLinalg.rtrace_add] at h
+  have hfull :
+      RHLinalg.rtrace (balancedFullLatticeZeroMatrix F T) =
+        fullLatticeZeroKernelCyclicTrace1 F T := by
+    calc
+      RHLinalg.rtrace (balancedFullLatticeZeroMatrix F T) =
+          RHLinalg.rtrace (fullLatticeZeroMatrix F T) := by
+        simpa only [pow_one] using
+          rtrace_balancedFull_pow_one_eq_full F T hhat
+      _ = fullLatticeZeroKernelCyclicTrace1 F T := by
+        simpa only [pow_one] using
+          rtrace_fullLatticeZeroMatrix_pow_one_eq_fullTrace F T
+  have hguard :
+      RHLinalg.rtrace (balancedGuardedLatticeZeroMatrix F T) =
+        QuarticTransfer.guardedZeroKernelCyclicTrace1 F T := by
+    calc
+      RHLinalg.rtrace (balancedGuardedLatticeZeroMatrix F T) =
+          RHLinalg.rtrace (guardedLatticeZeroMatrix F T) := by
+        simpa only [pow_one] using
+          rtrace_balancedGuarded_pow_one_eq_guarded F T hhat
+      _ = QuarticTransfer.guardedZeroKernelCyclicTrace1 F T := by
+        simpa only [pow_one] using
+          rtrace_guardedLatticeZeroMatrix_pow_one_eq_guardedTrace F T
+  rw [hfull, hguard] at h
   linarith
 
 theorem full_sub_guarded_trace_one_abs_le_pairScale
@@ -101,11 +122,9 @@ theorem full_sub_guarded_trace1_div_core_tendsto_zero_log
   have hscaleLim := remoteLatticePairScaleTwelve_tendsto_zero_log
     F hdata.support_pos.le hguard.bandwidth_pos htail.bandwidth_lt_one
       hRvM hguard.distinguished_period_log hmass
-  have hconst : Tendsto (fun _ : ℝ => 2) atTop (nhds 2) :=
-    tendsto_const_nhds
   have hupper : Tendsto (fun T =>
-      2 * remoteLatticePairScaleTwelve F T) atTop (nhds 0) := by
-    simpa only [mul_zero] using hconst.mul hscaleLim
+      (2 : ℝ) * remoteLatticePairScaleTwelve F T) atTop (nhds 0) := by
+    simpa only [mul_zero] using hscaleLim.const_mul (2 : ℝ)
   apply (tendsto_zero_iff_norm_tendsto_zero).2
   refine squeeze_zero' (Eventually.of_forall fun T => norm_nonneg _) ?_ hupper
   filter_upwards [eventually_gt_atTop (1 : ℝ),
@@ -144,6 +163,5 @@ theorem full_sub_guarded_trace1_div_core_tendsto_zero_log
       exact hquot.trans hNI
     _ = 2 * remoteLatticePairScaleTwelve F T := by
       field_simp [hNpos.ne']
-      ring
 
 end RH.Zeta85.RSPoissonCyclicBridge
