@@ -51,11 +51,12 @@ jobs:
           python verify/repair_smooth_radial_shell_round6.py
           python verify/repair_annular_energy_bridge.py
 
-      - name: Compile the annular construction and exact energy handoff
+      - name: Compile the annular construction and post-contraction handoff
         run: >-
           lake build
           RH.Zeta85.Discharge.SmoothRadialShell
           RH.Zeta85.Discharge.AnnularEnergyBridge
+          RH.Zeta85.Discharge.AnnularEnergyStage
 
       - name: Build base and extension headlines
         run: >-
