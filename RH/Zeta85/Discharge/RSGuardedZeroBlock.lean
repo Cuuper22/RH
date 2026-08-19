@@ -79,7 +79,6 @@ theorem distinguishedLatticeFeature_reflect
               PoissonKernelBridge.distinguishedGridStep F T : ℝ)) := by
     simp
   rw [harg, paperFT_star_of_even _ hadm.even]
-  rfl
 
 /-- The full guarded vector is equivariant under zero reflection. -/
 theorem guardedGridVector_reflect
