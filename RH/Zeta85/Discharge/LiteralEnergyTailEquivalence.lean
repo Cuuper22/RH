@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -/
 
 import RH.Zeta85.QuarticMain
+import Zeta23.Final
 
 /-!
 # Literal energy-tail equivalence
