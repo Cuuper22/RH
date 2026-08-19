@@ -15,7 +15,7 @@ noncomputable section
 
 namespace RH.Zeta85.RSPoissonCyclicBridge
 
-open Zeta23
+open Zeta23 TrimmedMoment
 
 /-- The target quartic evaluated on the completed full-lattice cyclic traces. -/
 def fullLatticeZeroKernelQuarticNumerator
