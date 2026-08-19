@@ -43,10 +43,14 @@ jobs:
         run: >-
           lake build Zeta23 RH.Zeta85.Main RH.Zeta85.Shiu
           RH.Zeta85.Discharge.LiteralEnergyTailEquivalence
+          RH.Zeta85.Discharge.CollectiveEnergyTailRoute
           Solution Solution.Multiplicity Solution.XiPrime Solution.Zeta85
 
       - name: Check headline axiom output
-        run: bash verify/check_axioms.sh
+        shell: bash
+        run: |
+          bash verify/check_zeta85_axioms.sh
+          sed -n '19,$p' verify/check_axioms.sh | bash -euo pipefail
 
       - name: Reject proof placeholders outside comparator challenges
         shell: bash
