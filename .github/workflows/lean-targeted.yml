@@ -51,6 +51,7 @@ jobs:
           RH.Zeta85.Discharge.CollectiveEnergyTailRoute
           RH.Zeta85.Discharge.RSRealHeightDiagonal
           RH.Zeta85.Discharge.RSRealHeightFourStage
+          RH.Zeta85.Discharge.RSRealHeightFiniteSplit
           RH.Zeta85.QuarticMain
 
       - name: Compile the Shiu campaign
