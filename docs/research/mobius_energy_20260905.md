@@ -1062,3 +1062,353 @@ not supplied by (17.1). Thus (17.3) closes the nonprincipal mixed block,
 not the positive Type-II square or the global principal packet synthesis.
 The remaining mixed boundaries are `Q~R`, `K~sqrt(T)`, and high conductors
 when `K>sqrt(T)`.
+
+## 18. A thin high-`K` extension and the exact first-block obstruction
+
+The source-numerator polynomial can be kept separate in the high-conductor
+range.  With the notation of Section 17, Pólya--Vinogradov, averaged over the
+extra coprimality divisors by fixed divisor moments, gives
+
+    |S_F^(PV)(P,Q,K)|
+      << [log^B(T)/K]
+          sqrt(H C(F^2+H)(F^2+C)),       H=QK/P.      (18.1)
+
+If `F^2>=H,C`, this is
+
+    |S_F^(PV)| << F^2 sqrt(TR/(PK)) log^B(T).          (18.2)
+
+At the worst endpoint `F=K=T^kappa`, with `P=T^rho`, the exponent is
+
+    beta_PV=(3/2)kappa+.745-(1/2)rho.
+
+Thus the high-conductor tail is power-saving, with fixed margins, whenever
+
+    rho>3kappa-.51.                                  (18.3)
+
+Combining the lower conductors with Section 17 therefore extends the complete
+**nonprincipal** mixed-block estimate to the thin region
+
+    1/2<kappa<(rho+.51)/3,
+
+provided `Q>R T^epsilon`, `K<=P`, the block is nonempty, and all displayed
+boundary inequalities have fixed margins.  For `rho=1` this reaches
+`1/2<kappa<.503333...`; if the same epsilon is placed at both ends, it must
+be smaller than `1/600`.  The conductor `F=1` is still excluded and must be
+recombined with the signed Section 14 principal term.  Burgess on the
+unweighted numerator does not enlarge this strip: at parameter two it gives
+exponent `.5+(19/16)kappa>1` for `kappa>1/2`.  Elementary completion instead
+introduces a linked `M_R(gh)`-weighted Kloosterman family and recovers the
+same square-root loss.
+
+At the other boundary, `R<=q<2R`, the exact identity `M_R(q)=-mu(q)` does
+not improve a separate energy estimate: the endpoint `P=K=R` has coefficient
+`-mu(n)` and mean-square asymptotic `(6/pi^2)R`.  There is nevertheless an
+exact recombination signal.  Coefficientwise
+
+    (mu*Lambda)(n)=-mu(n)log n,
+
+and, because the two excluded regions do not overlap on `n~Z`,
+
+    sum_(q>=R,c>V,qc=n) mu(q)Lambda(c)
+      =-mu(n)log n
+       -sum_(q<R,q|n)mu(q)Lambda(n/q)
+       -sum_(c<=V,c|n)Lambda(c)mu(n/c).               (18.4)
+
+The complement sums are Type-I/Vaughan-shaped.  Formula (18.4) therefore
+shows why isolating the first Type-II interval loses structure, but it does
+not close that interval by itself: `M_R=-mu` only for `q<2R`, so the boundary
+must be recombined with the adjacent Type-I and larger-`q` pieces before any
+Cauchy inequality.  The full Type-II square remains open.
+
+## 19. Large-prime descent has a positive fixed-power packet constant
+
+The exact descent (14.2)--(14.3) can be evaluated on a complete subfamily,
+but the result is a main term rather than a negligibility estimate. Fix
+
+    1/3<eta<1,       0<theta<min(eta,(1-eta)/2)
+
+and take the denominators `r=ps<=R T^theta`, where `p>2R` is prime and
+`(p,s)=1`. Uniformly for `s<=T^theta` and `v` in the fixed source interval,
+the zero-free-region prime number theorem applied to
+
+    zeta(1+z)^(-1) product_(l|s)(1-l^(-1-z))^(-1)
+
+gives
+
+    A_s log T=o(1/phi(s)),
+    L_s=mu(s)/phi(s)+o(1/phi(s)),
+    L_infty(s)=o(1/phi(s)),
+    E_s(R^2v)=o(1/phi(s)).                            (19.1)
+
+More quantitatively, the first three remainders in (19.1) are bounded by
+`phi(s)^(-1)log^A(T)exp(-c sqrt(log(R/s)))` after harmless powers of
+`log T`; the floor remainder satisfies the elementary bound
+`E_s(R^2v)<<sigma_1(s)/(phi(s)R)`. The fixed-power gap `s/R` makes these
+uniform errors summable. The coprime-numerator lattice count has error
+`O(tau(ps))`, also lower order after summation.
+Substitution in the exact descent, including the `p<=V` boundary, gives
+
+    P_(ps)(v)-D_(ps)(v)
+      =-mu(s)/[(p-1)phi(s)]
+         +o(1/[(p-1)phi(s)]).                        (19.2)
+
+Define its leading isolated packet synthesis by
+
+    F_(lift,theta)(alpha)
+      =-Z sum_(ps<=R T^theta,p>2R)
+          [mu(s)/((p-1)phi(s))]
+          sum_((a,ps)=1)widehat_W(Z(a/(ps)-alpha)),
+
+with `(p,s)=1`, and put
+
+    ||F||_B^2=integral chi(R alpha)|F(alpha)|^2 d alpha.
+
+Since `(R T^theta)^2/Z=T^(eta+2theta-1)=o(1)`, Farey
+off-diagonal overlaps are lower order. The variation bound
+
+    Var D_s << log R tau(s)^2/phi(s)
+
+controls the varying packet profiles, while
+`sum_(s<=x)mu(s)^2/phi(s)~log x` has residue exactly one. Consequently
+
+    ||F_(lift,theta)||_B^2
+      ~ C_(W,chi) J_eta(theta) T log T,                (19.3)
+
+where
+
+    C_(W,chi)=(integral_1^2 W(v)^2 dv)(integral chi(y)dy),
+    J_eta(theta)=(eta+theta)log(1+theta/eta)-theta.    (19.4)
+
+In particular, at `eta=.49`, `theta=.20`,
+
+    J_.49(.20)=.69 log(69/49)-.20
+              =.0361774824757766... .                 (19.5)
+
+Thus a fixed-power large-prime lift cannot be discarded as `o(T log T)`.
+This is the isolated positive packet norm: it has not yet been combined with
+the original single-index diagonal, cross terms, the smooth-denominator
+packets, or prime errors. More importantly, the bridge from this reduced
+bandpass form to the terminal zeta trace `O_1/Q_T` is still unproved and may
+restore two logarithmic powers. It is therefore invalid to compare (19.5)
+directly with the `0.0027556495...` terminal margin, and (19.3) yields no
+zero-percentage improvement by itself.
+
+The subfamily is also not the whole principal model. At the displayed
+parameters, denominators with no prime factor above `2R` have positive
+natural counting density among `r<=R T^theta`, namely the Dickman value
+
+    1-log(69/49)=.6577137935...,
+
+so sparsity cannot remove the smooth complement. This density statement is
+not a claim about its share of packet energy.
+
+## 20. Prime-modulus primitive energy: a partial gain and a weighted barrier
+
+For a prime packet denominator `r~R`, define
+
+    H_r=sum_(b mod r,b!=0)
+          |sum_(q~Q)M_R(q)w(q/Q)e(bq/r)|^2.           (20.1)
+
+Terms with `r|q` vanish: writing `q=rs` with `1<s<r` gives
+`M_R(rs)=M_R(s)=0`. Additive-to-multiplicative Fourier inversion therefore
+reduces the nonprincipal part of a dyadic divisor block `d~D`, `m~M`,
+`DM~Q`, up to the factor `r/(r-1)`, to
+
+    sum_(chi!=chi_0)|A_D(chi)|^2|B_M(chi)|^2,         (20.2)
+
+where `A_D=sum mu(d)a_d chi(d)` and `B_M=sum b_m chi(m)`. The omitted
+principal-character term is lower order here. If the smooth unweighted
+`m`-factor is polynomially longer than `r`, Poisson summation makes the
+nonprincipal block rapidly small. In the remaining range, character
+orthogonality and Pólya--Vinogradov give
+
+    H_r(D,M)<<r^2D T^o(1).                            (20.3)
+
+Inserted into the packet-projected two-sided prime variance of Section 16,
+this contributes
+
+    <<R^3D/Q T^o(1)=T^(.725+delta+o(1)),
+        D=T^delta.                                   (20.4)
+
+Thus, for prime packet denominators, Poisson plus (20.3) closes every factor
+block below `D=T^(.275-epsilon)`. Burgess with parameter two gives the
+global improvement
+
+    H_r<<r^(11/8)Q T^o(1),
+    B_(packet-projected error)<<R^(19/8)T^o(1)
+       =T^(1.16375+o(1)),                             (20.5)
+
+better than (16.12) but still above the target scale.
+
+The natural interval-product theorem does not close the remaining range.
+For unweighted intervals, Ayyad--Cochrane--Zheng and its composite-modulus
+extension give the principal-subtracted fourth moment of size
+`rDM T^o(1)`; see [Cochrane--Shi, Theorems 1--2](https://www.math.ksu.edu/~cochrane/research/xyequvmodm.pdf).
+Those theorems are not bounded-coefficient operator estimates. With the
+actual Möbius weight, their theorem plus Cauchy gives only
+
+    sum_(chi!=chi_0)|A_D(chi)|^2|B_M(chi)|^2
+      <<rDM sqrt(1+D^2/r) T^o(1),                    (20.6)
+
+which loses `D/sqrt(r)` in the hard range. The exact new input needed is
+
+    sum_(chi!=chi_0)|A_D(chi)|^2|B_M(chi)|^2
+      <<rDM T^o(1)                                   (20.7)
+
+for `T^.275<=D<=T^.49`, `T^.255<=M<=T^.470`, and `DM=T^.745`. This is a centered,
+Möbius-weighted product-congruence estimate, not a consequence of the
+unweighted ACZ theorem.
+
+Direct Poisson summation gives an equivalent weighted formulation:
+
+    F_r(b)=Q sum_(d<R) mu(d)/d
+      sum_(j=-bd mod r) widehat_w(Qj/(dr)).            (20.8)
+
+Here `j=0` is absent and the effective dual range is
+`|j|<=dr/Q<=r^2/Q=T^(.235)`. After squaring and summing `b`, the
+off-diagonal consists of the centered, smoothly weighted modular sums
+
+    Q^2 sum_(d,e<R; je=kd mod r)
+      [mu(d)mu(e)/(de)]
+       widehat_w(Qj/(dr)) conjugate(widehat_w(Qk/(er))) (20.9)
+
+with `j!=k`, together with the exact principal subtraction. Their
+`j=k` diagonal has the desired `rQ` scale. Cancellation in (20.9), or
+equivalently (20.7), is the unresolved prime-modulus lemma; even it would
+control only this packet projection, not the full Type-II square.
+
+The displayed constants and exponent transitions in Sections 18--20 are
+checked exactly by `verify/mobius_boundary_exponents.py`.
+
+## 21. Poisson before ACZ closes half of every modulus factor range
+
+The obstruction in (20.6) is partly an artifact of applying the product-box
+theorem before dualizing the smooth cofactor. For a prime `p~R`, a dyadic
+block has
+
+    F_(p,D)(b)=sum_(d~D)mu(d)alpha(d)
+      sum_m beta(m/M)e_p(bdm),       DM~Q.             (21.1)
+
+Assume first that `D,M<p`; the case where the smooth `m`-sum is
+polynomially longer than `p` is rapidly small. Poisson summation in `m`
+gives exactly, up to the Fourier-sign convention,
+
+    sum_m beta(m/M)e_p(bdm)
+      =M sum_(j=bd mod p) widehat_beta(Mj/p).          (21.2)
+
+Since `b,d` are units, `j=0` is absent. Schwartz decay restricts the core
+dual length to `K=p/M`; positive and negative `j` lie in ordinary boxes
+modulo `p`. Dyadic tails of lengths `J_1,J_2` are summed with their
+Schwartz decay after applying the same rectangular-box estimate. Only now
+take absolute values of the Möbius factors. Eliminating `b`
+after squaring gives the unweighted product congruence
+
+    j_1 d_2=j_2 d_1 mod p.
+
+The ACZ box estimate with side lengths `(D,K,D,K)` is
+
+    N_(D,K)<<D^2K^2/p+DK log^A p.                    (21.3)
+
+It follows with the correct Poisson factor that
+
+    H_(p,D)<<M^2 N_(D,K)log^A T
+            <<(pD^2+pDM)log^A T.                     (21.4)
+
+In particular,
+
+    H_(p,D)<<pQ log^A T        whenever D<=M.         (21.5)
+
+Thus, together with the rapidly small long-cofactor range, every
+prime-denominator divisor block
+
+    D<=sqrt(Q)=T^.3725
+
+satisfies the pointwise primitive-frequency target. This strictly extends
+the Pólya--Vinogradov cutoff `D<T^.275` from Section 20. Summing the
+logarithmically many proved blocks and using
+`|F_low+F_high|^2<=2|F_low|^2+2|F_high|^2`, the low-divisor part of the
+packet-projected covariance contributes
+
+    <<R^2 log^A T=T^(.98+o(1)).                       (21.6)
+
+No cross-range cancellation is assumed. Possible original terms `p|m`
+are included because (21.2) completes the full integer `m`-sum; its dual
+variable is nevertheless a unit.
+
+For `D>M`, (21.4) loses only the ACZ uniform main term `pD^2`. The range
+where the stronger pointwise estimate (21.5) remains open is
+
+    T^.3725<D<T^.49,
+    T^.255<M<T^.3725,
+    DM=T^.745.                                       (21.7)
+
+Before absolute values, the remaining prime-modulus sufficient statement is
+the centered Möbius-weighted dual-box estimate. Put
+`a_d=mu(d)alpha(d)` and subtract the exact principal character mode; the
+needed bound is
+
+    sum_(j_1d_2=j_2d_1 mod p)
+       a_(d_1)conjugate(a_(d_2))
+       widehat_beta(Mj_1/p)conjugate(widehat_beta(Mj_2/p))
+      -[1/(p-1)]|sum_d a_d|^2
+          |sum_(j!=0 mod p)widehat_beta(Mj/p)|^2
+      <<DK log^A T.                                  (21.8)
+
+The unweighted ACZ error already has this size; only the weighted main mode
+and discrepancy remain, with the absolute majorant too large by `D/M`,
+reaching `T^.235` at the endpoint.
+
+The low-divisor estimate extends to composite packet moduli without losing a
+power. For arbitrary `r~R`, split `d` by
+
+    delta=(d,r),  r=delta k,  d=delta d',  (d',k)=1. (21.9)
+
+In (21.2), `j=delta j'` and
+
+    j'=b d' mod k,        (j',k)=1,
+
+with Fourier argument `Mj'/k`. The reduction `U_r -> U_k` is surjective
+with fiber `phi(r)/phi(k)`. Cochrane--Shi's composite-modulus theorem counts
+the resulting unit solutions in arbitrary rectangular boxes as
+
+    |B^0|/phi(k)+O(k^o(1)sqrt(|B|)).                  (21.10)
+
+The main unit count is bounded by the product of the side lengths; it is
+not replaced by a false raw-volume asymptotic. Including the fiber and the
+Poisson factor gives, for one gcd stratum,
+
+    H_(r,D,delta)
+      <<[rD^2/delta^2+rDM/delta]T^o(1).               (21.11)
+
+Here `phi(r)/phi(k)<=delta` and `k/phi(k)<<loglog k`. When the formal dual
+length `k/M` is below one, dyadic boxes `J>=1` carry weights
+`(1+J/(k/M))^-A`; summing (21.10) with these weights gives the same formal
+right side. Shells `|j'|>=k` are first discarded by Schwartz decay, since
+their Fourier argument has size at least `M`; thus every box used in
+(21.10) has side length below `k`. If `D/delta<1`, replacing that side length by one is harmless
+because an inhabited stratum has `delta<2D`. The case `k=1` cannot occur,
+since it would force `r|d` while `d<R<=r`.
+
+Finally Cauchy over the divisor strata and the standard divisor sums give
+
+    H_(r,D)<<tau(r)sum_(delta|r)H_(r,D,delta)
+            <<(rD^2+rDM)T^o(1)
+            <<rQ T^o(1)              (D<=M).          (21.12)
+
+Therefore (21.6) holds after summing **every** packet modulus `r~R`, not
+only primes. There is a further small range where (21.12) misses the
+pointwise primitive-frequency target but still suffices after packet
+normalization. For `D=T^delta>M`, (21.12) and the prime variance give
+
+    B_(packet,D)<<R^2(D/M)T^o(1)
+      =T^(.235+2delta+o(1)).                           (21.13)
+
+Hence the actual packet-projected quadratic block is `o(T)` throughout
+
+    D<T^(.3825-epsilon).
+
+This closes the complete low-divisor half and a further `T^.01` strip for
+every modulus. The unresolved projected range is
+`T^.3825<=D<T^.49`; the pointwise bound remains open already at
+`D>T^.3725`. None of these estimates controls the complementary minor-arc
+mass or the full Type-II square.
