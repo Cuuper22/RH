@@ -379,3 +379,32 @@ Therefore no fixed-degree Rudnick--Sarnak-supported marked-moment hierarchy
 can prove the required `W_s/N<=.00932` without an additional residue
 anti-concentration theorem. The live alternatives are endpoint-uniform
 spectral flow or a genuinely all-scales shifted-resolvent estimate.
+
+The all-scales sign integral does admit a finite contour replacement, but it
+does not escape the zero-count problem. Put `f(z)=xi(1/2+iz)`, `g=f'`,
+`L=ell/2`, and
+
+    E_(0,a)=f''+iaL g,       E_(1,a)=-L^2f+iaL g,       a>0.
+
+The Cauchy-index/Hermite--Biehler identity gives, with the same collar terms,
+
+    2W_s=[N_+(E_(0,a))-N_-(E_(0,a))]
+          -[N_+(E_(1,a))-N_-(E_(1,a))]+O(endpoints).   (11)
+
+In the `s` coordinate these are, up to harmless overall signs,
+`xi''+aLxi'` and `L^2xi+aLxi'`. On the outer right boundary, standard
+logarithmic-derivative estimates make their ratio `1+O(1/L)`, so those
+contour pieces cancel to lower order. The surviving critical-boundary term is
+
+$$
+ \Delta\arg\frac{\xi''+aL\xi'}{L^2\xi+aL\xi'}.
+$$
+
+This is exactly the unknown relative signature in (11). Moreover the second
+endpoint signature is the real-zero count of `xi` itself by the existing
+Morse--Bezout identity. Thus a bound strong enough for `W_s/N<=.00932` is
+already a new Levinson-type zero-imbalance estimate; it does not follow from
+right-boundary closeness. The remaining possible escape in this route is a
+new critical-axis mean/argument estimate for this ratio that exploits the
+common gamma cancellation. Treating the outer `1+O(1/L)` estimate as such a
+bound would be circular.

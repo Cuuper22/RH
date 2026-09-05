@@ -603,6 +603,34 @@ do not bound the synthesized packet norm because neighboring Farey packets
 overlap. Formula (14.3) is consistent with (14.1); its two displayed terms
 must not be estimated separately near `r~R`.
 
+### Rigorous packet norm in a logarithmic collar
+
+The pointwise bound (14.1) controls more than a single denominator shell,
+but not a fixed-power collar. Put `Q=RH`, `B=(loglog T)^2`, and synthesize
+every principal packet with `cR<=r<=Q`. Farey spacing, Plancherel, and one
+integration by parts for each off-diagonal packet pair give
+
+    ||principal_[cR,Q]||_2^2
+      << T B^2 H^2
+         +R B^2 H^4 log T
+         +R B H^3 log^C T.                            (14.4)
+
+This retains the `v`-dependence of `P_r-D_r`. For `r>=R`, its variation is
+the step variation of `D_r`, and the finite q-sum gives
+
+    Var D_r << log R tau(r)^2/phi(r).
+
+For `cR<=r<R`, the additional `A_r log v` variation is `O(1/R)`.
+Consequently (14.4) is `o(T log T)` whenever
+
+    H^2(loglog T)^4=o(log T),
+
+for example `H=(log T)^(1/2-epsilon)/(loglog T)^2`. This includes every
+Farey overlap in that collar. Conversely, for `H=T^theta` the diagonal
+upper scale from the uniform coefficient bound alone is
+`T^(1+2theta)B^2`; essentially orthogonal packets show that no fixed-power
+extension follows without additional arithmetic cancellation.
+
 ### Precisely what is still unevaluated
 
 For each q and r, set `g=(q,r)`, `k=r/g`, `b=-a(q/g) mod k`, and prime length `X_q=Z/q`. The ACTUAL remaining additive prime error is
@@ -921,5 +949,116 @@ denominator created by the q-collision norm, whereas Section 14 uses
 reduced numerators converts it to an ordinary PNT remainder plus the finitely
 many prime powers whose bases divide `k`, but q-dependent lengths and outer
 weights must still be restored. This issue does not occur in the interior
-full-prime triangle above, where the sampled denominator is `r~P`; it remains
-a separate boundary/complementary-block task.
+balanced full-denominator block above; it remains a separate
+boundary/complementary-block task.
+
+### The exact two-sided variance missing even from the packet projection
+
+The same two large sieves do not close even the part of the Type-II error
+seen by the `r~R` Type-I packet neighborhoods. After subtracting the
+prime-progression principal term, put
+
+    A_r=sum_((x,r)=1)|E_(r,x)|^2,
+    H_r=sum_((x,r)=1)|F_r(x)|^2.
+
+The error packet at a reduced `a/r` is
+
+    R_(r,a)=sum_((x,r)=1) E_(r,x)F_r(ax),
+    |R_(r,a)|^2<=A_r H_r.                              (16.10)
+
+The multiplicative and additive large sieves, together with their elementary
+pointwise counterparts, give
+
+    sum_(r~R) A_r << C R log^A T,
+    max_(r~R) A_r << (C^2/R)log^A T,
+    sum_(r~R) H_r << R^2 Q log^A T,
+    max_(r~R) H_r << Q^2 log^A T.                      (16.11)
+
+Combining (16.10)--(16.11) in both directions and using the Type-I packet
+width `1/Z` gives only
+
+    B_(packet-projected error) << R min(C,Q)log^A T.   (16.12)
+
+At balance `Q=C=T^((1+eta)/2)`, the exponent is `(1+3eta)/2`, namely
+`1.235` at `eta=.49`. These four variance facts alone permit both energies
+to concentrate on the same exceptional moduli, so reordering their Cauchy
+inequalities cannot improve (16.12).
+
+The precise missing decorrelation estimate is
+
+    sum_(r~R) A_r H_r << C R^2 Q log^A T.              (16.13)
+
+It would imply a packet-projected bound
+`<<R^2 log^A T=T^(.98+o(1))`.
+The proved bound exceeds (16.13) by `C/R=T^.255`; reaching the target
+`T log T` needs a `T^(.235-o(1))` saving. In character coordinates this is
+a mixed fourth moment coupling
+
+    |sum_q M_R(q)chi(q)|^2 |sum_c Lambda(c)chi(c)|^2
+
+over the same moduli. Separate character large sieves control its two
+factors but not their covariance.
+
+This calculation does **not** localize the full positive Type-II square.
+The `r~R`, `a=O(1)` neighborhoods have total measure `R/Z=1/T`, whereas
+the band has measure `1/R`; the remaining Type-II error is not supported on
+those packets. Thus (16.13) is already necessary to control this projection,
+but the full square (16.1) and its complementary minor-arc mass remain a
+strictly larger open problem.
+
+
+## 17. Conductor-stratified estimate for the mixed block
+
+The balanced calculation extends to most nonprincipal mixed blocks, but only
+after characters are stratified by conductor. Write
+
+    r=gk~P,  q=gh~Q,  k~K,  g~P/K,
+    a~P/R,  h~QK/P,  c~C=TR/Q,
+
+and let a character modulo `k` be induced from a primitive conductor `f~F`,
+with `k=f l`. Its Gauss coefficient is zero unless `l` is squarefree and
+coprime to `f`; otherwise its size divided by `phi(k)` is
+`<<log^B(T)sqrt(F)/K`.
+
+Multiply the source-numerator and h-polynomials before applying the primitive
+character large sieve. Their product has length
+
+    N=(P/R)(QK/P)=QK/R
+
+and averaged coefficient energy `<<N log^B T`. Cauchy between this product
+and the prime character polynomial gives the audited conductor-shell bound
+
+    |S_F(P,Q,K)|
+      << [log^B(T)/(K sqrt(F))]
+          sqrt(N C(F^2+N)(F^2+C)).                    (17.1)
+
+Using `NC=TK` and
+`sqrt((F^2+N)(F^2+C))<=F^2+F sqrt(N)+F sqrt(C)+sqrt(NC)`, this implies
+
+    |S_F| << log^B(T) {
+       T/sqrt(F) + Q sqrt(CF)/R
+       + C sqrt(QF/(RK)) + sqrt(T)F^(3/2)/sqrt(K)}.    (17.2)
+
+At `eta=.49`, if `Q=T^t`, `K=T^kappa`, and `F=T^phi`, a fixed-power
+conductor shell is controlled whenever
+
+    phi < min(1.49-t, t+kappa-.49, (1+kappa)/3)
+
+with a fixed margin. In particular every **nonprincipal** conductor in a
+whole reduced-modulus block is `o(T log T)` throughout
+
+    Q>=R T^epsilon,       K<=T^(1/2-epsilon).          (17.3)
+
+Conductors between one and a sufficiently large log power are removed by
+Siegel--Walfisz; conductors above that log power gain through `T/sqrt(F)` in
+(17.2). Nonunit terms are prime powers `p^j` with `p|k` and contribute
+`<<QK/R log^B T`, also power-saving in (17.3).
+
+The conductor `f=1` is exactly the induced principal-character/Ramanujan
+term. Its signed dyadic `Q,K` pieces must first be recombined, after which
+Section 14 supplies coefficient cancellation. They must not be bounded
+absolutely shell by shell, and the large-source-denominator packet norm is
+not supplied by (17.1). Thus (17.3) closes the nonprincipal mixed block,
+not the positive Type-II square or the global principal packet synthesis.
+The remaining mixed boundaries are `Q~R`, `K~sqrt(T)`, and high conductors
+when `K>sqrt(T)`.
