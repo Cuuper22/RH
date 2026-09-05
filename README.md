@@ -10,6 +10,9 @@ inequality are written out; scalar constants are checked exactly. This is
 ordinary mathematical research, not a new fully machine-checked headline.
 **85% remains unproved.** The [research record](docs/research/research_20260905.md)
 also closes failed certificate classes and records the arithmetic progress.
+The continuation derives all finite ordered polynomial moments and a separate
+normalized Bezoutian counting certificate; neither supplies the missing 85%
+arithmetic estimate.
 
 ## Frozen extension ladder — status at HEAD
 

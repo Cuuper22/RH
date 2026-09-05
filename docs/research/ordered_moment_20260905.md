@@ -466,3 +466,6 @@ infinite resolvent series with the T limit. Higher singular moments of
 the resolvent introduce alternating paths, and shallow off-line pairs
 also prevent a free alpha-to-infinity passage. No 85% certificate has
 been obtained from this identity.
+
+
+Continuation: [the finite ordered hierarchy](ordered_hierarchy_20260905.md) now gives all two-path polynomial moments. [Certificate limits](certificate_limits_20260905.md) show that the elementary Cayley continuation above cannot reach 85%, even granting its unresolved asymptotic passage. The [normalized Bezoutian route](bezoutian_20260905.md) provides a separate proved counting mechanism; its required arithmetic inequality remains open.
