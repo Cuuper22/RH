@@ -1864,3 +1864,82 @@ are not included in `E_r^core`. The remaining floor problem is now precise:
 obtain one logarithmic saving in the grouped coefficients (27.2), and bound
 the transition/remainder on the same scale. Counting equal frequencies
 separately would lose the cancellation already built into `Gamma_r(k)`.
+
+## 28. The floor transition and quadratic remainder are negligible
+
+The two noncore pieces left at the end of Section 27 can in fact be removed
+unconditionally. The input is the uniform coprime Mertens estimate: for any
+fixed `kappa,B>0`, uniformly for `x>=T^kappa` and `s<=T^B`,
+
+    sum_(t<=x,(t,s)=1)mu(t)
+      <<x(log T)^C exp(-c sqrt(log T)).                (28.1)
+
+This follows from Perron summation and the classical zero-free region
+applied to
+
+    1/zeta(z) product_(p|s)(1-p^-z)^-1.
+
+The finite Euler factors are only polylogarithmic uniformly in the displayed
+range. Partial summation gives the same exponential decay for smooth or
+bounded-variation weights with polylogarithmic seminorms.
+
+First expand the exact cutoff coefficient as
+
+    Delta_s(R/t)=sum_(a|rad(s), at<R)mu(a).            (28.2)
+
+For the transition `st>Y`, every resulting t-interval starts at a fixed
+multiple of `Y/s`. Since
+
+    s<=r<=R T^theta,       Y~R^2,       theta<eta,
+
+we have `Y/s>>T^(eta-theta)`. Split at the finitely many v-dependent points
+`t=Yv/(js)` where `H_<(Yv/(st))` changes formula. On each open interval the
+weight
+
+    epsilon(Yv/(st))/t
+
+is smooth with polylogarithmic variation, and its endpoint jumps are handled
+as endpoints in partial summation. In particular one uses
+`epsilon(x)=-log x-gamma` only for `0<x<=1`; the strip
+`Y<st<Yv` is not incorrectly assigned that formula. Equations
+(28.1)--(28.2) give, uniformly in `v in [1,2]`,
+
+    |E_r^trans(Yv)|
+      <<[tau(r)^C/phi(r)]exp(-c sqrt(log T)).           (28.3)
+
+For the core remainder choose the strict sawtooth convention at integers and
+put
+
+    rho(x)=epsilon(x)-psi(x)/x,       x>=1.
+
+Then `rho` is continuous across the integer jumps,
+
+    |rho(x)|<<x^-2,       |rho'(x)|<<x^-2
+
+off the integers, with the same dyadic bounded-variation estimate. Let
+
+    X_0=T^((eta-theta)/3).
+
+For `t<X_0`, absolute summation and `s<=R T^theta`, `Y~R^2` give the power
+saving
+
+    <<[tau(r)^C/phi(r)]T^(-4(eta-theta)/3).            (28.4)
+
+For `t>=X_0`, expand (28.2) and apply (28.1) by partial summation to
+`rho(Yv/(st))/t`. Its total weighted variation is polylogarithmic, so
+
+    |E_r^rem(Yv)|
+      <<[tau(r)^C/phi(r)]
+         {T^(-4(eta-theta)/3)
+           +(log T)^C exp(-c sqrt(log T))}.            (28.5)
+
+Finally, standard fixed divisor moments imply
+
+    sum_(R<r<=R T^theta) phi(r)
+       int_1^2 |E_r^trans(Yv)+E_r^rem(Yv)|^2dv=o(1).   (28.6)
+
+Thus neither the transition nor the quadratic Euler remainder contributes
+to the target (23.1). The sole remaining floor term is the grouped leading
+sawtooth expression (27.3). Its present polylogarithmic estimate (27.6) is
+still not the required `o(log T)`; cancellation in `Gamma_r(k)`, averaged
+over the actual smooth denominator family, is the exact remaining task.
