@@ -1857,13 +1857,11 @@ majorizations `r/phi(r)<=tau(r)` and
 `T^(2theta)` bound for the complete grouped oscillatory core by a
 polylogarithmic bound.
 
-The result is deliberately not stated as (23.1). A fixed polylogarithm is
-not necessarily `o(log T)`, and (27.6) has discarded the signs
-`mu(r/s)mu(t)`. Moreover the `O(x^-2)` remainder and the transition `st>Y`
-are not included in `E_r^core`. The remaining floor problem is now precise:
-obtain one logarithmic saving in the grouped coefficients (27.2), and bound
-the transition/remainder on the same scale. Counting equal frequencies
-separately would lose the cancellation already built into `Gamma_r(k)`.
+The bound (27.6) alone is not (23.1): a fixed polylogarithm is not
+necessarily `o(log T)`, and it has discarded the signs `mu(r/s)mu(t)`.
+Section 29 below keeps the Möbius sign before Fourier expansion and closes
+this gap. Formula (27.3) remains the exact collision grouping and the finite
+check against which that cancellation can be audited.
 
 ## 28. The floor transition and quadratic remainder are negligible
 
@@ -1943,3 +1941,80 @@ to the target (23.1). The sole remaining floor term is the grouped leading
 sawtooth expression (27.3). Its present polylogarithmic estimate (27.6) is
 still not the required `o(log T)`; cancellation in `Gamma_r(k)`, averaged
 over the actual smooth denominator family, is the exact remaining task.
+
+## 29. Möbius bounded variation closes the complete floor mean square
+
+The leading sawtooth term is smaller if its Möbius sign is used before the
+Fourier series is expanded. For `s>1`, substitute
+
+    Delta_s(R/t)=sum_(a|rad(s),at<R)mu(a)
+
+directly into the core `R<=st<=Y`. Put `X_v=Yv/s`. Since
+
+    [mu(t)/t] psi(X_v/t)/(X_v/t)
+       =mu(t)psi(X_v/t)/X_v,
+
+the fixed `(s,a)` sum, apart from the exact outer factor
+`s/(Yv phi(r))`, is
+
+    sum_(t in I_(s,a),(t,s)=1) mu(t)psi(X_v/t),        (29.1)
+
+where the interval retains `R<=st<=Y` and `at<R` strictly.
+
+On a dyadic block `K<=t<2K`, the bounded variation satisfies
+
+    Var psi(X_v/t)<<1+X_v/K.                           (29.2)
+
+Indeed the smooth pieces have total variation `O(X_v/K)`, and there are
+`O(1+X_v/K)` integer crossings, each of jump size one. Apply the uniform
+coprime Mertens estimate (28.1) by Abel summation. If
+`K>=X_0=T^((eta-theta)/3)`, then
+
+    |sum_(t~K,(t,s)=1)mu(t)psi(X_v/t)|
+       <<(log T)^C exp(-c sqrt(log T))[K+X_v]
+       <<(log T)^C exp(-c sqrt(log T))X_v,             (29.3)
+
+because `K<=Y/s<=X_v`. Multiplication by `s/(Yv phi(r))`
+cancels `X_v=Yv/s` exactly. The dyadic blocks, divisors `a|rad(s)`, and
+outer divisors `s|r` cost only `(log T)tau(r)^C`.
+
+For `t<X_0`, use `|psi|<=1/2` before expanding the divisor cutoff. Since
+`s<=r<=R T^theta` and `Y~R^2`, this part is
+
+    <<[tau(r)^C/phi(r)] rX_0/Y
+     <<[tau(r)^C/phi(r)]T^(-2(eta-theta)/3).           (29.4)
+
+The `s=1` contribution is the separately proved
+`O(log T/R^2)` term in (23.4). Equations (29.3)--(29.4) therefore give,
+uniformly in `v in [1,2]`,
+
+    |E_r^core(Yv)|
+      <<[tau(r)^C/phi(r)]
+        {T^(-2(eta-theta)/3)
+          +(log T)^C exp(-c sqrt(log T))}.             (29.5)
+
+Fixed divisor moments and `theta<eta` imply
+
+    sum_(r in S_theta)phi(r)
+       int_1^2 |E_r^core(Yv)|^2dv=o(1).                (29.6)
+
+Combining (29.6) with the transition and remainder estimate (28.6) proves
+the previously missing statement
+
+    M_E(theta)=o(1),             0<theta<eta.          (29.7)
+
+In particular (23.1) holds, with room to spare. Therefore the smooth
+principal packets satisfy the asymptotic (23.2). Together with the
+large-prime lift (19.3), the entire principal model in the fixed-power
+denominator collar `R<r<=R T^theta` has constant
+
+    C_(W,chi){J_eta(theta)+theta-J_eta(theta)}
+       =C_(W,chi)theta                               (29.8)
+
+on the reduced `T log T` scale. At `eta=.49`, `theta=.20`, the two checked
+pieces are `.0361774824757766...` and `.1638225175242234...`.
+
+This is an unconditional principal-model evaluation, not a zero proportion.
+It does not estimate the centered high-divisor Type-II energy, the
+complementary denominator range beyond `R T^theta`, or the cross terms and
+secondary pieces required by the tapered terminal trace.

@@ -339,7 +339,9 @@ This supplies a valid zero-side-compatible smoothing bridge and removes the
 sharp endpoint as a blocker for that component. Section 26 of the arithmetic
 note also recombines the twisted principal mode exactly on the first
 denominator shell. It does **not** prove the complete tapered trace theorem.
-The larger-denominator principal synthesis and grouped floor/Farey-frequency
-energy, the high-divisor Type-II energy, cross-block recombination and
-diagonal subtraction, and the remaining secondary explicit-formula terms
-must still be controlled before (23) can be used with `D<=1.15`.
+The arithmetic note now also proves the grouped floor estimate and hence
+evaluates the complete principal model through every fixed-power collar
+`r<=R T^theta`, `theta<eta`. The denominator range beyond that collar, the
+high-divisor Type-II energy, cross-block recombination and diagonal
+subtraction, and the remaining secondary explicit-formula terms must still
+be controlled before (23) can be used with `D<=1.15`.
