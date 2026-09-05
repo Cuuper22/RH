@@ -3,7 +3,24 @@
 > Research artifact. Not maintained and not accepting contributions.
 > A Lean 4 formalization released as a static companion artifact to the paper.
 
+Research update (2026-09-05): a new
+[ordered-moment derivation](docs/research/ordered_moment_20260905.md)
+gives a proposed **67.2500732%** bound. The analytic proof and operator
+inequality are written out; scalar constants are checked exactly. This is
+ordinary mathematical research, not a new fully machine-checked headline.
+**85% remains unproved.** The [research record](docs/research/research_20260905.md)
+also closes failed certificate classes and records the arithmetic progress.
+
 ## Frozen extension ladder — status at HEAD
+
+**2026-09-05 correction:** the literal `SignedPairTraceGrade σ` predicate is
+false for every `σ > 1`: its independently quantified `IV = 0`, with
+`w = V = 1`, removes the main term and contradicts a positive-pair lower
+bound. Consequently the legacy axiom layer below is mathematically
+inconsistent, not merely conditional on an open estimate. This ordinary
+mathematical refutation is recorded in the
+[current research note](docs/research/research_20260905.md); it has not yet
+been formalized in Lean. The separate `Zeta23` base is unaffected.
 
 The target is the unconditional base-repository standard: comparator-validated
 headline theorems whose `#print axioms` output is exactly

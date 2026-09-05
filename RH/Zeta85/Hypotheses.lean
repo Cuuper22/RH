@@ -6,6 +6,12 @@ SPDX-License-Identifier: Apache-2.0
 /-
 RH/Zeta85/Hypotheses.lean — **the complete axiom set of the 85 % layer.**
 
+WARNING (2026-09-05): the literal `SignedPairTraceGrade σ` is mathematically
+false for every `σ > 1`; see `docs/research/research_20260905.md` for the
+Chebyshev/block-pair proof using `IV = 0`, `w = V = 1`. Axiom 2 therefore
+makes this legacy layer inconsistent. The refutation is not yet a Lean theorem.
+These declarations are retained as the frozen artifact, not valid research inputs.
+
 This is the ONLY file in `RH/` that declares an axiom.  Everything else under `RH/Zeta85/` is proved
 from Mathlib and from the base `Zeta23` library; `#print axioms` on the headline theorems of
 `RH/Zeta85/Main.lean` reports `propext`, `Classical.choice`, `Quot.sound` and a subset of the four

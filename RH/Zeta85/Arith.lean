@@ -182,7 +182,13 @@ is performed first"). -/
 def signedPairAggregate (w V : ℝ → ℝ) (S : ℕ → ℝ) (IV X H : ℝ) : ℝ :=
   ∑ h ∈ Finset.Icc 1 ⌈2 * H⌉₊, w (h / H) * (pairCorr V X h - S h * X * IV)
 
-/-- **The trace-grade criterion at connected support `σ`.**  There is a singular-series function `S`
+/-- **REFUTED for every `σ > 1` (ordinary proof, 2026-09-05).**
+The independently quantified `IV = 0`, with `w = V = 1`, removes the main term.
+Chebyshev and a block-pair lower bound then give `≫ XH`, contradicting the
+asserted bound. See `docs/research/research_20260905.md`. The literal definition
+is retained for provenance; it must not be treated as a viable research target.
+
+**The frozen trace-grade criterion at connected support `σ`.**  There is a singular-series function `S`
 such that, for every pair of bounded weights `(w, V)` and every logarithmic saving `A`, the signed
 aggregate at `X = T^σ`, `H = X/T = T^{σ−1}` is `O_A(X (log X)^{−A})`.
 

@@ -1,5 +1,13 @@
 # AXIOMS.md — what the 85 % layer assumes
 
+**Correction, 2026-09-05:** A2 assumes a false predicate, so the legacy
+axiom layer is mathematically inconsistent. Set `w = V = 1`, `IV = 0` in
+`SignedPairTraceGrade σ`; Chebyshev and a block-pair inequality give
+`≫ XH`, contradicting the claimed `O(X log⁻ᴬ T)` for every `σ > 1`.
+See the [proof](docs/research/research_20260905.md).
+This is an ordinary mathematical refutation, not a new Lean theorem;
+the compiled dependency lists below are retained as provenance.
+
 ## Table of contents
 
 - [Summary](#summary-table)
@@ -15,8 +23,8 @@
 | # | Name | One-line meaning | Status |
 |---|---|---|---|
 | A1 | `shiu_majorant₂` | Shiu-type majorant for multiplicative functions in progressions | **axiom** (proved for `eta >= 1/4`; open for `eta in (0,1/4)`) |
-| A2 | `signedPair_traceGrade_lt_5_4` | Signed aggregate criterion `(AS)` at support `< 5/4` (cycle-4 BBLR route) | **axiom** (run claim, undischarged) |
-| A3 | `signedPair_traceGrade_lt_3_2` | Signed aggregate criterion `(AS)` at support `< 3/2` (cycle-5 route) | **axiom** (run claim; log budget does not close) |
+| A2 | `signedPair_traceGrade_lt_5_4` | Signed aggregate criterion `(AS)` at support `< 5/4` (cycle-4 BBLR route) | **REFUTED mathematically:** conclusion false; BBLR premise already proved |
+| A3 | `signedPair_traceGrade_lt_3_2` | Signed aggregate criterion `(AS)` at support `< 3/2` (cycle-5 route) | **FALSE CONCLUSION:** uses the same refuted aggregate predicate |
 | A4 | `traceTransfer_saturated` | Trace evaluation with saturated kernel at support `> 1` | **axiom** (proved for `sigma <= 1`; open beyond) |
 | D1 | `bblrErrorBound_proved` | BBLR smoothed quadratic divisor sum error bound | **proved in Lean** |
 | D2 | `bblrPoissonBlocks_proved` | BBLR Poisson block decomposition | **proved in Lean** |
