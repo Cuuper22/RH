@@ -2176,3 +2176,67 @@ At the endpoint `X=T^.47343`, `Y=T^.210145`, these are respectively
 count `T^.89372`.  Hence arbitrary-coefficient Kloosterman technology, with
 the Möbius signs discarded, does not produce (30.5).  The fourth-moment lift
 above uses precisely the arithmetic information that route omits.
+
+## 31. The exact higher-moment closure and its exceptional-character barrier
+
+Section 30 has a clean formal continuation, but it also shows why merely
+asking for more moments would hide a serious new theorem.  For an integer
+`s>=2`, suppose one could prove on every surviving gcd stratum
+
+    sum_(k~K) sum_(chi!=chi_0 mod k)|A_(k,Delta)(chi)|^(2s)
+       <<K^2 X^s T^o(1),                 K=R/Delta.   (31.1)
+
+This is the diagonal-size averaged `2s`-th moment.  The dual polynomial
+`J_k` needs no new high moment.  Interpolation between
+
+    sum_chi |J_k(chi)|^2 <<kY T^o(1),
+    sum_(chi!=chi_0)|J_k(chi)|^4 <<kY^2T^o(1)
+
+gives, for `p=2s/(s-1)`,
+
+    ||J_k||_p^2 <<k^(1-1/s)Y T^o(1).                 (31.2)
+
+Hölder first in the character variable and then over `k`, using the first
+moment and pointwise bounds for `P_r` exactly as in (30.1), turns (31.1) into
+
+    sum_(r~R)P_rH_(r,D)
+       <<C R^2 Q (C/R)^(1/s)T^o(1),                 (31.3)
+
+and therefore
+
+    B_(packet,D)<<R^2(C/R)^(1/s)T^o(1).              (31.4)
+
+At balanced support the exponent is
+
+    2eta+(1-eta)/(2s).
+
+For `eta=47343/100000`, `s=4` still gives `1.01268125`, while `s=5`
+would give
+
+    2eta+(1-eta)/10=.999517.                          (31.5)
+
+Thus the tenth moment is the first rung which would close the complete
+high-divisor packet projection, with the small fixed margin `.000483`.
+
+Statement (31.1) for `s=5` is **not** a consequence of the ordinary large
+sieve.  Squaring `A^5` produces a coefficient sequence of length `X^5`, so
+that theorem gives
+
+    (K^2+X^5)X^5T^o(1),                              (31.6)
+
+which loses `K^3` against (31.1) when `X~K`.  More decisively, positivity in
+(31.1) would force every individual character in the family to satisfy
+
+    |A_(k,Delta)(chi)|<<K^(7/10+o(1))                 (X~K).
+
+This is a genuine power bound for a conductor-length Möbius-twisted
+character sum.  It is not supplied by a zero-free region uniform in the
+conductor; a possible exceptional real character is exactly the dangerous
+pretentious direction.  Consequently (31.5) is a proved implication, not a
+claimed estimate.
+
+The lean remaining attack is therefore conductor-sensitive: establish the
+moment gain only for the nonexceptional bulk, then keep any Landau--Page
+exceptional real mode coupled to the prime character polynomial before the
+positive norm is formed.  Bounding that mode separately by absolute values
+would recreate the loss that (30.5) removed.

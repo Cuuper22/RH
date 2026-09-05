@@ -37,6 +37,14 @@ assert absolute_count == Fraction(22343, 25000)       # 0.89372
 assert bc_first > absolute_count
 assert bc_second > absolute_count
 
+# Section 31 moment ladder.
+s4_exponent = 2 * eta + (1 - eta) / 8
+s5_exponent = 2 * eta + (1 - eta) / 10
+s5_margin = 1 - s5_exponent
+assert s4_exponent == Fraction(4050725, 4000000)     # 1.01268125
+assert s5_exponent == Fraction(999517, 1000000)      # 0.999517
+assert s5_margin == Fraction(483, 1000000)           # 0.000483
+
 print("eta =", float(eta))
 print("old packet exponent =", float(old_exponent))
 print("new packet exponent =", float(new_exponent))
@@ -44,3 +52,6 @@ print("remaining excess =", float(new_excess))
 print("old/new crossover =", float(crossover))
 print("BC errors =", float(bc_first), float(bc_second))
 print("absolute determinant exponent =", float(absolute_count))
+print("s=4 ladder exponent =", float(s4_exponent))
+print("s=5 ladder exponent =", float(s5_exponent))
+print("s=5 margin below one =", float(s5_margin))
