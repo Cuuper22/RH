@@ -1796,3 +1796,71 @@ low-divisor term on `r~R`. This does not settle the global principal packet
 synthesis for larger denominators: Sections 19 and 23 show that it contains
 a positive large-prime lift and a still-unproved grouped floor-discrepancy
 energy.
+
+## 27. Exact grouping of every equal floor frequency
+
+The core floor term in Section 23 can be grouped beyond its literal
+diagonal. Define, for `R<=n<=Y`,
+
+    B_r(n)=sum_(s|r, n=st, (s,t)=1, t<R)
+       mu(r/s)mu(t)s Delta_s(R/t),                     (27.1)
+
+and put
+
+    Gamma_r(k)=sum_(m: R<=km<=Y) B_r(km)/m.           (27.2)
+
+The leading `psi(x)/x` part of (23.4) is then **exactly**
+
+    E_r^core(Yv)=1/(2pi i Yv phi(r))
+      sum_(k<=Y) Gamma_r(k)
+        sum_(a!=0,(a,k)=1) e(aYv/k)/a.                (27.3)
+
+Indeed every original frequency `h/(st)` has a unique reduced expression
+`a/k`. Writing `st=km` forces `h=am`, and its coefficient `1/h` becomes
+`1/(am)`. Thus (27.2) collects all, and only, the formerly colliding
+triples `(s,t,h)`. The finite exact arithmetic is checked by
+`verify/floor_frequency_grouping.py`.
+
+This identity exposes why the literal diagonal estimate (23.5) was not the
+right endpoint. It also removes the fixed-power loss from the oscillatory
+core by an elementary large-sieve bound. To see the scale, keep one divisor
+`s` fixed and put
+
+    T_s=min(R,Y/s).
+
+After reducing the frequencies coming from `h/(st)`, their denominators are
+at most `T_s` and their phase is dilated by `Y/s`. Their spacing on the
+v-interval therefore gives large-sieve constant
+
+    1+s T_s^2/Y << 1+min(s,Y/s).                      (27.4)
+
+For a reduced denominator `k<=T_s`, the corresponding coefficient before
+the outer factor `s` is bounded by
+
+    <<tau(s)[1+log(T_s/k)].
+
+Consequently its squared coefficient sum is `<<T_s tau(s)^2`, since
+
+    sum_(k<=X)[1+log(X/k)]^2<<X.                      (27.5)
+
+Cauchy over `s|r`, followed by (27.4)--(27.5), yields
+
+    int_1^2 |E_r^core(Yv)|^2dv
+      << [tau(r)/(Y^2 phi(r)^2)]
+         {sum_(s|r,s<=R) R s^3 tau(s)^2
+          +sum_(s|r,s>R) Y^2 tau(s)^2}.               (27.6)
+
+For `Y~R^2`, summing (27.6) with weight `phi(r)` over
+`R<r<=R T^theta` gives a fixed power of `log T`; for example the elementary
+majorizations `r/phi(r)<=tau(r)` and
+`sum_(n<=x)tau(n)^5/n<<log^32 x` suffice. This replaces the previous
+`T^(2theta)` bound for the complete grouped oscillatory core by a
+polylogarithmic bound.
+
+The result is deliberately not stated as (23.1). A fixed polylogarithm is
+not necessarily `o(log T)`, and (27.6) has discarded the signs
+`mu(r/s)mu(t)`. Moreover the `O(x^-2)` remainder and the transition `st>Y`
+are not included in `E_r^core`. The remaining floor problem is now precise:
+obtain one logarithmic saving in the grouped coefficients (27.2), and bound
+the transition/remainder on the same scale. Counting equal frequencies
+separately would lose the cancellation already built into `Gamma_r(k)`.
