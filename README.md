@@ -5,15 +5,17 @@
 
 Research update (2026-09-05): a new
 [sharpened ordered-moment derivation](docs/research/sharpened_cubic_gain_20260905.md)
-gives a proposed **67.2504380%** bound. The analytic proof and operator
+gives a proposed **67.2504382097%** bound. The analytic proof and operator
 inequality are written out; scalar constants are checked exactly. This is
 ordinary mathematical research, not a new fully machine-checked headline.
 **85% remains unproved.** The [research record](docs/research/research_20260905.md)
 also closes failed certificate classes and records the arithmetic progress.
 The continuation derives all finite ordered polynomial moments and a separate
 normalized Bezoutian counting certificate; neither supplies the missing 85%
-arithmetic estimate. The latest increment is `1/272000`; its scalar
-implication was also checked through AXLE with only standard Lean axioms.
+arithmetic estimate. The latest exact profile increment is `1/271803`;
+its rational verifier passes. The underlying scalar implication at the
+slightly weaker `1/272000` value was also checked through AXLE with only
+standard Lean axioms.
 
 ## Frozen extension ladder — status at HEAD
 

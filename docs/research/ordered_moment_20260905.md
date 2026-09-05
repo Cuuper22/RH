@@ -11,7 +11,7 @@ assumes RH and is not used here.
 
 The analytic inputs in this note also feed the later
 [sharpened comparison](sharpened_cubic_gain_20260905.md), which improves the
-increment from `1/35280000` to `1/272000`. The original proof below is
+increment from `1/35280000` to `1/271803`. The original proof below is
 retained to make that dependency clear.
 
 ## 1. Actual complex zeros and the ordered operator

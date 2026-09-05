@@ -327,3 +327,55 @@ A normalization whose squared action on $(1,0)$ has integral at most $M$
 retains negative trace at most $2\epsilon M$. A uniform charge for an
 arbitrarily small wrong residue therefore requires singular amplification;
 bounded matrix normalization does not supply the missing estimate.
+
+
+## Wrong extrema are endpoint spectral flow
+
+The discontinuous sign datum has an exact finite-window formulation. In
+canonical pole coordinates the unmarked and residue-marked Hermitian kernels
+are congruent to
+
+    C=U J U*,             R=U J D U*.
+
+A simple real pole contributes `J=[1]`, `D=[r]`, with `r>0` for a correct
+extremum and `r<0` for a wrong one. A nonreal conjugate pair contributes a
+`(1,1)` inertia block to both kernels. Consequently
+
+    W_s=n_-(R)-n_-(C)
+       =spectral_flow_([0,1])((1-t)C+tR).              (10)
+
+The crossing attached to a negative real residue is
+`t=1/(1-r)`. In analytic terms this pencil is the pole kernel of
+
+    [(1-t)xi''+t(ell^2/4)xi]/xi',
+
+whose residue at a simple `xi'` zero is exactly `1-t+tr`. Thus the missing
+estimate is an endpoint-uniform relative-inertia statement for an explicit
+differential-polynomial pencil, not an unmarked derivative-zero count.
+
+There is a nonsingular pointwise sign majorant
+
+    1_(r<0) <= (r-1)^2/(r^2+1).
+
+It leads to shifted Cayley/resolvent kernels `R+iC` and `R-iC`; unlike an
+inverse-residue moment, these have no real-pole singularity. But evaluating
+their relative trace requires all-orders shifted-inverse information and is
+not implied by finitely many mixed moments.
+
+This failure is sharp. Let `P` be any real polynomial with distinct real
+roots and put
+
+    f_+=P^2+epsilon^2,       f_-=P^2-epsilon^2.
+
+The derivatives are identical. At each root `alpha` of `P`, both derivatives
+have the same simple critical point and second derivative, but it is wrong
+for `f_+` and correct for `f_-`; the two normalized residues have opposite
+sign and magnitude `O(epsilon^2/P'(alpha)^2)`. Hence every fixed collection
+of continuous positive-power residue marks converges to the same data as
+`epsilon` tends to zero, while the wrong-extremum counts differ by `deg P`.
+Equivalently, all the missed crossings accumulate at `t=1-O(epsilon^2)`.
+
+Therefore no fixed-degree Rudnick--Sarnak-supported marked-moment hierarchy
+can prove the required `W_s/N<=.00932` without an additional residue
+anti-concentration theorem. The live alternatives are endpoint-uniform
+spectral flow or a genuinely all-scales shifted-resolvent estimate.

@@ -519,23 +519,54 @@ with the exact remainder
 
 Its absolute value is at most `C R sigma_1(r)/(phi(r)Y)`. Substituting log Y=2log R+log v and log V=log T-log R proves the displayed identity for P_r-D_r.
 
-### A proved logarithmic improvement for r comparable to R
+### Uniform cancellation throughout the surviving rational collar
 
-Take fixed 0<c<C and cR<=r<=CR, and fixed eta<1/2. Then
+First, for fixed `c>0` and `cR<=r<R`, the elementary estimates
 
-    |A_r|+|L_r|=O_{c,C}(1/R),
-    |L_infty(r)-L_V(r)|=O_{c,C}(log^2 R/V)=o(1/R),
-    A_r(log V-gamma-H_V)=o(1/R).
+    |A_r|+|L_r|<<1/R,
+    |L_infty(r)-L_V(r)|<<log^2(T)/V,
+    A_r(log V-gamma-H_V)=o(1/R)
 
-For the tail bound, use V/r tending to infinity by a fixed power, sum the prime-power tails geometrically, and use `|A_s|<=(1+log(R/s))/s`. The last estimate uses the classical consequence of the prime number theorem `H_V=log V-gamma+o(1)`.
+give the same `O((loglog T)^2/R)` conclusion from the exact formula. The
+last term uses the prime number theorem
+`H_V=log V-gamma+o(1)`.
 
-Thus, uniformly for v in [1,2],
+Beyond that comparable range, every `r>=R` enjoys a stronger exact
+simplification: the strict cutoff `d<R` gives
+
+    A_r=L_r=0.
+
+Consequently the `A_r(log V-gamma-H_V)` term also vanishes. Moreover,
+`L_infty(r)-L_V(r)` is precisely the tail of the defining prime-power sum
+with `p^j>V`. Summing its geometric tails and using
+`|A_s|<=(1+log(R/s))/s` gives, uniformly for `R<=r<=T`,
+
+    |L_infty(r)-L_V(r)| << log^2(T)/V.
+
+The exact floor remainder and elementary Euler-product estimates give
+
+    |E_r(R^2v)| << [sigma_1(r)/phi(r)]/R
+                 << (loglog T)^2/R,
+    |mu(r)|/phi(r) << loglog(T)/R.
+
+It follows, uniformly for `v` in `[1,2]`, `cR<=r<=T`, and fixed
+`eta<1/2`, that
 
     P_r(v)-D_r(v)
-       = mu(r)/phi(r)-L_r-E_r(R^2v)+o(1/R)
-       = O_{c,C}((loglog R)^2/R).
+       = mu(r)/phi(r)
+          +O(log^2(T)/V+(loglog T)^2/R)
+       = O((loglog T)^2/R).                         (14.1)
 
-The separate primary coefficients can have size log R/R. Their leading log R therefore cancels, with an explicit quantitative remainder, in the actual eta=.49 range. This statement does not assert orthogonality of all rational packets or an upper bound for the full bandpass energy.
+Thus the principal Ramanujan model cancels across the entire denominator
+range met by the bandpass. Before taking norms, every overlap between two
+different rational packets carries the combined coefficients
+`(P_r-D_r)(P_s-D_s)`. This does not assert a Bessel inequality for the
+highly overlapping packet family, nor does it estimate the actual additive
+prime errors or the Type II square.
+
+For `r` comparable to `R`, (14.1) recovers the earlier interpretation:
+the separate primary coefficients can have size `log R/R`, but their
+leading `log R` terms cancel.
 
 For a bounded check, R=32, V=64, v=1.3 gave the following coefficients; the exact identity agreed to 2.1e-16:
 
@@ -545,6 +576,32 @@ For a bounded check, R=32, V=64, v=1.3 gave the following coefficients; the exac
 | 29 | -.145086 | .111877 | -.033209 | -.032320 |
 | 31 | -.135419 | .102994 | -.032424 | -.032309 |
 | 41 | .005682 | -.031742 | -.026060 | -.025000 |
+
+### Exact descent for denominators with a large prime factor
+
+There is a complementary structural reduction. Let `p` be prime,
+`p` not divide `s`, and `p>Y/R`, where `Y=R^2v`. Comparing the Ramanujan
+sums modulo `s` and `ps` gives the exact identity
+
+    D_(ps)=[1_(p<Y) mu(s)/phi(s)-D_s]/(p-1).           (14.2)
+
+The indicator is essential when `p>=Y`, because the term `q=p` then lies
+outside the strict cutoff. For `eta>1/3`, direct substitution in `B_r`
+also gives
+
+    P_(ps)-D_(ps)
+      =[D_s-1_(p<Y)mu(s)/phi(s)]/(p-1)
+        -1_(p<=V)(log p/p)A_s.                         (14.3)
+
+Thus every denominator containing a prime `p>Y/R` descends to a smaller
+denominator, apart from the displayed one-prime boundary term. Iterating
+(14.2) strips all such distinct primes; at `eta=.49` there can be at most
+two of them in `r<=T`. This reduces the irreducible coefficient class to
+`Y/R`-smooth bases. It is an exact coefficient identity only: after
+coprime-numerator weighting, the resulting prime-harmonic square sums still
+do not bound the synthesized packet norm because neighboring Farey packets
+overlap. Formula (14.3) is consistent with (14.1); its two displayed terms
+must not be estimated separately near `r~R`.
 
 ### Precisely what is still unevaluated
 
@@ -604,10 +661,10 @@ from
 is
 
     O_(B,M,W,chi)( T(log T)^(-M)
-                   + T^((1+eta)/2)(log T)^C ),          (1)
+                   + T^eta(log T)^C ),                  (1)
 
 for a fixed C depending on B and the profiles. In particular it is
-o(T log T) for every fixed0<eta<1. At eta=.49 the second power is T^.745.
+o(T log T) for every fixed0<eta<1. At eta=.49 the second power is T^.49.
 This is an unconditional asymptotic statement; its constants inherit the
 usual ineffectivity of Siegel–Walfisz.
 
@@ -640,24 +697,26 @@ Here Y lies between fixed multiples of V and T, so log Y is comparable to
 ell. Expanding the additive phase into residue classes and using partial
 summation gives, for any fixed A,
 
-    E_(k,b)(Y;w_q) << Y ell^(-A)+sqrt(Y) ell^2,
+    E_(k,b)(Y;w_q) << Y ell^(-A)+log k,
                          uniformly k<=K.                (4)
 
 The factor at most phi(k) from additive Fourier expansion is absorbed by
-choosing the Siegel–Walfisz logarithmic saving larger. The second term
-retains ALL higher prime powers by their elementary total-weight bound;
-this also covers powers whose base divides k. The cutoff c>V is retained
-by partial summation with its endpoint. Thus (4) has no missing
-non-coprime contribution.
+choosing the Siegel–Walfisz logarithmic saving larger. Here one applies
+Siegel--Walfisz directly to `psi(x;k,h)=sum Lambda(n)`, so every prime
+power coprime to `k` is already included. The noncoprime Lambda-support
+in a fixed dyadic window consists only of `c=p^j` with `p|k`; there are
+`O(1)` eligible exponents per such prime and their total weight is
+`O(sum_(p|k) log p)=O(log k)`. The cutoff `c>V` is retained by partial
+summation with its endpoint. Thus (4) has no omitted prime-power term.
 
-Finally |M_R(q)|<=tau(q), and the elementary divisor estimates give
+Finally `|M_R(q)|<=tau(q)`, and the elementary divisor estimates give
 
     sum_(q<=2R^2) tau(q)^2/q << ell^4,
-    sum_(q<=2R^2) tau(q)^2/sqrt(q) << R ell^3.
+    sum_(q<=2R^2) tau(q)^2 << R^2 ell^3.
 
 Combining these with (3)–(4) proves a bound
 
-    K T ell^(6-A)+K sqrt(Z) ell^7.
+    K T ell^(6-A)+K R ell^C.
 
 Choose A sufficiently large in terms of B,M. This proves (1). The other
 smooth profiles and the1/T derivative terms satisfy the same estimate.
@@ -725,3 +784,142 @@ redundant, so this identity does not estimate that defect. Moreover the
 small height-expansion remainder established for the original coefficients
 cannot be passed through $G^\dagger$ without a separate amplification
 bound. No such bound is asserted here.
+
+
+## 16. Type-II square and a closed balanced mixed block
+
+This section expands the remaining positive square before applying any
+triangle inequality. Put
+
+    C_(u,v,g)(h)=sum_(u c1-v c2=h) Lambda(c1)Lambda(c2)
+                   W(gu c1/Z)W(gv c2/Z).
+
+Writing `q1=gu`, `q2=gv`, `(u,v)=1`, gives the exact off-diagonal identity
+
+    B_off(II,II)
+      =R^(-1) sum_g sum_((u,v)=1) M_R(gu)M_R(gv)
+          sum_(h!=0) hat_chi(-gh/R) C_(u,v,g)(h).       (16.1)
+
+Thus the terminal quadratic error is a signed average of binary prime
+correlations with the two linked `M_R` weights. For every fixed
+`delta>0`, the range `g>=R^(1+delta)` is negligible. Indeed Schwartz
+decay and Chebyshev give, for every `A>1`,
+
+    contribution << T^2 R^(-delta(A+1)) log^C(T),       (16.2)
+
+so `A` may be chosen after `delta`. The hard range is therefore
+`g<R^(1+delta)`.
+
+There is also a useful diagonal audit. Equality `q1 c1=q2 c2` forces
+`u|c2` and `v|c1`. Since `c1,c2` are prime powers, the only possibilities
+are the same representation, two distinct prime-power bases with
+`c1=v,c2=u`, or a chain of powers of one prime. For distinct ordinary
+primes at `eta=.49`, the cross-representation family has `g=1` and
+`n=pq`, `p,q>V`. On it, exactly,
+
+    I(pq)=log(pq/R),   II(pq)=-log(pq),   r_R(pq)=-log R.
+
+The prime number theorem then shows that the combined diagonal coefficient
+is `eta^2/(1+eta)^2` times the Type-II-square coefficient on this stratum.
+At `eta=.49`, this removes `89.185%` of the separate Type-II diagonal.
+This is an accounting identity, not an off-diagonal estimate; it proves
+that estimating the Type-II square in isolation loses the main available
+cancellation.
+
+### Residue-class dispersion closes the balanced mixed block
+
+A first grouping by the reduced phase `aq/r` gives only
+`T^1.1175 log^A(T)` in the balanced block. That loss is artificial: it
+counts all colliding q-values with the same sign before using complete
+residue-class Parseval.
+
+Let
+
+    F(x)=sum_(q~Q) M_R(q)w(q/Q)e(qx),
+    D(Q,R)=sum_(r~R) sum_(h mod r)
+              |sum_(q~Q, q=h mod r) M_R(q)w(q/Q)|^2.
+
+Parseval and reduction of `a/r=b/k` give the exact decomposition
+
+    D(Q,R)=sum_(k<=2R) W_R(k) sum_((b,k)=1)|F(b/k)|^2,
+    W_R(k)=sum_(g: R<=gk<2R) 1/(gk) << 1/k.           (16.3)
+
+For `k~K`, the dual additive large sieve and `|M_R|<=tau` therefore give
+
+    D_K << (Q/K+K) Q log^A(T).                         (16.4)
+
+In particular, throughout `Q/R<=K<=R`, geometric summation yields
+
+    D_K << RQ log^A(T).
+
+This is the required diagonal-size bound; no cancellation conjecture for
+`M_R` is used.
+
+Here is the correct interface with the actual balanced mixed prime term.
+Mellin separation of `W(qc/Z)` reduces it, up to harmless logarithmic
+factors, to
+
+    S_Q=sum_(r~R) C_r sum_(c~C) Lambda(c)F(a_r c/r),
+    C=TR/Q,
+
+with `O(1)` reduced source numerators `(a_r,r)=1`. For each reduced residue `h mod r`,
+split the prime progression into its principal part and error:
+
+    P_(r,h)=sum_(c~C,c=h mod r) Lambda(c)w_c,
+    E_(r,h)=P_(r,h)-[C I_c/phi(r)]1_((h,r)=1).          (16.5)
+
+The principal pairing is exactly
+
+    [C I_c/phi(r)] sum_((h,r)=1)F(a_rh/r)
+      =[C I_c/phi(r)]sum_(q~Q)M_R(q)w_q c_r(q).
+
+After restoring `C=Z/Q` and the smooth `1/q` weight, this is the Section 14
+Ramanujan principal coefficient and combines with Type I as `P_r-D_r`.
+For `r~R`, distinct reduced source rationals are spaced by at least
+`1/(rs)>>1/R^2`, whereas each smooth packet has width `1/Z` and
+`Z/R^2=T/R` tends to infinity. Schwartz almost-orthogonality and (14.1)
+therefore give
+
+    ||principal packets||^2
+       << Z sum_(r~R,a=O(1))|P_r-D_r|^2
+       << T(loglog T)^4=o(T log T).                    (16.6)
+
+For the error, character orthogonality and the multiplicative large sieve
+give the unconditional dyadic variance bound
+
+    sum_(r~R)sum_((h,r)=1)|E_(r,h)|^2
+       << C(C/R+R)log^A(T) << CR log^A(T),              (16.7)
+
+because `R^2>C` in the balanced block. Also
+`sum_(r~R)sum_(h,r)=1 |F(h/r)|^2 << R D_(K~R)` and
+`|C_r|<<log^A(T)/R`. A final Cauchy inequality therefore yields
+
+    |S_(Q,error)| << log^A(T)sqrt(C D_(K~R))
+                  << log^A(T)sqrt(C R Q).              (16.8)
+
+At `eta=.49`, `Q=C=T^.745`, this is `T^.99+o(1)`, a genuine power saving
+from the previous `T^1.1175+o(1)` bound. Ordinary primes have full reduced
+denominator because `c>V>2R`; prime powers whose base divides `r` have an
+elementary negligible total weight. Thus the balanced `r~R` mixed block is
+closed after its principal term is combined as in Section 14. This argument
+does not yet cover all boundary/complementary dyadic blocks, and it does not
+control the Type-II square (16.1), which contains two independently varying
+prime factors.
+
+For completeness, small Fourier denominators have the exact Poisson form
+
+    F(b/k)=Q hat_w(0) A_k
+       +O_A(Q log R (Rk/Q)^A),
+    A_k=sum_(d<R,k|d) mu(d)/d,                         (16.9)
+
+when `(b,k)=1` and `k<Q/R`. The centered part is rapidly small when
+`Rk/Q` is power-small (or sufficiently log-small after choosing `A`). The raw
+principal term contains truncated Möbius sums and has no known fixed-power
+bound. It is **not** the Section 14 coefficient: `k` here is the dual
+denominator created by the q-collision norm, whereas Section 14 uses
+`r/(r,q)` and a `1/q` weight. Summing this new rank-one direction over all
+reduced numerators converts it to an ordinary PNT remainder plus the finitely
+many prime powers whose bases divide `k`, but q-dependent lengths and outer
+weights must still be restored. This issue does not occur in the interior
+full-prime triangle above, where the sampled denominator is `r~P`; it remains
+a separate boundary/complementary-block task.

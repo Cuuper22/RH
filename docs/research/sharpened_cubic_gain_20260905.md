@@ -222,3 +222,70 @@ An independent audit checked the distance identity, linear term, both
 triangular trace expansions, the coefficient `6 delta`, the height trace
 error above, and the exact rational verifier; no new gap was found in
 this operator/scalar extension.
+
+
+## 6. Exact optimized polynomial profile
+
+The cosine is stationary for the diagonal cost `D`, but not for the full
+objective in Section 5. A finite even-Legendre search locates a nearby
+strict local maximum. The following rational polynomial turns that numerical
+observation into an exact certificate. On `|x|<=1/2`, put
+
+$$
+ p(x)=10^{-12}\bigl(
+ 1091974251780-1092598710370x^2+183563572147x^4
+ -13799851355x^6+11008450474x^8
+ -46499927506x^{10}+75463768564x^{12}\bigr)
+$$
+
+and normalize `u=p/int p`. It is positive on the full interval: discarding
+its positive nonconstant terms and putting `x^2=1/4` in each negative term
+leaves a positive rational lower bound. Exact polynomial integration over
+the interval, triangle, and three-simplex gives
+
+$$
+\begin{aligned}
+ D(u)&=1.3274992970376471\ldots,\\
+ \kappa(u)&=3D(u)-2-M_3(u)=0.01177762039669757\ldots,\\
+ Q(u)&=0.3989636506914728\ldots .
+\end{aligned}
+$$
+
+The exact rational square ceilings
+
+$$
+ \sqrt{Q(u)}<0.631635694599,
+ \qquad
+ \sqrt{D(u)-2/3}<0.812916127514
+$$
+
+make the squared margin
+
+$$
+ \left(\kappa(u)-\frac6{271803}\right)^2
+ -\frac{18}{271803}
+   (0.631635694599+0.812916127514)^2
+ >3.3977\,10^{-10}.
+$$
+
+Therefore (6), after dropping its favorable `-delta` term as in Section 5,
+forces
+
+$$
+ \liminf\frac{N_0^s(T,2T)}{N(T,2T)}
+ \ge 2-D(u)+\frac1{271803}
+ =0.6725043820976089\ldots>0.672504382.               \tag{8}
+$$
+
+Smooth normalized profiles of strict width below one approximate this
+polynomial in `L^4`, so the strict margin persists under the same ordered
+moment transfer. The exact verifier
+[optimized_profile_gain.py](../../verify/optimized_profile_gain.py) checks
+positivity, all four profile integrals, the square ceilings, and the final
+scalar implication. It does not machine-check the analytic transfer or the
+finite operator theorem.
+
+Numerically, searches through even degree 18 stabilize at
+`0.67250438210662`; the five-mode Hessian at the critical point is negative
+definite. Thus this profile freedom is locally exhausted and is not a route
+to a macroscopic improvement toward 85%.
