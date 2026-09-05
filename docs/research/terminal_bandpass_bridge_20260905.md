@@ -222,3 +222,123 @@ there is no geometric tail saving without new signed arithmetic input.
 The inherited mean-value bound gives `O(L^2z)`, whose ratio to `Q_T` is
 `T^eta/ell` up to fixed logarithmic factors. It diverges for every fixed
 `eta>0`.
+
+## A tapered Gabor compression removes the sharp-endpoint tail
+
+The last obstruction is not intrinsic to the zero-side matrix. It can be
+removed by tapering the **finite Gabor coordinates**, while preserving the
+same unconditional zero count. This is different from replacing the prime
+kernel after the zero-side argument has already been fixed.
+
+Use the notation of the accepted base proof: the grid spacing is
+`h_0=2pi/L`, `tau_k=T+k h_0`, and
+
+    G_(k,l)=W(f_k,f_l),       Ghat=G/(aL^2).
+
+Let `delta=(log T)^(-A)` for a fixed sufficiently large `A`, and choose
+`h_T in C_c^infinity((1,2))` with
+
+    0<=h_T<=1,
+    h_T=1 on [1+delta,2-delta],
+    ||h_T^(j)||_infinity<<_j delta^(-j).               (15)
+
+Put `h_k=h_T(tau_k/T)`, `D_h=diag(sqrt(h_k))`, and
+
+    Ghat_h=D_h Ghat D_h.                               (16)
+
+This normalization is essential: the sampling identity is
+
+    sum_(k in Z)|phihat(gamma-tau_k)|^2=aL^2,
+
+not `aL`. Hence every simple on-line atom in (16) has trace at most one:
+
+    (aL^2)^(-1)sum_k h_k|phihat(gamma-tau_k)|^2<=1.    (17)
+
+The zero decomposition is pulled back by `D_h`. Since this diagonal matrix
+may be singular, inertia and rank need not be preserved as equalities, but
+they can only decrease. The on-line rank bounds, the one-positive-direction
+bound for every off-line pair, and the trace cap (17) therefore remain valid.
+The tail trace norm also contracts. Consequently the accepted finite
+zero-side argument gives the same form of inequality
+
+    N_0^s(T,2T)
+      >=4 tr(Ghat_h)-||Ghat_h||_F^2-2N(T,2T)-o(N).     (18)
+
+The count in the penalty is still the full `N(T,2T)`, not a weighted count.
+
+There is an equally explicit prime-side kernel. Extend `h_T` by zero and
+write
+
+    K_h(t,t')=sum_(k in Z)h_k phihat(t-tau_k)phihat(t'-tau_k).
+
+The unweighted sampling formula gives
+
+    K_infty(t,t')=L Phi(t-t').
+
+Subtract `h_T(t/T)K_infty` from `K_h` term by term. The Lipschitz bound in
+(15), Cauchy--Schwarz, and the first weighted sampling moment give, uniformly
+on the main height range,
+
+    K_h(t,t')=h_T(t/T)L Phi(t-t')
+                 +O(L^2/(T delta)).                   (19)
+
+The symmetric formula with `t'` also holds. Their product shows that the
+main trace-square kernel is
+
+    h_T(t/T)h_T(t'/T)L^2 Phi(t-t')^2,                  (20)
+
+with a lower-order error under the same envelope estimates as the base
+end-effect argument. Large `|t-t'|` is first removed using the decay of
+`Phi^2`; no uniform approximation across that discarded range is assumed.
+
+Let
+
+    H_1=int_1^2 h_T(v)dv,       H_2=int_1^2 h_T(v)^2dv.
+
+Then `H_1=1+O(delta)` and `H_2=1+O(delta)`. Direct weighted evaluation, not
+a comparison of Frobenius boundary rows, gives
+
+    tr(Ghat_h)=H_1 N(T,2T)+o(N),                       (21)
+
+while the archimedean--archimedean main and the prime diagonal main are
+respectively
+
+    H_2[2pi bL int_T^(2T)mu(t)^2dt]+o(Q_T),
+    H_2[(T/pi)sum_n Lambda(n)^2 g(log n)/n]+o(Q_T).    (22)
+
+Thus both displayed pieces of `D_diag(u)` are multiplied by `H_2`; the
+normalized zero-side expression is
+
+    4H_1-H_2 D-2=2-D+O(delta)                         (23)
+
+when `D` is the complete normalized second-trace cost. Since `delta=o(1)`,
+the taper spends no asymptotic part of the strict profile margin. It would
+be invalid instead to assert
+`||Ghat||_F^2-||Ghat_h||_F^2=o(N)` from the global mean square: the deleted
+boundary rows could contain all of the uncontrolled long-polynomial energy.
+
+Finally, after the shear in the prime-prime term, the exact height factor is
+
+    H_(x,T)(t)=h_T(t/T)h_T((t-x)/T).
+
+For `|x|<<delta T`, integration by parts gives
+
+    |int H_(x,T)(t)e^(it xi)dt|
+       <<_J T(1+delta T|xi|)^(-J).                     (24)
+
+On a local block `n,m~z`, its additive range is therefore only
+
+    |n-m|<<R_z/delta=R_z(log T)^A.                    (25)
+
+This is a polylogarithmic enlargement of the natural packet. Section 25 of
+`mobius_energy_20260905.md` proves a fixed-power retained-beta collar, so
+(25) lies wholly inside its valid range for the centered low-divisor
+component. The infinite sharp `1/h` shell is gone.
+
+This supplies a valid zero-side-compatible smoothing bridge and removes the
+sharp endpoint as a blocker for that component. It does **not** prove the
+complete tapered trace theorem. The twisted principal mode and its Type-I
+recombination, the grouped floor/Farey-frequency energy, the high-divisor
+Type-II energy, cross-block recombination and diagonal subtraction, and the
+remaining secondary explicit-formula terms must still be controlled before
+(23) can be used with `D<=1.15`.
