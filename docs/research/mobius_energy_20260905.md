@@ -1734,3 +1734,65 @@ resonance, so this argument does not cover a full Farey cell. It controls
 only the centered, smooth-weight, low-divisor component `D<=M`; the twisted
 principal mode, the high-divisor range, and the sharp terminal `1/h` tail
 remain open.
+
+## 26. The retained-beta principal mode recombines on the first shell
+
+For the same `r~R` shell, the principal prime mode excluded from the
+centered estimate in Section 25 does not require a new pointwise AP theorem.
+It recombines exactly with Type I before any norm is taken.
+
+Fix `alpha=a/r+beta`, a Type-II variable `q`, and put
+
+    k=r/(r,q),       b=-a(q/(r,q)) mod k.
+
+Then `(b,k)=1`. Define the principal part of the smoothly weighted additive
+prime sum by its ordinary reduced-residue density:
+
+    [mu(k)/phi(k)] int_(x>V) W(qx/Z)e(beta qx) dx.     (26.1)
+
+The factor is exact because
+
+    mu(k)/phi(k)=c_r(q)/phi(r).
+
+The actual prime sum minus (26.1) is, by definition, the centered error
+estimated after interval separation in Section 25; no claim of a pointwise
+prime asymptotic is inserted here. Changing variables `v=qx/Z` in (26.1)
+and interchanging the finite q-sum with the v-integral gives
+
+    -Z int W(v)e(beta Z v)
+       {[1/phi(r)]sum_(R<=q<R^2v)M_R(q)c_r(q)/q} dv
+      =-Z int W(v)D_r(v)e(beta Z v)dv.                (26.2)
+
+The cutoff `q<R^2v` is exactly equivalent to `x>V`, since
+`Z/V=R^2`; there is no endpoint relaxation. The Type-I identity in Section
+13 contributes on the same rational
+
+    Z int W(v)P_r(v)e(beta Z v)dv.                    (26.3)
+
+Thus the complete principal model at every retained beta is exactly
+
+    Z int W(v)[P_r(v)-D_r(v)]e(beta Z v)dv.           (26.4)
+
+In particular the logarithmic cancellation of Section 14 is a function
+identity in the source variable, not merely a statement at `beta=0`.
+
+This also has the right norm on the first shell. There are `O(1)` relevant
+source numerators for each `r~R`, distinct reduced rationals are separated
+by `>>R^-2`, and `Z/R^2=T/R` is a fixed power. Plancherel and (14.1) give
+
+    ||principal_(r~R)||_B^2
+      <<Z sum_(r~R,a=O(1)) int|W(v)[P_r(v)-D_r(v)]|^2dv
+      <<(Z/R)(loglog T)^4
+      =T(loglog T)^4.                                 (26.5)
+
+Off-diagonal packet overlaps are power-small after integration by parts.
+The tapered terminal construction enlarges the beta scale by only a power of
+`log T`, still far below the Farey spacing, so the same conclusion holds
+there with logarithmic seminorm losses. Even after the terminal logarithmic
+weights are restored, (26.5) is `o(Q_T)`.
+
+Therefore the twisted principal mode is closed together with the centered
+low-divisor term on `r~R`. This does not settle the global principal packet
+synthesis for larger denominators: Sections 19 and 23 show that it contains
+a positive large-prime lift and a still-unproved grouped floor-discrepancy
+energy.
