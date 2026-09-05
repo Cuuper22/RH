@@ -1318,7 +1318,8 @@ In particular,
 
     H_(p,D)<<pQ log^A T        whenever D<=M.         (21.5)
 
-Thus, together with the rapidly small long-cofactor range, every
+Thus, together with the long-cofactor range (rapid Poisson when separated
+from the transition, and Section 20 Pólya--Vinogradov at the transition), every
 prime-denominator divisor block
 
     D<=sqrt(Q)=T^.3725
@@ -1354,8 +1355,8 @@ needed bound is
           |sum_(j!=0 mod p)widehat_beta(Mj/p)|^2
       <<DK log^A T.                                  (21.8)
 
-The unweighted ACZ error already has this size; only the weighted main mode
-and discrepancy remain, with the absolute majorant too large by `D/M`,
+The unweighted ACZ error already has this size; only the centered weighted
+discrepancy remains, with the absolute majorant too large by `D/M`,
 reaching `T^.235` at the endpoint.
 
 The low-divisor estimate extends to composite packet moduli without losing a
