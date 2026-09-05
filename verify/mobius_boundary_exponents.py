@@ -57,12 +57,16 @@ endpoint_excess_sharp = (7 * eta_sharp - 3) / 2
 burgess_cross_sharp = (7 * eta_sharp + 4) / 16
 burgess_sharp = 19 * eta_sharp / 8
 farey_excess_sharp = (3 * eta_sharp - 1) / 2
+collar_049 = min((1 - 2 * eta) / 2, (1 - eta) / 4)
+collar_sharp = min((1 - 2 * eta_sharp) / 2, (1 - eta_sharp) / 4)
 
 assert pointwise_sharp == Fraction(147343, 400000)
 assert projected_sharp == Fraction(157971, 400000)
 assert endpoint_excess_sharp == Fraction(31401, 200000)
 assert burgess_cross_sharp == Fraction(731401, 1600000)
 assert farey_excess_sharp == Fraction(42029, 200000)
+assert collar_049 == Fraction(1, 100)
+assert collar_sharp == Fraction(2657, 100000)
 
 print(f"high-K endpoint = {float(kappa_endpoint):.15f}")
 print(f"J_0.49(0.20) = {j}")
@@ -76,3 +80,5 @@ print(f"sharp-support endpoint excess = {float(endpoint_excess_sharp):.15f}")
 print(f"sharp-support Burgess crossover = {float(burgess_cross_sharp):.15f}")
 print(f"sharp-support Burgess exponent = {float(burgess_sharp):.15f}")
 print(f"sharp-support Farey excess = {float(farey_excess_sharp):.15f}")
+print(f"eta=.49 retained-beta collar = {float(collar_049):.15f}")
+print(f"sharp-support retained-beta collar = {float(collar_sharp):.15f}")

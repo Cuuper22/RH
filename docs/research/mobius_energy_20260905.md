@@ -1625,3 +1625,112 @@ that the correct version of the remaining 85-percent packet lemma should be
 posed at the sharp admissible support: it asks for a `T^.157005` worst-case
 gain rather than `T^.215`, at the cost of using the very small but exact
 positive profile margin.
+
+## 25. A fixed-power retained-beta collar from the slanted determinant
+
+The centered Poisson estimate in Section 21 persists through a small but
+fixed-power neighborhood of each packet center. Put
+
+    R=T^eta,  Q=C=T^((1+eta)/2),  Z=Q^2,  DM=Q,
+    L=Q/R,
+
+and let `beta Z` have size `U`, with `1<=U<=L`. For a fixed ordinary prime
+`c` and primitive frequency `a (mod r)`, Poisson summation in `m` gives
+
+    sum_m b(m/M)e((a/r+beta)dmc)
+      =M sum_(j=-adc mod r)
+          bhat((M/r)(j-lambda d)),
+    lambda=r beta c.                                  (25.1)
+
+Thus the dual points lie in the slanted strip
+
+    d~D,       |j-lambda d|<<K,       K=r/M.           (25.2)
+
+On expanding the square, the congruences force
+
+    j_1d_2-j_2d_1=ell r.                              (25.3)
+
+Writing `j_i=lambda d_i+y_i` cancels the slope exactly. Hence the number of
+possible determinant levels is `O(1+DK/r)=O(1)` when `D<=M`; importantly,
+it is independent of `U`.
+
+Composite moduli require a fiber correction which cannot be discarded.
+Cauchy first over `delta=(d,r)`, and put
+
+    r=delta k,       d=delta x,       j=delta y.
+
+Because `(c,r)=1`, reduction from primitive residues modulo `r` to those
+modulo `k` has fiber
+
+    f=phi(r)/phi(k)<=delta.                            (25.4)
+
+The reduced transverse dimensions are `D/delta` and `K/delta`, while their
+ratio is still `D/K=L`. For a nonzero determinant level, the usual divisor
+parameterization gives
+
+    <<(DK/delta^2)T^o(1)
+
+reduced pairs. For the zero level, write `(x,y)=h(s,p)`, `(s,p)=1`. The
+allowed nonzero slopes satisfy
+
+    |p/s-lambda|<<1/L.
+
+If `q_0` is the least denominator in this interval, weighted Farey spacing
+gives
+
+    sum_((p,s)=1, |p/s-lambda|<<1/L) 1/s^2
+       <<[L^-1+q_0^-2]T^o(1).                         (25.5)
+
+Here `y` is a unit modulo `k>1`, so the zero slope is absent, and
+`q_0>>L/(U+1)`. Including the fiber (25.4), one gcd stratum therefore
+contributes
+
+    <<(DK/delta)[1+U^2/L]T^o(1).                      (25.6)
+
+The same bound follows with the actual Schwartz Poisson weights when
+`K/delta<1`, by splitting the Fourier tail dyadically. Cauchy over the gcd
+strata and `sum_(delta|r)delta^-1=T^o(1)` now yield the uniform slanted
+q-energy estimate
+
+    H_r(beta,c;D,M)
+       <<rQ[1+U^2/L]T^o(1).                           (25.7)
+
+In particular the centered strength `H_r<<rQ T^o(1)` survives for
+
+    U<=L^(1/2)T^-epsilon.                             (25.8)
+
+This proof applies to the coprime ordinary-prime variable; the prime-power
+terms disposed of in Section 15 are not being silently included.
+
+To combine (25.7) with the prime-progression error, partition only `c` into
+`O(U)` intervals of length `C/U`. Fourier separation removes the residual
+`e(beta q(c-c_s))`, whose mixed derivatives are bounded on each interval.
+If `A_(r,s)` is the centered prime variance on the `s`-th interval, the
+prime large sieve and disjointness give
+
+    sum_(r~R)sum_s A_(r,s)<<CR T^o(1).                (25.9)
+
+Direct-sum Cauchy across the `c` intervals, followed by the natural beta-slot
+width `1/Z`, proves
+
+    B_(one slot at U)<<U R^2T^o(1).
+
+There are `O(U)` natural slots in `beta Z~U`, and hence
+
+    B_(beta Z~U)<<U^2R^2T^o(1).                      (25.10)
+
+Consequently the centered low-divisor error is `o(T)` uniformly through
+
+    |beta|<=T^omega/Z,
+    omega<min((1-2eta)/2,(1-eta)/4).                 (25.11)
+
+At `eta=.49`, (25.11) gives the concrete collar `omega<.01`. At the sharp
+admissible `eta=.47343`, it gives the wider collar
+
+    omega<2657/100000=.02657.                         (25.12)
+
+The small-rational term `U^2/L` in (25.7) is a real zero-determinant
+resonance, so this argument does not cover a full Farey cell. It controls
+only the centered, smooth-weight, low-divisor component `D<=M`; the twisted
+principal mode, the high-divisor range, and the sharp terminal `1/h` tail
+remain open.
