@@ -305,3 +305,25 @@ Where the required inverses exist, a Schur complement C R^−1 C would preserve 
 including tiny ones, but its traces require inverse/resolvent information
 not supplied by the three displayed moments. That is a new input, not a
 consequence of the calculation above.
+
+
+## Bounded real derivative pencils do not control the missing sign count
+
+For any real polynomial $P$ with $n$ distinct real roots, put
+$f_\epsilon=P^2+\epsilon^2$. It has no real roots, while
+$f_\epsilon'=2PP'$ has $2n-1$ distinct real roots. For every finite $A$,
+choosing $\epsilon$ sufficiently small makes every pencil
+$f_\epsilon'+a f_\epsilon$, $0<|a|\le A$, have all $2n$ roots real and
+simple. Its logarithmic derivative has alternating humps of arbitrarily
+large height near the roots of $P$; each nonzero level in the fixed range
+crosses $2n$ times. The limiting derivative loses one root at infinity.
+Thus even complete real-root counts for every bounded pencil parameter
+do not force real roots of $f$ or a small wrong-extremum count.
+
+The adjacent-derivative matrix kernel has the same limitation. For
+$f_\epsilon(x)=x^2+\epsilon$, its jet Bezoutian is
+$2(x,1)^\mathsf T(y,1)-2\epsilon(1,0)^\mathsf T(1,0)$.
+A normalization whose squared action on $(1,0)$ has integral at most $M$
+retains negative trace at most $2\epsilon M$. A uniform charge for an
+arbitrarily small wrong residue therefore requires singular amplification;
+bounded matrix normalization does not supply the missing estimate.

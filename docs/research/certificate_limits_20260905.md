@@ -497,3 +497,265 @@ Volterra operator or prove realizability by zeta-zero exponential atoms.
 Higher-degree identities, other noncommutative localizers, or genuinely
 geometric information could still separate. None was pursued after this
 bounded degree-eight diagnostic.
+
+
+## Finite weighted pair bounds: source audit and an explicit obstruction
+
+Research note, 2026-09-05. Sources: [Carneiro–Milinovich–Ramos, arXiv:2310.01913](https://arxiv.org/pdf/2310.01913), especially §2.1, (2.8)–(2.10); and [Carneiro–Chandee–Chirre–Milinovich, arXiv:2108.09258](https://arxiv.org/pdf/2108.09258), especially §2.1 and Theorem7. Both papers assume RH. Their constants1.3208 and1.3302 concern sufficiently long intervals. The former proof retains a boundary contribution depending on its chosen test function; dividing it by interval length makes it negligible only in the long-interval regime. The latter paper supplies a finite-interval optimization problem, not the same long-average constant for every interval.
+
+### 1. Precisely what survives for actual complex ordinates
+
+Let z_rho=(rho-1/2)/i, with |Im z_rho|<=1/2, and use a conjugation-compatible finite zero sum (or the existing entire height weight). Put w(z)=4/(4+z^2). The identity
+
+    w(z-z')=2pi int_R exp(-4pi|u|)exp(2pi i u(z-z'))du
+
+is valid on the relevant strip. Because the zero multiset is closed under conjugation, reindexing the second zero gives
+
+    sum_(z,z') h(z)h(z') exp(i alpha L(z-z')) w(z-z')
+      =2pi int_R exp(-4pi|u|)
+          |sum_z h(z) exp(i(alpha L+2pi u)z)|^2 du >=0.
+
+Thus the positivity of this analytically continued F is not the failed step.
+
+The upper-bound proofs also use domination of a translated test by the untranslated one. On real zero differences, the modulation has modulus one and the test g is nonnegative. This domination fails off the real line. Take just a conjugate pair z=gamma+-iy, 0<y<1/2, and g(x)=(sin(pi x)/(pi x))^2. Its untranslated pair sum is
+
+    2+2 w(2iy) g(iLy/pi),
+
+whereas modulation by a real xi changes it to
+
+    2+2 w(2iy) g(iLy/pi) cosh(2xi Ly).
+
+The ratio is unbounded. On a conjugate pair this modulation is unitary for the indefinite exchange metric, but not for a positive Hilbert norm. It preserves inertia while allowing arbitrarily large amplification. Consequently inertia alone cannot replace the needed upper domination.
+
+### 2. The finite weighted target already exceeds these proofs' information
+
+There is an explicit positive model satisfying both positivity conditions used in the source proofs and the complete known band |alpha|<=1. Set eta=1/100 and
+
+    dmu(alpha)=min(|alpha|,1)dalpha+delta_0
+                +(1/5)(delta_(1+eta)+delta_(-1-eta)).       (1)
+
+Its inverse Fourier measure is
+
+    delta_0+[1-sinc(pi x)^2+(2/5)cos(2pi(1+eta)x)]dx.       (2)
+
+Both measures are nonnegative. Here sinc(pi x)=sin(pi x)/(pi x).
+
+An elementary verification of (2): write y=pi x. If y^2>=5/3, use sinc(y)^2<=1/y^2 and cos>=-1. If y^2<=5/3, the alternating cosine series gives
+
+    sin(y)^2<=y^2-y^4/3+2y^6/45.
+
+At eta=0 the density is consequently at least
+
+    P(y^2),   P(q)=(90-105q+50q^2-8q^3)/225.
+
+P is decreasing, since its derivative numerator -105+100q-24q^2 is strictly negative, and P(5/3)=91/1215. Changing eta from0 to1/100 changes the cosine term by at most (1/125)|y|<4/375. This is smaller than91/1215. Positivity follows.
+
+For every real nonnegative test g, multiplying the nonnegative pair measure (2) by cos(2pi xi x)<=1 yields exactly the translated-test domination used by the two papers. If ghat<=0 outside[-1,1], positivity of (1) gives the other inequality in their framework. Thus (1) satisfies all those abstract constraints, not just a few triangular tests. Its average over long intervals tends to1. The isolated masses can also be replaced by narrow positive smooth bumps outside the known band, using the strict positivity margin above.
+
+This is a countermodel to the sufficiency of those analytic inputs. It is not claimed to be the pair correlation of actual zeta zeros or of a realizable point process.
+
+### 3. Numerical comparison with the exact chosen cosine target
+
+For s=1.99, use the already-derived autocorrelation A_s from the cosine profile in the arithmetic target above. Its unknown-band mass is
+
+    M_s=2 int_1^s A_s(t)dt=0.1412533266567336... .
+
+The85% certificate requires its unknown-band cost to be at most
+
+    0.21389703648923175... .
+
+Model (1) instead gives the explicit value
+
+    M_s+(2/5)A_s(1.01)=0.22694581961912824...,
+
+or weighted mean1.6066582288050464.... Combined with the known-band cost, the two-trace simple-zero bound is only0.8369512168701034.... These decimals are ordinary quadrature of explicit trigonometric expressions; the gap exceeds0.013, so no fine numerical distinction is involved.
+
+Therefore the published long-average estimate cannot establish the required finite weighted upper bound, even if its RH-dependent domination were granted. A successful route needs both a replacement for complex modulation and additional finite-band arithmetic information excluding a spike of the form (1).
+
+
+## Half-interval Schur and additional matrix tests
+
+For an actual finite zero kernel $G=UMU^*$, restriction of its distinct
+exponential features to any nonempty interval preserves their linear
+independence. For its two interval blocks $A,B,D$, this gives exactly
+$D-B^*A^\dagger B=0$. Neither half supplies an independent half-sized rank
+budget. On equal halves, the first inverse-Schur quadratic term needs
+$3\sigma<2$; it is not a width-one fourth-level statistic.
+
+A valid auxiliary correction is $E=cH^2\ge0$, where $H$ is a Hermitian
+Schur cut of $G$ to edge length less than $1/2$. Its optimized gain is
+$[(\operatorname{tr}GH^2-2\operatorname{tr}H^2)_+]^2/
+\operatorname{tr}H^4$. All four-level moments are inside the support range.
+For a flat profile and real symmetric filter $h$, its numerator per zero is
+$-1+\iint|x-y|(2h-h^2)\,dx\,dy\le-2/3$.
+Nonconstant profiles can produce a positive correction, but the bounded
+joint profile/filter searches did not recover their increased baseline
+cost. Those numerical searches are not a universal impossibility theorem.
+
+
+## A legal confluent-pair four-level test and its cost
+
+Research derivation, 2026-09-05. No new percentage is proved. The candidate
+zero-side inequality below remains unproved; a valid arithmetic lower
+bound already makes this positive-window version uncompetitive.
+
+### Exterior support and the normalization problem
+
+For four real frequency coordinates x1,...,x4, every permutation satisfies
+
+    sum_i |xi-x_(pi(i))| <= 2(top two sum - bottom two sum).
+
+Consequently multiplication on exterior frequency space by the indicator
+of top-two sum minus bottom-two sum <1 is a positive compression that
+keeps every determinant term inside Fourier l1 support <2, including
+alternating cycles. This is not restricted to ordered two-path moments.
+
+Ordinary exterior atoms lose the unit-norm multiplicity normalization:
+their squared norm is the determinant of the individual feature Gram.
+It tends to zero when distinct real zeros coalesce. For a closed tuple
+containing b reflected off-line pairs, the exterior reflection sign is
+(-1)^b. Nonclosed reflected tuple orbits give signed rank-two blocks.
+Therefore positivity on real tuples cannot be applied unchanged to
+unconditional complex zeros.
+
+### A confluent pair feature
+
+Write sinc(t)=sin(pi t)/(pi t). Use frequency coordinates
+
+    x=m+d/2, y=m-d/2,
+    m in an interval of width <1/2, 0<d<1/2.
+
+For a nonnegative window measure W(dm,dd), let
+
+    C=integral d^2 W(dm,dd),
+    psi(z,w)(m,d)=d exp(2pi i(z+w)m) sinc(d(z-w))/sqrt(C).
+
+This is the analytic divided exterior determinant. It is symmetric in
+z,w, with its confluent value at z=w defined by continuity. For real z,
+||psi(z,z)||=1. For a closed off-line pair z,bar z its norm is at least
+one, since sinh(t)/t>=1. Its reflection is fixed, so that pair supplies
+a positive rank-one atom; the two signs from the exterior numerator and
+the divided difference cancel.
+
+For two frequency pairs (m,d),(m',d'),
+
+    top two sum - bottom two sum
+      =2 max(|m-m'|,(d+d')/2)<1.
+
+Convex interpolation inside the divided determinants preserves this
+bound. Thus the second trace of the pair operator uses legal four-level
+support while the coalescent feature exp(4pi i z m) has z-bandwidth one.
+
+Enumerate the actual zeros with multiplicity and set
+
+    B=sum_(j<k) psi(zj,zk) tensor psi(bar zj,bar zk)*.
+
+B is Hermitian. The proposed inequality was
+
+    ||B||_HS^2 >= b + sum_real binom(multiplicity,2),                 (1)
+
+where b is the number of off-line pairs counted with multiplicity.
+If true, it would imply S>=N-2||B||^2. It is immediate for all-real
+configurations, because B is positive and coincident pair atoms have
+unit norm. For mixed complex zeros, the nonclosed pair orbits are signed;
+(1) has NOT been established. Their naive inertia budget is quadratic
+in the total zero count and is not a usable substitute.
+
+### A sufficient arithmetic closure of this window family
+
+In the sine-process moment functional, all pair atoms are positive.
+The Hilbert--Schmidt square is a sum of nonnegative terms. Keeping only
+the terms in which the two unordered index pairs coincide gives
+
+    lim tr(B^2)/N >= (1/2) integral K(t)^2(1-sinc(t)^2) dt,            (2)
+
+where K(t)=integral sinc(d t)^2 nu(dd), and nu is the probability measure
+obtained by normalizing the d^2-weighted gap marginal of W.
+
+For 0<d<=e<=1/2, direct Fourier convolution gives
+
+    J(d,e):=(1/2) integral sinc(dt)^2 sinc(et)^2(1-sinc(t)^2) dt
+       =(1/2)[1/e-d/(3e^2)-1+e/3+d^2/(6e)-d^3/(30e^2)].
+
+Indeed the integral of the first two squared sinc factors is
+1/e-d/(3e^2). Their Fourier convolution is the law of the sum of two
+independent triangular variables X_d,X_e. Since d+e<=1, multiplication
+by sinc(t)^2 integrates to 1-E|X_d+X_e|, and
+
+    E|X_d+X_e|=e/3+d^2/(6e)-d^3/(30e^2).
+
+The displayed J decreases in both d and e on this triangle. For example,
+twice its d-derivative is at most -1/(3e^2)+1/3<0; twice its e-derivative
+is at most -1/(3e^2)+1/3+1/15<0. Therefore
+
+    J(d,e)>=J(1/2,1/2)=17/60.
+
+Integrating against nu(dd)nu(de) proves from (2) that tr(B^2)/N>=17/60.
+Even granting (1), this candidate's lower-bound expression is at most
+
+    1-2(17/60)=13/30=43.333... percent.
+
+This uses neither an invented rank bound nor an RH assumption about the
+actual zeros: it is a lower bound on the sine-side moment functional
+that the proposed legal four-level arithmetic transfer would evaluate.
+It retires this positive confluent-pair window family before a costly
+attempt to prove (1). The signed compression considered next requires
+a different argument.
+
+### Signed compression in the gap variable also cannot improve the baseline
+
+Now allow a single even entire gap profile P with Fourier support in
+[-1/4,1/4], P(0)=1, including signed or complex Fourier coefficients:
+
+    psi(z,w)(m)=exp(2pi i(z+w)m) P(z-w).
+
+Normalize the center window so that its total mass is one. The hoped-for
+off-pair atom bound would additionally require |P(2iy)|>=1 for all real y.
+The following obstruction holds without imposing that extra condition.
+
+Put Q(t)=|P(t)|^2 on the real line. Its entire continuation is P P#,
+so Q has Fourier support in [-1/2,1/2], Q(0)=1, and Q(t)>=0. The
+same-pair contribution to tr(B^2)/N is
+
+    (1/2) J(Q),  J(Q)=integral |Q(t)|^2(1-sinc(t)^2) dt.
+
+Write q for the Fourier transform of Q. On the interval [-1/2,1/2],
+
+    J(Q)=||q||_2^2-double_integral (1-|x-y|)q(x)conj(q(y)) dx dy,
+    integral q=1.
+
+The unrestricted quadratic minimizer is exactly the Montgomery--Taylor
+profile
+
+    q*(x)=cos(sqrt(2)x)/(sqrt(2)sin(1/sqrt(2))),
+    J(Q*)=D_MT-1,
+    D_MT=1/2+cot(1/sqrt(2))/sqrt(2)=1.3274992963205885... .
+
+The minimizing condition implies J(Q)=J(Q*)+J(Q-Q*) on this affine
+constraint. The kernel 1-|x-y| is nonnegative and has maximum row integral
+3/4, so Schur's bound gives J(R)>=||r||_2^2/4. Evaluation at any real t
+has norm at most one from L2 of this width-one frequency interval.
+
+At the explicit point t=3/2,
+
+    Q*(3/2)=-6pi cot(1/sqrt(2))/(sqrt(2)(9pi^2-2))
+            =-0.1796456739574475... .
+
+Since Q(3/2)>=0,
+
+    J(Q)>=D_MT-1+|Q*(3/2)|^2/4.
+
+Consequently, for every such signed compression,
+
+    tr(B^2)/N >= (D_MT-1)/2+|Q*(3/2)|^2/8
+                =0.1677837191817474... .
+
+Even granting the unproved zero-side inequality (1), the resulting
+simple-line lower-bound expression is therefore at most
+
+    2-D_MT-|Q*(3/2)|^2/4=0.6644325616365051... .
+
+This is below the inherited cosine baseline. No finite-dimensional search
+or unproved effective-rank estimate is used. The numeric values display
+explicit analytic expressions, rather than being optimization certificates.
+Non-product exterior compressions remain outside these two calculations.

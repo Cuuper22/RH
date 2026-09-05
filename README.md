@@ -4,15 +4,16 @@
 > A Lean 4 formalization released as a static companion artifact to the paper.
 
 Research update (2026-09-05): a new
-[ordered-moment derivation](docs/research/ordered_moment_20260905.md)
-gives a proposed **67.2500732%** bound. The analytic proof and operator
+[sharpened ordered-moment derivation](docs/research/sharpened_cubic_gain_20260905.md)
+gives a proposed **67.2504380%** bound. The analytic proof and operator
 inequality are written out; scalar constants are checked exactly. This is
 ordinary mathematical research, not a new fully machine-checked headline.
 **85% remains unproved.** The [research record](docs/research/research_20260905.md)
 also closes failed certificate classes and records the arithmetic progress.
 The continuation derives all finite ordered polynomial moments and a separate
 normalized Bezoutian counting certificate; neither supplies the missing 85%
-arithmetic estimate.
+arithmetic estimate. The latest increment is `1/272000`; its scalar
+implication was also checked through AXLE with only standard Lean axioms.
 
 ## Frozen extension ladder — status at HEAD
 
