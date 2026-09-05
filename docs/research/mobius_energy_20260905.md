@@ -1413,3 +1413,90 @@ every modulus. The unresolved projected range is
 `T^.3825<=D<T^.49`; the pointwise bound remains open already at
 `D>T^.3725`. None of these estimates controls the complementary minor-arc
 mass or the full Type-II square.
+
+## 22. The surviving high-divisor term is a binary Möbius correlation
+
+The unresolved part of Section 21 admits a sharper exact description. In a
+gcd stratum write
+
+    Delta=(d,r),  r=Delta k,  d=Delta x,  j=Delta y,
+    X=D/Delta,    Y=k/M.
+
+The aspect ratio is independent of the stratum:
+
+    X/Y=DM/r=Q/r=T^(.255+o(1)).                       (22.1)
+
+After Poisson, every nonzero determinant satisfies
+
+    y_1x_2-y_2x_1=ell k,
+    |ell|<<D/(Delta M).                               (22.2)
+
+Consequently every `Delta` larger than a fixed multiple of `D/M` has only
+the already-controlled zero determinant. The actual difficult gcds satisfy
+
+    Delta<<D/M<=T^.235.                               (22.3)
+
+For such a stratum, write `y_1=ga`, `y_2=gc` with `(a,c)=1`. Since the
+dual variables are units modulo `k`, `(g,k)=1`, so (22.2) forces
+`ell=gn`. Each determinant line is then parameterized by
+
+    x_1=x_(1,0)+a t,       x_2=x_(2,0)+c t,
+
+and the retained signed coefficient is a smoothly weighted binary
+correlation
+
+    sum_t mu(Delta(x_(1,0)+a t))
+          mu(Delta(x_(2,0)+c t)) W_*(t).              (22.4)
+
+Its generic length is `Xg/Y=Q/r=T^(.255+o(1))`. This explains why
+one-variable Davenport or zero-free-region estimates do not improve the
+bound: two Möbius values on growing-slope affine forms remain linked.
+
+If `D=T^delta`, the current Poisson--Cochrane--Shi packet exponent is
+
+    .235+2delta.
+
+For a fixed `delta>.3825`, reaching `o(T)` requires a power saving
+`T^(2delta-.765+epsilon)` in (22.4), rising to `T^(.215+epsilon)` at
+`delta=.49`. Burgess supplies the alternative exponent `1.16375`; it
+becomes better only after `delta=.464375` and still does not close the
+range. Any merely logarithmic-decay averaged-Chowla input would be
+insufficient for the displayed fixed-power requirement. Thus (22.4), averaged with the actual
+prime-progression energy, is the precise high-divisor packet lemma still
+missing. This remains only the packet projection of the full Type-II square.
+
+## 23. Exact floor-discrepancy target for the smooth principal complement
+
+The `2R`-smooth complement in Section 19 also reduces to one explicit
+estimate. Put
+
+    S_theta={r: R<r<=R T^theta, P^+(r)<=2R}
+
+and retain the exact floor remainder `E_r` from Section 14. The missing
+mean-square statement is
+
+    M_E(theta)=sum_(r in S_theta)phi(r)
+      integral_1^2 W(v)^2|E_r(R^2v)|^2 dv=o(log T).   (23.1)
+
+If (23.1) holds, Cauchy and `R^2T^(2theta)/Z=o(1)` make the exact coefficient
+`P_r-D_r` asymptotic to `mu(r)/phi(r)` in the full smooth packet norm. Farey
+near-orthogonality would then give
+
+    ||F_(smooth,theta)||_B^2
+      ~C_(W,chi)[theta-J_eta(theta)]T log T.           (23.2)
+
+Together with (19.3), the complete principal constant would be exactly
+`C_(W,chi)theta`. At `eta=.49`, `theta=.20`, the conditional smooth constant
+is
+
+    .20-.0361774824757766...=.1638225175242234... .   (23.3)
+
+This is a conditional implication, not an evaluation: the present pointwise
+floor bound gives only
+
+    M_E(theta)<<T^(2theta)(loglog T)^O(1),
+
+which loses a fixed power against (23.1). Moreover, the smooth and
+large-prime centers are asymptotically orthogonal in this range, so a signed
+cross-cancellation between those denominator classes cannot remove their
+diagonal masses. A new averaged floor-discrepancy estimate is required.

@@ -1,0 +1,150 @@
+# Exact terminal kernel versus the reduced additive bandpass
+
+Date: 2026-09-05. Ordinary analytic audit; no new zero proportion.
+
+This note fixes the normalization interface between the accepted zeta trace
+and the additive bandpass model in `mobius_energy_20260905.md`. It also
+records why the existing local arithmetic estimates do not yet imply the
+terminal theorem.
+
+## The inherited terminal form
+
+For real coefficient sequences `c,d` supported on `n<=X`, define
+
+\[
+ \mathcal O_T(c,d)=\frac1{2\pi^2}
+ \sum_{n\ne m\le X}\frac{c(n)d(m)}{\sqrt{nm}}
+ A^-_\Phi(T;\log n,\log m),                              \tag{1}
+\]
+
+where
+
+\[
+ A^-_\Phi(T;y,y')=\int_{-T}^{T}\Phi(x)^2
+ \int_{T+x_-}^{2T-x_+}\cos(xy+t(y-y'))\,dt\,dx .        \tag{2}
+\]
+
+This is exactly the accepted PDF/Lean `O1` kernel (`PPOffDiag` and
+`PPKernel`), not a heuristic replacement. With
+`r_R=Lambda-Lambda_R`, bilinearity gives
+
+\[
+ \mathcal O_T(\Lambda,\Lambda)
+ =\mathcal O_T(\Lambda_R,\Lambda_R)
+  +2\mathcal O_T(\Lambda_R,r_R)
+  +\mathcal O_T(r_R,r_R).                               \tag{3}
+\]
+
+For `phi(y)^2=u(y/ell)` and `integral u=1`, the accepted normalization is
+
+\[
+ aL=\ell,\qquad g(y)=\ell A_u(y/\ell),\qquad
+ Q_T=\ell^2N(T,2T)\sim\frac{T\ell^3}{2\pi}.             \tag{4}
+\]
+
+Thus the diagonal cost `D_diag` and the terminal allowance
+`1.15-D_diag` in the arithmetic note are normalized correctly.
+
+## The present reduced form is a different kernel
+
+For one additive block, the current research controls variants of
+
+\[
+ E_{\rm off,Z}=\sum_{n\ne m}r_R(n)r_R(m)W(n/Z)W(m/Z)K_R(n-m), \tag{5}
+\]
+
+with
+
+\[
+ K_R(h)=\frac1R\int\chi(v)e(hv/R)\,dv.                  \tag{6}
+\]
+
+Equations (1) and (5) are not equal. The terminal kernel depends on
+`log(n/m)`, `sqrt(nm)`, `g(log n)`, and moving height endpoints. The reduced
+kernel depends only on `n-m`. In particular, the same additive shift at two
+different basepoints has a different terminal phase.
+
+After a genuinely narrow localization around `n,m~z`, the formal leading
+scale is
+
+\[
+ R_z=\frac{2\pi z}{T},
+\qquad
+ \mathcal O_{T,z}(r_R,r_R)
+ =2g(\log z)E_{\rm off,z}+o(\text{local scale})
+ =2\ell A_u(\log z/\ell)E_{\rm off,z}+\cdots .          \tag{7}
+\]
+
+The exact variables are `z=T R_z/(2pi)` and, in exponent notation,
+`R_z=(T/(2pi))^eta`; the simplified `z=TR`, `R=T^eta` convention omits
+these constants.
+
+Formula (7) shows that one local estimate `E_off=O(T ell)` contributes only
+`O(T ell^2)=o(Q_T)`. It does **not** make the complete terminal residual
+negligible: the full range contains logarithmically many scales and their
+cross terms.
+
+## Precise missing bridge theorem
+
+A valid transfer must simultaneously:
+
+1. localize the Mellin phase `log(n/m)` to additive phases on shrinking
+   relative windows, with the endpoint and quadratic phase errors controlled;
+2. control neighboring-window cross terms and sum the logarithmic family of
+   blocks over `T<z<X`;
+3. work uniformly with the varying cutoff `R_z`, rather than only at
+   `eta=.49`;
+4. restore the model and mixed terms in (3), not just the residual square;
+5. subtract the exact bandpass diagonal, because (1) excludes `n=m` while
+   the positive bandpass norm includes it.
+
+A fixed-width dyadic linearization is insufficient: replacing `log(n/m)` by
+`(n-m)/z` over `n,m~z` leaves order-one phase error at height `T`. No
+inherited file proves the required shrinking-window or semiclassical
+Mellin-to-additive localization with its cross-block bounds.
+
+Consequently the positive packet norm in Section 19 of the arithmetic note
+has neither a terminal sign nor a percentage cost at present. Dividing its
+`T log T` scale directly by `Q_T`, or multiplying it by an assumed two-log
+factor, are both unjustified. The missing object is the explicit theorem
+above, together with the two other terms in (3).
+
+## Why the rational packet projection cannot simply tile the band
+
+There is also a quantitative obstruction inside one additive block. At the
+balanced scale put `Q=C=sqrt(Z)=T^.745`, `R=T^.49`. Farey cells of order
+`Q` form an exact partition and the cell around `a/r`, `r~P`, has width at
+most `1/(PQ)`. The arithmetic result in Section 21 of the Möbius note controls
+only the natural packet width `1/Z=1/Q^2`. Tiling one cell therefore needs
+`Q/P` natural translates.
+
+Even grant, optimistically, the same Section 21 estimate on every translate.
+For `D<=M`, its primitive-frequency bound and the prime large sieve give the
+natural-packet shell estimate
+
+\[
+ B_{\rm nat}(P)\ll
+ \left(\frac{PQ}{R}+\frac{P^3}{R}\right)T^{o(1)}.      \tag{8}
+\]
+
+Multiplying by the cell/packet ratio yields
+
+\[
+ B_{\rm cell}(P)\ll
+ \left(\frac{Q^2}{R}+\frac{QP^2}{R}\right)T^{o(1)}.   \tag{9}
+\]
+
+At the first shell `P=R`, the second term is `QR=T^1.235`, whereas the
+desired additive band scale `Q^2/R` has exponent one. Thus a nonnegative
+Farey cover recreates exactly the old `T^.235` loss even under a translated
+estimate stronger than the one proved.
+
+The translated estimate is in fact unavailable. At
+`alpha=a/r+beta`, Poisson completion in `q=dm` shifts the dual box by
+`r beta d c`; across a Farey cell the prime variable `c` moves it through
+`DC/Q` residue-scale aliases. This destroys the q-only congruence behind the
+Section 21 estimate. A lift therefore needs a centered three-variable
+`(d,m,c)` dispersion estimate, uniform across the Farey cell, with an extra
+`P^2/Q` covariance saving. At `P=R` this is precisely `T^.235`. No packet
+partition or nonnegative majorant can manufacture that saving from the
+proved marginal estimate alone.
