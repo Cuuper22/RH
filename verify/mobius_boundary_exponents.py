@@ -49,9 +49,30 @@ burgess_exponent = eta * Fraction(19, 8)
 assert burgess_exponent == Fraction(931, 800)
 assert float(burgess_exponent) == 1.16375
 
+# Section 24: repeat the packet geometry at the exact rational profile.
+eta_sharp = Fraction(47343, 100000)
+pointwise_sharp = (1 + eta_sharp) / 4
+projected_sharp = 3 * (1 - eta_sharp) / 4
+endpoint_excess_sharp = (7 * eta_sharp - 3) / 2
+burgess_cross_sharp = (7 * eta_sharp + 4) / 16
+burgess_sharp = 19 * eta_sharp / 8
+farey_excess_sharp = (3 * eta_sharp - 1) / 2
+
+assert pointwise_sharp == Fraction(147343, 400000)
+assert projected_sharp == Fraction(157971, 400000)
+assert endpoint_excess_sharp == Fraction(31401, 200000)
+assert burgess_cross_sharp == Fraction(731401, 1600000)
+assert farey_excess_sharp == Fraction(42029, 200000)
+
 print(f"high-K endpoint = {float(kappa_endpoint):.15f}")
 print(f"J_0.49(0.20) = {j}")
 print(f"Dickman complement = {dickman}")
 print(f"PV divisor endpoint = {float(1 - pv_base):.15f}")
 print(f"Poisson-ACZ projected endpoint = {float(projected_acz_endpoint):.15f}")
 print(f"Burgess projected exponent = {float(burgess_exponent):.15f}")
+print(f"sharp-support pointwise endpoint = {float(pointwise_sharp):.15f}")
+print(f"sharp-support projected endpoint = {float(projected_sharp):.15f}")
+print(f"sharp-support endpoint excess = {float(endpoint_excess_sharp):.15f}")
+print(f"sharp-support Burgess crossover = {float(burgess_cross_sharp):.15f}")
+print(f"sharp-support Burgess exponent = {float(burgess_sharp):.15f}")
+print(f"sharp-support Farey excess = {float(farey_excess_sharp):.15f}")

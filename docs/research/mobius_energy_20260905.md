@@ -1465,6 +1465,32 @@ insufficient for the displayed fixed-power requirement. Thus (22.4), averaged wi
 prime-progression energy, is the precise high-divisor packet lemma still
 missing. This remains only the packet projection of the full Type-II square.
 
+There is an exact concentration formulation of the same obstruction. Put
+`L=D/M`. The additive large sieve gives
+
+    sum_(r~R)H_(r,D)<<R^2Q T^o(1),
+
+so values at their pointwise ceiling `RQL` can occupy at most `R/L` moduli.
+The prime variance has ceiling `C^2/R` and total `CR`, so its maximum can
+occupy `R^2/C` moduli. At `eta=.49`,
+
+    (R/L)/(R^2/C)=C/(RL)>=T^.02,                     (22.5)
+
+throughout the hard range. Complete harmful alignment is therefore still
+allowed. A sufficient cardinality-sensitive estimate is
+
+    sum_(largest R^2/C values of H_(r,D)) H_(r,D)
+      <<R^3Q/C T^o(1),                               (22.6)
+
+or, equivalently, the weighted tail bound
+
+    sum_(H_(r,D)>lambda RQ) A_r
+      <<CR/lambda T^o(1),      1<=lambda<=L.          (22.7)
+
+Even a sparse-modulus large sieve retains a `Q^2` length term exceeding
+(22.6) by `CQ/R^3=T^.02`. The large-gcd zero-determinant tail is already
+`O(R^2/L)<=T^.96`, but `Delta=1` alone retains the full hard loss.
+
 ## 23. Exact floor-discrepancy target for the smooth principal complement
 
 The `2R`-smooth complement in Section 19 also reduces to one explicit
@@ -1500,3 +1526,102 @@ which loses a fixed power against (23.1). Moreover, the smooth and
 large-prime centers are asymptotically orthogonal in this range, so a signed
 cross-cancellation between those denominator classes cannot remove their
 diagonal masses. A new averaged floor-discrepancy estimate is required.
+
+There is an exact simplification before attempting that estimate. Define
+
+    Delta_s(x)=sum_(a|rad(s),a<x)mu(a).
+
+Grouping the original floor formula by `n=lcm(s,d)`, write uniquely
+`n=st`, where `t` is squarefree and `(s,t)=1`. Every contributing
+squarefree `d` has the form `d=ta`, `a|rad(s)`, and `(s,d)/d=1/t`.
+Consequently
+
+    E_r(Yv)=[1/phi(r)]sum_(s|r)mu(r/s)
+      sum_(t<R,(t,s)=1) [mu(t)/t]Delta_s(R/t)
+        epsilon(Yv/(st)).                              (23.4)
+
+For `s>1`, the coefficient `Delta_s(R/t)` vanishes identically whenever
+`st<R`, because the cutoff then contains every divisor of `rad(s)`. Thus
+there is no bulk floor term: all nontrivial `s>1` contributions lie on or
+beyond the sharp hyperbola `st=R`. For `s=1`, (23.4) reduces to
+
+    [mu(r)/phi(r)]sum_(t<R)[mu(t)/t]epsilon(Yv/t),
+
+whose total contribution to (23.1) is `O(log T/R^2)` from
+`epsilon(Yv/t)<<t/Y`.
+
+On the v-independent oscillatory core `R<=st<=Y`, with
+`psi(x)=1/2-{x}` and `e(x)=exp(2pi i x)`, the leading expansion is
+
+    epsilon(x)=psi(x)/x+O(x^-2),
+    psi(x)=sum_(h!=0)e(hx)/(2pi i h).
+
+It gives a prefactor `1/(Yv phi(r))` and profile constant
+`integral W(v)^2/v^2 dv`. Using `st<=Y`, hence
+`t<=min(R,Y/s)`, the literal identical-`(s,t,h)` diagonal is
+
+    <<T^o(1)[R^3/Y^2+Q/Y]
+      =T^o(1)[R^-1+T^(theta-eta)].                    (23.5)
+
+It is therefore `o(1)` throughout the strict range `theta<eta`, including
+`eta=.49`, `theta=.20`. This does **not** control distinct indices with
+the same reduced frequency, near frequencies, the `O(x^-2)` remainder, or
+the transition `st>Y`; those remain part of (23.1).
+
+The exact finite algebra in (23.4), including the strict cutoff and bulk
+vanishing, is checked by `verify/floor_hyperbola_identity.py`.
+
+## 24. Moving to the sharp admissible support reduces the missing power
+
+Sections 16--23 used `eta=.49` to preserve a visible profile margin. The
+Poisson--Cochrane--Shi calculation has a useful exact general form at the
+balanced scale
+
+    R=T^eta,      Q=C=T^((1+eta)/2),      D=T^delta.
+
+The pointwise primitive-frequency estimate (21.12) holds through
+
+    delta<=(1+eta)/4,                                  (24.1)
+
+and beyond that the normalized packet projection has exponent
+
+    (3eta-1)/2+2delta.                                 (24.2)
+
+It is therefore `o(T)` throughout
+
+    delta<3(1-eta)/4.                                 (24.3)
+
+Use now the exact rational profile from `support_tradeoff_20260905.md`,
+
+    eta=47343/100000=.47343,
+
+whose diagonal cost is strictly below `1.15`. Equations (24.1)--(24.3)
+become
+
+    pointwise endpoint =147343/400000=.3683575,
+    projected endpoint =157971/400000=.3949275.        (24.4)
+
+Thus the unresolved projected divisor range shrinks to
+
+    T^.3949275<=D<T^.47343.                            (24.5)
+
+At its worst endpoint, (24.2) exceeds one by only
+
+    (7eta-3)/2=31401/200000=.157005,                   (24.6)
+
+instead of `.215` at `eta=.49`. The Burgess alternative crosses the ACZ
+bound at
+
+    delta=(7eta+4)/16=.457125625
+
+and has exponent `19eta/8=1.12439625...`; it still does not close (24.5).
+Likewise the optimistic first-shell Farey-cell loss in the terminal bridge
+drops from `.235` to
+
+    (3eta-1)/2=.210145.                                (24.7)
+
+This parameter change proves no new zero proportion. It shows, however,
+that the correct version of the remaining 85-percent packet lemma should be
+posed at the sharp admissible support: it asks for a `T^.157005` worst-case
+gain rather than `T^.215`, at the cost of using the very small but exact
+positive profile margin.

@@ -88,8 +88,9 @@ cross terms.
 
 A valid transfer must simultaneously:
 
-1. localize the Mellin phase `log(n/m)` to additive phases on shrinking
-   relative windows, with the endpoint and quadratic phase errors controlled;
+1. localize the Mellin phase `log(n/m)` by a variable-bandwidth symbol or
+   shrinking relative windows, with the endpoint and nonlinear phase errors
+   controlled;
 2. control neighboring-window cross terms and sum the logarithmic family of
    blocks over `T<z<X`;
 3. work uniformly with the varying cutoff `R_z`, rather than only at
@@ -148,3 +149,76 @@ Section 21 estimate. A lift therefore needs a centered three-variable
 `P^2/Q` covariance saving. At `P=R` this is precisely `T^.235`. No packet
 partition or nonnegative majorant can manufacture that saving from the
 proved marginal estimate alone.
+
+## Exact smooth-height surrogate and the sharp-endpoint obstruction
+
+There is a rigorous partial bridge if the inherited sheared sharp height
+interval is first replaced by a fixed `chi in C_c^infinity((1,2))`. Integrating
+the `x` variable by Fourier inversion gives the exact smooth-height form
+
+\[
+ \mathcal O_T^\chi(c,c)=\frac{T}{\pi}\Re
+ \sum_{n\ne m}\frac{c(n)c(m)g(\log n)}{\sqrt{nm}}
+ \int\chi(v)e^{iTv\log(n/m)}\,dv .                    \tag{10}
+\]
+
+By symmetry, `g(log n)` may be replaced by
+`[g(log n)+g(log m)]/2`. On a multiplicative block write
+`m=zv_0`, `n=m+h`, `s=Th/z`, and `R_z=2pi z/T`. The exact local symbol is
+
+\[
+ K_T(v_0,s)=\int\chi(v)
+ \exp\!\left(ivT\log\left(1+\frac{s}{Tv_0}\right)\right)dv . \tag{11}
+\]
+
+It is uniformly Schwartz in `s` and
+
+\[
+ K_T(v_0,s)=\widehat\chi(-s/v_0)
+   +O_A\!\left(T^{-1}(1+|s|)^{-A}\right).             \tag{12}
+\]
+
+A rapidly convergent smooth expansion in `v_0` separates (11) into source
+weights and ordinary additive kernels at scale `R_z`. These are exactly the
+sort of smooth weights allowed in the Section 21 Poisson--Cochrane--Shi
+argument. A smooth logarithmic partition has only neighboring block
+interactions after Schwartz decay; polarization and a finite coloring handle
+them. Although there are `O(log T)` blocks, their bounds grow geometrically:
+
+\[
+ \sum_z R_z^2\ll R_{\max}^2.
+\]
+
+Thus the transferred low-divisor packet component is
+`O(ell R_max^2 T^o(1))=o(Q_T)` for every `eta_max<1/2`. More generally it
+retains the thresholds `(1+eta)/4` for the pointwise divisor range and
+`3(1-eta)/4` for the packet-projected range. This is a valid partial theorem
+for (10), not for the exact inherited kernel (1).
+
+The distinction is essential. Formula (1) has the sharp sheared interval
+`t in [T+x_-,2T-x_+]`. Its Fourier transform has a `1/log(n/m)` tail for
+`|n-m|>>z/T`; the smooth surrogate is Schwartz and sees only the natural
+shift scale. Replacing the sharp interval by an interior smooth cutoff is not
+known to be negligible for a polynomial longer than `T`: the generic
+mean-value endpoint bound is of size
+
+\[
+ T^{1+\eta+o(1)},                                     \tag{13}
+\]
+
+against a terminal `T` power scale after suppressing logarithms. Hence no
+fixed positive `eta` bridge to the exact `O_1` follows from the current
+packet estimates. One must either resolve the `1/h` tail into signed forms at
+all shifts `h>=z/T`, or redesign the zero-side/Gabor construction with a
+smooth height weight and reprove its rank and trace normalization.
+
+More explicitly, on `n~z` the inherited endpoint weight is bounded by
+
+    (L/z)min(T,z/|h|)+(log L)/z,       h=n-m.          (14)
+
+With `h_0=z/T`, the shell `|h|~2^j h_0` has coefficient
+`LT/(2^j z)` but contains `~2^j z/T` shifts. The two factors cancel, so
+there is no geometric tail saving without new signed arithmetic input.
+The inherited mean-value bound gives `O(L^2z)`, whose ratio to `Q_T` is
+`T^eta/ell` up to fixed logarithmic factors. It diverges for every fixed
+`eta>0`.
