@@ -2018,3 +2018,161 @@ This is an unconditional principal-model evaluation, not a zero proportion.
 It does not estimate the centered high-divisor Type-II energy, the
 complementary denominator range beyond `R T^theta`, or the cross terms and
 secondary pieces required by the tapered terminal trace.
+
+## 30. A fourth-moment lift halves the high-divisor packet loss
+
+The high-divisor estimate in Sections 21--24 can be strengthened without a
+binary-Möbius correlation theorem.  The gain comes from using the
+multiplicative large sieve only after squaring the Möbius character
+polynomial.
+
+Keep the balanced notation
+
+    R=T^eta,       Q=C=T^((1+eta)/2),       DM=Q,
+
+and let `P_r` denote the centered prime-progression energy called `A_r` in
+(16.10).  Equations (16.7) and (16.11) give
+
+    sum_(r~R) P_r << C R T^o(1),
+    max_(r~R) P_r << C^2/R T^o(1),
+
+and hence
+
+    sum_(r~R) P_r^2 << C^3 T^o(1).                    (30.1)
+
+Consider a gcd stratum `Delta=(d,r)` from (21.9), and put
+
+    r=Delta k,       d=Delta x,       X=D/Delta.
+
+Only `Delta<<D/M` occurs in the nonzero-determinant range.  Since `D<=r`,
+this implies `M<<k`; harmless fixed endpoint constants can be absorbed by
+splitting intervals.  In reduced character coordinates define
+
+    A_(k,Delta)(chi)=sum_(x~X,(x,k)=1)
+       mu(Delta x) alpha_(Delta x) chi(x).
+
+To avoid silently discarding terms with `(m,k)>1`, use the Poisson-dual
+variable rather than a character polynomial in `m`.  If
+
+    b_(k,M)(j)=sum_(n in Z) hat_beta(M(j+nk)/k),
+    J_k(chi)=sum_((j,k)=1)b_(k,M)(j)chi(j),
+
+then `b_(k,M)` is a periodic Schwartz weight of effective length `Y=k/M`.
+All its dyadic tails have rapidly decaying total variation.  The reduced
+principal character is exactly the density mode removed in the centered
+prime error and recombined in Section 26.
+
+The composite rectangular product-congruence estimate (21.10), followed by
+partial summation in the four smooth dual variables, gives
+
+    V_k:=sum_(chi!=chi_0 mod k)|J_k(chi)|^4
+       <<k Y^2 T^o(1)=k^3/M^2 T^o(1).                (30.2)
+
+The uniform-volume term in the product count is precisely
+`|J_k(chi_0)|^4`; it disappears here.  The periodic tails are summed after
+the same estimate.  This dual formulation includes every original `m`,
+including nonunits modulo `k`.
+
+Put
+
+    U_(k,Delta)=sum_(chi!=chi_0 mod k)
+                         |A_(k,Delta)(chi)|^4.
+
+For fixed `Delta`, square `A` before averaging over `k`:
+
+    A_(k,Delta)(chi)^2=sum_n c_Delta(n)chi(n),
+    c_Delta(n)=sum_(x_1 x_2=n) a_Delta(x_1)a_Delta(x_2),
+
+with `a_Delta(x)=mu(Delta x)alpha_(Delta x)` on `x~X`.  The divisor bound
+gives
+
+    sum_n |c_Delta(n)|^2 <<X^2 T^o(1).
+
+Although the displayed definition of `A_(k,Delta)` restricts to `(x,k)=1`,
+the coefficient sequence here is independent of `k`: a Dirichlet character
+is zero on the omitted nonunits.  Thus the large sieve applies to this one
+fixed `c_Delta` sequence.
+
+The multiplicative large sieve, including imprimitive characters at the
+cost of another divisor power, now yields
+
+    sum_(k~R/Delta) U_(k,Delta)
+       <<[(R/Delta)^2+X^2]X^2 T^o(1)
+       <<R^2 D^2/Delta^4 T^o(1),                     (30.3)
+
+because `X<=R/Delta`.  Notice that (30.3) is an averaged fourth moment of
+the actual Möbius coefficients; no pointwise Chowla assertion has entered.
+
+The reduction `U_r -> U_k` has fiber `phi(r)/phi(k)<=Delta`.
+Multiplicative Parseval on `U_k` contributes the Poisson normalization
+`M^2/phi(k)`.  Cauchy in the character variable, (30.2),
+`k/phi(k)=T^o(1)`, and the same gcd-stratum Cauchy used in Section 21 give
+
+    H_(r,D,Delta)
+       <<[Delta M^2/k]sqrt(U_(k,Delta)V_k)T^o(1)
+       <<M sqrt(r Delta U_(k,Delta))T^o(1).           (30.4)
+
+For a fixed `Delta`, apply Cauchy over `k` to the product with `P_(Delta k)`.
+By (30.1)--(30.3) and `r Delta asymp R Delta`,
+
+    sum_(k~R/Delta) P_(Delta k)H_(Delta k,D,Delta)
+      <<M C^(3/2) R^(3/2)D Delta^(-3/2)T^o(1).
+
+Summing the convergent `Delta^(-3/2)` majorant (and absorbing the divisor
+number from recombining the strata) proves the new linked estimate
+
+    sum_(r~R) P_r H_(r,D)
+       <<Q C^(3/2)R^(3/2)T^o(1)
+       =C R^2 Q (C/R)^(1/2)T^o(1).                  (30.5)
+
+Thus the two energies cannot realize the full `D/M` alignment allowed by
+the first-moment bounds.  Relative to the desired covariance (16.13), the
+remaining loss is only `(C/R)^(1/2)`, independent of the high divisor block.
+Through the same packet normalization used after (16.13),
+
+    B_(packet,D)<<R^2(C/R)^(1/2)T^o(1).              (30.6)
+
+Together with (21.13), the best bound proved here is more precisely
+
+    B_(packet,D)<<R^2 min(D/M,(C/R)^(1/2))T^o(1).
+
+The two estimates cross at `D=T^((3+eta)/8)`, namely
+`D=T^.43417875` at the sharp support.
+
+At balanced support this has exponent
+
+    2eta+(1-eta)/4=(7eta+1)/4.
+
+For the sharp admissible `eta=47343/100000`, (30.6) is
+
+    T^(1.0785025+o(1)).                               (30.7)
+
+The former worst bound (24.2) at `D=R` was `T^(1.157005+o(1))`.
+Accordingly the fixed-power gap has been cut exactly in half,
+
+    .157005  ->  .0785025.                            (30.8)
+
+This is an unconditional improvement of the centered high-divisor packet
+projection, not an `o(T)` estimate.  It does not control the complementary
+minor-arc mass or the complete positive Type-II square.  A further
+`T^.0785025` saving, or a recombination avoiding this positive covariance,
+is still required at this stage.
+
+There is also a literature trap worth closing explicitly.  The withdrawn
+Dong--Robles--Zeindler preprint
+[arXiv:2601.00292](https://arxiv.org/abs/2601.00292) initially advertised an
+improved arbitrary-coefficient Kloosterman-fraction bound.  Its January 5,
+2026 withdrawal states that a missing `L^2` factor changes `L^5` to `L^7`
+and removes the claimed improvement.  The valid averaged
+[Bettin--Chandee Theorem 1](https://arxiv.org/abs/1502.00769), applied with
+long variables `X`, transverse
+variables `Y`, and determinant-level length `Y`, is no substitute here: its
+two errors have sizes
+
+    X^1.95 Y^.85,       X^1.875 Y.
+
+At the endpoint `X=T^.47343`, `Y=T^.210145`, these are respectively
+`T^1.10181175` and `T^1.09782625`, both worse than the absolute determinant
+count `T^.89372`.  Hence arbitrary-coefficient Kloosterman technology, with
+the Möbius signs discarded, does not produce (30.5).  The fourth-moment lift
+above uses precisely the arithmetic information that route omits.
