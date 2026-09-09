@@ -1,17 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-expected_zeta85() {
+normalize_axiom_output() {
   awk '
-    /^## 1\. `#print axioms`/ { section = 1; next }
-    section && /^### 1\.4 / { exit }
-    section && /^```$/ { code = !code; next }
-    section && code { print }
-  ' AXIOMS.md
+    {
+      line = $0
+      sub(/^[[:space:]]+/, "", line)
+      if (buffer == "") buffer = line
+      else buffer = buffer " " line
+      if (line ~ /\]$/) {
+        print buffer
+        buffer = ""
+      }
+    }
+    END {
+      if (buffer != "") print buffer
+    }
+  '
+}
+
+expected_zeta85() {
+  cat <<'EOF'
+'zeta85_rung_support_101_over_100' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4, RH.Zeta85.Hypotheses.traceTransfer_saturated]
+'zeta85_rung_support_101_over_100_cumulative' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4, RH.Zeta85.Hypotheses.traceTransfer_saturated]
+'zeta85_rung_support_5_over_4' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4, RH.Zeta85.Hypotheses.traceTransfer_saturated]
+'zeta85_rung_support_5_over_4_cumulative' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_5_4, RH.Zeta85.Hypotheses.traceTransfer_saturated]
+'zeta85_simple_on_critical_line' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.shiu_majorant₂, RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2, RH.Zeta85.Hypotheses.traceTransfer_saturated]
+'zeta85_simple_on_critical_line_cumulative' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.shiu_majorant₂, RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2, RH.Zeta85.Hypotheses.traceTransfer_saturated]
+'zeta85_eighty_five_percent' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.shiu_majorant₂, RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2, RH.Zeta85.Hypotheses.traceTransfer_saturated]
+'zeta85_eighty_five_percent_cumulative' depends on axioms: [propext, Classical.choice, Quot.sound, RH.Zeta85.Hypotheses.shiu_majorant₂, RH.Zeta85.Hypotheses.signedPair_traceGrade_lt_3_2, RH.Zeta85.Hypotheses.traceTransfer_saturated]
+EOF
 }
 
 actual_zeta85() {
-  lake env lean comparator/PrintAxioms/Zeta85.lean 2>&1
+  lake env lean comparator/PrintAxioms/Zeta85.lean 2>&1 | normalize_axiom_output
 }
 
 diff -u <(expected_zeta85) <(actual_zeta85)
@@ -63,24 +85,6 @@ expected_standard_three_from_printer() {
       print "\047" $0 "\047 depends on axioms: [propext, Classical.choice, Quot.sound]"
     }
   ' "$1"
-}
-
-normalize_axiom_output() {
-  awk '
-    {
-      line = $0
-      sub(/^[[:space:]]+/, "", line)
-      if (buffer == "") buffer = line
-      else buffer = buffer " " line
-      if (line ~ /\]$/) {
-        print buffer
-        buffer = ""
-      }
-    }
-    END {
-      if (buffer != "") print buffer
-    }
-  '
 }
 
 for audit in \
