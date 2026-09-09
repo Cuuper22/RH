@@ -45,6 +45,7 @@ import RH.Zeta85.Discharge.RobustStability
 import RH.Zeta85.Discharge.RSPairIntegrals
 import RH.Zeta85.Discharge.RSReduction
 import RH.Zeta85.Discharge.RSBlockMomentBridge
+import RH.Zeta85.Discharge.RSQuarticRemoteCorrection
 import RH.Zeta85.Discharge.SmoothTopHatApprox
 import RH.Zeta85.Discharge.TopHatMoments
 import RH.Zeta85.Discharge.TrimmedMoment

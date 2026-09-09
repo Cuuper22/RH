@@ -12,6 +12,7 @@ Conditional: these proofs use the four axioms of `RH/Zeta85/Hypotheses.lean` in 
 per-theorem dependency is in `AXIOMS.md`.
 -/
 import RH.Zeta85.Main
+import RH.Zeta85.Discharge.RSLowDegreeRemoteCorrectionTwo
 import ChallengeDeps
 
 noncomputable section

@@ -2,12 +2,7 @@
 set -euo pipefail
 
 expected_zeta85() {
-  awk '
-    /^## 1\. `#print axioms`/ { section = 1; next }
-    section && /^### 1\.4 / { exit }
-    section && /^```$/ { code = !code; next }
-    section && code { print }
-  ' AXIOMS.md
+  cat verify/zeta85_axioms.expected
 }
 
 actual_zeta85() {
