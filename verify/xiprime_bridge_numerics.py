@@ -52,7 +52,7 @@ def block(n0, n1, pts=32):
     return zeros, counts, Bs, mids, mono_fail
 
 
-def exact_delta_star(zeros, j, pts=240):
+def exact_delta_star(zeros, j, pts=160):
     """largest delta for which collapsing gap j into a pair at midpoint gives 3 critical points."""
     gm1, g0, g1, g2 = zeros[j - 1], zeros[j], zeros[j + 1], zeros[j + 2]
     m = (g0 + g1) / 2
@@ -88,7 +88,7 @@ def main():
     t0 = time.time()
     out = []
     P = lambda *a: (print(*a), out.append(" ".join(str(x) for x in a)))
-    blocks = [(1, 500), (10000, 10060)]
+    blocks = [(1, 400), (10000, 10060)]
     all_ratio = []
     saved = None
     for n0, n1 in blocks:
@@ -118,10 +118,10 @@ def main():
         if saved is None:
             saved = (zeros, Bs, mids)
     zeros, Bs, mids = saved
-    P("Exact delta* (bisection) vs heuristic 1/|B_n| for gaps j = 10, 25, ..., 460 of block 1 (units: mean spacing):")
+    P("Exact delta* (bisection) vs heuristic 1/|B_n| for gaps j = 10, 40, ..., 370 of block 1 (units: mean spacing):")
     P("   j   gap/spacing   delta*/spacing   heur/spacing   ratio exact/heur")
     rat = []
-    for j in range(10, 470, 15):
+    for j in range(10, 390, 30):
         ds, nc = exact_delta_star(zeros, j)
         sp_ = spacing(mids[j])
         heur = 1 / abs(Bs[j])
