@@ -67,11 +67,12 @@ explicit local model function, not for ξ), **CONJECTURE**, **REFUTED**.
   ξ-terms, the ξ′ certificate bounds *deep* off-line pairs (≤ 6.57 %), while
   the transfer loses exactly on *shallow* ones, which are the ones the ξ
   certificate cannot resolve at bandwidth one.
-* **Numerics (NUMERICAL).** On actual zeros (ordinates 14–650 and ≈ 9880) every
-  gap has exactly one critical point of f(t) = ξ(1/2 + it), the Morse identity
-  holds exactly, and the depth 1/|B_n| an off-line pair would need to create
-  a wrong extremum has median ≈ 0.8 (height ≤ 650) and ≈ 1.5 (height ≈ 9900)
-  mean spacings; exact bisection gives δ*/(1/|B_n|) ≈ 0.5–0.8.
+* **Numerics (NUMERICAL).** On actual zeros (ordinates 14–680 and ≈ 9880–9930)
+  every gap has exactly one critical point of f(t) = ξ(1/2 + it), the Morse
+  identity holds exactly, and the depth 1/|B_n| an off-line pair would need to
+  create a wrong extremum has median 0.78 (height ≤ 680) and 1.46 (height
+  ≈ 9900) mean spacings; exact bisection gives δ*/(1/|B_n|) between 0.38 and
+  0.79 (median 0.64) on a sample of 13 gaps.
 * **Verdict.** No improvement over 0.6725043820976 is obtained. The reframed
   target W* ≈ 9.8 % is a cleaner statement of what is missing, but any proof
   of ω < W* must carry sign-sensitive information at sub-mean-spacing
@@ -393,7 +394,45 @@ each in Ω and are not the bottleneck).
 
 ## 5. Numerics (NUMERICAL)
 
-NUMERICS_PLACEHOLDER
+All figures from [`verify/xiprime_bridge_numerics.out`](../../verify/xiprime_bridge_numerics.out)
+(mpmath, 15 digits; f′/f(t) = −Im(ξ′/ξ)(1/2+it) from the logarithmic derivative
+formula, checked against a numerical derivative of log|ξ| and against the residue
++1 at γ₁). These are diagnostics on the verified-RH range, where Ω = 0 is forced
+by Prop. 7(iii); they test the identities and illustrate the local scale of the
+obstruction, nothing more.
+
+*Critical points per gap.* Blocks of zeros #1–#400 (ordinates 14.13–679.74,
+399 gaps) and #10000–#10060 (9877.78–9929.44, 60 gaps), 32 interior sample
+points per gap: every gap shows exactly one sign change of f′/f, f′/f is
+strictly decreasing on every sampled grid, and the Morse identity
+R_d = G − W + δ holds exactly (398 = 399 − 0 − 1 and 59 = 60 − 0 − 1, with
+δ = −1 because σ = sgn(ff′) is +1 just right of the first zero and −1 just left
+of the last). So W = C₂ = 0, R_d′ − R_d = 1, consistent with (1.1), (4.1).
+
+*Susceptibility.* 1/|B_n| with B_n = f′/f at the gap midpoint, in units of the
+local mean spacing 2π/log(t/2π):
+
+| block | min | q1 | median | q3 | max | fraction > 1/2 | fraction > 1 |
+|---|---|---|---|---|---|---|---|
+| #1–#400 | 0.266 | 0.615 | 0.782 | 1.105 | 7.68 | 0.907 | 0.306 |
+| #10000–#10060 | 0.623 | 0.955 | 1.464 | 2.965 | 392 | 1.000 | 0.717 |
+
+Exact thresholds δ* (bisection on the modified log-derivative, 160 grid points
+over the two neighbouring gaps) for 13 gaps of the first block lie between 0.36
+and 0.60 mean spacings, and δ*/(1/|B_n|) ranges over 0.38–0.79 (median 0.64);
+the frozen-background heuristic overestimates δ* by a bounded factor because
+B varies across the gap. In the s-coordinate, a hypothetical off-line pair
+collapsing a typical gap would need |β − 1/2| ≲ 0.4–0.6 mean spacings
+to produce a wrong extremum; pairs deeper than that produce a
+nonreal ξ′ pair instead (MODEL of §4e). The large values of 1/|B_n| (up to 392
+spacings) occur where f′/f is nearly zero at the midpoint, i.e. where the two
+neighbouring gaps nearly balance; there even a very shallow pair would be
+"deep" in the sense of §4e.
+
+The data say nothing about the unconditional density ω: in this range W = 0
+identically, as it must be. What they quantify is the scale at which the
+shallow/deep dichotomy operates — a fixed fraction of the mean spacing — which
+is exactly the resolution a bandwidth-one certificate lacks.
 
 ## 6. Assessment
 

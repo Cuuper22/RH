@@ -31,4 +31,3 @@ Exact delta* (bisection) vs heuristic 1/|B_n| for gaps j = 10, 40, ..., 370 of b
    370      0.9208         0.5346         0.9482     0.5638
   exact/heuristic ratio: min 0.383 median 0.641 max 0.785
 elapsed 463.9s
-exit 0
