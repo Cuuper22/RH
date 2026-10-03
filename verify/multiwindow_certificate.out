@@ -1,0 +1,56 @@
+
+==============================================================================
+[A] NUMERICAL sanity: finite-matrix operator identities
+==============================================================================
+identity (3.2) tr((p(G)-p(H))Phi) = tr(R X)+2Re tr(Z*(Y_V-Y_W))+2Re tr(H Y(Z,Z))-3tr(X^2 Phi): max error 2.78e-13
+block form R = 2 Pi0 Phi Pi0 - E Phi E + 2 F Phi F for H=E+2F: error 1.78e-15
+||W||_4^4 = tr(H^2K^2)/2 : max rel. error 2.98e-16
+tr(H K^2) = tr(H^3)/3    : max error 1.78e-14
+max ||W Phi W||_2^2/||W||_4^4 over |phi|<=1 samples: 0.1933 (must be <=1)
+
+==============================================================================
+[B] NUMERICAL: polarized functionals (Gauss-Legendre)
+==============================================================================
+flat: D=1.333333333333 (4/3)  M3=2.000000000000 (2)  Q=0.405555555556 (73/180=0.405555555556)
+cosine: D=1.3274992963206  kappa=3D-2-M3=0.0117753128004  Q=0.3989629428664
+
+localized cubic defect density of the cosine, c(x)=u(u^2-2Du-K(u^2)+3D-2):
+  int c = 0.0117772245 (=kappa), int |c| = 0.0265689630, int c_+ = 0.0191730937, int c_- = -0.0073958693
+  x=0.0  c(x)=+0.051605
+  x=0.1  c(x)=+0.044092
+  x=0.2  c(x)=+0.024244
+  x=0.3  c(x)=-0.000642
+  x=0.4  c(x)=-0.020812
+  x=0.5  c(x)=-0.027159
+  phi=1 control: kappa=0.0117753128, E_Y=9Q=3.5906664858
+
+==============================================================================
+[C] CHECKED: exact rational localized certificate
+==============================================================================
+profile u = p8/int p8,  D(u) = 1.3274992963205883,  2 - D(u) = 0.6725007036794116
+  (2 - D* = 0.6725007036794116457..., difference < 1e-17)
+control phi=1: kappa=0.011775312695 Q=0.398962942825 ; inequality (6) excludes delta<=1/272000: True
+sup_{|x|<=1/2} |phi| <= 1.0001797009  (Bernstein, 400 pieces, 0.8s)
+kappa_phi = 0.02572936695466   E_Y(phi) = 1.94205279052313   int u phi^2 = 0.81431323705434   (112.4s)
+C_phi <= 6.490801315722,  q = 6 sup|phi| = 6.001078205489
+(kappa_phi - q d0)^2 - d0 C_phi^2 = positive ~ 9.606252e-07  with d0 = 1/64200
+CHECKED scalar implication: liminf N_0^s/N >= 2 - D(u) + 1/64200 = 0.6725162800034...
+  previous frontier 0.6725043820976; increment over it: 1.190e-05
+
+==============================================================================
+[D] NUMERICAL: second-order (pair-measure) LP, multiplicities <= 2, real zeros
+==============================================================================
+max diagonal atom A (simple fraction = 2 - A) ; D* = 1.3274992963
+  S=  20  band data only: A=1.323184 (D*-A=0.00432)   + F>=0 on [1,4]: A=1.312785
+  S=  40  band data only: A=1.325472 (D*-A=0.00203)   + F>=0 on [1,4]: A=1.318881
+  (truncation: tail beyond S fixed to Lebesgue density 1; gap ~0.08/S)
+
+==============================================================================
+[E] NUMERICAL: SOCP selection of the multiplier (even Legendre basis)
+==============================================================================
+  K=0 (degree  0): max kappa/C = 0.001617, (kappa/C)^2 = 1/382317
+  K=2 (degree  4): max kappa/C = 0.003493, (kappa/C)^2 = 1/81961
+  K=4 (degree  8): max kappa/C = 0.003858, (kappa/C)^2 = 1/67188
+  K=6 (degree 12): max kappa/C = 0.003934, (kappa/C)^2 = 1/64599
+
+total time 170.9s
