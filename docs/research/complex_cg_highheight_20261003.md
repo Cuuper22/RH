@@ -193,3 +193,70 @@ common-height factorisation. The missing statement is a lower bound for ∫ρ|S|
 pairs at *unequal* heights within distance O(v) of each other, mixed with real atoms, that is
 exact on common-height lattices and uses the integer slack of heavy clusters (Prop. 3.3). Lemma
 A settles the case of two pairs alone; Lemma 3.2 settles two pairs with the heavier one higher.
+
+## 5. Strategy (ii): the price of enlarging V₀ (NUMERICAL)
+
+Theorem 4's binding inequality (A) compares 4Σβ with 4π²q(0), where β(Δ) =
+[m₊(Δ) − r(Δ)/(2V₀²)]₊ measures how far the negative part of the pair–real kernel exceeds the
+real slack r. The cheapest way to enlarge V₀ is to make β ≡ 0 by LP constraints: the two
+endpoint conditions r(Δ) ≥ 4π²V₀²(−q(Δ)) (w → 0 in −Q_w/w²) and r(Δ) ≥ −Q_{2V₀}(Δ)/2 (w = 2V₀),
+imposed on the grid Δ ∈ 0.02·Z ∩ [0.5, 60] (both linear in the node values of r̂), then Theorem 4
+holds for that V₀ with κ = r(0), up to the far tail Σβ ≈ 0.08 (which (A) and (B) absorb easily).
+Minimising P under the original LP constraints plus these (script Part 5; scratch run on a 0.01
+grid, Part 5 uses 0.02):
+
+| V₀ forced | P | 2 − P | ρ(0) |
+|---|---|---|---|
+| 0 (Theorem 1) | 1.3210847 | 0.6789153 | 1.00444 |
+| 0.04 | 1.3280253 | 0.6719747 | 1.01329 |
+| 0.08 | 1.3489071 | 0.6510929 | 1.04216 |
+| 0.10 | 1.3643012 | 0.6356988 | 1.06215 |
+
+The frontier P < 1.3274837 is already lost at V₀ = 0.04, i.e. below the V₀ = 0.0796 that
+Theorem 4 obtains from the same ρ by *spending* the budget (A) instead of forcing β = 0. (The
+intermediate option — allow a sum of window heights up to the budget — is a nonconvex design
+problem; its gain is bounded by the margin structure of Theorem 4, whose first window at Δ ≈ 1.05
+alone carries β_c ≈ 0.95 of the budget 1.46.) Combined with Section 4 — no V₁ exists — the
+two-regime closing "V₀ ≥ V₁" is unattainable for every ρ in the class: not for lack of margin
+in V₀ but because the high regime does not exist.
+
+## 6. Assessment: what the two-regime programme reduces to
+
+1. *Low regime.* Theorem 4 (heights ≤ 0.0796) is the only place where the budget inequality
+   (A) is used; it has 0.4 % margin and Section 5 shows that re-optimising ρ buys at most a few
+   hundredths in V₀ before the frontier is lost.
+2. *High regime.* A pair is self-dominated against real atoms at every height (H1), against a
+   second pair of any height if there is nothing else (Lemma A), and against a lower *lighter*
+   pair in isolation (Lemma 3.2). It is never self-dominated against a pair of comparable height
+   with other mass around (Prop. 4.1, hybrid Lemma 3.1). So the regimes do not meet at any V₁;
+   the obstruction is not the size of V₀ but the pair–pair kernel −√(C(v)C(v′)) at Δ ≡ 1/2.
+3. *The remaining case* is a configuration with pairs at two or more distinct heights within
+   distance O(v) of each other, mixed with real atoms. Numerically its ratio is ≥ 1.0013 (hybrid
+   memo, 28 800 optimisations), and the per-pair excess is at least the lattice value
+   4(ρ(0) − 1) = 0.0178 against an allowance of 4(1 − 0.99518) = 0.0193 at the frontier: a proof
+   must be exact to within 8 % on pair lattices, where every termwise bound fails, while
+   Prop. 3.3 shows that exact reductions must carry the cost slack of heavy clusters. The two
+   ingredients a proof must combine are therefore the identity of Lemma 3.1 (which isolates the
+   height dependence in |U|², with Φ shift-invariant) and the integer penalties of H1's Step 2.
+   We did not find the combination.
+4. *Mechanism (b) target.* Prop. 2.5 of the hybrid memo would accept Σ_Z(ρ) ≥ cost(non-high) +
+   κ_H cost(high) with κ_H > 0.99023. Lemma A gives κ_H = 1.00777 for two isolated pairs and H1
+   gives κ_H = 1 for one pair among reals, but the unit pair lattice (ratio ρ(0) at every height,
+   excess 0.0178 per pair shared with nothing) shows that any κ_H must be earned from the real
+   inequality on the collapsed lattice, not from height. No κ_H > 0.987962 is proved for all Z.
+
+## 7. Self-check
+
+| claim | status | RH / real-zero use | uniformity |
+|---|---|---|---|
+| Lemma A (two pairs, any heights, κ = 1.00777) | PROVED; constant CHECKED | none | all m₁, m₂, v₁, v₂, Δ |
+| Lemma 3.1 (two-height identity) | PROVED; CHECKED 10⁻¹² | none | any Z |
+| Lemma 3.2 (two-pair reduction, W₁ ≥ W₂) | PROVED | none | pairs-only, two atoms |
+| Prop. 3.3 (common-shift monotonicity false) | REFUTED; 30-digit CHECKED | — | counterexamples have ratio ≥ 1.5 |
+| Prop. 4.1 (no removal step, no V₁) | REFUTED; CHECKED | — | two-pair example, Lemma A ratio |
+| magnitude table for one pair vs low atoms | NUMERICAL (certified cell bounds, crude constants) | — | superseded by H1 |
+| Pareto price of V₀ (LP with endpoint constraints) | NUMERICAL | — | not a certificate of Theorem 4 at that V₀ |
+| (**) for several pairs at unequal heights | OPEN (CONJECTURE, no violation known) | — | — |
+
+Nothing above uses β = 1/2 or the reality of zeros. **No unconditional proportion above
+0.6725162800 is certified by this note.**

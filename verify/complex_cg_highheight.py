@@ -199,11 +199,11 @@ def solve_V0(V0, du=0.001, U=50.0, eps=1e-6, Dgrid=np.arange(0.5, 60.0, 0.02)):
     rows += [-4 * np.pi ** 2 * V0 ** 2 * Mq - Mr, -MQ / 2 - Mr]; rhs += [np.zeros(len(Dgrid))] * 2
     res = linprog(obj, A_ub=np.vstack(rows), b_ub=np.concatenate(rhs), A_eq=normfull[None, :], b_eq=[1.0], bounds=bounds, method="highs")
     return res
-for V0 in ([] if QUICK else [0.05, 0.08, 0.12]):
+for V0 in ([] if QUICK else [0.04, 0.08, 0.10]):
     t1 = time.time(); res = solve_V0(V0)
     if res.status != 0: print("  V0=%.3f: LP %s" % (V0, res.message)); continue
     print("  V0=%.3f: P = %.7f  2 - P = %.7f  rho(0) = %.5f  %s  [%.0fs]" % (V0, res.fun, 2 - res.fun, res.x[0], "below frontier" if res.fun < 1.3274837 else "ABOVE frontier", time.time() - t1))
     sys.stdout.flush()
-print("  (scratch run with the 0.01 grid: V0 = 0.08 gives P = 1.3489, V0 = 0.10 gives P = %s; see the memo table.)" % "1.36-1.38")
+print("  (scratch run, grid step 0.01: V0 = 0.04 -> P = 1.3280253, 0.08 -> 1.3489071, 0.10 -> 1.3643012; the frontier is lost already at V0 = 0.04.)")
 print("\nStatus: Lemma A and Lemmas 3.1-3.2 PROVED; common-shift monotonicity and the high-pair removal step REFUTED (so no V1 exists);")
-print("        strategy (ii) priced (frontier crossed near V0 ~ 0.05-0.08 with windows forced closed); (**) for several pairs at unequal heights remains OPEN.")
+print("        strategy (ii) priced (frontier crossed already at V0 = 0.04 with windows forced closed); (**) for several pairs at unequal heights remains OPEN.")
