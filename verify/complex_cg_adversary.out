@@ -1,6 +1,8 @@
 Part 0: LP-optimal rho (verbatim Part A of positivity_class_certificate.py)
   P = 1.3209166550  R = int rho = 1.01261107  rho(0) = 1.00387347  rho(1) = 0.0e+00  slope rho'(1-) = -0.4483
   self-check: P and R equal the memo's 1.3209166550 / 1.01261107: True
+  caveat: full CG test r(u) on a 0.001 grid of [0,12]: min r = -2.02e-05 at u = 1.045 (LP enforces r >= 0 only on a 0.01 grid),
+  so even the REAL inequality with kappa = r(0) = 1 is certified only up to such dips (kappa = 1 - 1e-4 costs nothing).
   q(u) = int rho a^2 cos(2 pi a u): q(0) = 0.14875, min q = -0.08649 at u = 0.775 ; Prop.5 two-body lifting threshold t* = q(0)/|min q| = 1.720
 
 Part 1: periodic reduction and two exact facts (CHECKED)
@@ -14,3 +16,67 @@ Part 1: periodic reduction and two exact facts (CHECKED)
    s=1,p=2: min 1.8e+00, v at min 0.0e+00 ; s=2,p=3: min 4.6e+00, v at min 3.1e-08 ; s=0,p=2: min 7.0e+00, v at min 0.0e+00 ; s=2,p=2: min 3.2e+00, v at min 0.0e+00 ; s=1,p=1: min 1.0e+00, v at min 0.0e+00 ; s=1,p=2: min 1.8e+00, v at min 0.0e+00 ; s=2,p=3: min 4.6e+00, v at min 0.0e+00 ; s=1,p=2: min 1.8e+00, v at min 0.0e+00
 
 Part 2: periodic adversary for the LP rho (NUMERICAL)
+  2a random multiplicity patterns: 320 patterns x 8 starts ; 2b lattice-like starts with pairs inserted (K = 6..40 atoms): 400 runs x 4 height scales
+  min ratio over 2a+2b = 1.0002544  (reals [2, 2], pairs [1, 1, 1], M = 7.0000, max v = 0.0e+00)
+  minimisers with some v > 1e-3: 109 of 720 ; smallest such ratio = 1.08681
+  largest lifting gain at a lifted local minimum: ratio 1.25411 vs 1.36573 collapsed at the same x (reals 2 atoms, pairs m = [1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2], max v = 0.573)
+  2c near-tight real designs with doubles (400 runs): min real ratio 1.0002969 ; min lifting coefficient C over all their doubles = 0.04079 (> 0)
+     re-optimisation after replacing every double by a pair at v0 in {.05,.15,.3,.5}: min ratio 1.0002969 ; runs ending with v > 1e-3: 0
+     best near-tight design: period M = 13.000000, atoms x = [0.000000, 1.982233, 3.967537, 5.949767, 7.903044, 8.952636, 9.997135, 11.046724], multiplicities [2, 2, 2, 2, 2, 2, 2, 2]
+
+Part 3: large finite (non-periodic) configurations, 15..60 atoms, local optimisation (NUMERICAL)
+  128 runs: min ratio 1.002225 (29 atoms) ; runs ending with some v > 1e-3: 11 (their min ratio 1.2397)
+
+Part 4: fixed-height scans at the best near-tight design (NUMERICAL)
+  one pair lifted: v=0.00: 1.000297 | v=0.02: 1.000537 | v=0.05: 1.001813 | v=0.10: 1.006597 | v=0.20: 1.029661 | v=0.35: 1.138111 | v=0.50: 1.545091
+  all doubles lifted (independent heights fixed at v, 1.5v, 0.5v, ...): v=0.00: 1.000297 | v=0.02: 1.001725 | v=0.05: 1.009258 | v=0.10: 1.037121 | v=0.20: 1.172843 | v=0.35: 2.001124 | v=0.50: 7.802492
+
+Part 5: mechanism, control, interpolation
+  control rho = 1_[1/2,1]: N-point real lattice, spacing 0.9, exact (mpmath) ratio Sigma/N: N=10: 0.10988, N=100: 0.01144, N=1000: 0.0011445
+  -> kappa_real(control) = 0 (CHECKED); the memo's real infimum 0.1496 was over <= 12 points only. The control's complex
+     minimisers (0.0071 in the memo) are not below the true real infimum: the control exhibits no complex-only failure.
+  (1-l) rho_LP + l 1_[1/2,1]   l=0.00 rho(0)=1.0039  -min q/q(0)=0.581  real-inf 1.00029 (lattice 1.00097)  complex-pattern-inf 1.00095 (P [1, 1, 1, 1]+[1, 1, 1], max v 0.00)  complex >= real
+  (1-l) rho_LP + l 1_[1/2,1]   l=0.10 rho(0)=0.9035  -min q/q(0)=0.615  real-inf 0.90349 (lattice 0.90349)  complex-pattern-inf 0.93941 (P []+[1, 1, 1], max v 0.04)  complex >= real
+  (1-l) rho_LP + l 1_[1/2,1]   l=0.30 rho(0)=0.7027  -min q/q(0)=0.714  real-inf 0.70271 (lattice 0.70271)  complex-pattern-inf 0.79534 (P [1, 1]+[1], max v 0.00)  complex >= real
+  (1-l) rho_LP + l 1_[1/2,1]   l=0.60 rho(0)=0.4015  -min q/q(0)=0.805  real-inf 0.40155 (lattice 0.40155)  complex-pattern-inf 0.48749 (P []+[1, 1, 1], max v 0.06)  complex >= real
+  (1-l) rho_LP + l 1_[1/2,1]   l=1.00 rho(0)=0.0000  -min q/q(0)=0.869  real-inf 0.00000 (lattice 0.00000)  complex-pattern-inf 0.01170 (P []+[1, 1, 1], max v 0.24)  complex >= real
+  rho_LP + l 1_[1/2,1]         l=0.05 rho(0)=1.0039  -min q/q(0)=0.590  real-inf 1.00387 (lattice 1.00387)  complex-pattern-inf 1.02294 (P [1, 1]+[1], max v 0.00)  complex >= real
+  rho_LP + l 1_[1/2,1]         l=0.20 rho(0)=1.0039  -min q/q(0)=0.651  real-inf 1.00387 (lattice 1.00387)  complex-pattern-inf 1.06661 (P [1, 1]+[1, 1], max v 0.00)  complex >= real
+  rho_LP + l 1_[1/2,1]         l=1.00 rho(0)=1.0039  -min q/q(0)=0.781  real-inf 1.00387 (lattice 1.00387)  complex-pattern-inf 1.10226 (P [1, 1]+[1, 1], max v 0.00)  complex >= real
+  random piecewise-linear rho >= 0 (5 knots, rho(1) = 0, R = 1): 96 tested ; 3 needed an intensified real search ; complex-pattern-inf < real-inf - 1e-4 afterwards in 1
+     seed 59: real 0.25136 complex 0.24119 (P []+[1, 1, 1], max v 0.350)
+  random NONINCREASING piecewise-linear rho (R = 1): 48 tested ; complex-pattern-inf < real-inf - 1e-4 in 0
+  genuine complex-only gap: rho_59 = piecewise linear through knots [0.000000, 0.116944, 0.377430, 0.587747, 0.826066, 1.000000] with values [0.357250, 0.307421, 0.011162, 1.865539, 0.000000, 0.000000] (then gridded at step 0.005, R = 1)
+  family (1-l) rho_LP + l rho_59, two-pass continuation over 384 pooled configurations (lifted = some v > 0.05):
+    l=0.000  real-inf 1.00050  lifted-complex-inf 1.50581  real - lifted = -0.50531
+    l=0.500  real-inf 0.64981  lifted-complex-inf 0.69891  real - lifted = -0.04910
+    l=0.800  real-inf 0.41244  lifted-complex-inf 0.43548  real - lifted = -0.02305
+    l=0.850  real-inf 0.37209  lifted-complex-inf 0.38663  real - lifted = -0.01454
+    l=0.875  real-inf 0.35186  lifted-complex-inf 0.36082  real - lifted = -0.00895
+    l=0.900  real-inf 0.33164  lifted-complex-inf 0.33404  real - lifted = -0.00239
+    l=0.925  real-inf 0.31139  lifted-complex-inf 0.30617  real - lifted = +0.00522
+    l=0.950  real-inf 0.29112  lifted-complex-inf 0.27713  real - lifted = +0.01399
+    l=1.000  real-inf 0.25053  lifted-complex-inf 0.21493  real - lifted = +0.03560
+    -> complex-only gap opens at l* ~ 0.908 (linear interpolation of the sign change)
+    rho_59 minimiser (l = 1): M = 10.666667, pairs x = [1.265936, 9.416564, 4.478061, 6.900529, 3.688404], v = [0.000000, 0.000000, 0.442649, 0.000000, 0.442649], m = [1, 1, 1, 1, 1] ; ratio float 0.21493272, mpmath 0.214932719684 ; best real 0.25053
+
+Part 6: restricted adversary (zeta-like constraints), NUMERICAL
+  scaling (memo sec.1): zeta zero 1/2 + i gamma + (beta - 1/2) -> z = gamma - i(beta-1/2), multiplied by L = log T/(2 pi):
+  mean spacing 1 (density 1), scaled height v = (beta - 1/2) log T/(2 pi).  Selberg N(sigma,T) << T^{1-(sigma-1/2)/4} log T
+  gives #{v' >= v} << N e^{-pi v/2}: no constraint at the relevant heights v <= 0.5.
+  density exactly 1 (M = N), no cap                                       : 120 patterns, min ratio 1.000861 (max v 0.0e+00)
+  density exactly 1 (M = N), off-line <= 7/12 (PRZZ: >= 5/12 on the line) : 120 patterns, min ratio 1.000861 (max v 0.0e+00)
+  density exactly 1 (M = N), off-line <= 1/3 (hypothetical)               : 77 patterns, min ratio 1.000989 (max v 0.0e+00)
+
+Part 7: mpmath re-evaluation (30 digits, exact per-period quadratic form) of reported minimisers
+  Part 2 best        : float 1.0002544361   mpmath 1.00025443606
+  best near-tight    : float 1.0002969446   mpmath 1.00029694461
+  Part 2 best design: M = 7.000000, real x = [0.000000, 1.040694] m = [2, 2] ; pair x = [2.085658, 5.955036, 4.020347] v = [0.000000, 0.000000, 0.000000] m = [1, 1, 1]
+  lifted local min  : M = 21.000000, real x = [0.000000, 2.032682] m = [1, 1] ; pair x = [-8.920576, -8.064451, -7.218603, -5.150553, -6.219287, -4.221231, -3.184901, -2.081743, 3.092852, 4.163961, 6.388897, 7.348980, 8.203144, 9.065167, 9.936491, 11.012432] v = [0.511025, 0.560702, 0.502508, 0.348685, 0.000000, 0.274949, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.478218, 0.562086, 0.573421, 0.510110, 0.000000] m = [1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2]
+  lifted local min   : float 1.2541060353   mpmath 1.25410603533   (collapsed same x: 1.36573282223)
+  self-checks: rho = LP rho (Part 0); multiplicities are integers by construction; each pair enters S as 2m cosh e(ax)
+  (conjugation closure); s_1 counts only real atoms with m = 1 (cost function); ratios use 2N - s_1.
+
+Verdict: overall minimum ratio found = 1.0002544 (>= kappa = 1); minimisers with ratio < 1.01 having some v > 1e-3: 0.
+(**) for the LP rho: NOT refuted; CONJECTURE, numerically supported.  Infimum found is attained by REAL designs.
+runtime 224 s

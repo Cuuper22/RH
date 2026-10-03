@@ -18,7 +18,7 @@ This finite quadratic form is used for all extensive searches; Part 1 checks it 
 direct truncations.
 
 Labels: CHECKED = exact / high precision evaluation; NUMERICAL = optimisation without
-certificate.  Default run: about 8 minutes on 4 cores.  Do not import from elsewhere.
+certificate.  Default run: about 4 minutes on 4 cores.  Do not import from elsewhere.
 """
 import os, sys, time
 os.environ.setdefault("OMP_NUM_THREADS", "1")
@@ -176,8 +176,8 @@ def lift_coeff(Rh, M, xr, mr, xp, mp_, x0):
     return float(np.sum(W * A ** 2 * np.real(np.conj(T) * np.exp(2j * np.pi * A * x0))))
 
 # exact (mpmath) evaluation of the per-period quadratic form for the LP rho
-def mp_ratio_periodic(cvec, M, xr, mr, xp, vp, mp_):
-    M = mp.mpf(M); S = mp.mpf(0); h = mp.mpf(1) / 100
+def mp_ratio_periodic(cvec, M, xr, mr, xp, vp, mp_, steps=100):
+    M = mp.mpf(M); S = mp.mpf(0); h = mp.mpf(1) / steps
     for n in range(0, int(mp.ceil(M))):
         a = n / M
         if a >= 1: break
@@ -270,14 +270,17 @@ def job_density1(args):
 def family_test(Rh, rng, starts=6):
     """(real-inf, complex-pattern-inf, its pattern, its max height) for a generic rho; complex optima with
     v = 0 are real configurations and are folded into the real infimum."""
-    comp = []
+    comp = []; coll = []
     for mr, mp_ in [([1, 1], [1, 1]), ([1, 1, 1], [1, 1, 1]), ([3], [1]), ([1], [1, 1]), ([4], [1, 1]), ([1, 1, 1, 1], [1, 1])]:
         v, cfg = optimise(Rh, mr, mp_, rng, starts=starts, periodic=False); comp.append((v, 'F', mr, mp_, cfg[3].max()))
+        coll.append(sig_fin(Rh, cfg[1], np.array(mr, float), cfg[2], 0 * cfg[3], np.array(mp_, float), grad=False) / cost(mr, mp_))
     for mr, mp_ in [([1], [1]), ([1, 1], [1]), ([1, 1], [1, 1]), ([], [1, 1, 1]), ([3], [1]), ([1, 1, 1, 1], [1, 1, 1])]:
         v, cfg = optimise(Rh, mr, mp_, rng, starts=starts); comp.append((v, 'P', mr, mp_, cfg[3].max()))
-    # real infimum: lattices (left limits at integer period), lone atom, real patterns incl. collapsed versions
+        coll.append(sig_per(Rh, cfg[0], cfg[1], np.array(mr, float), cfg[2], 0 * cfg[3], np.array(mp_, float), grad=False) / cost(mr, mp_))
+    # real infimum: lattices (left limits at integer period), lone atom, real patterns, and every complex optimum
+    # collapsed at the same positions (v -> 0 gives a legitimate real configuration with doubles)
     lat = min(float(Rh(0)), min((Rh(0) + 2 * np.sum(Rh(np.arange(1, int(np.ceil(a))) / a))) / a for a in np.arange(0.3, 8, 0.002)))
-    reals = [lat, float(Rh.W.sum())] + [t[0] for t in comp if t[4] <= 1e-6]
+    reals = [lat, float(Rh.W.sum())] + coll
     for mr in [[1, 1], [1, 1, 1], [1] * 5, [1, 2], [2, 2], [1, 1, 2], [1, 1, 2, 2], [1, 1, 1, 1, 2, 2], [3, 2], [4, 2, 2], [1, 1, 1, 1, 1, 1, 2, 2, 2]]:
         reals.append(optimise(Rh, mr, [], rng, starts=starts, periodic=False)[0]); reals.append(optimise(Rh, mr, [], rng, starts=starts)[0])
     bc = min(comp, key=lambda t: t[0])
@@ -298,8 +301,77 @@ def job_randrho(seed):
     vals = np.interp(g, xs, kv)
     if vals.max() < 1e-3: return None
     vals = vals / (2 * np.sum((vals[1:] + vals[:-1]) / 2) * (g[1] - g[0]))
-    kr, lat, bc = family_test(Rho(g, vals), rng, starts=5)
+    Rh = Rho(g, vals)
+    kr, lat, bc = family_test(Rh, rng, starts=5)
+    intensified = False
+    if bc[0] < kr - 1e-4:   # candidate complex-only gap: intensify the REAL search before reporting it
+        intensified = True
+        pats = [[1] * k for k in range(1, 9)] + [[2], [1, 2], [2, 2], [1, 1, 2], [1, 2, 2], [1, 1, 1, 2], [3], [1, 3], [2, 3], [1, 1, 2, 2]]
+        pats.append(list(bc[2]) + [2] * len(bc[3]))
+        for mr in pats:
+            for per in (True, False):
+                kr = min(kr, optimise(Rh, mr, [], rng, starts=25, periodic=per)[0])
+    return seed, kr, bc, intensified
+
+def random_rho(seed, monotone=False):
+    rng = np.random.default_rng(seed)
+    g = np.linspace(0, 1, 201)
+    xs = np.concatenate([[0], np.sort(rng.uniform(0, 1, 4)), [1]])
+    if monotone:
+        kv = np.sort(rng.uniform(0, 1, 6))[::-1].copy(); kv[-1] = 0.0
+        if rng.random() < 0.5: kv[1:-1] *= rng.uniform(0.2, 1)
+    else:
+        kv = rng.uniform(0, 1, 6) * (rng.random(6) < .8); kv[-1] = 0.0
+    vals = np.interp(g, xs, kv)
+    if vals.max() < 1e-3: return None
+    return g, vals / (2 * np.sum((vals[1:] + vals[:-1]) / 2) * (g[1] - g[0])), xs, kv, rng
+
+def job_monotone(seed):
+    g, vals, xs, kv, rng = random_rho(10000 + seed, monotone=True)
+    Rh = Rho(g, vals)
+    kr, lat, bc = family_test(Rh, rng, starts=5)
+    if bc[0] < kr - 1e-4:
+        for mr in [[1] * k for k in range(1, 9)] + [[2], [1, 2], [2, 2], [1, 1, 2], [1, 2, 2], [1, 1, 1, 2], [3], [1, 3], [2, 3], [1, 1, 2, 2]] + [list(bc[2]) + [2] * len(bc[3])]:
+            for per in (True, False):
+                kr = min(kr, optimise(Rh, mr, [], rng, starts=25, periodic=per)[0])
     return seed, kr, bc
+
+# genuine complex-only gap: rho_59 = random_rho(59), continuation in lambda for (1-lam) rho_LP + lam rho_59
+Z59 = (16 / 3, [0.55669557, 2.85199449, -0.1861852], [0.35002264, 0.0, 0.34998744])
+# a deeper exploratory run (708 pooled configurations) found this 5-pair design (M = 32/3); used as an extra seed
+R59B = [8.43373494, 5.92382134, 3.39175188, 2.53206947]   # real seed (m = 1,1,2,2) from the same run
+Z59B = [32 / 3, 1.26593644, 9.41656415, 4.47806078, 6.90052866, 3.68840442, 0.0, 0.0, 0.44264871, 0.0, 0.44264858]
+RP59 = [[1] * k for k in range(1, 9)] + [[1] * k + [2] * j for k in range(0, 5) for j in range(1, 4)]
+CP59 = [([], [1, 1, 1]), ([], [1, 1, 1, 1, 1]), ([1], [1, 1]), ([1, 1], [1, 1]), ([], [1, 1]), ([2], [1, 1]), ([1], [1, 1, 1])]
+def _z(cfg, nr):
+    M, xr, xp, vp = cfg; b = xr[0] if nr else 0.0
+    return [M] + list(xr[1:] - b) + list(xp - b) + list(vp)
+def job59_pass1(args):
+    lam, grid, vlp, v59 = args
+    Rh = Rho(grid, (1 - lam) * vlp + lam * v59); rng = np.random.default_rng(int(lam * 1000) + 9); out = []
+    for mr in RP59:
+        c, cfg = optimise(Rh, mr, [], rng, starts=10); out.append(('R', mr, [], _z(cfg, len(mr))))
+    M, xp, vp = Z59; out.append(('C', [], [1, 1, 1], [M] + xp + vp))
+    out.append(('C', [], [1] * 5, Z59B))
+    out.append(('R', [1, 1, 2, 2], [], R59B))
+    for mr, mp_ in CP59:
+        for _ in range(10):
+            c, cfg = optimise(Rh, mr, mp_, rng, starts=1); out.append(('C', mr, mp_, _z(cfg, len(mr))))
+    return out
+def job59_pass2(args):
+    lam, grid, vlp, v59, cfgs = args
+    Rh = Rho(grid, (1 - lam) * vlp + lam * v59); rng = np.random.default_rng(1)
+    lat = min(float(Rh(0)), min((Rh(0) + 2 * np.sum(Rh(np.arange(1, int(np.ceil(a))) / a))) / a for a in np.arange(0.3, 10, 0.001)))
+    kr = min(lat, float(Rh.W.sum())); kc = np.inf; arg = None
+    for kind, mr, mp_, z in cfgs:
+        c, cfg = optimise(Rh, mr, mp_, rng, starts=1, x0s=[z])
+        if kind == 'R' or cfg[3].max() <= 0.05:
+            kr = min(kr, c)
+        else:
+            if c < kc: kc, arg = c, (mr, mp_, cfg)
+        if kind == 'C':   # collapsed version (v -> 0) is a legitimate real configuration
+            kr = min(kr, sig_per(Rh, cfg[0], cfg[1], np.array(mr, float), cfg[2], 0 * cfg[3], np.array(mp_, float), grad=False) / cost(mr, mp_))
+    return lam, kr, kc, arg
 
 def job_rigidity(seed):
     """Lemma 3 illustration: D points per period (s simple reals + p pairs), minimise sum_{n=1}^{m} |T(n)|^2,
@@ -329,6 +401,11 @@ def main():
     print("Part 0: LP-optimal rho (verbatim Part A of positivity_class_certificate.py)")
     print("  P = %.10f  R = int rho = %.8f  rho(0) = %.8f  rho(1) = %.1e  slope rho'(1-) = %.4f" % (P, R, c[0], c[k1], (c[k1] - c[k1 - 1]) / D))
     print("  self-check: P and R equal the memo's 1.3209166550 / 1.01261107: %s" % (abs(P - 1.3209166550) < 1e-8 and abs(R - 1.01261107) < 1e-7))
+    Rfull = Rho(al, c)   # full rhat on [0, 2.5] (Rho only uses grid/vals; quadrature over [0, 2.5])
+    us_f = np.arange(0, 12, 0.001); rf = np.array([Rfull.W @ np.cos(2 * np.pi * Rfull.A * u) for u in us_f])
+    print("  caveat: full CG test r(u) on a 0.001 grid of [0,12]: min r = %.2e at u = %.3f (LP enforces r >= 0 only on a 0.01 grid),"
+          % (rf.min(), us_f[np.argmin(rf)]))
+    print("  so even the REAL inequality with kappa = r(0) = 1 is certified only up to such dips (kappa = 1 - 1e-4 costs nothing).")
     print("  q(u) = int rho a^2 cos(2 pi a u): q(0) = %.5f, min q = %.5f at u = %.3f ; Prop.5 two-body lifting threshold t* = q(0)/|min q| = %.3f"
           % (q(0), qs.min(), 0.005 * np.argmin(qs), q(0) / -qs.min()))
 
@@ -357,7 +434,7 @@ def main():
     # ---------------------------------------------------------------- Part 2
     print("\nPart 2: periodic adversary for the LP rho (NUMERICAL)")
     rng0 = np.random.default_rng(7); pats = []
-    for i in range(160):
+    for i in range(320):
         ns = int(rng0.integers(0, 12)); nd = int(rng0.integers(0, 3)); nt = int(rng0.integers(0, 2)) if rng0.random() < .3 else 0
         np1 = int(rng0.integers(1, 5)); np2 = int(rng0.integers(0, 2)) if rng0.random() < .3 else 0
         mr_ = [1] * ns + [2] * nd + [3] * nt; mp__ = [1] * np1 + [2] * np2
@@ -365,12 +442,12 @@ def main():
         pats.append((i, mr_, mp__))
     with Pool(4, initializer=init_worker, initargs=(rho_grid, rho_vals)) as pool:
         resA = pool.map(job_patterns, pats)
-        resB = pool.map(job_lattice, range(200))
-        resC = pool.map(job_neartight, range(240))
+        resB = pool.map(job_lattice, range(400))
+        resC = pool.map(job_neartight, range(400))
     allAB = resA + resB
     best = min(allAB, key=lambda t: t[0])
     lifted = [t for t in allAB if len(t[4][3]) and t[4][3].max() > 1e-3]
-    print("  2a random multiplicity patterns: %d patterns x 8 starts ; 2b lattice-like starts with pairs inserted (K = 6..40 atoms): 200 runs x 4 height scales" % len(pats))
+    print("  2a random multiplicity patterns: %d patterns x 8 starts ; 2b lattice-like starts with pairs inserted (K = 6..40 atoms): 400 runs x 4 height scales" % len(pats))
     print("  min ratio over 2a+2b = %.7f  (reals %s, pairs %s, M = %.4f, max v = %.1e)" % (best[0], best[2], best[3], best[4][0], (best[4][3].max() if len(best[4][3]) else 0)))
     print("  minimisers with some v > 1e-3: %d of %d ; smallest such ratio = %.5f" % (len(lifted), len(allAB), min(t[0] for t in lifted) if lifted else np.nan))
     if lifted:
@@ -378,7 +455,7 @@ def main():
         print("  largest lifting gain at a lifted local minimum: ratio %.5f vs %.5f collapsed at the same x (reals %d atoms, pairs m = %s, max v = %.3f)"
               % (w[0], w[1], len(w[2]), w[3], w[4][3].max()))
     valsC = [t[0] for t in resC]; iC = int(np.argmin(valsC))
-    print("  2c near-tight real designs with doubles (240 runs): min real ratio %.7f ; min lifting coefficient C over all their doubles = %.5f (> 0)"
+    print("  2c near-tight real designs with doubles (400 runs): min real ratio %.7f ; min lifting coefficient C over all their doubles = %.5f (> 0)"
           % (valsC[iC], min(t[1] for t in resC)))
     print("     re-optimisation after replacing every double by a pair at v0 in {.05,.15,.3,.5}: min ratio %.7f ; runs ending with v > 1e-3: %d"
           % (min(t[2] for t in resC), sum(1 for t in resC if t[3] > 1e-3)))
@@ -389,10 +466,10 @@ def main():
     # ---------------------------------------------------------------- Part 3
     print("\nPart 3: large finite (non-periodic) configurations, 15..60 atoms, local optimisation (NUMERICAL)")
     with Pool(4, initializer=init_worker, initargs=(rho_grid, rho_vals)) as pool:
-        resF = pool.map(job_finite, range(64))
+        resF = pool.map(job_finite, range(128))
     bf = min(resF, key=lambda t: t[0])
     lf = [t for t in resF if t[3] > 1e-3]
-    print("  64 runs: min ratio %.6f (%d atoms) ; runs ending with some v > 1e-3: %d (their min ratio %.4f)" % (bf[0], bf[4], len(lf), min([t[0] for t in lf] + [np.inf])))
+    print("  128 runs: min ratio %.6f (%d atoms) ; runs ending with some v > 1e-3: %d (their min ratio %.4f)" % (bf[0], bf[4], len(lf), min([t[0] for t in lf] + [np.inf])))
 
     # ---------------------------------------------------------------- Part 4
     print("\nPart 4: fixed-height scans at the best near-tight design (NUMERICAL)")
@@ -433,11 +510,36 @@ def main():
         print("  %-28s l=%.2f rho(0)=%.4f  -min q/q(0)=%.3f  real-inf %.5f (lattice %.5f)  complex-pattern-inf %.5f (%s %s+%s, max v %.2f)  %s"
               % (tag, l, r0, th, kr, lat, bc[0], bc[1], bc[2], bc[3], bc[4], "COMPLEX < REAL" if bc[0] < kr - 1e-4 else "complex >= real"))
     with Pool(4) as pool:
-        resR = [t for t in pool.map(job_randrho, range(48)) if t is not None]
+        resR = [t for t in pool.map(job_randrho, range(96)) if t is not None]
     badR = [t for t in resR if t[2][0] < t[1] - 1e-4]
-    print("  random piecewise-linear rho >= 0 (5 knots, rho(1) = 0, R = 1): %d tested ; complex-pattern-inf < real-inf - 1e-4 in %d" % (len(resR), len(badR)))
+    print("  random piecewise-linear rho >= 0 (5 knots, rho(1) = 0, R = 1): %d tested ; %d needed an intensified real search ;"
+          " complex-pattern-inf < real-inf - 1e-4 afterwards in %d" % (len(resR), sum(1 for t in resR if t[3]), len(badR)))
     for t in badR[:5]:
         print("     seed %d: real %.5f complex %.5f (%s %s+%s, max v %.3f)" % (t[0], t[1], t[2][0], t[2][1], t[2][2], t[2][3], t[2][4]))
+    with Pool(4) as pool:
+        resM = pool.map(job_monotone, range(48))
+    badM = [t for t in resM if t[2][0] < t[1] - 1e-4]
+    print("  random NONINCREASING piecewise-linear rho (R = 1): %d tested ; complex-pattern-inf < real-inf - 1e-4 in %d" % (len(resM), len(badM)))
+    g59, v59, xs59, kv59, _ = random_rho(59)
+    print("  genuine complex-only gap: rho_59 = piecewise linear through knots %s with values %s (then gridded at step 0.005, R = 1)"
+          % (fmt(xs59), fmt(kv59 / (2 * np.sum((np.interp(g59, xs59, kv59)[1:] + np.interp(g59, xs59, kv59)[:-1]) / 2) * 0.005))))
+    vlp = np.interp(g59, rho_grid, rho_vals)
+    lams_1 = [0.6, 0.8, 0.9, 1.0]; lams_2 = [0.0, 0.5, 0.8, 0.85, 0.875, 0.9, 0.925, 0.95, 1.0]
+    with Pool(4) as pool:
+        cf = [c for o in pool.map(job59_pass1, [(l, g59, vlp, v59) for l in lams_1]) for c in o]
+        res59 = pool.map(job59_pass2, [(l, g59, vlp, v59, cf) for l in lams_2])
+    print("  family (1-l) rho_LP + l rho_59, two-pass continuation over %d pooled configurations (lifted = some v > 0.05):" % len(cf))
+    prev = None; lam_star = None
+    for lam, kr, kc, arg in res59:
+        print("    l=%.3f  real-inf %.5f  lifted-complex-inf %.5f  real - lifted = %+.5f" % (lam, kr, kc, kr - kc))
+        if prev is not None and prev[1] - prev[2] <= 0 < kr - kc:
+            lam_star = prev[0] + (lam - prev[0]) * (-(prev[1] - prev[2])) / ((kr - kc) - (prev[1] - prev[2]))
+        prev = (lam, kr, kc)
+    print("    -> complex-only gap opens at l* ~ %s (linear interpolation of the sign change)" % ("%.3f" % lam_star if lam_star else "none"))
+    lam, kr, kc, arg = res59[-1]
+    M, xr, xp, vp = arg[2]
+    print("    rho_59 minimiser (l = 1): M = %.6f, pairs x = %s, v = %s, m = %s ; ratio float %.8f, mpmath %s ; best real %.5f"
+          % (M, fmt(xp), fmt(vp), arg[1], kc, mp.nstr(mp_ratio_periodic(v59, M, xr, arg[0], xp, vp, arg[1], steps=200), 12), kr))
 
     # ---------------------------------------------------------------- Part 6
     print("\nPart 6: restricted adversary (zeta-like constraints), NUMERICAL")
@@ -461,8 +563,11 @@ def main():
     M, xr, xp, vp = best[4]
     print("  Part 2 best        : float %.10f   mpmath %s" % (best[0], mp.nstr(mp_ratio_periodic(rho_vals, M, xr, best[2], xp, vp, best[3]), 12)))
     print("  best near-tight    : float %.10f   mpmath %s" % (valsC[iC], mp.nstr(mp_ratio_periodic(rho_vals, M_, xr_, mr_, [], [], []), 12)))
+    M, xr, xp, vp = best[4]
+    print("  Part 2 best design: M = %.6f, real x = %s m = %s ; pair x = %s v = %s m = %s" % (M, fmt(xr), best[2], fmt(xp), fmt(vp), best[3]))
     if lifted:
         M, xr, xp, vp = w[4]
+        print("  lifted local min  : M = %.6f, real x = %s m = %s ; pair x = %s v = %s m = %s" % (M, fmt(xr), w[2], fmt(xp), fmt(vp), w[3]))
         print("  lifted local min   : float %.10f   mpmath %s   (collapsed same x: %s)" % (
             w[0], mp.nstr(mp_ratio_periodic(rho_vals, M, xr, w[2], xp, vp, w[3]), 12), mp.nstr(mp_ratio_periodic(rho_vals, M, xr, w[2], xp, 0 * vp, w[3]), 12)))
     print("  self-checks: rho = LP rho (Part 0); multiplicities are integers by construction; each pair enters S as 2m cosh e(ax)")
