@@ -1,0 +1,93 @@
+Part A: Cheer-Goldston class LP (RH side), Lam=2.5, grid 0.01, positivity to u=60
+  P = rhat(0) + 2 int_0^1 a rhat = 1.3209166550   simple proportion 2-P = 0.6790833450   (CGdL 2020: 1.3208 / 0.6792)
+  Montgomery-Taylor value for comparison: 1/2 + 2^(-1/2) cot(2^(-1/2)) = 1.3274992963 -> 0.6725007037
+  R = int_{-1}^1 rho = 1.01261107 ; kappa = r(0) = 1 ; min rhat on [0,1] = 0.000e+00 (rho >= 0 inside) ; min rhat on (1,Lam] = -0.02019
+  r_in = bandwidth-one part: min r_in(u) = -0.004744 at u = 2.100 ; completion mass s(0) = R - 1 = 0.012611
+  NUMERICAL: LP with grid positivity; not an exact certificate of r >= 0 (the RH-side value is CGdL's theorem).
+
+Part B: lone conjugate pair obstruction (CHECKED with mpmath, 30 digits)
+  y= 0.1 : r(2iy)/r(0) = +1.090348e+00  [need >= 1 for s1 >= 2N - Sigma/r(0)]   bandwidth-one part r_in(2iy) = 1.135774e+00 (>= R, fine for (**))
+  y=0.25 : r(2iy)/r(0) = +1.915814e-01  [need >= 1 for s1 >= 2N - Sigma/r(0)]   bandwidth-one part r_in(2iy) = 2.003245e+00 (>= R, fine for (**))
+           -> lone pair violates the naive complex-zero certificate: 2N - Sigma_Z(r)/r(0) = 1.6168e+00 > 0 = s_1
+  y= 0.5 : r(2iy)/r(0) = -2.202760e+03  [need >= 1 for s1 >= 2N - Sigma/r(0)]   bandwidth-one part r_in(2iy) = 1.094845e+01 (>= R, fine for (**))
+           -> lone pair violates the naive complex-zero certificate: 2N - Sigma_Z(r)/r(0) = 4.4075e+03 > 0 = s_1
+  y= 1.0 : r(2iy)/r(0) = -5.573143e+09  [need >= 1 for s1 >= 2N - Sigma/r(0)]   bandwidth-one part r_in(2iy) = 1.206765e+03 (>= R, fine for (**))
+           -> lone pair violates the naive complex-zero certificate: 2N - Sigma_Z(r)/r(0) = 1.1146e+10 > 0 = s_1
+  y= 2.0 : r(2iy)/r(0) = -7.157843e+22  [need >= 1 for s1 >= 2N - Sigma/r(0)]   bandwidth-one part r_in(2iy) = 7.274290e+07 (>= R, fine for (**))
+           -> lone pair violates the naive complex-zero certificate: 2N - Sigma_Z(r)/r(0) = 1.4316e+23 > 0 = s_1
+
+Part C: adversarial search for (**) with the LP-optimal rho (kappa = 1) and a control rho
+  --- LP-optimal rho (CG class) : R = 1.012611
+    real-only reals m=[1]                          min = 1.012611
+    real-only reals m=[1, 1]                       min = 1.007866
+    real-only reals m=[2]                          min = 1.012611
+    real-only reals m=[1, 1, 1]                    min = 1.005964
+    real-only reals m=[2, 1]                       min = 1.008815
+    real-only reals m=[2, 2]                       min = 1.007866
+    real-only reals m=[3]                          min = 1.518917
+    complex   reals m=[]        pairs m=[1]       min = 1.012611   collapsed-real min = 1.012611   max v at min = 3.00e-15
+    complex   reals m=[]        pairs m=[1, 1]    min = 1.007866   collapsed-real min = 1.007866   max v at min = 1.12e-09
+    complex   reals m=[]        pairs m=[1, 1, 1] min = 1.007454   collapsed-real min = 1.007364   max v at min = 9.97e-09
+    complex   reals m=[1]       pairs m=[1]       min = 1.008815   collapsed-real min = 1.008815   max v at min = 7.83e-10
+    complex   reals m=[2]       pairs m=[1]       min = 1.007866   collapsed-real min = 1.007866   max v at min = 2.76e-09
+    complex   reals m=[3]       pairs m=[1]       min = 1.310701   collapsed-real min = 1.310701   max v at min = 6.24e-09
+    complex   reals m=[3, 1]    pairs m=[1]       min = 1.280861   collapsed-real min = 1.282175   max v at min = 7.08e-10  BELOW collapsed real pattern by 1.31e-03
+    complex   reals m=[4]       pairs m=[1]       min = 1.681359   collapsed-real min = 1.681359   max v at min = 3.17e-09
+    complex   reals m=[1, 1]    pairs m=[1]       min = 1.007809   collapsed-real min = 1.007513   max v at min = 4.99e-10
+    complex   reals m=[2, 2]    pairs m=[1]       min = 1.005964   collapsed-real min = 1.005964   max v at min = 5.78e-10
+    complex   reals m=[3]       pairs m=[1, 1]    min = 1.221213   collapsed-real min = 1.223245   max v at min = 4.16e-09  BELOW collapsed real pattern by 2.03e-03
+    complex   reals m=[4]       pairs m=[1, 1]    min = 1.511713   collapsed-real min = 1.511269   max v at min = 4.00e-09
+    complex   reals m=[5]       pairs m=[1]       min = 2.090773   collapsed-real min = 2.090773   max v at min = 2.97e-09
+    complex   reals m=[5]       pairs m=[1, 1]    min = 1.848583   collapsed-real min = 1.845730   max v at min = 6.95e-09
+    complex   reals m=[5]       pairs m=[2]       min = 2.295959   collapsed-real min = 2.295959   max v at min = 1.79e-09
+    complex   reals m=[6]       pairs m=[2]       min = 2.621402   collapsed-real min = 2.621402   max v at min = 9.38e-10
+    complex   reals m=[3, 3]    pairs m=[1]       min = 1.383098   collapsed-real min = 1.383098   max v at min = 1.36e-09
+    complex   reals m=[4, 4]    pairs m=[1, 1]    min = 1.672592   collapsed-real min = 1.676815   max v at min = 2.70e-01  BELOW collapsed real pattern by 4.22e-03
+    complex   reals m=[2, 1, 1] pairs m=[1, 1]    min = 1.004665   collapsed-real min = 1.004616   max v at min = 3.17e-09
+    complex   reals m=[1, 1, 1] pairs m=[1, 1, 1] min = 1.004776   collapsed-real min = 1.003726   max v at min = 8.03e-09
+  summary: min over all patterns of Sigma/(2N-s1) = 1.004665 (kappa = 1: (**) holds on these patterns);
+           complex patterns strictly below their collapsed real pattern: 3 of 20
+  -> lifting off the line lowers the ratio for this rho (kappa_C(rho) < kappa_real(rho) possible); worst case: ([4, 4], [1, 1], np.float64(1.6725918673444655), np.float64(1.6768146806710902), np.float64(0.2700927043030812))
+  --- control rho = 1_[1/2,1] (deep dip, r_in min ~ -0.83 R) : R = 1.010000
+    real-only reals m=[1]                          min = 1.010000
+    real-only reals m=[1, 1]                       min = 0.172546
+    real-only reals m=[2]                          min = 1.010000
+    real-only reals m=[1, 1, 1]                    min = 0.149618
+    real-only reals m=[2, 1]                       min = 0.340037
+    real-only reals m=[2, 2]                       min = 0.172546
+    real-only reals m=[3]                          min = 1.515000
+    complex   reals m=[]        pairs m=[1]       min = 1.010000   collapsed-real min = 1.010000   max v at min = 1.22e-09
+    complex   reals m=[]        pairs m=[1, 1]    min = 0.172546   collapsed-real min = 0.172546   max v at min = 9.09e-10
+    complex   reals m=[]        pairs m=[1, 1, 1] min = 0.025907   collapsed-real min = 0.149618   max v at min = 2.23e-01  BELOW collapsed real pattern by 1.24e-01
+    complex   reals m=[1]       pairs m=[1]       min = 0.340037   collapsed-real min = 0.340037   max v at min = 2.66e-09
+    complex   reals m=[2]       pairs m=[1]       min = 0.172546   collapsed-real min = 0.172546   max v at min = 2.77e-09
+    complex   reals m=[3]       pairs m=[1]       min = 0.280580   collapsed-real min = 0.308056   max v at min = 1.44e-01  BELOW collapsed real pattern by 2.75e-02
+    complex   reals m=[3, 1]    pairs m=[1]       min = 0.069732   collapsed-real min = 0.070290   max v at min = 5.74e-02  BELOW collapsed real pattern by 5.58e-04
+    complex   reals m=[4]       pairs m=[1]       min = 0.418930   collapsed-real min = 0.566729   max v at min = 2.20e-01  BELOW collapsed real pattern by 1.48e-01
+    complex   reals m=[1, 1]    pairs m=[1]       min = 0.035675   collapsed-real min = 0.035675   max v at min = 3.30e-09
+    complex   reals m=[2, 2]    pairs m=[1]       min = 0.149618   collapsed-real min = 0.149618   max v at min = 1.81e-09
+    complex   reals m=[3]       pairs m=[1, 1]    min = 0.033578   collapsed-real min = 0.334350   max v at min = 3.58e-09  BELOW collapsed real pattern by 3.01e-01
+    complex   reals m=[4]       pairs m=[1, 1]    min = 0.035096   collapsed-real min = 0.053513   max v at min = 1.18e-01  BELOW collapsed real pattern by 1.84e-02
+    complex   reals m=[5]       pairs m=[1]       min = 0.570779   collapsed-real min = 0.895781   max v at min = 2.70e-01  BELOW collapsed real pattern by 3.25e-01
+    complex   reals m=[5]       pairs m=[1, 1]    min = 0.054984   collapsed-real min = 0.439548   max v at min = 1.94e-01  BELOW collapsed real pattern by 3.85e-01
+    complex   reals m=[5]       pairs m=[2]       min = 0.436475   collapsed-real min = 0.439548   max v at min = 6.95e-02  BELOW collapsed real pattern by 3.07e-03
+    complex   reals m=[6]       pairs m=[2]       min = 0.561161   collapsed-real min = 0.616111   max v at min = 1.44e-01  BELOW collapsed real pattern by 5.50e-02
+    complex   reals m=[3, 3]    pairs m=[1]       min = 0.039003   collapsed-real min = 0.133278   max v at min = 3.07e-01  BELOW collapsed real pattern by 9.43e-02
+    complex   reals m=[4, 4]    pairs m=[1, 1]    min = 0.125324   collapsed-real min = 0.093469   max v at min = 2.77e-01
+    complex   reals m=[2, 1, 1] pairs m=[1, 1]    min = 0.046184   collapsed-real min = 0.056806   max v at min = 1.38e-01  BELOW collapsed real pattern by 1.06e-02
+    complex   reals m=[1, 1, 1] pairs m=[1, 1, 1] min = 0.007065   collapsed-real min = 0.054037   max v at min = 3.19e-01  BELOW collapsed real pattern by 4.70e-02
+  summary: min over all patterns of Sigma/(2N-s1) = 0.007065 (kappa = 1: (**) FAILS on these patterns);
+           complex patterns strictly below their collapsed real pattern: 13 of 20
+  -> lifting off the line lowers the ratio for this rho (kappa_C(rho) < kappa_real(rho) possible); worst case: ([5], [1, 1], np.float64(0.0549843455571413), np.float64(0.4395475294178067), np.float64(0.19378011461001804))
+
+Part D: second-order lifting test at near-tight real designs (LP-optimal rho)
+  Lifting a real double zero at x_j into a pair x_j +- i v changes Sigma by 2 (2 pi v)^2 C_j + O(v^4),
+  C_j = sum_k m_k q(x_j - x_k),  q(u) = int rho(a) a^2 cos(2 pi a u) da.  A violation of (**) from a tight
+  design needs C_j < 0.  Designs: n simple zeros + one double zero, positions optimised for the real ratio.
+  q(0) = 0.148755 ; min_u q(u) = -0.086492
+  n= 6: real-design ratio 1.004578 ; C_j = +0.250076 ; lifted ratios v=.05,.1,.2: [1.009584 1.025455 1.103185] ; joint re-optimisation -> ratio 1.004578 at v = 2.1e-09
+  n=10: real-design ratio 1.003384 ; C_j = +0.249175 ; lifted ratios v=.05,.1,.2: [1.006947 1.018244 1.073593] ; joint re-optimisation -> ratio 1.003384 at v = 1.9e-09
+
+Status: Lemma 1 (naive transfer refuted by a lone pair) PROVED in memo and CHECKED above;
+        (**) for complex Z with the CG-optimal rho: CONJECTURE supported numerically, not proved;
+        no unconditional bound above the Montgomery-Taylor value is certified by this script.
