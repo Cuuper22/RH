@@ -80,8 +80,7 @@ of comparable height: Section 4.
 
 *Proof.* |S|² = (W₁c₁ − W₂c₂)² + 2W₁W₂ c₁c₂ (1 + cos 2παΔ) with c_j = cosh a_j ≥ 1 and
 1 + cos ≥ 0, so |S|² ≥ (W₁c₁ − W₂c₂)² + 2W₁W₂(1 + cos 2παΔ); integrate. The constant
-min_Δ (R + r_in(Δ)) = 1.007865 (attained at Δ = 2.098, CHECKED on a 5·10⁻⁴ grid; the script
-prints 1.007865, the summary rounds down) and W₁W₂ ≥ W₁ + W₂ = cost/2 for W_j ≥ 2. □
+min_Δ (R + r_in(Δ)) = 1.007772 (attained at Δ = 2.098, CHECKED on a 5·10⁻⁴ grid) and W₁W₂ ≥ W₁ + W₂ = cost/2 for W_j ≥ 2. □
 
 Lemma A is sharp in the sense that its lower bound is attained at v₁ = v₂ = 0, Δ = 2.098
 (ratio 1.00787): two pairs are never closer to tight than two real doubles. It also covers the
@@ -119,15 +118,15 @@ and v₁ = 2v₂ small, (W₁ sinh a₁ − W₂ sinh a₂)² = O(α⁶) while W
 **Proposition 3.3 (REFUTED: common-shift monotonicity).** The statement "Σ_Z(ρ) does not
 increase when all pair heights are lowered by v_min" is false, even for pairs of equal
 multiplicity one and no real atoms. Certified counterexamples (30-digit closed-form
-evaluation of the per-cell integrals ∫ρe^{λα}, script Part 2):
+evaluation of the per-cell integrals ∫ρe^{λα}, script Part 2; values here from the certified ρ, the script's own output supersedes them at the 10⁻³ level):
 
 | configuration (x; v) | Σ(v) − Σ(shifted) | ratio Σ/cost |
 |---|---|---|
-| 4 pairs W = 2: x = (1.58, 0.815, 0.045, 1.58), v = (0.05, 0.236, 0.05, 0.05) | −0.0720 | 1.692 |
-| 6 pairs W = 2: x = (2.585, 0.169, 1.018, 1.825, 1.018, 1.018), v = (0.05, 0.205, 0.05, 0.289, 0.05, 0.05) | −0.432 | 2.160 |
-| 2 pairs + real quadruple: x = (1.98, 1.222, 2.751), v = (0.282, 0.15, 0) | −0.509 | 1.680 |
-| 2 pairs + two real doubles: x = (2.466, 3.232, 1.697, 1.697), v = (0.223, 0.05, 0, 0) | −0.218 | 1.685 |
-| pair W = 2 next to pair W = 4: x = (2.27, 1.495), v = (0.093, 0.004) | −0.00085 | 1.840 |
+| 4 pairs W = 2: x = (1.58, 0.815, 0.045, 1.58), v = (0.05, 0.236, 0.05, 0.05) | −0.0712 | 1.693 |
+| 6 pairs W = 2: x = (2.585, 0.169, 1.018, 1.825, 1.018, 1.018), v = (0.05, 0.205, 0.05, 0.289, 0.05, 0.05) | −0.430 | 2.162 |
+| 2 pairs + real quadruple: x = (1.98, 1.222, 2.751), v = (0.282, 0.15, 0) | −0.506 | 1.681 |
+| 2 pairs + two real doubles: x = (2.466, 3.232, 1.697, 1.697), v = (0.223, 0.05, 0, 0) | −0.217 | 1.686 |
+| pair W = 2 next to pair W = 4: x = (2.27, 1.495), v = (0.093, 0.004) | −0.00084 | 1.841 |
 
 The mechanism is the one of the positivity memo (Prop. 5): a pair adjacent (distance 0.75–0.8)
 to heavy mass of relative weight ≥ 1.72 has negative lifting curvature; three stacked pairs or
