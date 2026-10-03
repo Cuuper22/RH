@@ -1,0 +1,58 @@
+Part 0: certified Cheer-Goldston test (re-solved; identical to verify/complex_cg_proof.py)
+  P(rho) = 1.3210846946, R = int rho = 1.01246016, rho(0) = 1.004442, r(0) = 1 (LP equality); max cell bound of T on [u0,50] = -2.23e-06 -> r >= 0 on R CERTIFIED
+  kappa_real(rho) >= 1 (Cheer-Goldston); (**) for complex Z would give 2 - P = 0.6789153   [87s]
+  rho(0) = 1.004442, R = 1.012460, rmin(1/2) >= 0.4710, X(0.2) = 0.2836, X(0.5) = 4.9467, X(1) = 598.71
+
+Part 1: exact identities (CHECKED on random configurations, Gauss nodes, relative error)
+  (a) Sigma = int rho|U|^2 + sum W_j W_k t(0,|v_j-v_k|,Delta_jk)      max rel. err 3.2e-16
+  (b) Abel form S = sum_l (c_l - c_{l-1}) T_l                          max rel. err 2.6e-16
+  (c) one layer: Sigma = Sigma_{Z0} + E_P + 2 sum W_j W_k Q_v           max rel. err 3.7e-16
+      = Sigma_{Z0}(rho cosh) + Sigma_P(rho cosh(cosh-1)) - Sigma_R(rho(cosh-1))   max rel. err 3.9e-16
+  (d) CS bound Sigma_Z >= Sigma_{Z0} - Sigma_R(rho tanh^2): min slack over 60 configs 8.328e-01 (>= 0: True)
+      CS lower bound / cost for the 3 worst configs: v=1.34: true 7773.0795, CS 0.7585, v=1.04: true 165.3858, CS 0.9221, v=0.16: true 1.0984, CS 0.9942
+
+Part 2: Theorem C -- no negative cross-height bond => (**).  Delta*(u) = sup{d : G_u >= 0 on (0, d]}  (NUMERICAL, grid 1e-4)
+  u      :   0.02   0.05   0.08   0.10   0.15   0.20   0.30   0.40   0.50   0.70   1.00   1.50   2.00   3.00   5.00
+  Delta* : 1.0258 0.9923 0.9583 0.9355 0.8787 0.8225 0.7156 0.6235 0.5516 0.4568 0.3827 0.3290 0.3052 0.2838 0.2687
+  PROVED: Delta*(u) >= 1/4 for every u (cos(2 pi a Delta) >= 0 for |a| <= 1, |Delta| <= 1/4, and r >= 0); Delta*(u) -> 1/4 as u -> oo.
+  300 random clusters (diameter <= 1/4, 2-4 pairs at heights in [0.05, 2], 0-2 reals): min ratio 2.8079, min certificate int rho|U|^2 + sum(W^2 - cost) = 6.062e+00 (>= 0: True)
+
+Part 3: minimal open sub-cases (NUMERICAL: Nelder-Mead from 6 random starts per job, exact Gauss-node evaluation)
+  55 jobs [5s]; minima of Sigma/cost (all >= 1: True)
+  O2 v=0.15 min ratio 1.047310  at O2 v=0.15 k=3 simple+double: x = [ 0.    -5.076 -3.042 -4.036 -2.053], v = [0.   0.   0.15 0.15 0.15]
+  O2 v=0.30 min ratio 1.165928  at O2 v=0.30 k=3 simple+double: x = [0.    1.098 2.963 2.073 3.835], v = [0.  0.  0.3 0.3 0.3]
+  O2 v=0.50 min ratio 1.567964  at O2 v=0.50 k=3 simple+double: x = [0.    3.339 2.467 0.872 1.666], v = [0.  0.  0.5 0.5 0.5]
+  O2 v=1.00 min ratio 31.108288  at O2 v=1.00 k=2 1 triple: x = [0.    1.23  0.635], v = [0. 1. 1.]
+  O3        min ratio 1.014307  at O3 m0=2 W=(2, 2): x = [0.    2.061 3.137], v = [0.   0.05 0.05]
+  O1        min ratio 1.016668  at O1 W=(2, 2, 2): x = [0.    2.146 1.073], v = [0.05 0.05 0.05]
+  reference: pair lattice ratio rho(0) = 1.004442; Lemma A floor for two pairs alone 1.00777
+
+Part 3c: joint-field bookkeeping on pair-lattice segments (W = 2 at x = 0..n-1, common height v), reals anywhere (NUMERICAL)
+  resource E_P = int rho sinh^2 |S_P|^2 (+ pair r-bonds); damage = sum over H1-type cells (components of the negative set, pieces <= 0.5-0.7 as in H1)
+  of Psi_c(sup_c Phi^-/4), Phi = joint field sum_k 4 G_v(x - x_k); 'separate' = H1 bookkeeping pair by pair (own negative field),
+  which ignores the cancellation.  x in [-40, n+40], h = 1e-3 (tail beyond omitted: O(T(v)/40)).
+     v    n |       E_P sum W^2 X |    joint separate | ratios = damage / (E_P + pair r-bonds)
+   0.2    1 |     1.134     1.134 |    0.966    0.966 | joint 0.852, separate 0.852
+   0.2    2 |     1.485     2.269 |    1.204    1.932 | joint 0.801, separate 1.286
+   0.2    3 |     1.674     3.403 |    1.324    2.898 | joint 0.775, separate 1.697
+   0.2    4 |     1.808     4.537 |    1.407    3.865 | joint 0.757, separate 2.080
+   0.2    6 |     1.993     6.806 |    1.519    5.798 | joint 0.731, separate 2.790
+   0.2    8 |     2.125     9.075 |    1.594    7.731 | joint 0.710, separate 3.446
+   0.2   12 |     2.309    13.612 |    1.692   11.600 | joint 0.678, separate 4.645
+   0.5    1 |    19.787    19.787 |   14.488   14.488 | joint 0.732, separate 0.732
+   0.5    2 |    34.491    39.574 |   17.390   28.956 | joint 0.504, separate 0.839
+   0.5    3 |    43.762    59.360 |   18.879   43.427 | joint 0.431, separate 0.992
+   0.5    4 |    50.434    79.147 |   19.900   57.899 | joint 0.394, separate 1.147
+   0.5    6 |    59.857   118.721 |   21.275   86.849 | joint 0.355, separate 1.449
+   0.5    8 |    66.544   158.294 |   22.199  115.805 | joint 0.333, separate 1.737
+   0.5   12 |    75.970   237.441 |   23.440  173.737 | joint 0.308, separate 2.281
+   1.0    1 |  2394.849  2394.849 | 1283.330 1283.330 | joint 0.536, separate 0.536
+   1.0    2 |  6590.268  4789.697 | 2436.679 2566.045 | joint 0.370, separate 0.389
+   1.0    3 | 10353.989  7184.546 | 2769.702 3848.566 | joint 0.268, separate 0.372
+   1.0    4 | 13438.020  9579.394 | 2880.459 5131.111 | joint 0.214, separate 0.382
+   1.0    6 | 18124.680 14369.092 | 2946.807 7696.339 | joint 0.163, separate 0.425
+   1.0    8 | 21583.687 19158.789 | 2964.751 10261.738 | joint 0.137, separate 0.475
+   1.0   12 | 26554.223 28738.183 | 2977.186 15393.000 | joint 0.112, separate 0.580
+
+Status: identities CHECKED; Theorem C (cluster criterion) PROVED; minimal open cases O1-O3 survive targeted search (NUMERICAL);
+        (**) for several pairs at unequal heights close together, and for >= 2 pairs at a common height v > 0.08 with reals, remains OPEN.  total 339s
