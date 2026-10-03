@@ -56,3 +56,8 @@ Part 5: strategy (ii), NUMERICAL -- price in P of closing the Theorem-4 windows 
   by the two endpoints in w (not a certificate).  Frontier: P < 1.3274837 (proportion 0.6725162800) at kappa = 1.
   V0=0.040: P = 1.3279011  2 - P = 0.6720989  rho(0) = 1.01387  ABOVE frontier  [95s]
   V0=0.080: P = 1.3488092  2 - P = 0.6511908  rho(0) = 1.04135  ABOVE frontier  [106s]
+  V0=0.100: P = 1.3642497  2 - P = 0.6357503  rho(0) = 1.06142  ABOVE frontier  [105s]
+  (scratch run, grid step 0.01: V0 = 0.04 -> P = 1.3280253, 0.08 -> 1.3489071, 0.10 -> 1.3643012; the frontier is lost already at V0 = 0.04.)
+
+Status: Lemma A and Lemmas 3.1-3.2 PROVED; common-shift monotonicity and the high-pair removal step REFUTED (so no V1 exists);
+        strategy (ii) priced (frontier crossed already at V0 = 0.04 with windows forced closed); (**) for several pairs at unequal heights remains OPEN.
