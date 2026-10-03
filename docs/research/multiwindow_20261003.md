@@ -155,7 +155,7 @@ PROVED. The discretized LP fixes the tail beyond `S` to Lebesgue density
 |---:|---:|---:|---:|
 | 20 | 1.323184 | 0.00432 | 1.312785 |
 | 40 | 1.325472 | 0.00203 | 1.318881 |
-| 80 | 1.326457 | 0.00104 | 1.320687 |
+| 80 (development run, not in verifier) | 1.326457 | 0.00104 | 1.320687 |
 
 The band-only value converges to `D*=1.3274993`. Below `s<11.5`, 98% of
 the optimal `nu`'s mass lies within 0.03 of the zeros `s_k` of `u*^`, as

@@ -31,3 +31,38 @@ profile u = p8/int p8,  D(u) = 1.3274992963205883,  2 - D(u) = 0.672500703679411
   (2 - D* = 0.6725007036794116457..., difference < 1e-17)
 control phi=1: kappa=0.011775312695 Q=0.398962942825 ; inequality (6) excludes delta<=1/272000: True
 sup_{|x|<=1/2} |phi| <= 1.0001797009  (Bernstein, 400 pieces, 0.7s)
+kappa_phi = 0.02572936695466   E_Y(phi) = 1.94205279052313   int u phi^2 = 0.81431323705434   (105.0s)
+C_phi <= 6.490801315722,  q = 6 sup|phi| = 6.001078205489
+(kappa_phi - q d0)^2 - d0 C_phi^2 = positive ~ 9.606252e-07  with d0 = 1/64200
+CHECKED scalar implication: liminf N_0^s/N >= 2 - D(u) + 1/64200 = 0.6725162800034...
+  previous frontier 0.6725043820976; increment over it: 1.190e-05
+
+==============================================================================
+[D] NUMERICAL: second-order (pair-measure) LP, multiplicities <= 2, real zeros
+==============================================================================
+max diagonal atom A (simple fraction = 2 - A) ; D* = 1.3274992963
+  S=  20  band data only: A=1.323184 (D*-A=0.00432)   + F>=0 on [1,4]: A=1.312785
+  S=  40  band data only: A=1.325472 (D*-A=0.00203)   + F>=0 on [1,4]: A=1.318881
+  (truncation: tail beyond S fixed to Lebesgue density 1; gap ~0.08/S)
+
+==============================================================================
+[E] NUMERICAL: SOCP selection of the multiplier (even Legendre basis)
+==============================================================================
+  K=0 (degree  0): max kappa/C = 0.001617, (kappa/C)^2 = 1/382317
+  K=2 (degree  4): max kappa/C = 0.003493, (kappa/C)^2 = 1/81961
+  K=4 (degree  8): max kappa/C = 0.003858, (kappa/C)^2 = 1/67188
+  K=6 (degree 12): max kappa/C = 0.003934, (kappa/C)^2 = 1/64599
+
+==============================================================================
+[F] NUMERICAL: independent checks (CUE, lattice) of the weighted formulas
+==============================================================================
+  kappa_phi, phi=1       CUE N=160 (300 samples): 0.01181 +- 0.00075   formula 0.01178
+  kappa_phi, phi=1-8x^2  CUE N=160 (300 samples): 0.02015 +- 0.00038   formula 0.02009
+  kappa_phi, phi=4x^2    CUE N=160 (300 samples): -0.00417 +- 0.00024   formula -0.00416
+  arc-CUE Nc=80 (~40 pts): Q 0.3635+-0.0087 (formula 0.3990)   E_Y(1-8x^2) 1.1174+-0.0176 (formula 1.2728)
+  arc-CUE Nc=160 (~80 pts): Q 0.3900+-0.0081 (formula 0.3990)   E_Y(1-8x^2) 1.2081+-0.0208 (formula 1.2728)
+  (finite-size values approach the formulas from below; see the memo)
+  lattice M=40: ||V^2||^2/M = 0.2926   (limit C0/lam^3 = 0.3255, log-slow)
+  lattice M=80: ||V^2||^2/M = 0.3044   (limit C0/lam^3 = 0.3255, log-slow)
+
+total time 414.8s
