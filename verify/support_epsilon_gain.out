@@ -14,3 +14,4 @@ eps=0.5    D*(eps) in [1.1343257453233248067840830777428327925364742, 1.13432574
 
 == Part B: exact rational piecewise-polynomial certificates ==
 (upper bound D(u0) exact; lower bound D(u0) - ||r||^2/m with m = 1-2s^2/pi^2-2eps^2)
+exit 124
