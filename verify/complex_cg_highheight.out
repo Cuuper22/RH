@@ -1,0 +1,58 @@
+Part 0: certified rho (LP of complex_cg_proof.py, grid 0.001 on [0,50], r >= 1e-6)
+  P = 1.3210846946  R = 1.01246016  rho(0) = 1.004442  [75s]
+  exact-vs-quadrature check of Sigma: 16.8278556118 vs 16.8278556118 (rel diff 2.1e-16)
+
+Part 1: Lemma A (PROVED) -- two pairs of any heights and multiplicities satisfy (**) with kappa = 1
+  |S|^2 = (W1 c1 - W2 c2)^2 + 2 W1 W2 c1 c2 (1 + cos 2 pi a Delta) >= (W1 c1 - W2 c2)^2 + 2 W1 W2 (1 + cos),  c_j = cosh(2 pi a v_j) >= 1
+  => Sigma >= 2 W1 W2 (R + r_in(Delta)) >= 2 W1 W2 * 1.007772 >= (W1 + W2) * 2.015545 = cost * 1.007772   (W1 W2 >= W1 + W2 for W_j >= 2)
+  min_Delta (R + r_in(Delta)) = 1.007772 (at Delta = 2.099); so kappa = 1.00777 for all two-pair configurations.
+  examples (v1, v2, Delta, ratio): [(0.5, 0.5, 0.5, np.float64(4.10038)), (1.0, 0.9, 0.5, np.float64(132.69795)), (0.3, 0.0, 2.1, np.float64(1.3995)), (2.0, 1.95, 0.5, np.float64(2644527.71336)), (0.0, 0.0, 2.1, np.float64(1.00777))]
+
+Part 2: two-height identity, two-pair reduction, and the failure of common-shift monotonicity
+  identity |S|^2 = |U|^2 + Phi (U = sum W_j sinh a_j e_j, Phi = sum W_j W_k cosh(a_j - a_k) cos): 28.9730217851 + 40.3967314823 = 69.3697532674 vs Sigma = 69.3697532674 (diff 0.0e+00)
+  Phi is invariant under a common shift of all pair heights (pairs-only configurations).
+  Two-pair reduction (PROVED): v1 >= v2, W1 >= W2  =>  Sigma({x1 +- i v1 (W1), x2 +- i v2 (W2)}) >= Sigma({x1 +- i (v1 - v2) (W1), real atom W2 at x2}),
+     from (W1 sinh a1 - W2 sinh a2)^2 >= W1^2 sinh^2(a1 - a2) (superadditivity of sinh). Spot checks of the difference (must be >= 0):
+     v=(0.50,0.30) Delta=0.50 W=(2,2): 15.787
+     v=(0.80,0.75) Delta=0.50 W=(4,2): 798.06
+     v=(0.30,0.10) Delta=1.00 W=(2,2): 1.76287
+     v=(1.20,0.20) Delta=0.52 W=(2,2): 16981.3
+  REFUTED: Sigma(v) >= Sigma(v - v_min on the pairs) in general.  Certified counterexamples (30-digit exact per-cell integrals):
+     4 equal pairs                x=[1.58, 0.815, 0.045, 1.58] v=[0.05, 0.236, 0.05, 0.05] : Sigma(v) - Sigma(shifted) = -0.071247009 ; ratio Sigma/cost = 1.6926918
+     6 equal pairs                x=[2.585, 0.169, 1.018, 1.825, 1.018, 1.018] v=[0.05, 0.205, 0.05, 0.289, 0.05, 0.05] : Sigma(v) - Sigma(shifted) = -0.42996042 ; ratio Sigma/cost = 2.1615212
+     2 pairs + real quadruple     x=[1.98, 1.222, 2.751] v=[0.282, 0.15, 0.0] : Sigma(v) - Sigma(shifted) = -0.50627821 ; ratio Sigma/cost = 1.6808743
+     2 pairs + two real doubles   x=[2.466, 3.232, 1.697, 1.697] v=[0.223, 0.05, 0.0, 0.0] : Sigma(v) - Sigma(shifted) = -0.21718477 ; ratio Sigma/cost = 1.6856545
+     pair + heavier pair (W=2,4)  x=[2.27, 1.495] v=[0.093, 0.004] : Sigma(v) - Sigma(shifted) = -0.00082965524 ; ratio Sigma/cost = 1.8413184
+  All counterexamples have ratio >= 1.5: the shift fails only next to heavy mass (cost slack), never near tightness (NUMERICAL).
+
+Part 3: REFUTED -- 'delete a high pair' is not a valid reduction (self-domination fails against comparable pairs)
+  Z = two pairs W = 2 at distance 1/2, heights v >= v'.  Deletion gain Sigma(Z) - Sigma(Z \ {higher pair}) must be >= 4 for the step to preserve (**):
+   v=0.5 : v'=0.50: +8.97 | v'=0.45: +13.4 | v'=0.40: +16.7 | v'=0.20: +23.8 ; (**) itself holds there with ratio >= 3.6 (Lemma A)
+   v=1.0 : v'=1.00: -1.38e+03 | v'=0.95: -489 | v'=0.90: +191 | v'=0.70: +1.64e+03 ; (**) itself holds there with ratio >= 118.9 (Lemma A)
+   v=2.0 : v'=2.00: -1.28e+08 | v'=1.95: -6.02e+07 | v'=1.90: -9.12e+06 | v'=1.70: +9.55e+07 ; (**) itself holds there with ratio >= 1976968.2 (Lemma A)
+  Asymptotically Sigma(Z) - Sigma(Z \ {pair}) ~ W^2 [C(v) - 2 sqrt(C(v) C(v'))] < 0 whenever C(v') > C(v)/4, i.e. v' > v - log(2)/(2 pi) - o(1) = v - 0.11.
+  Hence no threshold V1 exists above which pairs are 'self-dominated' uniformly in their neighbours: strategy (i) in its removal form is REFUTED.
+
+Part 4: magnitude table -- one high pair (weight W >= 2, height v) against arbitrary neighbours of height <= V0 = 1/(4 pi)
+  Bond kernel g_v(Delta) >= sup_{u <= V0} [-(t(u,v,Delta) - s(Delta))]_+ ; cells of length 1/2; Gamma = sum_c sup_c g, Gamma2 = sum_c sup_c g^2.
+  Sparse load (cells of weight <= 2): <= 2 W Gamma, paid by W^2 X(v) iff 2 Gamma <= X.  Dense cells (weight A >= 3): slack rho_* A(A-2) (Theorem 4 leaves
+  the fraction 1 - nu, nu = 0.48, of it); AM-GM makes the pair pay 3 g_c^2 / ((1-nu) rho_*) per dense cell.  Requirement: phi(v) = 2 Gamma/X + c_D Gamma2/X <= 1.
+   v     B(v)      X(v)     2Gamma/X   c_D*Gamma2/X   phi(v)
+   0.4      1.58      2.035     1.9997      2.1062      4.1059
+   0.6     2.638      12.17     1.0081      3.1608      4.1689
+   0.8     5.083      80.45     0.4800      3.9605      4.4404
+   1.0     10.91      598.7     0.1892      4.1681      4.3572
+   1.5     100.2  1.278e+05     0.0134      3.4328      3.4462
+   2.0      1198  3.605e+07     0.0008      2.5529      2.5537
+   3.0  2.557e+05  4.264e+12     0.0000      1.6033      1.6033
+  The sparse part is negligible beyond v ~ 1 (ratio ~ v B(v)/X ~ v^3 e^{-2 pi v}); the dense part is of order
+  c_D (pi v/2)(B/X) B ~ c_D pi v / (2 * 5.5 v^2) and decays only like 1/v.  With these crude constants phi < 1 needs v > 5;
+  Theorem H1 of the hybrid memo closes the same bookkeeping with exact integer penalties at every v >= 0.0795.
+  Against neighbouring PAIRS the same bookkeeping is impossible (Part 3): the pair-pair kernel is ~ -sqrt(C(v) C(v')) at Delta = 1/2.
+
+Part 5: strategy (ii), NUMERICAL -- price in P of closing the Theorem-4 windows up to height V0 by LP constraints
+  LP of Part 0 plus, on the grid Delta in [0.5, 60] (step 0.02):  r(Delta) >= 4 pi^2 V0^2 (-q(Delta))  (w -> 0 endpoint of -Q_w/w^2)
+  and  r(Delta) >= -Q_{2V0}(Delta)/2  (w = 2V0 endpoint).  Both are linear in the node values; beta = 0 on the grid is approximated
+  by the two endpoints in w (not a certificate).  Frontier: P < 1.3274837 (proportion 0.6725162800) at kappa = 1.
+  V0=0.040: P = 1.3279011  2 - P = 0.6720989  rho(0) = 1.01387  ABOVE frontier  [95s]
+  V0=0.080: P = 1.3488092  2 - P = 0.6511908  rho(0) = 1.04135  ABOVE frontier  [106s]
