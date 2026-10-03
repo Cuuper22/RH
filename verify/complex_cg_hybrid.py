@@ -3,8 +3,8 @@ a single-pair theorem valid at every height, and a targeted mid-height adversary
 
 Companion to docs/research/complex_cg_hybrid_20261003.md (labels PROVED / CHECKED /
 NUMERICAL / REFUTED as there).  Output: verify/complex_cg_hybrid.out.
-Default run: about 6 minutes on 4 cores.  `python3 complex_cg_hybrid.py full` runs the
-larger adversary (about 15 minutes) whose numbers are quoted in the memo.
+Default run: about 4 minutes on 4 cores (9600 adversarial optimisations).
+`python3 complex_cg_hybrid.py full` triples the adversary.
 
 (**)  Sigma_Z(rho) = int_{-1}^{1} rho |S_Z|^2  >=  kappa (2N - s_1),   kappa = r(0) = 1,
 S_Z(a) = sum_real m_j e(a x_j) + sum_pairs 2 m_k cosh(2 pi a v_k) e(a x_k).
@@ -174,6 +174,27 @@ def part1(P, R):
           % (R - kap, rr[0], supp.min() * h, supp.max() * h, rr.max(), rr.argmax() * h))
     print("  sigma(0) = %.6f = rho(0); Var(phi) = sigma(0) - int sigma = %.6f; P(sigma)/int sigma = %.6f (>= c_MT = 1.3274993)"
           % (sig[0], sig[0] - kap, (sig[0] + 2 * h * np.sum(np.arange(n + 1) * h * sig) - h * sig[-1]) / kap))
+    # column generation over the cone of autocorrelations (mixtures are covered by Lemma R additively)
+    cols = []; mass = []
+    def addcol(p):
+        p = np.maximum(p, 0); sg = acf(p)
+        if sg[0] > 0: cols.append(sg / sg[0]); mass.append((h * p.sum()) ** 2 / sg[0])
+    for L in range(5, 101, 5):
+        p = np.zeros(n); p[:L] = 1; addcol(p)
+    xx = (np.arange(n) + 0.5) * h - 0.5
+    for a_ in (0.5, 1, 2, 3): addcol(np.cos(np.pi * xx) ** a_)
+    addcol(np.cos(xx / np.sqrt(2))); addcol(phi)
+    rng = np.random.default_rng(0)
+    for it in range(25):
+        res = linprog(-np.array(mass), A_ub=np.array(cols).T, b_ub=rhon, bounds=[(0, None)] * len(cols), method='highs')
+        y = -res.ineqlin.marginals; val = -res.fun
+        bestp = None
+        for trial in range(6):
+            f_ = lambda p: -((h * p.sum()) ** 2 - y @ acf(p)) / (h * np.dot(p, p) + 1e-300)
+            rr_ = minimize(f_, rng.random(n) if trial else np.ones(n), bounds=[(0, None)] * n, method='L-BFGS-B', options={'maxiter': 200})
+            if bestp is None or rr_.fun < bestp[0]: bestp = (rr_.fun, rr_.x)
+        addcol(bestp[1])
+    print("  mixtures (column generation, %d columns, 25 pricing rounds): best mixture mass %.6f (NUMERICAL: no gain over the single sigma)" % (len(cols), val))
     cMT = 0.5 + 2 ** -0.5 / math.tan(2 ** -0.5); front = 0.6725162800
     need = P / (2 - front)
     print("  all-height (**) from Lemma R alone: kappa = %.6f -> 2 - P/kappa = %.6f (below Montgomery-Taylor 0.6725007)" % (kap, 2 - P / kap))
@@ -358,7 +379,14 @@ TIGHT = []
 def adv_job(args):
     seed, vlo, mode = args; rng = np.random.default_rng(10007 * seed + 13)
     VHI = 0.6
-    if mode == 'random':
+    if mode == 'plattice':
+        # near-unit lattice of pairs at heights >= v_lo with a few real atoms / doubles inserted
+        Kp = rng.integers(4, 16); nr = rng.integers(0, 4)
+        x = np.r_[np.arange(Kp, dtype=float), rng.uniform(0, Kp, nr)]; Wt = np.r_[np.full(Kp, 2.0), rng.choice([1., 2.], nr)]
+        isp = np.r_[np.ones(Kp, bool), np.zeros(nr, bool)]; Kk = len(Wt); mid = np.arange(Kp)
+        vlo_a = np.where(isp, vlo, 0.0); vhi_a = np.where(isp, VHI, 0.0); M = Kp + nr * rng.uniform(0.3, 1.0)
+        v0 = np.where(isp, vlo + 0.1 * rng.random(Kk), 0.0); x0 = x + rng.normal(0, 0.05, Kk)
+    elif mode == 'random':
         Kk = rng.integers(5, 41); kinds = rng.choice(4, size=Kk, p=[0.35, 0.3, 0.1, 0.25])
         Wt = np.array([1., 2., 0, 0])[kinds]; Wt[kinds == 2] = rng.choice([3., 4., 5.], (kinds == 2).sum())
         isp = kinds == 3; Wt[isp] = 2.0 * rng.choice([1, 1, 2], isp.sum())
@@ -405,7 +433,7 @@ def part4():
     allt = sorted([o for part in tt for o in part], key=lambda o: o[0])
     TIGHT.extend(allt[:60])
     print("  near-tight real seeds: best real ratio %.6f (period %.3f, %d atoms); %d seeds kept" % (allt[0][0], allt[0][3], len(allt[0][1]), len(TIGHT)))
-    vlos = [0.08, 0.15, 0.25, 0.4]; modes = ['single', 'two', 'cluster', 'alllift', 'random']; ns = 100 if FULL else 20
+    vlos = [0.08, 0.15, 0.25, 0.4]; modes = ['single', 'two', 'cluster', 'alllift', 'plattice', 'random']; ns = 1200 if FULL else 400
     jobs = [(s, vlo, m) for vlo in vlos for m in modes for s in range(ns)]
     with Pool(4) as pool: res = pool.map(adv_job, jobs, chunksize=4)
     print("  %d local optimisations, %d-%d atoms per period" % (len(res), min(r[4] for r in res), max(r[4] for r in res)))

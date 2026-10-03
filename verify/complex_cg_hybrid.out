@@ -1,0 +1,63 @@
+Part 0: certified Cheer-Goldston test (re-solved; identical to verify/complex_cg_proof.py)
+  P(rho) = 1.3210846946, R = int rho = 1.01246016, rho(0) = 1.004442, r(0) = 1 (LP equality); max cell bound of T on [u0,50] = -2.23e-06 -> r >= 0 on R CERTIFIED
+  kappa_real(rho) >= 1 (Cheer-Goldston); (**) for complex Z would give 2 - P = 0.6789153   [66s]
+
+Part 1: the split rho = sigma + rho_r with sigma = phi*phi~ (Lemma R covers sigma at every height)
+  sigma = phi*phi~, phi >= 0 piecewise constant on the 0.01 grid of [-1/2,1/2]; sigma and rho are PL on the same nodes,
+  so sigma <= rho on [-1,1] iff at the 101 nodes: True (max sigma - rho = 0.0e+00).  kappa_auto(rho) >= int sigma = (int phi)^2 = 0.987962 (CHECKED)
+  remainder rho_r = rho - sigma >= 0: int rho_r = 0.024498, rho_r(0) = 2.0e-12, rho_r > 1e-9 only on |a| in [0.01, 0.72], max rho_r = 0.0345 at |a| = 0.21
+  sigma(0) = 1.004442 = rho(0); Var(phi) = sigma(0) - int sigma = 0.016479; P(sigma)/int sigma = 1.330655 (>= c_MT = 1.3274993)
+  mixtures (column generation, 51 columns, 25 pricing rounds): best mixture mass 0.987962 (NUMERICAL: no gain over the single sigma)
+  all-height (**) from Lemma R alone: kappa = 0.987962 -> 2 - P/kappa = 0.662819 (below Montgomery-Taylor 0.6725007)
+  [Prop 2.3] any mixture of autocorrelations sigma <= rho has int sigma <= P(rho)/c_MT = 0.995168 < 0.995180 = P/(2 - frontier) needed
+             so an all-height argument must extract >= 0.00722 per unit cost (frontier) / 0.01204 (kappa = 1) beyond Lemma R
+  [Prop 2.5] high pairs charged at kappa_H = 0.987962, everything else at 1: worst case (2-P-eps)/(1-eps) = 0.670994, eps = 0.02408;
+             the frontier is beaten iff kappa_H > 0.99023, or iff the fraction of zeros in high pairs is < 0.2658
+  [Prop 2.6] remainder supported in [-a,a]: beats the frontier only if a > 0.75330  (using Lemma 4 (kappa_real <= rho(0))); height gain factor 1/a < 1.3275
+  [Prop 2.6] remainder supported in [-a,a]: beats the frontier only if a > 0.98661  (using bandwidth-one ceiling 0.6818287); height gain factor 1/a < 1.0136
+  [Prop 2.6] remainder supported in [-a,a]: beats the frontier only if a > 0.99051  (using LP value (NUMERICAL)); height gain factor 1/a < 1.0096
+
+Part 2: pair lattices (memo Section 3, PROVED; numerical confirmation)
+  unit lattice of pairs (m=1) at common height v=0.1: Sigma/cost per period = 1.004442 = rho(0)
+  unit lattice of pairs (m=1) at common height v=0.6: Sigma/cost per period = 1.004442 = rho(0)
+  unit lattice of pairs (m=1) at common height v=2.0: Sigma/cost per period = 1.004442 = rho(0)
+  unit lattice of pairs (m=1) at common height v=5.0: Sigma/cost per period = 1.004442 = rho(0)
+  lifting field of the unit pair lattice at v=0.6 on a real atom: sum_{|n|<=4000} Q_v(x-n) = [-7.19560e-05 -2.32837e-04  2.91975e-05] (Q_v(0.5) alone = -0.487; tail O(1/N))
+  triangle test sigma = (1-|a|)_+ (phi = 1 on [-1/2,1/2]): pair lattice gives Sigma/cost = sigma(0) = 1 = int sigma at every height -> Lemma R exactly tight, no per-pair height surplus
+
+Part 3: Theorem H1 -- (**) for arbitrary real atoms plus ONE conjugate pair (any multiplicity m, any height v)
+  identity: Sigma - cost = sum_j (W_j^2 - cost_j) + sum_{j!=k} W_j W_k r(x_j-x_k) + 4m sum_j W_j G_v(x_j) + 4m^2 X(v) + 4m(m-1) + int shat |S_0|^2,
+  G_v = r + Q_v, Q_v = FT[rho (cosh(2 pi a v) - 1)], X(v) = int rho sinh^2(2 pi a v).  Cell packing: per cell of diameter d,
+  gain <= Psi(m g_c) with pen(w) from integer multiplicities and intra-cell r >= rmin(d).  Need sum_c Psi <= 4 m^2 X + 4m(m-1).
+  sweep v in [0.0795, 20]: 918 contiguous intervals, every certified ratio < 1: True   [110s]
+    v in [ 0.08, 0.13):  165 intervals, max certified ratio 0.944 (m = 1: 0.944, all m >= 2: 0.476)
+    v in [ 0.13, 0.25):  219 intervals, max certified ratio 0.937 (m = 1: 0.937, all m >= 2: 0.496)
+    v in [ 0.25, 0.40):  104 intervals, max certified ratio 0.945 (m = 1: 0.945, all m >= 2: 0.784)
+    v in [ 0.40, 0.60):   97 intervals, max certified ratio 0.949 (m = 1: 0.949, all m >= 2: 0.842)
+    v in [ 0.60, 1.00):   78 intervals, max certified ratio 0.949 (m = 1: 0.949, all m >= 2: 0.871)
+    v in [ 1.00, 2.00):   30 intervals, max certified ratio 0.948 (m = 1: 0.948, all m >= 2: 0.948)
+    v in [ 2.00, 5.00):   53 intervals, max certified ratio 0.949 (m = 1: 0.949, all m >= 2: 0.949)
+    v in [ 5.00,10.00):   60 intervals, max certified ratio 0.948 (m = 1: 0.948, all m >= 2: 0.948)
+    v in [10.00,20.00):  112 intervals, max certified ratio 0.950 (m = 1: 0.950, all m >= 2: 0.950)
+  analytic bound v=20: (2+4pi)||f_v||^2/(rmin(1/2) X) <= 0.7647, linear part <= 1.8e-47  (l_1=0.4442, L_1=0.5874, rmin(1/2)=0.4710)
+  analytic bound v=25: (2+4pi)||f_v||^2/(rmin(1/2) X) <= 0.6118, linear part <= 7.0e-61  (l_1=0.4442, L_1=0.5874, rmin(1/2)=0.4710)
+  analytic bound v=40: (2+4pi)||f_v||^2/(rmin(1/2) X) <= 0.3824, linear part <= 2.7e-101  (l_1=0.4442, L_1=0.5874, rmin(1/2)=0.4710)
+  both pieces are decreasing in v for v >= 1/(4 pi (1-a_1)) = 0.80, so the bound < 1 holds for all v >= 20: True
+  Theorem 4 of complex_cg_proof covers v <= 0.08.  => (**) with kappa = 1 for every Z = (reals) + (one pair), any height: PROVED (modulo the CHECKED constants)
+
+Part 4: targeted adversary, pairs at middle heights v in [v_lo, 0.6] (periodic configurations, exact quadratic form)
+  near-tight real seeds: best real ratio 1.000792 (period 7.000, 5 atoms); 60 seeds kept
+  9600 local optimisations, 4-80 atoms per period
+  v_lo | min ratio over configs with a pair at v >= v_lo (mode, atoms) | min excess per mid pair (mode) | 4X(v_lo) | pair lattice
+  0.08 | 1.001437 (single, 33) | 0.0178 (plattice, 4 atoms) | 0.1546 | ratio 1.004442, excess/pair 0.0178
+         by mode (min ratio / min excess per mid pair): single 1.00144/0.0575; two 1.00207/0.0591; cluster 1.00248/0.0721; alllift 1.00723/0.0289; plattice 1.00444/0.0178; random 1.00457/0.1313
+  0.15 | 1.002006 (single, 72) | 0.0178 (plattice, 4 atoms) | 0.5868 | ratio 1.004442, excess/pair 0.0178
+         by mode (min ratio / min excess per mid pair): single 1.00201/0.1645; two 1.00365/0.1494; cluster 1.00406/0.1790; alllift 1.01669/0.0668; plattice 1.00444/0.0178; random 1.00766/0.3294
+  0.25 | 1.003685 (single, 72) | 0.0178 (plattice, 6 atoms) | 1.9755 | ratio 1.004442, excess/pair 0.0178
+         by mode (min ratio / min excess per mid pair): single 1.00368/0.5400; two 1.00901/0.3486; cluster 1.00942/0.4004; alllift 1.03842/0.1537; plattice 1.00444/0.0178; random 1.02364/1.0491
+  0.40 | 1.004526 (plattice, 4) | 0.0181 (plattice, 4 atoms) | 8.1402 | ratio 1.004442, excess/pair 0.0178
+         by mode (min ratio / min excess per mid pair): single 1.01556/3.0851; two 1.03174/1.1585; cluster 1.05437/1.5741; alllift 1.09876/0.3950; plattice 1.00453/0.0181; random 1.09013/4.3888
+  violations of (**) (ratio < 1): 0   [52s]
+
+Status: Lemma-R split kappa_auto >= 0.987962 (all heights, below MT); hybrid barriers CHECKED; pair lattices: no per-pair height surplus;
+        Theorem H1 (reals + one pair, every height) certified; (**) for several pairs at unequal heights remains open.  total 232s
