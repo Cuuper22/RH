@@ -1,0 +1,68 @@
+Part 0: certified Cheer-Goldston test (re-solved; identical to verify/complex_cg_proof.py)
+  P(rho) = 1.3210846946, R = int rho = 1.01246016, rho(0) = 1.004442, r(0) = 1 (LP equality); max cell bound of T on [u0,50] = -2.23e-06 -> r >= 0 on R CERTIFIED
+  kappa_real(rho) >= 1 (Cheer-Goldston); (**) for complex Z would give 2 - P = 0.6789153   [93s]
+  rho(1/2) = 0.4988, s(0) = R - 1 = 0.01246, r(0.37) = 0.6785, r(0.736) = 0.1483, rmin(0.5) >= 0.4710
+
+Part 1: Conjecture 3.2 on pair-lattice segments of spacing 2 (W = 2 at x = 0, 2, ..., 2(n-1)), v = 0.5
+  LHS = sum_c Psi_c(sup_c Phi^-/2), RHS = E_P + pair r-bonds + sum W(W-2) (= 0 here).  Grid h = 1e-3, window +-60;
+  rho_c = grid minimum of r on [0, d_c] (>= true minimum), grid sup of Phi^- (<= true sup), tail cells omitted:
+  every approximation makes the LHS SMALLER.
+  n =  8: E_P =  105.4925, bonds = 0.00273 | H1 cells l=0.5:  109.9597 (ratio 1.0423), l=0.6: 1.0053, l=0.7: 0.9636, best l: ratio 0.9636 | optimal cells:  101.3749 (ratio 0.9609)
+  n = 20: E_P =  237.6547, bonds = 0.00924 | H1 cells l=0.5:  265.3726 (ratio 1.1166), l=0.6: 1.0983, l=0.7: 1.0797, best l: ratio 1.0797 | optimal cells:  255.2447 (ratio 1.0740)
+  n = 40: E_P =  453.1229, bonds = 0.02241 | H1 cells l=0.5:  524.0374 (ratio 1.1564), l=0.6: 1.1491, l=0.7: 1.1394, best l: ratio 1.1394 | optimal cells:  513.2145 (ratio 1.1326)
+  -> ratio > 1 from n = 20 on: Conjecture 3.2 is REFUTED (with H1 cells and with optimal cell partitions).  [270s]
+
+Part 2: the true inequality (**) on the same configurations (Sigma_Z(rho)/cost; NUMERICAL)
+  segment n = 20, v = 0.5, reals of multiplicity 1 at the field minima x = 1, 3, ...: Sigma/cost = 2.8461
+  segment n = 20, v = 0.5, reals of multiplicity 2 at the field minima x = 1, 3, ...: Sigma/cost = 1.8190
+  segment n = 20, v = 0.5, reals of multiplicity 3 at the field minima x = 1, 3, ...: Sigma/cost = 1.6694
+  segment n = 20, v = 0.5, reals of multiplicity 4 at the field minima x = 1, 3, ...: Sigma/cost = 1.7331
+  segment n = 40, v = 0.5, reals of multiplicity 1 at the field minima x = 1, 3, ...: Sigma/cost = 2.7024
+  segment n = 40, v = 0.5, reals of multiplicity 2 at the field minima x = 1, 3, ...: Sigma/cost = 1.7097
+  segment n = 40, v = 0.5, reals of multiplicity 3 at the field minima x = 1, 3, ...: Sigma/cost = 1.5759
+  segment n = 40, v = 0.5, reals of multiplicity 4 at the field minima x = 1, 3, ...: Sigma/cost = 1.6519
+  periodic lattice v = 0.50, L = 2.00, <= 2 reals per period, multiplicities <= 24: min Sigma/cost = 1.4587 (reals [3] at [1.])
+  periodic lattice v = 1.00, L = 2.00, <= 2 reals per period, multiplicities <= 24: min Sigma/cost = 5.2350 (reals [16] at [1.])
+  periodic lattice v = 0.70, L = 1.75, <= 2 reals per period, multiplicities <= 24: min Sigma/cost = 3.3289 (reals [8] at [0.875])
+  -> (**) holds there with margin >= 40%: the failure in Part 1 is the bookkeeping's, not the inequality's.  [270s]
+
+Part 3: infinite pair lattices of spacing L (W = 2) at height v, per period (exact Poisson forms).  Ratios damage/(E_P + bonds):
+  H1 = H1 cells (best l in {0.5,0.6,0.7}); DP = optimal partition into cells <= 1.02 (mesh 0.01); loc = component-local exact functional (Conj. 3.2')
+    v\L |              1.25 |              1.50 |              1.75 |              2.00 |              2.50 |              3.00 |              4.00 |              6.00
+   0.20 |  0.00  0.00  0.00 |  0.00  0.00  0.00 |  0.32  0.32  0.32 |  0.87  0.87  0.87 |  0.10  0.10  0.10 |  0.87  0.87  0.87 |  0.86  0.86  0.86 |  0.86  0.86  0.86
+   0.30 |  0.00  0.00  0.00 |  0.15  0.15  0.15 |  0.55  0.55  0.55 |  0.79  0.79  0.79 |  0.36  0.36  0.36 |  0.82  0.82  0.82 |  0.81  0.81  0.81 |  0.81  0.81  0.81
+   0.50 |  0.15  0.15  0.15 |  0.53  0.53  0.33 |  1.01  0.94  0.49 |  1.24  1.22  0.57 |  0.41  0.41  0.35 |  0.92  0.90  0.58 |  0.81  0.81  0.58 |  0.77  0.77  0.56
+   0.70 |  0.42  0.37  0.20 |  0.90  0.81  0.36 |  1.24  1.15  0.46 |  1.45  1.38  0.52 |  0.59  0.51  0.26 |  1.10  1.01  0.46 |  0.91  0.83  0.41 |  0.78  0.71  0.38
+   1.00 |  0.57  0.47  0.23 |  1.08  0.94  0.38 |  1.47  1.27  0.46 |  1.79  1.50  0.50 |  0.61  0.51  0.24 |  1.14  1.00  0.41 |  0.88  0.76  0.33 |  0.68  0.59  0.27
+   1.50 |  0.61  0.50  0.23 |  1.16  0.99  0.39 |  1.61  1.33  0.47 |  2.04  1.56  0.50 |  0.61  0.51  0.23 |  1.16  0.99  0.39 |  0.83  0.70  0.30 |  0.56  0.46  0.21
+   2.00 |  0.61  0.51  0.23 |  1.17  0.99  0.39 |  1.63  1.34  0.47 |  2.10  1.58  0.50 |  0.61  0.51  0.23 |  1.17  0.99  0.39 |  0.82  0.69  0.30 |  0.51  0.42  0.20
+  worst: H1 cells 2.099, optimal cells 1.576, component-local 0.868   [324s]
+
+Part 4: periodic motifs (component-local bookkeeping, Conj. 3.2'; NUMERICAL)
+  two pairs per period {0, d} + L Z (v in [0.2,1.5], L in [2,5], d in [0.25,1.25], 120 cases): worst H1 2.096, worst component-local 0.833 at (v,L,d) = (0.2, 3.0, 1.0)
+  60 random motifs (2-4 pairs, W in {2,4}, period 3-8): worst H1 0.872, worst component-local 0.318   [333s]
+
+Part 5: field-energy duality at one point.  Lemma 5.1 of the memo (PROVED): Phi_Q(y)^2 <= tau_0(v) E_P, tau_0 = int rho tanh^2(pi a v),
+  sharp over signed P.  Positive P (NUMERICAL, convex QP over densities nu >= 0 on [-6, 6], mesh 0.1; window-limited, so lower bounds):
+  kappa_+(v) = sup Phi_Q^-(0)^2 / E_P ;  kappa(v) = sup Phi^-(0)^2 / (E_P + pair r-bonds)  (continuum limit, integrality irrelevant at scale)
+  v = 0.2: tau_0 = 0.0536 | kappa_+ >= 0.0502 | kappa >= 0.0033 | one pair alone: max Q_v^-(t)^2/X(v) = 0.0181
+  v = 0.5: tau_0 = 0.2360 | kappa_+ >= 0.2227 | kappa >= 0.1109 | one pair alone: max Q_v^-(t)^2/X(v) = 0.0731
+  v = 1.0: tau_0 = 0.4861 | kappa_+ >= 0.4595 | kappa >= 0.3809 | one pair alone: max Q_v^-(t)^2/X(v) = 0.0852
+  v = 2.0: tau_0 = 0.7128 | kappa_+ >= 0.6594 | kappa >= 0.6345 | one pair alone: max Q_v^-(t)^2/X(v) = 0.0325
+  Lemma 5.1 check on random signed configurations: max (sum b Phi_Q)^2 / (E_P b'Mb) = 0.639203 (<= 1)   [337s]
+
+Part 6: continuum one-layer configurations: pairs with density Lambda*nu, nu = beta - b >= 0, one real atom of weight Lambda at 0,
+  b = FT^{-1}[sech(2 pi a v)] = sech(pi x/(2v))/(2v), beta = sech(pi theta x/(2v))/(2v) (theta < 1).  Then S_Z/Lambda = c * beta^ exactly, and
+  [Sigma_Z(rho) - int shat |S_Z0|^2]/Lambda^2 = Q = int rho c^2 |beta^|^2 - int shat |1 + nu^|^2   (order Lambda^2; costs are O(Lambda))
+  int shat = 0.012460  (= s(0) = R - 1)
+  v =  10, theta = 1/2: int rho c^2 |beta^|^2 = 0.08211, s-hat term = 0.01246, Q = +0.06965
+  v =  20, theta = 1/2: int rho c^2 |beta^|^2 = 0.04108, s-hat term = 0.01246, Q = +0.02862
+  v =  50, theta = 1/2: int rho c^2 |beta^|^2 = 0.01644, s-hat term = 0.01246, Q = +0.00398
+  v =  66, theta = 1/2: int rho c^2 |beta^|^2 = 0.01245, s-hat term = 0.01246, Q = -0.00001
+  v =  70, theta = 1/2: int rho c^2 |beta^|^2 = 0.01174, s-hat term = 0.01246, Q = -0.00072
+  v = 100, theta = 1/2: int rho c^2 |beta^|^2 = 0.00822, s-hat term = 0.01246, Q = -0.00424
+  v = 200, theta = 1/2: int rho c^2 |beta^|^2 = 0.00411, s-hat term = 0.01246, Q = -0.00835
+  -> Q < 0 for v >~ 66: dropping int shat|S_Z0|^2 (H1-type reductions, 3.2, 3.2') loses (**) at order Lambda^2 there (HEURISTIC transfer)   [338s]
+
+Status: Conjecture 3.2 (joint field with H1 cells) REFUTED (Part 1); (**) itself holds with margin on the refuting
+        configurations (Part 2); component-local version 3.2' NUMERICAL (Parts 3-4); O2 and (**) remain OPEN.  total 338s
