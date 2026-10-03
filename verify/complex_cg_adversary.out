@@ -1,0 +1,16 @@
+Part 0: LP-optimal rho (verbatim Part A of positivity_class_certificate.py)
+  P = 1.3209166550  R = int rho = 1.01261107  rho(0) = 1.00387347  rho(1) = 0.0e+00  slope rho'(1-) = -0.4483
+  self-check: P and R equal the memo's 1.3209166550 / 1.01261107: True
+  q(u) = int rho a^2 cos(2 pi a u): q(0) = 0.14875, min q = -0.08649 at u = 0.775 ; Prop.5 two-body lifting threshold t* = q(0)/|min q| = 1.720
+
+Part 1: periodic reduction and two exact facts (CHECKED)
+  truncation with  50 periods: Sigma/P = 17.827509   periodic formula = 17.829245
+  truncation with 200 periods: Sigma/P = 17.828703   periodic formula = 17.829245
+  lattice of simple atoms, spacing a -> 1-: ratio rho(0)/a -> rho(0) = 1.003873, so kappa_C <= kappa_real <= rho(0) for ANY rho.
+  pairs-only, p pairs per period M in (p, p+1): if T(1..p-1) = 0 the 2p points zeta = e((x +- iv)/M) have a self-inversive
+  polynomial X^2p + a X^p + c0 (Newton), forcing a common-height regular p-gon and |T(p)| >= 2p (PROVED in memo, Lemma 2).
+  Lemma 3 illustration: D points/period, min sum_{n<=(D-1)/2}|T(n)|^2 over positions+heights (20 starts each):
+   s=1,p=1: min 1.0e+00, v at min 0.0e+00 ; s=3,p=1: min 1.5e+00, v at min 0.0e+00 ; s=0,p=1: min 4.0e+00, v at min 0.0e+00 ; s=1,p=3: min 2.6e+00, v at min 3.4e-19 ; s=1,p=2: min 1.8e+00, v at min 0.0e+00 ; s=1,p=1: min 1.0e+00, v at min 0.0e+00 ; s=0,p=3: min 1.0e+01, v at min 2.4e-02 ; s=2,p=1: min 1.8e+00, v at min 0.0e+00
+   s=1,p=2: min 1.8e+00, v at min 0.0e+00 ; s=2,p=3: min 4.6e+00, v at min 3.1e-08 ; s=0,p=2: min 7.0e+00, v at min 0.0e+00 ; s=2,p=2: min 3.2e+00, v at min 0.0e+00 ; s=1,p=1: min 1.0e+00, v at min 0.0e+00 ; s=1,p=2: min 1.8e+00, v at min 0.0e+00 ; s=2,p=3: min 4.6e+00, v at min 0.0e+00 ; s=1,p=2: min 1.8e+00, v at min 0.0e+00
+
+Part 2: periodic adversary for the LP rho (NUMERICAL)
