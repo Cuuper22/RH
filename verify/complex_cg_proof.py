@@ -37,7 +37,7 @@ Part 3 (PROVED modulo the CHECKED constants).  Bounded-height theorem: for the
 
 Only standard analysis is used.  Nothing here is a Lean statement.
 """
-import sys, time
+import sys, time, math
 import numpy as np
 from scipy.optimize import linprog
 
@@ -159,58 +159,96 @@ sys.stdout.flush()
 
 # ------------------------------------------------------------------ Part 3
 print("\nPart 3: constants of the bounded-height theorem (Theorem 4 of the memo)")
-print("  X(v) = int rho sinh^2(2 pi a v) >= 4 pi^2 q(0) v^2 with q(0) = int rho a^2 = %.6f ; budget pi^2 q(0) = %.4f" % (q0, np.pi ** 2 * q0))
+print("  X(v) = int rho sinh^2(2 pi a v) >= 4 pi^2 q(0) v^2, q(0) = int rho a^2 = %.6f ; budget for Sum beta: pi^2 q(0) = %.4f" % (q0, np.pi ** 2 * q0))
+# moments and derivative bounds
+def mom(n): return 2 * np.sum(W * A ** n)                      # int_{-1}^{1} rho a^n (n even)
+r2 = 4 * np.pi ** 2 * (mom(2) + 2 * np.sum(Ws * As ** 2))      # ||r''||_inf <= 4 pi^2 int |a^2 rhat|
 slopes = np.diff(c[:k1 + 1]) / D
 Jr = np.zeros(k1 + 1); Jr[0] = 2 * slopes[0]; Jr[1:k1] = slopes[1:] - slopes[:-1]; Jr[k1] = -slopes[-1]
 _, W1 = build(al[:k1 + 1], np.ones(k1 + 1)); rho_a = np.interp(A, al[:k1 + 1], c[:k1 + 1]); rp = np.repeat(slopes, len(gx))
-def Cm(V0, nw=60):
-    """m_+(Delta) <= C_m / Delta^2 from |Q_w(Delta)| <= TV((rho d_w)'') / (4 pi^2 Delta^2)."""
-    best = 0.0
-    for w in np.linspace(2 * V0 / nw, 2 * V0, nw):
-        dw = np.cosh(2 * np.pi * al[:k1 + 1] * w) - 1
-        tv_ = np.abs(Jr[0]) * dw[0] + 2 * np.sum(np.abs(Jr[1:]) * dw[1:])
-        d1 = 2 * np.pi * w * np.sinh(2 * np.pi * A * w); d2 = (2 * np.pi * w) ** 2 * np.cosh(2 * np.pi * A * w)
-        ac = 2 * np.sum(W1 * (2 * np.abs(rp) * d1 + rho_a * d2))
-        best = max(best, (tv_ + ac) / w ** 2)
-    return best / (4 * np.pi ** 2)
-UMAX, DU = 150.0, 0.001
-us = np.arange(0.5, UMAX, DU); rv = r(us)
-def mfun(V0, nw=24):
-    best = np.full(len(us), -np.inf)
-    for w in np.linspace(2 * V0 / nw, 2 * V0, nw):
-        coef = W * (np.cosh(2 * np.pi * A * w) - 1); Qw = np.zeros(len(us))
-        for s0 in range(0, len(us), 40000):
-            Qw[s0:s0 + 40000] = 2 * np.cos(2 * np.pi * np.outer(us[s0:s0 + 40000], A)) @ coef
-        best = np.maximum(best, -Qw / w ** 2)
-    return best
+def Cm(V0):
+    """m_+(Delta) <= C_m / Delta^2: |Q_w(Delta)| <= TV((rho d_w)') / (4 pi^2 Delta^2), monotone in w, so w = 2 V0."""
+    w = 2 * V0; dw = np.cosh(2 * np.pi * al[:k1 + 1] * w) - 1
+    tv_ = np.abs(Jr[0]) * dw[0] + 2 * np.sum(np.abs(Jr[1:]) * dw[1:])
+    d1 = 2 * np.pi * w * np.sinh(2 * np.pi * A * w); d2 = (2 * np.pi * w) ** 2 * np.cosh(2 * np.pi * A * w)
+    return (tv_ + 2 * np.sum(W1 * (2 * np.abs(rp) * d1 + rho_a * d2))) / w ** 2 / (4 * np.pi ** 2)
+UMAX, h = 150.0, 0.0001
+us = np.arange(0.5, UMAX + h / 2, h)
+# batched Fourier transforms on the fine grid: r, r', q_{2n}, q_{2n}' (n = 1..4)
+Cf = np.stack([W] + [W * A ** (2 * n) for n in (1, 2, 3, 4)], axis=1)         # (nA, 5)
+F0 = np.zeros((len(us), 5)); F1 = np.zeros((len(us), 5)); sv = np.zeros(len(us)); spv = np.zeros(len(us))
+CH = 10000
+for s0 in range(0, len(us), CH):
+    ph = 2 * np.pi * np.outer(us[s0:s0 + CH], A)
+    F0[s0:s0 + CH] = 2 * np.cos(ph) @ Cf; F1[s0:s0 + CH] = -2 * np.sin(ph) @ (Cf * (2 * np.pi * A)[:, None])
+    ph = 2 * np.pi * np.outer(us[s0:s0 + CH], As)
+    sv[s0:s0 + CH] = 2 * np.cos(ph) @ Ws; spv[s0:s0 + CH] = -2 * np.sin(ph) @ (Ws * 2 * np.pi * As)
+rv = F0[:, 0] - sv; rpv = F1[:, 0] - spv
+Q = {n: F0[:, n] for n in (1, 2, 3, 4)}; Qp = {n: F1[:, n] for n in (1, 2, 3, 4)}
+print("  fine grid: %d points on [0.5, %g] with h = %g  (min r on the grid = %.2e)" % (len(us), UMAX, h, rv.min())); sys.stdout.flush()
 wstar = 0.5
-rsmall = r(np.arange(0, wstar + 1e-9, 0.0005)).min()
+dg = np.arange(0, wstar + 1e-9, 0.0005); r_small = r(dg); qg = q(dg)
 best_V0 = None
 for V0 in [float(x) for x in sys.argv[1:]] or [0.03, 0.04, 0.05]:
-    t1 = time.time()
-    mp = np.maximum(mfun(V0), 0.0)
-    beta = np.maximum(mp - rv / (2 * V0 ** 2), 0.0); crit = beta > 0
+    t1 = time.time(); w2 = 2 * V0
+    cn = {n: (2 * np.pi) ** (2 * n) * w2 ** (2 * n - 2) / math.factorial(2 * n) for n in (2, 3, 4)}
+    eps5 = 2 * np.sum(W * (np.cosh(2 * np.pi * A * w2) - sum((2 * np.pi * A * w2) ** (2 * n) / math.factorial(2 * n) for n in range(0, 5)))) / w2 ** 2
+    # majorant of m(Delta) = sup_{0<w<=2V0} -Q_w/w^2:  M(Delta) = -2 pi^2 q(Delta) + sum_{n=2..4} c_n |q_{2n}(Delta)| + eps5
+    M = -2 * np.pi ** 2 * Q[1] + sum(cn[n] * np.abs(Q[n]) for n in (2, 3, 4)) + eps5
+    F = M - rv / (2 * V0 ** 2)                                 # beta = [F]_+  (since r >= 0, [M_+ - r/2V0^2]_+ = [M - r/2V0^2]_+)
+    # cell upper bound on [u_i, u_i+h]:  F <= F(u_i) + |F'(u_i)| h + ||F''|| h^2/2, with |M'| <= 2pi^2|q'| + sum c_n |q_2n'|
+    Fp = 2 * np.pi ** 2 * np.abs(Qp[1]) + sum(cn[n] * np.abs(Qp[n]) for n in (2, 3, 4)) + np.abs(rpv) / (2 * V0 ** 2)
+    F2 = 2 * np.pi ** 2 * 4 * np.pi ** 2 * mom(4) + sum(cn[n] * 4 * np.pi ** 2 * mom(2 * n + 2) for n in (2, 3, 4)) + r2 / (2 * V0 ** 2)
+    Fup = F + Fp * h + F2 * h ** 2 / 2 + 1e-9
+    crit = Fup > 0
     wins = []; i = 0
     while i < len(us):
         if crit[i]:
             j = i
             while j + 1 < len(us) and crit[j + 1]: j += 1
-            wins.append([us[i], us[j], beta[i:j + 1].max()]); i = j + 1
+            wins.append([us[i], us[j] + h, Fup[i:j + 1].max()]); i = j + 1
         else: i += 1
     clus = []
     for wn in wins:
         if clus and wn[1] - clus[-1][0] <= wstar: clus[-1][1] = wn[1]; clus[-1][2] = max(clus[-1][2], wn[2])
         else: clus.append(list(wn))
-    sumb = sum(cl[2] for cl in clus); cm = Cm(V0)
-    tail = 250 * cm * sum(1.0 / (100 * n - 50) ** 2 for n in range(2, 200000))   # windows beyond 150 live within 50 of 100n, n>=2
-    rho_star = min(rsmall, (rv - 2 * V0 ** 2 * mp)[us <= wstar].min())
-    condA = 4 * (sumb + tail) <= 4 * np.pi ** 2 * q0; condB = 24 * V0 ** 2 * (sumb + tail) <= rho_star
-    print("  V0=%.3f: %d windows in %d clusters (diam <= %.3f, last at u=%.1f); sum_c beta_c = %.4f, C_m = %.3f, tail bound = %.4f, total = %.4f vs budget %.4f -> (A) %s ;  rho_* = %.3f vs 24 V0^2 total = %.4f -> (B) %s   [%.0fs]"
-          % (V0, len(wins), len(clus), max(cl[1] - cl[0] for cl in clus), clus[-1][0], sumb, cm, tail, sumb + tail, np.pi ** 2 * q0,
-             "OK" if condA else "FAIL", rho_star, 24 * V0 ** 2 * (sumb + tail), "OK" if condB else "FAIL", time.time() - t1))
-    print("      first clusters [lo, hi, beta_c]:", [(round(cl[0], 4), round(cl[1], 4), round(cl[2], 4)) for cl in clus[:4]])
+    # a window longer than w* is cut into ceil(L/w*) pieces, each with the window's sup (clusters need not be separated)
+    npieces = sum(max(1, math.ceil((cl[1] - cl[0]) / wstar - 1e-12)) for cl in clus)
+    sumb = sum(cl[2] * max(1, math.ceil((cl[1] - cl[0]) / wstar - 1e-12)) for cl in clus); cm = Cm(V0)
+    # far tail Delta > 150: r(Delta) Delta^2 = r(delta) delta^2, delta = dist(Delta, 100 Z) (T is 100-periodic); beta > 0 forces
+    # r(delta) delta^2 < 2 V0^2 C_m, delta in E; far clusters = components of 100 n + E (n >= 2), beta_c <= C_m / (100 n - 50)^2.
+    hd = 0.0005; dd = np.arange(0, 50 + hd / 2, hd); rd2 = r(dd) * dd ** 2
+    LipT = 2 * np.pi * np.sum(np.abs(np.r_[jumps(c)[0] / 2, jumps(c)[1:]]) * al) / (2 * np.pi ** 2)   # |d/du (r u^2)| = |T'|/(2 pi^2)
+    inE = rd2 < 2 * V0 ** 2 * cm + LipT * hd
+    comps = []; i = 0
+    while i < len(dd):
+        if inE[i]:
+            j = i
+            while j + 1 < len(dd) and inE[j + 1]: j += 1
+            comps.append((dd[i], dd[j] + hd)); i = j + 1
+        else: i += 1
+    # components of E in [-50,50] (symmetric): [-a0,a0] once; interior ones twice; the one touching 50 merges with its
+    # mirror image in the next period into [100n+a, 100(n+1)-a] (counted once per n); each is cut into pieces of length <= w*.
+    pieces = lambda L: max(1, math.ceil(L / wstar - 1e-12))
+    NE = pieces(2 * comps[0][1]); dE = 2 * comps[0][1]
+    for a, b in comps[1:]:
+        if b >= 50 - hd / 2: NE += pieces(2 * (50 - a)); dE = max(dE, 2 * (50 - a))
+        else: NE += 2 * pieces(b - a); dE = max(dE, b - a)
+    tail = NE * cm * sum(1.0 / (100 * n - 50) ** 2 for n in range(2, 300000))
+    # rho_* = min_{[0,w*]} (r - 2 V0^2 M_+)  with  M_+ <= 2 pi^2 |q| + sum c_n mom(2n) + eps5 on [0,w*]; grid error via Lipschitz of r
+    Mup = 2 * np.pi ** 2 * np.abs(qg) + sum(cn[n] * mom(2 * n) for n in (2, 3, 4)) + eps5
+    rho_star = (r_small - 2 * V0 ** 2 * Mup).min() - 2.1 * 0.0005 / 2 - 2 * V0 ** 2 * 2 * np.pi ** 2 * 2 * np.pi * mom(3) * 0.0005 / 2
+    total = sumb + tail
+    condA = 4 * total <= 4 * np.pi ** 2 * q0; condB = 24 * V0 ** 2 * total <= rho_star
+    print("  V0=%.3f: eps5=%.1e; %d windows -> %d clusters -> %d pieces of length <= w* on [0.5,150] (longest cluster %.3f, last at u=%.1f); Sum beta_c = %.4f"
+          % (V0, eps5, len(wins), len(clus), npieces, max(cl[1] - cl[0] for cl in clus), clus[-1][0], sumb))
+    print("          far tail: C_m = %.3f, E in [-50,50] gives %d pieces per period (longest component %.3f), tail <= %.4f" % (cm, NE, dE, tail))
+    print("          (A) 4*%.4f = %.4f <= 4 pi^2 q(0) = %.4f : %s ;  (B) 24 V0^2 * %.4f = %.4f <= rho_* = %.4f : %s   [%.0fs]"
+          % (total, 4 * total, 4 * np.pi ** 2 * q0, "OK" if condA else "FAIL", total, 24 * V0 ** 2 * total, rho_star, "OK" if condB else "FAIL", time.time() - t1))
+    print("          first clusters [lo, hi, beta_c]:", [(round(cl[0], 3), round(cl[1], 3), round(cl[2], 4)) for cl in clus[:5]])
     if condA and condB: best_V0 = V0
     sys.stdout.flush()
-print("  Largest admissible V0 in the list: %s  -> (**) with kappa = 1 holds for all Z with pair heights <= V0 (Theorem 4)." % best_V0)
+print("  Largest admissible V0 in the list: %s  -> (**) with kappa = 1 holds for all Z with pair heights <= V0 (Theorem 4);" % best_V0)
+if best_V0: print("  for zeta: all zeros with T < gamma <= 2T and |beta - 1/2| <= 2 pi V0 / log T = %.3f / log T  =>  at least %.5f of them simple and on the line." % (2 * np.pi * best_V0, 2 - P))
 print("\nStatus: real case CERTIFIED (kappa_real >= 1, P = %.7f); (**)_cont, the intermediate inequality and PL termwise" % P)
 print("        certificates REFUTED; bounded-height theorem PROVED for V0 = %s; (**) for unbounded heights remains open." % best_V0)

@@ -36,16 +36,18 @@ certificate), CONJECTURE, REFUTED.
 * **Bounded-height theorem (Theorem 4, PROVED modulo CHECKED constants).** For
   the certified ρ and κ = 1, (**) holds for every conjugation-invariant
   multiset Z whose conjugate pairs have scaled height ≤ V₀, uniformly in |Z|,
-  for V₀ = **V0STAR** (the script prints the largest admissible value in its
-  list). The proof pays the lifting loss of a pair out of its own self-term
+  for **V₀ = 1/(4π) = 0.0796** (and for V₀ = 0.08; the budget inequality (A)
+  then has a margin of 0.3 %). The proof pays the lifting loss of a pair out of its own self-term
   excess ∫ρ sinh²(2παv) ≥ 4π²q(0)v² when its neighbourhood is sparse (weight
   ≤ 2 at each critical distance) and out of the clustering slack
   Σ W_jW_k r(Δ_jk) + κ(W² − cost) when it is dense. Two numerical inequalities
   (A), (B) between computed constants close the argument. For zeta this is
-  the statement: *if all zeros with T < γ ≤ 2T satisfy |β − 1/2| ≤ 2πV₀/log T,
-  then at least 67.89 % of them are simple and on the line* (BGSTB 2023,
-  Thm. 2, prove 61.7 % under |β − 1/2| < 1/(2 log T), i.e. V₀ = 1/(4π) =
-  0.0796; our V₀ is smaller, so the two results are not comparable).
+  the statement: *if all zeros with T < γ ≤ 2T satisfy |β − 1/2| ≤ 1/(2 log T),
+  then at least 67.89 % of them are simple and on the line.* This is exactly
+  the hypothesis of Baluyot–Goldston–Suriajaya–Turnage-Butterbaugh (2023,
+  Thm. 2), who obtain 61.7 % under it; Theorem 4 raises their conditional
+  proportion to 0.67892, above the unconditional frontier 0.6725043820976 and
+  above Cheer–Goldston's RH value 0.672753. It is not an unconditional result.
 * **Open.** (**) for unbounded heights. The adversary memo found no
   counterexample (infimum 1.00025, attained by real designs) and conjectures
   κ_C = κ_real for nonincreasing ρ. Section 5 records why the obstacles found
@@ -149,11 +151,11 @@ along such u. □
 
 For the grid-PL class the obstruction is concrete: T_w has period 100, so
 G(100, w) = −(2πw)² ∫ρ cosh(2παw)/(4π²·10⁴) + FT(g_w)(100)/(4π²10⁴); the script
-finds G(100, 0.02) = −4.06·10⁻⁸, G(100, 0.05) = −2.55·10⁻⁷, G(100, 0.1) =
-−1.04·10⁻⁶, each equal to the predicted leading term to three digits. For a ρ
-with kinks only at 0 and ±1 (C² in between) the same computation shows the
-necessary condition |ρ'(0⁺)| ≥ |ρ'(1⁻)| cosh(2πw) − ŝ'(1⁺); for the LP shape
-(|ρ'(0⁺)| ≈ 0.39 < |ρ'(1⁻)| ≈ 0.59) this already fails at w = 0, and the
+finds G(100, 0.02) = −4.05·10⁻⁸, G(100, 0.05) = −2.55·10⁻⁷, G(100, 0.1) =
+−1.04·10⁻⁶, each equal to the predicted leading term to three digits. (For a ρ
+with kinks only at 0 and ±1 and C² in between, the leading coefficient of
+−4π²u²G(u, w) along u → ∞ is governed by J₀/2 + J₁cosh(2πw) + (ŝ-kinks), and the
+cosh factor on the kink at ±1 is what no completion can follow.) The
 re-optimised LP with G(u, w) ≥ 0 imposed for w ≤ W on a grid u ≤ 60
 (NUMERICAL, `lp_height` runs recorded in the scratch output) gives
 P = 1.32644 (W = 0.05), 1.34265 (0.10), 1.40329 (0.20), 1.73300 (0.50): the
@@ -235,35 +237,53 @@ using (4.1), the dense load is at most S.
 Adding the two parts, Σ_Z(ρ) − cost ≥ 0. □
 
 **Constants (CHECKED by the script; see `complex_cg_proof.out`).** With
-q(0) = 0.148400 the budget in (A) is π²q(0) = 1.4646 for Σβ. The script
-evaluates β on the grid 0.001 of [0.5, 150] with the sup over w on a grid of
-24 values in (0, 2V₀], forms the clusters, bounds the far tail as described,
-and reports:
+q(0) = 0.148400 the budget in (A) is π²q(0) = 1.4646 for Σβ. The sup over w
+is replaced by the rigorous majorant m(Δ) ≤ M(Δ) := −2π²q(Δ) +
+Σ_{n=2}^{4} (2π)^{2n}(2V₀)^{2n−2}|q_{2n}(Δ)|/(2n)! + ε₅, q_{2n} = FT(ρα^{2n}),
+ε₅ = ∫ρ[cosh(2πα·2V₀) − Taylor₈]/(4V₀²) ≤ 1.1·10⁻⁷ (termwise |cos| ≤ 1 and
+monotonicity of the remainders in w); the theorem holds verbatim with M in
+place of m₊. The script evaluates F = M − r/(2V₀²) on the grid h = 10⁻⁴ of
+[0.5, 150] and bounds β on each cell by [F(u_i) + |F'(u_i)|h + ‖F''‖h²/2]₊
+with ‖F''‖ ≤ 2π²·4π²∫ρα⁴ + Σ c_n 4π²∫ρα^{2n+2} + ‖r''‖/(2V₀²), ‖r''‖ ≤
+4π²∫α²|r̂| (so the cell term is ≤ 2·10⁻⁵); windows longer than w* are cut
+into pieces of length ≤ w*, each carrying the window's sup (clusters need
+not be separated). It then forms the clusters, bounds the far tail as described
+(E is computed with the Lipschitz constant ‖T'‖/(2π²) of r(δ)δ² added to the
+threshold),
+and reports (Σβ includes the far tail; budget π²q(0) = 1.4646):
 
-TABLE4
+| V₀ | windows on [0.5,150] | pieces | Σβ | 4Σβ vs 4π²q(0) = 5.8586 | (A) | 24V₀²Σβ vs ρ* | (B) |
+|---|---|---|---|---|---|---|---|
+| 0.030 | 95 | 111 | 1.3081 | 5.2325 | OK | 0.0283 vs 0.4696 | OK |
+| 0.050 | 145 | 162 | 1.3727 | 5.4907 | OK | 0.0824 vs 0.4678 | OK |
+| 0.070 | 150 | 167 | 1.4284 | 5.7135 | OK | 0.1680 vs 0.4648 | OK |
+| 0.075 | 150 | 168 | 1.4437 | 5.7749 | OK | 0.1949 vs 0.4638 | OK |
+| 1/(4π) = 0.0796 | 150 | 169 | 1.4590 | 5.8358 | OK | 0.2219 vs 0.4629 | OK |
+| 0.080 | 150 | 169 | 1.4603 | 5.8411 | OK | 0.2243 vs 0.4628 | OK |
 
 The windows sit at the near-zeros of r (near the integers, where r has
 double zeros of size ≈ 10⁻⁶ by the LP margin) and the first cluster, around
 Δ ≈ 1.05 where q = −0.046, carries most of Σβ (β_c ≈ 0.95 ≈ 2π²·0.046). (B)
-holds with a large margin (ρ* ≈ 0.47); (A) is the binding constraint, and it
-fails from V₀ ≈ 0.04–0.05 on because the windows widen and merge and the
-Taylor remainder of cosh grows. The admissible V₀ = V0STAR corresponds for
-zeta to |β − 1/2| ≤ 2π V₀/log T = SCALED/log T.
+holds with a large margin (ρ* ≈ 0.46); (A) is the binding constraint: its
+margin is 11 % at V₀ = 0.03, 2.5 % at 0.07 and 0.4 % at V₀ = 1/(4π), and it
+fails shortly above 0.08 because the first window widens (β_c grows from
+0.92 to 0.98) and more far windows open where r sits at its LP floor 10⁻⁶.
+The admissible V₀ = 1/(4π) corresponds for zeta to |β − 1/2| ≤ 1/(2 log T).
 
 Remarks. (a) Nothing in the proof depends on |Z|; all heights ≤ V₀ including
 zero are allowed, so the real case is recovered (with Theorem 1). (b) The
 proof uses only: r ≥ 0, ŝ ≥ 0 (Lemma 0), the two-sided structure of
 cosh a cosh b, and counting; no RH, no reality of zeros. (c) The constant 2 in
 min(1, 2/ψ_j) is forced by W_k ≥ 2 (pairs of multiplicity one are cost-tight:
-cost = W² = 4); the margin in (A) at V₀ = 0.03 is about 10 %, so the method
-cannot reach heights of order 0.1 without a new idea — for instance using
-the slack ∫ŝ|S_{Z₀}|² (not used here) or the exact bond structure instead of
-the cluster suprema.
+cost = W² = 4). The method cannot reach heights of order 0.1 without a new
+idea — for instance using the slack ∫ŝ|S_{Z₀}|² (not used here), the exact
+bond structure instead of the cluster suprema, or an LP margin r ≥ ε(u) that
+grows with u (the far windows exist only because the LP lets r sit at 10⁻⁶).
 
 ## 5. What remains, and an honest assessment
 
-* (**) is open for heights above V₀ ≈ 0.03–0.04 (scaled), i.e. for zeros with
-  |β − 1/2| ≳ 0.2/log T. Lifting lowers Σ only near heavy mass (adversary
+* (**) is open for heights above V₀ = 0.08 (scaled), i.e. for zeros with
+  |β − 1/2| > 1/(2 log T). Lifting lowers Σ only near heavy mass (adversary
   memo), and every such configuration found has ratio ≥ 1.087, but Theorem 2
   shows that any proof must track the integer cost slack — there is no
   positive-definite/nonnegative kernel decomposition behind (**).
@@ -285,7 +305,9 @@ the cluster suprema.
 * **Certified unconditional bound from this class: none above 0.6725043820976.**
   Theorem 1 fixes the conditional value at 0.6789153 (κ = 1) and Theorem 4
   proves the required inequality for all configurations with pair heights
-  ≤ V0STAR.
+  ≤ 1/(4π), i.e. the BGSTB hypothesis; under that hypothesis the proportion
+  of simple zeros on the line is at least 0.67892 (PROVED modulo CHECKED
+  constants), against their 0.617.
 
 ## 6. Self-check
 
@@ -298,6 +320,6 @@ the cluster suprema.
 | echo obstruction, PL ρ | PROVED; CHECKED at u = 100 | — |
 | termwise bounded-height LP cost | NUMERICAL (grid u ≤ 60, not a certificate) | — |
 | Lemma 4.1, slack bound (4.1), bookkeeping | PROVED | none |
-| constants Σβ, ρ*, C_m, E | CHECKED (grids 0.001 in Δ, 24 values in w) | — |
-| (**) for heights ≤ V0STAR | PROVED modulo the CHECKED constants | none |
+| constants Σβ, ρ*, C_m, E | CHECKED (grid 10⁻⁴ in Δ with cell bounds; Taylor majorant in w) | — |
+| (**) for heights ≤ 1/(4π) | PROVED modulo the CHECKED constants | none |
 | (**) for all heights | CONJECTURE (no counterexample; adversary memo) | — |
