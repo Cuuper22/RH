@@ -1,0 +1,63 @@
+
+==============================================================================
+[1] support geometry under vertex weights (exact rational sampling)
+==============================================================================
+xi = vertex differences; sum|xi| = 2*range on triangles and on the ++-- orthant: True
+=> supp Psi_w is contained in {xi = differences of points of supp u} for ANY bounded
+   vertex weight w: weights multiply the Fourier-side density, they do not convolve it.
+
+==============================================================================
+[2] generic-symbol formulas: reductions and symmetries
+==============================================================================
+flat width 1: D=1.333333333333333 (4/3)  M3=1.999999999999998 (2)  Q=0.405555555555555 (73/180=0.405555555555556)
+closed form Q_flat(lam)=1/(6lam^3)+2/(9lam)+lam/60 at lam=1: 0.405555555555556
+cosine: D=1.3274992963206 (closed form 1.3274992963206)  kappa=0.0117753128004  Q=0.3989629428664
+asymmetric signed weights: Q=-0.004121485014348  path-swap y<->t: -0.004121485014348  reflection: -0.004121485014348
+cubic: cyclic rotation -0.182781249999999 vs -0.182781249999999; orientation reversal -0.182781249999999
+product weight consistency: 0.246067961938686 = 0.246067961938686
+inherited height constants re-evaluated: C0=0.1666666666 (1/6)  C1=0.3333333333 (1/3)
+phi=1: E_Y/9 = 0.3989629428664   Q(cos) as above
+
+==============================================================================
+[3] independent evaluation of the certificate inputs (float, GL exact for polynomials)
+==============================================================================
+multiwindow (Taylor-8 cosine, degree-20 phi):
+   D      audit 1.32749929632059   memo 1.32749929632059   diff -2.2e-16
+   kappa  audit 0.02572936695467   memo 0.02572936695466   diff 5.8e-15
+   EY     audit 1.94205279052354   memo 1.94205279052313   diff 4.1e-13
+   uphi2  audit 0.81431323705458   memo 0.81431323705434   diff 2.4e-13
+   phi=1: kappa=0.0117753126951  Q=0.3989629428246
+triple-correlation (degree-12 profile, degree-24 mark):
+   D        audit 1.32749929703765   memo 1.32749929703765   diff -4.4e-16
+   kappa    audit 0.01177762039670   memo 0.01177762039670   diff -5.5e-16
+   kappa_a  audit 0.02022781321611   memo 0.02022781321611   diff 3.5e-16
+   QA       audit 1.62343800717028   memo 1.62343800717028   diff -2.7e-15
+   Q        audit 0.39896365069147   memo 0.39896365069147   diff -2.8e-16
+   cosine: general d(x) at 0,1/4,1/2 = [ 0.051606  0.011845 -0.027159] ; Euler form diff 1.6e-15
+   Taylor-8: general d(x) at 0,1/4,1/2 = [ 0.051606  0.011845 -0.027159] ; Euler form diff 9.6e-09
+
+==============================================================================
+[4] sup|phi| and the range of the mark (dense grid + second-derivative bound)
+==============================================================================
+phi: max on grid 1.0001753121 ; |phi''|<=1.045e+08 ; rigorous-ish sup bound 1.0001761299 (memo 1.0001797009)
+     phi(0)=0.999128 phi(1/2)=-0.954192
+mark a: min -0.20001661 max 0.99999802 on grid (|a''|<=3.44e+04, grid slack 1.1e-10); need 1-beta=-0.20020 < a < 1
+
+==============================================================================
+[5] scalar margins from the audit's own values
+==============================================================================
+multiwindow: C_phi=6.4908013157 q=6.0010782054 margin at 1/64200 = 9.606252e-07
+   largest certifiable delta0 = 1/64106.9 ; proportion 2-D(u)+1/64200 = 0.6725162800034
+triple: C=9.3993289381 margin at 1/216600 = 1.618788e-07 ; largest delta0 = 1/216514.3 ; proportion 0.6725053197675
+control (unmarked, sharpened (6)): largest delta0 = 1/271802.3
+
+==============================================================================
+[6] operator algebra: identities (zero-diagonal matrices) and full inequalities
+==============================================================================
+identity (3.2), tr G^3 Phi = 2Re tr(V*Y(V,V)), ||W||_4^4=tr(H^2K^2)/2, tr HK^2=trH^3/3: max residual 3.4e-13
+||W Phi W||_2^2 <= ||phi||^2 ||W||_4^4 on 200 random cases: OK
+discretized continuous configurations (M=500, simple/double/off-line pairs, 60 cases):
+   multiwindow Thm 3.2: max(lhs-rhs)=-1.237e-01, max lhs/rhs=0.065
+   triple Thm 5.1     : max(lhs-rhs)=-1.275e-01, max lhs/rhs=0.030
+
+all assertions passed (22s)

@@ -3,6 +3,14 @@
 > Research artifact. Not maintained and not accepting contributions.
 > A Lean 4 formalization released as a static companion artifact to the paper.
 
+Research update (2026-10-03): a [localized cubic certificate](docs/research/multiwindow_20261003.md)
+raises the proposed bound to **67.25162800%** (`2 - D(u) + 1/64200`), with
+an independent [referee audit](docs/research/weighted_transfer_audit_20261003.md)
+of its weighted limits. It has the same status as the previous frontier:
+written proofs and exact rational checks, not a machine-checked headline.
+The [2026-10-03 record](docs/research/research_20261003.md) also isolates one
+point-configuration inequality worth 67.908% if proved, and closes four routes.
+
 Research update (2026-09-05): a new
 [sharpened ordered-moment derivation](docs/research/sharpened_cubic_gain_20260905.md)
 gives a proposed **67.2504382097%** bound. The analytic proof and operator
