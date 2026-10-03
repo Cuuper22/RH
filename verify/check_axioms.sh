@@ -113,6 +113,7 @@ for audit in \
   comparator/PrintAxioms/RSBlockMomentBridge.lean \
   comparator/PrintAxioms/ShiuMajorantQuarter.lean \
   comparator/PrintAxioms/ShiuNoGo.lean \
+  comparator/PrintAxioms/SignedPairNoGo.lean \
   comparator/PrintAxioms/TopHatMoments.lean \
   comparator/PrintAxioms/TrimmedMoment.lean
 do

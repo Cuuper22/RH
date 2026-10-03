@@ -25,8 +25,13 @@ false for every `σ > 1`: its independently quantified `IV = 0`, with
 bound. Consequently the legacy axiom layer below is mathematically
 inconsistent, not merely conditional on an open estimate. This ordinary
 mathematical refutation is recorded in the
-[current research note](docs/research/research_20260905.md); it has not yet
-been formalized in Lean. The separate `Zeta23` base is unaffected.
+[current research note](docs/research/research_20260905.md) and is now a
+Lean theorem: `RH.Zeta85.not_signedPairTraceGrade`
+(`RH/Zeta85/Discharge/SignedPairNoGo.lean`) proves `¬ SignedPairTraceGrade σ`
+for every `σ > 1` with only `propext`, `Classical.choice`, `Quot.sound`.
+`RH/Zeta85/Discharge/SignedPairInconsistency.lean` derives `False` from
+`signedPair_traceGrade_lt_5_4` alone, and from `signedPair_traceGrade_lt_3_2`
+together with `shiu_majorant₂`. The separate `Zeta23` base is unaffected.
 
 The target is the unconditional base-repository standard: comparator-validated
 headline theorems whose `#print axioms` output is exactly

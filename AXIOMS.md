@@ -5,8 +5,12 @@ axiom layer is mathematically inconsistent. Set `w = V = 1`, `IV = 0` in
 `SignedPairTraceGrade σ`; Chebyshev and a block-pair inequality give
 `≫ XH`, contradicting the claimed `O(X log⁻ᴬ T)` for every `σ > 1`.
 See the [proof](docs/research/research_20260905.md).
-This is an ordinary mathematical refutation, not a new Lean theorem;
-the compiled dependency lists below are retained as provenance.
+The refutation is now formalized: `RH.Zeta85.not_signedPairTraceGrade`
+(`RH/Zeta85/Discharge/SignedPairNoGo.lean`, standard axioms only) proves
+`¬ SignedPairTraceGrade σ` for every `σ > 1`, and
+`RH/Zeta85/Discharge/SignedPairInconsistency.lean` derives `False` from A2
+alone and from A3 with A1. The compiled dependency lists below are retained
+as provenance.
 
 ## Table of contents
 
