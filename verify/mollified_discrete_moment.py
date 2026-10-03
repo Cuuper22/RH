@@ -240,13 +240,22 @@ def min_s(p, e0, c1=c1f, c2=c2f, grid=4001):
     """inf over pairs data of |S|/N subject to S1=c1, S2=c2 (units), |U|^2<=p(E+V),
     -E<=V<=E, E<=e0.  |S| >= (c1-u)^2/(c2-v)."""
     best = 1.0
+    if p == 0:
+        e0 = 0.0                     # no pairs: no off-line energy at all
     for i in range(grid):
         e = e0 * i / (grid - 1)
         for j in range(201):
             v = -e + 2 * e * j / 200
+            Y = c2 - v                      # = sum_S |F|^2 / (N L^2), must be >= 0
+            if Y < 0:
+                continue                    # infeasible configuration
             umax = math.sqrt(max(p * (e + v), 0.0))
+            if Y == 0:
+                if umax >= c1:
+                    best = 0.0
+                continue
             u = min(c1, umax)
-            s = (c1 - u) ** 2 / (c2 - v) if c2 - v > 0 else 0.0
+            s = (c1 - u) ** 2 / Y
             best = min(best, s)
     return best
 
@@ -257,7 +266,7 @@ for p in [0.0, 0.001, 0.01, 0.05, 0.16375]:
     row = [min_s(p, e0) for e0 in [0.0, 0.01, 0.02, 0.04, 0.08, 0.16, 0.32, 1.0]]
     say("    %-8.5f" % p + "".join("  %.4f" % r for r in row))
 say("  (p = 0.16375 is the largest pair fraction allowed by the repo's 0.6725 simple-on-line theorem;")
-say("   row p=0 is the RH case e0 irrelevant: 19/27 = 0.7037.)")
+say("   row p=0 has no pairs, hence E_off=0 and the RH value 19/27 = 0.7037 for every cap.)")
 
 # ----------------------------------------------------------------------------
 say()
