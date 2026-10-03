@@ -320,6 +320,31 @@ I have checked that the slot bookkeeping carries over to signed smooth
 vertex weights with the same strict support gap. This multilinear
 transfer has not been independently audited.
 
+*Independent NUMERICAL checks (verifier [F]).*
+(i) Cubic. Full-circle CUE in mode space samples traces exactly. With
+`N=200` and 600 samples (run during development), it gave
+`kappa_phi=0.02008+-0.00027` for `phi=1-8x^2` (formula 0.02009) and
+`-0.00422+-0.00015` for `phi=4x^2` (formula -0.00416). The sign change
+of the local density is therefore real for sine-kernel statistics.
+(ii) Ordered quartic. Matrix discretizations of the triangular
+truncation are unreliable unless the diagonal peak (width `1/N`, height
+`N`) is resolved and given trapezoid weight 1/2. Without this, the
+error is `O(hN)`. My first CUE attempts failed for exactly this reason;
+they are not evidence against the formula. With eigenvalues restricted
+to a half-circle (a height window), a fine grid and trapezoid
+truncation, I ran `Nc=80, 160, 320` (about 40, 80, 160 points). The
+results were `Q=0.382, 0.395, 0.390` (formula 0.3990) and
+`E_Y(1-8x^2)=1.167, 1.212, 1.230` (formula 1.2728). The ratio
+`E_Y/9Q` was 0.341, 0.342, 0.351 (formula 0.3545). The values approach
+the formula from below, slowly.
+(iii) The exact lattice reduction (no fluctuations in band) isolates the
+`C0` term. For a flat window, `||V^2||^2 = u^4 int_0^lam (lam-s)|K_+*K_+(s)|^2 ds`.
+At `lam=0.8` this gives 0.293, 0.304, 0.312 for `M=40, 80, 160`,
+increasing to `C0/lam^3=0.3255`. In the continuum,
+`int_0^R |k_+*k_+|^2` equals 0.1608, 0.1646, 0.1660 at `R=50, 200, 800`,
+tending to `C0=1/6`. These checks are consistent with the formulas.
+They are slow, logarithmic-rate finite-size tests, not proofs.
+
 **3.4 (NUMERICAL, then CHECKED) Selecting `phi` and the exact
 certificate.** For fixed `u` and `c=0`, maximizing `kappa_phi/C_phi` is
 a second-order cone program. `kappa_phi` is linear in `phi`, `E_Y` and
@@ -394,5 +419,15 @@ memo's inequality (6) excludes `delta<=1/272000`, reproducing the
 * *What would refute §3.* An error in the `R` block formula, in the
   `||W||_4^4` identity, or in the slot assignment of `Q`. The first two
   are checked to machine precision. For the third, the flat and cosine
-  reproductions check only the diagonal (`phi=1`) case of the
-  polarization; the weighted case relies on the bookkeeping in §3.3.
+  reproductions test only `phi=1`. The weighted case relies on the
+  bookkeeping in §3.3, supported by the arc-CUE trend in §3.3(ii). That
+  trend approaches the formula, but only at about the 3% level for the
+  sizes run.
+* *Sensitivity (NUMERICAL).* `E_Y` is the least-validated input, and it
+  enters only through `sqrt(E_Y)` in `C_phi`. Inflating it by a factor
+  `1+epsilon` (other inputs fixed) moves the certifiable `delta_0` as
+  follows: `1/64107` at `epsilon=0`, `1/66007` at 10%, `1/73087` at
+  50%, `1/81117` at 100%. The improvement over `1/271803` survives
+  unless `E_Y` is about 20 times too small. The specific value `1/64200`
+  tolerates only a 0.48% inflation. The CUE evidence shows finite-size
+  values *below* the formula, which is the safe direction.

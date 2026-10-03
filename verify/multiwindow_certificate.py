@@ -22,6 +22,9 @@ Companion to docs/research/multiwindow_20261003.md.  Sections and labels:
       off-band Bochner positivity of the form factor.
   [E] NUMERICAL (optional, needs cvxpy, flag --socp): the SOCP that selects
       the best multiplier phi in an even Legendre basis.
+  [F] NUMERICAL: independent checks of the vertex-weighted formulas against
+      CUE (full circle for traces; half-circle arc + fine grid for ordered
+      norms) and the exact lattice reduction of the C0 term.
 
 Run:  python3 verify/multiwindow_certificate.py [--socp]
 """
@@ -480,5 +483,83 @@ if "--socp" in sys.argv:
         val = kv @ a.value
         print("  K=%d (degree %2d): max kappa/C = %.6f, (kappa/C)^2 = 1/%.0f"
               % (K, 2 * K, val, 1 / val ** 2), flush=True)
+
+# ---------------------------------------------------------------------------
+# [F] independent random-matrix checks of the vertex-weighted formulas
+# ---------------------------------------------------------------------------
+hdr("[F] NUMERICAL: independent checks (CUE, lattice) of the weighted formulas")
+rngF = np.random.default_rng(17)
+
+
+def haar(Nn):
+    Zg = (rngF.normal(size=(Nn, Nn)) + 1j * rngF.normal(size=(Nn, Nn))) / np.sqrt(2)
+    Qm, Rm = np.linalg.qr(Zg)
+    return Qm * (np.diag(Rm) / abs(np.diag(Rm)))
+
+
+# (F1) localized cubic defect: full-circle CUE in mode space samples traces exactly
+Nn, SAMP = 160, 300
+ks = np.arange(-(Nn // 2), Nn // 2 + 1)
+xk = ks / Nn
+uk = ucos(xk) / Nn
+tests = {"1": lambda s: np.ones_like(s), "1-8x^2": lambda s: 1 - 8 * s ** 2,
+         "4x^2": lambda s: (2 * s) ** 2}
+accF = {k: [] for k in tests}
+for _ in range(SAMP):
+    th = np.angle(np.linalg.eigvals(haar(Nn)))
+    trU = np.exp(1j * np.outer(np.arange(-Nn, Nn + 1), th)).sum(1)
+    Gm = np.sqrt(np.outer(uk, uk)) * trU[(ks[:, None] - ks[None, :]) + Nn]
+    pG = Gm @ Gm @ Gm - 3 * Gm @ Gm + 2 * Gm
+    for k, f in tests.items():
+        accF[k].append(-np.real(np.sum(np.diag(pG) * f(xk))) / Nn)
+for k, f in tests.items():
+    v = np.array(accF[k])
+    print("  kappa_phi, phi=%-7s CUE N=%d (%d samples): %.5f +- %.5f   formula %.5f"
+          % (k, Nn, SAMP, v.mean(), v.std() / np.sqrt(SAMP), kappa_phi(ucos, f)))
+
+# (F2) ordered quartic E_Y: eigenvalues on a half-circle arc (a height window),
+# continuous frequency grid, trapezoid-corrected triangular truncation.
+phiF = lambda s: 1 - 8 * s ** 2  # noqa: E731
+EYth, Qth = EY(ucos, phiF), Qc
+for Nc, ng, smp in [(80, 800, 24), (160, 1600, 12)]:
+    xg = np.linspace(-0.5, 0.5, ng)
+    hg = xg[1] - xg[0]
+    wg = np.full(ng, hg)
+    wg[0] = wg[-1] = hg / 2
+    pg = phiF(xg)
+    Qs, Es = [], []
+    for _ in range(smp):
+        th = np.angle(np.linalg.eigvals(haar(Nc)))
+        th = th[np.abs(th) < np.pi / 2]
+        Fm = np.sqrt(ucos(xg) * wg)[:, None] * np.exp(2j * np.pi * np.outer(xg, Nc * th / (2 * np.pi)))
+        Gm = Fm @ Fm.conj().T
+        Vm = np.tril(Gm, -1) + np.diag(np.diag(Gm)) / 2
+        V2 = Vm @ Vm
+        Ym = pg[:, None] * V2 + Vm @ (pg[:, None] * Vm) + V2 * pg[None, :]
+        Qs.append(np.linalg.norm(V2) ** 2 / len(th))
+        Es.append(np.linalg.norm(Ym) ** 2 / len(th))
+    Qs, Es = np.array(Qs), np.array(Es)
+    print("  arc-CUE Nc=%d (~%d pts): Q %.4f+-%.4f (formula %.4f)   E_Y(1-8x^2) %.4f+-%.4f (formula %.4f)"
+          % (Nc, Nc // 2, Qs.mean(), Qs.std() / np.sqrt(smp), Qth, Es.mean(), Es.std() / np.sqrt(smp), EYth))
+print("  (finite-size values approach the formulas from below; see the memo)")
+
+# (F3) lattice (no fluctuation in band): ordered quartic reduces exactly to
+# u^4 int_0^lam (lam-s)|K_+*K_+(s)|^2 ds -> C0 int u^4 = 1/(6 lam^3).
+lam = 0.8
+for Mm in [40, 80]:
+    jj = np.arange(Mm)
+    dd = jj[:, None] - jj[None, :]
+
+    def cK(s):
+        with np.errstate(divide="ignore", invalid="ignore"):
+            term = np.where(dd != 0, (np.exp(2j * np.pi * dd * s) - 1) / (2j * np.pi * np.where(dd != 0, dd, 1)), s)
+        return np.sum(np.exp(2j * np.pi * jj[None, :] * s) * term)
+    edges = np.linspace(0, lam, int(40 * Mm * lam) + 1)
+    tt, ww = leggauss(6)
+    tot = 0.0
+    for lo_, hi_ in zip(edges[:-1], edges[1:]):
+        ss = (hi_ - lo_) * (tt + 1) / 2 + lo_
+        tot += np.sum(ww * (hi_ - lo_) / 2 * (lam - ss) * np.array([abs(cK(s)) ** 2 for s in ss]))
+    print("  lattice M=%d: ||V^2||^2/M = %.4f   (limit C0/lam^3 = %.4f, log-slow)" % (Mm, tot / lam ** 4 / Mm, 1 / (6 * lam ** 3)))
 
 print("\ntotal time %.1fs" % (time.time() - T0))
