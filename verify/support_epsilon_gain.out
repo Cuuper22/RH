@@ -14,19 +14,3 @@ eps=0.5    D*(eps) in [1.1343257453233248067840830777428327925364742, 1.13432574
 
 == Part B: exact rational piecewise-polynomial certificates ==
 (upper bound D(u0) exact; lower bound D(u0) - ||r||^2/m with m = 1-2s^2/pi^2-2eps^2)
-Traceback (most recent call last):
-  File "/home/user/RH/verify/support_epsilon_gain.py", line 308, in <module>
-    main()
-  File "/home/user/RH/verify/support_epsilon_gain.py", line 264, in main
-    a_num, bp_num = fit_rational_params(eps)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/user/RH/verify/support_epsilon_gain.py", line 197, in fit_rational_params
-    e = mp.mpf(eps)
-        ^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/mpmath/ctx_mp_python.py", line 79, in __new__
-    v._mpf_ = mpf_pos(cls.mpf_convert_arg(val, prec, rounding), prec, rounding)
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/mpmath/ctx_mp_python.py", line 98, in mpf_convert_arg
-    raise TypeError("cannot create mpf from " + repr(x))
-TypeError: cannot create mpf from Fraction(1, 1000)
-exit 1

@@ -194,7 +194,8 @@ def convexity_constant(eps):
 
 def fit_rational_params(eps):
     """Rational a, b' from the high-precision closed form (A = 1)."""
-    e = mp.mpf(eps)
+    eps = Fr(eps)
+    e = mp.mpf(eps.numerator) / eps.denominator
     x0 = (1 - e) / 2
     r2, r3 = mp.sqrt(2), mp.sqrt(3)
     M = mp.matrix([[mp.cos(e / 2), -mp.sin(r3 * e / 2)], [mp.sin(e / 2), r3 * mp.cos(r3 * e / 2)]])

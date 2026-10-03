@@ -250,3 +250,176 @@ A singular but integrable one-sided bound `F(alpha)<=c(alpha-1)^{-theta}`,
 an **averaged, one-sided, bounded** form factor just beyond `alpha=1`.
 (PROVED that (W) suffices for a positive gain; the size of the gain is
 NUMERICAL.)
+
+## 5. The weakest sufficient arithmetic statement, in prime terms — PROVED reduction
+
+Write the second trace through the accepted prime-side expansion
+(`terminal_bandpass_bridge_20260905.md`, (1)–(4)): with
+`phi(y)^2=u(y/ell)`, the only term not controlled at support `1+eps` is
+the genuine off-diagonal
+
+```
+O_T = (1/2pi^2) sum_{n != m <= X} Lambda(n)Lambda(m)/sqrt(nm) A^-_Phi(T; log n, log m),
+X = T^{1+eps},
+```
+
+normalised by `Q_T = T ell^3/(2pi)`. The kernel `A^-` localises
+`|log(n/m)| <~ 1/T`, and the profile weight `g(log n)` restricts the
+strip contribution to `T < n <= T^{1+eps}`. Hence, on the strip, `O_T` is a
+sum over shifted prime pairs
+
+```
+sum_{T<n<=T^{1+eps}} sum_{0<|h| <~ n/T} Lambda(n) Lambda(n+h) w_T(n,h),      (5.1)
+```
+
+with shifts `|h| <= n/T in [1, T^eps]` and a signed Schwartz shift weight
+`w_T` of total mass zero in `h` (the kernel `k(s)=int chi(v)cos(vs)dv` of
+`mobius_energy_20260905.md`, Section 5). Therefore:
+
+**Statement (P).** There is a fixed `eps>0` and a fixed `C` such that
+
+```
+int_T^{2T} | sum_{T<n<=T^{1+eps}} Lambda(n) n^{-1/2-it} v(log n/log T) |^2 dt
+   <= C T sum_{T<n<=T^{1+eps}} Lambda(n)^2 v(log n/log T)^2 / n          (5.2)
+```
+
+for every fixed smooth `v` supported in `(1,1+eps)`. By the Fourier
+expansion of the height weight (the explicit formula, as in the base
+proof) (5.2) is the one-sided bound `F<=C'` on the strip in averaged form,
+hence (W) of Section 4, hence a positive gain. Conversely a gain through
+this certificate needs an upper bound of this type: the strip term is a
+positive-definite mean square minus its diagonal, and only its upper bound
+enters. (PROVED as a reduction; the constant bookkeeping `C -> C'` is the
+standard Montgomery convolution and is not re-derived here.)
+
+Montgomery--Vaughan gives (5.2) with `C T` replaced by `T + O(T^{1+eps})`,
+i.e. it loses exactly `T^eps`. That `T^eps` is the whole problem: the
+liminf statement needs a fixed `eps`, so no `eps=eps_T -> 0` trick helps
+(`T^{eps_T}=O(1)` forces `eps_T << 1/log T` and the gain `0.68 eps_T` vanishes).
+
+**Equivalent short-interval form.** Set `N=T^{1+eps}` and `h=N/T=T^eps`. By
+the Goldston--Montgomery correspondence (Tauberian lemmas with positive
+kernels, Goldston--Montgomery 1987), (5.2) for all `v` is equivalent, up to
+constants, to
+
+```
+int_N^{2N} ( psi(x+h) - psi(x) - h )^2 dx <= C'' h N log N,
+h = N^theta,  theta in (0, eps/(1+eps)],                                  (5.3)
+```
+
+uniformly for the small exponents `theta`. (The asymptotic version
+`~ hN log(N/h)` is exactly `F->1`; the one-sided bounded version with
+`C''>1` is what (W) needs. I have not re-derived the constant transfer in
+the Tauberian lemmas; the equivalence of *bounded* versions is stated here
+as the standard reading of those lemmas, CONJECTURE-level only in the
+constant, PROVED in the exponent range.)
+
+## 6. Comparison with what is known; averaging ansätze — REFUTED / closed
+
+1. **Variance of primes in short intervals.** Unconditionally the mean
+   square (5.3) is known as an *upper bound* with an extra logarithm,
+   `<< hN log^2 N`, and only for `h >= N^{1/6+delta}` (Saffari--Vaughan via
+   Huxley's zero density; Guth--Maynard's density improves the exponent but
+   not the logarithm). Under RH Selberg's bound is also `<< hN log^2`.
+   The extra logarithm comes from treating the zero sum
+   `sum_rho x^rho (( 1+h/x)^rho - 1)/rho` by the Hilbert inequality, which
+   charges each zero its `1/log` spacing. Removing it *is* the
+   pair-correlation input (Goldston--Montgomery), so the circle cannot be
+   broken from this side. Moreover the required range `theta <= eps/(1+eps)`
+   is the very short one (`h = T^eps`), where even the `log^2` bound is
+   unknown for `theta<1/6`. In the exponent language of the repository:
+   `h >= N^{1/6}` corresponds to `alpha >= 6/5`, while the certificate needs
+   the strip immediately above `alpha=1`.
+2. **Averaged Hardy--Littlewood sums.** (5.1) is a signed average of
+   `sum_n Lambda(n)Lambda(n+h)` over `|h| <= H = T^eps` at `n ~ T^{1+eps}`,
+   i.e. `H = X^{eps/(1+eps)}`. The averaged results (Mikawa, Perelli--Pintz,
+   Baier--Browning--Marasingha--Zhao, Matomäki--Radziwill--Tao type) need
+   `H >= X^{1/3+delta}` or at best `H >= X^{delta}` for *almost all* `h`
+   with an `o(X)` error only on average over `h` — but the signed weight
+   `w_T` has mass zero in `h`, so (5.1) is a **second-order** quantity: it is
+   the derivative-type term `-(1/2) int w(y)/y dy` of the singular-series
+   average `sum_{h<=H} S(h) = H - (1/2) log H + ...`. One needs the error in
+   the averaged Hardy--Littlewood asymptotic to be `o(X)` **per unit `h`**
+   after the signed average, i.e. of relative size `o(1/H)`. No averaged
+   result has that precision for any power range of `h`; this is the same
+   `X^{...}` gap the repository records at `.0785025` for its bandpass
+   model at `eta=.47`, now needed at every small `eta`.
+3. **Averaging over heights.** The quantity (5.2) is already a `t`-average
+   over `[T,2T]`. Longer `t`-ranges only move `T` and lose the dyadic
+   normalisation. A smooth height weight (the tapered Gabor compression of
+   `terminal_bandpass_bridge_20260905.md`) changes `A^-` to a Schwartz
+   kernel but leaves (5.2) as the required input. REFUTED as a route.
+4. **Twisting by characters / averaging over moduli.** Averaging the test
+   over `chi mod q`, `q<=Q`, replaces `n != m` by `n = m (mod q)` and turns
+   the off-diagonal into a Barban--Davenport--Halberstam / Hooley variance,
+   which **is** known with an asymptotic for `Q >= X^{1/2+delta}`. This is
+   the mechanism of Özlük's `q`-analogue of pair correlation (support
+   beyond one for the *family* of Dirichlet `L`-functions) and of the
+   Chandee--Lee--Liu--Radziwill asymptotic-large-sieve simple-zero results
+   (GRH there; the repository's complex-zero machinery would handle the
+   zero side unconditionally, as in Theorem E). But the conclusion is a
+   **family-averaged** proportion for `L(s,chi)`, and zeta is a single,
+   measure-zero member. Taking instead the union of zeros of `zeta` and
+   `L(s,chi)` (Dedekind zeta of a quadratic field) and averaging over the
+   family does not help zeta: the cross Gram block
+   `sum_{rho in zeta, rho' in chi} |uhat(L(z_rho-z_rho'))|^2` has an
+   archimedean main term `int u^2 N`-type that is **added** to the
+   second trace, so the union certificate is strictly worse than the
+   separate ones. REFUTED for zeta.
+5. **Weighting zeros by a short Dirichlet polynomial** (`w_rho=|M(rho)|^2`,
+   Conrey--Ghosh--Gonek style). The second trace becomes the *mollified*
+   pair correlation `sum_{rho,rho'} w_rho w_rho' |uhat|^2`; its diagonal is
+   a discrete fourth moment of `M` on the zeros and its off-diagonal a
+   mollified shifted-prime sum. Both are open unconditionally, and the
+   zero-side positivity (needed for complex zeros) is lost for non-real
+   weights. Legacy cycle 7 (`docs/run/10_...weighted_levinson...`) records
+   that the ordinary mollified second moment cannot recover the coupling.
+   Not pursued.
+6. **Using the sign.** The one-sided requirement is an *upper* bound on a
+   positive-definite quantity minus its diagonal; positivity of `F` only
+   gives the free direction (lower bounds). The Montgomery--Vaughan error
+   `theta sum n|a_n|^2`, `|theta|<=1`, is two-sided and is already the
+   sharp form of the Hilbert inequality for generic coefficients; the gain
+   must come from the primes, i.e. from (5.3). REFUTED as a free lunch.
+
+## 7. What was proved, what remains open
+
+* PROVED: closed form (2.5) for `g(eps)` under (H1); the first-order law
+  (2.8); the convexity constant (2.6) and dual bound (2.7); the exposure
+  lemma (4.1); the reduction of the needed input to (5.2)/(W); the
+  first-variation argument that any bounded one-sided strip bound gives a
+  positive gain.
+* CHECKED: table of Section 3 (interval closed form and exact rational
+  two-sided enclosures); positivity of all profiles; `g'(0+)` to 40 digits.
+* NUMERICAL: second-order coefficient; `g_C(eps)` table and the
+  `min(eps,1/C)` law's constants.
+* OPEN: statement (P)/(5.2) for any fixed `eps>0`, equivalently (5.3) with a
+  bounded constant for some fixed small `theta`. No attack found; the
+  precise obstruction is the `T^eps` of Montgomery--Vaughan versus the
+  `log T` of every zero-sum method, with Goldston--Montgomery showing these
+  are the same wall.
+
+## 8. Adversarial self-check
+
+* *Like with like?* The gain `g(eps)` is for the same certificate
+  (`2-D`, rank--trace, complex zeros) as the inherited `0.6725007...`; the
+  cubic add-on `1/271803` is excluded on both sides of the comparison
+  (Section 1). The legacy rungs at `eps=1/4,1/2` were recomputed from the
+  same closed form and agree to the printed digits, which cross-validates
+  the formula against an independent earlier derivation.
+* *Cherry-picking?* The table uses the five requested `eps` values; the
+  `C`-dependence uses a fixed grid and reports every value computed.
+* *Inference bridging a proof?* Two places: (i) the equivalence between
+  (5.2) and the bounded short-interval variance (5.3) is quoted from the
+  Goldston--Montgomery Tauberian lemmas without re-deriving the constant
+  transfer — flagged CONJECTURE in the constant; (ii) the statement that no
+  unconditional method gives `F(alpha)=O(1)` for fixed `alpha>1` is a
+  literature claim, not a theorem; it is consistent with every source
+  cited in this repository and with the structure of the two known
+  methods, but a reader should treat it as "no method known to me".
+* *Hidden positivity assumptions?* The dual bound (2.7) holds for signed
+  `u`, so the lower bounds on `inf D` are valid for the full admissible
+  class; the upper bounds use nonnegative `u_0` only.
+* *Does (W) really suffice?* The first-variation argument shows a strict
+  decrease of `D` for a one-parameter family; the second variation is
+  controlled by (2.6). The displayed size `c/C` is numerical.
