@@ -182,12 +182,26 @@ checks `(D_s^*-D^*(eps))/eps^3` stays bounded, NUMERICAL.)
 
 Part A of the verifier evaluates (2.5) in 40-digit interval arithmetic.
 Part B gives, for each `eps`, an explicit nonnegative **rational
-piecewise-polynomial** profile (degree-28 Taylor pieces of (2.3) with
+piecewise-polynomial** profile (Taylor pieces of order 20 of (2.3) with
 rational `a,b'=b sqrt3`), its exact cost `D(u_0)` (upper bound on `inf D`,
 hence a rigorous lower bound on `g`), and the exact dual bound (2.7) with
 `pi>314159/100000`. The two enclosures agree.
 
-TABLE_PLACEHOLDER
+| `eps` | `D*(eps)` (closed form, interval) | `g(eps)` | `(g-g(0))/eps` | gain / `(1/271803)` | exact profile: `D(u0)` and dual gap `||r||^2/m` |
+|---|---|---|---|---|---|
+| 0.001 | 1.32681552038371077077 | 0.67318447961628922923 | 0.68377594 | 185.85 | 1.326815520383710867, gap `< 6e-40` |
+| 0.01  | 1.32074856184348489678 | 0.67925143815651510322 | 0.67507345 | 1834.87 | 1.320748561843484881, gap `< 5e-39` |
+| 0.05  | 1.29556679582353748581 | 0.70443320417646251419 | 0.63865001 | 8679.35 | 1.295566795823537509, gap `< 2e-38` |
+| 0.1   | 1.26772553526854663448 | 0.73227446473145336552 | 0.59773761 | 16246.69 | 1.267725535268546588, gap `< 1e-39` |
+| 0.25  | 1.20278584707663061412 | 0.79721415292336938588 | 0.49885380 | 33897.49 | 1.202785847076630610, gap `< 3e-38` |
+| 0.5   | 1.13432574532332480678 | 0.86567425467667519322 | 0.38634710 | 52505.15 | (not certified in Part B) |
+
+All interval widths in Part A are below `10^-30`. In Part B the rational
+profiles have Taylor order 20 on each piece and rational `a, b'` with
+denominator `10^18`; positivity is certified by an exact root count on each
+piece (sympy `count_roots`), and every rigorous gain over `g(0)`
+(`g_lo - (2 - 13274992963/10^10)`) is strictly positive. Second-order
+coefficient of `g`: `-0.9804` (NUMERICAL, from `eps = 10^-5`).
 
 For comparison, the current frontier is `0.6725043820976` (cubic gain
 `1/271803 = 3.679e-6`). The support extension `eps=0.001` is worth
@@ -229,14 +243,28 @@ second variation `m||h||^2 ~ t^2/tau` then limits the gain to order `1/C`.
 Thus
 
 ```
-g_C(eps) - g(0)  ~  min( 0.68 eps,  c/C ),     c ~ 0.2,                  (4.2)
+g_C(eps) - g(0)  ~  min( 0.68 eps,  c/C ),     c ~ 0.3,                  (4.2)
 ```
 
 with no break-even threshold in `C`: any fixed bounded one-sided bound on
 any fixed strip gives a strictly positive gain. The verifier's Part C
 tabulates `g_C(eps)-g(0)` by a discretised QP (NUMERICAL):
 
-CTABLE_PLACEHOLDER
+C| `eps` | `D*(eps)` (closed form, interval) | `g(eps)` | `(g-g(0))/eps` | gain / `(1/271803)` | exact profile: `D(u0)` and dual gap `||r||^2/m` |
+|---|---|---|---|---|---|
+| 0.001 | 1.32681552038371077077 | 0.67318447961628922923 | 0.68377594 | 185.85 | 1.326815520383710867, gap `< 6e-40` |
+| 0.01  | 1.32074856184348489678 | 0.67925143815651510322 | 0.67507345 | 1834.87 | 1.320748561843484881, gap `< 5e-39` |
+| 0.05  | 1.29556679582353748581 | 0.70443320417646251419 | 0.63865001 | 8679.35 | 1.295566795823537509, gap `< 2e-38` |
+| 0.1   | 1.26772553526854663448 | 0.73227446473145336552 | 0.59773761 | 16246.69 | 1.267725535268546588, gap `< 1e-39` |
+| 0.25  | 1.20278584707663061412 | 0.79721415292336938588 | 0.49885380 | 33897.49 | 1.202785847076630610, gap `< 3e-38` |
+| 0.5   | 1.13432574532332480678 | 0.86567425467667519322 | 0.38634710 | 52505.15 | (not certified in Part B) |
+
+All interval widths in Part A are below `10^-30`. In Part B the rational
+profiles have Taylor order 20 on each piece and rational `a, b'` with
+denominator `10^18`; positivity is certified by an exact root count on each
+piece (sympy `count_roots`), and every rigorous gain over `g(0)`
+(`g_lo - (2 - 13274992963/10^10)`) is strictly positive. Second-order
+coefficient of `g`: `-0.9804` (NUMERICAL, from `eps = 10^-5`).
 
 A singular but integrable one-sided bound `F(alpha)<=c(alpha-1)^{-theta}`,
 `theta<1`, also gives a gain by the same first-variation computation

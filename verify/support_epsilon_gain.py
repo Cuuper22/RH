@@ -28,6 +28,8 @@ import numpy as np
 import sympy as sp
 from mpmath import iv, mp
 
+X = sp.symbols("x")
+
 mp.dps = 40
 iv.dps = 40
 
@@ -82,106 +84,162 @@ def g_prime_zero():
 
 
 # ---------------------------------------------------------------------------
-# Part B: exact rational piecewise-polynomial certificate
+# Part B: exact rational piecewise-polynomial certificate (Fraction arithmetic)
 # ---------------------------------------------------------------------------
-X, Y = sp.symbols("x y")
+# A polynomial is a list of Fractions, index = power.
+
+
+def padd(p, q):
+    n = max(len(p), len(q))
+    return [(p[i] if i < len(p) else 0) + (q[i] if i < len(q) else 0) for i in range(n)]
+
+
+def pscale(p, c):
+    return [c * a for a in p]
+
+
+def pmul(p, q):
+    out = [Fr(0)] * (len(p) + len(q) - 1)
+    for i, a in enumerate(p):
+        if a:
+            for j, b in enumerate(q):
+                out[i + j] += a * b
+    return out
+
+
+def pint(p):
+    """Antiderivative with zero constant term."""
+    return [Fr(0)] + [a / (i + 1) for i, a in enumerate(p)]
+
+
+def peval(p, x):
+    v = Fr(0)
+    for a in reversed(p):
+        v = v * x + a
+    return v
+
+
+def pdef(p, lo, hi):
+    P = pint(p)
+    return peval(P, hi) - peval(P, lo)
+
+
+def pshift(p, c):
+    """p(x + c) as a polynomial in x."""
+    out = [Fr(0)] * len(p)
+    for i, a in enumerate(p):
+        if a:
+            for k in range(i + 1):
+                out[k] += a * Fr(factorial(i), factorial(k) * factorial(i - k)) * c ** (i - k)
+    return out
+
+
+def pxmul(p):
+    return [Fr(0)] + list(p)
 
 
 def taylor_cos_sqrt2(J):
-    return sum(sp.Rational((-1) ** j * 2 ** j, factorial(2 * j)) * X ** (2 * j)
-               for j in range(J + 1))
+    p = [Fr(0)] * (2 * J + 1)
+    for j in range(J + 1):
+        p[2 * j] = Fr((-1) ** j * 2 ** j, factorial(2 * j))
+    return p
 
 
-def taylor_cos(z, J):
-    return sum(sp.Rational((-1) ** j, factorial(2 * j)) * z ** (2 * j)
-               for j in range(J + 1))
+def taylor_cos(J):
+    p = [Fr(0)] * (2 * J + 1)
+    for j in range(J + 1):
+        p[2 * j] = Fr((-1) ** j, factorial(2 * j))
+    return p
 
 
-def taylor_sin_sqrt3_over_sqrt3(z, J):
-    # sin(sqrt3 z)/sqrt3 = sum (-1)^j 3^j z^(2j+1)/(2j+1)!
-    return sum(sp.Rational((-1) ** j * 3 ** j, factorial(2 * j + 1)) * z ** (2 * j + 1)
-               for j in range(J + 1))
+def taylor_sin_sqrt3_over_sqrt3(J):
+    p = [Fr(0)] * (2 * J + 2)
+    for j in range(J + 1):
+        p[2 * j + 1] = Fr((-1) ** j * 3 ** j, factorial(2 * j + 1))
+    return p
 
 
-def rational_profile(eps, a_num, bp_num, J=14):
-    """Piecewise polynomial pieces [(interval, poly)] for width 1+eps.
+def rational_profile(eps, a_num, bp_num, J=10):
+    """Pieces [(lo, hi, poly)] on L, M, R for width 1+eps (A = 1).
 
-    a_num, bp_num: rational approximations of a and b' = b*sqrt3 (A = 1).
+    a_num, bp_num: rational approximations of a and b' = b*sqrt3.
     """
-    eps = sp.Rational(eps)
+    eps = Fr(eps)
     s = 1 + eps
     x0 = (1 - eps) / 2
-    pm = sp.expand(taylor_cos_sqrt2(J))
-    z = X - sp.Rational(1, 2)
-    pr = sp.expand(a_num * taylor_cos(z, J) + bp_num * taylor_sin_sqrt3_over_sqrt3(z, J))
-    pl = sp.expand(pr.subs(X, -X))
-    return [((-s / 2, -x0), pl), ((-x0, x0), pm), ((x0, s / 2), pr)]
+    pm = taylor_cos_sqrt2(J)
+    f = padd(pscale(taylor_cos(J), a_num), pscale(taylor_sin_sqrt3_over_sqrt3(J), bp_num))
+    pr = pshift(f, -Fr(1, 2))                       # f(x - 1/2)
+    pl = [a * (-1) ** i for i, a in enumerate(pr)]  # pr(-x)
+    return [(-s / 2, -x0, pl), (-x0, x0, pm), (x0, s / 2, pr)]
 
 
 def check_positive(pieces):
-    for (lo, hi), p in pieces:
-        poly = sp.Poly(p, X)
-        assert poly.count_roots(lo, hi) == 0, "root inside piece"
-        assert p.subs(X, (lo + hi) / 2) > 0
+    for lo, hi, p in pieces:
+        poly = sp.Poly([sp.Rational(a.numerator, a.denominator) for a in reversed(p)], X)
+        assert poly.count_roots(sp.Rational(lo.numerator, lo.denominator),
+                                sp.Rational(hi.numerator, hi.denominator)) == 0
+        assert peval(p, (lo + hi) / 2) > 0
 
 
-def integrate_piece(p, lo, hi):
-    return sp.integrate(p, (X, lo, hi))
+def left_abs_integral(p, lo, x_poly_shift=None):
+    """Polynomial in x equal to int_lo^x (x - y) p(y) dy."""
+    Q, R = pint(p), pint(pxmul(p))
+    # x*(Q(x)-Q(lo)) - (R(x)-R(lo))
+    term = padd(pxmul(padd(Q, [-peval(Q, lo)])), pscale(padd(R, [-peval(R, lo)]), Fr(-1)))
+    return term
 
 
-def cost_exact(pieces, eps):
-    """Exact D(u) for u = P/mass with K = min(|t|,1); also returns pieces of u."""
-    eps = sp.Rational(eps)
-    s = 1 + eps
-    mass = sum(integrate_piece(p, lo, hi) for (lo, hi), p in pieces)
-    u_pieces = [((lo, hi), sp.expand(p / mass)) for (lo, hi), p in pieces]
-    i2 = sum(integrate_piece(p ** 2, lo, hi) for (lo, hi), p in u_pieces)
-    # iint |x-y| u u = 2 * sum over ordered pairs x>y
-    abs_part = 0
-    for i, ((lo_i, hi_i), p_i) in enumerate(u_pieces):
-        # same piece: x in [lo_i,hi_i], y in [lo_i, x]
-        inner = sp.integrate((X - Y) * p_i * p_i.subs(X, Y), (Y, lo_i, X))
-        abs_part += sp.integrate(inner, (X, lo_i, hi_i))
-        for j in range(i):
-            (lo_j, hi_j), p_j = u_pieces[j]
-            inner = sp.integrate((X - Y) * p_i * p_j.subs(X, Y), (Y, lo_j, hi_j))
-            abs_part += sp.integrate(inner, (X, lo_i, hi_i))
-    abs_part = 2 * abs_part
-    # saturation: subtract 2 * int_{x in R} int_{y in L, y < x-1} (x-y-1) u u
-    (lo_l, hi_l), p_l = u_pieces[0]
-    (lo_r, hi_r), p_r = u_pieces[2]
-    inner = sp.integrate((X - Y - 1) * p_r * p_l.subs(X, Y), (Y, lo_l, X - 1))
-    sat = 2 * sp.integrate(inner, (X, lo_r, hi_r))
-    D = sp.nsimplify(i2 + abs_part - sat)
-    return sp.Rational(D), u_pieces
+def right_abs_integral(p, hi):
+    """Polynomial in x equal to int_x^hi (y - x) p(y) dy."""
+    Q, R = pint(p), pint(pxmul(p))
+    return padd(padd([peval(R, hi)], pscale(R, Fr(-1))),
+                pscale(pxmul(padd([peval(Q, hi)], pscale(Q, Fr(-1)))), Fr(-1)))
 
 
-def residual_norm_sq(u_pieces, eps):
-    """Exact ||u + K*u - c||_2^2 with c the mean of u + K*u on the window."""
-    eps = sp.Rational(eps)
-    s = 1 + eps
-    (lo_l, hi_l), p_l = u_pieces[0]
-    (lo_r, hi_r), p_r = u_pieces[2]
-    ku = []
-    for i, ((lo_i, hi_i), p_i) in enumerate(u_pieces):
-        val = 0
-        for j, ((lo_j, hi_j), p_j) in enumerate(u_pieces):
-            if j < i:
-                val += sp.integrate((X - Y) * p_j.subs(X, Y), (Y, lo_j, hi_j))
-            elif j > i:
-                val += sp.integrate((Y - X) * p_j.subs(X, Y), (Y, lo_j, hi_j))
+def ku_pieces(u_pieces, eps):
+    """(K*u) on each piece as a polynomial, K = min(|t|,1)."""
+    lo_l, hi_l, p_l = u_pieces[0]
+    lo_r, hi_r, p_r = u_pieces[2]
+    out = []
+    for i, (lo_i, hi_i, p_i) in enumerate(u_pieces):
+        val = [Fr(0)]
+        for j, (lo_j, hi_j, p_j) in enumerate(u_pieces):
+            m0, m1 = pdef(p_j, lo_j, hi_j), pdef(pxmul(p_j), lo_j, hi_j)
+            if j < i:      # int (x - y) p_j = x m0 - m1
+                val = padd(val, [-m1, m0])
+            elif j > i:    # int (y - x) p_j = m1 - x m0
+                val = padd(val, [m1, -m0])
             else:
-                val += sp.integrate((X - Y) * p_i.subs(X, Y), (Y, lo_i, X))
-                val += sp.integrate((Y - X) * p_i.subs(X, Y), (Y, X, hi_i))
-        if i == 2:   # right collar: y < x-1 lies in the left collar
-            val -= sp.integrate((X - Y - 1) * p_l.subs(X, Y), (Y, lo_l, X - 1))
-        if i == 0:   # left collar: y > x+1 lies in the right collar
-            val -= sp.integrate((Y - X - 1) * p_r.subs(X, Y), (Y, X + 1, hi_r))
-        ku.append(sp.expand(p_i + val))
-    c = sum(integrate_piece(q, lo, hi) for ((lo, hi), _), q in zip(u_pieces, ku)) / s
-    rr = sum(integrate_piece(sp.expand((q - c) ** 2), lo, hi)
-             for ((lo, hi), _), q in zip(u_pieces, ku))
-    return sp.Rational(sp.nsimplify(rr)), sp.Rational(sp.nsimplify(c))
+                val = padd(val, left_abs_integral(p_i, lo_i))
+                val = padd(val, right_abs_integral(p_i, hi_i))
+        if i == 2:
+            # subtract int_{lo_l}^{x-1} (x-1-y) p_l(y) dy  =  G(x-1), G(z)=int_{lo_l}^{z}(z-y)p_l
+            G = left_abs_integral(p_l, lo_l)
+            val = padd(val, pscale(pshift(G, Fr(-1)), Fr(-1)))
+        if i == 0:
+            # subtract int_{x+1}^{hi_r} (y-x-1) p_r(y) dy = H(x+1), H(z)=int_z^{hi_r}(y-z)p_r
+            H = right_abs_integral(p_r, hi_r)
+            val = padd(val, pscale(pshift(H, Fr(1)), Fr(-1)))
+        out.append(val)
+    return out
+
+
+def cost_and_residual(pieces, eps):
+    """Exact D(u) for u = P/mass, and exact ||u + K*u - c||^2."""
+    eps = Fr(eps)
+    s = 1 + eps
+    mass = sum(pdef(p, lo, hi) for lo, hi, p in pieces)
+    u_pieces = [(lo, hi, pscale(p, 1 / mass)) for lo, hi, p in pieces]
+    ku = ku_pieces(u_pieces, eps)
+    # D = int u (u + K*u)
+    D = sum(pdef(pmul(p, padd(p, k)), lo, hi) for (lo, hi, p), k in zip(u_pieces, ku))
+    c = sum(pdef(padd(p, k), lo, hi) for (lo, hi, p), k in zip(u_pieces, ku)) / s
+    rr = Fr(0)
+    for (lo, hi, p), k in zip(u_pieces, ku):
+        r = padd(padd(p, k), [-c])
+        rr += pdef(pmul(r, r), lo, hi)
+    return D, rr, c
 
 
 def convexity_constant(eps):
@@ -202,8 +260,7 @@ def fit_rational_params(eps):
     rhs = mp.matrix([mp.cos(r2 * x0), -r2 * mp.sin(r2 * x0)])
     a, b = mp.lu_solve(M, rhs)
     scale = 10 ** 18
-    return (sp.Rational(int(mp.nint(a * scale)), scale),
-            sp.Rational(int(mp.nint(b * r3 * scale)), scale))
+    return Fr(int(mp.nint(a * scale)), scale), Fr(int(mp.nint(b * r3 * scale)), scale)
 
 
 # ---------------------------------------------------------------------------
@@ -211,8 +268,14 @@ def fit_rational_params(eps):
 # ---------------------------------------------------------------------------
 
 
-def qp(eps, C=1.0, n=900):
-    """Piecewise-constant discretisation of inf D with K=C on 1<|t|<=1+eps."""
+def qp(eps, C=1.0, n=900, iters=4000):
+    """Piecewise-constant discretisation of inf D with K=C on 1<|t|<=1+eps.
+
+    Monotone projected-gradient descent on the simplex, started from the
+    (admissible) width-one Montgomery--Taylor cosine, so the returned value is
+    always the cost of a feasible profile (an upper bound on inf D, hence the
+    reported gain is a valid lower bound and is >= 0 up to discretisation).
+    """
     s = 1 + eps
     h = s / n
     x = -s / 2 + h * (np.arange(n) + 0.5)
@@ -220,17 +283,39 @@ def qp(eps, C=1.0, n=900):
     K = np.where(T <= 1, T, C)
     K[np.arange(n), np.arange(n)] = h / 3
     Q = h * np.eye(n) + h * h * K
-    active = np.ones(n, bool)
-    u = None
-    for _ in range(60):
-        idx = np.where(active)[0]
-        v = np.linalg.solve(Q[np.ix_(idx, idx)], np.ones(len(idx)))
-        u = np.zeros(n)
-        u[idx] = v / (h * v.sum())
-        if (u[idx] >= -1e-12).all():
-            break
-        active[idx[u[idx] < 0]] = False
-    return float(u @ Q @ u), u, x
+    # start: cosine on |x|<=1/2
+    u = np.where(np.abs(x) <= 0.5, np.cos(np.sqrt(2) * x), 0.0)
+    u /= h * u.sum()
+    L = np.linalg.norm(Q, 2) * 2
+    step = 1.0 / L
+
+    def project(v):
+        # Euclidean projection onto {v >= 0, h*sum v = 1}
+        target = 1.0 / h
+        w = np.sort(v)[::-1]
+        css = np.cumsum(w)
+        k = np.arange(1, n + 1)
+        cond = w - (css - target) / k > 0
+        rho = k[cond][-1]
+        theta = (css[rho - 1] - target) / rho
+        return np.maximum(v - theta, 0.0)
+
+    f = u @ Q @ u
+    y, t = u.copy(), 1.0
+    for _ in range(iters):
+        g = 2 * Q @ y
+        u_new = project(y - step * g)
+        f_new = u_new @ Q @ u_new
+        if f_new > f:                      # monotone safeguard: restart momentum
+            y, t = u.copy(), 1.0
+            u_new = project(u - step * (2 * Q @ u))
+            f_new = u_new @ Q @ u_new
+            if f_new > f:
+                break
+        t_new = (1 + np.sqrt(1 + 4 * t * t)) / 2
+        y = u_new + ((t - 1) / t_new) * (u_new - u)
+        u, f, t = u_new, f_new, t_new
+    return float(f), u, x
 
 
 # ---------------------------------------------------------------------------
@@ -263,17 +348,17 @@ def main():
     print("(upper bound D(u0) exact; lower bound D(u0) - ||r||^2/m with m = 1-2s^2/pi^2-2eps^2)")
     for eps in EPS_TABLE:
         a_num, bp_num = fit_rational_params(eps)
-        pieces = rational_profile(eps, a_num, bp_num, J=14)
+        pieces = rational_profile(eps, a_num, bp_num, J=10)
         check_positive(pieces)
-        D_up, u_pieces = cost_exact(pieces, eps)
-        rr, c = residual_norm_sq(u_pieces, eps)
+        D_up, rr, c = cost_and_residual(pieces, eps)
         m = convexity_constant(eps)
         assert m > 0
-        D_lo = D_up - Fr(rr) / m
+        D_lo = D_up - rr / m
         g_lo, g_hi = 2 - D_up, 2 - D_lo
-        Dcf, _ = rows[eps][0], None
-        # consistency with Part A
-        assert float(D_lo) <= float(Dcf.b) and float(D_up) >= float(Dcf.a), "enclosures disagree"
+        Dcf = rows[eps][0]
+        # consistency with Part A (interval endpoints are mpf; compare through decimal strings)
+        cf_lo, cf_hi = (Fr(t.strip()) for t in mpmath.nstr(Dcf, 40).strip('[]').split(','))
+        assert D_lo <= cf_hi + Fr(1, 10 ** 30) and D_up >= cf_lo - Fr(1, 10 ** 30), "enclosures disagree"
         D1_lo = Fr(13274992963, 10 ** 10)          # rational lower bound of D_1
         assert D1.a > mp.mpf(D1_lo.numerator) / D1_lo.denominator
         gain_lo = g_lo - (2 - D1_lo)              # rigorous strict gain over g(0)
@@ -282,24 +367,25 @@ def main():
               f"  => D* in [{float(D_lo):.18f}, {float(D_up):.18f}]")
         print(f"          g(eps) in [{float(g_lo):.16f}, {float(g_hi):.16f}];  rigorous gain over g(0) >= "
               f"{float(gain_lo):.12e}  = {float(gain_lo * 271803):.1f} x (1/271803)")
+        print(f"          profile: a={a_num}, b'={bp_num} (A=1, Taylor order 20)")
 
     print("\n== Part C: floating diagnostics (NUMERICAL) ==")
     g0f = float(g0.mid)
     for eps in [0.001, 0.01, 0.05, 0.1, 0.25]:
-        Dq, _, _ = qp(eps, 1.0, 900)
+        Dq, _, _ = qp(eps, 1.0, 600)
         print(f"eps={eps:<6} QP D={Dq:.9f}  (closed form {mpmath.nstr(rows[Fr(str(eps))][0].mid, 10)})")
     print("gain g_C(eps)-g(0) when only F <= C is known on 1<|alpha|<=1+eps:")
     for eps in [0.01, 0.05, 0.1, 0.25]:
         row = []
         for C in [1, 2, 5, 10, 30, 100]:
-            Dq, _, _ = qp(eps, C, 700)
+            Dq, _, _ = qp(eps, C, 500)
             row.append((C, round(2 - Dq - g0f, 7)))
         print(f"  eps={eps}: {row}")
     print("best gain over eps for fixed C (law ~ const/C):")
     for C in [5, 10, 30, 100]:
         best = (0, 0)
         for eps in np.concatenate([np.linspace(0.004, 0.1, 13), np.linspace(0.15, 0.6, 10)]):
-            Dq, _, _ = qp(eps, C, 500)
+            Dq, _, _ = qp(eps, C, 400)
             if 2 - Dq - g0f > best[1]:
                 best = (eps, 2 - Dq - g0f)
         print(f"  C={C}: eps_opt~{best[0]:.3f}  gain~{best[1]:.5f}  gain*C~{best[1] * C:.3f}")
